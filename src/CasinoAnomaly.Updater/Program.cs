@@ -37,6 +37,8 @@ internal static class Program
     {
         if (args.Length == 1 && args[0] == "--self-test")
             return SelfTest();
+        if (args.Length == 2 && args[0] == "--self-test-inherited-cwd")
+            return SelfTestInheritedWorkingDirectory(args[1]);
 
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
@@ -121,6 +123,13 @@ internal static class Program
         if (string.IsNullOrWhiteSpace(name) || Path.GetPathRoot(installDirectory) == installDirectory)
             throw new InvalidOperationException("Refusing to modify a filesystem root.");
 
+        // Godot starts the helper with the game's working directory by default.
+        // On Windows, our own process holding that directory open can make
+        // Directory.Move(installDirectory, backup) fail with ERROR_SHARING_VIOLATION.
+        // Move *this updater's* working directory outside the installation
+        // before downloading files, waiting for the game, or renaming folders.
+        LeaveInstallationWorkingDirectory(installDirectory);
+
         using var client = new HttpClient { Timeout = TimeSpan.FromMinutes(8) };
         report("Updateinformationen werden geladen ...");
         using var response = await client.GetAsync(ManifestUrl + "?revision=" + DateTimeOffset.UtcNow.ToUnixTimeSeconds());
@@ -196,6 +205,7 @@ internal static class Program
             }
 
             report("Neue Version wird installiert ...");
+            Log("Activating update. Install=" + installDirectory + "; staging=" + staging);
             MoveDirectoryWithRetry(installDirectory, backup);
             originalMoved = true;
             MoveDirectoryWithRetry(staging, installDirectory);
@@ -251,15 +261,72 @@ internal static class Program
         catch (InvalidOperationException) { return true; }
     }
 
+    private static void LeaveInstallationWorkingDirectory(string installDirectory)
+    {
+        var previous = Environment.CurrentDirectory;
+        var candidates = new[]
+        {
+            LogDirectory,
+            Path.Combine(Path.GetTempPath(), "CasinoAnomalyUpdater"),
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
+        };
+
+        foreach (var candidate in candidates)
+        {
+            if (string.IsNullOrWhiteSpace(candidate) || IsWithinDirectory(candidate, installDirectory))
+                continue;
+
+            try
+            {
+                Directory.CreateDirectory(candidate);
+                Environment.CurrentDirectory = candidate;
+                if (IsWithinDirectory(Environment.CurrentDirectory, installDirectory))
+                    continue;
+                Log("Updater working directory moved from '" + previous
+                    + "' to '" + Environment.CurrentDirectory + "'.");
+                return;
+            }
+            catch (IOException) { /* Try another separate location. */ }
+            catch (UnauthorizedAccessException) { /* Try another separate location. */ }
+        }
+
+        throw new IOException("Cannot relocate the updater working directory outside the game installation.");
+    }
+
+    private static bool IsWithinDirectory(string candidate, string parent)
+    {
+        var fullParent = Path.GetFullPath(parent).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        var fullCandidate = Path.GetFullPath(candidate).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        return fullCandidate.Equals(fullParent, StringComparison.OrdinalIgnoreCase)
+            || fullCandidate.StartsWith(fullParent + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
+    }
+
     private static void MoveDirectoryWithRetry(string source, string destination)
     {
         for (var attempt = 0; attempt < 12; attempt++)
         {
-            try { Directory.Move(source, destination); return; }
-            catch (IOException) when (attempt < 11) { Thread.Sleep(500); }
-            catch (UnauthorizedAccessException) when (attempt < 11) { Thread.Sleep(500); }
+            try
+            {
+                Directory.Move(source, destination);
+                return;
+            }
+            catch (IOException exception) when (attempt < 11)
+            {
+                if (attempt == 0)
+                    Log("Directory move is temporarily blocked: " + source + " -> " + destination
+                        + "; CWD=" + Environment.CurrentDirectory + "; " + exception.Message);
+                Thread.Sleep(500);
+            }
+            catch (UnauthorizedAccessException exception) when (attempt < 11)
+            {
+                if (attempt == 0)
+                    Log("Directory move was denied: " + source + " -> " + destination
+                        + "; CWD=" + Environment.CurrentDirectory + "; " + exception.Message);
+                Thread.Sleep(500);
+            }
         }
-        throw new IOException("Failed to move directory " + source + " to " + destination);
+        throw new IOException("Failed to move directory " + source + " to " + destination
+            + "; updater CWD=" + Environment.CurrentDirectory);
     }
 
     private static void ValidateManifest(UpdateManifest manifest, long installedVersion)
@@ -302,12 +369,71 @@ internal static class Program
             try { ValidateManifest(manifest, 1); }
             catch (InvalidDataException) { foreignRejected = true; }
             if (!foreignRejected) throw new InvalidOperationException("Foreign package URL was accepted.");
+            VerifyUpdaterDoesNotLockInstallDirectory();
             Console.WriteLine("Casino Anomaly updater contract PASS");
             return 0;
         }
         catch (Exception error)
         {
             Console.Error.WriteLine(error);
+            return 1;
+        }
+    }
+
+    // Real Windows regression: a child updater starts with the fake game
+    // installation as its inherited CWD, exactly as Godot launches it.
+    // The child must be able to rename and restore that directory while alive.
+    private static void VerifyUpdaterDoesNotLockInstallDirectory()
+    {
+        var testRoot = Path.Combine(Path.GetTempPath(), "CasinoAnomaly-CwdRegression-" + Guid.NewGuid().ToString("N"));
+        var install = Path.Combine(testRoot, "Casino Anomaly");
+        Directory.CreateDirectory(install);
+        var marker = Path.Combine(install, "old-version.txt");
+        File.WriteAllText(marker, "preserve old installation");
+        try
+        {
+            var updater = Environment.ProcessPath
+                ?? throw new InvalidOperationException("Cannot find the updater executable for the regression test.");
+            var start = new ProcessStartInfo(updater)
+            {
+                UseShellExecute = false,
+                WorkingDirectory = install,
+                CreateNoWindow = true
+            };
+            start.ArgumentList.Add("--self-test-inherited-cwd");
+            start.ArgumentList.Add(install);
+            using var child = Process.Start(start)
+                ?? throw new InvalidOperationException("Could not launch directory-lock regression test.");
+            if (!child.WaitForExit(30000))
+            {
+                child.Kill(entireProcessTree: true);
+                throw new TimeoutException("Updater directory-lock regression test timed out.");
+            }
+            if (child.ExitCode != 0 || !File.Exists(marker))
+                throw new IOException("Updater could not rename and restore the original install directory.");
+        }
+        finally
+        {
+            if (Directory.Exists(testRoot))
+                Directory.Delete(testRoot, true);
+        }
+    }
+
+    private static int SelfTestInheritedWorkingDirectory(string install)
+    {
+        try
+        {
+            if (!IsWithinDirectory(Environment.CurrentDirectory, install))
+                throw new InvalidOperationException("Regression test did not inherit the game installation CWD.");
+            LeaveInstallationWorkingDirectory(install);
+            var moved = install + "-backup";
+            MoveDirectoryWithRetry(install, moved);
+            MoveDirectoryWithRetry(moved, install);
+            return 0;
+        }
+        catch (Exception error)
+        {
+            Log("Directory-lock regression failed: " + error);
             return 1;
         }
     }
