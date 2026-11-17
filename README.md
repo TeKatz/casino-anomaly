@@ -1,26 +1,17 @@
 # Casino Anomaly
 
-An independent, offline-first Windows 3D exploration game built with **Godot 4.5.1**. The first playable milestone is the original Poly Haven oak-plank floor test, now with a main menu and an optional independent Development updater.
+Independent Godot 4.5.1 first-person prototype with a separate Windows updater and the dedicated [Development release](https://github.com/TeKatz/casino-anomaly/releases/tag/development).
 
-## Development workflow
+## Room design pass
 
-- `dev` is the active Development release branch.
-- `main` is reserved for reviewed stable changes.
-- A verified push to `dev` publishes a separate [Development release](https://github.com/TeKatz/casino-anomaly/releases/tag/development) in **this** repository.
-- [Blackjack Casino](https://github.com/TeKatz/blackjack-casino) is a separate application and release channel.
+The current walkable hall is **L-shaped**: from the entrance it leads straight past slot-machine groups, turns **left** at the illuminated, wrap-around corner bar, and continues to the west wing with roulette/blackjack tables, a lounge and decorative exit doors. The red-and-gold bordered carpet forms an uninterrupted route through the corner. Players can step off the carpet to inspect furniture. This is a first spatial and lighting pass using handcrafted primitive placeholder meshes, not final models or anomaly gameplay.
 
-## Playtest
+The wooden floor retains the CC0 Poly Haven [Oak Wood Planks](https://polyhaven.com/a/oak_wood_planks) PBR material. The runner uses the CC0 [Quatrefoil Jacquard Fabric](https://polyhaven.com/a/quatrefoil_jacquard_fabric) PBR maps, with a muted finish and a dark/gold border. Original source maps and their pinned SHA-256 values are managed by `tools/ensure_assets.py`.
 
-Download and extract **every file** from the Windows Development ZIP. Launch `CasinoAnomaly.exe`. Select **Raum betreten** to walk over the 14 m × 14 m oak floor with WASD and mouse look. Press **Esc** to return to the menu. The menu can check for updates and installs newer verified Development packages through a separate Windows updater process. Network access is optional; offline gameplay works without it.
+## Playtest and controls
 
-The current build deliberately contains no walls, casino furniture, anomaly mechanics, progression or casino application integration.
+Download and fully extract `casino-anomaly-win-x64.zip` from the Development release. Start `CasinoAnomaly.exe`, then select **Raum betreten**. WASD moves, mouse looks, and Esc returns to the menu. Exit doors are decorative for now; there is no anomaly detection or round progression.
 
-## Assets
+The main menu checks this repo's Development channel for updates. It runs a separate Windows updater which verifies package SHA-256 and size, stages the download, and attempts recovery after failures. Game and updater are independent of Blackjack Casino. Save data belongs in the Godot user-data directory outside the install folder.
 
-The material is [Oak Wood Planks](https://polyhaven.com/a/oak_wood_planks) by Dimitrios Savva from [Poly Haven](https://polyhaven.com), CC0. Color, roughness and OpenGL normal maps are used at 2K resolution. Original files are downloaded and verified against pinned SHA-256 hashes by `tools/ensure_assets.py`.
-
-## Release safety
-
-Updates are a separate, opt-in action. The updater validates the Development manifest and the downloaded ZIP against SHA-256/size, stages it alongside the installation, waits for the running game to close, then exchanges directories with rollback on activation failure. Saves and settings belong in the Godot user-data directory, never under the replaceable install folder. Updates **do not** use Blackjack Casino's release or update endpoints.
-
-The independent release is Windows x64 only. The updater is not available when running from the Godot editor.
+`dev` publishes Development releases; `main` remains the reviewed integration baseline. Verified Windows builds use Godot 4.5.1, .NET 10 for the updater, and original CC0 asset sources. No checkout, terminal, editor or asset import is required for playtesting.
