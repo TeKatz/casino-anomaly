@@ -1,6 +1,9 @@
 extends SceneTree
 
 func _initialize() -> void:
+    call_deferred("_run_smoke")
+
+func _run_smoke() -> void:
     var menu: PackedScene = load("res://menu.tscn")
     var scene: PackedScene = load("res://main.tscn")
     if menu == null or scene == null:
