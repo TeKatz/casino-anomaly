@@ -8,13 +8,19 @@
   "license": "CC0-1.0",
   "maps": {
     "quatrefoil_jacquard_fabric_diff_2k.jpg": {
-      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/quatrefoil_jacquard_fabric/quatrefoil_jacquard_fabric_diff_2k.jpg"
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/quatrefoil_jacquard_fabric/quatrefoil_jacquard_fabric_diff_2k.jpg",
+      "sha256": "7ecc9e2c7f0e8640d229fefc7f97f0cb5615a73687c258d42072facc31f743cd",
+      "bytes": 2631567
     },
     "quatrefoil_jacquard_fabric_rough_2k.jpg": {
-      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/quatrefoil_jacquard_fabric/quatrefoil_jacquard_fabric_rough_2k.jpg"
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/quatrefoil_jacquard_fabric/quatrefoil_jacquard_fabric_rough_2k.jpg",
+      "sha256": "ba6f500f048291368eba303a78b8fcfca80236f1b0ef625cb73761ee87b6851d",
+      "bytes": 4001315
     },
     "quatrefoil_jacquard_fabric_nor_gl_2k.jpg": {
-      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/quatrefoil_jacquard_fabric/quatrefoil_jacquard_fabric_nor_gl_2k.jpg"
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/quatrefoil_jacquard_fabric/quatrefoil_jacquard_fabric_nor_gl_2k.jpg",
+      "sha256": "56526e6c911b17e572a41aae99b0b09f8f67ac3be75b693435a529e2c4dddb5a",
+      "bytes": 3928243
     }
   }
 }
