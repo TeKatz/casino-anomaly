@@ -1,0 +1,173 @@
+name: Casino Anomaly Development Release
+
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: casino-anomaly-development
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/dev'
+    runs-on: windows-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Import verified Poly Haven textures
+        shell: pwsh
+        run: |
+          python tools/ensure_assets.py
+          if ($LASTEXITCODE -ne 0) { throw 'Source textures unavailable or invalid' }
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- assets/oak_wood_planks
+          git diff --cached --quiet
+          if ($LASTEXITCODE -eq 1) {
+            git commit -m 'assets: import verified Poly Haven oak PBR textures'
+            if ($LASTEXITCODE -ne 0) { throw 'Asset commit failed' }
+            git push origin HEAD:refs/heads/dev
+            if ($LASTEXITCODE -ne 0) { throw 'Asset upload failed' }
+          }
+          "PUBLISHED_COMMIT=$((git rev-parse HEAD).Trim())" >> $env:GITHUB_ENV
+
+      - name: Embed version
+        shell: pwsh
+        run: |
+          python tools/write_version.py
+          if ($LASTEXITCODE -ne 0) { throw 'Version generation failed' }
+          "VERSION=$((Get-Content version.json -Raw | ConvertFrom-Json).version)" >> $env:GITHUB_ENV
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Compile updater and run contract tests
+        shell: pwsh
+        run: |
+          dotnet publish src/CasinoAnomaly.Updater/CasinoAnomaly.Updater.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:DebugType=None -o artifacts/updater
+          if ($LASTEXITCODE -ne 0) { throw 'Updater compilation failed' }
+          & ./artifacts/updater/CasinoAnomaly.Updater.exe --self-test
+          if ($LASTEXITCODE -ne 0) { throw 'Updater contract failed' }
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/AppData/Roaming/Godot/export_templates/4.5.1.stable
+          key: anomaly-godot-4.5.1-win-x64-v1
+
+      - name: Install pinned Godot 4.5.1
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $ProgressPreference = 'SilentlyContinue'
+          $base = 'https://github.com/godotengine/godot-builds/releases/download/4.5.1-stable'
+          $work = Join-Path $env:RUNNER_TEMP 'casino-anomaly-godot'
+          $editorDir = Join-Path $work 'editor'
+          New-Item -ItemType Directory -Force $editorDir | Out-Null
+          $archive = Join-Path $work 'editor.zip'
+          Invoke-WebRequest "$base/Godot_v4.5.1-stable_win64.exe.zip" -OutFile $archive
+          Expand-Archive $archive $editorDir -Force
+          $editor = Join-Path $editorDir 'Godot_v4.5.1-stable_win64_console.exe'
+          if (!(Test-Path $editor)) { throw 'Godot executable missing' }
+          "GODOT_EDITOR=$editor" >> $env:GITHUB_ENV
+          $templates = Join-Path $env:APPDATA 'Godot/export_templates/4.5.1.stable'
+          $template = Join-Path $templates 'windows_release_x86_64.exe'
+          New-Item -ItemType Directory -Force $templates | Out-Null
+          if (!(Test-Path $template)) {
+            $archivePath = Join-Path $work 'templates.tpz'
+            Invoke-WebRequest "$base/Godot_v4.5.1-stable_export_templates.tpz" -OutFile $archivePath
+            Add-Type -AssemblyName System.IO.Compression.FileSystem
+            $zip = [System.IO.Compression.ZipFile]::OpenRead($archivePath)
+            try {
+              $entry = $zip.GetEntry('templates/windows_release_x86_64.exe')
+              if ($null -eq $entry) { throw 'Godot Windows template missing' }
+              [System.IO.Compression.ZipFileExtensions]::ExtractToFile($entry, $template, $true)
+            } finally { $zip.Dispose() }
+          }
+
+      - name: Godot scene smoke and Windows export
+        shell: pwsh
+        run: |
+          & "$env:GODOT_EDITOR" --headless --path . --editor --import 2>&1 | Tee-Object -FilePath import.log
+          if ($LASTEXITCODE -ne 0 -or (Get-Content import.log -Raw) -match '(?m)(SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:)') { throw 'Godot import failed' }
+          & "$env:GODOT_EDITOR" --headless --path . --script res://tests/smoke.gd 2>&1 | Tee-Object -FilePath smoke.log
+          if ($LASTEXITCODE -ne 0 -or (Get-Content smoke.log -Raw) -notmatch 'Casino Anomaly scenes and PBR floor smoke PASS') { throw 'Godot scene smoke failed' }
+          New-Item -ItemType Directory -Force artifacts/game | Out-Null
+          $exe = Join-Path (Get-Location) 'artifacts/game/CasinoAnomaly.exe'
+          & "$env:GODOT_EDITOR" --headless --path . --export-release 'Windows Desktop' $exe 2>&1 | Tee-Object -FilePath export.log
+          if ($LASTEXITCODE -ne 0 -or (Get-Content export.log -Raw) -match '(?m)(SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:)') { throw 'Godot export failed' }
+          if (!(Test-Path artifacts/game/CasinoAnomaly.exe) -or !(Test-Path artifacts/game/CasinoAnomaly.pck)) { throw 'Missing exported game' }
+
+      - name: Package standalone game and manifest
+        shell: pwsh
+        run: |
+          $bundle = 'artifacts/package'
+          New-Item -ItemType Directory -Force "$bundle/tools/updater" | Out-Null
+          Copy-Item artifacts/game/CasinoAnomaly.exe $bundle
+          Copy-Item artifacts/game/CasinoAnomaly.pck $bundle
+          Copy-Item artifacts/updater/CasinoAnomaly.Updater.exe "$bundle/tools/updater/"
+          Copy-Item version.json $bundle
+          Copy-Item third_party/GODOT-LICENSE.txt $bundle
+          Copy-Item third_party/GODOT-COPYRIGHT.txt $bundle
+          'ZIP vollstaendig entpacken und CasinoAnomaly.exe starten. Im Hauptmenue koennen Updates installiert werden.' | Set-Content "$bundle/START-HIER.txt" -Encoding utf8
+          $package = 'artifacts/casino-anomaly-win-x64.zip'
+          Compress-Archive -Path "$bundle/*" -DestinationPath $package -CompressionLevel Optimal
+          $hash = (Get-FileHash $package -Algorithm SHA256).Hash.ToLowerInvariant()
+          $size = (Get-Item $package).Length
+          if ($size -lt 1000000) { throw 'Package suspiciously small' }
+          $manifest = [ordered]@{
+            schemaVersion = 1
+            version = $env:VERSION
+            versionCode = [int]$env:GITHUB_RUN_NUMBER
+            channel = 'development'
+            publishedAt = (Get-Date).ToUniversalTime().ToString('o')
+            sourceCommit = $env:PUBLISHED_COMMIT
+            package = [ordered]@{
+              url = "https://github.com/TeKatz/casino-anomaly/releases/download/development/casino-anomaly-win-x64.zip?revision=$env:VERSION"
+              sha256 = $hash
+              sizeBytes = $size
+            }
+          }
+          $manifest | ConvertTo-Json -Depth 5 | Set-Content artifacts/update-manifest.json -Encoding utf8NoBOM
+          "$hash  casino-anomaly-win-x64.zip" | Set-Content artifacts/casino-anomaly-win-x64.zip.sha256 -Encoding ascii
+          "Independent Casino Anomaly Development $env:VERSION" | Set-Content artifacts/release-notes.md -Encoding utf8
+
+      - name: Publish independent Development release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view development --repo "$env:GITHUB_REPOSITORY" *> $null
+          if ($LASTEXITCODE -eq 0) {
+            gh release delete development --repo "$env:GITHUB_REPOSITORY" --yes --cleanup-tag
+            if ($LASTEXITCODE -ne 0) { throw 'Previous release deletion failed' }
+          }
+          gh release create development --repo "$env:GITHUB_REPOSITORY" --target "$env:PUBLISHED_COMMIT" --prerelease --title "Casino Anomaly Development $env:VERSION" --notes-file artifacts/release-notes.md artifacts/casino-anomaly-win-x64.zip artifacts/casino-anomaly-win-x64.zip.sha256 artifacts/update-manifest.json
+          if ($LASTEXITCODE -ne 0) { throw 'Could not publish Casino Anomaly' }
+
+      - name: Verify public release download
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $dir = 'artifacts/verification'
+          New-Item -ItemType Directory -Force $dir | Out-Null
+          gh release download development --repo "$env:GITHUB_REPOSITORY" --dir $dir --pattern 'casino-anomaly-win-x64.zip' --pattern 'casino-anomaly-win-x64.zip.sha256' --pattern 'update-manifest.json'
+          if ($LASTEXITCODE -ne 0) { throw 'Published download failed' }
+          $manifest = Get-Content "$dir/update-manifest.json" -Raw | ConvertFrom-Json
+          if ($manifest.channel -ne 'development' -or $manifest.version -ne $env:VERSION) { throw 'Wrong published version' }
+          if ((Get-FileHash "$dir/casino-anomaly-win-x64.zip" -Algorithm SHA256).Hash.ToLowerInvariant() -ne $manifest.package.sha256) { throw 'Published checksum mismatch' }
+          if ((Get-Item "$dir/casino-anomaly-win-x64.zip").Length -ne $manifest.package.sizeBytes) { throw 'Published size mismatch' }
+          Write-Host "Verified published Casino Anomaly $env:VERSION"

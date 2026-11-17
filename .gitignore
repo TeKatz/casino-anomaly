@@ -1,0 +1,8 @@
+.godot/
+build/
+artifacts/
+.idea/
+.vscode/
+*.tmp
+.DS_Store
+Thumbs.db
