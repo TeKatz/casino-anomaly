@@ -1,0 +1,68 @@
+name: Casino Anomaly Full Visual Room Authoring
+
+on:
+  push:
+    branches: [fix/full-godot-room-authoring]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: anomaly-room-bake
+  cancel-in-progress: false
+
+jobs:
+  bake-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Import original PBR and glTF sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/ensure_assets.py
+          python3 tools/ensure_fabric037.py
+          python3 tools/import_model_assets.py
+          python3 tools/unpack_sketchfab_assets.py --require-all
+      - name: Install pinned Godot 4.5.1
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 -o /tmp/godot.zip "https://github.com/godotengine/godot-builds/releases/download/4.5.1-stable/Godot_v4.5.1-stable_linux.x86_64.zip"
+          mkdir -p /tmp/godot-bin
+          unzip -q /tmp/godot.zip -d /tmp/godot-bin
+          chmod +x /tmp/godot-bin/Godot_v4.5.1-stable_linux.x86_64
+      - name: Bake permanent editable geometry and validate
+        shell: bash
+        run: |
+          set -euo pipefail
+          GODOT=/tmp/godot-bin/Godot_v4.5.1-stable_linux.x86_64
+          "$GODOT" --headless --path . --editor --import 2>&1 | tee /tmp/import.log
+          if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' /tmp/import.log; then exit 1; fi
+          "$GODOT" --headless --path . --script res://tools/bake_room.gd 2>&1 | tee /tmp/bake.log
+          grep -Eq 'Casino Anomaly full room authoring BAKE PASS|Room already authored' /tmp/bake.log
+          if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' /tmp/bake.log; then exit 1; fi
+          "$GODOT" --headless --path . --editor --import 2>&1 | tee /tmp/reimport.log
+          if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' /tmp/reimport.log; then exit 1; fi
+          for spec in             'tests/editor_full_scene_qa.gd:Casino Anomaly complete Godot editor scene QA PASS'             'tests/editor_layout_qa.gd:Casino Anomaly editor layout QA PASS'             'tests/smoke.gd:Casino Anomaly scenes and PBR floor smoke PASS'             'tests/visual_fx_qa.gd:Casino Anomaly visual FX QA PASS'             'tests/prop_visuals_qa.gd:Casino Anomaly prop visuals and orientations QA PASS'             'tests/spatial_qa.gd:Casino Anomaly spatial QA PASS'             'tests/screenshot_layout_qa.gd:Casino Anomaly ten screenshot layout QA PASS'             'tests/texture_stability_qa.gd:Casino Anomaly texture stability QA PASS'; do
+            script="${spec%%:*}"
+            marker="${spec#*:}"
+            "$GODOT" --headless --path . --script "res://$script" > /tmp/test.log 2>&1 || { cat /tmp/test.log; exit 1; }
+            grep -Fq "$marker" /tmp/test.log || { cat /tmp/test.log; exit 1; }
+            if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' /tmp/test.log; then cat /tmp/test.log; exit 1; fi
+            echo "$script PASS"
+          done
+      - name: Commit baked scene for GitHub Desktop users
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- main.tscn
+          if ! git diff --cached --quiet; then
+            git commit -m 'scene: save all generated casino geometry as editable Godot nodes'
+            git push origin HEAD:refs/heads/fix/full-godot-room-authoring
+          fi

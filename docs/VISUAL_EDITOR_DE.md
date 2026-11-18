@@ -19,9 +19,17 @@ Die **vorhandene Godot-3D-Ansicht** ist der Raumeditor. Kein eigenes Programm, k
 - **Bar:** Der gesamte `CornerBar`-Knoten ist frei positionierbar; alle zugehörigen Teile und Kollisionskörper bewegen sich gemeinsam.
 - **Materialien:** Bereits als `.tres` hinterlegte Boden-, Wand-, Holz-, Stoff-, Säulen- und Bar-Materialien können über den Dateisystembereich geöffnet und im Inspektor geändert werden. Ihre Vorschau wird von der vorhandenen Raumgeometrie verwendet.
 
+## Vollständige Bearbeitung der bisher prozeduralen Elemente
+
+Die zweite Umstellung überführt den gebauten Raum in echte, speicherbare Knoten der Szene `main.tscn`. Unter `SlotMachines/Slot_XX/PlayerStool` kannst du einen Hocker unabhängig von der Slotmaschine versetzen. Unter `Decor/Plant_XX` verschiebst du Topf, Blätter und Kollision gemeinsam. `ModelInteriors/BustPedestal_01` und `BustPedestal_02` enthalten die Sockel, `CasinoAtmosphere` die Neonstreifen, beleuchteten Schilderrahmen und Spotlights.
+
+Wichtige Architekturteile und ihre Kollisionskörper sind als einzelne Knoten sichtbar und gespeichert; wenn ein Element mehrere Teile enthält, am besten den passenden übergeordneten Knoten auswählen. **Bei einzelnen separat gespeicherten Wand- und Säulenmeshes die zugehörigen Kollisionskörper nicht vergessen.** Beim Verschieben nur einer Meshfläche bewegt sich eine separat gespeicherte Kollision nicht automatisch mit. Neue Geometrie sollte künftig als gebündelte Szene aus Mesh und Kollision angelegt werden.
+
+Objekt- und Positionsänderungen speichert Godot in `main.tscn`. Zusätzliche dekorative Laufzeit-Partikeleffekte (Staub) werden weiterhin durch das Atmosphärenskript gesteuert.
+
 ## Wichtig: Grenzen der ersten Editierfassung
 
-Die Grundarchitektur (einzelne Wände, Säulen, Teppich-Geometrie), ein Teil der Pflanzen und die komplexen Slot-Einzelteile bleiben vorerst **procedural preview** und sind nicht als einzelne gespeicherte Nodes umgebaut. Sie werden in der Editor-3D-Ansicht durch das Tool-Skript `hall.gd` sichtbar, aber Änderungen an diesen *temporären* Kindern bitte nicht als dauerhafte Raum-Edits behandeln. Benutze dafür die oben genannten stabilen Anker bzw. die Materialressourcen.
+Die Grundarchitektur und die prozeduralen Slot-Einzelteile sind jetzt als echte Szenenknoten gespeichert. Einzelne frei positionierte Meshes haben teilweise separate Kollisionsknoten; deshalb sollte bei Architekturumbauten die passende Kollision mitgeführt werden. Die Laufzeitanimationen und importierte Sketchfab-Ersatzmodelle werden weiterhin durch die jeweiligen Skripte verwaltet.
 
 Die Poly-Haven-Vorschau zeigt die echten GLTF-Meshes. Die Sketchfab-Pakete sind als ZIPs im Repository und werden weiterhin vom Build-Prozess entpackt; der Godot-Editor benötigt diese entpackten Modelle nur für deren spielinterne Darstellung. Deren Slots/Spieltischpositionen sind auch ohne Entpacken editierbar.
 

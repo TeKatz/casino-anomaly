@@ -635,14 +635,19 @@ func _slot_machine(pos: Vector3, yaw: float, accent: Color, number: int) -> void
             Vector3(-0.236 + float(i) * 0.057, 0.465, 0.361),
             Vector3(0.023, 0.090, 0.014), ebony)
 
-    # Chairs must be solid too; the previous visual cylinders had no physics.
-    _cylinder(unit, "StoolStem", Vector3(0, 0.315, 1.24),
+    # This child group keeps ALL stool meshes and collision volumes together.
+    # In Godot: move SlotMachines/Slot_XX/PlayerStool independently of the slot.
+    var stool := Node3D.new()
+    stool.name = "PlayerStool"
+    stool.position = Vector3(0, 0, 1.24)
+    unit.add_child(stool)
+    _cylinder(stool, "StoolStem", Vector3(0, 0.315, 0),
         0.056, 0.49, bronze, true, 16)
-    _cylinder(unit, "StoolFoot", Vector3(0, 0.077, 1.24),
+    _cylinder(stool, "StoolFoot", Vector3(0, 0.077, 0),
         0.255, 0.050, brushed_metal, true, 20)
-    _cylinder(unit, "StoolSeatRim", Vector3(0, 0.632, 1.24),
+    _cylinder(stool, "StoolSeatRim", Vector3(0, 0.632, 0),
         0.306, 0.067, brushed_metal, false, 24)
-    _cylinder(unit, "StoolSeat", Vector3(0, 0.677, 1.24),
+    _cylinder(stool, "StoolSeat", Vector3(0, 0.677, 0),
         0.283, 0.107, velvet, true, 24)
 
 
@@ -842,8 +847,13 @@ func _plant_visual(pos: Vector3, index: int, leaf_mesh: Mesh) -> void:
     leaf_dark.cull_mode = BaseMaterial3D.CULL_DISABLED
     leaf_light.cull_mode = BaseMaterial3D.CULL_DISABLED
 
-    var pot := _cylinder(decor, "PlantPot_%02d" % index,
-        pos + Vector3(0, 0.32, 0), 0.29, 0.63,
+    # The plant root moves the pot, foliage AND pot collider together.
+    var plant := Node3D.new()
+    plant.name = "Plant_%02d" % index
+    plant.position = pos
+    decor.add_child(plant)
+    var pot := _cylinder(plant, "PlantPot_%02d" % index,
+        Vector3(0, 0.32, 0), 0.29, 0.63,
         terracotta, true, 20)
     pot.set_meta("decor_type", "plant")
     # Taper pot visually, while retaining its original physics cylinder.
@@ -856,8 +866,8 @@ func _plant_visual(pos: Vector3, index: int, leaf_mesh: Mesh) -> void:
 
     var crown := Node3D.new()
     crown.name = "PlantFoliage_%02d" % index
-    crown.position = pos
-    decor.add_child(crown)
+    crown.position = Vector3.ZERO
+    plant.add_child(crown)
     _cylinder(crown, "CeramicLip", Vector3(0, 0.614, 0),
         0.311, 0.065, terracotta, false, 20)
     _cylinder(crown, "PotSoil", Vector3(0, 0.652, 0),
