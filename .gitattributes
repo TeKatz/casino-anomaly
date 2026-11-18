@@ -1,0 +1,16 @@
+# Keep imported Poly Haven assets byte-for-byte identical on Windows and Linux.
+# glTF is JSON text, but exact source hashes are pinned and must not be rewritten.
+*.gltf -text
+*.bin -text
+*.jpg -text
+*.jpeg -text
+*.png -text
+*.webp -text
+*.ogg -text
+*.zip -text
+
+# Source/configuration files keep deterministic line endings.
+*.gd text eol=lf
+*.tscn text eol=lf
+*.tres text eol=lf
+*.py text eol=lf
