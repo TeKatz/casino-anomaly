@@ -112,7 +112,7 @@ func _run() -> void:
         if physical_gate.collision_layer == 0:
             _fail("%s gate has no physical collision" % lane)
             return
-        var shape_node := physical_gate.get_node_or_null("CollisionShape3D") as CollisionShape3D
+        var shape_node := physical_gate.get_node_or_null("Shape") as CollisionShape3D
         if shape_node == null or shape_node.disabled:
             _fail("%s gate has no enabled blocking shape" % lane)
             return
