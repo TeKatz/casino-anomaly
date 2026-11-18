@@ -20,13 +20,17 @@ The main menu checks this repo's Development channel for updates. It runs a sepa
 
 **Neues Spiel** führt zuerst in den separat editierbaren Tutorialraum (`gameplay/tutorial.tscn`). Dort mit **E** durch die Tür gehen. Danach läuft das Spiel **ohne weitere Interaktionstaste**: Am westlichen Ende des L-förmigen Casinos führt die **linke, nun offene Ausgangspassage** zu „Anomalie“, die **rechte** zu „normal“. Die ursprünglichen Schilder und goldenen Rahmen werden weiterverwendet, die vorher durchgehende Wand und die dekorativen geschlossenen Türfüllungen werden nur zur Laufzeit passend geöffnet.
 
-### Raumübergang ohne Teleport
+### Abgewinkelte, gegen Zurücklaufen gesicherte Verbindungsgänge
 
-- Bei Annäherung an das Flurende (bereits ca. 15 Meter vor dem Ausgang) instanziiert Godot eine **zweite Kopie derselben `main.tscn`**. Ressourcen wie Texturen und Modelle werden geteilt; die 3D-/Physikknoten liegen vorübergehend zweimal vor.
-- Ein 8,3 Meter langer, **wirklich begehbarer Verbindungsgang** verbindet die gewählte Ausgangspassage mit dem Eingang des nächsten Flurs. Der zweite Flur ist um 90 Grad gedreht und so versetzt, dass beide Portale im selben Weltraum exakt aneinanderstoßen.
-- Beim Überqueren der Ausgangswand wird die Links-/Rechts-Entscheidung bewertet. Gleichzeitig erhält der noch vorausliegende neue Flur seine zufällige Anomalie oder einen normalen Zustand.
-- Kurz hinter der nächsten Eingangswand werden **dieselbe Spielerfigur und derselbe HUD-Controller ohne Positions-/Kamerawechsel** an die neue Rauminstanz übergeben. Die alte Rauminstanz wird freigegeben.
-- Das wiederholt sich beliebig oft. **Keine Schwarzblende, kein Ladebildschirm, kein Spielerteleport, keine dritte Raumkopie.**
+- Bereits vor dem Exit wird eine zweite `main.tscn`-Instanz vorbereitet; ihre teuren Materialien/Modelle werden gemeinsam benutzt. Der nächste Raum liegt **hinter einer massiven Ecke** und ist von den Exit-Türen aus nicht mehr sichtbar.
+- Der **linke Ausgang** führt zunächst geradeaus, dann mit einem Knick **nach links** (+Z im ursprünglichen Casino). Der **rechte** führt mit einem Knick **nach rechts** (−Z). Beide Übergänge besitzen einen eigenen Boden, Wände, Decke, Licht und physikalische Kollisionen.
+- Sobald man tief genug durch einen Ausgang gegangen ist, wird links/rechts bewertet. **Beide Rückwege werden hinter dem Spieler mit festen Sperrwänden verschlossen**; ein späterer Wechsel zum anderen Ausgang ist ausgeschlossen.
+- Nach dem Abbiegen schließt der begehbare Gang exakt an den Eingang der vorbereiteten nächsten Rauminstanz an. Diese übernimmt **dieselbe Spieler- und Kamera-Instanz** in unveränderten Weltkoordinaten, ohne Ladebildschirm, Schwarzblende oder Teleport.
+- Der alte Casinoraum wird danach freigegeben. **Der bereits durchquerte, am anderen Ende versperrte Verbindungsgang bleibt aber an der neuen Szene erhalten**, sodass man beim Zurückschauen nicht mehr die Außenseite des entladenen Raums sehen kann.
+- Maximal zwei vollständige Casinoräume werden gleichzeitig gehalten. Beim Weiterlaufen wird derselbe Vorgang in den bereits gedrehten Koordinaten erneut durchgeführt.
+
+Alle Wände, Sperren und Verbindungen existieren nur zur Laufzeit. **Die manuell gestaltete `main.tscn` bleibt unverändert.**
+
 
 Die provisorischen drei Test-Anomalien verändern ausschließlich vorhandene 3D-Schilder und werden pro Durchlauf zurückgesetzt. Die endgültige Anomalienliste ist noch offen.
 
