@@ -77,7 +77,8 @@ func prepare_room(room: Node3D) -> bool:
         _box(generated, "ExitWallPier", Vector3(EXIT_X, 3.0, (span.x + span.y) * 0.5),
             Vector3(0.36, HALL_HEIGHT, span.y - span.x), wall_mat)
     for z in [EXIT_Z_LEFT, EXIT_Z_RIGHT]:
-        _box(generated, "ExitOverdoor", Vector3(EXIT_X, 4.76, z),
+        var portal_id := "Left" if is_equal_approx(z, EXIT_Z_LEFT) else "Right"
+        _box(generated, "ExitOverdoor_" + portal_id, Vector3(EXIT_X, 4.76, z),
             Vector3(0.36, 2.48, 2.24), wall_mat)
 
     # Open the previously closed starting wall for the subsequent instance.
@@ -91,17 +92,20 @@ func prepare_room(room: Node3D) -> bool:
     # Two separate *open* connector passages, no intermediate doors/fades.
     # At the far end the next hall's doorway aligns with the connector.
     for z in [EXIT_Z_LEFT, EXIT_Z_RIGHT]:
+        var portal_id := "Left" if is_equal_approx(z, EXIT_Z_LEFT) else "Right"
         var center_x := (EXIT_X + ENTRY_PORTAL_X) * 0.5
         var length := EXIT_X - ENTRY_PORTAL_X + 0.24
-        _box(generated, "ConnectorFloor", Vector3(center_x, -0.11, z),
+        _box(generated, "ConnectorFloor_" + portal_id, Vector3(center_x, -0.11, z),
             Vector3(length, 0.22, CORRIDOR_WIDTH + 0.24), floor_mat)
-        _box(generated, "ConnectorCeiling", Vector3(center_x, 3.64, z),
+        _box(generated, "ConnectorCeiling_" + portal_id, Vector3(center_x, 3.64, z),
             Vector3(length, 0.18, CORRIDOR_WIDTH + 0.24), trim_mat)
         for side in [-1.0, 1.0]:
-            _box(generated, "ConnectorWall", Vector3(center_x, 1.79, z + side * 1.21),
+            var side_id := "North" if side > 0.0 else "South"
+            _box(generated, "ConnectorWall_" + portal_id + "_" + side_id,
+                Vector3(center_x, 1.79, z + side * 1.21),
                 Vector3(length, 3.58, 0.18), wall_mat)
         var lighting := OmniLight3D.new()
-        lighting.name = "ConnectorWarmLight"
+        lighting.name = "ConnectorWarmLight_" + portal_id
         lighting.position = Vector3(center_x, 3.04, z)
         lighting.light_color = Color(1.0, 0.78, 0.51)
         lighting.light_energy = 0.8
