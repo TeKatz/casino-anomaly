@@ -33,8 +33,20 @@ func _run() -> void:
         _fail("Four authorable spotlights must be saved")
         return
     var bust := models.get_node_or_null("BustPedestal_01") as StaticBody3D
-    if bust == null or bust.get_node_or_null("PolishedStonePedestal") == null             or bust.get_node_or_null("BustPedestalCollision") == null:
-        _fail("Busting statue pedestal has no saved material or collision")
+    if bust == null:
+        _fail("Saved BustPedestal_01 is absent")
+        return
+    if bust.get_node_or_null("PolishedStonePedestal") == null:
+        var child_names := []
+        for part in bust.get_children():
+            child_names.append(str(part.name))
+        _fail("Bust pedestal lacks PolishedStonePedestal; children=" + str(child_names))
+        return
+    if bust.get_node_or_null("BustPedestalCollision") == null:
+        var child_names := []
+        for part in bust.get_children():
+            child_names.append(str(part.name))
+        _fail("Bust pedestal lacks collision; children=" + str(child_names))
         return
     var plant := decor.get_node_or_null("Plant_00") as Node3D
     if plant == null or plant.get_node_or_null("PlantPot_00") == null             or plant.get_node_or_null("PlantPot_00_Collision") == null             or plant.get_node_or_null("PlantFoliage_00") == null:
