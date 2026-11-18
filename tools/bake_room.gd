@@ -28,6 +28,9 @@ func _bake() -> void:
         return
     if (world.get_node("Architecture") as Node3D).get_child_count() > 0:
         print("Room already authored; not rebaking over artist changes")
+        # This instance was never added to SceneTree: release its Physics RIDs
+        # explicitly to avoid noisy headless engine leak errors.
+        world.free()
         quit(0)
         return
 
