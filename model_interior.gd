@@ -237,6 +237,7 @@ func _pedestal(pos: Vector3) -> void:
     body.material_override = stone
     holder.add_child(body)
     var collision := CollisionShape3D.new()
+    collision.name = "BustPedestalCollision"
     var box_shape := BoxShape3D.new()
     box_shape.size = mesh.size
     collision.shape = box_shape
