@@ -94,7 +94,12 @@ func _spot(label: String, pos: Vector3, target: Vector3, power: float) -> void:
     lamp.spot_range = 6.2
     lamp.spot_angle = 32.0
     lamp.spot_attenuation = 1.8
-    lamp.shadow_enabled = false
+    # Only the cat's display spot casts extra shadows; other spots
+    # stay cheap for the GL Compatibility renderer.
+    lamp.shadow_enabled = label == "CatHighlight"
+    if lamp.shadow_enabled:
+        lamp.shadow_bias = 0.08
+        lamp.shadow_blur = 1.30
     add_child(lamp)
     lamp.look_at(target, Vector3.UP)
 
@@ -131,30 +136,40 @@ func _slots() -> void:
         i += 1
 
 func _dust() -> void:
-    # Sparse CPU motes near just two chandeliers; no volumetric fog.
+    # Dust floats through localized pools of chandelier light; this avoids
+    # fullscreen effects and does not add any anomaly targets.
     var mesh := SphereMesh.new()
-    mesh.radius = 0.012
-    mesh.height = 0.024
+    mesh.radius = 0.022
+    mesh.height = 0.044
     mesh.radial_segments = 6
     mesh.rings = 4
     var mat := StandardMaterial3D.new()
-    mat.albedo_color = Color(1, 0.86, 0.66, 0.6)
+    mat.albedo_color = Color(1, 0.87, 0.72, 0.48)
+    mat.emission_enabled = true
+    mat.emission = Color(0.78, 0.57, 0.32)
+    mat.emission_energy_multiplier = 0.32
     mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
     mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
     mesh.material = mat
-    for pos in [Vector3(-1.4, 3.4, -6.8), Vector3(-30.0, 3.4, -6.5)]:
+    for pos in [
+        Vector3(0.0, 2.95, 6.0),
+        Vector3(-1.4, 2.95, -6.8),
+        Vector3(-17.5, 2.95, -6.5),
+        Vector3(-30.0, 2.95, -6.5),
+        Vector3(-41.0, 2.95, -6.5)
+    ]:
         var particles := CPUParticles3D.new()
         particles.name = "ChandelierDust"
         particles.position = pos
-        particles.amount = 22
-        particles.lifetime = 7.5
+        particles.amount = 54
+        particles.lifetime = 9.0
         particles.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
-        particles.emission_box_extents = Vector3(2.1, 1.2, 2.1)
+        particles.emission_box_extents = Vector3(2.45, 1.85, 2.45)
         particles.direction = Vector3.UP
         particles.spread = 170.0
         particles.gravity = Vector3(0, 0.005, 0)
-        particles.initial_velocity_min = 0.01
-        particles.initial_velocity_max = 0.05
+        particles.initial_velocity_min = 0.012
+        particles.initial_velocity_max = 0.048
         particles.mesh = mesh
         particles.emitting = true
         add_child(particles)

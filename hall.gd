@@ -486,27 +486,35 @@ func _make_details() -> void:
         _sphere(decor, "ChandelierBulb", Vector3(x, 4.75, z), 0.115, warm_white)
         _cylinder(decor, "ChandelierChain", Vector3(x, 5.13, z), 0.025, 0.64, gold)
 
-func _omni(pos: Vector3, tint: Color, energy: float, reach: float) -> void:
+func _omni(pos: Vector3, tint: Color, energy: float, reach: float,
+        cast_shadows: bool = false) -> void:
     var light := OmniLight3D.new()
     light.name = "WarmCasinoLamp"
     light.position = pos
     light.light_color = tint
     light.light_energy = energy
     light.omni_range = reach
-    light.shadow_enabled = false
+    light.shadow_enabled = cast_shadows
+    if cast_shadows:
+        light.shadow_bias = 0.08
+        light.shadow_blur = 1.30
     lights.add_child(light)
 
 func _make_lights() -> void:
-    for pos in [
+    # Four overhead fixtures cast shadows, the rest are inexpensive fill.
+    # Reducing omnidirectional overlap restores visible contrast and depth.
+    var ceiling_positions := [
         Vector3(0, 4.8, 9.2), Vector3(0, 4.8, 2.3),
         Vector3(1.3, 4.8, -7.0), Vector3(-8, 4.8, -6.0),
         Vector3(-17, 4.8, -6.0), Vector3(-26, 4.8, -6.0),
         Vector3(-35, 4.8, -6.0), Vector3(-43, 4.8, -6.0)
-    ]:
-        _omni(pos, Color("#ffdaa7"), 1.8, 13.5)
-    _omni(Vector3(1.2, 3.35, -9.8), Color("#ffba71"), 1.35, 8.0)
+    ]
+    for i in range(ceiling_positions.size()):
+        _omni(ceiling_positions[i], Color("#ffdaa7"), 1.5, 11.5,
+            i in [0, 2, 4, 6])
+    _omni(Vector3(1.2, 3.35, -9.8), Color("#ffba71"), 1.05, 7.0)
     for pos in [Vector3(5.55, 3.1, 10.5), Vector3(-5.55, 3.1, 8.4),
                 Vector3(-10, 3.1, -12.6), Vector3(-21.0, 3.1, -12.6),
                 Vector3(-33, 3.1, -12.6), Vector3(-43, 3.1, -12.6)]:
         _sphere(decor, "WallSconce", pos, 0.16, warm_white)
-        _omni(pos, Color("#ffd39c"), 0.55, 5.0)
+        _omni(pos, Color("#ffd39c"), 0.42, 4.0)
