@@ -5,7 +5,7 @@ Die **vorhandene Godot-3D-Ansicht** ist der Raumeditor. Kein eigenes Programm, k
 ## Öffnen
 
 1. [Godot 4.5.1 Standard](https://godotengine.org/download/archive/4.5.1-stable/) installieren.
-2. Repository über GitHub Desktop klonen und den Branch `feature/godot-visual-room-editing` auschecken (nach dem Merge später `dev`).
+2. Repository über GitHub Desktop klonen und den Branch `dev` auswählen.
 3. `project.godot` im Godot-Projektmanager importieren und `main.tscn` öffnen. Beim ersten Import können die GLTF-Modelle kurz brauchen.
 4. In der Szene `ModelInteriors`, `SlotMachines`, `GamingTables`, `CornerBar` oder `Lighting` aufklappen. In der 3D-Ansicht Objekte anklicken und W/E/R für Verschieben/Drehen/Skalieren benutzen.
 5. Mit Strg+S speichern. GitHub Desktop zeigt `main.tscn` als Änderung an. Commit + Push übertragen den Raumstand.
@@ -17,7 +17,7 @@ Die **vorhandene Godot-3D-Ansicht** ist der Raumeditor. Kein eigenes Programm, k
 - **Spieltische:** `Roulette2`, `Blackjack3`, `Roulette4`, `Cards5`, `Roulette6`, `Cards7`. Die Sketchfab-Austauschlogik bleibt erhalten.
 - **Lichtquellen:** Neun echte `OmniLight3D`-Nodes unter `Lighting`: Position, Farbe, Intensität und Reichweite im Inspektor ändern.
 - **Bar:** Der gesamte `CornerBar`-Knoten ist frei positionierbar; alle zugehörigen Teile und Kollisionskörper bewegen sich gemeinsam.
-- **Materialien:** Bereits als `.tres` hinterlegte Boden-, Wand-, Holz-, Stoff-, Säulen- und Bar-Materialien können über den Dateisystembereich geöffnet und im Inspektor geändert werden. Ihre Vorschau wird von der vorhandenen Raumgeometrie verwendet.
+- **Materialien:** Der fertig gespeicherte Raum enthält eigene Materialinstanzen. Wähle das betreffende Mesh im Szenenbaum und ändere im Inspektor `Material Override` (z. B. Textur, Farbe oder Roughness). Die `.tres`-Dateien bleiben Ausgangsvorlagen; ihre Änderung wirkt nicht automatisch auf bereits gespeicherte Mesh-Materialien.
 
 ## Vollständige Bearbeitung der bisher prozeduralen Elemente
 

@@ -9,7 +9,7 @@ permissions:
 
 concurrency:
   group: anomaly-room-bake
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   bake-and-test:
