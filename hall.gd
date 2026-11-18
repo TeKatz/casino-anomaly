@@ -280,13 +280,13 @@ func _make_architecture() -> void:
     # Crossings have different widths, and coplanar placeholder overlays
     # were removed rather than stacked on top of the new timber.
     for x in [-45.90, -6.0, 5.90]:
-        _box(architecture, "CeilingGoldBeam", Vector3(x, 5.885, -6.5),
+        _box(architecture, "CeilingGoldBeam_%04d" % architecture.get_child_count(), Vector3(x, 5.885, -6.5),
             Vector3(0.22, 0.25, 12.82), beam_wood)
     for z in [0.0, 7.0, 13.0]:
-        _box(architecture, "CeilingTrim", Vector3(0, 5.865, z),
+        _box(architecture, "CeilingTrim_%04d" % architecture.get_child_count(), Vector3(0, 5.865, z),
             Vector3(11.72, 0.27, 0.20), beam_wood)
     for x in [-42.0, -35.0, -28.0, -21.0, -14.0, -10.0]:
-        _box(architecture, "WestCeilingTrim", Vector3(x, 5.865, -6.5),
+        _box(architecture, "WestCeilingTrim_%04d" % architecture.get_child_count(), Vector3(x, 5.865, -6.5),
             Vector3(0.20, 0.27, 12.75), beam_wood)
     # Entry framing and end wall doors (decorative until anomaly logic is added).
     _box(architecture, "EntryDoor", Vector3(0, 1.5, 13.97), Vector3(3.2, 3, 0.1), dark_wood)
