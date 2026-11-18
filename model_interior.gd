@@ -17,6 +17,16 @@ var _statue_plinth_index := 0
 var _bust_pedestal_index := 0
 var _chandelier_light_index := 0
 
+func _has_authored_room_layout() -> bool:
+    # The 3D scene baker made the scene, not these scripts, authoritative.
+    # A missing fixture in that scene was removed by the level designer.
+    # In a legacy procedural room, missing fixtures are still generated.
+    var hall := get_parent() as Node3D
+    if hall == null:
+        return false
+    var floor := hall.get_node_or_null("Architecture/OakMainWing")
+    return floor != null and floor.owner == hall
+
 func _ready() -> void:
     call_deferred("_populate")
 
@@ -151,8 +161,8 @@ func _populate() -> void:
 func _display_plinth(ground: Vector3, height: float, width: float) -> void:
     _statue_plinth_index += 1
     var stable_name := "DecorativeStatuePlinth_%02d" % _statue_plinth_index
-    if has_node(stable_name):
-        return # Saved editor plinth already includes mesh and collider.
+    if has_node(stable_name) or _has_authored_room_layout():
+        return # Never regenerate artist-deleted plinths in the authored room.
     var body := StaticBody3D.new()
     body.name = stable_name
     body.position = ground + Vector3(0, height * 0.5, 0)
@@ -195,7 +205,7 @@ func _stool_cushion(stool: Node3D) -> void:
 
 
 func _cabinet_plinth(ground: Vector3) -> void:
-    if has_node("BarCabinetPlinth"):
+    if has_node("BarCabinetPlinth") or _has_authored_room_layout():
         return
     var plinth := StaticBody3D.new()
     plinth.name = "BarCabinetPlinth"
@@ -221,7 +231,7 @@ func _cabinet_plinth(ground: Vector3) -> void:
 func _pedestal(pos: Vector3) -> void:
     _bust_pedestal_index += 1
     var stable_name := "BustPedestal_%02d" % _bust_pedestal_index
-    if has_node(stable_name):
+    if has_node(stable_name) or _has_authored_room_layout():
         return
     var holder := StaticBody3D.new()
     holder.name = stable_name
@@ -247,7 +257,7 @@ func _pedestal(pos: Vector3) -> void:
 func _soft_light(pos: Vector3, power: float, reach: float) -> void:
     _chandelier_light_index += 1
     var stable_name := "ChandelierWarmLight_%02d" % _chandelier_light_index
-    if has_node(stable_name):
+    if has_node(stable_name) or _has_authored_room_layout():
         return
     var lamp := OmniLight3D.new()
     lamp.name = stable_name

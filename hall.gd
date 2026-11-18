@@ -525,7 +525,12 @@ func _slot_machine(pos: Vector3, yaw: float, accent: Color, number: int) -> void
         unit.rotation.y = yaw
         machines.add_child(unit)
     elif unit.get_child_count() > 0:
-        return # Already generated; do not duplicate editor preview meshes.
+        # A designer can delete the visible cabinet but unintentionally
+        # leave its old collision bodies. Never leave invisible obstacles
+        # where the slot was removed in the editor.
+        if not Engine.is_editor_hint() and not unit.has_node("Body"):
+            unit.queue_free()
+        return # Respect the saved edit; never recreate missing visuals.
 
     var lacquer := _material(Color("#261c21"), 0.33, 0.12)
     var side_wood := _material(Color("#523226"), 0.61)
