@@ -1,3 +1,4 @@
+@tool
 extends Node3D
 
 # First room-design pass. Everything is intentionally modular so assets may replace
@@ -47,7 +48,7 @@ var lights: Node3D
 func _ready() -> void:
     # The headless editor does not expose all GPU-only anti-aliasing settings.
     # Ensure the actual Forward+ game viewport uses TAA during play.
-    if DisplayServer.get_name() != "headless":
+    if not Engine.is_editor_hint() and DisplayServer.get_name() != "headless":
         var viewport := get_viewport()
         viewport.use_taa = true
         viewport.anisotropic_filtering_level = Viewport.ANISOTROPY_8X
@@ -85,18 +86,28 @@ func _ready() -> void:
     lounge = _section("Lounge")
     decor = _section("Decor")
     lights = _section("Lighting")
-    _make_architecture()
-    _make_carpet()
+    # Existing section nodes in main.tscn are stable editor objects.
+    # Generated detail nodes stay unowned: they are a visible editor preview,
+    # never accidentally saved as duplicates over their runtime versions.
+    if architecture.get_child_count() == 0:
+        _make_architecture()
+    if carpeting.get_child_count() == 0:
+        _make_carpet()
     _make_slots()
-    _make_bar()
-    # Move the entire bar and its solid collision away from the wall pillars.
-    bar_area.position.x = -0.95
+    if bar_area.get_child_count() == 0:
+        _make_bar()
     _make_tables()
     _make_lounge()
-    _make_details()
-    _make_lights()
+    if decor.get_child_count() == 0:
+        _make_details()
+    if lights.get_child_count() == 0:
+        _make_lights()
 
 func _section(label: String) -> Node3D:
+    var saved := get_node_or_null(label) as Node3D
+    if saved != null:
+        return saved
+    # Backwards compatible when hall.gd is used outside main.tscn.
     var node := Node3D.new()
     node.name = label
     add_child(node)
@@ -505,11 +516,16 @@ func _slot_machine(pos: Vector3, yaw: float, accent: Color, number: int) -> void
     # Detailed, inexpensive retro cabinet for the nine procedural machines.
     # Slot_01 is still replaced by the licensed Sketchfab hero in its own
     # layer; keep this instance's layout, collision and TopGlow contract.
-    var unit := Node3D.new()
-    unit.name = "Slot_%02d" % number
-    unit.position = pos
-    unit.rotation.y = yaw
-    machines.add_child(unit)
+    var stable_name := "Slot_%02d" % number
+    var unit := machines.get_node_or_null(stable_name) as Node3D
+    if unit == null:
+        unit = Node3D.new()
+        unit.name = stable_name
+        unit.position = pos
+        unit.rotation.y = yaw
+        machines.add_child(unit)
+    elif unit.get_child_count() > 0:
+        return # Already generated; do not duplicate editor preview meshes.
 
     var lacquer := _material(Color("#261c21"), 0.33, 0.12)
     var side_wood := _material(Color("#523226"), 0.61)
@@ -730,14 +746,18 @@ func _make_bar() -> void:
 
 
 func _game_table(pos: Vector3, label: String, index: int) -> void:
-    var group := Node3D.new()
-    group.name = label + str(index)
-    group.position = pos
-    # The first north-side cards table sits in a 3.48 m aisle between
-    # wall and carpet. Full-size chairs crossed both boundaries.
-    if index == 7:
-        group.scale = Vector3(0.68, 1.0, 0.68)
-    gaming.add_child(group)
+    var stable_name := label + str(index)
+    var group := gaming.get_node_or_null(stable_name) as Node3D
+    if group == null:
+        group = Node3D.new()
+        group.name = stable_name
+        group.position = pos
+        # Fallback for legacy scenes without authorable placement nodes.
+        if index == 7:
+            group.scale = Vector3(0.68, 1.0, 0.68)
+        gaming.add_child(group)
+    elif group.get_child_count() > 0:
+        return
     var base := _cylinder(group, "TableSupport", Vector3(0, 0.49, 0),
         0.18, 0.94, dark_wood)
     base.rotation.y = float(index) * 0.2

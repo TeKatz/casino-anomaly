@@ -1,0 +1,66 @@
+@tool
+extends Node3D
+## A stable placement marker in main.tscn. Move/rotate/scale this node in
+## Godot's regular 3D viewport. Its imported glTF preview only exists in the
+## editor; model_interior.gd builds the collidable version during gameplay.
+
+@export var asset_id: String = ""
+@export var target_height: float = 1.0
+@export var max_footprint: float = 0.0
+@export var wall_mount: bool = false
+@export var mesh_variant: String = ""
+
+var _preview: Node3D
+
+
+func _ready() -> void:
+    if Engine.is_editor_hint():
+        call_deferred("_create_preview")
+
+
+func _create_preview() -> void:
+    if not Engine.is_editor_hint() or not is_inside_tree():
+        return
+    if _preview != null and is_instance_valid(_preview):
+        remove_child(_preview)
+        _preview.free()
+    var path := "res://models/%s/%s_1k.gltf" % [asset_id, asset_id]
+    if asset_id.is_empty() or not ResourceLoader.exists(path):
+        return
+    var packed := load(path) as PackedScene
+    if packed == null:
+        return
+    var imported := packed.instantiate() as Node3D
+    if imported == null:
+        return
+    # Internal children are visible in 3D but cannot accidentally be saved
+    # as duplicate game geometry by the scene editor.
+    imported.name = "_EditorOnlyModelPreview"
+    add_child(imported, false, Node.INTERNAL_MODE_BACK)
+    _preview = imported
+    var found := false
+    var bounds := AABB()
+    for candidate in imported.find_children("*", "MeshInstance3D", true, false):
+        var piece := candidate as MeshInstance3D
+        if piece.mesh == null:
+            continue
+        if not mesh_variant.is_empty() and not piece.name.begins_with(mesh_variant):
+            piece.visible = false
+            continue
+        var local_transform := imported.global_transform.affine_inverse() * piece.global_transform
+        var transformed: AABB = local_transform * piece.get_aabb()
+        bounds = bounds.merge(transformed) if found else transformed
+        found = true
+    if not found or bounds.size.y <= 0.0001:
+        return
+    var factor := target_height / bounds.size.y
+    if max_footprint > 0.0:
+        factor = minf(factor, max_footprint / maxf(bounds.size.x, bounds.size.z))
+    imported.scale = Vector3.ONE * factor
+    imported.position = Vector3(
+        -(bounds.position.x + bounds.size.x * 0.5) * factor,
+        -bounds.position.y * factor,
+        -(bounds.position.z + bounds.size.z * 0.5) * factor
+    )
+    if wall_mount:
+        imported.position.y -= target_height * 0.5
