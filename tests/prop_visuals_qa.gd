@@ -35,7 +35,7 @@ func _run() -> void:
         var label: String = str(obj.get_meta("placement_group", ""))
         if label == "LoungeSofa":
             sofa_count += 1
-            if absf(obj.rotation.y - PI) > 0.0001:
+            if absf(wrapf(obj.rotation.y - PI, -PI, PI)) > 0.0001:
                 _fail("Lounge sofa did not receive the second 90-degree correction")
                 return
             if obj.get_node_or_null("ModelSolidBody") == null:
@@ -64,7 +64,7 @@ func _run() -> void:
         rebuilt_slots += 1
         for part in [
             "Body", "RoundedMarqueeTop", "TopGlow", "ReelGlass",
-            "ReelOuterFrame", "MarqueeInlay", "ButtonDeskTop", "StoolSeat"
+            "ReelOuterFrame", "MarqueeInlay", "ButtonDeskTop"
         ]:
             if machine.get_node_or_null(part) == null:
                 _fail("Slot %s is missing %s" % [machine.name, part])
@@ -76,9 +76,13 @@ func _run() -> void:
         if machine.get_node_or_null("Body_Collision") == null:
             _fail("Slot %s lost its existing body collision" % machine.name)
             return
-        # Seat, foot and stem are no longer only decorative.
+        # The separately movable stool must keep its complete collision.
+        var stool_group := machine.get_node_or_null("PlayerStool") as Node3D
+        if stool_group == null or stool_group.get_node_or_null("StoolSeat") == null:
+            _fail("Slot stool group missing")
+            return
         for part in ["StoolSeat_Collision", "StoolStem_Collision", "StoolFoot_Collision"]:
-            var physics: StaticBody3D = machine.get_node_or_null(part) as StaticBody3D
+            var physics: StaticBody3D = stool_group.get_node_or_null(part) as StaticBody3D
             if physics == null or physics.get_child_count() == 0:
                 _fail("Slot stool has no physics: %s" % part)
                 return
@@ -99,20 +103,27 @@ func _run() -> void:
 
     var pots := 0
     var foliage := 0
-    for child in decor.get_children():
-        if child is MeshInstance3D and child.get_meta("decor_type", "") == "plant":
+    for plant in decor.get_children():
+        if not plant is Node3D or not plant.name.begins_with("Plant_"):
+            continue
+        var pot := plant.get_node_or_null("PlantPot_%s" % plant.name.trim_prefix("Plant_")) as MeshInstance3D
+        var crown := plant.get_node_or_null("PlantFoliage_%s" % plant.name.trim_prefix("Plant_")) as Node3D
+        if pot != null and pot.get_meta("decor_type", "") == "plant":
             pots += 1
-            if not (child.mesh is CylinderMesh):
+            if not (pot.mesh is CylinderMesh):
                 _fail("Decorative plant has no tapered ceramic pot")
                 return
-            var mesh: CylinderMesh = child.mesh as CylinderMesh
+            var mesh: CylinderMesh = pot.mesh as CylinderMesh
             if mesh.bottom_radius >= mesh.top_radius:
                 _fail("Ceramic pot must taper toward its base")
                 return
-        elif child is Node3D and child.name.begins_with("PlantFoliage_"):
+            if plant.get_node_or_null(pot.name + "_Collision") == null:
+                _fail("Plant pot collision is not grouped with the movable plant")
+                return
+        if crown != null:
             foliage += 1
-            if child.find_children("Leaf_*", "MeshInstance3D", false, false).size() < 18:
-                _fail("Plant %s has not been replaced by detailed leaves" % child.name)
+            if crown.find_children("Leaf_*", "MeshInstance3D", false, false).size() < 18:
+                _fail("Plant %s has not been replaced by detailed leaves" % plant.name)
                 return
     if pots != 6 or foliage != 6:
         _fail("Expected six potted plants and six detailed foliage crowns")

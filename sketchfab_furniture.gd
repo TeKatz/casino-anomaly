@@ -12,6 +12,9 @@ var replaced_blackjack := 0
 var poker_props_placed := 0
 
 func _ready() -> void:
+    # Bake original authorable slots/tables, not their runtime replacements.
+    if get_parent().has_meta("_baking_room"):
+        return
     call_deferred("_populate")
 
 func _load_scene(slug: String, filename: String = "scene.gltf") -> PackedScene:

@@ -31,7 +31,7 @@ func _run() -> void:
     # Entry lettering faces the actual approach, and the obsolete SLOTS
     # label no longer hangs across its upper luminous border.
     var entrance: Label3D = architecture.get_node_or_null("Sign_CASINO_ANOMALY") as Label3D
-    if entrance == null or absf(entrance.rotation.y - PI) > 0.0001:
+    if entrance == null or absf(wrapf(entrance.rotation.y - PI, -PI, PI)) > 0.0001:
         _bad("The casino entrance lettering is mirrored from the hallway")
         return
     if entrance.position.y > 4.4 or decor.get_node_or_null("Sign_SLOTS") != null:

@@ -16,21 +16,32 @@ var signs: Array[StandardMaterial3D] = []
 var plant_crowns: Array[Node3D] = []
 
 func _ready() -> void:
-    call_deferred("_build") # Hall geometry is procedural and assembled in parent _ready.
+    # The one-time scene baker captures static neon frames and spotlights.
+    # Do not build transient particle/spill effects during that process.
+    if get_parent().has_meta("_baking_room"):
+        return
+    call_deferred("_build")
 
 func _build() -> void:
     if not active:
         return
     set_meta("ambient_fx_only", true)
-    _architecture()
-    _spot("CatHighlight", Vector3(-8.45, 4.7, -3.25),
-        Vector3(-8.45, 1.0, -1.04), 1.05)
-    _spot("ChessHighlight", Vector3(-28.6, 4.7, -4.25),
-        Vector3(-28.6, 0.65, -2.75), 0.85)
-    _spot("HorseHighlight", Vector3(-44.1, 4.8, -3.1),
-        Vector3(-44.2, 1.1, -1.35), 1.05)
-    _spot("BustHighlight", Vector3(-3.5, 4.8, 10.8),
-        Vector3(-2.75, 1.35, 12.15), 0.75)
+    if not has_node("EntrySignTop"):
+        _architecture()
+        _spot("CatHighlight", Vector3(-8.45, 4.7, -3.25),
+            Vector3(-8.45, 1.0, -1.04), 1.05)
+        _spot("ChessHighlight", Vector3(-28.6, 4.7, -4.25),
+            Vector3(-28.6, 0.65, -2.75), 0.85)
+        _spot("HorseHighlight", Vector3(-44.1, 4.8, -3.1),
+            Vector3(-44.2, 1.1, -1.35), 1.05)
+        _spot("BustHighlight", Vector3(-3.5, 4.8, 10.8),
+            Vector3(-2.75, 1.35, 12.15), 0.75)
+    else:
+        # Animate the saved materials rather than creating a second neon layer.
+        for label in ["EntrySignTop", "BarSignTop"]:
+            var neon := get_node_or_null(label) as MeshInstance3D
+            if neon != null and neon.material_override is StandardMaterial3D:
+                signs.append(neon.material_override as StandardMaterial3D)
     _slots()
     _plants()
     _dust()
@@ -147,9 +158,11 @@ func _plants() -> void:
     var decoration: Node3D = get_parent().get_node_or_null("Decor") as Node3D
     if decoration == null:
         return
-    for child in decoration.get_children():
-        if child is Node3D and child.name.begins_with("PlantFoliage_"):
-            plant_crowns.append(child as Node3D)
+    for plant in decoration.get_children():
+        if plant is Node3D and plant.name.begins_with("Plant_"):
+            for crown in plant.get_children():
+                if crown is Node3D and crown.name.begins_with("PlantFoliage_"):
+                    plant_crowns.append(crown as Node3D)
 
 
 func _dust() -> void:

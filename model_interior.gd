@@ -13,6 +13,9 @@ var placed_model_count: int = 0
 var successful_model_ids: Dictionary = {}
 var _scene_cache: Dictionary = {}
 var _placement_indices: Dictionary = {}
+var _statue_plinth_index := 0
+var _bust_pedestal_index := 0
+var _chandelier_light_index := 0
 
 func _ready() -> void:
     call_deferred("_populate")
@@ -146,8 +149,12 @@ func _populate() -> void:
         successful_model_ids.size(), " source assets")
 
 func _display_plinth(ground: Vector3, height: float, width: float) -> void:
+    _statue_plinth_index += 1
+    var stable_name := "DecorativeStatuePlinth_%02d" % _statue_plinth_index
+    if has_node(stable_name):
+        return # Saved editor plinth already includes mesh and collider.
     var body := StaticBody3D.new()
-    body.name = "DecorativeStatuePlinth"
+    body.name = stable_name
     body.position = ground + Vector3(0, height * 0.5, 0)
     var surface := MeshInstance3D.new()
     surface.name = "StonePlinthMesh"
@@ -188,6 +195,8 @@ func _stool_cushion(stool: Node3D) -> void:
 
 
 func _cabinet_plinth(ground: Vector3) -> void:
+    if has_node("BarCabinetPlinth"):
+        return
     var plinth := StaticBody3D.new()
     plinth.name = "BarCabinetPlinth"
     plinth.position = ground + Vector3(0, 0.12, 0)
@@ -210,8 +219,12 @@ func _cabinet_plinth(ground: Vector3) -> void:
 
 
 func _pedestal(pos: Vector3) -> void:
+    _bust_pedestal_index += 1
+    var stable_name := "BustPedestal_%02d" % _bust_pedestal_index
+    if has_node(stable_name):
+        return
     var holder := StaticBody3D.new()
-    holder.name = "BustPedestal"
+    holder.name = stable_name
     holder.position = pos + Vector3(0, 0.50, 0)
     var body := MeshInstance3D.new()
     body.name = "PolishedStonePedestal"
@@ -224,6 +237,7 @@ func _pedestal(pos: Vector3) -> void:
     body.material_override = stone
     holder.add_child(body)
     var collision := CollisionShape3D.new()
+    collision.name = "BustPedestalCollision"
     var box_shape := BoxShape3D.new()
     box_shape.size = mesh.size
     collision.shape = box_shape
@@ -231,8 +245,12 @@ func _pedestal(pos: Vector3) -> void:
     add_child(holder)
 
 func _soft_light(pos: Vector3, power: float, reach: float) -> void:
+    _chandelier_light_index += 1
+    var stable_name := "ChandelierWarmLight_%02d" % _chandelier_light_index
+    if has_node(stable_name):
+        return
     var lamp := OmniLight3D.new()
-    lamp.name = "ChandelierWarmLight"
+    lamp.name = stable_name
     lamp.position = pos
     lamp.light_color = Color("#f3c692")
     lamp.light_energy = power
