@@ -1,9 +1,11 @@
 extends SceneTree
-## Live runtime test for genuine two-instance streaming:
-## both rooms occupy distinct adjacent world coordinates; only one Player
-## and one controller/HUD survive each handoff, without a teleport/fade.
+## Integration regression: 2 genuine blind L-bends, both locked departures,
+## retained arrival-connector after unloading and two consecutive no-teleport
+## room swaps. Detects the reported ability to walk into the exterior void.
 
 const ROOM = preload("res://main.tscn")
+const Portals = preload("res://gameplay/stream_portals.gd")
+
 
 func _initialize() -> void:
     call_deferred("_run")
@@ -22,115 +24,173 @@ func _run() -> void:
     state.save_path = "user://casino_streaming_qa.cfg"
     state.start_new_run()
     state.complete_tutorial()
+
+    var shape = Portals.new()
     var first := ROOM.instantiate() as Node3D
     root.add_child(first)
     current_scene = first
     await process_frame
     await process_frame
-    await process_frame
+    await physics_frame
 
     var controller := first.get_node_or_null("LoopController")
-    if controller == null:
-        _fail("Initial hall has no gameplay controller")
-        return
     var player := first.get_node_or_null("Player") as CharacterBody3D
-    if player == null:
-        _fail("Initial hall has no player")
+    if controller == null or player == null:
+        _fail("Streaming hall lost its active controller or player")
         return
     var portal := first.get_node_or_null("StreamingPortals") as Node3D
-    if portal == null or portal.find_children("ConnectorFloor*", "MeshInstance3D", true, false).size() != 2:
-        _fail("Both walkable physical connectors were not built")
+    if portal == null:
+        _fail("The casino did not create runtime streaming portals")
         return
+    for lane in ["left", "right"]:
+        var corridor := shape.get_connector(first, lane)
+        if corridor == null:
+            _fail("Missing the separate L-shaped %s corridor" % lane)
+            return
+        for name in [
+            "StraightFloor", "StraightCeiling", "TurnFloor", "TurnCeiling",
+            "StraightOuterWall", "StraightInnerWall", "TurnOuterWall", "TurnInnerWall"
+        ]:
+            if corridor.get_node_or_null(name) == null                     or corridor.get_node_or_null(name + "_Collision") == null:
+                _fail("%s corridor does not contain collidable %s" % [lane, name])
+                return
+        if corridor.has_node("OneWayGate"):
+            _fail("Departure was locked before the player made a decision")
+            return
+
     if (first.get_node("Architecture/FarExitWall") as MeshInstance3D).visible:
-        _fail("Existing solid exit wall is still visible")
+        _fail("Original solid wall still blocks the exits")
         return
     var far_collision := first.get_node("Architecture/FarExitWall_Collision") as StaticBody3D
     if far_collision == null:
-        _fail("Original collision body unexpectedly deleted")
+        _fail("Original far-wall body disappeared")
         return
     for part in far_collision.get_children():
         if part is CollisionShape3D and not (part as CollisionShape3D).disabled:
-            _fail("Original exit wall is still collidable")
+            _fail("Original full wall's collision is still active")
+            return
+
+    # Looking straight through the original door must meet a *solid wall*
+    # before the next hall comes into view, for BOTH left and right exits.
+    for lane in ["left", "right"]:
+        var from_pos := first.to_global(Vector3(-47.15, 1.65, shape.lane_z(lane)))
+        var end_pos := first.to_global(Vector3(shape.BEND_X - 3.0, 1.65, shape.lane_z(lane)))
+        var ray := PhysicsRayQueryParameters3D.create(from_pos, end_pos)
+        ray.exclude = [player.get_rid()]
+        var hit: Dictionary = first.get_world_3d().direct_space_state.intersect_ray(ray)
+        if hit.is_empty() or not str((hit["collider"] as Node).name).begins_with("TurnOuterWall_Collision"):
+            _fail("Direct sightline into the %s next room was not blocked by an opaque corner" % lane)
             return
 
     controller.call("_stage_next", "left")
     var second := controller.get("staged") as Node3D
     if second == null or second == first or second.get_parent() != root:
-        _fail("Second full hall was not preloaded beside the first")
+        _fail("The next independent hall was not preloaded")
         return
-    if second.get_node_or_null("Player") != null or second.get_node_or_null("LoopController") != null:
-        _fail("Standby hall duplicated the player or runtime controller")
+    if second.has_node("Player") or second.has_node("LoopController"):
+        _fail("Standby hall generated a second player or controller")
         return
-    var expected_entry := first.to_global(Vector3(-54.50, 0, -3.70))
-    var actual_entry := second.to_global(Vector3(0, 0, 14.18))
-    if expected_entry.distance_to(actual_entry) > 0.015:
-        _fail("Exit passage and next-room entry are not physically aligned")
+    var entry_left := first.to_global(Vector3(shape.BEND_X, 0, shape.end_z("left")))
+    if entry_left.distance_to(second.to_global(Vector3(0, 0, shape.ENTRY_Z))) > 0.02:
+        _fail("The left bend does not meet the next room entrance")
         return
+    var second_transform := second.global_transform
 
     controller.call("_commit_choice", "left")
     if state.visited_loops != 1 or not state.round_ready:
-        _fail("Crossing an open portal failed to score/prepare the next round")
+        _fail("Crossing the left passage did not prepare the next round")
         return
+    if not bool(controller.get("choice_taken")):
+        _fail("The left choice was not permanently committed")
+        return
+    for lane in ["left", "right"]:
+        var corridor := shape.get_connector(first, lane)
+        var physical_gate := corridor.get_node_or_null("OneWayGate_Collision") as StaticBody3D
+        if physical_gate == null or not corridor.has_node("OneWayGate"):
+            _fail("Backtracking through the %s exit is still possible" % lane)
+            return
+        if physical_gate.collision_layer == 0:
+            _fail("%s gate has no physical collision" % lane)
+            return
+        var shape_node := physical_gate.get_node_or_null("CollisionShape3D") as CollisionShape3D
+        if shape_node == null or shape_node.disabled:
+            _fail("%s gate has no enabled blocking shape" % lane)
+            return
+    var score := state.visited_loops
+    controller.call("_stage_next", "right")
+    if state.visited_loops != score or str(controller.get("staged_lane")) != "left"             or not second.global_transform.is_equal_approx(second_transform):
+        _fail("A committed player can switch the already selected EXIT")
+        return
+
     var next_anomaly := str(state.anomaly_id)
-    var expected_player_pos := first.to_global(Vector3(-55.10, 1.02, -3.70))
-    player.global_position = expected_player_pos
-    var saved_pose := player.global_transform
+    player.global_position = first.to_global(
+        Vector3(shape.BEND_X, 1.02, shape.end_z("left") + 4.4)
+    )
+    var old_pose := player.global_transform
     controller.call("_handoff")
-    if current_scene != second:
-        _fail("SceneTree did not promote the preloaded hall")
+    if current_scene != second or player.get_parent() != second             or controller.get_parent() != second:
+        _fail("The staged room did not take over the original player/controller")
         return
-    if not is_instance_valid(player) or player.get_parent() != second:
-        _fail("The original Player was not transferred into the new room")
+    if player.global_position.distance_to(old_pose.origin) > 0.001:
+        _fail("Room handoff teleported the first-person camera")
         return
-    if controller.get_parent() != second:
-        _fail("HUD/controller were not kept alive during the swap")
-        return
-    if player.global_transform.origin.distance_to(saved_pose.origin) > 0.001:
-        _fail("Streaming caused a position teleport")
+    if second.get_node_or_null("ArrivalConnector/OneWayGate_Collision") == null:
+        _fail("The passage behind the player vanished and exposed the void")
         return
     if second.get_node("WorldEnvironment").environment == null:
-        _fail("New active hall never activated its original environment")
-        return
-    if not second.has_node("StreamingPortals"):
-        _fail("Next hall did not already have its exits and entry opened")
+        _fail("The new room did not activate its original lighting")
         return
     await process_frame
     await process_frame
     if is_instance_valid(first):
-        _fail("Previous room was not unloaded after passing its connector")
+        _fail("The previous full casino room was not freed")
         return
     if str(state.anomaly_id) != next_anomaly:
-        _fail("Preloaded room lost the already selected round/anomaly")
+        _fail("The preselected anomaly was lost during room handoff")
         return
 
-    # Another loop must work after rotating the whole level by 90 degrees.
+    # The new room may have rotated 180 degrees relative to the last one.
+    # Test the opposite turn from that new local coordinate system.
     controller.call("_stage_next", "right")
     var third := controller.get("staged") as Node3D
     if third == null:
-        _fail("A third loop cannot be preloaded after scene handoff")
+        _fail("Could not prepare a third continuous loop")
         return
-    var expected_third_entry := second.to_global(Vector3(-54.50, 0, -9.65))
-    if expected_third_entry.distance_to(third.to_global(Vector3(0, 0, 14.18))) > 0.015:
-        _fail("Rotated second connector does not meet the third room")
+    var third_entry := second.to_global(
+        Vector3(shape.BEND_X, 0, shape.end_z("right"))
+    )
+    if third_entry.distance_to(third.to_global(Vector3(0, 0, shape.ENTRY_Z))) > 0.02:
+        _fail("Right turn is spatially misaligned after a rotated hall")
         return
     controller.call("_commit_choice", "right")
     if state.visited_loops != 2:
-        _fail("Second decision was not counted")
+        _fail("The second left/right choice was not counted")
         return
-    player.global_position = second.to_global(Vector3(-55.10, 1.02, -9.65))
-    var second_pose := player.global_transform
+    for lane in ["left", "right"]:
+        if not shape.get_connector(second, lane).has_node("OneWayGate_Collision"):
+            _fail("Second loop did not close both reverse paths")
+            return
+
+    player.global_position = second.to_global(
+        Vector3(shape.BEND_X, 1.02, shape.end_z("right") - 4.4)
+    )
+    var another_pose := player.global_transform
     controller.call("_handoff")
-    if current_scene != third or player.global_position.distance_to(second_pose.origin) > 0.001:
-        _fail("Second spatial handoff altered player location")
+    if current_scene != third or player.global_position.distance_to(another_pose.origin) > 0.001:
+        _fail("Second handoff moved the player")
         return
     await process_frame
     await process_frame
     if is_instance_valid(second):
-        _fail("Second room remained resident after leaving it")
+        _fail("Second old hall survived after the next handoff")
+        return
+    if third.get_node_or_null("ArrivalConnector/OneWayGate_Collision") == null:
+        _fail("Third hall still allows looking out through its unloaded predecessor")
         return
     if third.find_children("LoopController", "Node3D", false, false).size() != 1:
-        _fail("Repetitions created duplicate gameplay controllers")
+        _fail("Multiple loop controllers survived a handoff")
         return
+
     third.queue_free()
     await process_frame
     DirAccess.remove_absolute(ProjectSettings.globalize_path(state.save_path))
