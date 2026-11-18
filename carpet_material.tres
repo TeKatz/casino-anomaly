@@ -17,4 +17,4 @@ normal_texture = ExtResource("3")
 emission_enabled = true
 emission = Color(0.48, 0.055, 0.07, 1)
 emission_energy_multiplier = 0.26
-texture_filter = 1
+texture_filter = 5

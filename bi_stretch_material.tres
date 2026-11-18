@@ -14,4 +14,4 @@ metallic = 0.12
 normal_enabled = true
 normal_scale = 0.58
 normal_texture = ExtResource("3")
-texture_filter = 1
+texture_filter = 5

@@ -144,7 +144,7 @@ func _box(parent: Node3D, label: String, position_3d: Vector3,
             pbr.uv1_scale = Vector3(
                 maxf(1.0, dimensions.x / 1.45),
                 maxf(1.0, dimensions.z / 1.45), 1.0)
-        pbr.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+        pbr.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
         mesh_node.material_override = pbr
     else:
         mesh_node.material_override = mat

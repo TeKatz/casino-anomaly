@@ -14,5 +14,9 @@ window/stretch/aspect="expand"
 
 [rendering]
 renderer/rendering_method="forward_plus"
+# Reduce texture shimmering in fine repeating PBR wall, floor and roof patterns.
+anti_aliasing/quality/use_taa=true
+textures/default_filters/anisotropic_filtering_level=3
+textures/default_filters/texture_mipmap_bias=0.25
 renderer/rendering_method.mobile="gl_compatibility"
 environment/defaults/default_clear_color=Color(0.07, 0.06, 0.055, 1)
