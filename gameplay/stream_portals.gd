@@ -264,6 +264,7 @@ func _box(parent: Node3D, label: String, center: Vector3,
     body.name = label + "_Collision"
     body.position = center
     var collision := CollisionShape3D.new()
+    collision.name = "Shape"
     var shape := BoxShape3D.new()
     shape.size = dimensions
     collision.shape = shape
