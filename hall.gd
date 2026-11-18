@@ -48,7 +48,10 @@ func _ready() -> void:
     # The headless editor does not expose all GPU-only anti-aliasing settings.
     # Ensure the actual Forward+ game viewport uses TAA during play.
     if DisplayServer.get_name() != "headless":
-        get_viewport().use_taa = true
+        var viewport := get_viewport()
+        viewport.use_taa = true
+        viewport.anisotropic_filtering_level = Viewport.ANISOTROPY_8X
+        viewport.texture_mipmap_bias = 0.25
     wood = OAK.duplicate() as StandardMaterial3D
     wood.uv1_scale = Vector3.ONE
     wood.cull_mode = BaseMaterial3D.CULL_DISABLED

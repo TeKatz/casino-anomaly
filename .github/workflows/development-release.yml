@@ -106,6 +106,12 @@ jobs:
       - name: Godot scene smoke and Windows export
         shell: pwsh
         run: |
+          # Verify committed rendering intent BEFORE headless editor import,
+          # which may normalize GPU-only rendering settings on CI runners.
+          $renderCfg = Get-Content project.godot -Raw
+          foreach ($flag in @('anti_aliasing/quality/use_taa=true', 'textures/default_filters/anisotropic_filtering_level=3')) {
+            if (-not $renderCfg.Contains($flag)) { throw "Required rendering flag missing: $flag" }
+          }
           & "$env:GODOT_EDITOR" --headless --path . --editor --import 2>&1 | Tee-Object -FilePath import.log
           if ($LASTEXITCODE -ne 0 -or (Get-Content import.log -Raw) -match '(?m)(SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:)') { throw 'Godot import failed' }
           & "$env:GODOT_EDITOR" --headless --path . --script res://tests/smoke.gd 2>&1 | Tee-Object -FilePath smoke.log
