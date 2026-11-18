@@ -122,8 +122,23 @@ func _run() -> void:
         _fail("Player camera was lost after starting a run")
         return
 
+    # The first real door choice must fade, score, reset and choose another
+    # round without instantiating another casino scene.
+    var correct_answer := not str(state.anomaly_id).is_empty()
+    loop.call("_enter_door", correct_answer)
+    await create_timer(1.25).timeout
+    if state.visited_loops != 1 or state.correct_streak != 1 or not state.round_ready:
+        _fail("Using an exit door did not advance to a new random loop")
+        return
+    var player := scene.get_node("Player") as CharacterBody3D
+    if player.position.distance_to(Vector3(0, 1.02, 11.1)) > 0.4:
+        _fail("The disguised doorway did not return the player to the entrance")
+        return
+
     scene.queue_free()
     await process_frame
+    local.free()
+    restored.free()
     DirAccess.remove_absolute(ProjectSettings.globalize_path(state.save_path))
     print("Casino Anomaly playable tutorial, save and loop gameplay QA PASS")
     quit(0)
