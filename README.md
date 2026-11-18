@@ -16,6 +16,14 @@ The main menu checks this repo's Development channel for updates. It runs a sepa
 
 `dev` publishes Development releases; `main` remains the reviewed integration baseline. Verified Windows builds use Godot 4.5.1, .NET 10 for the updater, and original CC0 asset sources. No checkout, terminal, editor or asset import is required for playtesting.
 
+## Spielbarer Anomalie-Loop (erster Gameplay-Prototyp)
+
+**Neues Spiel** führt zunächst in einen kleinen, separat editierbaren Tutorialraum (`gameplay/tutorial.tscn`). An dessen Tür startet mit **E** der vorhandene L-förmige Casinoflur. Am westlichen Flurende stehen zwei Türen aus `gameplay/decision_doors.tscn`: **links** bedeutet „Anomalie“, **rechts** bedeutet „normal“. Die Türen stehen bewusst vor der bisher geschlossenen Endwand; mit **E** wird die Entscheidung bestätigt.
+
+Für die erste Version verdeckt eine kurze Abdunkelung den Rücksprung zum Eingang; später kann ein physischer, abgedunkelter Verbindungsgang denselben Übergang verstecken. Der **gleiche Raum** wird für jeden Durchlauf wiederverwendet, nicht mehrfach instanziiert. Die provisorischen Test-Anomalien verändern ausschließlich vorhandene 3D-Schilder und werden nach jedem Durchlauf vollständig zurückgesetzt. Die endgültige Anomalienliste ist noch offen.
+
+Der erste Prototyp verlangt acht richtige Entscheidungen hintereinander; ein Fehler setzt die Serie auf null, aber nicht den gesamten Spielstand. Ein einzelner Spielstand wird unter `user://anomaly_run.cfg` gespeichert. Neues Spiel überschreibt diesen Stand; Fortsetzen überspringt das Tutorial, sofern es abgeschlossen ist. Der Gameplay-Controller wird ausschließlich zur Laufzeit durch `hall.gd` erzeugt: **`main.tscn` mit der manuellen Casino-Gestaltung bleibt unverändert.**
+
 ## Poly Haven interior pass
 
 The next development pass loads **10 original CC0 Poly Haven 3D models** as reusable imported glTF scenes: both chandeliers, brass candleholders, marble bust, framed painting, CCTV camera, wine bottles, round bar chairs, coffee cart and wooden cabinet. They are integrated into the existing L-shaped hall and the wraparound corner bar, with low-cost non-shadow-casting practical lights, basic pedestrian collision for furniture and data-driven automatic alignment. Imported models use original source geometry and mostly 1K PBR texture maps to keep performance and download size reasonable. Asset manifests and SHA-256 checks are stored under `models/`, with licensing recorded in [ASSET_CREDITS.md](ASSET_CREDITS.md). Further visual tweaking will follow on-device playtests.

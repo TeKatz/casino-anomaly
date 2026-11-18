@@ -103,6 +103,17 @@ func _ready() -> void:
     if lights.get_child_count() == 0:
         _make_lights()
 
+    # Keep the designer-authored scene untouched. The game controller and
+    # choice doors exist only in a started/continued run, not in editor mode.
+    if not Engine.is_editor_hint():
+        var state = get_node_or_null("/root/LoopState")
+        if state != null and state.active and state.tutorial_done and not state.finished:
+            var controller := Node3D.new()
+            controller.name = "LoopController"
+            controller.set_script(load("res://gameplay/loop_controller.gd"))
+            add_child(controller)
+
+
 func _section(label: String) -> Node3D:
     var saved := get_node_or_null(label) as Node3D
     if saved != null:

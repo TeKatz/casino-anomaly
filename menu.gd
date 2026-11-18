@@ -18,7 +18,11 @@ func _ready() -> void:
     if parsed is Dictionary:
         current_version_code = int(parsed.get("versionCode", 0))
         version_label.text = "Version " + str(parsed.get("version", "0.1.0-dev.0"))
+    var state = get_node_or_null("/root/LoopState")
+    $CenterPanel/Content/Stack/PlayButton.text = "NEUES SPIEL"
+    $CenterPanel/Content/Stack/ContinueButton.disabled = state == null or not state.has_continue()
     $CenterPanel/Content/Stack/PlayButton.pressed.connect(_on_play)
+    $CenterPanel/Content/Stack/ContinueButton.pressed.connect(_on_continue)
     $CenterPanel/Content/Stack/Casino2PreviewButton.pressed.connect(_on_preview)
     $CenterPanel/Content/Stack/QuitButton.pressed.connect(_on_quit)
     update_button.pressed.connect(_check_update)
@@ -27,7 +31,22 @@ func _ready() -> void:
     call_deferred("_check_update")
 
 func _on_play() -> void:
-    get_tree().change_scene_to_file("res://main.tscn")
+    var state = get_node_or_null("/root/LoopState")
+    if state == null:
+        status_label.text = "Spielstandsystem konnte nicht gestartet werden."
+        return
+    state.start_new_run()
+    get_tree().change_scene_to_file("res://gameplay/tutorial.tscn")
+
+
+func _on_continue() -> void:
+    var state = get_node_or_null("/root/LoopState")
+    if state == null or not state.has_continue():
+        return
+    get_tree().change_scene_to_file(
+        "res://main.tscn" if state.tutorial_done else "res://gameplay/tutorial.tscn"
+    )
+
 
 func _on_preview() -> void:
     get_tree().change_scene_to_file("res://casino2_preview.tscn")
