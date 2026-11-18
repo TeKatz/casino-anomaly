@@ -1,0 +1,74 @@
+[gd_scene load_steps=5 format=3]
+
+[sub_resource type="StandardMaterial3D" id="DoorWood"]
+albedo_color = Color(0.22, 0.12, 0.095, 1)
+roughness = 0.72
+
+[sub_resource type="StandardMaterial3D" id="DoorGold"]
+albedo_color = Color(0.75, 0.54, 0.3, 1)
+metallic = 0.59
+roughness = 0.35
+
+[sub_resource type="BoxMesh" id="DoorPanel"]
+size = Vector3(0.14, 3.05, 1.85)
+
+[sub_resource type="BoxMesh" id="DoorTop"]
+size = Vector3(0.22, 0.12, 2.10)
+
+[node name="DecisionDoors" type="Node3D"]
+
+[node name="LeftDoor" type="Node3D" parent="."]
+position = Vector3(-45.73, 1.53, -3.65)
+
+[node name="Panel" type="MeshInstance3D" parent="LeftDoor"]
+mesh = SubResource("DoorPanel")
+material_override = SubResource("DoorWood")
+
+[node name="Frame" type="MeshInstance3D" parent="LeftDoor"]
+position = Vector3(0.06, 1.56, 0)
+mesh = SubResource("DoorTop")
+material_override = SubResource("DoorGold")
+
+[node name="Label" type="Label3D" parent="LeftDoor"]
+position = Vector3(0.12, 0.83, 0)
+billboard = 1
+pixel_size = 0.007
+font_size = 32
+text = "LINKS"
+modulate = Color(1, 0.75, 0.69, 1)
+
+[node name="DecisionHint" type="Label3D" parent="LeftDoor"]
+position = Vector3(0.13, 0.36, 0)
+billboard = 1
+pixel_size = 0.006
+font_size = 23
+text = "ANOMALIE"
+modulate = Color(1, 0.86, 0.8, 1)
+
+[node name="RightDoor" type="Node3D" parent="."]
+position = Vector3(-45.73, 1.53, -6.65)
+
+[node name="Panel" type="MeshInstance3D" parent="RightDoor"]
+mesh = SubResource("DoorPanel")
+material_override = SubResource("DoorWood")
+
+[node name="Frame" type="MeshInstance3D" parent="RightDoor"]
+position = Vector3(0.06, 1.56, 0)
+mesh = SubResource("DoorTop")
+material_override = SubResource("DoorGold")
+
+[node name="Label" type="Label3D" parent="RightDoor"]
+position = Vector3(0.12, 0.83, 0)
+billboard = 1
+pixel_size = 0.007
+font_size = 32
+text = "RECHTS"
+modulate = Color(0.72, 1, 0.94, 1)
+
+[node name="DecisionHint" type="Label3D" parent="RightDoor"]
+position = Vector3(0.13, 0.36, 0)
+billboard = 1
+pixel_size = 0.006
+font_size = 23
+text = "NORMAL"
+modulate = Color(0.78, 1, 0.93, 1)
