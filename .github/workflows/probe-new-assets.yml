@@ -1,0 +1,30 @@
+name: Probe New Poly Haven 1K Models and 2K Materials
+
+on:
+  push:
+    branches: [feature/lounge-fabric-roulette-bar]
+    paths: [".github/workflows/probe-new-assets.yml"]
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect official API manifests
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json,urllib.request
+          ids=['wood_table_001','wood_table_worn','dark_wood','smoke_speckled_veneer','round_wooden_table_01','sofa_02','chess_set','concrete_cat_statue','horse_statue_01']
+          for name in ids:
+              try:
+                  j=json.load(urllib.request.urlopen('https://api.polyhaven.com/files/'+name,timeout=25))
+                  if 'gltf' in j:
+                      m=j['gltf'].get('1k',{}).get('gltf',{})
+                      print('MODEL',name,'1k',m.get('url'),'main_bytes',m.get('size'),'includes_bytes',sum(x.get('size',0) for x in m.get('include',{}).values()),flush=True)
+                  else:
+                      print('TEXTURE',name,'jpeg2k',json.dumps(list(j.get('Diffuse',{}).get('2k',{}).get('jpg',{}).keys())),'keys',list(j),'maps',[(k,v.get('2k',{}).get('jpg',{}).get('url')) for k,v in j.items() if isinstance(v,dict) and v.get('2k',{}).get('jpg')],flush=True)
+              except Exception as e: print('FAIL',name,str(e),flush=True)
+          PY
