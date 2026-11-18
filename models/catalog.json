@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "source": "Poly Haven",
+  "license": "CC0-1.0",
+  "resolution": "1k",
+  "models": [
+    {
+      "id": "Chandelier_02",
+      "role": "main chandelier at casino bend"
+    },
+    {
+      "id": "Chandelier_01",
+      "role": "smaller chandeliers over second wing"
+    },
+    {
+      "id": "brass_candleholders",
+      "role": "tabletop candles"
+    },
+    {
+      "id": "marble_bust_01",
+      "role": "marble statue on pedestal"
+    },
+    {
+      "id": "fancy_picture_frame_01",
+      "role": "framed art on casino walls"
+    },
+    {
+      "id": "security_camera_01",
+      "role": "security cameras along ceiling"
+    },
+    {
+      "id": "wine_bottles_01",
+      "role": "wine bottles at corner bar"
+    },
+    {
+      "id": "bar_chair_round_01",
+      "role": "stools around the bar"
+    },
+    {
+      "id": "CoffeeCart_01",
+      "role": "coffee station at bar"
+    },
+    {
+      "id": "modern_wooden_cabinet",
+      "role": "wooden storage furniture behind bar"
+    }
+  ]
+}

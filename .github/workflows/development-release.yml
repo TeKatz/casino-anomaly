@@ -26,17 +26,19 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Import verified Poly Haven textures
+      - name: Import verified Poly Haven textures and 3D model dependencies
         shell: pwsh
         run: |
           python tools/ensure_assets.py
           if ($LASTEXITCODE -ne 0) { throw 'Source textures unavailable or invalid' }
+          python tools/import_model_assets.py
+          if ($LASTEXITCODE -ne 0) { throw '3D model dependencies unavailable or invalid' }
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -- assets/
+          git add -- assets/ models/
           git diff --cached --quiet
           if ($LASTEXITCODE -eq 1) {
-            git commit -m 'assets: import verified Poly Haven oak PBR textures'
+            git commit -m 'assets: verify and import Poly Haven PBR textures and 3D models'
             if ($LASTEXITCODE -ne 0) { throw 'Asset commit failed' }
             git push origin HEAD:refs/heads/dev
             if ($LASTEXITCODE -ne 0) { throw 'Asset upload failed' }

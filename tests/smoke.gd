@@ -12,6 +12,8 @@ func _run_smoke() -> void:
         return
     var world: Node3D = scene.instantiate() as Node3D
     root.add_child(world)
+    await process_frame
+    await process_frame
     var player: Camera3D = world.get_node_or_null("Player/Camera3D") as Camera3D
     var architecture: Node3D = world.get_node_or_null("Architecture") as Node3D
     var carpet: Node3D = world.get_node_or_null("RedCarpet") as Node3D
@@ -65,6 +67,21 @@ func _run_smoke() -> void:
         push_error("The extended wing needs evenly distributed visual details")
         quit(1)
         return
+    var models: Node3D = world.get_node_or_null("ModelInteriors") as Node3D
+    if models == null or models.get("successful_model_ids").size() != 10 or int(models.get("placed_model_count")) < 31:
+        push_error("All 10 requested Poly Haven models must be placed in the room")
+        quit(1)
+        return
+    for asset_id in [
+        "Chandelier_02", "Chandelier_01", "brass_candleholders",
+        "marble_bust_01", "fancy_picture_frame_01",
+        "security_camera_01", "wine_bottles_01",
+        "bar_chair_round_01", "CoffeeCart_01", "modern_wooden_cabinet"
+    ]:
+        if not bool(models.get("successful_model_ids").has(asset_id)):
+            push_error("Missing imported model: " + asset_id)
+            quit(1)
+            return
     world.queue_free()
     print("Casino Anomaly scenes and PBR floor smoke PASS")
     quit(0)

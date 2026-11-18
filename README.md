@@ -15,3 +15,7 @@ Download and fully extract `casino-anomaly-win-x64.zip` from the Development rel
 The main menu checks this repo's Development channel for updates. It runs a separate Windows updater which verifies package SHA-256 and size, stages the download, and attempts recovery after failures. Game and updater are independent of Blackjack Casino. Save data belongs in the Godot user-data directory outside the install folder.
 
 `dev` publishes Development releases; `main` remains the reviewed integration baseline. Verified Windows builds use Godot 4.5.1, .NET 10 for the updater, and original CC0 asset sources. No checkout, terminal, editor or asset import is required for playtesting.
+
+## Poly Haven interior pass
+
+The next development pass loads **10 original CC0 Poly Haven 3D models** as reusable imported glTF scenes: both chandeliers, brass candleholders, marble bust, framed painting, CCTV camera, wine bottles, round bar chairs, coffee cart and wooden cabinet. They are integrated into the existing L-shaped hall and the wraparound corner bar, with low-cost non-shadow-casting practical lights, basic pedestrian collision for furniture and data-driven automatic alignment. Imported models use original source geometry and mostly 1K PBR texture maps to keep performance and download size reasonable. Asset manifests and SHA-256 checks are stored under `models/`, with licensing recorded in [ASSET_CREDITS.md](ASSET_CREDITS.md). Further visual tweaking will follow on-device playtests.

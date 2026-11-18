@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://hall.gd" id="1_hall"]
 [ext_resource type="Script" path="res://player.gd" id="2_player"]
+[ext_resource type="Script" path="res://model_interior.gd" id="3_models"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape_player"]
 radius = 0.34
@@ -31,6 +32,9 @@ position = Vector3(0, 0.55, 0)
 current = true
 fov = 75.0
 near = 0.05
+
+[node name="ModelInteriors" type="Node3D" parent="."]
+script = ExtResource("3_models")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_casino")
