@@ -88,6 +88,15 @@ func _bake() -> void:
         quit(1)
         return
 
+    # Do not accidentally serialize the character after several frames of
+    # gravity, or the eye camera after its breathing interpolation.
+    var player := world.get_node("Player") as CharacterBody3D
+    player.position = Vector3(0, 1.02, 11.1)
+    player.velocity = Vector3.ZERO
+    var camera := world.get_node("Player/Camera3D") as Camera3D
+    camera.position = Vector3(0, 0.55, 0)
+    camera.rotation = Vector3.ZERO
+
     world.remove_meta("_baking_room")
     var authored := PackedScene.new()
     var packed_error := authored.pack(world)
