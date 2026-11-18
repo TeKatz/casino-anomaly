@@ -19,6 +19,7 @@ func _ready() -> void:
         current_version_code = int(parsed.get("versionCode", 0))
         version_label.text = "Version " + str(parsed.get("version", "0.1.0-dev.0"))
     $CenterPanel/Content/Stack/PlayButton.pressed.connect(_on_play)
+    $CenterPanel/Content/Stack/Casino2PreviewButton.pressed.connect(_on_preview)
     $CenterPanel/Content/Stack/QuitButton.pressed.connect(_on_quit)
     update_button.pressed.connect(_check_update)
     install_button.pressed.connect(_install_update)
@@ -27,6 +28,9 @@ func _ready() -> void:
 
 func _on_play() -> void:
     get_tree().change_scene_to_file("res://main.tscn")
+
+func _on_preview() -> void:
+    get_tree().change_scene_to_file("res://casino2_preview.tscn")
 
 func _on_quit() -> void:
     get_tree().quit()

@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "license": "CC-BY-4.0",
+  "source": "Sketchfab",
+  "modified": "Original geometry preserved; PBR textures downscaled for real-time Godot rendering; poker_set includes a selectively extracted 27,152-triangle prop GLB",
+  "models": [
+    {
+      "id": "roulette_table",
+      "title": "Roulette Table",
+      "author": "Robilben",
+      "authorUrl": "https://sketchfab.com/Robilben",
+      "sourceUrl": "https://sketchfab.com/3d-models/roulette-table-18a27b0e326644a0b47887d07e0d0f99",
+      "bytes": 13987809,
+      "sha256": "5fef1e2fa5c0709140928add10f084c134a508e643a77f716c52de008c758ee0",
+      "triangleCount": 87136
+    },
+    {
+      "id": "retro_slot_machine",
+      "title": "Retro Slot Machine",
+      "author": "ARTEL_3D",
+      "authorUrl": "https://sketchfab.com/artel_3D",
+      "sourceUrl": "https://sketchfab.com/3d-models/retro-slot-machine-46f0ae338d984364ac1249451067c1a3",
+      "bytes": 19537838,
+      "sha256": "7fd7ab2141933678bc9b83a7148952daf7eb11bc57676ddd2b7a585b9308df32",
+      "triangleCount": 499996
+    },
+    {
+      "id": "poker_set",
+      "title": "Poker set",
+      "author": "Matth_mat",
+      "authorUrl": "https://sketchfab.com/Matth_mat",
+      "sourceUrl": "https://sketchfab.com/3d-models/poker-set-841e271f392b4b3187b19fbdbb81ef62",
+      "bytes": 13986052,
+      "sha256": "5fdd02ce3ef84af4775f61afeb8c38a235ce1a1a4a2441402606ae4e82a7adf5",
+      "triangleCount": 628892,
+      "usablePropTriangles": 27152
+    },
+    {
+      "id": "blackjack_table",
+      "title": "Blackjack Table",
+      "author": "Ravi Jangid",
+      "authorUrl": "https://sketchfab.com/ravijangid.rv",
+      "sourceUrl": "https://sketchfab.com/3d-models/blackjack-table-baf7e3cbd14140ca81ea1a79d28fb635",
+      "bytes": 1314927,
+      "sha256": "2b7dd0ae8fc092ccb6bfa37172961f69d3abfab1965f3b19d9af0c649e39fd1d",
+      "triangleCount": 5788
+    },
+    {
+      "id": "casino_2",
+      "title": "Casino_2",
+      "author": "crittaa",
+      "authorUrl": "https://sketchfab.com/crittaa",
+      "sourceUrl": "https://sketchfab.com/3d-models/casino-2-3f0e1cca9a3e46ba89f849e62df289ad",
+      "bytes": 5904307,
+      "sha256": "2769f0a87948953822dbf816386519eb40b319614abfceb8b3a60e68747d1d14",
+      "triangleCount": 42040,
+      "isWholeEnvironment": true
+    }
+  ]
+}

@@ -27,3 +27,21 @@ Fixed seven issues from in-game screenshots: (1) both marble busts face the walk
 ## Spatial QA pass (after dev.10)
 
 The player-reported defects were fixed in the scene itself: no procedural stools behind the Poly Haven bar stools, greater spacing at the L-shaped counter, the bar and its colliders shifted away from the wall pilasters, physical collision on every architectural pillar, coffee cart in a free wall bay, topiary separated from the sofas, and no luminous spheres on lounge tables. The previously disabled ambient-light source has been replaced with color ambient lighting; both material meshes now render from either side. A new spatial regression test validates floor materials, pillar bodies, furniture spacing and lighting before release.
+
+## Sketchfab casino objects (feature branch)
+
+The uploaded models have been audited; the five original Sketchfab glTF
+archives include CC BY 4.0 license files and author attribution. For the
+first pass, the scene attempts to replace three roulette-table prototypes,
+one blackjack table and one retro slot-machine prototype; the poker set
+is reduced to a compact, approximately 27k-triangle cards/chips/dice display.
+The original *Casino_2* file is a whole room, so it has its own model-preview
+button instead of overlapping the established L-shaped casino.
+
+To complete the binary upload to GitHub, place the five verified, compressed
+ZIP files from the Sketchfab asset package in `sketchfab_drop/` on
+`feature/sketchfab-casino-assets`. They are individually under the 25 MiB
+GitHub web-upload limit. Checksums are pinned in `catalog.json`.
+The CI workflow extracts them before Godot import; no Godot authoring or
+manual asset processing is required. The `dev` release workflow is not
+modified until this feature branch is validated and merged.

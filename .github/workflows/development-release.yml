@@ -33,6 +33,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Source textures unavailable or invalid' }
           python tools/import_model_assets.py
           if ($LASTEXITCODE -ne 0) { throw '3D model dependencies unavailable or invalid' }
+          python tools/unpack_sketchfab_assets.py --require-all
+          if ($LASTEXITCODE -ne 0) { throw 'Sketchfab CC-BY 4.0 models unavailable or invalid' }
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -- assets/ models/
@@ -106,6 +108,8 @@ jobs:
           if ($LASTEXITCODE -ne 0 -or (Get-Content import.log -Raw) -match '(?m)(SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:)') { throw 'Godot import failed' }
           & "$env:GODOT_EDITOR" --headless --path . --script res://tests/smoke.gd 2>&1 | Tee-Object -FilePath smoke.log
           if ($LASTEXITCODE -ne 0 -or (Get-Content smoke.log -Raw) -notmatch 'Casino Anomaly scenes and PBR floor smoke PASS') { throw 'Godot scene smoke failed' }
+          & "$env:GODOT_EDITOR" --headless --path . --script res://tests/sketchfab_smoke.gd 2>&1 | Tee-Object -FilePath sketchfab-smoke.log
+          if ($LASTEXITCODE -ne 0 -or (Get-Content sketchfab-smoke.log -Raw) -notmatch 'Casino Anomaly Sketchfab model smoke PASS') { throw 'Sketchfab model smoke failed' }
           New-Item -ItemType Directory -Force artifacts/game | Out-Null
           $exe = Join-Path (Get-Location) 'artifacts/game/CasinoAnomaly.exe'
           & "$env:GODOT_EDITOR" --headless --path . --export-release 'Windows Desktop' $exe 2>&1 | Tee-Object -FilePath export.log
@@ -121,6 +125,7 @@ jobs:
           Copy-Item artifacts/game/CasinoAnomaly.pck $bundle
           Copy-Item artifacts/updater/CasinoAnomaly.Updater.exe "$bundle/tools/updater/"
           Copy-Item version.json $bundle
+          Copy-Item ASSET_CREDITS.md $bundle
           Copy-Item third_party/GODOT-LICENSE.txt $bundle
           Copy-Item third_party/GODOT-COPYRIGHT.txt $bundle
           'ZIP vollstaendig entpacken und CasinoAnomaly.exe starten. Im Hauptmenue koennen Updates installiert werden.' | Set-Content "$bundle/START-HIER.txt" -Encoding utf8

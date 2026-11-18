@@ -6,3 +6,6 @@ artifacts/
 *.tmp
 .DS_Store
 Thumbs.db
+
+# Extracted bundled models are generated from verified source ZIPs in CI.
+models/sketchfab/

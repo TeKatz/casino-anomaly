@@ -1,0 +1,100 @@
+name: Sketchfab Casino Models Preview (Windows)
+
+on:
+  push:
+    branches: [feature/sketchfab-casino-assets]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-preview:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Verify user-provided Sketchfab licenses and ZIP checksums
+        shell: pwsh
+        run: |
+          python tools/unpack_sketchfab_assets.py --require-all
+          if ($LASTEXITCODE -ne 0) { throw 'Five CC BY source ZIPs must be uploaded first' }
+          python tools/ensure_assets.py
+          if ($LASTEXITCODE -ne 0) { throw 'Poly Haven textures unavailable' }
+          python tools/import_model_assets.py
+          if ($LASTEXITCODE -ne 0) { throw 'Poly Haven models unavailable' }
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/AppData/Roaming/Godot/export_templates/4.5.1.stable
+          key: casino-anomaly-godot-4.5.1-win-x64-v1
+
+      - name: Install pinned Godot 4.5.1
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $ProgressPreference = 'SilentlyContinue'
+          $base = 'https://github.com/godotengine/godot-builds/releases/download/4.5.1-stable'
+          $work = Join-Path $env:RUNNER_TEMP 'sketchfab-preview-godot'
+          $editorDir = Join-Path $work 'editor'
+          New-Item -ItemType Directory -Force $editorDir | Out-Null
+          $archive = Join-Path $work 'editor.zip'
+          Invoke-WebRequest "$base/Godot_v4.5.1-stable_win64.exe.zip" -OutFile $archive
+          Expand-Archive $archive $editorDir -Force
+          $editor = Join-Path $editorDir 'Godot_v4.5.1-stable_win64_console.exe'
+          if (!(Test-Path $editor)) { throw 'Godot executable missing' }
+          "GODOT_EDITOR=$editor" >> $env:GITHUB_ENV
+          $templates = Join-Path $env:APPDATA 'Godot/export_templates/4.5.1.stable'
+          $template = Join-Path $templates 'windows_release_x86_64.exe'
+          New-Item -ItemType Directory -Force $templates | Out-Null
+          if (!(Test-Path $template)) {
+            $templateArchive = Join-Path $work 'templates.tpz'
+            Invoke-WebRequest "$base/Godot_v4.5.1-stable_export_templates.tpz" -OutFile $templateArchive
+            Add-Type -AssemblyName System.IO.Compression.FileSystem
+            $zip = [System.IO.Compression.ZipFile]::OpenRead($templateArchive)
+            try {
+              $entry = $zip.GetEntry('templates/windows_release_x86_64.exe')
+              if ($null -eq $entry) { throw 'Windows export template missing' }
+              [System.IO.Compression.ZipFileExtensions]::ExtractToFile($entry, $template, $true)
+            } finally { $zip.Dispose() }
+          }
+
+      - name: Import Godot assets and run original and new smoke tests
+        shell: pwsh
+        run: |
+          & "$env:GODOT_EDITOR" --headless --path . --editor --import 2>&1 | Tee-Object -FilePath import.log
+          if ($LASTEXITCODE -ne 0 -or (Get-Content import.log -Raw) -match '(?m)(SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:)') { throw 'Godot import failed' }
+          & "$env:GODOT_EDITOR" --headless --path . --script res://tests/smoke.gd 2>&1 | Tee-Object -FilePath smoke.log
+          if ($LASTEXITCODE -ne 0 -or (Get-Content smoke.log -Raw) -notmatch 'Casino Anomaly scenes and PBR floor smoke PASS') { throw 'Original room regression failed' }
+          & "$env:GODOT_EDITOR" --headless --path . --script res://tests/sketchfab_smoke.gd 2>&1 | Tee-Object -FilePath sketchfab-smoke.log
+          if ($LASTEXITCODE -ne 0 -or (Get-Content sketchfab-smoke.log -Raw) -notmatch 'Casino Anomaly Sketchfab model smoke PASS') { throw 'Sketchfab furniture regression failed' }
+
+      - name: Export portable Windows playtest without changing dev release
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force artifacts/sketchfab-preview | Out-Null
+          $out = Join-Path (Get-Location) 'artifacts/sketchfab-preview/CasinoAnomaly.exe'
+          & "$env:GODOT_EDITOR" --headless --path . --export-release 'Windows Desktop' $out 2>&1 | Tee-Object -FilePath export.log
+          if ($LASTEXITCODE -ne 0 -or (Get-Content export.log -Raw) -match '(?m)(SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:)') { throw 'Godot Windows preview export failed' }
+          if (!(Test-Path artifacts/sketchfab-preview/CasinoAnomaly.exe) -or !(Test-Path artifacts/sketchfab-preview/CasinoAnomaly.pck)) { throw 'Windows preview executable or PCK missing' }
+          Copy-Item ASSET_CREDITS.md artifacts/sketchfab-preview/
+          @'
+          Casino Anomaly - Sketchfab model prototype
+          ZIP komplett entpacken, CasinoAnomaly.exe starten.
+          RAUM BETRETEN: erste neue Roulette- und Blackjack-Tische und Retro-Slot.
+          CASINO 2 - MODELLVORSCHAU: separater Raum als Referenz.
+          Esc: zurueck zum Hauptmenue.
+          Dies ist nur ein Preview-Artefakt, kein Development-Update.
+          '@ | Set-Content artifacts/sketchfab-preview/START-HIER.txt -Encoding utf8
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: casino-anomaly-sketchfab-windows-preview
+          path: artifacts/sketchfab-preview/
+          retention-days: 14
+          if-no-files-found: error

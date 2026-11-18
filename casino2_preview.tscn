@@ -1,0 +1,47 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://casino2_preview.gd" id="1_preview"]
+[ext_resource type="Script" path="res://player.gd" id="2_player"]
+
+[sub_resource type="CapsuleShape3D" id="Shape_player"]
+radius = 0.34
+height = 1.87
+
+[sub_resource type="BoxShape3D" id="Shape_preview_floor"]
+size = Vector3(28, 0.3, 28)
+
+[sub_resource type="Environment" id="Env_preview"]
+background_mode = 1
+background_color = Color(0.04, 0.04, 0.05, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.88, 0.82, 0.73, 1)
+ambient_light_energy = 0.7
+tonemap_mode = 2
+
+[node name="Casino2ModelPreview" type="Node3D"]
+script = ExtResource("1_preview")
+
+[node name="Ground" type="StaticBody3D" parent="."]
+position = Vector3(0, -0.16, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
+shape = SubResource("Shape_preview_floor")
+
+[node name="Player" type="CharacterBody3D" parent="."]
+position = Vector3(0, 1.02, 8.0)
+script = ExtResource("2_player")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
+shape = SubResource("Shape_player")
+
+[node name="Camera3D" type="Camera3D" parent="Player"]
+position = Vector3(0, 0.55, 0)
+current = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Env_preview")
+
+[node name="Sunlight" type="DirectionalLight3D" parent="."]
+rotation = Vector3(-0.78, -0.2, 0)
+light_energy = 0.65
+shadow_enabled = false
