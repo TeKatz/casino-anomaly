@@ -44,6 +44,10 @@ func _run() -> void:
         if child.name.begins_with("Chandelier"):
             _bad("A primitive chandelier globe or chain is still rendered")
             return
+    for child in bar.get_children():
+        if child.name.begins_with("Pendant"):
+            _bad("A white placeholder globe or rod remains above the bar")
+            return
 
     # The wooden bar backdrop is now fully solid, including all shelves.
     var rear: StaticBody3D = bar.get_node_or_null("BarBackboard_Collision") as StaticBody3D

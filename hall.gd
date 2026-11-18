@@ -718,9 +718,9 @@ func _make_bar() -> void:
     # All barstools are now supplied solely by model_interior.gd.
     # Do not spawn cylinder placeholders behind the imported stools.
 
-    for x in [-6.25, -3.5, -0.75, 1.95, 4.10]:
-        _sphere(bar_area, "Pendant", Vector3(x, 4.45, -9.70), 0.16, warm_white)
-        _cylinder(bar_area, "PendantStem", Vector3(x, 5.26, -9.70), 0.025, 1.49, gold)
+    # The five primitive white bar pendant globes and rods are removed.
+    # The imported main chandelier supplies the decorative lighting.
+
 
 func _game_table(pos: Vector3, label: String, index: int) -> void:
     var group := Node3D.new()
