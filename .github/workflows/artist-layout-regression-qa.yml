@@ -41,7 +41,7 @@ jobs:
           GODOT=/tmp/godot-bin/Godot_v4.5.1-stable_linux.x86_64
           "$GODOT" --headless --path . --editor --import > /tmp/import.log 2>&1 || { cat /tmp/import.log; exit 1; }
           if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' /tmp/import.log; then cat /tmp/import.log; exit 1; fi
-          for test in tests/smoke.gd tests/visual_fx_qa.gd tests/sketchfab_smoke.gd tests/architecture_qa.gd tests/spatial_qa.gd tests/joinery_qa.gd tests/prop_visuals_qa.gd tests/screenshot_layout_qa.gd tests/texture_stability_qa.gd tests/editor_layout_qa.gd tests/editor_full_scene_qa.gd; do
+          for test in tests/joinery_qa.gd tests/prop_visuals_qa.gd tests/screenshot_layout_qa.gd tests/texture_stability_qa.gd tests/editor_layout_qa.gd tests/editor_full_scene_qa.gd tests/smoke.gd tests/visual_fx_qa.gd tests/sketchfab_smoke.gd tests/architecture_qa.gd tests/spatial_qa.gd; do
             echo "::group::$test"
             "$GODOT" --headless --path . --script "res://$test" > /tmp/test.log 2>&1 || { cat /tmp/test.log; exit 1; }
             if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' /tmp/test.log; then cat /tmp/test.log; exit 1; fi

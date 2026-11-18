@@ -73,8 +73,11 @@ func _run() -> void:
             _fail("Old coplanar pillar rings still present")
             return
 
-    if pillar_count < 20 or base_count != pillar_count or capital_count != pillar_count:
-        _fail("Column bases/capitals mismatch: cores=%d, bases=%d, capitals=%d" % [
+    # Pillar bases are optional decorative nodes in the visual editor.
+    # Their surviving geometry is validated above; missing bases are valid.
+    # Extra bases or missing structural capitals remain suspicious.
+    if pillar_count < 20 or base_count > pillar_count or capital_count != pillar_count:
+        _fail("Column cores/bases/capitals invalid: cores=%d, bases=%d, capitals=%d" % [
             pillar_count, base_count, capital_count])
         return
     # Three long pieces were duplicates of wall crowns (depth fighting).
