@@ -20,7 +20,7 @@ jobs:
           ids=['wood_table_001','wood_table_worn','dark_wood','smoke_speckled_veneer','round_wooden_table_01','sofa_02','chess_set','concrete_cat_statue','horse_statue_01']
           for name in ids:
               try:
-                  j=json.load(urllib.request.urlopen('https://api.polyhaven.com/files/'+name,timeout=25))
+                  j=json.load(urllib.request.urlopen(urllib.request.Request('https://api.polyhaven.com/files/'+name, headers={'User-Agent': 'CasinoAnomalyAssetImport/2.0'}),timeout=25))
                   if 'gltf' in j:
                       m=j['gltf'].get('1k',{}).get('gltf',{})
                       print('MODEL',name,'1k',m.get('url'),'main_bytes',m.get('size'),'includes_bytes',sum(x.get('size',0) for x in m.get('include',{}).values()),flush=True)
