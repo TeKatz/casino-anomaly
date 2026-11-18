@@ -2,7 +2,7 @@ name: Casino Anomaly Seamless Streaming QA
 
 on:
   push:
-    branches: [feature/seamless-casino-room-streaming]
+    branches: [feature/seamless-casino-room-streaming, fix/bent-oneway-streaming-passages]
   pull_request:
     paths:
       - 'gameplay/**'
