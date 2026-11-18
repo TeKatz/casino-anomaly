@@ -35,7 +35,7 @@ func _run() -> void:
         var label: String = str(obj.get_meta("placement_group", ""))
         if label == "LoungeSofa":
             sofa_count += 1
-            if absf(obj.rotation.y - PI) > 0.0001:
+            if absf(wrapf(obj.rotation.y - PI, -PI, PI)) > 0.0001:
                 _fail("Lounge sofa did not receive the second 90-degree correction")
                 return
             if obj.get_node_or_null("ModelSolidBody") == null:
