@@ -13,6 +13,7 @@ var slot_glows: Array[StandardMaterial3D] = []
 var slot_phases: Array[float] = []
 var slot_spills: Array[OmniLight3D] = []
 var signs: Array[StandardMaterial3D] = []
+var plant_crowns: Array[Node3D] = []
 
 func _ready() -> void:
     call_deferred("_build") # Hall geometry is procedural and assembled in parent _ready.
@@ -31,6 +32,7 @@ func _build() -> void:
     _spot("BustHighlight", Vector3(-3.5, 4.8, 10.8),
         Vector3(-2.75, 1.35, 12.15), 0.75)
     _slots()
+    _plants()
     _dust()
 
 func _glow(color: Color, power: float) -> StandardMaterial3D:
@@ -139,6 +141,17 @@ func _slots() -> void:
             slot_spills.append(light)
         i += 1
 
+func _plants() -> void:
+    # Almost imperceptible indoor-air motion, independent of their solid pots.
+    # Never move collision bodies or the stable anomaly landmarks.
+    var decoration: Node3D = get_parent().get_node_or_null("Decor") as Node3D
+    if decoration == null:
+        return
+    for child in decoration.get_children():
+        if child is Node3D and child.name.begins_with("PlantFoliage_"):
+            plant_crowns.append(child as Node3D)
+
+
 func _dust() -> void:
     # Fine atmospheric dust is distributed throughout both wings rather
     # than clustering under the five chandelier positions. Deliberately
@@ -202,3 +215,8 @@ func _process(delta: float) -> void:
         signs[i].emission_energy_multiplier = (
             (1.8 if i == 0 else 1.55) +
             0.12 * sin(elapsed * 0.58 + float(i)))
+    for i in range(plant_crowns.size()):
+        # Slow <1-degree sway, deliberately subtle for an indoor casino.
+        plant_crowns[i].rotation.z = 0.009 * sin(elapsed * 0.47 + float(i) * 1.7)
+        plant_crowns[i].rotation.x = 0.007 * sin(elapsed * 0.39 + float(i) * 2.1)
+

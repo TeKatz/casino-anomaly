@@ -120,6 +120,8 @@ jobs:
           if ($LASTEXITCODE -ne 0 -or (Get-Content spatial-qa.log -Raw) -notmatch 'Casino Anomaly spatial QA PASS') { throw 'Spatial QA failed' }
           & "$env:GODOT_EDITOR" --headless --path . --script res://tests/joinery_qa.gd 2>&1 | Tee-Object -FilePath joinery-qa.log
           if ($LASTEXITCODE -ne 0 -or (Get-Content joinery-qa.log -Raw) -notmatch 'Casino Anomaly joinery and PBR texture QA PASS') { throw 'Joinery QA failed' }
+          & "$env:GODOT_EDITOR" --headless --path . --script res://tests/prop_visuals_qa.gd 2>&1 | Tee-Object -FilePath prop-visuals-qa.log
+          if ($LASTEXITCODE -ne 0 -or (Get-Content prop-visuals-qa.log -Raw) -notmatch 'Casino Anomaly prop visuals and orientations QA PASS') { throw 'Prop visuals QA failed' }
           New-Item -ItemType Directory -Force artifacts/game | Out-Null
           $exe = Join-Path (Get-Location) 'artifacts/game/CasinoAnomaly.exe'
           & "$env:GODOT_EDITOR" --headless --path . --export-release 'Windows Desktop' $exe 2>&1 | Tee-Object -FilePath export.log

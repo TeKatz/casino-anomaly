@@ -475,26 +475,121 @@ func _carpet_patch(label: String, x0: float, x1: float, z0: float, z1: float) ->
     _floor_quad(label, x0, x1, z0, z1, FLOOR_Y, fabric, 0.95, carpeting)
 
 func _slot_machine(pos: Vector3, yaw: float, accent: Color, number: int) -> void:
+    # Detailed, inexpensive retro cabinet for the nine procedural machines.
+    # Slot_01 is still replaced by the licensed Sketchfab hero in its own
+    # layer; keep this instance's layout, collision and TopGlow contract.
     var unit := Node3D.new()
     unit.name = "Slot_%02d" % number
     unit.position = pos
     unit.rotation.y = yaw
     machines.add_child(unit)
-    var glow_mat := _glow(accent, 2.0)
-    _box(unit, "Body", Vector3(0, 0.98, 0), Vector3(0.86, 1.88, 0.75), dark_wood, true)
-    _box(unit, "SideTrimL", Vector3(-0.38, 1.16, 0.39), Vector3(0.08, 1.25, 0.06), gold)
-    _box(unit, "SideTrimR", Vector3(0.38, 1.16, 0.39), Vector3(0.08, 1.25, 0.06), gold)
-    _box(unit, "ScreenRim", Vector3(0, 1.23, 0.396), Vector3(0.68, 0.81, 0.042), brass)
-    _box(unit, "Display", Vector3(0, 1.25, 0.426), Vector3(0.58, 0.67, 0.02), screen_black)
-    _text(unit, "7 7 7" if number % 3 == 0 else ("BAR" if number % 3 == 1 else "★ 7 ★"),
-        Vector3(0, 1.22, 0.453), 0, 43, accent)
-    _box(unit, "TopGlow", Vector3(0, 1.89, 0.39), Vector3(0.71, 0.11, 0.06), glow_mat)
-    _box(unit, "ButtonTray", Vector3(0, 0.73, 0.48), Vector3(0.71, 0.12, 0.23), gold)
+
+    var lacquer := _material(Color("#261c21"), 0.33, 0.12)
+    var side_wood := _material(Color("#523226"), 0.61)
+    var ebony := _material(Color("#11171b"), 0.31, 0.22)
+    var brushed_metal := _material(Color("#b4945d"), 0.35, 0.72)
+    var bronze := _material(Color("#6b4d36"), 0.43, 0.61)
+    var screen := _material(Color("#0a1520"), 0.15, 0.10)
+    var reel_back := _material(Color("#e8dfc8"), 0.63)
+    var glass := _material(Color(0.45, 0.72, 0.88, 0.13), 0.09, 0.12)
+    glass.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+    glass.cull_mode = BaseMaterial3D.CULL_DISABLED
+    var accent_glow := _glow(accent, 1.65)
+    var dim_glow := _glow(accent.darkened(0.48), 0.55)
+
+    # Body and original collider still define the same walkable footprint.
+    _box(unit, "Body", Vector3(0, 1.00, 0), Vector3(0.86, 1.86, 0.71), lacquer, true)
+    _box(unit, "FootSocle", Vector3(0, 0.14, 0), Vector3(0.88, 0.20, 0.73), ebony)
+    _box(unit, "SideVeneerLeft", Vector3(-0.424, 1.10, 0.005),
+        Vector3(0.025, 1.57, 0.67), side_wood)
+    _box(unit, "SideVeneerRight", Vector3(0.424, 1.10, 0.005),
+        Vector3(0.025, 1.57, 0.67), side_wood)
+    for side in [-1.0, 1.0]:
+        _box(unit, "VerticalChrome_%s" % ("L" if side < 0.0 else "R"),
+            Vector3(side * 0.384, 1.35, 0.381),
+            Vector3(0.034, 1.17, 0.030), brushed_metal)
+        _box(unit, "LowSideGilt_%s" % ("L" if side < 0.0 else "R"),
+            Vector3(side * 0.345, 0.40, 0.375),
+            Vector3(0.026, 0.46, 0.023), bronze)
+
+    # Rounded marquee above the reel housing, not a tall rectangular box.
+    _box(unit, "MarqueeBody", Vector3(0, 1.92, 0.055),
+        Vector3(0.82, 0.34, 0.70), side_wood)
+    var arch := MeshInstance3D.new()
+    arch.name = "RoundedMarqueeTop"
+    var capsule := CapsuleMesh.new()
+    capsule.radius = 0.145
+    capsule.height = 0.80
+    capsule.radial_segments = 18
+    capsule.rings = 6
+    arch.mesh = capsule
+    arch.position = Vector3(0, 2.092, 0.06)
+    arch.rotation.z = PI * 0.5
+    arch.material_override = side_wood
+    unit.add_child(arch)
+    _box(unit, "MarqueeBrassFrame", Vector3(0, 1.99, 0.425),
+        Vector3(0.735, 0.225, 0.029), brushed_metal)
+    _box(unit, "MarqueeInlay", Vector3(0, 1.99, 0.448),
+        Vector3(0.665, 0.170, 0.018), screen)
+    _text(unit,
+        ["MIDNIGHT", "GOLD RUSH", "LUCKY 7", "NOVA", "ROYAL"][number % 5],
+        Vector3(0, 1.959, 0.465), 0, 24, accent)
+    # This exact node and shared emissive material are used by ambience.gd.
+    _box(unit, "TopGlow", Vector3(0, 2.133, 0.395),
+        Vector3(0.67, 0.045, 0.034), accent_glow)
+
+    # Deep-set, separated mechanical reels under a dim reflective glass.
+    _box(unit, "ReelOuterFrame", Vector3(0, 1.357, 0.383),
+        Vector3(0.730, 0.780, 0.072), brushed_metal)
+    _box(unit, "ReelDarkBezel", Vector3(0, 1.357, 0.432),
+        Vector3(0.685, 0.720, 0.036), ebony)
+    var glyphs := ["7", "BAR", "★", "♦", "♣"]
+    for reel_i in range(3):
+        var x := -0.219 + float(reel_i) * 0.219
+        _box(unit, "ReelWell_%d" % reel_i,
+            Vector3(x, 1.366, 0.457),
+            Vector3(0.198, 0.565, 0.022), reel_back)
+        _box(unit, "ReelDivider_%d" % reel_i,
+            Vector3(x + 0.107, 1.366, 0.470),
+            Vector3(0.013, 0.607, 0.020), bronze)
+        _text(unit, glyphs[(number + reel_i * 2) % glyphs.size()],
+            Vector3(x, 1.327, 0.478), 0, 34, Color("#372722"))
+        _box(unit, "ReelTopMask_%d" % reel_i,
+            Vector3(x, 1.630, 0.479), Vector3(0.193, 0.046, 0.008), ebony)
+        _box(unit, "ReelBottomMask_%d" % reel_i,
+            Vector3(x, 1.105, 0.479), Vector3(0.193, 0.046, 0.008), ebony)
+    _box(unit, "ReelGlass", Vector3(0, 1.357, 0.492),
+        Vector3(0.655, 0.656, 0.008), glass)
+
+    # Distinct control desk, status strip, coin slot and padded player seat.
+    _box(unit, "ButtonDesk", Vector3(0, 0.870, 0.442),
+        Vector3(0.77, 0.150, 0.230), side_wood)
+    _box(unit, "ButtonDeskTop", Vector3(0, 0.959, 0.455),
+        Vector3(0.73, 0.037, 0.215), brushed_metal)
     for i in range(3):
-        _sphere(unit, "ButtonLamp", Vector3(-0.20 + float(i) * 0.2, 0.82, 0.57), 0.045, glow_mat)
-    # A stool is offset from the cabinet's facing edge.
-    _cylinder(unit, "StoolSeat", Vector3(0, 0.61, 1.25), 0.30, 0.15, velvet)
-    _cylinder(unit, "StoolStem", Vector3(0, 0.30, 1.25), 0.08, 0.5, brass)
+        _sphere(unit, "ControlLamp_%d" % i,
+            Vector3(-0.22 + float(i) * 0.22, 0.991, 0.516),
+            0.048, accent_glow if i == 1 else dim_glow)
+    _box(unit, "FrontStatus", Vector3(0, 0.677, 0.362),
+        Vector3(0.63, 0.075, 0.028), dim_glow)
+    _box(unit, "CoinPlate", Vector3(0.165, 0.485, 0.368),
+        Vector3(0.25, 0.145, 0.023), brushed_metal)
+    _box(unit, "CoinSlot", Vector3(0.165, 0.500, 0.385),
+        Vector3(0.140, 0.015, 0.014), ebony)
+    for i in range(5):
+        _box(unit, "SpeakerSlot_%d" % i,
+            Vector3(-0.236 + float(i) * 0.057, 0.465, 0.361),
+            Vector3(0.023, 0.090, 0.014), ebony)
+
+    _cylinder(unit, "StoolStem", Vector3(0, 0.315, 1.24),
+        0.056, 0.49, bronze, false, 16)
+    _cylinder(unit, "StoolFoot", Vector3(0, 0.077, 1.24),
+        0.255, 0.050, brushed_metal, false, 20)
+    _cylinder(unit, "StoolSeatRim", Vector3(0, 0.632, 1.24),
+        0.306, 0.067, brushed_metal, false, 24)
+    _cylinder(unit, "StoolSeat", Vector3(0, 0.677, 1.24),
+        0.283, 0.107, velvet, false, 24)
+
 
 func _make_slots() -> void:
     var colors := [
@@ -623,19 +718,114 @@ func _make_lounge() -> void:
     # model_interior.gd. Do not instantiate old cube sofas or coffee tables.
     lounge.set_meta("replaced_by_polyhaven", true)
 
+func _botanical_leaf_mesh() -> ArrayMesh:
+    # A simple curved, ridged leaf, not an elongated sphere. This one mesh
+    # is shared by all foliage instances, so geometry stays inexpensive.
+    var tool := SurfaceTool.new()
+    tool.begin(Mesh.PRIMITIVE_TRIANGLES)
+    for i in range(7):
+        var t0 := float(i) / 7.0
+        var t1 := float(i + 1) / 7.0
+        var w0 := 0.006 + 0.145 * sin(PI * t0)
+        var w1 := 0.006 + 0.145 * sin(PI * t1)
+        var y0 := 0.78 * t0
+        var y1 := 0.78 * t1
+        var curve0 := 0.13 * sin(PI * t0)
+        var curve1 := 0.13 * sin(PI * t1)
+        var left0 := Vector3(-w0, y0, curve0)
+        var mid0 := Vector3(0, y0, curve0 - 0.040 * sin(PI * t0))
+        var right0 := Vector3(w0, y0, curve0)
+        var left1 := Vector3(-w1, y1, curve1)
+        var mid1 := Vector3(0, y1, curve1 - 0.040 * sin(PI * t1))
+        var right1 := Vector3(w1, y1, curve1)
+        # Two shallow wings create a central vein ridge and highlights.
+        for vertex in [
+            left0, mid1, mid0, left0, left1, mid1,
+            mid0, mid1, right1, mid0, right1, right0
+        ]:
+            tool.set_uv(Vector2(vertex.x * 2.0 + 0.5, vertex.y / 0.78))
+            tool.add_vertex(vertex)
+    tool.generate_normals()
+    tool.generate_tangents()
+    return tool.commit()
+
+
+func _plant_visual(pos: Vector3, index: int, leaf_mesh: Mesh) -> void:
+    # Six distinct potted plants preserve the old footprints and collisions.
+    # Only the pot is solid; leaves can be walked past at the corridor edge.
+    var terracotta := _material(
+        [Color("#493338"), Color("#2d4544"), Color("#574b3b")][index % 3],
+        0.57, 0.04)
+    var leaf_dark := _material(
+        [Color("#285143"), Color("#386343"), Color("#294d3d")][index % 3],
+        0.77, 0.0)
+    var leaf_light := _material(
+        [Color("#497454"), Color("#587c58"), Color("#49705e")][index % 3],
+        0.70, 0.0)
+    var soil := _material(Color("#261e18"), 0.98)
+    leaf_dark.cull_mode = BaseMaterial3D.CULL_DISABLED
+    leaf_light.cull_mode = BaseMaterial3D.CULL_DISABLED
+
+    var pot := _cylinder(decor, "PlantPot_%02d" % index,
+        pos + Vector3(0, 0.32, 0), 0.29, 0.63,
+        terracotta, true, 20)
+    pot.set_meta("decor_type", "plant")
+    # Taper pot visually, while retaining its original physics cylinder.
+    var pot_mesh := CylinderMesh.new()
+    pot_mesh.top_radius = 0.300
+    pot_mesh.bottom_radius = 0.225
+    pot_mesh.height = 0.63
+    pot_mesh.radial_segments = 20
+    pot.mesh = pot_mesh
+
+    var crown := Node3D.new()
+    crown.name = "PlantFoliage_%02d" % index
+    crown.position = pos
+    decor.add_child(crown)
+    _cylinder(crown, "CeramicLip", Vector3(0, 0.614, 0),
+        0.311, 0.065, terracotta, false, 20)
+    _cylinder(crown, "PotSoil", Vector3(0, 0.652, 0),
+        0.265, 0.024, soil, false, 20)
+    _cylinder(crown, "LowStem", Vector3(0, 0.970, 0),
+        0.036, 0.64, soil, false, 10)
+    var tips := 18 + (index % 3) * 3
+    for i in range(tips):
+        var level := float(i % 3)
+        var theta := float(i) * 2.39996323 + float(index) * 0.27
+        var leaf := MeshInstance3D.new()
+        leaf.name = "Leaf_%02d" % i
+        leaf.mesh = leaf_mesh
+        leaf.material_override = leaf_dark if i % 3 == 0 else leaf_light
+        leaf.position = Vector3(
+            cos(theta) * (0.035 + level * 0.028),
+            0.795 + level * 0.148,
+            sin(theta) * (0.035 + level * 0.028))
+        leaf.rotation = Vector3(0, theta, 0.54 + 0.16 * sin(float(i) * 1.83))
+        var length_scale := 0.91 + 0.12 * cos(float(i) * 2.51 + float(index))
+        leaf.scale = Vector3(
+            0.80 + 0.19 * sin(float(i) * 0.83 + 1.0),
+            length_scale * (1.10 if i % 4 == 0 else 0.89),
+            1.0)
+        leaf.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+        crown.add_child(leaf)
+
+
 func _make_details() -> void:
     _text(decor, "SLOTS", Vector3(0, 4.54, 13.7), 0, 62)
     _text(decor, "TABLE GAMES", Vector3(-15, 3.55, -12.89), 0, 57)
-    # Space decorative topiary between sofa groups instead of inside cushions.
-    for pos in [Vector3(2.9, 0, 12.2), Vector3(-3.65, 0, 12),
-                Vector3(-20.95, 0, -0.78), Vector3(-7.2, 0, -1.25),
-                Vector3(-31.15, 0, -0.78), Vector3(-41.4, 0, -0.78)]:
-        var pot := _cylinder(decor, "PlantPot", pos + Vector3(0, 0.32, 0), 0.29, 0.65, stone, true, 12)
-        pot.set_meta("decor_type", "plant")
-        _cylinder(decor, "PlantStem", pos + Vector3(0, 0.95, 0), 0.07, 0.65, dark_wood)
-        var leaves := _material(Color("#214f3c"), 0.93)
-        _sphere(decor, "PlantLeaves", pos + Vector3(0, 1.50, 0), 0.53, leaves)
-    # Distinctive octagonal chandelier at the bend; the L has a visual landmark.
+    # Replace the six identically sized green spheres with individually
+    # constructed taper-pot foliage, no overlap with lounge furniture.
+    var leaf_mesh := _botanical_leaf_mesh()
+    var positions: Array[Vector3] = [
+        Vector3(2.9, 0, 12.2), Vector3(-3.65, 0, 12.0),
+        Vector3(-20.95, 0, -0.78), Vector3(-7.2, 0, -1.25),
+        Vector3(-31.15, 0, -0.78), Vector3(-41.4, 0, -0.78)
+    ]
+    for i in range(positions.size()):
+        _plant_visual(positions[i], i, leaf_mesh)
+
+    # Existing sculptural chandelier at the bend; it is replaced by the
+    # Poly Haven donor in model_interior.gd after the room is populated.
     _cylinder(decor, "ChandelierMount", Vector3(-1.4, 5.75, -6.8), 0.25, 0.3, brass)
     _cylinder(decor, "ChandelierStem", Vector3(-1.4, 5.2, -6.8), 0.055, 0.9, gold)
     for i in range(12):
@@ -644,6 +834,7 @@ func _make_details() -> void:
         var z := -6.8 + cos(angle) * 1.22
         _sphere(decor, "ChandelierBulb", Vector3(x, 4.75, z), 0.115, warm_white)
         _cylinder(decor, "ChandelierChain", Vector3(x, 5.13, z), 0.025, 0.64, gold)
+
 
 func _omni(pos: Vector3, tint: Color, energy: float, reach: float,
         cast_shadows: bool = false) -> void:

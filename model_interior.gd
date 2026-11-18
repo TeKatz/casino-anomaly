@@ -82,12 +82,13 @@ func _populate() -> void:
         _place("brass_candleholders", "SingleBrassCandleholder",
             entry[0], entry[1], 0.0, false, false, "brass_candleholder_03")
 
-    # Replace all five primitive lounge sofas and tables rather than
-    # stacking detailed models over the old cube/cylinder placeholders.
+    # Sofa model faces the lounge area only after rotating 90 degrees from
+    # its default forward direction. Keep the existing physical footprints.
+    # Replace all five primitive sofas and tables, never stack duplicates.
     for i in range(5):
         var x := -18.4 - float(i) * 5.1
         _place("sofa_02", "LoungeSofa",
-            Vector3(x, 0.005, -1.14), 1.08, 0.0, true, false, "", 2.42)
+            Vector3(x, 0.005, -1.14), 1.08, PI / 2.0, true, false, "", 2.42)
         _place("round_wooden_table_01", "LoungeCoffeeTable",
             Vector3(x, 0.005, -2.75), 0.56, 0.0, true, false, "", 1.22)
     # The complete chessboard is deliberately unique; no repeated identical
@@ -119,8 +120,10 @@ func _populate() -> void:
     # between architecture and movable anomaly targets for later gameplay.
     _place("security_camera_01", "EntranceSecurityCamera",
         Vector3(5.80, 4.75, 10.8), 0.42, -PI / 2.0)
+    # The west-end device must point down the wing (+X) rather than out
+    # through the far wall (-X). Rotating the instance preserves its mount.
     _place("security_camera_01", "WestSecurityCamera",
-        Vector3(-44.7, 4.7, -12.64), 0.42, PI / 2.0)
+        Vector3(-44.7, 4.7, -12.64), 0.42, -PI / 2.0)
 
     # Smaller service furnishings belong at the bar edge and never obstruct
     # the 3.14-meter-wide main carpet corridor.
