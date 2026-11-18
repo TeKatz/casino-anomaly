@@ -16,13 +16,25 @@ The main menu checks this repo's Development channel for updates. It runs a sepa
 
 `dev` publishes Development releases; `main` remains the reviewed integration baseline. Verified Windows builds use Godot 4.5.1, .NET 10 for the updater, and original CC0 asset sources. No checkout, terminal, editor or asset import is required for playtesting.
 
-## Spielbarer Anomalie-Loop (erster Gameplay-Prototyp)
+## Spielbarer Anomalie-Loop mit nahtlosem Raum-Streaming
 
-**Neues Spiel** führt zunächst in einen kleinen, separat editierbaren Tutorialraum (`gameplay/tutorial.tscn`). An dessen Tür startet mit **E** der vorhandene L-förmige Casinoflur. Am westlichen Flurende werden die **beiden bereits vorhandenen Exit-Türen aus `main.tscn`** verwendet: **links** bedeutet „Anomalie“, **rechts** bedeutet „normal“. Die Türen stehen bewusst vor der bisher geschlossenen Endwand; mit **E** wird die Entscheidung bestätigt.
+**Neues Spiel** führt zuerst in den separat editierbaren Tutorialraum (`gameplay/tutorial.tscn`). Dort mit **E** durch die Tür gehen. Danach läuft das Spiel **ohne weitere Interaktionstaste**: Am westlichen Ende des L-förmigen Casinos führt die **linke, nun offene Ausgangspassage** zu „Anomalie“, die **rechte** zu „normal“. Die ursprünglichen Schilder und goldenen Rahmen werden weiterverwendet, die vorher durchgehende Wand und die dekorativen geschlossenen Türfüllungen werden nur zur Laufzeit passend geöffnet.
 
-Für die erste Version verdeckt eine kurze Abdunkelung den Rücksprung zum Eingang; später kann ein physischer, abgedunkelter Verbindungsgang denselben Übergang verstecken. Der **gleiche Raum** wird für jeden Durchlauf wiederverwendet, nicht mehrfach instanziiert. Die provisorischen Test-Anomalien verändern ausschließlich vorhandene 3D-Schilder und werden nach jedem Durchlauf vollständig zurückgesetzt. Die endgültige Anomalienliste ist noch offen.
+### Raumübergang ohne Teleport
 
-Der erste Prototyp verlangt acht richtige Entscheidungen hintereinander; ein Fehler setzt die Serie auf null, aber nicht den gesamten Spielstand. Ein einzelner Spielstand wird unter `user://anomaly_run.cfg` gespeichert. Neues Spiel überschreibt diesen Stand; Fortsetzen überspringt das Tutorial, sofern es abgeschlossen ist. Der Gameplay-Controller wird ausschließlich zur Laufzeit durch `hall.gd` erzeugt: **`main.tscn` mit der manuellen Casino-Gestaltung bleibt unverändert.**
+- Bei Annäherung an das Flurende (bereits ca. 15 Meter vor dem Ausgang) instanziiert Godot eine **zweite Kopie derselben `main.tscn`**. Ressourcen wie Texturen und Modelle werden geteilt; die 3D-/Physikknoten liegen vorübergehend zweimal vor.
+- Ein 8,3 Meter langer, **wirklich begehbarer Verbindungsgang** verbindet die gewählte Ausgangspassage mit dem Eingang des nächsten Flurs. Der zweite Flur ist um 90 Grad gedreht und so versetzt, dass beide Portale im selben Weltraum exakt aneinanderstoßen.
+- Beim Überqueren der Ausgangswand wird die Links-/Rechts-Entscheidung bewertet. Gleichzeitig erhält der noch vorausliegende neue Flur seine zufällige Anomalie oder einen normalen Zustand.
+- Kurz hinter der nächsten Eingangswand werden **dieselbe Spielerfigur und derselbe HUD-Controller ohne Positions-/Kamerawechsel** an die neue Rauminstanz übergeben. Die alte Rauminstanz wird freigegeben.
+- Das wiederholt sich beliebig oft. **Keine Schwarzblende, kein Ladebildschirm, kein Spielerteleport, keine dritte Raumkopie.**
+
+Die provisorischen drei Test-Anomalien verändern ausschließlich vorhandene 3D-Schilder und werden pro Durchlauf zurückgesetzt. Die endgültige Anomalienliste ist noch offen.
+
+Der erste Prototyp verlangt acht richtige Entscheidungen hintereinander; ein Fehler setzt die Serie auf null, aber nicht den Spielstand. Die laufende Runde wird unter `user://anomaly_run.cfg` gespeichert. Beim Fortsetzen startet man am Beginn des aktuellen Durchlaufs, nicht mitten im Übergang.
+
+**Für Leveldesign wichtig:** `main.tscn` bleibt unverändert und vollständig im Godot-Editor bearbeitbar. `gameplay/stream_portals.gd` erzeugt die Öffnungen, Boden-, Decken- und Wandsegmente der Übergänge **nur im laufenden Spiel**. Für spätere grafische Gestaltung der Übergänge können wir daraus eigene `.tscn`-Szenen machen, ohne die Spiellogik zu ändern. Die Streaming- und Handoff-Logik liegt in `gameplay/loop_controller.gd`.
+
+**Performance:** Kurzzeitig leben zwei große Hallen gleichzeitig; deshalb wird die zweite bereits vor dem Ausgang vorbereitet. Auf schwächeren PCs kann das erste Instanziieren noch einen kurzen Hänger verursachen. Diesen optimieren wir nach dem ersten visuellen Playtest mit Profilerwerten, statt zusätzliche Modelle einzubauen.
 
 ## Poly Haven interior pass
 

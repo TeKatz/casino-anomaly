@@ -106,7 +106,7 @@ func _run() -> void:
     await process_frame
     await process_frame
     var loop := scene.get_node_or_null("LoopController")
-    var choice_markers := scene.get_node_or_null("DoorChoices") as Node3D
+    var choice_markers := loop.get_node_or_null("DoorChoices") as Node3D
     if loop == null or choice_markers == null:
         _fail("Runtime loop did not attach to original casino EXIT doors")
         return
