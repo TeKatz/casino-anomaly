@@ -1,54 +1,61 @@
 extends Node3D
-## Runtime-only corridor controller. Never modifies main.tscn on disk.
-## One authored hall is reused; the next round begins while the doorway
-## occludes the player with a brief dark transition.
+## Seamless Exit-8-style spatial streaming.
+## At most two authored casino rooms coexist briefly: active + next.
+## All edits to walls/doors and all connector meshes are runtime-only.
+## The player walks through one of the original EXIT apertures, never fades,
+## and keeps the same world transform when the old scene is freed.
 
 const DemoAnomalies = preload("res://gameplay/demo_anomalies.gd")
-const RESET_POINT := Vector3(0, 1.02, 11.1)
-const INTERACT_DISTANCE := 2.7
+const StreamPortals = preload("res://gameplay/stream_portals.gd")
+const ROOM = preload("res://main.tscn")
+
+const PRELOAD_AT_X := -31.0
+const CHOICE_AT_X := -46.42
+const HANDOFF_AT_X := -55.05
+const NEXT_ENTRY_WORLD_X := -54.50
+const EXIT_Z_LEFT := -3.70
+const EXIT_Z_RIGHT := -9.65
+const LANE_HALF_WIDTH := 1.07
 
 var room: Node3D
 var player: CharacterBody3D
 var doors: Node3D
 var demo: RefCounted
+var portals: RefCounted
 var hud: Label
 var prompt: Label
 var feedback: Label
-var veil: ColorRect
+var staged: Node3D
+var staged_environment: Environment
+var staged_lane := ""
+var choice_taken := false
 var transitioning := false
+var won := false
 
 
 func _ready() -> void:
     room = get_parent() as Node3D
     player = room.get_node_or_null("Player") as CharacterBody3D
     if player == null:
-        push_error("Casino loop needs the existing first-person Player")
+        push_error("Streaming controller needs the original Player")
         queue_free()
         return
-    # The artist's main.tscn already contains two complete EXIT doors.
-    # Create invisible position markers only; NEVER overlay more door meshes.
+    portals = StreamPortals.new()
+    if not portals.prepare_room(room):
+        push_error("Could not open the authored casino's exit portals")
+        queue_free()
+        return
+
+    demo = DemoAnomalies.new()
     doors = Node3D.new()
     doors.name = "DoorChoices"
-    room.add_child(doors)
-    var existing_signs: Array[Label3D] = []
-    var architecture := room.get_node_or_null("Architecture") as Node3D
-    if architecture != null:
-        for child in architecture.get_children():
-            if child is Label3D and (child as Label3D).text == "EXIT":
-                existing_signs.append(child as Label3D)
-    if existing_signs.size() != 2:
-        push_error("Casino gameplay expects the two original EXIT doors")
+    add_child(doors)
+    if not _place_markers():
+        push_error("Casino needs both original EXIT signs as portal markers")
         queue_free()
         return
-    var left_label := existing_signs[0]
-    var right_label := existing_signs[1]
-    if left_label.global_position.z < right_label.global_position.z:
-        left_label = existing_signs[1]
-        right_label = existing_signs[0]
-    _door_marker("LeftDoor", left_label)
-    _door_marker("RightDoor", right_label)
-    demo = DemoAnomalies.new()
     _build_hud()
+
     var state = get_node_or_null("/root/LoopState")
     if state == null:
         queue_free()
@@ -59,15 +66,36 @@ func _ready() -> void:
     _update_hud()
 
 
-func _door_marker(label: String, exit_sign: Label3D) -> void:
-    var marker := Marker3D.new()
-    marker.name = label
-    doors.add_child(marker)
-    marker.global_position = Vector3(
-        exit_sign.global_position.x,
-        1.6,
-        exit_sign.global_position.z
+func _exit_tree() -> void:
+    # Prevent a preloaded second hall from remaining in SceneTree if ESC
+    # switches to the menu before a player enters a portal.
+    if staged != null and is_instance_valid(staged):
+        staged.queue_free()
+        staged = null
+
+
+func _place_markers() -> bool:
+    for child in doors.get_children():
+        child.free()
+    var signs: Array[Label3D] = []
+    var architecture := room.get_node_or_null("Architecture") as Node3D
+    if architecture == null:
+        return false
+    for part in architecture.get_children():
+        if part is Label3D and (part as Label3D).text == "EXIT":
+            signs.append(part as Label3D)
+    if signs.size() != 2:
+        return false
+    signs.sort_custom(func(a: Label3D, b: Label3D) -> bool:
+        return room.to_local(a.global_position).z > room.to_local(b.global_position).z
     )
+    for i in range(2):
+        var marker := Marker3D.new()
+        marker.name = "LeftDoor" if i == 0 else "RightDoor"
+        doors.add_child(marker)
+        var local := room.to_local(signs[i].global_position)
+        marker.global_position = room.to_global(Vector3(local.x, 1.6, local.z))
+    return true
 
 
 func _build_hud() -> void:
@@ -75,7 +103,6 @@ func _build_hud() -> void:
     layer.name = "GameHUD"
     layer.layer = 2
     add_child(layer)
-
     hud = Label.new()
     hud.position = Vector2(23, 20)
     hud.add_theme_font_size_override("font_size", 19)
@@ -93,17 +120,11 @@ func _build_hud() -> void:
     prompt.anchor_bottom = 1.0
     prompt.offset_left = 23
     prompt.offset_top = -60
-    prompt.offset_right = 820
+    prompt.offset_right = 900
     prompt.offset_bottom = -25
     prompt.add_theme_font_size_override("font_size", 20)
     prompt.add_theme_color_override("font_color", Color("#f5e5c6"))
     layer.add_child(prompt)
-
-    veil = ColorRect.new()
-    veil.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-    veil.color = Color(0, 0, 0, 0)
-    veil.mouse_filter = Control.MOUSE_FILTER_IGNORE
-    layer.add_child(veil)
 
 
 func _update_hud() -> void:
@@ -118,91 +139,136 @@ func _update_hud() -> void:
     ]
 
 
-func _nearest_door() -> String:
-    if player == null or doors == null:
-        return ""
-    var left := doors.get_node("LeftDoor") as Node3D
-    var right := doors.get_node("RightDoor") as Node3D
-    var a := player.global_position.distance_to(left.global_position)
-    var b := player.global_position.distance_to(right.global_position)
-    if minf(a, b) > INTERACT_DISTANCE:
-        return ""
-    return "left" if a <= b else "right"
+func _candidate_lane(local_z: float) -> String:
+    return "left" if absf(local_z - EXIT_Z_LEFT) <= absf(local_z - EXIT_Z_RIGHT) else "right"
+
+
+func _lane_z(lane: String) -> float:
+    return EXIT_Z_LEFT if lane == "left" else EXIT_Z_RIGHT
 
 
 func _process(_delta: float) -> void:
-    if transitioning or player == null:
+    if transitioning or won or room == null or player == null:
         return
-    match _nearest_door():
-        "left":
-            prompt.text = "[E] LINKE TÜR – ANOMALIE"
-        "right":
-            prompt.text = "[E] RECHTE TÜR – KEINE ANOMALIE"
-        _:
-            prompt.text = "Suche nach Veränderungen. Am Ende entscheidest du links oder rechts."
+    var local := room.to_local(player.global_position)
+    if local.x < PRELOAD_AT_X and not choice_taken:
+        _stage_next(_candidate_lane(local.z))
+
+    if not choice_taken:
+        prompt.text = "LINKER AUSGANG: ANOMALIE   |   RECHTER AUSGANG: NORMAL   –   einfach hindurchgehen"
+        var lane := _candidate_lane(local.z)
+        if local.x < CHOICE_AT_X and absf(local.z - _lane_z(lane)) <= LANE_HALF_WIDTH:
+            _commit_choice(lane)
+    elif local.x < HANDOFF_AT_X and absf(local.z - _lane_z(staged_lane)) <= LANE_HALF_WIDTH:
+        _handoff()
 
 
-func _unhandled_input(event: InputEvent) -> void:
-    if transitioning or not (event is InputEventKey) or not event.pressed or event.echo:
-        return
-    if event.keycode != KEY_E:
-        return
-    var choice := _nearest_door()
-    if choice.is_empty():
-        return
-    get_viewport().set_input_as_handled()
-    _enter_door(choice == "left")
+func _stage_transform(lane: String) -> Transform3D:
+    # The new hall's local entrance faces -Z. Rotating +90 degrees
+    # makes that direction point straight west, in line with the connector.
+    # local entrance wall z=14.18 -> active-local x=-54.50.
+    return room.global_transform * Transform3D(
+        Basis(Vector3.UP, PI * 0.5),
+        Vector3(NEXT_ENTRY_WORLD_X - 14.18, 0.0, _lane_z(lane))
+    )
 
 
-func _enter_door(guess_anomaly: bool) -> void:
-    if transitioning:
+func _stage_next(lane: String) -> void:
+    if choice_taken:
         return
+    if staged != null and is_instance_valid(staged):
+        if staged_lane != lane:
+            staged.global_transform = _stage_transform(lane)
+            staged_lane = lane
+        return
+
+    # Prewarm well ahead of the exits. Godot caches the PackedScene and all
+    # shared textures; only the scene nodes/physics are instantiated twice.
+    var next := ROOM.instantiate() as Node3D
+    if next == null:
+        push_error("Cannot preload next casino hall")
+        return
+    next.set_meta("_streaming_standby", true)
+    var duplicate_player := next.get_node_or_null("Player")
+    if duplicate_player != null:
+        duplicate_player.free()
+    if not portals.prepare_room(next):
+        next.free()
+        return
+    var environment_node := next.get_node_or_null("WorldEnvironment") as WorldEnvironment
+    staged_environment = environment_node.environment if environment_node != null else null
+    if environment_node != null:
+        environment_node.environment = null
+    next.transform = _stage_transform(lane)
+    get_tree().root.add_child(next)
+    staged = next
+    staged_lane = lane
+
+
+func _commit_choice(lane: String) -> void:
+    _stage_next(lane)
+    if staged == null or not is_instance_valid(staged):
+        return # Keep the current loop safe if staging fails.
+    choice_taken = true
     var state = get_node_or_null("/root/LoopState")
     if state == null:
         return
-    transitioning = true
-    prompt.text = ""
-    # A brief occlusion masks the spatial seam. A walkable connector and
-    # opening animations can replace this transition without changing rules.
-    var darken := create_tween()
-    darken.tween_property(veil, "color", Color.BLACK, 0.43)
-    await darken.finished
-
-    var result: Dictionary = state.decide(guess_anomaly)
-    if not bool(result.get("valid", false)):
-        transitioning = false
+    var verdict: Dictionary = state.decide(lane == "left")
+    if not bool(verdict.get("valid", false)):
         return
     demo.clear()
-    if bool(result.get("finished", false)):
+    if bool(verdict.get("finished", false)):
         _show_victory()
         return
 
-    # Reuse the original level, not a second expensive scene copy.
-    # While the player sees black, select and apply the next round.
-    var available: Array[String] = demo.available_ids(room)
-    state.prepare_round(available)
-    demo.apply(room, str(state.anomaly_id))
-    player.global_position = RESET_POINT
-    player.rotation = Vector3.ZERO
-    player.velocity = Vector3.ZERO
-    var camera := player.get_node_or_null("Camera3D") as Camera3D
-    if camera != null:
-        camera.rotation = Vector3.ZERO
+    # Populate the NEXT room while the player is still in the connector.
+    # The previous room stays visible behind them until the exit handoff.
+    var candidates: Array[String] = demo.available_ids(staged)
+    state.prepare_round(candidates)
+    demo.apply(staged, str(state.anomaly_id))
     _update_hud()
-    feedback.text = "RICHTIG – weiter." if bool(result.get("correct", false)) else "FALSCH – Fortschritt zurückgesetzt."
-    var lighten := create_tween()
-    lighten.tween_property(veil, "color", Color(0, 0, 0, 0), 0.50)
-    await lighten.finished
+    feedback.text = "RICHTIG." if bool(verdict.get("correct", false)) else "FALSCH – Serie zurückgesetzt."
+    prompt.text = "Folge dem Gang. Der nächste Durchlauf beginnt ohne Ladebildschirm."
+
+
+func _handoff() -> void:
+    if staged == null or not is_instance_valid(staged):
+        return
+    transitioning = true
+    var previous := room
+    var upcoming := staged
+    staged = null
+    staged_lane = ""
+    choice_taken = false
+
+    # Preserve the single CharacterBody3D and the live HUD/controller.
+    # No camera cut, teleport, or orientation change occurs at handoff.
+    player.reparent(upcoming, true)
+    reparent(upcoming, true)
+    room = upcoming
+    var environment_node := upcoming.get_node_or_null("WorldEnvironment") as WorldEnvironment
+    if environment_node != null:
+        environment_node.environment = staged_environment
+    upcoming.remove_meta("_streaming_standby")
+    get_tree().current_scene = upcoming
+    previous.queue_free()
+    _place_markers()
+    _update_hud()
+    Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
     transitioning = false
 
 
 func _show_victory() -> void:
+    won = true
     player.set_physics_process(false)
     Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+    prompt.text = ""
+    if staged != null and is_instance_valid(staged):
+        staged.queue_free()
+        staged = null
     var panel := Label.new()
     panel.position = Vector2(145, 225)
     panel.add_theme_font_size_override("font_size", 32)
     panel.add_theme_color_override("font_color", Color("#f1d39d"))
     panel.text = "DU HAST DEN AUSGANG GEFUNDEN\n\nAcht richtige Entscheidungen hintereinander.\n\nESC – Zurück zum Hauptmenü"
-    veil.get_parent().add_child(panel)
-    panel.move_to_front()
+    get_node("GameHUD").add_child(panel)
