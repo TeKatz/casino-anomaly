@@ -38,7 +38,7 @@ func _run() -> void:
         _fail("Initial hall has no player")
         return
     var portal := first.get_node_or_null("StreamingPortals") as Node3D
-    if portal == null or portal.find_children("ConnectorFloor", "MeshInstance3D", true, false).size() != 2:
+    if portal == null or portal.find_children("ConnectorFloor*", "MeshInstance3D", true, false).size() != 2:
         _fail("Both walkable physical connectors were not built")
         return
     if (first.get_node("Architecture/FarExitWall") as MeshInstance3D).visible:
