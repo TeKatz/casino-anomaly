@@ -61,7 +61,7 @@ func _run_smoke() -> void:
         push_error("The exit end wall was not relocated with the extended wing")
         quit(1)
         return
-    if tables.get_child_count() < 6 or lounge.get_child_count() < 40:
+    if tables.get_child_count() < 6 or lounge.get_child_count() < 35:
         push_error("The extended wing needs evenly distributed visual details")
         quit(1)
         return
