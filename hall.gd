@@ -426,7 +426,8 @@ func _make_tables() -> void:
 func _make_lounge() -> void:
     for i in range(5):
         var x := -18.4 - float(i) * 5.1
-        _box(lounge, "SofaBase", Vector3(x, 0.39, -1.17), Vector3(2.25, 0.57, 1.05), velvet, true)
+        var sofa := _box(lounge, "SofaBase", Vector3(x, 0.39, -1.17), Vector3(2.25, 0.57, 1.05), velvet, true)
+        sofa.set_meta("decor_type", "sofa")
         _box(lounge, "SofaBack", Vector3(x, 0.85, -0.67), Vector3(2.25, 0.95, 0.23), velvet)
         for dx in [-1.04, 1.04]:
             _box(lounge, "SofaArm", Vector3(x + dx, 0.62, -1.2),
@@ -441,7 +442,8 @@ func _make_details() -> void:
     for pos in [Vector3(3.7, 0, 11.2), Vector3(-3.65, 0, 12),
                 Vector3(-20.95, 0, -0.78), Vector3(-7.2, 0, -1.25),
                 Vector3(-31.15, 0, -0.78), Vector3(-41.4, 0, -0.78)]:
-        _cylinder(decor, "PlantPot", pos + Vector3(0, 0.32, 0), 0.29, 0.65, stone, true, 12)
+        var pot := _cylinder(decor, "PlantPot", pos + Vector3(0, 0.32, 0), 0.29, 0.65, stone, true, 12)
+        pot.set_meta("decor_type", "plant")
         _cylinder(decor, "PlantStem", pos + Vector3(0, 0.95, 0), 0.07, 0.65, dark_wood)
         var leaves := _material(Color("#214f3c"), 0.93)
         _sphere(decor, "PlantLeaves", pos + Vector3(0, 1.50, 0), 0.53, leaves)

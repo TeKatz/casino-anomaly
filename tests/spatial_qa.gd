@@ -110,7 +110,7 @@ func _run() -> void:
         if child.name.begins_with("Lamp"):
             _fail("Old glowing coffee-table spheres are still visible")
             return
-        if child is MeshInstance3D and child.name.begins_with("SofaBase"):
+        if child is MeshInstance3D and child.get_meta("decor_type", "") == "sofa":
             sofa_positions.append(child.position)
     if sofa_positions.size() != 5:
         _fail("Unexpected lounge seating layout")
@@ -119,7 +119,7 @@ func _run() -> void:
     # Plant pots/leaves must not share the same footprint as sofa seats.
     var pot_count := 0
     for item in decor.get_children():
-        if not (item is MeshInstance3D) or not item.name.begins_with("PlantPot"):
+        if not (item is MeshInstance3D) or item.get_meta("decor_type", "") != "plant":
             continue
         pot_count += 1
         for sofa_pos in sofa_positions:
