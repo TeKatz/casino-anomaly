@@ -345,94 +345,130 @@ func _column(pos: Vector3) -> void:
     _box(architecture, "PillarCapital" + column_suffix, pos + Vector3(0, 5.855, 0),
         Vector3(0.89, 0.31, 0.89), beam_wood)
 
-func _beveled_carpet_rail(label: String, center: Vector3, length: float,
-        along_x: bool) -> void:
-    # Rounded edge profile with multiple small chamfers. The long run is
-    # one continuous piece rather than stacked coincident boxes.
-    var section := [
-        Vector2(-0.090, 0.009), Vector2(-0.090, 0.044),
-        Vector2(-0.083, 0.061), Vector2(-0.063, 0.073),
-        Vector2(-0.040, 0.078), Vector2(0.040, 0.078),
-        Vector2(0.063, 0.073), Vector2(0.083, 0.061),
-        Vector2(0.090, 0.044), Vector2(0.090, 0.009)
-    ]
-    var surface := SurfaceTool.new()
-    surface.begin(Mesh.PRIMITIVE_TRIANGLES)
-    surface.set_material(parquet_border)
-    for index in range(section.size() - 1):
-        var p: Vector2 = section[index]
-        var q: Vector2 = section[index + 1]
-        var vertex_data := []
-        for item in [
-            Vector3(-length * 0.5, p.x, p.y),
-            Vector3(length * 0.5, p.x, p.y),
-            Vector3(length * 0.5, q.x, q.y),
-            Vector3(-length * 0.5, q.x, q.y)
-        ]:
-            var vertex := Vector3.ZERO
-            if along_x:
-                vertex = Vector3(center.x + item.x, item.z, center.z + item.y)
-            else:
-                vertex = Vector3(center.x + item.y, item.z, center.z + item.x)
-            vertex_data.append([vertex, Vector2(
-                (center.x + item.x if along_x else center.z + item.x) / 0.72,
-                item.y / 0.72)])
-        var triangles := [0, 2, 1, 0, 3, 2] if along_x else [0, 1, 2, 0, 2, 3]
-        for vertex_index in triangles:
-            surface.set_uv(vertex_data[vertex_index][1])
-            surface.add_vertex(vertex_data[vertex_index][0])
-    surface.generate_normals()
-    surface.generate_tangents()
-    var rail := MeshInstance3D.new()
-    rail.name = label
-    rail.mesh = surface.commit()
-    rail.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
-    carpeting.add_child(rail)
+func _carpet_mitered_point(vertices: Array[Vector2],
+        outward_normals: Array[Vector2], corner: int,
+        lateral_offset: float, elevation: float) -> Vector3:
+    # Each 90-degree joint shares the SAME mitered vertex for both runs.
+    # An outward CCW normal is (direction.y, -direction.x) in X/Z space.
+    var previous: Vector2 = outward_normals[(corner - 1 + vertices.size()) % vertices.size()]
+    var current: Vector2 = outward_normals[corner]
+    var bisector: Vector2 = (previous + current).normalized()
+    var projected_length := maxf(0.25, bisector.dot(current))
+    var p: Vector2 = vertices[corner] + bisector * (lateral_offset / projected_length)
+    return Vector3(p.x, elevation, p.y)
 
-func _carpet_piping(label: String, center: Vector3,
-        length: float, along_x: bool) -> void:
-    # The thin Bi Stretch fabric stripe sits DIRECTLY against the top face
-    # of the parquet rail, inset by 2 mm to avoid a visible floating gap.
-    var dimensions := Vector3(length, 0.012, 0.022) if along_x else Vector3(0.022, 0.012, length)
-    _box(carpeting, label, Vector3(center.x, 0.081, center.z),
-        dimensions, fabric_piping)
+
+func _carpet_surface_quad(surface: SurfaceTool,
+        a: Vector3, b: Vector3, c: Vector3, d: Vector3,
+        start_u: float, end_u: float, start_v: float, end_v: float) -> void:
+    # This order is consistent along every counter-clockwise perimeter edge:
+    # a -> b -> c -> d. In particular, top faces point UP rather than
+    # flipping between X and Z runs as in the previous six-piece border.
+    var corners: Array[Vector3] = [a, b, c, d]
+    var uv: Array[Vector2] = [
+        Vector2(start_u, start_v), Vector2(end_u, start_v),
+        Vector2(end_u, end_v), Vector2(start_u, end_v)
+    ]
+    for i in [0, 1, 2, 0, 2, 3]:
+        surface.set_uv(uv[i])
+        surface.add_vertex(corners[i])
+
+
+func _make_carpet_perimeter() -> void:
+    # A single COUNTER-CLOCKWISE outline in the horizontal X/Z plane.
+    # Six shared joints include the concave corner at (-1.57, -3.48).
+    # The runner itself is intentionally unchanged and retains three
+    # non-overlapping floor patches. Decorative edging never has collision.
+    var outline: Array[Vector2] = [
+        Vector2(1.57, 12.7), Vector2(-1.57, 12.7),
+        Vector2(-1.57, -3.48), Vector2(-44.9, -3.48),
+        Vector2(-44.9, -6.62), Vector2(1.57, -6.62)
+    ]
+    var outward_normals: Array[Vector2] = []
+    var cumulative_lengths: Array[float] = [0.0]
+    for i in range(outline.size()):
+        var edge: Vector2 = outline[(i + 1) % outline.size()] - outline[i]
+        outward_normals.append(Vector2(edge.y, -edge.x).normalized())
+        cumulative_lengths.append(cumulative_lengths[i] + edge.length())
+
+    # Closed, slightly rounded cross-section, from the INSIDE carpet
+    # edge across the flat top to the OUTSIDE floor edge and underneath.
+    # Closing the underside removes open profile faces at shallow angles.
+    var profile: Array[Vector2] = [
+        Vector2(-0.088, 0.007), Vector2(-0.088, 0.041),
+        Vector2(-0.080, 0.056), Vector2(-0.060, 0.069),
+        Vector2(-0.038, 0.077), Vector2(0.040, 0.077),
+        Vector2(0.062, 0.070), Vector2(0.080, 0.056),
+        Vector2(0.088, 0.042), Vector2(0.088, 0.007),
+        Vector2(-0.088, 0.007)
+    ]
+    var timber_surface := SurfaceTool.new()
+    timber_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+    timber_surface.set_material(parquet_border)
+    for edge_i in range(outline.size()):
+        var following := (edge_i + 1) % outline.size()
+        var start_u := cumulative_lengths[edge_i] / 0.72
+        var end_u := cumulative_lengths[edge_i + 1] / 0.72
+        for side_i in range(profile.size() - 1):
+            var first: Vector2 = profile[side_i]
+            var second: Vector2 = profile[side_i + 1]
+            var a := _carpet_mitered_point(outline, outward_normals,
+                edge_i, first.x, first.y)
+            var b := _carpet_mitered_point(outline, outward_normals,
+                following, first.x, first.y)
+            var c := _carpet_mitered_point(outline, outward_normals,
+                following, second.x, second.y)
+            var d := _carpet_mitered_point(outline, outward_normals,
+                edge_i, second.x, second.y)
+            _carpet_surface_quad(timber_surface, a, b, c, d,
+                start_u, end_u,
+                (first.x + 0.10 + first.y * 0.5) / 0.72,
+                (second.x + 0.10 + second.y * 0.5) / 0.72)
+    timber_surface.generate_normals()
+    timber_surface.generate_tangents()
+    var timber := MeshInstance3D.new()
+    timber.name = "CarpetPerimeterWood"
+    timber.mesh = timber_surface.commit()
+    timber.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+    carpeting.add_child(timber)
+
+    # One continuous, thin fabric inlay. Its top is just 1.5 mm above
+    # the wood's horizontal top (y=0.077): visually flush, no Z-fighting.
+    # The band has identical miter joints, including the entry end.
+    var gold_surface := SurfaceTool.new()
+    gold_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+    gold_surface.set_material(fabric_piping)
+    for edge_i in range(outline.size()):
+        var following := (edge_i + 1) % outline.size()
+        var a := _carpet_mitered_point(outline, outward_normals,
+            edge_i, -0.032, 0.0785)
+        var b := _carpet_mitered_point(outline, outward_normals,
+            following, -0.032, 0.0785)
+        var c := _carpet_mitered_point(outline, outward_normals,
+            following, -0.012, 0.0785)
+        var d := _carpet_mitered_point(outline, outward_normals,
+            edge_i, -0.012, 0.0785)
+        _carpet_surface_quad(gold_surface, a, b, c, d,
+            cumulative_lengths[edge_i] / 0.40,
+            cumulative_lengths[edge_i + 1] / 0.40, 0.0, 0.05)
+    gold_surface.generate_normals()
+    gold_surface.generate_tangents()
+    var gold_inlay := MeshInstance3D.new()
+    gold_inlay.name = "CarpetPerimeterGold"
+    gold_inlay.mesh = gold_surface.commit()
+    gold_inlay.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+    carpeting.add_child(gold_inlay)
+
 
 func _make_carpet() -> void:
-    # The three existing runner surfaces retain their exact joined topology.
+    # Existing 3-patch L-shape is retained. All six perimeter edges
+    # now join at their actual corners, with no separate end caps.
     var strip_half := 1.57
     _carpet_patch("ApproachRunner", -strip_half, strip_half, -3.48, 12.7)
     _carpet_patch("TurnRunner", -strip_half, strip_half, -6.62, -3.48)
     _carpet_patch("WestRunner", -44.9, -strip_half, -6.62, -3.48)
+    _make_carpet_perimeter()
 
-    # The L has six exposed boundaries. Trim the rails at their meeting
-    # points, leaving no overlapping coplanar tops or dark doubled corners.
-    _beveled_carpet_rail("ApproachBorderEast",
-        Vector3(1.57, 0, 3.04), 19.14, false)
-    _beveled_carpet_rail("ApproachBorderWest",
-        Vector3(-1.57, 0, 4.61), 16.0, false)
-    _beveled_carpet_rail("WestBorderSouth",
-        Vector3(-21.665, 0, -6.62), 46.29, true)
-    _beveled_carpet_rail("WestBorderNorth",
-        Vector3(-23.235, 0, -3.48), 43.15, true)
-    _beveled_carpet_rail("EntryBorderEnd",
-        Vector3(0, 0, 12.7), 3.14, true)
-    _beveled_carpet_rail("WestBorderEnd",
-        Vector3(-44.9, 0, -5.05), 3.14, false)
-
-    # Gold fabric piping follows the outer wood rail with identical joins;
-    # the material is exactly Poly Haven bi_stretch (not a flat gold color).
-    _carpet_piping("ApproachGoldPipingEast",
-        Vector3(1.55, 0, 3.04), 19.14, false)
-    _carpet_piping("ApproachGoldPipingWest",
-        Vector3(-1.55, 0, 4.61), 16.0, false)
-    _carpet_piping("WestGoldPipingSouth",
-        Vector3(-21.665, 0, -6.60), 46.29, true)
-    _carpet_piping("WestGoldPipingNorth",
-        Vector3(-23.235, 0, -3.50), 43.15, true)
-    _carpet_piping("EntryGoldPiping",
-        Vector3(0, 0, 12.68), 3.14, true)
-    _carpet_piping("WestEndGoldPiping",
-        Vector3(-44.88, 0, -5.05), 3.14, false)
 
 func _carpet_patch(label: String, x0: float, x1: float, z0: float, z1: float) -> void:
     # Show the jacquard motif at readable floor scale instead of tiny noise.
