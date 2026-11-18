@@ -12,7 +12,7 @@ Die **vorhandene Godot-3D-Ansicht** ist der Raumeditor. Kein eigenes Programm, k
 
 ## Was jetzt editierbar ist
 
-- **Poly-Haven-Modelle:** Alle 43 platzierten Modelle haben einzeln benannte, gespeicherte `Node3D`-Anker (`LoungeSofa_01` usw.). Original-GLTFs erscheinen als Editor-Vorschau. Verschieben, Drehen und Skalieren verändert später auch das Spielmodell **inklusive dessen Kollision**. Die Vorschaumeshes werden nicht als separate Objekte gespeichert.
+- **Poly-Haven-Modelle:** Alle 41 platzierten Modelle haben einzeln benannte, gespeicherte `Node3D`-Anker (`LoungeSofa_01` usw.). Original-GLTFs erscheinen als Editor-Vorschau. Verschieben, Drehen und Skalieren verändert später auch das Spielmodell **inklusive dessen Kollision**. Die Vorschaumeshes werden nicht als separate Objekte gespeichert.
 - **Slots:** `Slot_01` bis `Slot_10` sind gespeicherte Anker. Der erste wird beim Spielen weiterhin durch das Sketchfab-Modell ersetzt; seine neue Position wird mit übernommen.
 - **Spieltische:** `Roulette2`, `Blackjack3`, `Roulette4`, `Cards5`, `Roulette6`, `Cards7`. Die Sketchfab-Austauschlogik bleibt erhalten.
 - **Lichtquellen:** Neun echte `OmniLight3D`-Nodes unter `Lighting`: Position, Farbe, Intensität und Reichweite im Inspektor ändern.
