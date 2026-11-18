@@ -106,7 +106,7 @@ func _run() -> void:
     await process_frame
     await process_frame
     var loop := scene.get_node_or_null("LoopController")
-    var choice_markers := scene.get_node_or_null("DoorChoices") as Node3D
+    var choice_markers := loop.get_node_or_null("DoorChoices") as Node3D
     if loop == null or choice_markers == null:
         _fail("Runtime loop did not attach to original casino EXIT doors")
         return
@@ -122,17 +122,22 @@ func _run() -> void:
         _fail("Player camera was lost after starting a run")
         return
 
-    # The first real door choice must fade, score, reset and choose another
-    # round without instantiating another casino scene.
-    var correct_answer := not str(state.anomaly_id).is_empty()
-    loop.call("_enter_door", correct_answer)
-    await create_timer(1.25).timeout
-    if state.visited_loops != 1 or state.correct_streak != 1 or not state.round_ready:
-        _fail("Using an exit door did not advance to a new random loop")
+    # First round now streams another casino scene in spatial continuity.
+    # Approaching the current far exits opens two real walkable portals.
+    if scene.get_node_or_null("StreamingPortals") == null:
+        _fail("The gameplay did not open walkable door apertures")
         return
-    var player := scene.get_node("Player") as CharacterBody3D
-    if player.position.distance_to(Vector3(0, 1.02, 11.1)) > 0.4:
-        _fail("The disguised doorway did not return the player to the entrance")
+    if (scene.get_node("Architecture/FarExitWall") as MeshInstance3D).visible:
+        _fail("The solid far wall still blocks both exits")
+        return
+    loop.call("_stage_next", "left")
+    var staged := loop.get("staged") as Node3D
+    if staged == null or staged.get_node_or_null("Player") != null:
+        _fail("Next hall was not preloaded as a passive playerless instance")
+        return
+    loop.call("_commit_choice", "left")
+    if state.visited_loops != 1 or not state.round_ready:
+        _fail("Walking through the left doorway did not score and prepare a round")
         return
 
     scene.queue_free()
