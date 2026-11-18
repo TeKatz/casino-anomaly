@@ -499,25 +499,22 @@ func _omni(pos: Vector3, tint: Color, energy: float, reach: float,
     # low-energy fill lamps out of the fog to prevent overbright haze.
     light.light_volumetric_fog_energy = 0.85 if cast_shadows else 0.14
     if cast_shadows:
-        light.shadow_bias = 0.08
-        light.shadow_blur = 1.30
+        light.shadow_bias = 0.055
+        light.shadow_blur = 1.10
     lights.add_child(light)
 
 func _make_lights() -> void:
-    # Four overhead fixtures cast shadows, the rest are inexpensive fill.
-    # Reducing omnidirectional overlap restores visible contrast and depth.
+    # Each main ceiling bay now casts real shadows; keep the pool size
+    # compact so adjacent unshadowed lights don't wash the details away.
     var ceiling_positions := [
         Vector3(0, 4.8, 9.2), Vector3(0, 4.8, 2.3),
         Vector3(1.3, 4.8, -7.0), Vector3(-8, 4.8, -6.0),
         Vector3(-17, 4.8, -6.0), Vector3(-26, 4.8, -6.0),
         Vector3(-35, 4.8, -6.0), Vector3(-43, 4.8, -6.0)
     ]
-    for i in range(ceiling_positions.size()):
-        _omni(ceiling_positions[i], Color("#ffdaa7"), 1.5, 11.5,
-            i in [0, 2, 4, 6])
-    _omni(Vector3(1.2, 3.35, -9.8), Color("#ffba71"), 1.05, 7.0)
-    for pos in [Vector3(5.55, 3.1, 10.5), Vector3(-5.55, 3.1, 8.4),
-                Vector3(-10, 3.1, -12.6), Vector3(-21.0, 3.1, -12.6),
-                Vector3(-33, 3.1, -12.6), Vector3(-43, 3.1, -12.6)]:
-        _sphere(decor, "WallSconce", pos, 0.16, warm_white)
-        _omni(pos, Color("#ffd39c"), 0.42, 4.0)
+    for pos in ceiling_positions:
+        _omni(pos, Color("#ffdaa7"), 1.38, 10.2, true)
+    # A single small warm bar fill remains, with no shadow map.
+    _omni(Vector3(1.2, 3.35, -9.8), Color("#ffba71"), 0.65, 5.0)
+    # The floating white wall globes (WallSconce) and their six
+    # unshadowed point lights were intentionally removed.

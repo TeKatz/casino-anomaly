@@ -140,42 +140,49 @@ func _slots() -> void:
         i += 1
 
 func _dust() -> void:
-    # Dust floats through localized pools of chandelier light; this avoids
-    # fullscreen effects and does not add any anomaly targets.
+    # Fine atmospheric dust is distributed throughout both wings rather
+    # than clustering under the five chandelier positions. Deliberately
+    # non-emissive, tiny and slow: it must never resemble falling snow.
     var mesh := SphereMesh.new()
-    mesh.radius = 0.022
-    mesh.height = 0.044
+    mesh.radius = 0.007
+    mesh.height = 0.014
     mesh.radial_segments = 6
     mesh.rings = 4
     var mat := StandardMaterial3D.new()
-    mat.albedo_color = Color(1, 0.87, 0.72, 0.48)
-    mat.emission_enabled = true
-    mat.emission = Color(0.78, 0.57, 0.32)
-    mat.emission_energy_multiplier = 0.32
+    mat.albedo_color = Color(0.96, 0.86, 0.74, 0.22)
     mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
     mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
     mesh.material = mat
+    # Broad, overlapping volumes cover the walkable hall at several heights.
+    # Keep boxes below the ceiling and outside the floor.
     var dust_index := 0
     for pos in [
-        Vector3(0.0, 2.95, 6.0),
-        Vector3(-1.4, 2.95, -6.8),
-        Vector3(-17.5, 2.95, -6.5),
-        Vector3(-30.0, 2.95, -6.5),
-        Vector3(-41.0, 2.95, -6.5)
+        Vector3(-1.9, 2.9, 10.5),
+        Vector3(2.1, 2.7, 6.5),
+        Vector3(-1.6, 2.8, 2.5),
+        Vector3(1.7, 2.9, -2.0),
+        Vector3(-4.8, 2.8, -6.3),
+        Vector3(-10.2, 2.7, -7.6),
+        Vector3(-15.7, 2.8, -4.4),
+        Vector3(-21.2, 2.7, -7.5),
+        Vector3(-26.8, 2.9, -4.6),
+        Vector3(-32.3, 2.8, -7.4),
+        Vector3(-37.8, 2.7, -4.6),
+        Vector3(-43.0, 2.8, -7.2)
     ]:
         var particles := CPUParticles3D.new()
-        particles.name = "ChandelierDust_%02d" % dust_index
+        particles.name = "AmbientDust_%02d" % dust_index
         dust_index += 1
         particles.position = pos
-        particles.amount = 54
-        particles.lifetime = 9.0
+        particles.amount = 22
+        particles.lifetime = 11.0
         particles.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
-        particles.emission_box_extents = Vector3(2.45, 1.85, 2.45)
+        particles.emission_box_extents = Vector3(3.1, 1.85, 3.15)
         particles.direction = Vector3.UP
-        particles.spread = 170.0
-        particles.gravity = Vector3(0, 0.005, 0)
-        particles.initial_velocity_min = 0.012
-        particles.initial_velocity_max = 0.048
+        particles.spread = 180.0
+        particles.gravity = Vector3.ZERO
+        particles.initial_velocity_min = 0.006
+        particles.initial_velocity_max = 0.020
         particles.mesh = mesh
         particles.emitting = true
         add_child(particles)

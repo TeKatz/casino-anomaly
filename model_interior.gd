@@ -34,7 +34,7 @@ func _populate() -> void:
         for child in decor.get_children():
             if child.name.begins_with("Chandelier"):
                 child.queue_free()
-        _soft_light(Vector3(-1.4, 4.5, -6.8), 1.7, 8.5)
+        _soft_light(Vector3(-1.4, 4.5, -6.8), 0.48, 6.3)
 
     for entry in [
         [Vector3(0.3, 4.48, 5.8), 1.28],
@@ -50,7 +50,7 @@ func _populate() -> void:
         Vector3(-31.0, 4.4, -6.5),
         Vector3(-41.0, 4.4, -6.5)
     ]:
-        _soft_light(lamp, 0.62, 7.5)
+        _soft_light(lamp, 0.26, 5.8)
 
     # All ten bar stools come from the imported Poly Haven model only.
     # Keep front and side rows separated around the curved corner.
@@ -231,7 +231,11 @@ func _soft_light(pos: Vector3, power: float, reach: float) -> void:
     lamp.light_color = Color("#f3c692")
     lamp.light_energy = power
     lamp.omni_range = reach
+    # The eight structural ceiling lights already cast the shadows.
+    # Keep these imported chandelier highlights faint and local so their
+    # unshadowed contribution doesn't flatten the room's contrast.
     lamp.shadow_enabled = false
+    lamp.light_volumetric_fog_energy = 0.12
     add_child(lamp)
 
 func _asset_path(identifier: String) -> String:

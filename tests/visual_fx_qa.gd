@@ -75,8 +75,8 @@ func _run() -> void:
         var bulb := item as OmniLight3D
         if bulb != null and bulb.shadow_enabled:
             shadow_count += 1
-    if shadow_count != 4:
-        push_error("Expected four shadow-casting ceiling lights, found %d" % shadow_count)
+    if shadow_count != 8:
+        push_error("Expected eight shadow-casting ceiling lights, found %d" % shadow_count)
         quit(1)
         return
     for item in hall_lights.get_children():
@@ -85,16 +85,37 @@ func _run() -> void:
             push_error("Shadow-casting chandeliers need volumetric scattering")
             quit(1)
             return
-    var dust_emitters := fx.find_children("ChandelierDust_*", "CPUParticles3D", false, false)
-    if dust_emitters.size() != 5:
-        push_error("Dust motes must be placed throughout both casino wings")
+    # Ambient dust stays fine and spans the full casino instead of
+    # concentrating in visible clumps beneath the chandeliers.
+    var dust_emitters := fx.find_children("AmbientDust_*", "CPUParticles3D", false, false)
+    if dust_emitters.size() != 12:
+        push_error("Fine dust must cover both casino wings in twelve zones")
         quit(1)
         return
     for motes in dust_emitters:
-        if motes.amount < 50 or motes.amount > 60:
-            push_error("Particle budget exceeded")
+        if motes.amount < 18 or motes.amount > 26:
+            push_error("Fine dust particle budget exceeded")
             quit(1)
             return
+        var dust_mesh: SphereMesh = motes.mesh as SphereMesh
+        if dust_mesh == null or dust_mesh.radius > 0.008:
+            push_error("Dust motes must be smaller than the old placeholder spheres")
+            quit(1)
+            return
+    # White wall globes and their bright unshadowed lights must both vanish.
+    var decor: Node3D = hall.get_node_or_null("Decor") as Node3D
+    if decor == null or decor.find_children("WallSconce", "MeshInstance3D", false, false).size() != 0:
+        push_error("Floating white wall globes must be removed")
+        quit(1)
+        return
+    if hall_lights.get_child_count() != 9:
+        push_error("Unexpected unshadowed ceiling/wall lighting remains")
+        quit(1)
+        return
+    if env.environment.ambient_light_energy > 0.38:
+        push_error("Casino should be darker than the previous forward+ pass")
+        quit(1)
+        return
     var player: CharacterBody3D = hall.get_node_or_null("Player") as CharacterBody3D
     var camera: Camera3D = hall.get_node_or_null("Player/Camera3D") as Camera3D
     if player == null or camera == null:
