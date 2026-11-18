@@ -79,8 +79,16 @@ func _run() -> void:
     if models.get_child_count() != models_before:
         _fail("Duplicate saved model support/placement nodes were spawned")
         return
-    if (world.get_node("SlotMachines") as Node3D).get_child_count() != 9:
+    # Check actual hero replacement and invisible-collider cleanup, rather
+    # than assuming the artist kept all ten original slot placements.
+    var authored_slots := world.get_node("SlotMachines") as Node3D
+    var imported_furniture := world.get_node("SketchfabFurniture") as Node3D
+    if imported_furniture == null or int(imported_furniture.get("replaced_slots")) != 1             or authored_slots.has_node("Slot_01"):
         _fail("Runtime Sketchfab hero replacement failed")
         return
+    for cabinet in authored_slots.get_children():
+        if cabinet.name.begins_with("Slot_") and not cabinet.has_node("Body"):
+            _fail("An artist-deleted slot left behind an invisible collision cabinet")
+            return
     print("Casino Anomaly complete Godot editor scene QA PASS")
     quit(0)
