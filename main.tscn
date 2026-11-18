@@ -1,9 +1,10 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://hall.gd" id="1_hall"]
 [ext_resource type="Script" path="res://player.gd" id="2_player"]
 [ext_resource type="Script" path="res://model_interior.gd" id="3_models"]
 [ext_resource type="Script" path="res://sketchfab_furniture.gd" id="4_sketchfab"]
+[ext_resource type="Script" path="res://casino_atmosphere.gd" id="5_atmosphere"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape_player"]
 radius = 0.34
@@ -17,6 +18,10 @@ ambient_light_color = Color(0.78, 0.71, 0.65, 1)
 ambient_light_energy = 0.68
 reflected_light_source = 1
 tonemap_mode = 2
+glow_enabled = true
+glow_intensity = 0.32
+glow_bloom = 0.04
+glow_hdr_threshold = 0.95
 
 [node name="CasinoAnomalyHall" type="Node3D"]
 script = ExtResource("1_hall")
@@ -42,3 +47,6 @@ script = ExtResource("4_sketchfab")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_casino")
+
+[node name="CasinoAtmosphere" type="Node3D" parent="."]
+script = ExtResource("5_atmosphere")

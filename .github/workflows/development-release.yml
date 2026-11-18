@@ -110,6 +110,8 @@ jobs:
           if ($LASTEXITCODE -ne 0 -or (Get-Content import.log -Raw) -match '(?m)(SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:)') { throw 'Godot import failed' }
           & "$env:GODOT_EDITOR" --headless --path . --script res://tests/smoke.gd 2>&1 | Tee-Object -FilePath smoke.log
           if ($LASTEXITCODE -ne 0 -or (Get-Content smoke.log -Raw) -notmatch 'Casino Anomaly scenes and PBR floor smoke PASS') { throw 'Godot scene smoke failed' }
+          & "$env:GODOT_EDITOR" --headless --path . --script res://tests/visual_fx_qa.gd 2>&1 | Tee-Object -FilePath visual-fx-qa.log
+          if ($LASTEXITCODE -ne 0 -or (Get-Content visual-fx-qa.log -Raw) -notmatch 'Casino Anomaly visual FX QA PASS') { throw 'Visual FX QA failed' }
           & "$env:GODOT_EDITOR" --headless --path . --script res://tests/sketchfab_smoke.gd 2>&1 | Tee-Object -FilePath sketchfab-smoke.log
           if ($LASTEXITCODE -ne 0 -or (Get-Content sketchfab-smoke.log -Raw) -notmatch 'Casino Anomaly Sketchfab model smoke PASS') { throw 'Sketchfab model smoke failed' }
           & "$env:GODOT_EDITOR" --headless --path . --script res://tests/architecture_qa.gd 2>&1 | Tee-Object -FilePath architecture-qa.log
