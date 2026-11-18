@@ -23,3 +23,7 @@ The next development pass loads **10 original CC0 Poly Haven 3D models** as reus
 ## Interior visual QA pass
 
 Fixed seven issues from in-game screenshots: (1) both marble busts face the walkable hall; (2) stools are taller and all have matching burgundy upholstery; (3) grouped labelled bottles were removed from the customer-facing counter and moved to a dedicated shelf spot; (4) coffee cart rotated to face the room; (5) the wide donor sideboard rests on a wood base and has geometry-sized collision; (6) floor meshes now generate tangents required by their PBR normalmaps, restoring proper wood/jacquard lighting, with a subtle burgundy lift and more legible textile pattern; (7) individual tall candleholders are extracted from the three-piece glTF, with only one larger candlestick per table. No new third-party assets were added.
+
+## Spatial QA pass (after dev.10)
+
+The player-reported defects were fixed in the scene itself: no procedural stools behind the Poly Haven bar stools, greater spacing at the L-shaped counter, the bar and its colliders shifted away from the wall pilasters, physical collision on every architectural pillar, coffee cart in a free wall bay, topiary separated from the sofas, and no luminous spheres on lounge tables. The previously disabled ambient-light source has been replaced with color ambient lighting; both material meshes now render from either side. A new spatial regression test validates floor materials, pillar bodies, furniture spacing and lighting before release.

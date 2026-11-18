@@ -11,9 +11,9 @@ height = 1.87
 [sub_resource type="Environment" id="Environment_casino"]
 background_mode = 1
 background_color = Color(0.034, 0.033, 0.04, 1)
-ambient_light_source = 1
-ambient_light_color = Color(0.72, 0.65, 0.59, 1)
-ambient_light_energy = 0.46
+ambient_light_source = 2
+ambient_light_color = Color(0.78, 0.71, 0.65, 1)
+ambient_light_energy = 0.68
 reflected_light_source = 1
 tonemap_mode = 2
 

@@ -34,8 +34,10 @@ var lights: Node3D
 func _ready() -> void:
     wood = OAK.duplicate() as StandardMaterial3D
     wood.uv1_scale = Vector3.ONE
+    wood.cull_mode = BaseMaterial3D.CULL_DISABLED
     fabric = JACQUARD.duplicate() as StandardMaterial3D
     fabric.uv1_scale = Vector3.ONE
+    fabric.cull_mode = BaseMaterial3D.CULL_DISABLED
     wall_paint = _material(Color("#202a35"), 0.82)
     wall_panel = _material(Color("#4a2a2b"), 0.8)
     dark_wood = _material(Color("#37221b"), 0.65)
@@ -61,6 +63,8 @@ func _ready() -> void:
     _make_carpet()
     _make_slots()
     _make_bar()
+    # Move the entire bar and its solid collision away from the wall pillars.
+    bar_area.position.x = -0.95
     _make_tables()
     _make_lounge()
     _make_details()
@@ -246,7 +250,7 @@ func _wall(label: String, pos: Vector3, size: Vector3) -> void:
         _box(architecture, label + "_Crown", Vector3(pos.x, 5.63, pos.z), Vector3(0.42, 0.13, size.z), gold)
 
 func _column(pos: Vector3) -> void:
-    _box(architecture, "FlutedPillar", pos + Vector3(0, 2.78, 0), Vector3(0.33, 5.3, 0.33), dark_wood)
+    _box(architecture, "FlutedPillar", pos + Vector3(0, 2.78, 0), Vector3(0.52, 5.3, 0.52), dark_wood, true)
     for y in [0.19, 5.36, 5.55]:
         _box(architecture, "PillarGoldRing", pos + Vector3(0, y, 0), Vector3(0.52, 0.13, 0.52), gold)
 
@@ -374,13 +378,8 @@ func _make_bar() -> void:
         Vector3(4.2, 0.9, 0.14), screen_black)
     _text(bar_area, "MIDNIGHT BAR", Vector3(-1.38, 4.58, -12.40), 0, 68)
 
-    # Bar seating follows BOTH sides of the continuous corner.
-    for x in [-7.1, -5.45, -3.75, -2.05, -0.3, 1.48, 3.05]:
-        _cylinder(bar_area, "BarStoolSeat", Vector3(x, 0.72, -8.30), 0.30, 0.13, velvet)
-        _cylinder(bar_area, "BarStoolStem", Vector3(x, 0.35, -8.30), 0.075, 0.61, brass)
-    for z in [-5.02, -6.65, -8.10]:
-        _cylinder(bar_area, "SideBarStool", Vector3(3.50, 0.72, z), 0.30, 0.13, velvet)
-        _cylinder(bar_area, "SideStoolStem", Vector3(3.50, 0.35, z), 0.075, 0.61, brass)
+    # All barstools are now supplied solely by model_interior.gd.
+    # Do not spawn cylinder placeholders behind the imported stools.
 
     for x in [-6.25, -3.5, -0.75, 1.95, 4.10]:
         _sphere(bar_area, "Pendant", Vector3(x, 4.45, -9.70), 0.16, warm_white)
@@ -432,14 +431,14 @@ func _make_lounge() -> void:
                 Vector3(0.20, 0.58, 1.08), velvet)
         _cylinder(lounge, "CoffeeTable", Vector3(x, 0.42, -2.75), 0.53, 0.12, dark_wood, true)
         _cylinder(lounge, "CoffeeTableLeg", Vector3(x, 0.21, -2.75), 0.10, 0.35, brass)
-        _sphere(lounge, "Lamp", Vector3(x + 0.6, 0.56, -2.75), 0.10, warm_white)
 
 func _make_details() -> void:
     _text(decor, "SLOTS", Vector3(0, 4.54, 13.7), 0, 62)
     _text(decor, "TABLE GAMES", Vector3(-15, 3.55, -12.89), 0, 57)
+    # Space decorative topiary between sofa groups instead of inside cushions.
     for pos in [Vector3(3.7, 0, 11.2), Vector3(-3.65, 0, 12),
-                Vector3(-23.0, 0, -1.4), Vector3(-7.2, 0, -1.25),
-                Vector3(-33.0, 0, -1.4), Vector3(-43.1, 0, -1.3)]:
+                Vector3(-20.95, 0, -0.78), Vector3(-7.2, 0, -1.25),
+                Vector3(-31.15, 0, -0.78), Vector3(-41.4, 0, -0.78)]:
         _cylinder(decor, "PlantPot", pos + Vector3(0, 0.32, 0), 0.29, 0.65, stone, true, 12)
         _cylinder(decor, "PlantStem", pos + Vector3(0, 0.95, 0), 0.07, 0.65, dark_wood)
         var leaves := _material(Color("#214f3c"), 0.93)

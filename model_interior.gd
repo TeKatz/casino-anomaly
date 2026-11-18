@@ -7,6 +7,7 @@ extends Node3D
 # in asset pivots and original Blender measurement units.
 
 const RESOLUTION := "1k"
+const BAR_SHIFT_X := -0.95
 
 var placed_model_count: int = 0
 var successful_model_ids: Dictionary = {}
@@ -50,26 +51,24 @@ func _populate() -> void:
     ]:
         _soft_light(lamp, 0.62, 7.5)
 
-    # Import the vintage round stools in place of the former cylinders,
-    # preserving the bar's collision, shape and comfortable approach paths.
+    # All ten bar stools come from the imported Poly Haven model only.
+    # Keep front and side rows separated around the curved corner.
     if _asset_available("bar_chair_round_01"):
-        for child in bar.get_children():
-            if child.name.begins_with("BarStoolSeat") or child.name.begins_with("BarStoolStem") \
-                or child.name.begins_with("SideBarStool") or child.name.begins_with("SideStoolStem"):
-                child.queue_free()
-        for x in [-7.1, -5.45, -3.75, -2.05, -0.3, 1.48, 3.05]:
-            var stool := _place("bar_chair_round_01", "CounterStool", Vector3(x, 0.005, -8.30), 1.03, 0.0, true)
+        for x in [-7.5, -6.05, -4.6, -3.15, -1.7, -0.25, 1.2]:
+            var stool := _place("bar_chair_round_01", "CounterStool",
+                Vector3(x + BAR_SHIFT_X, 0.005, -8.30), 1.03, 0.0, true)
             if stool != null:
                 _stool_cushion(stool)
-        for z in [-5.02, -6.65, -8.10]:
-            var stool := _place("bar_chair_round_01", "SideStool", Vector3(3.50, 0.005, z), 1.03, PI / 2.0, true)
+        for z in [-4.98, -6.55, -8.05]:
+            var stool := _place("bar_chair_round_01", "SideStool",
+                Vector3(3.45 + BAR_SHIFT_X, 0.005, z), 1.03, PI / 2.0, true)
             if stool != null:
                 _stool_cushion(stool)
 
     # Remove label-flickering wine-bottle groups from the COUNTER. One small
     # set sits on a cleared display shelf, away from the patron's viewpoint
     # and from the original block-shaped bottle placeholders.
-    _place("wine_bottles_01", "ShelfWine", Vector3(-5.85, 1.96, -12.38), 0.45)
+    _place("wine_bottles_01", "ShelfWine", Vector3(-5.85 + BAR_SHIFT_X, 1.96, -12.38), 0.45)
 
     # This Poly Haven glTF contains THREE physically separate candleholders.
     # Select only the tall third variant; never put a complete trio on a
@@ -78,7 +77,7 @@ func _populate() -> void:
         [Vector3(-18.4, 0.49, -2.75), 0.77],
         [Vector3(-28.6, 0.49, -2.75), 0.76],
         [Vector3(-38.8, 0.49, -2.75), 0.77],
-        [Vector3(-0.45, 1.35, -9.42), 0.68]
+        [Vector3(-0.45 + BAR_SHIFT_X, 1.35, -9.42), 0.68]
     ]:
         _place("brass_candleholders", "SingleBrassCandleholder",
             entry[0], entry[1], 0.0, false, false, "brass_candleholder_03")
@@ -107,14 +106,14 @@ func _populate() -> void:
     # Park the coffee cart flush with the lounge-side wall, its service face
     # toward the player area rather than side-on into the corner.
     _place("CoffeeCart_01", "CoffeeServiceCart",
-        Vector3(-9.0, 0.005, -1.15), 1.33, PI, true)
+        Vector3(-15.6, 0.005, -0.95), 1.33, PI, true)
 
     # The donor cabinet is a LOW WIDE sideboard (2.44 x 0.68 m originally).
     # Its old 1.4m normalization made it almost 5m wide and put it directly
     # on the floor. Restore credible dimensions and raise on a solid plinth.
-    _cabinet_plinth(Vector3(-2.5, 0.0, -12.03))
+    _cabinet_plinth(Vector3(-2.5 + BAR_SHIFT_X, 0.0, -12.03))
     _place("modern_wooden_cabinet", "BarServiceCabinet",
-        Vector3(-2.5, 0.245, -12.03), 1.02, 0.0, true)
+        Vector3(-2.5 + BAR_SHIFT_X, 0.245, -12.03), 1.02, 0.0, true)
 
     print("Poly Haven 3D interior: ", placed_model_count, " model instances from ",
         successful_model_ids.size(), " source assets")

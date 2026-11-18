@@ -5,6 +5,7 @@
 [ext_resource type="Texture2D" path="res://assets/oak_wood_planks/oak_wood_planks_nor_gl_2k.png" id="3_normal"]
 
 [resource]
+cull_mode = 2
 resource_name = "Poly Haven Oak Wood Planks - 2K"
 albedo_texture = ExtResource("1_diff")
 roughness = 1.0
