@@ -46,6 +46,25 @@ func _run_smoke() -> void:
         push_error("The bar must wrap around the left turn")
         quit(1)
         return
+    if not bar.has_node("BarRoundedCorner") or not bar.has_node("BarCounterSideInset"):
+        push_error("The corner bar counter must be visibly continuous and rounded")
+        quit(1)
+        return
+    var west_aabb: AABB = west_floor.get_aabb()
+    var runner_aabb: AABB = second_runner.get_aabb()
+    if west_aabb.size.x < 39.9 or runner_aabb.size.x < 43.2:
+        push_error("The second leg must retain its doubled length and extended carpet")
+        quit(1)
+        return
+    var far_wall: MeshInstance3D = architecture.get_node_or_null("FarExitWall") as MeshInstance3D
+    if far_wall == null or far_wall.position.x > -45.9:
+        push_error("The exit end wall was not relocated with the extended wing")
+        quit(1)
+        return
+    if tables.get_child_count() < 6 or lounge.get_child_count() < 40:
+        push_error("The extended wing needs evenly distributed visual details")
+        quit(1)
+        return
     world.queue_free()
     print("Casino Anomaly scenes and PBR floor smoke PASS")
     quit(0)

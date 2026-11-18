@@ -182,45 +182,46 @@ func _floor_quad(name: String, left: float, right: float, back: float, front: fl
 
 func _make_architecture() -> void:
     # Two non-overlapping floor sections form the L (a concave corner at -6,0).
+    # The west wing was extended from 20 to 40 m after the first visual playtest.
     _floor_quad("OakMainWing", -6.0, 6.0, -13.0, 14.0, 0.005, wood, 1.20, architecture)
-    _floor_quad("OakWestWing", -26.0, -6.0, -13.0, 0.0, 0.005, wood, 1.20, architecture)
+    _floor_quad("OakWestWing", -46.0, -6.0, -13.0, 0.0, 0.005, wood, 1.20, architecture)
     _box(architecture, "MainWingFloorCollider", Vector3(0, -0.12, 0.5), Vector3(12, 0.24, 27), dark_wood, true).visible = false
-    _box(architecture, "WestWingFloorCollider", Vector3(-16, -0.12, -6.5), Vector3(20, 0.24, 13), dark_wood, true).visible = false
+    _box(architecture, "WestWingFloorCollider", Vector3(-26, -0.12, -6.5), Vector3(40, 0.24, 13), dark_wood, true).visible = false
     # Outer perimeter walls, broken only at the deliberate concave corner.
     _wall("EntryBackWall", Vector3(0, 3.0, 14.18), Vector3(12.4, WALL_HEIGHT, 0.36))
     _wall("RightMainWall", Vector3(6.18, 3.0, 0.5), Vector3(0.36, WALL_HEIGHT, 27.4))
-    _wall("NorthWestWall", Vector3(-10, 3.0, -13.18), Vector3(32.4, WALL_HEIGHT, 0.36))
-    _wall("FarExitWall", Vector3(-26.18, 3.0, -6.5), Vector3(0.36, WALL_HEIGHT, 13.4))
-    _wall("SouthWestWall", Vector3(-16, 3.0, 0.18), Vector3(20.4, WALL_HEIGHT, 0.36))
+    _wall("NorthWestWall", Vector3(-20, 3.0, -13.18), Vector3(52.4, WALL_HEIGHT, 0.36))
+    _wall("FarExitWall", Vector3(-46.18, 3.0, -6.5), Vector3(0.36, WALL_HEIGHT, 13.4))
+    _wall("SouthWestWall", Vector3(-26, 3.0, 0.18), Vector3(40.4, WALL_HEIGHT, 0.36))
     _wall("LeftMainWall", Vector3(-6.18, 3.0, 7), Vector3(0.36, WALL_HEIGHT, 14.4))
 
     _box(architecture, "MainCeiling", Vector3(0, 6.10, 0.5), Vector3(12.2, 0.23, 27.2), dark_ceiling)
-    _box(architecture, "WestCeiling", Vector3(-16, 6.10, -6.5), Vector3(20.2, 0.23, 13.2), dark_ceiling)
+    _box(architecture, "WestCeiling", Vector3(-26, 6.10, -6.5), Vector3(40.2, 0.23, 13.2), dark_ceiling)
 
     # Wainscoting, trims and pillars make the wall segments read as one casino.
     for item in [
         [Vector3(0, 1.02, 14.0), Vector3(12, 2.0, 0.12)],
         [Vector3(5.99, 1.02, 0.5), Vector3(0.12, 2.0, 27)],
-        [Vector3(-10, 1.02, -12.99), Vector3(32, 2.0, 0.12)],
-        [Vector3(-25.99, 1.02, -6.5), Vector3(0.12, 2.0, 13)],
-        [Vector3(-16, 1.02, -0.01), Vector3(20, 2.0, 0.12)],
+        [Vector3(-20, 1.02, -12.99), Vector3(52, 2.0, 0.12)],
+        [Vector3(-45.99, 1.02, -6.5), Vector3(0.12, 2.0, 13)],
+        [Vector3(-26, 1.02, -0.01), Vector3(40, 2.0, 0.12)],
         [Vector3(-5.99, 1.02, 7), Vector3(0.12, 2.0, 14)]
     ]:
         _box(architecture, "WoodWainscoting", item[0], item[1], wall_panel)
     for z in [12.0, 6.0, 0.0, -6.0, -12.0]:
         _column(Vector3(5.65, 0, z))
-    for x in [-24.0, -18.0, -12.0, -6.0]:
+    for x in [-44.0, -38.0, -32.0, -26.0, -20.0, -14.0, -8.0]:
         _column(Vector3(x, 0, -12.7))
     _column(Vector3(-5.8, 0, 0.1))
-    for x in [-21.0, -14.0, -8.0]:
+    for x in [-43.0, -37.0, -31.0, -25.0, -19.0, -13.0, -8.0]:
         _column(Vector3(x, 0, 0.2))
     for z in [4.0, 11.0]:
         _column(Vector3(-5.7, 0, z))
-    for x in [-25.9, -6.0, 6.0]:
+    for x in [-45.9, -6.0, 6.0]:
         _box(architecture, "CeilingGoldBeam", Vector3(x, 5.82, -6.5), Vector3(0.09, 0.14, 12.8), gold)
     for z in [0.0, 7.0, 13.0]:
         _box(architecture, "CeilingTrim", Vector3(0, 5.85, z), Vector3(11.8, 0.13, 0.12), gold)
-    for x in [-24.0, -17.0, -10.0]:
+    for x in [-42.0, -35.0, -28.0, -21.0, -14.0, -10.0]:
         _box(architecture, "WestCeilingTrim", Vector3(x, 5.85, -6.5), Vector3(0.12, 0.13, 12.8), gold)
     # Entry framing and end wall doors (decorative until anomaly logic is added).
     _box(architecture, "EntryDoor", Vector3(0, 1.5, 13.97), Vector3(3.2, 3, 0.1), dark_wood)
@@ -228,11 +229,11 @@ func _make_architecture() -> void:
         _box(architecture, "EntryDoorRail", Vector3(x, 1.7, 13.8), Vector3(0.075, 3.3, 0.11), gold)
     _text(architecture, "CASINO ANOMALY", Vector3(0, 4.15, 13.88), 0, 76)
     for z in [-9.65, -3.7]:
-        _box(architecture, "ExitDoor", Vector3(-25.94, 1.62, z), Vector3(0.1, 3.25, 2.05), dark_wood)
-        _box(architecture, "ExitFrameTop", Vector3(-25.84, 3.35, z), Vector3(0.22, 0.11, 2.26), gold)
+        _box(architecture, "ExitDoor", Vector3(-45.94, 1.62, z), Vector3(0.1, 3.25, 2.05), dark_wood)
+        _box(architecture, "ExitFrameTop", Vector3(-45.84, 3.35, z), Vector3(0.22, 0.11, 2.26), gold)
         for dz in [-1.09, 1.09]:
-            _box(architecture, "ExitFrame", Vector3(-25.84, 1.7, z + dz), Vector3(0.2, 3.3, 0.08), gold)
-        _text(architecture, "EXIT", Vector3(-25.72, 4.02, z), PI / 2.0, 58)
+            _box(architecture, "ExitFrame", Vector3(-45.84, 1.7, z + dz), Vector3(0.2, 3.3, 0.08), gold)
+        _text(architecture, "EXIT", Vector3(-45.72, 4.02, z), PI / 2.0, 58)
 
 func _wall(label: String, pos: Vector3, size: Vector3) -> void:
     _box(architecture, label, pos, size, wall_paint, true)
@@ -252,7 +253,7 @@ func _make_carpet() -> void:
     var strip_half := 1.57
     _carpet_patch("ApproachRunner", -strip_half, strip_half, -3.48, 12.7)
     _carpet_patch("TurnRunner", -strip_half, strip_half, -6.62, -3.48)
-    _carpet_patch("WestRunner", -24.9, -strip_half, -6.62, -3.48)
+    _carpet_patch("WestRunner", -44.9, -strip_half, -6.62, -3.48)
 
     var trim := _material(Color("#331a20"), 0.92)
     for x in [-strip_half, strip_half]:
@@ -260,10 +261,10 @@ func _make_carpet() -> void:
         _box(carpeting, "ApproachGoldPiping", Vector3(x + (0.115 if x < 0 else -0.115), 0.067, 4.61),
             Vector3(0.025, 0.012, 16.18), gold)
     for z in [-6.62, -3.48]:
-        _box(carpeting, "WestBorderDark", Vector3(-13.24, 0.038, z), Vector3(23.33, 0.047, 0.16), trim)
-        _box(carpeting, "WestGoldPiping", Vector3(-13.24, 0.067, z + (0.115 if z < -5 else -0.115)),
-            Vector3(23.33, 0.012, 0.025), gold)
-    _box(carpeting, "EndTrim", Vector3(-24.9, 0.045, -5.05), Vector3(0.13, 0.035, 3.14), gold)
+        _box(carpeting, "WestBorderDark", Vector3(-23.24, 0.038, z), Vector3(43.33, 0.047, 0.16), trim)
+        _box(carpeting, "WestGoldPiping", Vector3(-23.24, 0.067, z + (0.115 if z < -5 else -0.115)),
+            Vector3(43.33, 0.012, 0.025), gold)
+    _box(carpeting, "EndTrim", Vector3(-44.9, 0.045, -5.05), Vector3(0.13, 0.035, 3.14), gold)
 
 func _carpet_patch(label: String, x0: float, x1: float, z0: float, z1: float) -> void:
     _floor_quad(label, x0, x1, z0, z1, FLOOR_Y, fabric, 0.52, carpeting)
@@ -301,50 +302,81 @@ func _make_slots() -> void:
     for z in [10.1, 7.6, 4.6, 1.9]:
         n += 1
         _slot_machine(Vector3(-4.82, 0, z), PI / 2.0, colors[n % colors.size()], n)
-    # An asymmetrical mini-bank near the turn adds some visual layering.
+    # Keep the corner view clear: no standalone machine hides the bar.
+    # The visual rhythm stays asymmetrical in the entry wing.
     n += 1
-    _slot_machine(Vector3(3.7, 0, -2.3), -PI / 2.0, colors[2], n)
+    _slot_machine(Vector3(4.65, 0, 11.85), -PI / 2.0, colors[2], n)
 
 func _make_bar() -> void:
-    # Perpendicular runs wrap around the outside of the left-turn corner.
-    _box(bar_area, "BarRunFacingApproach", Vector3(2.8, 0.61, -9.12),
-        Vector3(5.2, 1.18, 0.85), dark_wood, true)
-    _box(bar_area, "BarRunAlongTurn", Vector3(5.0, 0.61, -7.3),
-        Vector3(0.85, 1.18, 3.85), dark_wood, true)
-    _box(bar_area, "BarCounterFront", Vector3(2.8, 1.22, -9.12),
-        Vector3(5.43, 0.13, 1.08), gold)
-    _box(bar_area, "BarCounterSide", Vector3(5.0, 1.22, -7.3),
-        Vector3(1.05, 0.13, 4.1), gold)
-    _box(bar_area, "BarCounterTopInset", Vector3(2.7, 1.305, -9.12),
-        Vector3(4.95, 0.06, 0.81), dark_wood)
-    _box(bar_area, "BarBackboard", Vector3(2.6, 2.75, -12.76),
-        Vector3(5.9, 3.3, 0.16), dark_wood)
-    for y in [1.9, 2.75, 3.6]:
-        _box(bar_area, "BottleShelf", Vector3(2.5, y, -12.50),
-            Vector3(5.25, 0.09, 0.37), gold)
+    # The bar remains on the outside/right of the left turn as shown in the
+    # playtest screenshot, but is now ONE continuous corner counter.
+    # It reaches back into the second wing so it can be seen after turning.
+    # Patron-facing sides stay north (+Z) and west (-X) of the counter.
+    var top_wood := _material(Color("#513024"), 0.49)
+    var bar_front := _material(Color("#4c2525"), 0.76)
+    var metal_detail := _material(Color("#d6b879"), 0.34, 0.68)
+
+    # Long counter: across the visible bend and along the start of the west wing.
+    _box(bar_area, "BarRunFacingApproach", Vector3(-2.0, 0.61, -9.46),
+        Vector3(12.6, 1.18, 0.85), bar_front, true)
+    _box(bar_area, "BarCounterFront", Vector3(-2.0, 1.22, -9.46),
+        Vector3(12.7, 0.13, 1.01), gold)
+    _box(bar_area, "BarCounterFrontInset", Vector3(-2.0, 1.305, -9.46),
+        Vector3(12.48, 0.06, 0.81), top_wood)
+    _box(bar_area, "BarFrontGoldFoot", Vector3(-2.0, 0.11, -8.99),
+        Vector3(12.64, 0.10, 0.075), metal_detail)
+    _box(bar_area, "BarFrontRail", Vector3(-2.0, 0.84, -8.99),
+        Vector3(12.64, 0.055, 0.045), brass)
+
+    # Perpendicular counter: its outer end follows the approach-side wall.
+    # The shared rounded corner makes this an unmistakable L, rather than
+    # two disconnected rectangular islands.
+    _box(bar_area, "BarRunAlongTurn", Vector3(4.69, 0.61, -7.05),
+        Vector3(0.85, 1.18, 4.50), bar_front, true)
+    _box(bar_area, "BarCounterSide", Vector3(4.69, 1.22, -7.05),
+        Vector3(1.03, 0.13, 4.61), gold)
+    _box(bar_area, "BarCounterSideInset", Vector3(4.69, 1.305, -7.05),
+        Vector3(0.83, 0.06, 4.46), top_wood)
+    _box(bar_area, "BarSideRail", Vector3(4.23, 0.84, -7.05),
+        Vector3(0.055, 0.055, 4.50), brass)
+    _cylinder(bar_area, "BarRoundedCorner", Vector3(4.31, 0.61, -9.12),
+        0.55, 1.18, bar_front, true, 24)
+    _cylinder(bar_area, "BarRoundedGoldCap", Vector3(4.31, 1.22, -9.12),
+        0.61, 0.13, gold, false, 24)
+    _cylinder(bar_area, "BarRoundedWoodInset", Vector3(4.31, 1.305, -9.12),
+        0.52, 0.06, top_wood, false, 24)
+
+    # Bottle wall stays behind the bar; extend its shelving toward the bend.
+    _box(bar_area, "BarBackboard", Vector3(-1.40, 2.75, -12.76),
+        Vector3(11.4, 3.30, 0.16), dark_wood)
+    for y in [1.9, 2.75, 3.60]:
+        _box(bar_area, "BottleShelf", Vector3(-1.38, y, -12.52),
+            Vector3(10.85, 0.09, 0.36), gold)
     var bottles := [
         Color("#80b69d"), Color("#a66d4f"), Color("#8a659e"), Color("#e5b66f")
     ]
     for row in range(3):
-        for i in range(11):
-            var x := 0.10 + float(i) * 0.47
+        for i in range(21):
+            var x := -6.44 + float(i) * 0.50
             var y := 2.13 + float(row) * 0.85
-            var color := _material(bottles[(i + row) % bottles.size()], 0.22)
+            var color := _material(bottles[(i + row) % bottles.size()], 0.24)
             _cylinder(bar_area, "Bottle", Vector3(x, y, -12.48), 0.105, 0.39, color, false, 10)
             _cylinder(bar_area, "BottleNeck", Vector3(x, y + 0.25, -12.48), 0.052, 0.13, color, false, 10)
-    _box(bar_area, "BarSignPanel", Vector3(2.55, 4.68, -12.52),
-        Vector3(3.65, 0.88, 0.14), screen_black)
-    _text(bar_area, "MIDNIGHT BAR", Vector3(2.55, 4.56, -12.41), 0, 65)
-    for i in range(3):
-        var x := 0.75 + float(i) * 1.65
-        _cylinder(bar_area, "BarStoolSeat", Vector3(x, 0.72, -7.72), 0.33, 0.13, velvet)
-        _cylinder(bar_area, "BarStoolStem", Vector3(x, 0.36, -7.72), 0.075, 0.62, brass)
-    for z in [-5.8, -7.35]:
-        _cylinder(bar_area, "SideBarStool", Vector3(3.82, 0.72, z), 0.32, 0.12, velvet)
-        _cylinder(bar_area, "SideStoolStem", Vector3(3.82, 0.35, z), 0.07, 0.61, brass)
-    for x in [1.0, 2.7, 4.4]:
-        _sphere(bar_area, "Pendant", Vector3(x, 4.37, -9.55), 0.16, warm_white)
-        _cylinder(bar_area, "PendantStem", Vector3(x, 5.2, -9.55), 0.025, 1.58, gold)
+    _box(bar_area, "BarSignPanel", Vector3(-1.38, 4.72, -12.51),
+        Vector3(4.2, 0.9, 0.14), screen_black)
+    _text(bar_area, "MIDNIGHT BAR", Vector3(-1.38, 4.58, -12.40), 0, 68)
+
+    # Bar seating follows BOTH sides of the continuous corner.
+    for x in [-7.1, -5.45, -3.75, -2.05, -0.3, 1.48, 3.05]:
+        _cylinder(bar_area, "BarStoolSeat", Vector3(x, 0.72, -8.30), 0.30, 0.13, velvet)
+        _cylinder(bar_area, "BarStoolStem", Vector3(x, 0.35, -8.30), 0.075, 0.61, brass)
+    for z in [-5.02, -6.65, -8.10]:
+        _cylinder(bar_area, "SideBarStool", Vector3(3.50, 0.72, z), 0.30, 0.13, velvet)
+        _cylinder(bar_area, "SideStoolStem", Vector3(3.50, 0.35, z), 0.075, 0.61, brass)
+
+    for x in [-6.25, -3.5, -0.75, 1.95, 4.10]:
+        _sphere(bar_area, "Pendant", Vector3(x, 4.45, -9.70), 0.16, warm_white)
+        _cylinder(bar_area, "PendantStem", Vector3(x, 5.26, -9.70), 0.025, 1.49, gold)
 
 func _game_table(pos: Vector3, label: String, index: int) -> void:
     var group := Node3D.new()
@@ -372,14 +404,19 @@ func _game_table(pos: Vector3, label: String, index: int) -> void:
                 Vector3(0.16, 0.012, 0.23), warm_white)
 
 func _make_tables() -> void:
-    _game_table(Vector3(-10.7, 0, -10.0), "Roulette", 2)
-    _game_table(Vector3(-17.2, 0, -10.2), "Blackjack", 3)
-    _game_table(Vector3(-22.6, 0, -10.0), "Roulette", 4)
-    _game_table(Vector3(-10.7, 0, -1.95), "Cards", 5)
+    # Establish a longer second act after the corner without clogging the runner.
+    # The first table sits beyond the end of the bar, with distinct small groups
+    # along the southern side; the lounge occupies the northern side.
+    _game_table(Vector3(-13.6, 0, -10.05), "Roulette", 2)
+    _game_table(Vector3(-20.3, 0, -10.15), "Blackjack", 3)
+    _game_table(Vector3(-27.2, 0, -10.10), "Roulette", 4)
+    _game_table(Vector3(-34.2, 0, -10.15), "Cards", 5)
+    _game_table(Vector3(-41.1, 0, -10.05), "Roulette", 6)
+    _game_table(Vector3(-11.5, 0, -1.95), "Cards", 7)
 
 func _make_lounge() -> void:
-    for i in range(2):
-        var x := -18.4 - float(i) * 4.2
+    for i in range(5):
+        var x := -18.4 - float(i) * 5.1
         _box(lounge, "SofaBase", Vector3(x, 0.39, -1.17), Vector3(2.25, 0.57, 1.05), velvet, true)
         _box(lounge, "SofaBack", Vector3(x, 0.85, -0.67), Vector3(2.25, 0.95, 0.23), velvet)
         for dx in [-1.04, 1.04]:
@@ -393,7 +430,8 @@ func _make_details() -> void:
     _text(decor, "SLOTS", Vector3(0, 4.54, 13.7), 0, 62)
     _text(decor, "TABLE GAMES", Vector3(-15, 3.55, -12.89), 0, 57)
     for pos in [Vector3(3.7, 0, 11.2), Vector3(-3.65, 0, 12),
-                Vector3(-23.0, 0, -1.4), Vector3(-7.2, 0, -1.25)]:
+                Vector3(-23.0, 0, -1.4), Vector3(-7.2, 0, -1.25),
+                Vector3(-33.0, 0, -1.4), Vector3(-43.1, 0, -1.3)]:
         _cylinder(decor, "PlantPot", pos + Vector3(0, 0.32, 0), 0.29, 0.65, stone, true, 12)
         _cylinder(decor, "PlantStem", pos + Vector3(0, 0.95, 0), 0.07, 0.65, dark_wood)
         var leaves := _material(Color("#214f3c"), 0.93)
@@ -422,11 +460,13 @@ func _make_lights() -> void:
     for pos in [
         Vector3(0, 4.8, 9.2), Vector3(0, 4.8, 2.3),
         Vector3(1.3, 4.8, -7.0), Vector3(-8, 4.8, -6.0),
-        Vector3(-17, 4.8, -6.0), Vector3(-23.5, 4.8, -6.0)
+        Vector3(-17, 4.8, -6.0), Vector3(-26, 4.8, -6.0),
+        Vector3(-35, 4.8, -6.0), Vector3(-43, 4.8, -6.0)
     ]:
         _omni(pos, Color("#ffdaa7"), 1.8, 13.5)
-    _omni(Vector3(3.8, 3.35, -9.8), Color("#ffba71"), 1.25, 7.5)
+    _omni(Vector3(1.2, 3.35, -9.8), Color("#ffba71"), 1.35, 8.0)
     for pos in [Vector3(5.55, 3.1, 10.5), Vector3(-5.55, 3.1, 8.4),
-                Vector3(-10, 3.1, -12.6), Vector3(-21.0, 3.1, -12.6)]:
+                Vector3(-10, 3.1, -12.6), Vector3(-21.0, 3.1, -12.6),
+                Vector3(-33, 3.1, -12.6), Vector3(-43, 3.1, -12.6)]:
         _sphere(decor, "WallSconce", pos, 0.16, warm_white)
         _omni(pos, Color("#ffd39c"), 0.55, 5.0)
