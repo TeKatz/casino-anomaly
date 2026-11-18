@@ -12,6 +12,7 @@ const BAR_SHIFT_X := -0.95
 var placed_model_count: int = 0
 var successful_model_ids: Dictionary = {}
 var _scene_cache: Dictionary = {}
+var _placement_indices: Dictionary = {}
 
 func _ready() -> void:
     call_deferred("_populate")
@@ -285,17 +286,27 @@ func _place(identifier: String, label: String, anchor: Vector3,
     if packed == null:
         return null
 
-    var wrapper := Node3D.new()
-    wrapper.name = label
+    # The numbered nodes in main.tscn are the designer's source of truth.
+    # Keep their saved transform (including scale); only the model geometry,
+    # collision and decorative details are constructed during play.
+    var index: int = int(_placement_indices.get(label, 0)) + 1
+    _placement_indices[label] = index
+    var saved_name := "%s_%02d" % [label, index]
+    var wrapper := get_node_or_null(saved_name) as Node3D
+    var generated := wrapper == null
+    if generated:
+        wrapper = Node3D.new()
+        wrapper.name = label
+        wrapper.position = anchor
+        wrapper.rotation.y = yaw
+        add_child(wrapper)
     wrapper.set_meta("asset_id", identifier)
     wrapper.set_meta("placement_group", label)
-    wrapper.position = anchor
-    wrapper.rotation.y = yaw
-    add_child(wrapper)
 
     var imported: Node3D = packed.instantiate() as Node3D
     if imported == null:
-        wrapper.queue_free()
+        if generated:
+            wrapper.queue_free()
         push_error("Poly Haven glTF does not instantiate as Node3D: " + identifier)
         return null
     wrapper.add_child(imported)
@@ -311,13 +322,15 @@ func _place(identifier: String, label: String, anchor: Vector3,
                 node_parent.remove_child(mesh_node)
                 mesh_node.free()
         if not variant_found:
-            wrapper.queue_free()
+            if generated:
+                wrapper.queue_free()
             push_error("Requested candleholder variant is missing: " + mesh_variant)
             return null
 
     var bounds := _bounds_for(imported)
     if bounds.size.y <= 0.0001:
-        wrapper.queue_free()
+        if generated:
+            wrapper.queue_free()
         push_error("Poly Haven model has invalid vertical bounds: " + identifier)
         return null
 

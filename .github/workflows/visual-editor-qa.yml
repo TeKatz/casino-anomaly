@@ -1,0 +1,50 @@
+name: Casino Anomaly Visual Editor QA
+
+on:
+  push:
+    branches: [feature/godot-visual-room-editing]
+  pull_request:
+    paths:
+      - 'main.tscn'
+      - 'hall.gd'
+      - 'model_interior.gd'
+      - 'editor/**'
+      - 'tests/editor_layout_qa.gd'
+
+permissions:
+  contents: read
+
+jobs:
+  editor-layout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Resolve original assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/ensure_assets.py
+          python3 tools/ensure_fabric037.py
+          python3 tools/import_model_assets.py
+          python3 tools/unpack_sketchfab_assets.py --require-all
+      - name: Install Godot 4.5.1
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 -o /tmp/godot.zip "https://github.com/godotengine/godot-builds/releases/download/4.5.1-stable/Godot_v4.5.1-stable_linux.x86_64.zip"
+          mkdir -p /tmp/godot-bin
+          unzip -q /tmp/godot.zip -d /tmp/godot-bin
+          chmod +x /tmp/godot-bin/Godot_v4.5.1-stable_linux.x86_64
+      - name: Import and exercise editable placements
+        shell: bash
+        run: |
+          set -euo pipefail
+          GODOT=/tmp/godot-bin/Godot_v4.5.1-stable_linux.x86_64
+          "$GODOT" --headless --path . --editor --import 2>&1 | tee /tmp/editor-import.log
+          if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' /tmp/editor-import.log; then exit 1; fi
+          "$GODOT" --headless --path . --script res://tests/editor_layout_qa.gd 2>&1 | tee /tmp/editor-layout.log
+          grep -q 'Casino Anomaly editor layout QA PASS' /tmp/editor-layout.log
+          "$GODOT" --headless --path . --script res://tests/smoke.gd 2>&1 | tee /tmp/editor-smoke.log
+          grep -q 'Casino Anomaly scenes and PBR floor smoke PASS' /tmp/editor-smoke.log
+          if grep -Eh 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' /tmp/editor-layout.log /tmp/editor-smoke.log; then exit 1; fi
