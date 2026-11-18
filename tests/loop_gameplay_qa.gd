@@ -14,10 +14,9 @@ func _fail(reason: String) -> void:
 
 func _run() -> void:
     var intro_resource := load("res://gameplay/tutorial.tscn") as PackedScene
-    var door_resource := load("res://gameplay/decision_doors.tscn") as PackedScene
     var room_resource := load("res://main.tscn") as PackedScene
-    if intro_resource == null or door_resource == null or room_resource == null:
-        _fail("One of the three authored scenes cannot load")
+    if intro_resource == null or room_resource == null:
+        _fail("Tutorial or original casino scene cannot load")
         return
 
     var intro := intro_resource.instantiate() as Node3D
@@ -25,18 +24,6 @@ func _run() -> void:
         _fail("Tutorial room has no entry door or first-person player")
         return
     intro.free()
-
-    var doors := door_resource.instantiate() as Node3D
-    var left := doors.get_node_or_null("LeftDoor") as Node3D
-    var right := doors.get_node_or_null("RightDoor") as Node3D
-    if left == null or right == null:
-        _fail("Two exit choices are required")
-        return
-    # Facing west at the end of the red runner, +Z is physically left.
-    if left.position.z <= right.position.z or left.position.x > -44.0:
-        _fail("Exit doors are not arranged left / right at the far western wall")
-        return
-    doors.free()
 
     var local := StateScript.new()
     local.save_path = "user://anomaly_loop_logic_qa.cfg"
@@ -50,6 +37,13 @@ func _run() -> void:
         return
 
     var scene := room_resource.instantiate() as Node3D
+    var exit_signs: Array[Label3D] = []
+    for part in (scene.get_node("Architecture") as Node3D).get_children():
+        if part is Label3D and (part as Label3D).text == "EXIT":
+            exit_signs.append(part as Label3D)
+    if exit_signs.size() != 2:
+        _fail("The designer's room must retain exactly two original EXIT doors")
+        return
     var demo := DemoScript.new()
     var available: Array[String] = demo.available_ids(scene)
     if available.size() < 2:
@@ -112,8 +106,14 @@ func _run() -> void:
     await process_frame
     await process_frame
     var loop := scene.get_node_or_null("LoopController")
-    if loop == null or scene.get_node_or_null("DecisionDoors") == null:
-        _fail("Run did not attach visible left/right doors and loop controller")
+    var choice_markers := scene.get_node_or_null("DoorChoices") as Node3D
+    if loop == null or choice_markers == null:
+        _fail("Runtime loop did not attach to original casino EXIT doors")
+        return
+    var left := choice_markers.get_node_or_null("LeftDoor") as Node3D
+    var right := choice_markers.get_node_or_null("RightDoor") as Node3D
+    if left == null or right == null or left.global_position.z <= right.global_position.z:
+        _fail("Casino exit markers must be physically arranged left / right")
         return
     if not state.round_ready or loop.get_node_or_null("GameHUD") == null:
         _fail("Gameplay HUD and first random round were not initialized")

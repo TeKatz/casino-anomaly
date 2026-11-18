@@ -18,7 +18,7 @@ The main menu checks this repo's Development channel for updates. It runs a sepa
 
 ## Spielbarer Anomalie-Loop (erster Gameplay-Prototyp)
 
-**Neues Spiel** führt zunächst in einen kleinen, separat editierbaren Tutorialraum (`gameplay/tutorial.tscn`). An dessen Tür startet mit **E** der vorhandene L-förmige Casinoflur. Am westlichen Flurende stehen zwei Türen aus `gameplay/decision_doors.tscn`: **links** bedeutet „Anomalie“, **rechts** bedeutet „normal“. Die Türen stehen bewusst vor der bisher geschlossenen Endwand; mit **E** wird die Entscheidung bestätigt.
+**Neues Spiel** führt zunächst in einen kleinen, separat editierbaren Tutorialraum (`gameplay/tutorial.tscn`). An dessen Tür startet mit **E** der vorhandene L-förmige Casinoflur. Am westlichen Flurende werden die **beiden bereits vorhandenen Exit-Türen aus `main.tscn`** verwendet: **links** bedeutet „Anomalie“, **rechts** bedeutet „normal“. Die Türen stehen bewusst vor der bisher geschlossenen Endwand; mit **E** wird die Entscheidung bestätigt.
 
 Für die erste Version verdeckt eine kurze Abdunkelung den Rücksprung zum Eingang; später kann ein physischer, abgedunkelter Verbindungsgang denselben Übergang verstecken. Der **gleiche Raum** wird für jeden Durchlauf wiederverwendet, nicht mehrfach instanziiert. Die provisorischen Test-Anomalien verändern ausschließlich vorhandene 3D-Schilder und werden nach jedem Durchlauf vollständig zurückgesetzt. Die endgültige Anomalienliste ist noch offen.
 

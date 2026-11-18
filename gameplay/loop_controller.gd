@@ -3,7 +3,6 @@ extends Node3D
 ## One authored hall is reused; the next round begins while the doorway
 ## occludes the player with a brief dark transition.
 
-const DOORS = preload("res://gameplay/decision_doors.tscn")
 const DemoAnomalies = preload("res://gameplay/demo_anomalies.gd")
 const RESET_POINT := Vector3(0, 1.02, 11.1)
 const INTERACT_DISTANCE := 2.7
@@ -26,8 +25,28 @@ func _ready() -> void:
         push_error("Casino loop needs the existing first-person Player")
         queue_free()
         return
-    doors = DOORS.instantiate() as Node3D
+    # The artist's main.tscn already contains two complete EXIT doors.
+    # Create invisible position markers only; NEVER overlay more door meshes.
+    doors = Node3D.new()
+    doors.name = "DoorChoices"
     room.add_child(doors)
+    var existing_signs: Array[Label3D] = []
+    var architecture := room.get_node_or_null("Architecture") as Node3D
+    if architecture != null:
+        for child in architecture.get_children():
+            if child is Label3D and (child as Label3D).text == "EXIT":
+                existing_signs.append(child as Label3D)
+    if existing_signs.size() != 2:
+        push_error("Casino gameplay expects the two original EXIT doors")
+        queue_free()
+        return
+    var left_label := existing_signs[0]
+    var right_label := existing_signs[1]
+    if left_label.global_position.z < right_label.global_position.z:
+        left_label = existing_signs[1]
+        right_label = existing_signs[0]
+    _door_marker("LeftDoor", left_label)
+    _door_marker("RightDoor", right_label)
     demo = DemoAnomalies.new()
     _build_hud()
     var state = get_node_or_null("/root/LoopState")
@@ -38,6 +57,17 @@ func _ready() -> void:
     state.prepare_round(available)
     demo.apply(room, str(state.anomaly_id))
     _update_hud()
+
+
+func _door_marker(label: String, exit_sign: Label3D) -> void:
+    var marker := Marker3D.new()
+    marker.name = label
+    doors.add_child(marker)
+    marker.global_position = Vector3(
+        exit_sign.global_position.x,
+        1.6,
+        exit_sign.global_position.z
+    )
 
 
 func _build_hud() -> void:
@@ -132,11 +162,8 @@ func _enter_door(guess_anomaly: bool) -> void:
         return
     transitioning = true
     prompt.text = ""
-    # The panel briefly swings shut against the old view as it goes dark.
-    var chosen_door := doors.get_node("LeftDoor" if guess_anomaly else "RightDoor") as Node3D
-    var panel := chosen_door.get_node("Panel") as MeshInstance3D
-    var swing := create_tween()
-    swing.tween_property(panel, "rotation:y", 0.34, 0.20)
+    # A brief occlusion masks the spatial seam. A walkable connector and
+    # opening animations can replace this transition without changing rules.
     var darken := create_tween()
     darken.tween_property(veil, "color", Color.BLACK, 0.43)
     await darken.finished
@@ -146,7 +173,6 @@ func _enter_door(guess_anomaly: bool) -> void:
         transitioning = false
         return
     demo.clear()
-    panel.rotation.y = 0.0
     if bool(result.get("finished", false)):
         _show_victory()
         return
