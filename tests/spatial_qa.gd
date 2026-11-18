@@ -53,9 +53,9 @@ func _run() -> void:
     var pillar_count := 0
     var colliders := 0
     for child in architecture.get_children():
-        if child is MeshInstance3D and child.name.begins_with("FlutedPillar"):
+        if child is MeshInstance3D and child.get_meta("decor_type", "") == "pillar":
             pillar_count += 1
-        if child is StaticBody3D and child.name.begins_with("FlutedPillar_Collision"):
+        if child is StaticBody3D and child.get_meta("collision_for", "") == "FlutedPillar":
             colliders += 1
             var collision: CollisionShape3D = child.get_child(0) as CollisionShape3D
             if collision == null or collision.shape == null:

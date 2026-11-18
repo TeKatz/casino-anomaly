@@ -103,6 +103,7 @@ func _box(parent: Node3D, label: String, position_3d: Vector3,
     if solid:
         var body := StaticBody3D.new()
         body.name = label + "_Collision"
+        body.set_meta("collision_for", label)
         body.position = position_3d
         var shape := CollisionShape3D.new()
         var box_shape := BoxShape3D.new()
@@ -250,7 +251,8 @@ func _wall(label: String, pos: Vector3, size: Vector3) -> void:
         _box(architecture, label + "_Crown", Vector3(pos.x, 5.63, pos.z), Vector3(0.42, 0.13, size.z), gold)
 
 func _column(pos: Vector3) -> void:
-    _box(architecture, "FlutedPillar", pos + Vector3(0, 2.78, 0), Vector3(0.52, 5.3, 0.52), dark_wood, true)
+    var pillar := _box(architecture, "FlutedPillar", pos + Vector3(0, 2.78, 0), Vector3(0.52, 5.3, 0.52), dark_wood, true)
+    pillar.set_meta("decor_type", "pillar")
     for y in [0.19, 5.36, 5.55]:
         _box(architecture, "PillarGoldRing", pos + Vector3(0, y, 0), Vector3(0.52, 0.13, 0.52), gold)
 
