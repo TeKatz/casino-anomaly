@@ -58,7 +58,7 @@ func _run() -> void:
         push_error("Expected four shadow-casting ceiling lights, found %d" % shadow_count)
         quit(1)
         return
-    var dust_emitters := fx.find_children("ChandelierDust", "CPUParticles3D", false, false)
+    var dust_emitters := fx.find_children("ChandelierDust_*", "CPUParticles3D", false, false)
     if dust_emitters.size() != 5:
         push_error("Dust motes must be placed throughout both casino wings")
         quit(1)

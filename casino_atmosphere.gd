@@ -151,6 +151,7 @@ func _dust() -> void:
     mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
     mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
     mesh.material = mat
+    var dust_index := 0
     for pos in [
         Vector3(0.0, 2.95, 6.0),
         Vector3(-1.4, 2.95, -6.8),
@@ -159,7 +160,8 @@ func _dust() -> void:
         Vector3(-41.0, 2.95, -6.5)
     ]:
         var particles := CPUParticles3D.new()
-        particles.name = "ChandelierDust"
+        particles.name = "ChandelierDust_%02d" % dust_index
+        dust_index += 1
         particles.position = pos
         particles.amount = 54
         particles.lifetime = 9.0
