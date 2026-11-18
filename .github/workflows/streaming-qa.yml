@@ -1,0 +1,61 @@
+name: Casino Anomaly Seamless Streaming QA
+
+on:
+  push:
+    branches: [feature/seamless-casino-room-streaming]
+  pull_request:
+    paths:
+      - 'gameplay/**'
+      - 'hall.gd'
+      - 'tests/streaming_qa.gd'
+      - 'tests/loop_gameplay_qa.gd'
+
+permissions:
+  contents: read
+
+jobs:
+  godot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore game textures and model sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/ensure_assets.py
+          python3 tools/ensure_fabric037.py
+          python3 tools/import_model_assets.py
+          python3 tools/unpack_sketchfab_assets.py --require-all
+      - name: Install Godot 4.5.1
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 -o /tmp/godot.zip "https://github.com/godotengine/godot-builds/releases/download/4.5.1-stable/Godot_v4.5.1-stable_linux.x86_64.zip"
+          mkdir -p /tmp/godot-bin
+          unzip -q /tmp/godot.zip -d /tmp/godot-bin
+          chmod +x /tmp/godot-bin/Godot_v4.5.1-stable_linux.x86_64
+      - name: Godot import, actual streaming, prior gameplay and room tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          GODOT=/tmp/godot-bin/Godot_v4.5.1-stable_linux.x86_64
+          "$GODOT" --headless --path . --editor --import > /tmp/import.log 2>&1 || { cat /tmp/import.log; exit 1; }
+          if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' /tmp/import.log; then cat /tmp/import.log; exit 1; fi
+          for entry in \
+            'tests/streaming_qa.gd:Casino Anomaly seamless two-room streaming QA PASS' \
+            'tests/loop_gameplay_qa.gd:Casino Anomaly playable tutorial, save and loop gameplay QA PASS' \
+            'tests/smoke.gd:Casino Anomaly scenes and PBR floor smoke PASS' \
+            'tests/visual_fx_qa.gd:Casino Anomaly visual FX QA PASS' \
+            'tests/editor_full_scene_qa.gd:Casino Anomaly complete Godot editor scene QA PASS' \
+            'tests/spatial_qa.gd:Casino Anomaly spatial QA PASS' \
+            'tests/texture_stability_qa.gd:Casino Anomaly texture stability QA PASS'; do
+            script="${entry%%:*}"
+            expected="${entry#*:}"
+            echo "::group::$script"
+            "$GODOT" --headless --path . --script "res://$script" > /tmp/test.log 2>&1 || { cat /tmp/test.log; exit 1; }
+            grep -Fq "$expected" /tmp/test.log || { cat /tmp/test.log; exit 1; }
+            if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' /tmp/test.log; then cat /tmp/test.log; exit 1; fi
+            echo "$expected"
+            echo "::endgroup::"
+          done
