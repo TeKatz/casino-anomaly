@@ -57,13 +57,13 @@ func _run() -> void:
                 return
         if mesh.get_meta("decor_type", "") == "pillar":
             pillar_count += 1
-        elif mesh.name == "PillarBase":
+        elif mesh.name.begins_with("PillarBase") and not mesh.name.begins_with("PillarBaseCollar"):
             base_count += 1
             var foot := mesh.mesh as BoxMesh
             if foot == null or absf(mesh.position.y - foot.size.y * 0.5 - 0.005) > 0.011:
                 _fail("Column foot fails to touch the floor")
                 return
-        elif mesh.name == "PillarCapital":
+        elif mesh.name.begins_with("PillarCapital") and not mesh.name.begins_with("PillarCapitalCollar"):
             capital_count += 1
             var crown := mesh.mesh as BoxMesh
             if crown == null or mesh.position.y + crown.size.y * 0.5 < 5.985:
