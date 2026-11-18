@@ -234,6 +234,8 @@ func _place(identifier: String, label: String, anchor: Vector3,
 
     var wrapper := Node3D.new()
     wrapper.name = label
+    wrapper.set_meta("asset_id", identifier)
+    wrapper.set_meta("placement_group", label)
     wrapper.position = anchor
     wrapper.rotation.y = yaw
     add_child(wrapper)
@@ -286,6 +288,7 @@ func _place(identifier: String, label: String, anchor: Vector3,
         body.name = "ModelSolidBody"
         body.position = Vector3(0, target_height * 0.5, 0)
         var shape := CollisionShape3D.new()
+        shape.name = "ModelCollisionShape"
         var collision := BoxShape3D.new()
         collision.size = Vector3(
             maxf(bounds.size.x * height_scale, 0.23),
