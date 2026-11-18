@@ -495,6 +495,9 @@ func _omni(pos: Vector3, tint: Color, energy: float, reach: float,
     light.light_energy = energy
     light.omni_range = reach
     light.shadow_enabled = cast_shadows
+    # Warm chandelier light can scatter through the volume, but keep
+    # low-energy fill lamps out of the fog to prevent overbright haze.
+    light.light_volumetric_fog_energy = 0.85 if cast_shadows else 0.14
     if cast_shadows:
         light.shadow_bias = 0.08
         light.shadow_blur = 1.30

@@ -32,12 +32,33 @@ func _run() -> void:
         push_error("Screen spill light budget exceeded")
         quit(1)
         return
+    for light in fx.find_children("SlotSpill*", "OmniLight3D", true, false):
+        if light.light_volumetric_fog_energy != 0.0:
+            push_error("Animated slot spill must not cause fog ghosting")
+            quit(1)
+            return
     if fx.find_children("*", "CollisionObject3D", true, false).size() != 0:
         push_error("Decorative FX may not add collisions")
         quit(1)
         return
-    if not env.environment.fog_enabled or env.environment.fog_density < 0.005:
+    if ProjectSettings.get_setting("rendering/renderer/rendering_method") != "forward_plus":
+        push_error("Casino Anomaly must use the Forward+ renderer")
+        quit(1)
+        return
+    if not env.environment.fog_enabled or env.environment.fog_density <= 0.0:
         push_error("Casino depth fog is missing")
+        quit(1)
+        return
+    if not env.environment.volumetric_fog_enabled:
+        push_error("Forward+ volume scattering is disabled")
+        quit(1)
+        return
+    if env.environment.volumetric_fog_density <= 0.0 or env.environment.volumetric_fog_density > 0.025:
+        push_error("Volumetric haze is not configured to stay subtle")
+        quit(1)
+        return
+    if not env.environment.ssao_enabled:
+        push_error("Forward+ screen-space contact occlusion is disabled")
         quit(1)
         return
     if env.environment.ambient_light_energy > 0.50:
@@ -58,6 +79,12 @@ func _run() -> void:
         push_error("Expected four shadow-casting ceiling lights, found %d" % shadow_count)
         quit(1)
         return
+    for item in hall_lights.get_children():
+        var lamp := item as OmniLight3D
+        if lamp != null and lamp.shadow_enabled and lamp.light_volumetric_fog_energy <= 0.0:
+            push_error("Shadow-casting chandeliers need volumetric scattering")
+            quit(1)
+            return
     var dust_emitters := fx.find_children("ChandelierDust_*", "CPUParticles3D", false, false)
     if dust_emitters.size() != 5:
         push_error("Dust motes must be placed throughout both casino wings")

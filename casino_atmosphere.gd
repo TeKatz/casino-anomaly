@@ -1,7 +1,7 @@
 extends Node3D
 
 # Non-colliding atmosphere, independent of gameplay/anomaly targets.
-# Uses only Godot 4.5.1 GL Compatibility features.
+# Uses Godot 4.5.1 Forward+ for volumetric lighting and screen-space occlusion.
 @export var active: bool = true
 
 const GOLD = Color("#e8b76f")
@@ -94,8 +94,10 @@ func _spot(label: String, pos: Vector3, target: Vector3, power: float) -> void:
     lamp.spot_range = 6.2
     lamp.spot_angle = 32.0
     lamp.spot_attenuation = 1.8
-    # Only the cat's display spot casts extra shadows; other spots
-    # stay cheap for the GL Compatibility renderer.
+    # Controlled cones of light become visible in the Forward+ fog.
+    lamp.light_volumetric_fog_energy = 0.85
+    # Only the cat's display spot casts additional shadows; the other
+    # spotlights remain shadowless to limit rendering cost.
     lamp.shadow_enabled = label == "CatHighlight"
     if lamp.shadow_enabled:
         lamp.shadow_bias = 0.08
@@ -130,6 +132,8 @@ func _slots() -> void:
             light.light_color = material.emission.lerp(WARM, 0.3)
             light.light_energy = 0.24
             light.omni_range = 2.7
+            # Animated slot washes should not smear through fog reprojection.
+            light.light_volumetric_fog_energy = 0.0
             light.shadow_enabled = false
             add_child(light)
             slot_spills.append(light)
