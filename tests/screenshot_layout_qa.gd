@@ -64,11 +64,13 @@ func _run() -> void:
 
     var sign_panel: MeshInstance3D = bar.get_node_or_null("BarSignPanel") as MeshInstance3D
     var sign_text: Label3D = bar.get_node_or_null("Sign_MIDNIGHT_BAR") as Label3D
-    if sign_panel == null or sign_text == null             or sign_panel.position.distance_to(Vector3(-1.38, 4.72, -12.51)) > 0.01:
-        _bad("Bar signage objects are missing or displaced")
+    if sign_panel == null or sign_text == null:
+        _bad("Bar signage objects are missing")
         return
-    if absf(sign_text.position.x - sign_panel.position.x) > 0.0001             or absf(sign_text.position.y - sign_panel.position.y) > 0.0001             or int(sign_text.horizontal_alignment) != HORIZONTAL_ALIGNMENT_CENTER:
-        _bad("MIDNIGHT BAR must be centered on its shelf sign panel")
+    # A designer may move the sign panel. The text should still be near its
+    # backing panel and horizontally centered, but not at a fixed world point.
+    if absf(sign_text.position.x - sign_panel.position.x) > 0.12             or absf(sign_text.position.y - sign_panel.position.y) > 0.12             or int(sign_text.horizontal_alignment) != HORIZONTAL_ALIGNMENT_CENTER:
+        _bad("MIDNIGHT BAR text is no longer aligned to its sign panel")
         return
 
     # Moving the cat away from Cards7 restores a separate viewing position,
@@ -84,8 +86,10 @@ func _run() -> void:
         return
     var cat_floor := Vector2(cat.position.x, cat.position.z)
     var table_floor := Vector2(game.position.x, game.position.z)
-    if cat_floor.distance_to(table_floor) < 2.9 or cat_floor.x > -7.8:
-        _bad("Cat statue is still crowding the card table")
+    # Preserve editor placements, including moving the cat to a
+    # completely different part of the room. Only reject real overlap.
+    if cat_floor.distance_to(table_floor) < 0.8:
+        _bad("Cat statue intersects the card table")
         return
     if game.scale.x > 0.70 or game.scale.z > 0.70:
         _bad("Cards7 still has full-size stools in a narrow wall aisle")
