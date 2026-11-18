@@ -146,7 +146,7 @@ func _run_smoke() -> void:
                 cabinet_correct = item.position.y >= 0.24 and shape != null and shape.size.x >= 3.0
     if count_busts != 2 or count_stools != 10 or count_candles != 4 or not wine_on_shelf \
         or not coffee_correct or not cabinet_correct or interior.get_node_or_null("BarCabinetPlinth") == null:
-        push_error("The seven interior QA corrections are incomplete")
+        push_error("Interior QA failed: busts=%d stools=%d candles=%d shelfWine=%s coffee=%s cabinet=%s plinth=%s" % [count_busts, count_stools, count_candles, str(wine_on_shelf), str(coffee_correct), str(cabinet_correct), str(interior.get_node_or_null("BarCabinetPlinth") != null)])
         quit(1)
         return
 
