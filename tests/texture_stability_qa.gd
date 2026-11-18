@@ -12,10 +12,17 @@ func _run() -> void:
     if ProjectSettings.get_setting("rendering/renderer/rendering_method") != "forward_plus":
         _fail("Forward+ is required for temporal antialiasing")
         return
-    if not bool(ProjectSettings.get_setting("rendering/anti_aliasing/quality/use_taa", false)):
-        _fail("Temporal AA is not enabled")
+    # CI runs Godot with --headless, where GPU-specific ProjectSettings
+    # can be normalized away. Read the exact on-disk config, then verify
+    # the runtime viewport separately when a graphics device is available.
+    var config := ConfigFile.new()
+    if config.load("res://project.godot") != OK:
+        _fail("Unable to read project rendering configuration")
         return
-    if int(ProjectSettings.get_setting("rendering/textures/default_filters/anisotropic_filtering_level", 0)) < 3:
+    if not bool(config.get_value("rendering", "anti_aliasing/quality/use_taa", false)):
+        _fail("Temporal AA must be enabled in project.godot")
+        return
+    if int(config.get_value("rendering", "textures/default_filters/anisotropic_filtering_level", 0)) < 3:
         _fail("Anisotropic filtering must be at least 8x")
         return
 
@@ -42,6 +49,9 @@ func _run() -> void:
     root.add_child(hall)
     await process_frame
     await process_frame
+    if DisplayServer.get_name() != "headless" and not root.use_taa:
+        _fail("Rendered casino viewport has temporal AA disabled")
+        return
     var architecture: Node3D = hall.get_node_or_null("Architecture") as Node3D
     if architecture == null:
         _fail("Room architecture missing")

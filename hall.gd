@@ -45,6 +45,10 @@ var decor: Node3D
 var lights: Node3D
 
 func _ready() -> void:
+    # The headless editor does not expose all GPU-only anti-aliasing settings.
+    # Ensure the actual Forward+ game viewport uses TAA during play.
+    if DisplayServer.get_name() != "headless":
+        get_viewport().use_taa = true
     wood = OAK.duplicate() as StandardMaterial3D
     wood.uv1_scale = Vector3.ONE
     wood.cull_mode = BaseMaterial3D.CULL_DISABLED
