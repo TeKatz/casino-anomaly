@@ -1,0 +1,51 @@
+name: Casino Anomaly Artist Layout Regression QA
+
+on:
+  push:
+    branches: [fix/visual-fx-after-editor]
+  pull_request:
+    paths:
+      - 'main.tscn'
+      - 'hall.gd'
+      - 'tests/**'
+
+permissions:
+  contents: read
+
+jobs:
+  godot-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare pinned assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/ensure_assets.py
+          python3 tools/ensure_fabric037.py
+          python3 tools/import_model_assets.py
+          python3 tools/unpack_sketchfab_assets.py --require-all
+      - name: Install Godot 4.5.1
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 -o /tmp/godot.zip "https://github.com/godotengine/godot-builds/releases/download/4.5.1-stable/Godot_v4.5.1-stable_linux.x86_64.zip"
+          mkdir -p /tmp/godot-bin
+          unzip -q /tmp/godot.zip -d /tmp/godot-bin
+          chmod +x /tmp/godot-bin/Godot_v4.5.1-stable_linux.x86_64
+      - name: Editor import and layout regression tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          GODOT=/tmp/godot-bin/Godot_v4.5.1-stable_linux.x86_64
+          "$GODOT" --headless --path . --editor --import > /tmp/import.log 2>&1 || { cat /tmp/import.log; exit 1; }
+          if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' /tmp/import.log; then cat /tmp/import.log; exit 1; fi
+          for test in tests/smoke.gd tests/visual_fx_qa.gd tests/sketchfab_smoke.gd tests/architecture_qa.gd tests/spatial_qa.gd tests/joinery_qa.gd tests/prop_visuals_qa.gd tests/screenshot_layout_qa.gd tests/texture_stability_qa.gd tests/editor_layout_qa.gd tests/editor_full_scene_qa.gd; do
+            echo "::group::$test"
+            "$GODOT" --headless --path . --script "res://$test" > /tmp/test.log 2>&1 || { cat /tmp/test.log; exit 1; }
+            if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' /tmp/test.log; then cat /tmp/test.log; exit 1; fi
+            grep -q 'PASS' /tmp/test.log || { cat /tmp/test.log; exit 1; }
+            cat /tmp/test.log
+            echo "::endgroup::"
+          done

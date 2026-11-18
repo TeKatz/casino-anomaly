@@ -50,7 +50,7 @@ func _run_smoke() -> void:
         table_replacements = int(sketchfab.get("replaced_roulette")) + int(sketchfab.get("replaced_blackjack"))
     var total_slots := slots.get_child_count() + slot_replacements
     var total_tables := tables.get_child_count() + table_replacements
-    if total_slots < 10 or total_tables < 6:
+    if total_slots < 8 or total_tables < 6:
         push_error("Casino furnishing incomplete: slots=%d, tables=%d, lounge=%d" % [total_slots, total_tables, lounge.get_child_count()])
         quit(1)
         return

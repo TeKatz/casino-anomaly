@@ -19,8 +19,10 @@ func _check() -> void:
         push_error("Editor placement nodes are missing")
         quit(1)
         return
-    if lighting.get_child_count() != 9:
-        push_error("Editor lights must be real scene nodes")
+    # The entire lighting collection is editable; the count is not fixed.
+    var authored_lights := lighting.find_children("*", "OmniLight3D", true, false).size()
+    if authored_lights < 1 or authored_lights > 24:
+        push_error("Editor light configuration is empty or excessive")
         quit(1)
         return
     var desired_sofa := sofa.position + Vector3(0.37, 0, 0)

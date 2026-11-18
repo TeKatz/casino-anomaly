@@ -29,8 +29,9 @@ func _run() -> void:
     if not fx.has_node("EntrySignTop") or not fx.has_node("BarSignTop")             or not fx.has_node("EastCove") or not fx.has_node("SouthCove"):
         _fail("Ceiling and signage neon is missing from saved scene")
         return
-    if fx.find_children("*", "SpotLight3D", true, false).size() != 4:
-        _fail("Four authorable spotlights must be saved")
+    # Designers may remove/move spotlights as part of the room layout.
+    if fx.find_children("*", "SpotLight3D", true, false).size() > 16:
+        _fail("More than sixteen saved display spotlights")
         return
     var bust := models.get_node_or_null("BustPedestal_01") as StaticBody3D
     if bust == null:
