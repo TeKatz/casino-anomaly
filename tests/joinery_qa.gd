@@ -74,7 +74,8 @@ func _run() -> void:
             return
 
     if pillar_count < 20 or base_count != pillar_count or capital_count != pillar_count:
-        _fail("Column bases and capitals must match each existing pillar")
+        _fail("Column bases/capitals mismatch: cores=%d, bases=%d, capitals=%d" % [
+            pillar_count, base_count, capital_count])
         return
     if wood_beam_count != 18:
         _fail("Expected 18 wood ceiling/wall beams, got " + str(wood_beam_count))

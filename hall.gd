@@ -325,6 +325,9 @@ func _wall(label: String, pos: Vector3, size: Vector3) -> void:
             Vector3(0.24, 0.25, size.z - 0.04), beam_wood)
 
 func _column(pos: Vector3) -> void:
+    # Decorative names must be unique: Godot silently substitutes generated
+    # node names for duplicates, which breaks cap lookup and QA by prefix.
+    var column_suffix := "_%04d" % architecture.get_child_count()
     # Core spans the full room height. Existing colliders and metadata stay
     # attached to FlutedPillar; all caps are decorative and non-colliding.
     var pillar := _box(architecture, "FlutedPillar",
@@ -333,13 +336,13 @@ func _column(pos: Vector3) -> void:
     pillar.set_meta("decor_type", "pillar")
     # A stepped wooden shoe and capital hide both open ends. All caps have
     # larger footprints than the core: no equal-size coplanar ring faces.
-    _box(architecture, "PillarBase", pos + Vector3(0, 0.145, 0),
+    _box(architecture, "PillarBase" + column_suffix, pos + Vector3(0, 0.145, 0),
         Vector3(0.82, 0.28, 0.82), beam_wood)
-    _box(architecture, "PillarBaseCollar", pos + Vector3(0, 0.315, 0),
+    _box(architecture, "PillarBaseCollar" + column_suffix, pos + Vector3(0, 0.315, 0),
         Vector3(0.70, 0.075, 0.70), beam_wood)
-    _box(architecture, "PillarCapitalCollar", pos + Vector3(0, 5.67, 0),
+    _box(architecture, "PillarCapitalCollar" + column_suffix, pos + Vector3(0, 5.67, 0),
         Vector3(0.74, 0.12, 0.74), beam_wood)
-    _box(architecture, "PillarCapital", pos + Vector3(0, 5.855, 0),
+    _box(architecture, "PillarCapital" + column_suffix, pos + Vector3(0, 5.855, 0),
         Vector3(0.89, 0.31, 0.89), beam_wood)
 
 func _beveled_carpet_rail(label: String, center: Vector3, length: float,
