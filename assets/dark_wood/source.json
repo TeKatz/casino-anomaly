@@ -4,13 +4,19 @@
   "license": "CC0-1.0",
   "maps": {
     "dark_wood_diff_2k.jpg": {
-      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/dark_wood/dark_wood_diff_2k.jpg"
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/dark_wood/dark_wood_diff_2k.jpg",
+      "sha256": "ff811f97ab46f1148f2753451fd9d64abf0ab9101e85922ed9f45fc3595a3cf2",
+      "bytes": 2894186
     },
     "dark_wood_rough_2k.jpg": {
-      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/dark_wood/dark_wood_rough_2k.jpg"
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/dark_wood/dark_wood_rough_2k.jpg",
+      "sha256": "09eb42a24aeadcd5dd04d19f89d8df4116fd9cdbd405d0dab17e263b54ece133",
+      "bytes": 2325418
     },
     "dark_wood_nor_gl_2k.jpg": {
-      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/dark_wood/dark_wood_nor_gl_2k.jpg"
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/dark_wood/dark_wood_nor_gl_2k.jpg",
+      "sha256": "624c7262c726cbc7da8ad02941dc6c95dec104fdc20e2804560ea112814b1d5d",
+      "bytes": 1603278
     }
   }
 }
