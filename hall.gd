@@ -10,6 +10,9 @@ const ROOF_PLANKS: StandardMaterial3D = preload("res://ceiling_material.tres")
 const BAR_COUNTER_WOOD: StandardMaterial3D = preload("res://bar_top_material.tres")
 const BAR_PANEL_WOOD: StandardMaterial3D = preload("res://bar_side_material.tres")
 const PILLAR_VENEER: StandardMaterial3D = preload("res://pillar_material.tres")
+const BEAM_TIMBER: StandardMaterial3D = preload("res://brown_planks_05_material.tres")
+const PARQUET_EDGE: StandardMaterial3D = preload("res://herringbone_parquet_material.tres")
+const GOLD_FABRIC: StandardMaterial3D = preload("res://bi_stretch_material.tres")
 const FLOOR_Y := 0.035
 const WALL_HEIGHT := 6.0
 
@@ -26,6 +29,9 @@ var screen_black: StandardMaterial3D
 var stone: StandardMaterial3D
 var pillar_wood: StandardMaterial3D
 var dark_ceiling: StandardMaterial3D
+var beam_wood: StandardMaterial3D
+var parquet_border: StandardMaterial3D
+var fabric_piping: StandardMaterial3D
 var warm_white: StandardMaterial3D
 var red_light: StandardMaterial3D
 
@@ -58,6 +64,9 @@ func _ready() -> void:
     stone = _material(Color("#3b3b43"), 0.72)
     pillar_wood = PILLAR_VENEER.duplicate() as StandardMaterial3D
     dark_ceiling = ROOF_PLANKS.duplicate() as StandardMaterial3D
+    beam_wood = BEAM_TIMBER.duplicate() as StandardMaterial3D
+    parquet_border = PARQUET_EDGE.duplicate() as StandardMaterial3D
+    fabric_piping = GOLD_FABRIC.duplicate() as StandardMaterial3D
     warm_white = _glow(Color("#ffd5a1"), 1.55)
     red_light = _glow(Color("#f2545d"), 1.3)
 
@@ -126,6 +135,11 @@ func _box(parent: Node3D, label: String, position_3d: Vector3,
                 maxf(1.0, dimensions.y / 1.4), 1.0)
         elif label == "FlutedPillar":
             pbr.uv1_scale = Vector3(1.0, 3.0, 1.0)
+        elif label.begins_with("Pillar") or label.ends_with("_Crown")                 or label.contains("Ceiling"):
+            pbr.uv1_scale = Vector3(
+                maxf(1.0, dimensions.x / 1.0),
+                maxf(1.0, dimensions.y / 1.0),
+                maxf(1.0, dimensions.z / 1.0))
         else:
             pbr.uv1_scale = Vector3(
                 maxf(1.0, dimensions.x / 1.45),
@@ -261,12 +275,19 @@ func _make_architecture() -> void:
         _column(Vector3(x, 0, 0.2))
     for z in [4.0, 11.0]:
         _column(Vector3(-5.7, 0, z))
-    for x in [-45.9, -6.0, 6.0]:
-        _box(architecture, "CeilingGoldBeam", Vector3(x, 5.82, -6.5), Vector3(0.09, 0.14, 12.8), gold)
+    # Brown Planks 05 structural beams. Their tops run INTO the ceiling
+    # (underside y=5.985) instead of ending below it with a visible gap.
+    # Crossings have different widths, and coplanar placeholder overlays
+    # were removed rather than stacked on top of the new timber.
+    for x in [-45.90, -6.0, 5.90]:
+        _box(architecture, "CeilingGoldBeam", Vector3(x, 5.885, -6.5),
+            Vector3(0.22, 0.25, 12.82), beam_wood)
     for z in [0.0, 7.0, 13.0]:
-        _box(architecture, "CeilingTrim", Vector3(0, 5.85, z), Vector3(11.8, 0.13, 0.12), gold)
+        _box(architecture, "CeilingTrim", Vector3(0, 5.865, z),
+            Vector3(11.72, 0.24, 0.20), beam_wood)
     for x in [-42.0, -35.0, -28.0, -21.0, -14.0, -10.0]:
-        _box(architecture, "WestCeilingTrim", Vector3(x, 5.85, -6.5), Vector3(0.12, 0.13, 12.8), gold)
+        _box(architecture, "WestCeilingTrim", Vector3(x, 5.865, -6.5),
+            Vector3(0.20, 0.24, 12.75), beam_wood)
     # Entry framing and end wall doors (decorative until anomaly logic is added).
     _box(architecture, "EntryDoor", Vector3(0, 1.5, 13.97), Vector3(3.2, 3, 0.1), dark_wood)
     for x in [-1.64, 1.64]:
@@ -281,35 +302,134 @@ func _make_architecture() -> void:
 
 func _wall(label: String, pos: Vector3, size: Vector3) -> void:
     _box(architecture, label, pos, size, wall_paint, true)
+    # Crown mouldings follow the INSIDE wall face, not the wall center.
+    # This removes the old suspended orange lines at the top of the walls.
+    var crown_pos := Vector3(pos.x, 5.885, pos.z)
     if size.x > size.z:
-        _box(architecture, label + "_Crown", Vector3(pos.x, 5.63, pos.z), Vector3(size.x, 0.13, 0.42), gold)
+        if label == "NorthWestWall":
+            crown_pos.z = -12.90
+        elif label == "SouthWestWall":
+            crown_pos.z = -0.10
+        else: # EntryBackWall
+            crown_pos.z = 13.90
+        _box(architecture, label + "_Crown", crown_pos,
+            Vector3(size.x - 0.04, 0.25, 0.24), beam_wood)
     else:
-        _box(architecture, label + "_Crown", Vector3(pos.x, 5.63, pos.z), Vector3(0.42, 0.13, size.z), gold)
+        if label == "FarExitWall":
+            crown_pos.x = -45.90
+        elif label == "LeftMainWall":
+            crown_pos.x = -5.90
+        else: # RightMainWall
+            crown_pos.x = 5.90
+        _box(architecture, label + "_Crown", crown_pos,
+            Vector3(0.24, 0.25, size.z - 0.04), beam_wood)
 
 func _column(pos: Vector3) -> void:
-    var pillar := _box(architecture, "FlutedPillar", pos + Vector3(0, 2.78, 0), Vector3(0.52, 5.3, 0.52), pillar_wood, true)
+    # Core spans the full room height. Existing colliders and metadata stay
+    # attached to FlutedPillar; all caps are decorative and non-colliding.
+    var pillar := _box(architecture, "FlutedPillar",
+        pos + Vector3(0, 2.955, 0), Vector3(0.52, 5.87, 0.52),
+        pillar_wood, true)
     pillar.set_meta("decor_type", "pillar")
-    for y in [0.19, 5.36, 5.55]:
-        _box(architecture, "PillarGoldRing", pos + Vector3(0, y, 0), Vector3(0.52, 0.13, 0.52), gold)
+    # A stepped wooden shoe and capital hide both open ends. All caps have
+    # larger footprints than the core: no equal-size coplanar ring faces.
+    _box(architecture, "PillarBase", pos + Vector3(0, 0.145, 0),
+        Vector3(0.82, 0.28, 0.82), beam_wood)
+    _box(architecture, "PillarBaseCollar", pos + Vector3(0, 0.315, 0),
+        Vector3(0.70, 0.075, 0.70), beam_wood)
+    _box(architecture, "PillarCapitalCollar", pos + Vector3(0, 5.67, 0),
+        Vector3(0.74, 0.12, 0.74), beam_wood)
+    _box(architecture, "PillarCapital", pos + Vector3(0, 5.855, 0),
+        Vector3(0.89, 0.31, 0.89), beam_wood)
+
+func _beveled_carpet_rail(label: String, center: Vector3, length: float,
+        along_x: bool) -> void:
+    # Rounded edge profile with multiple small chamfers. The long run is
+    # one continuous piece rather than stacked coincident boxes.
+    var section := [
+        Vector2(-0.090, 0.009), Vector2(-0.090, 0.044),
+        Vector2(-0.083, 0.061), Vector2(-0.063, 0.073),
+        Vector2(-0.040, 0.078), Vector2(0.040, 0.078),
+        Vector2(0.063, 0.073), Vector2(0.083, 0.061),
+        Vector2(0.090, 0.044), Vector2(0.090, 0.009)
+    ]
+    var surface := SurfaceTool.new()
+    surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+    surface.set_material(parquet_border)
+    for index in range(section.size() - 1):
+        var p: Vector2 = section[index]
+        var q: Vector2 = section[index + 1]
+        var vertex_data := []
+        for item in [
+            Vector3(-length * 0.5, p.x, p.y),
+            Vector3(length * 0.5, p.x, p.y),
+            Vector3(length * 0.5, q.x, q.y),
+            Vector3(-length * 0.5, q.x, q.y)
+        ]:
+            var vertex := Vector3.ZERO
+            if along_x:
+                vertex = Vector3(center.x + item.x, item.z, center.z + item.y)
+            else:
+                vertex = Vector3(center.x + item.y, item.z, center.z + item.x)
+            vertex_data.append([vertex, Vector2(
+                (center.x + item.x if along_x else center.z + item.x) / 0.72,
+                item.y / 0.72)])
+        var triangles := [0, 2, 1, 0, 3, 2] if along_x else [0, 1, 2, 0, 2, 3]
+        for vertex_index in triangles:
+            surface.set_uv(vertex_data[vertex_index][1])
+            surface.add_vertex(vertex_data[vertex_index][0])
+    surface.generate_normals()
+    surface.generate_tangents()
+    var rail := MeshInstance3D.new()
+    rail.name = label
+    rail.mesh = surface.commit()
+    rail.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+    carpeting.add_child(rail)
+
+func _carpet_piping(label: String, center: Vector3,
+        length: float, along_x: bool) -> void:
+    # The thin Bi Stretch fabric stripe sits DIRECTLY against the top face
+    # of the parquet rail, inset by 2 mm to avoid a visible floating gap.
+    var dimensions := Vector3(length, 0.012, 0.022) if along_x else Vector3(0.022, 0.012, length)
+    _box(carpeting, label, Vector3(center.x, 0.081, center.z),
+        dimensions, fabric_piping)
 
 func _make_carpet() -> void:
-    # The runner turns LEFT as approached from the entrance (+Z heading -Z).
-    # Three coplanar patches meet edge-to-edge and do not z-fight.
+    # The three existing runner surfaces retain their exact joined topology.
     var strip_half := 1.57
     _carpet_patch("ApproachRunner", -strip_half, strip_half, -3.48, 12.7)
     _carpet_patch("TurnRunner", -strip_half, strip_half, -6.62, -3.48)
     _carpet_patch("WestRunner", -44.9, -strip_half, -6.62, -3.48)
 
-    var trim := _material(Color("#331a20"), 0.92)
-    for x in [-strip_half, strip_half]:
-        _box(carpeting, "ApproachBorderDark", Vector3(x, 0.038, 4.61), Vector3(0.16, 0.047, 16.18), trim)
-        _box(carpeting, "ApproachGoldPiping", Vector3(x + (0.115 if x < 0 else -0.115), 0.067, 4.61),
-            Vector3(0.025, 0.012, 16.18), gold)
-    for z in [-6.62, -3.48]:
-        _box(carpeting, "WestBorderDark", Vector3(-23.24, 0.038, z), Vector3(43.33, 0.047, 0.16), trim)
-        _box(carpeting, "WestGoldPiping", Vector3(-23.24, 0.067, z + (0.115 if z < -5 else -0.115)),
-            Vector3(43.33, 0.012, 0.025), gold)
-    _box(carpeting, "EndTrim", Vector3(-44.9, 0.045, -5.05), Vector3(0.13, 0.035, 3.14), gold)
+    # The L has six exposed boundaries. Trim the rails at their meeting
+    # points, leaving no overlapping coplanar tops or dark doubled corners.
+    _beveled_carpet_rail("ApproachBorderEast",
+        Vector3(1.57, 0, 3.04), 19.14, false)
+    _beveled_carpet_rail("ApproachBorderWest",
+        Vector3(-1.57, 0, 4.61), 16.0, false)
+    _beveled_carpet_rail("WestBorderSouth",
+        Vector3(-21.665, 0, -6.62), 46.29, true)
+    _beveled_carpet_rail("WestBorderNorth",
+        Vector3(-23.235, 0, -3.48), 43.15, true)
+    _beveled_carpet_rail("EntryBorderEnd",
+        Vector3(0, 0, 12.7), 3.14, true)
+    _beveled_carpet_rail("WestBorderEnd",
+        Vector3(-44.9, 0, -5.05), 3.14, false)
+
+    # Gold fabric piping follows the outer wood rail with identical joins;
+    # the material is exactly Poly Haven bi_stretch (not a flat gold color).
+    _carpet_piping("ApproachGoldPipingEast",
+        Vector3(1.55, 0, 3.04), 19.14, false)
+    _carpet_piping("ApproachGoldPipingWest",
+        Vector3(-1.55, 0, 4.61), 16.0, false)
+    _carpet_piping("WestGoldPipingSouth",
+        Vector3(-21.665, 0, -6.60), 46.29, true)
+    _carpet_piping("WestGoldPipingNorth",
+        Vector3(-23.235, 0, -3.50), 43.15, true)
+    _carpet_piping("EntryGoldPiping",
+        Vector3(0, 0, 12.68), 3.14, true)
+    _carpet_piping("WestEndGoldPiping",
+        Vector3(-44.88, 0, -5.05), 3.14, false)
 
 func _carpet_patch(label: String, x0: float, x1: float, z0: float, z1: float) -> void:
     # Show the jacquard motif at readable floor scale instead of tiny noise.

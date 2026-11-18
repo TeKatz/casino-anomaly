@@ -47,3 +47,19 @@ All new materials and objects below are CC0, legally redistributable and retaine
 - [Poly Haven Chess Set](https://polyhaven.com/a/chess_set) — CC0; one chess display.
 - [Poly Haven Concrete Cat Statue](https://polyhaven.com/a/concrete_cat_statue) — CC0; sculptural accent.
 - [Poly Haven Horse Statue 01](https://polyhaven.com/a/horse_statue_01) — CC0; sculptural accent.
+
+## Player-selected joinery materials (Poly Haven CC0)
+
+The following original 2K JPEG diffuse, OpenGL normal and roughness maps are
+imported by `tools/ensure_assets.py` from their exact Poly Haven source pages.
+Source URLs and SHA-256 hashes are recorded under each `assets/*/source.json`.
+The game requires no texture download during gameplay.
+
+- [Brown Planks 05](https://polyhaven.com/a/brown_planks_05) — ceiling beams,
+  wooden wall crowns and column base/capital transitions.
+- [Herringbone Parquet](https://polyhaven.com/a/herringbone_parquet) — beveled
+  timber perimeter of the L-shaped casino carpet.
+- [Bi Stretch](https://polyhaven.com/a/bi_stretch) — warm gold-toned fabric
+  inlays sitting directly on the parquet carpet border (a textile, not gold metal).
+
+All three source materials are CC0-1.0 and remain attributed here for clarity.
