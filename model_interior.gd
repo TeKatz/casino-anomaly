@@ -82,13 +82,14 @@ func _populate() -> void:
         _place("brass_candleholders", "SingleBrassCandleholder",
             entry[0], entry[1], 0.0, false, false, "brass_candleholder_03")
 
-    # Sofa model faces the lounge area only after rotating 90 degrees from
-    # its default forward direction. Keep the existing physical footprints.
+    # A further 90-degree correction: the imported sofa's front axis
+    # is different from the assumed one, leaving the previous row crosswise.
+    # PI aligns each sofa length with the lounge wall again.
     # Replace all five primitive sofas and tables, never stack duplicates.
     for i in range(5):
         var x := -18.4 - float(i) * 5.1
         _place("sofa_02", "LoungeSofa",
-            Vector3(x, 0.005, -1.14), 1.08, PI / 2.0, true, false, "", 2.42)
+            Vector3(x, 0.005, -1.14), 1.08, PI, true, false, "", 2.42)
         _place("round_wooden_table_01", "LoungeCoffeeTable",
             Vector3(x, 0.005, -2.75), 0.56, 0.0, true, false, "", 1.22)
     # The complete chessboard is deliberately unique; no repeated identical
@@ -97,9 +98,9 @@ func _populate() -> void:
         Vector3(-28.6, 0.565, -2.75), 0.19, 0.0, false, false, "", 0.70)
     # Two small animal sculptures mark distinct landmarks for future
     # anomaly spotting. Their plinths are away from the carpet corridor.
-    _display_plinth(Vector3(-9.15, 0.005, -1.05), 0.62, 0.72)
+    _display_plinth(Vector3(-8.45, 0.005, -1.04), 0.62, 0.72)
     _place("concrete_cat_statue", "ConcreteCatDisplay",
-        Vector3(-9.15, 0.625, -1.05), 0.49, PI, false, false, "", 0.58)
+        Vector3(-8.45, 0.625, -1.04), 0.49, PI, false, false, "", 0.58)
     _display_plinth(Vector3(-44.20, 0.005, -1.35), 0.74, 0.88)
     _place("horse_statue_01", "HorseStatueDisplay",
         Vector3(-44.20, 0.745, -1.35), 1.10, -PI / 2.0, false, false, "", 0.85)
@@ -120,17 +121,18 @@ func _populate() -> void:
     # between architecture and movable anomaly targets for later gameplay.
     _place("security_camera_01", "EntranceSecurityCamera",
         Vector3(5.80, 4.75, 10.8), 0.42, -PI / 2.0)
-    # The west-end device must point down the wing (+X) rather than out
-    # through the far wall (-X). Rotating the instance preserves its mount.
+    # This particular glTF lens is oriented along its local +Z, not the
+    # default -Z Camera3D forward vector. Aim diagonally from the far corner
+    # toward the room center (+X, +Z), not toward the far wall.
     _place("security_camera_01", "WestSecurityCamera",
-        Vector3(-44.7, 4.7, -12.64), 0.42, -PI / 2.0)
+        Vector3(-44.7, 4.7, -12.64), 0.42, 1.25)
 
     # Smaller service furnishings belong at the bar edge and never obstruct
     # the 3.14-meter-wide main carpet corridor.
-    # Park the coffee cart flush with the lounge-side wall, its service face
-    # toward the player area rather than side-on into the corner.
+    # Park cart halfway between adjacent sofas, with its back close to the
+    # panelled wall (inside face near z=0); keep its wheels and physics solid.
     _place("CoffeeCart_01", "CoffeeServiceCart",
-        Vector3(-15.6, 0.005, -0.95), 1.33, PI, true)
+        Vector3(-15.85, 0.005, -0.54), 1.33, PI, true)
 
     # The donor cabinet is a LOW WIDE sideboard (2.44 x 0.68 m originally).
     # Its old 1.4m normalization made it almost 5m wide and put it directly

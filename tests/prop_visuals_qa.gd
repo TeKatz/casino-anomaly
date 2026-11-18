@@ -35,20 +35,22 @@ func _run() -> void:
         var label: String = str(obj.get_meta("placement_group", ""))
         if label == "LoungeSofa":
             sofa_count += 1
-            if absf(obj.rotation.y - PI * 0.5) > 0.0001:
-                _fail("Lounge sofa is not rotated 90 degrees")
+            if absf(obj.rotation.y - PI) > 0.0001:
+                _fail("Lounge sofa did not receive the second 90-degree correction")
                 return
             if obj.get_node_or_null("ModelSolidBody") == null:
                 _fail("Rotated lounge sofa lost its collision")
                 return
         elif label == "WestSecurityCamera":
             west_camera_count += 1
-            if absf(obj.rotation.y + PI * 0.5) > 0.0001:
-                _fail("West security camera is facing the outer wall")
+            if absf(obj.rotation.y - 1.25) > 0.0001:
+                _fail("West security camera yaw does not match its mounted model axis")
                 return
-            var forward: Vector3 = -obj.global_transform.basis.z
-            if forward.dot(Vector3.RIGHT) < 0.95:
-                _fail("West camera is not aimed into the casino wing")
+            # Lens of security_camera_01 points along local +Z, unlike
+            # Camera3D's conventional -Z. Require an inward diagonal.
+            var forward: Vector3 = obj.global_transform.basis.z
+            if forward.dot(Vector3.RIGHT) < 0.92 or forward.dot(Vector3.BACK) < 0.20:
+                _fail("West camera is not aimed diagonally into the hall")
                 return
     if sofa_count != 5 or west_camera_count != 1:
         _fail("Expected five sofas and one west camera")
@@ -74,6 +76,17 @@ func _run() -> void:
         if machine.get_node_or_null("Body_Collision") == null:
             _fail("Slot %s lost its existing body collision" % machine.name)
             return
+        # Seat, foot and stem are no longer only decorative.
+        for part in ["StoolSeat_Collision", "StoolStem_Collision", "StoolFoot_Collision"]:
+            var physics: StaticBody3D = machine.get_node_or_null(part) as StaticBody3D
+            if physics == null or physics.get_child_count() == 0:
+                _fail("Slot stool has no physics: %s" % part)
+                return
+        for reel in range(3):
+            var glyph: Label3D = machine.get_node_or_null("ReelGlyph_%d" % reel) as Label3D
+            if glyph == null or glyph.pixel_size > 0.003 or glyph.font_size > 35:
+                _fail("A reel glyph can overrun its 0.20 m window")
+                return
         var glow: MeshInstance3D = machine.get_node_or_null("TopGlow") as MeshInstance3D
         var material: StandardMaterial3D = glow.material_override as StandardMaterial3D
         if material == null or not material.emission_enabled:

@@ -23,8 +23,8 @@ func _build() -> void:
         return
     set_meta("ambient_fx_only", true)
     _architecture()
-    _spot("CatHighlight", Vector3(-9.15, 4.7, -3.25),
-        Vector3(-9.15, 1.0, -1.05), 1.05)
+    _spot("CatHighlight", Vector3(-8.45, 4.7, -3.25),
+        Vector3(-8.45, 1.0, -1.04), 1.05)
     _spot("ChessHighlight", Vector3(-28.6, 4.7, -4.25),
         Vector3(-28.6, 0.65, -2.75), 0.85)
     _spot("HorseHighlight", Vector3(-44.1, 4.8, -3.1),

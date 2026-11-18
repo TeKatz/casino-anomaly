@@ -209,6 +209,8 @@ func _text(parent: Node3D, value: String, pos: Vector3,
     sign.text = value
     sign.font_size = size
     sign.pixel_size = 0.005
+    sign.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+    sign.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
     sign.modulate = tint
     sign.position = pos
     sign.rotation.y = yaw
@@ -279,20 +281,24 @@ func _make_architecture() -> void:
     # (underside y=5.985) instead of ending below it with a visible gap.
     # Crossings have different widths, and coplanar placeholder overlays
     # were removed rather than stacked on top of the new timber.
-    for x in [-45.90, -6.0, 5.90]:
-        _box(architecture, "CeilingGoldBeam_%04d" % architecture.get_child_count(), Vector3(x, 5.885, -6.5),
-            Vector3(0.22, 0.25, 12.82), beam_wood)
+    # The three former longitudinal "CeilingGoldBeam" members coincided
+    # with the existing *_Crown wall beams, producing depth-buffer fighting
+    # at the far exit and bar. Wall crowns now provide those members alone.
+    # Cross beams meet (rather than penetrate) the exposed crown inner face.
     for z in [0.0, 7.0, 13.0]:
-        _box(architecture, "CeilingTrim_%04d" % architecture.get_child_count(), Vector3(0, 5.865, z),
-            Vector3(11.72, 0.27, 0.20), beam_wood)
+        _box(architecture, "CeilingTrim_%04d" % architecture.get_child_count(),
+            Vector3(0, 5.865, z), Vector3(11.56, 0.27, 0.20), beam_wood)
     for x in [-42.0, -35.0, -28.0, -21.0, -14.0, -10.0]:
-        _box(architecture, "WestCeilingTrim_%04d" % architecture.get_child_count(), Vector3(x, 5.865, -6.5),
-            Vector3(0.20, 0.27, 12.75), beam_wood)
+        _box(architecture, "WestCeilingTrim_%04d" % architecture.get_child_count(),
+            Vector3(x, 5.865, -6.5), Vector3(0.20, 0.27, 12.55), beam_wood)
     # Entry framing and end wall doors (decorative until anomaly logic is added).
     _box(architecture, "EntryDoor", Vector3(0, 1.5, 13.97), Vector3(3.2, 3, 0.1), dark_wood)
     for x in [-1.64, 1.64]:
         _box(architecture, "EntryDoorRail", Vector3(x, 1.7, 13.8), Vector3(0.075, 3.3, 0.11), gold)
-    _text(architecture, "CASINO ANOMALY", Vector3(0, 4.15, 13.88), 0, 76)
+    # The label originally showed its back face to the incoming player.
+    # Rotate 180 degrees and keep it vertically inside the illuminated frame.
+    _text(architecture, "CASINO ANOMALY",
+        Vector3(0, 4.14, 13.70), PI, 64)
     for z in [-9.65, -3.7]:
         _box(architecture, "ExitDoor", Vector3(-45.94, 1.62, z), Vector3(0.1, 3.25, 2.05), dark_wood)
         _box(architecture, "ExitFrameTop", Vector3(-45.84, 3.35, z), Vector3(0.22, 0.11, 2.26), gold)
@@ -302,27 +308,41 @@ func _make_architecture() -> void:
 
 func _wall(label: String, pos: Vector3, size: Vector3) -> void:
     _box(architecture, label, pos, size, wall_paint, true)
-    # Crown mouldings follow the INSIDE wall face, not the wall center.
-    # This removes the old suspended orange lines at the top of the walls.
+    # Each timber crown stops at the INNER face of the next crown.
+    # Previous full-length boxes intersected at equal heights: their
+    # coplanar tops were responsible for angular z-fighting, especially
+    # at the far exit and behind the bar.
     var crown_pos := Vector3(pos.x, 5.885, pos.z)
     if size.x > size.z:
-        if label == "NorthWestWall":
-            crown_pos.z = -12.90
-        elif label == "SouthWestWall":
-            crown_pos.z = -0.10
-        else: # EntryBackWall
-            crown_pos.z = 13.90
+        var run_width: float
+        match label:
+            "NorthWestWall":
+                crown_pos.z = -12.90
+                run_width = 51.56  # x=-45.78 .. +5.78
+            "SouthWestWall":
+                crown_pos.x = -25.90
+                crown_pos.z = -0.10
+                run_width = 39.76  # x=-45.78 .. -6.02
+            _:
+                crown_pos.z = 13.90
+                run_width = 11.56  # x=-5.78 .. +5.78
         _box(architecture, label + "_Crown", crown_pos,
-            Vector3(size.x - 0.04, 0.25, 0.24), beam_wood)
+            Vector3(run_width, 0.25, 0.24), beam_wood)
     else:
-        if label == "FarExitWall":
-            crown_pos.x = -45.90
-        elif label == "LeftMainWall":
-            crown_pos.x = -5.90
-        else: # RightMainWall
-            crown_pos.x = 5.90
+        var run_depth: float
+        match label:
+            "FarExitWall":
+                crown_pos.x = -45.90
+                run_depth = 12.56  # z=-12.78 .. -0.22
+            "LeftMainWall":
+                crown_pos.x = -5.90
+                crown_pos.z = 6.78
+                run_depth = 14.0   # z=-0.22 .. +13.78
+            _:
+                crown_pos.x = 5.90
+                run_depth = 26.56  # z=-12.78 .. +13.78
         _box(architecture, label + "_Crown", crown_pos,
-            Vector3(0.24, 0.25, size.z - 0.04), beam_wood)
+            Vector3(0.24, 0.25, run_depth), beam_wood)
 
 func _column(pos: Vector3) -> void:
     # Decorative names must be unique: Godot silently substitutes generated
@@ -552,8 +572,19 @@ func _slot_machine(pos: Vector3, yaw: float, accent: Color, number: int) -> void
         _box(unit, "ReelDivider_%d" % reel_i,
             Vector3(x + 0.107, 1.366, 0.470),
             Vector3(0.013, 0.607, 0.020), bronze)
-        _text(unit, glyphs[(number + reel_i * 2) % glyphs.size()],
-            Vector3(x, 1.327, 0.478), 0, 34, Color("#372722"))
+        # Fixed-size, individually centered glyphs. The shared _text()
+        # pixel scale made 'BAR' larger than a reel and merged symbols.
+        var symbol: String = glyphs[(number + reel_i * 2) % glyphs.size()]
+        var reel_text := Label3D.new()
+        reel_text.name = "ReelGlyph_%d" % reel_i
+        reel_text.text = symbol
+        reel_text.font_size = 18 if symbol == "BAR" else 35
+        reel_text.pixel_size = 0.0026
+        reel_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+        reel_text.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+        reel_text.modulate = Color("#342e31")
+        reel_text.position = Vector3(x, 1.366, 0.503)
+        unit.add_child(reel_text)
         _box(unit, "ReelTopMask_%d" % reel_i,
             Vector3(x, 1.630, 0.479), Vector3(0.193, 0.046, 0.008), ebony)
         _box(unit, "ReelBottomMask_%d" % reel_i,
@@ -581,14 +612,15 @@ func _slot_machine(pos: Vector3, yaw: float, accent: Color, number: int) -> void
             Vector3(-0.236 + float(i) * 0.057, 0.465, 0.361),
             Vector3(0.023, 0.090, 0.014), ebony)
 
+    # Chairs must be solid too; the previous visual cylinders had no physics.
     _cylinder(unit, "StoolStem", Vector3(0, 0.315, 1.24),
-        0.056, 0.49, bronze, false, 16)
+        0.056, 0.49, bronze, true, 16)
     _cylinder(unit, "StoolFoot", Vector3(0, 0.077, 1.24),
-        0.255, 0.050, brushed_metal, false, 20)
+        0.255, 0.050, brushed_metal, true, 20)
     _cylinder(unit, "StoolSeatRim", Vector3(0, 0.632, 1.24),
         0.306, 0.067, brushed_metal, false, 24)
     _cylinder(unit, "StoolSeat", Vector3(0, 0.677, 1.24),
-        0.283, 0.107, velvet, false, 24)
+        0.283, 0.107, velvet, true, 24)
 
 
 func _make_slots() -> void:
@@ -647,11 +679,14 @@ func _make_bar() -> void:
         0.52, 0.06, top_wood, false, 24)
 
     # Bottle wall stays behind the bar; extend its shelving toward the bend.
+    # The wooden rear wall and all three long shelves were decorative-only.
+    # Their new StaticBody3D volumes keep the player behind the bar from
+    # walking straight through the timber.
     _box(bar_area, "BarBackboard", Vector3(-1.40, 2.75, -12.76),
-        Vector3(11.4, 3.30, 0.16), bar_front)
+        Vector3(11.4, 3.30, 0.16), bar_front, true)
     for y in [1.9, 2.75, 3.60]:
         _box(bar_area, "BottleShelf", Vector3(-1.38, y, -12.52),
-            Vector3(10.85, 0.09, 0.36), gold)
+            Vector3(10.85, 0.09, 0.36), gold, true)
     var bottles := [
         Color("#80b69d"), Color("#a66d4f"), Color("#8a659e"), Color("#e5b66f")
     ]
@@ -668,7 +703,17 @@ func _make_bar() -> void:
             _cylinder(bar_area, "BottleNeck", Vector3(x, y + 0.25, -12.48), 0.052, 0.13, color, false, 10)
     _box(bar_area, "BarSignPanel", Vector3(-1.38, 4.72, -12.51),
         Vector3(4.2, 0.9, 0.14), screen_black)
-    _text(bar_area, "MIDNIGHT BAR", Vector3(-1.38, 4.58, -12.40), 0, 68)
+    # Center against the ACTUAL shelf panel, not the old offset baseline.
+    var bar_title := Label3D.new()
+    bar_title.name = "Sign_MIDNIGHT_BAR"
+    bar_title.text = "MIDNIGHT BAR"
+    bar_title.font_size = 62
+    bar_title.pixel_size = 0.0045
+    bar_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+    bar_title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+    bar_title.position = Vector3(-1.38, 4.72, -12.408)
+    bar_title.modulate = Color("#e1c28e")
+    bar_area.add_child(bar_title)
 
     # All barstools are now supplied solely by model_interior.gd.
     # Do not spawn cylinder placeholders behind the imported stools.
@@ -681,6 +726,10 @@ func _game_table(pos: Vector3, label: String, index: int) -> void:
     var group := Node3D.new()
     group.name = label + str(index)
     group.position = pos
+    # The first north-side cards table sits in a 3.48 m aisle between
+    # wall and carpet. Full-size chairs crossed both boundaries.
+    if index == 7:
+        group.scale = Vector3(0.68, 1.0, 0.68)
     gaming.add_child(group)
     var base := _cylinder(group, "TableSupport", Vector3(0, 0.49, 0),
         0.18, 0.94, dark_wood)
@@ -811,7 +860,8 @@ func _plant_visual(pos: Vector3, index: int, leaf_mesh: Mesh) -> void:
 
 
 func _make_details() -> void:
-    _text(decor, "SLOTS", Vector3(0, 4.54, 13.7), 0, 62)
+    # Removed the redundant "SLOTS" heading which intersected the neon
+    # frame above the entrance and showed its mirrored back face.
     _text(decor, "TABLE GAMES", Vector3(-15, 3.55, -12.89), 0, 57)
     # Replace the six identically sized green spheres with individually
     # constructed taper-pot foliage, no overlap with lounge furniture.
@@ -824,16 +874,8 @@ func _make_details() -> void:
     for i in range(positions.size()):
         _plant_visual(positions[i], i, leaf_mesh)
 
-    # Existing sculptural chandelier at the bend; it is replaced by the
-    # Poly Haven donor in model_interior.gd after the room is populated.
-    _cylinder(decor, "ChandelierMount", Vector3(-1.4, 5.75, -6.8), 0.25, 0.3, brass)
-    _cylinder(decor, "ChandelierStem", Vector3(-1.4, 5.2, -6.8), 0.055, 0.9, gold)
-    for i in range(12):
-        var angle := float(i) * TAU / 12.0
-        var x := -1.4 + sin(angle) * 1.22
-        var z := -6.8 + cos(angle) * 1.22
-        _sphere(decor, "ChandelierBulb", Vector3(x, 4.75, z), 0.115, warm_white)
-        _cylinder(decor, "ChandelierChain", Vector3(x, 5.13, z), 0.025, 0.64, gold)
+    # Do not add the old white globe-and-chain chandelier placeholders:
+    # the Poly Haven chandelier in ModelInteriors is the only fixture.
 
 
 func _omni(pos: Vector3, tint: Color, energy: float, reach: float,

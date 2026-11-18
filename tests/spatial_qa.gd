@@ -100,8 +100,34 @@ func _run() -> void:
                 return
 
     # The service cart belongs to a free wall bay, not a gaming chair.
-    if coffee == null or coffee.position.distance_to(Vector3(-15.6, 0.005, -0.95)) > 0.08:
-        _fail("Coffee service cart still blocks the gaming table or sits away from wall")
+    if coffee == null or coffee.position.distance_to(Vector3(-15.85, 0.005, -0.54)) > 0.08:
+        _fail("Coffee cart is not centered in the free wall bay")
+        return
+    if coffee.get_node_or_null("ModelSolidBody") == null:
+        _fail("Coffee cart lost its solid collision")
+        return
+
+    # This table is narrower to keep every seat off the red carpet and
+    # away from the wainscoting. Check actual rotated/scaled seat footprints.
+    var gaming: Node3D = world.get_node_or_null("GamingTables") as Node3D
+    var side_cards: Node3D = gaming.get_node_or_null("Cards7") as Node3D
+    if side_cards == null or side_cards.scale.x > 0.70 or side_cards.scale.z > 0.70:
+        _fail("North-side game table still blocks the corridor")
+        return
+    var checked_seats := 0
+    for seat in side_cards.get_children():
+        if not (seat is MeshInstance3D) or not (seat.mesh is CylinderMesh):
+            continue
+        if absf(seat.position.y - 0.51) > 0.001:
+            continue
+        var seat_radius: float = (seat.mesh as CylinderMesh).top_radius * side_cards.scale.z
+        var absolute_z: float = side_cards.position.z + seat.position.z * side_cards.scale.z
+        if absolute_z - seat_radius <= -3.48 or absolute_z + seat_radius >= -0.12:
+            _fail("A north-side chair clips into the carpet or back wall")
+            return
+        checked_seats += 1
+    if checked_seats != 5:
+        _fail("Expected five safely placed chairs at the north-side table")
         return
 
     # No obsolete spherical emissive dots remain on any lounge coffee table.

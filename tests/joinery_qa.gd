@@ -77,8 +77,30 @@ func _run() -> void:
         _fail("Column bases/capitals mismatch: cores=%d, bases=%d, capitals=%d" % [
             pillar_count, base_count, capital_count])
         return
-    if wood_beam_count != 18:
-        _fail("Expected 18 wood ceiling/wall beams, got " + str(wood_beam_count))
+    # Three long pieces were duplicates of wall crowns (depth fighting).
+    # Six uniquely butt-jointed crowns and nine transverse ceiling members
+    # remain; none may use the old longitudinal CeilingGoldBeam name.
+    if wood_beam_count != 15:
+        _fail("Expected 15 non-overlapping wood ceiling/wall members, got " + str(wood_beam_count))
+        return
+    for item in architecture.get_children():
+        if item.name.begins_with("CeilingGoldBeam"):
+            _fail("Duplicate longitudinal beam still overlaps its wall crown")
+            return
+    var north: MeshInstance3D = architecture.get_node_or_null("NorthWestWall_Crown") as MeshInstance3D
+    var far: MeshInstance3D = architecture.get_node_or_null("FarExitWall_Crown") as MeshInstance3D
+    var south: MeshInstance3D = architecture.get_node_or_null("SouthWestWall_Crown") as MeshInstance3D
+    if north == null or far == null or south == null:
+        _fail("Trimmed wall crown joinery is missing")
+        return
+    var north_mesh := north.mesh as BoxMesh
+    var far_mesh := far.mesh as BoxMesh
+    var south_mesh := south.mesh as BoxMesh
+    if north_mesh == null or far_mesh == null or south_mesh == null:
+        _fail("Wall crowns lost their BoxMesh profiles")
+        return
+    if north_mesh.size.x > 51.58 or far_mesh.size.z > 12.58 or south_mesh.size.x > 39.78:
+        _fail("Wall crown at the room end penetrates a perpendicular crown")
         return
 
     # One continuous closed wood profile and ONE matching gold inlay
