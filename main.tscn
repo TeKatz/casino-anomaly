@@ -1,58 +1,51 @@
-[gd_scene load_steps=1373 format=4]
+[gd_scene load_steps=1280 format=4 uid="uid://3qbt7lcevocj"]
 
-[ext_resource type="Script" path="res://hall.gd" id="1_hall"]
-[ext_resource type="Script" path="res://player.gd" id="2_player"]
-[ext_resource type="Script" path="res://model_interior.gd" id="3_models"]
-[ext_resource type="Script" path="res://sketchfab_furniture.gd" id="4_sketchfab"]
-[ext_resource type="Script" path="res://casino_atmosphere.gd" id="5_atmosphere"]
-[ext_resource type="Script" path="res://editor/model_placement_preview.gd" id="6_editor_anchor"]
-[ext_resource type="Texture2D" path="res://assets/oak_wood_planks/oak_wood_planks_diff_2k.jpg" id="7_come4"]
-[ext_resource type="Texture2D" path="res://assets/oak_wood_planks/oak_wood_planks_nor_gl_2k.png" id="8_h8e4i"]
-[ext_resource type="Texture2D" path="res://assets/oak_wood_planks/oak_wood_planks_rough_2k.jpg" id="9_4lmeg"]
-[ext_resource type="Texture2D" path="res://assets/fabric037/Fabric037_2K-JPG_Color.jpg" id="10_0cp0l"]
-[ext_resource type="Texture2D" path="res://assets/fabric037/Fabric037_2K-JPG_NormalGL.jpg" id="11_d2t1y"]
-[ext_resource type="Texture2D" path="res://assets/fabric037/Fabric037_2K-JPG_Roughness.jpg" id="12_gngh3"]
-[ext_resource type="Texture2D" path="res://assets/brown_planks_05/brown_planks_05_diff_2k.jpg" id="13_0n3wm"]
-[ext_resource type="Texture2D" path="res://assets/brown_planks_05/brown_planks_05_nor_gl_2k.jpg" id="14_qnost"]
-[ext_resource type="Texture2D" path="res://assets/brown_planks_05/brown_planks_05_rough_2k.jpg" id="15_wnkbs"]
-[ext_resource type="Texture2D" path="res://assets/roof_planks/roof_planks_diff_2k.jpg" id="16_f6a44"]
-[ext_resource type="Texture2D" path="res://assets/roof_planks/roof_planks_nor_gl_2k.jpg" id="17_0cbny"]
-[ext_resource type="Texture2D" path="res://assets/roof_planks/roof_planks_rough_2k.jpg" id="18_hrvbo"]
-[ext_resource type="Texture2D" path="res://assets/wooden_panels/wooden_panels_diff_2k.jpg" id="19_uypp3"]
-[ext_resource type="Texture2D" path="res://assets/wooden_panels/wooden_panels_nor_gl_2k.jpg" id="20_blkrb"]
-[ext_resource type="Texture2D" path="res://assets/wooden_panels/wooden_panels_rough_2k.jpg" id="21_abqjc"]
-[ext_resource type="Texture2D" path="res://assets/smoke_speckled_veneer/smoke_speckled_veneer_diff_2k.jpg" id="22_6iyjs"]
-[ext_resource type="Texture2D" path="res://assets/smoke_speckled_veneer/smoke_speckled_veneer_nor_gl_2k.jpg" id="23_4w656"]
-[ext_resource type="Texture2D" path="res://assets/smoke_speckled_veneer/smoke_speckled_veneer_rough_2k.jpg" id="24_e71vb"]
-[ext_resource type="Texture2D" path="res://assets/quatrefoil_jacquard_fabric/quatrefoil_jacquard_fabric_diff_2k.jpg" id="25_rnkwl"]
-[ext_resource type="Texture2D" path="res://assets/quatrefoil_jacquard_fabric/quatrefoil_jacquard_fabric_nor_gl_2k.jpg" id="26_vke2r"]
-[ext_resource type="Texture2D" path="res://assets/quatrefoil_jacquard_fabric/quatrefoil_jacquard_fabric_rough_2k.jpg" id="27_uit24"]
-[ext_resource type="Texture2D" path="res://assets/herringbone_parquet/herringbone_parquet_diff_2k.jpg" id="28_ruth0"]
-[ext_resource type="Texture2D" path="res://assets/herringbone_parquet/herringbone_parquet_nor_gl_2k.jpg" id="29_rm4vd"]
-[ext_resource type="Texture2D" path="res://assets/herringbone_parquet/herringbone_parquet_rough_2k.jpg" id="30_pjyto"]
-[ext_resource type="Texture2D" path="res://assets/bi_stretch/bi_stretch_diff_2k.jpg" id="31_sm6fg"]
-[ext_resource type="Texture2D" path="res://assets/bi_stretch/bi_stretch_nor_gl_2k.jpg" id="32_b17eg"]
-[ext_resource type="Texture2D" path="res://assets/bi_stretch/bi_stretch_rough_2k.jpg" id="33_ntx8l"]
-[ext_resource type="Texture2D" path="res://assets/dark_wood/dark_wood_diff_2k.jpg" id="34_uatky"]
-[ext_resource type="Texture2D" path="res://assets/dark_wood/dark_wood_nor_gl_2k.jpg" id="35_rqtf5"]
-[ext_resource type="Texture2D" path="res://assets/dark_wood/dark_wood_rough_2k.jpg" id="36_1vm84"]
-[ext_resource type="Texture2D" path="res://assets/wood_table_worn/wood_table_worn_diff_2k.jpg" id="37_wu3dr"]
-[ext_resource type="Texture2D" path="res://assets/wood_table_worn/wood_table_worn_nor_gl_2k.jpg" id="38_cyx1q"]
-[ext_resource type="Texture2D" path="res://assets/wood_table_worn/wood_table_worn_rough_2k.jpg" id="39_0dhbp"]
+[ext_resource type="Script" uid="uid://2cb8gajthh70" path="res://hall.gd" id="1_hall"]
+[ext_resource type="Script" uid="uid://b80bl20jsqir5" path="res://player.gd" id="2_player"]
+[ext_resource type="Script" uid="uid://u327arp55gfv" path="res://model_interior.gd" id="3_models"]
+[ext_resource type="Script" uid="uid://4yi1518yf4mn" path="res://sketchfab_furniture.gd" id="4_sketchfab"]
+[ext_resource type="Script" uid="uid://i4ar7s7uokb2" path="res://casino_atmosphere.gd" id="5_atmosphere"]
+[ext_resource type="Script" uid="uid://kkvw3d4wcyw5" path="res://editor/model_placement_preview.gd" id="6_editor_anchor"]
+[ext_resource type="Texture2D" uid="uid://b6igd7kkrs3ke" path="res://assets/oak_wood_planks/oak_wood_planks_diff_2k.jpg" id="7_come4"]
+[ext_resource type="Texture2D" uid="uid://km7gbh2we8vr" path="res://assets/oak_wood_planks/oak_wood_planks_nor_gl_2k.png" id="8_h8e4i"]
+[ext_resource type="Texture2D" uid="uid://1wgorijf8myn" path="res://assets/oak_wood_planks/oak_wood_planks_rough_2k.jpg" id="9_4lmeg"]
+[ext_resource type="Texture2D" uid="uid://dbiujeel3dd2m" path="res://assets/fabric037/Fabric037_2K-JPG_Color.jpg" id="10_0cp0l"]
+[ext_resource type="Texture2D" uid="uid://bvcji1g6xm4sy" path="res://assets/fabric037/Fabric037_2K-JPG_NormalGL.jpg" id="11_d2t1y"]
+[ext_resource type="Texture2D" uid="uid://c8cctxks12qgy" path="res://assets/fabric037/Fabric037_2K-JPG_Roughness.jpg" id="12_gngh3"]
+[ext_resource type="Texture2D" uid="uid://cciufycic5yd7" path="res://assets/brown_planks_05/brown_planks_05_diff_2k.jpg" id="13_0n3wm"]
+[ext_resource type="Texture2D" uid="uid://cub67xewield5" path="res://assets/brown_planks_05/brown_planks_05_nor_gl_2k.jpg" id="14_qnost"]
+[ext_resource type="Texture2D" uid="uid://c1hf21s5jb2lm" path="res://assets/brown_planks_05/brown_planks_05_rough_2k.jpg" id="15_wnkbs"]
+[ext_resource type="Texture2D" uid="uid://c721jmv51f8wc" path="res://assets/roof_planks/roof_planks_diff_2k.jpg" id="16_f6a44"]
+[ext_resource type="Texture2D" uid="uid://wlfxbjgdat4i" path="res://assets/roof_planks/roof_planks_nor_gl_2k.jpg" id="17_0cbny"]
+[ext_resource type="Texture2D" uid="uid://bvdypo66xp62r" path="res://assets/roof_planks/roof_planks_rough_2k.jpg" id="18_hrvbo"]
+[ext_resource type="Texture2D" uid="uid://divd4uwnx8n5p" path="res://assets/wooden_panels/wooden_panels_diff_2k.jpg" id="19_uypp3"]
+[ext_resource type="Texture2D" uid="uid://dc872gduiigo3" path="res://assets/wooden_panels/wooden_panels_nor_gl_2k.jpg" id="20_blkrb"]
+[ext_resource type="Texture2D" uid="uid://qnhd54qtkbue" path="res://assets/wooden_panels/wooden_panels_rough_2k.jpg" id="21_abqjc"]
+[ext_resource type="Texture2D" uid="uid://dhcn33w3fatn6" path="res://assets/smoke_speckled_veneer/smoke_speckled_veneer_diff_2k.jpg" id="22_6iyjs"]
+[ext_resource type="Texture2D" uid="uid://b6ep34so08lu3" path="res://assets/smoke_speckled_veneer/smoke_speckled_veneer_nor_gl_2k.jpg" id="23_4w656"]
+[ext_resource type="Texture2D" uid="uid://btpccop4gcscg" path="res://assets/smoke_speckled_veneer/smoke_speckled_veneer_rough_2k.jpg" id="24_e71vb"]
+[ext_resource type="Texture2D" uid="uid://camluxjdm6mh3" path="res://assets/quatrefoil_jacquard_fabric/quatrefoil_jacquard_fabric_diff_2k.jpg" id="25_rnkwl"]
+[ext_resource type="Texture2D" uid="uid://csjw6ehg6lrjm" path="res://assets/quatrefoil_jacquard_fabric/quatrefoil_jacquard_fabric_nor_gl_2k.jpg" id="26_vke2r"]
+[ext_resource type="Texture2D" uid="uid://dwcm48bt52413" path="res://assets/quatrefoil_jacquard_fabric/quatrefoil_jacquard_fabric_rough_2k.jpg" id="27_uit24"]
+[ext_resource type="Texture2D" uid="uid://bmtcte3btk1o2" path="res://assets/herringbone_parquet/herringbone_parquet_diff_2k.jpg" id="28_ruth0"]
+[ext_resource type="Texture2D" uid="uid://6xyk7nx7amm2" path="res://assets/herringbone_parquet/herringbone_parquet_nor_gl_2k.jpg" id="29_rm4vd"]
+[ext_resource type="Texture2D" uid="uid://vdbgcof0rpwa" path="res://assets/herringbone_parquet/herringbone_parquet_rough_2k.jpg" id="30_pjyto"]
+[ext_resource type="Texture2D" uid="uid://ca0h17cy1plwe" path="res://assets/bi_stretch/bi_stretch_diff_2k.jpg" id="31_sm6fg"]
+[ext_resource type="Texture2D" uid="uid://nb1s65ywtmau" path="res://assets/bi_stretch/bi_stretch_nor_gl_2k.jpg" id="32_b17eg"]
+[ext_resource type="Texture2D" uid="uid://b3r05co3ypwwk" path="res://assets/bi_stretch/bi_stretch_rough_2k.jpg" id="33_ntx8l"]
+[ext_resource type="Texture2D" uid="uid://6l5n6wkfgeqe" path="res://assets/dark_wood/dark_wood_diff_2k.jpg" id="34_uatky"]
+[ext_resource type="Texture2D" uid="uid://jbwo1v5gpj24" path="res://assets/dark_wood/dark_wood_nor_gl_2k.jpg" id="35_rqtf5"]
+[ext_resource type="Texture2D" uid="uid://cqjbwuqih3kb7" path="res://assets/dark_wood/dark_wood_rough_2k.jpg" id="36_1vm84"]
+[ext_resource type="Material" path="res://herringbone_parquet_material.tres" id="37_0cp0l"]
+[ext_resource type="Texture2D" uid="uid://bh5d6b1u1soxu" path="res://assets/wood_table_worn/wood_table_worn_diff_2k.jpg" id="37_wu3dr"]
+[ext_resource type="Texture2D" uid="uid://1cfqxumtev1u" path="res://assets/wood_table_worn/wood_table_worn_nor_gl_2k.jpg" id="38_cyx1q"]
+[ext_resource type="Texture2D" uid="uid://bnyjbufx6ul5q" path="res://assets/wood_table_worn/wood_table_worn_rough_2k.jpg" id="39_0dhbp"]
+[ext_resource type="Material" path="res://bar_top_material.tres" id="41_d2t1y"]
+[ext_resource type="Material" path="res://bi_stretch_material.tres" id="42_gngh3"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape_player"]
 radius = 0.34
 height = 1.87
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jx0wj"]
-albedo_color = Color(0.6666667, 0.65882355, 0.63529414, 1)
-roughness = 0.6
-
-[sub_resource type="BoxMesh" id="BoxMesh_kkkcx"]
-size = Vector3(0.72, 0.62, 0.72)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_34ol3"]
-size = Vector3(0.72, 0.62, 0.72)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_c2n8d"]
 albedo_color = Color(0.6666667, 0.65882355, 0.63529414, 1)
@@ -217,6 +210,21 @@ _surfaces = [{
 "vertex_count": 6,
 "vertex_data": PackedByteArray("AAA4wgrXozsAAFDBAADAwArXozsAAAAAAADAwArXozsAAFDBAAA4wgrXozsAAFDBAAA4wgrXozsAAAAAAADAwArXozsAAAAA/3///////7//f///////v/9///////+//3///////7//f///////v/9///////+/")
 }]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cit2p"]
+resource_name = "Poly Haven Brown Planks 05 2K PBR"
+albedo_color = Color(0.78, 0.69, 0.61, 1)
+albedo_texture = ExtResource("13_0n3wm")
+roughness = 0.68
+roughness_texture = ExtResource("15_wnkbs")
+normal_enabled = true
+normal_scale = 0.58
+normal_texture = ExtResource("14_qnost")
+uv1_scale = Vector3(1, 1, 12.55)
+texture_filter = 5
+
+[sub_resource type="BoxMesh" id="BoxMesh_46ndd"]
+size = Vector3(0.2, 0.27, 12.55)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dij0e"]
 albedo_color = Color(0.21568628, 0.13333334, 0.105882354, 1)
@@ -437,6 +445,7 @@ normal_scale = 0.6
 normal_texture = ExtResource("17_0cbny")
 uv1_scale = Vector3(6.9714284, 15.542857, 1)
 texture_filter = 5
+disable_receive_shadows = true
 
 [sub_resource type="BoxMesh" id="BoxMesh_xkvoa"]
 size = Vector3(12.2, 0.23, 27.2)
@@ -450,8 +459,10 @@ roughness_texture = ExtResource("18_hrvbo")
 normal_enabled = true
 normal_scale = 0.6
 normal_texture = ExtResource("17_0cbny")
+refraction_scale = 0.73
 uv1_scale = Vector3(22.97143, 7.542857, 1)
 texture_filter = 5
+disable_receive_shadows = true
 
 [sub_resource type="BoxMesh" id="BoxMesh_pw0td"]
 size = Vector3(40.2, 0.23, 13.2)
@@ -490,10 +501,9 @@ size = Vector3(0.12, 2, 27)
 resource_name = "Poly Haven wooden_panels Casino Interior PBR"
 albedo_color = Color(0.89, 0.83, 0.78, 1)
 albedo_texture = ExtResource("19_uypp3")
-roughness = 0.85
+roughness = 0.88
 roughness_texture = ExtResource("21_abqjc")
 normal_enabled = true
-normal_scale = 0.65
 normal_texture = ExtResource("20_blkrb")
 uv1_scale = Vector3(26, 1.4285715, 1)
 texture_filter = 5
@@ -562,34 +572,6 @@ size = Vector3(0.52, 5.87, 0.52)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_6seew"]
 size = Vector3(0.52, 5.87, 0.52)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_3ox4t"]
-resource_name = "Poly Haven Brown Planks 05 2K PBR"
-albedo_color = Color(0.78, 0.69, 0.61, 1)
-albedo_texture = ExtResource("13_0n3wm")
-roughness = 0.68
-roughness_texture = ExtResource("15_wnkbs")
-normal_enabled = true
-normal_scale = 0.58
-normal_texture = ExtResource("14_qnost")
-texture_filter = 5
-
-[sub_resource type="BoxMesh" id="BoxMesh_4fmho"]
-size = Vector3(0.82, 0.28, 0.82)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aivy6"]
-resource_name = "Poly Haven Brown Planks 05 2K PBR"
-albedo_color = Color(0.78, 0.69, 0.61, 1)
-albedo_texture = ExtResource("13_0n3wm")
-roughness = 0.68
-roughness_texture = ExtResource("15_wnkbs")
-normal_enabled = true
-normal_scale = 0.58
-normal_texture = ExtResource("14_qnost")
-texture_filter = 5
-
-[sub_resource type="BoxMesh" id="BoxMesh_bil4k"]
-size = Vector3(0.7, 0.075, 0.7)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hnquj"]
 resource_name = "Poly Haven Brown Planks 05 2K PBR"
@@ -1512,34 +1494,6 @@ size = Vector3(0.52, 5.87, 0.52)
 [sub_resource type="BoxShape3D" id="BoxShape3D_130bj"]
 size = Vector3(0.52, 5.87, 0.52)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xa7an"]
-resource_name = "Poly Haven Brown Planks 05 2K PBR"
-albedo_color = Color(0.78, 0.69, 0.61, 1)
-albedo_texture = ExtResource("13_0n3wm")
-roughness = 0.68
-roughness_texture = ExtResource("15_wnkbs")
-normal_enabled = true
-normal_scale = 0.58
-normal_texture = ExtResource("14_qnost")
-texture_filter = 5
-
-[sub_resource type="BoxMesh" id="BoxMesh_dk42n"]
-size = Vector3(0.82, 0.28, 0.82)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4dwmn"]
-resource_name = "Poly Haven Brown Planks 05 2K PBR"
-albedo_color = Color(0.78, 0.69, 0.61, 1)
-albedo_texture = ExtResource("13_0n3wm")
-roughness = 0.68
-roughness_texture = ExtResource("15_wnkbs")
-normal_enabled = true
-normal_scale = 0.58
-normal_texture = ExtResource("14_qnost")
-texture_filter = 5
-
-[sub_resource type="BoxMesh" id="BoxMesh_swdh1"]
-size = Vector3(0.7, 0.075, 0.7)
-
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8v027"]
 resource_name = "Poly Haven Brown Planks 05 2K PBR"
 albedo_color = Color(0.78, 0.69, 0.61, 1)
@@ -1584,34 +1538,6 @@ size = Vector3(0.52, 5.87, 0.52)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ecwfn"]
 size = Vector3(0.52, 5.87, 0.52)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ip2l3"]
-resource_name = "Poly Haven Brown Planks 05 2K PBR"
-albedo_color = Color(0.78, 0.69, 0.61, 1)
-albedo_texture = ExtResource("13_0n3wm")
-roughness = 0.68
-roughness_texture = ExtResource("15_wnkbs")
-normal_enabled = true
-normal_scale = 0.58
-normal_texture = ExtResource("14_qnost")
-texture_filter = 5
-
-[sub_resource type="BoxMesh" id="BoxMesh_s14wm"]
-size = Vector3(0.82, 0.28, 0.82)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_q4gy1"]
-resource_name = "Poly Haven Brown Planks 05 2K PBR"
-albedo_color = Color(0.78, 0.69, 0.61, 1)
-albedo_texture = ExtResource("13_0n3wm")
-roughness = 0.68
-roughness_texture = ExtResource("15_wnkbs")
-normal_enabled = true
-normal_scale = 0.58
-normal_texture = ExtResource("14_qnost")
-texture_filter = 5
-
-[sub_resource type="BoxMesh" id="BoxMesh_cnw22"]
-size = Vector3(0.7, 0.075, 0.7)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8e868"]
 resource_name = "Poly Haven Brown Planks 05 2K PBR"
@@ -1658,34 +1584,6 @@ size = Vector3(0.52, 5.87, 0.52)
 [sub_resource type="BoxShape3D" id="BoxShape3D_d1vw0"]
 size = Vector3(0.52, 5.87, 0.52)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pmrog"]
-resource_name = "Poly Haven Brown Planks 05 2K PBR"
-albedo_color = Color(0.78, 0.69, 0.61, 1)
-albedo_texture = ExtResource("13_0n3wm")
-roughness = 0.68
-roughness_texture = ExtResource("15_wnkbs")
-normal_enabled = true
-normal_scale = 0.58
-normal_texture = ExtResource("14_qnost")
-texture_filter = 5
-
-[sub_resource type="BoxMesh" id="BoxMesh_pbe4p"]
-size = Vector3(0.82, 0.28, 0.82)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8ldsf"]
-resource_name = "Poly Haven Brown Planks 05 2K PBR"
-albedo_color = Color(0.78, 0.69, 0.61, 1)
-albedo_texture = ExtResource("13_0n3wm")
-roughness = 0.68
-roughness_texture = ExtResource("15_wnkbs")
-normal_enabled = true
-normal_scale = 0.58
-normal_texture = ExtResource("14_qnost")
-texture_filter = 5
-
-[sub_resource type="BoxMesh" id="BoxMesh_f4177"]
-size = Vector3(0.7, 0.075, 0.7)
-
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_nckbc"]
 resource_name = "Poly Haven Brown Planks 05 2K PBR"
 albedo_color = Color(0.78, 0.69, 0.61, 1)
@@ -1730,34 +1628,6 @@ size = Vector3(0.52, 5.87, 0.52)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_d8xcs"]
 size = Vector3(0.52, 5.87, 0.52)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2ixj2"]
-resource_name = "Poly Haven Brown Planks 05 2K PBR"
-albedo_color = Color(0.78, 0.69, 0.61, 1)
-albedo_texture = ExtResource("13_0n3wm")
-roughness = 0.68
-roughness_texture = ExtResource("15_wnkbs")
-normal_enabled = true
-normal_scale = 0.58
-normal_texture = ExtResource("14_qnost")
-texture_filter = 5
-
-[sub_resource type="BoxMesh" id="BoxMesh_t6w6j"]
-size = Vector3(0.82, 0.28, 0.82)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_itvpi"]
-resource_name = "Poly Haven Brown Planks 05 2K PBR"
-albedo_color = Color(0.78, 0.69, 0.61, 1)
-albedo_texture = ExtResource("13_0n3wm")
-roughness = 0.68
-roughness_texture = ExtResource("15_wnkbs")
-normal_enabled = true
-normal_scale = 0.58
-normal_texture = ExtResource("14_qnost")
-texture_filter = 5
-
-[sub_resource type="BoxMesh" id="BoxMesh_4jpym"]
-size = Vector3(0.7, 0.075, 0.7)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_j4mna"]
 resource_name = "Poly Haven Brown Planks 05 2K PBR"
@@ -1804,34 +1674,6 @@ size = Vector3(0.52, 5.87, 0.52)
 [sub_resource type="BoxShape3D" id="BoxShape3D_1h7wj"]
 size = Vector3(0.52, 5.87, 0.52)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_p03h6"]
-resource_name = "Poly Haven Brown Planks 05 2K PBR"
-albedo_color = Color(0.78, 0.69, 0.61, 1)
-albedo_texture = ExtResource("13_0n3wm")
-roughness = 0.68
-roughness_texture = ExtResource("15_wnkbs")
-normal_enabled = true
-normal_scale = 0.58
-normal_texture = ExtResource("14_qnost")
-texture_filter = 5
-
-[sub_resource type="BoxMesh" id="BoxMesh_ypkft"]
-size = Vector3(0.82, 0.28, 0.82)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tdfff"]
-resource_name = "Poly Haven Brown Planks 05 2K PBR"
-albedo_color = Color(0.78, 0.69, 0.61, 1)
-albedo_texture = ExtResource("13_0n3wm")
-roughness = 0.68
-roughness_texture = ExtResource("15_wnkbs")
-normal_enabled = true
-normal_scale = 0.58
-normal_texture = ExtResource("14_qnost")
-texture_filter = 5
-
-[sub_resource type="BoxMesh" id="BoxMesh_l0fe1"]
-size = Vector3(0.7, 0.075, 0.7)
-
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tmofn"]
 resource_name = "Poly Haven Brown Planks 05 2K PBR"
 albedo_color = Color(0.78, 0.69, 0.61, 1)
@@ -1877,34 +1719,6 @@ size = Vector3(0.52, 5.87, 0.52)
 [sub_resource type="BoxShape3D" id="BoxShape3D_nrh2l"]
 size = Vector3(0.52, 5.87, 0.52)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cuixb"]
-resource_name = "Poly Haven Brown Planks 05 2K PBR"
-albedo_color = Color(0.78, 0.69, 0.61, 1)
-albedo_texture = ExtResource("13_0n3wm")
-roughness = 0.68
-roughness_texture = ExtResource("15_wnkbs")
-normal_enabled = true
-normal_scale = 0.58
-normal_texture = ExtResource("14_qnost")
-texture_filter = 5
-
-[sub_resource type="BoxMesh" id="BoxMesh_bwis2"]
-size = Vector3(0.82, 0.28, 0.82)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lyu6w"]
-resource_name = "Poly Haven Brown Planks 05 2K PBR"
-albedo_color = Color(0.78, 0.69, 0.61, 1)
-albedo_texture = ExtResource("13_0n3wm")
-roughness = 0.68
-roughness_texture = ExtResource("15_wnkbs")
-normal_enabled = true
-normal_scale = 0.58
-normal_texture = ExtResource("14_qnost")
-texture_filter = 5
-
-[sub_resource type="BoxMesh" id="BoxMesh_prs1d"]
-size = Vector3(0.7, 0.075, 0.7)
-
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_klk0y"]
 resource_name = "Poly Haven Brown Planks 05 2K PBR"
 albedo_color = Color(0.78, 0.69, 0.61, 1)
@@ -1949,34 +1763,6 @@ size = Vector3(0.52, 5.87, 0.52)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_wvadq"]
 size = Vector3(0.52, 5.87, 0.52)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_g3g33"]
-resource_name = "Poly Haven Brown Planks 05 2K PBR"
-albedo_color = Color(0.78, 0.69, 0.61, 1)
-albedo_texture = ExtResource("13_0n3wm")
-roughness = 0.68
-roughness_texture = ExtResource("15_wnkbs")
-normal_enabled = true
-normal_scale = 0.58
-normal_texture = ExtResource("14_qnost")
-texture_filter = 5
-
-[sub_resource type="BoxMesh" id="BoxMesh_o86rh"]
-size = Vector3(0.82, 0.28, 0.82)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rh1eg"]
-resource_name = "Poly Haven Brown Planks 05 2K PBR"
-albedo_color = Color(0.78, 0.69, 0.61, 1)
-albedo_texture = ExtResource("13_0n3wm")
-roughness = 0.68
-roughness_texture = ExtResource("15_wnkbs")
-normal_enabled = true
-normal_scale = 0.58
-normal_texture = ExtResource("14_qnost")
-texture_filter = 5
-
-[sub_resource type="BoxMesh" id="BoxMesh_5i5n0"]
-size = Vector3(0.7, 0.075, 0.7)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_yeist"]
 resource_name = "Poly Haven Brown Planks 05 2K PBR"
@@ -2270,21 +2056,6 @@ uv1_scale = Vector3(1, 1, 12.55)
 texture_filter = 5
 
 [sub_resource type="BoxMesh" id="BoxMesh_fgks3"]
-size = Vector3(0.2, 0.27, 12.55)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cit2p"]
-resource_name = "Poly Haven Brown Planks 05 2K PBR"
-albedo_color = Color(0.78, 0.69, 0.61, 1)
-albedo_texture = ExtResource("13_0n3wm")
-roughness = 0.68
-roughness_texture = ExtResource("15_wnkbs")
-normal_enabled = true
-normal_scale = 0.58
-normal_texture = ExtResource("14_qnost")
-uv1_scale = Vector3(1, 1, 12.55)
-texture_filter = 5
-
-[sub_resource type="BoxMesh" id="BoxMesh_46ndd"]
 size = Vector3(0.2, 0.27, 12.55)
 
 [sub_resource type="BoxMesh" id="BoxMesh_3cabt"]
@@ -4406,6 +4177,8 @@ height = 0.096
 radial_segments = 12
 rings = 6
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_come4"]
+
 [sub_resource type="SphereMesh" id="SphereMesh_1kag8"]
 radius = 0.048
 height = 0.096
@@ -4475,234 +4248,6 @@ height = 0.107
 radial_segments = 24
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_8qede"]
-height = 0.107
-radius = 0.283
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0inuk"]
-albedo_color = Color(0.14901961, 0.10980392, 0.12941177, 1)
-metallic = 0.12
-roughness = 0.33
-
-[sub_resource type="BoxMesh" id="BoxMesh_d4i0y"]
-size = Vector3(0.86, 1.86, 0.71)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_mto8i"]
-size = Vector3(0.86, 1.86, 0.71)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_yc6xu"]
-albedo_color = Color(0.06666667, 0.09019608, 0.105882354, 1)
-metallic = 0.22
-roughness = 0.31
-
-[sub_resource type="BoxMesh" id="BoxMesh_o3cey"]
-size = Vector3(0.88, 0.2, 0.73)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ao7r0"]
-albedo_color = Color(0.32156864, 0.19607843, 0.14901961, 1)
-roughness = 0.61
-
-[sub_resource type="BoxMesh" id="BoxMesh_i31w3"]
-size = Vector3(0.025, 1.57, 0.67)
-
-[sub_resource type="BoxMesh" id="BoxMesh_e5l3g"]
-size = Vector3(0.025, 1.57, 0.67)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_vdjed"]
-albedo_color = Color(0.7058824, 0.5803922, 0.3647059, 1)
-metallic = 0.72
-roughness = 0.35
-
-[sub_resource type="BoxMesh" id="BoxMesh_weq6e"]
-size = Vector3(0.034, 1.17, 0.03)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gdlar"]
-albedo_color = Color(0.41960785, 0.3019608, 0.21176471, 1)
-metallic = 0.61
-roughness = 0.43
-
-[sub_resource type="BoxMesh" id="BoxMesh_jlgx8"]
-size = Vector3(0.026, 0.46, 0.023)
-
-[sub_resource type="BoxMesh" id="BoxMesh_87gla"]
-size = Vector3(0.034, 1.17, 0.03)
-
-[sub_resource type="BoxMesh" id="BoxMesh_hckku"]
-size = Vector3(0.026, 0.46, 0.023)
-
-[sub_resource type="BoxMesh" id="BoxMesh_mwuh8"]
-size = Vector3(0.82, 0.34, 0.7)
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_vgwel"]
-radius = 0.145
-height = 0.8
-radial_segments = 18
-rings = 6
-
-[sub_resource type="BoxMesh" id="BoxMesh_tupss"]
-size = Vector3(0.735, 0.225, 0.029)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jsanw"]
-albedo_color = Color(0.039215688, 0.08235294, 0.1254902, 1)
-metallic = 0.1
-roughness = 0.15
-
-[sub_resource type="BoxMesh" id="BoxMesh_kmxe1"]
-size = Vector3(0.665, 0.17, 0.018)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6duxw"]
-albedo_color = Color(0.88235295, 0.63529414, 1, 1)
-roughness = 0.35
-emission_enabled = true
-emission = Color(0.88235295, 0.63529414, 1, 1)
-emission_energy_multiplier = 1.65
-
-[sub_resource type="BoxMesh" id="BoxMesh_k5jcy"]
-size = Vector3(0.67, 0.045, 0.034)
-
-[sub_resource type="BoxMesh" id="BoxMesh_6jbc1"]
-size = Vector3(0.73, 0.78, 0.072)
-
-[sub_resource type="BoxMesh" id="BoxMesh_70ph4"]
-size = Vector3(0.685, 0.72, 0.036)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_deirx"]
-albedo_color = Color(0.9098039, 0.8745098, 0.78431374, 1)
-roughness = 0.63
-
-[sub_resource type="BoxMesh" id="BoxMesh_i0sxi"]
-size = Vector3(0.198, 0.565, 0.022)
-
-[sub_resource type="BoxMesh" id="BoxMesh_38rlb"]
-size = Vector3(0.013, 0.607, 0.02)
-
-[sub_resource type="BoxMesh" id="BoxMesh_lwbm8"]
-size = Vector3(0.193, 0.046, 0.008)
-
-[sub_resource type="BoxMesh" id="BoxMesh_vuw1a"]
-size = Vector3(0.193, 0.046, 0.008)
-
-[sub_resource type="BoxMesh" id="BoxMesh_733g7"]
-size = Vector3(0.198, 0.565, 0.022)
-
-[sub_resource type="BoxMesh" id="BoxMesh_41tu7"]
-size = Vector3(0.013, 0.607, 0.02)
-
-[sub_resource type="BoxMesh" id="BoxMesh_bmor6"]
-size = Vector3(0.193, 0.046, 0.008)
-
-[sub_resource type="BoxMesh" id="BoxMesh_8d3tx"]
-size = Vector3(0.193, 0.046, 0.008)
-
-[sub_resource type="BoxMesh" id="BoxMesh_v44vg"]
-size = Vector3(0.198, 0.565, 0.022)
-
-[sub_resource type="BoxMesh" id="BoxMesh_7qcj0"]
-size = Vector3(0.013, 0.607, 0.02)
-
-[sub_resource type="BoxMesh" id="BoxMesh_g1hat"]
-size = Vector3(0.193, 0.046, 0.008)
-
-[sub_resource type="BoxMesh" id="BoxMesh_qm1do"]
-size = Vector3(0.193, 0.046, 0.008)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_igxt4"]
-transparency = 1
-cull_mode = 2
-albedo_color = Color(0.45, 0.72, 0.88, 0.13)
-metallic = 0.12
-roughness = 0.09
-
-[sub_resource type="BoxMesh" id="BoxMesh_4rxau"]
-size = Vector3(0.655, 0.656, 0.008)
-
-[sub_resource type="BoxMesh" id="BoxMesh_npitx"]
-size = Vector3(0.77, 0.15, 0.23)
-
-[sub_resource type="BoxMesh" id="BoxMesh_2r0wp"]
-size = Vector3(0.73, 0.037, 0.215)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_t54ub"]
-albedo_color = Color(0.4588235, 0.33035293, 0.52, 1)
-roughness = 0.35
-emission_enabled = true
-emission = Color(0.4588235, 0.33035293, 0.52, 1)
-emission_energy_multiplier = 0.55
-
-[sub_resource type="SphereMesh" id="SphereMesh_s0svm"]
-radius = 0.048
-height = 0.096
-radial_segments = 12
-rings = 6
-
-[sub_resource type="SphereMesh" id="SphereMesh_pn17s"]
-radius = 0.048
-height = 0.096
-radial_segments = 12
-rings = 6
-
-[sub_resource type="SphereMesh" id="SphereMesh_bfvw4"]
-radius = 0.048
-height = 0.096
-radial_segments = 12
-rings = 6
-
-[sub_resource type="BoxMesh" id="BoxMesh_035bi"]
-size = Vector3(0.63, 0.075, 0.028)
-
-[sub_resource type="BoxMesh" id="BoxMesh_k78lf"]
-size = Vector3(0.25, 0.145, 0.023)
-
-[sub_resource type="BoxMesh" id="BoxMesh_2b4i7"]
-size = Vector3(0.14, 0.015, 0.014)
-
-[sub_resource type="BoxMesh" id="BoxMesh_dci15"]
-size = Vector3(0.023, 0.09, 0.014)
-
-[sub_resource type="BoxMesh" id="BoxMesh_qio4e"]
-size = Vector3(0.023, 0.09, 0.014)
-
-[sub_resource type="BoxMesh" id="BoxMesh_5ng4k"]
-size = Vector3(0.023, 0.09, 0.014)
-
-[sub_resource type="BoxMesh" id="BoxMesh_eb7x7"]
-size = Vector3(0.023, 0.09, 0.014)
-
-[sub_resource type="BoxMesh" id="BoxMesh_6x7q2"]
-size = Vector3(0.023, 0.09, 0.014)
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_lyrb1"]
-top_radius = 0.056
-bottom_radius = 0.056
-height = 0.49
-radial_segments = 16
-
-[sub_resource type="CylinderShape3D" id="CylinderShape3D_5w8wo"]
-height = 0.49
-radius = 0.056
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_qifeb"]
-top_radius = 0.255
-bottom_radius = 0.255
-height = 0.05
-radial_segments = 20
-
-[sub_resource type="CylinderShape3D" id="CylinderShape3D_kwio7"]
-height = 0.05
-radius = 0.255
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_k01oo"]
-top_radius = 0.306
-bottom_radius = 0.306
-height = 0.067
-radial_segments = 24
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_0ubvw"]
-top_radius = 0.283
-bottom_radius = 0.283
-height = 0.107
-radial_segments = 24
-
-[sub_resource type="CylinderShape3D" id="CylinderShape3D_6sj4b"]
 height = 0.107
 radius = 0.283
 
@@ -4813,19 +4358,6 @@ bottom_radius = 0.35
 height = 0.045
 radial_segments = 24
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7lydy"]
-albedo_color = Color(1, 0.8352941, 0.6313726, 1)
-roughness = 0.35
-emission_enabled = true
-emission = Color(1, 0.8352941, 0.6313726, 1)
-emission_energy_multiplier = 1.55
-
-[sub_resource type="SphereMesh" id="SphereMesh_eaanh"]
-radius = 0.045
-height = 0.09
-radial_segments = 12
-rings = 6
-
 [sub_resource type="CylinderMesh" id="CylinderMesh_emulp"]
 top_radius = 0.18
 bottom_radius = 0.18
@@ -4907,6 +4439,13 @@ top_radius = 0.08
 bottom_radius = 0.08
 height = 0.41
 radial_segments = 20
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7lydy"]
+albedo_color = Color(1, 0.8352941, 0.6313726, 1)
+roughness = 0.35
+emission_enabled = true
+emission = Color(1, 0.8352941, 0.6313726, 1)
+emission_energy_multiplier = 1.55
 
 [sub_resource type="BoxMesh" id="BoxMesh_c0lmd"]
 size = Vector3(0.16, 0.012, 0.23)
@@ -5016,12 +4555,6 @@ top_radius = 0.35
 bottom_radius = 0.35
 height = 0.045
 radial_segments = 24
-
-[sub_resource type="SphereMesh" id="SphereMesh_wlka2"]
-radius = 0.045
-height = 0.09
-radial_segments = 12
-rings = 6
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_q0woa"]
 top_radius = 0.18
@@ -5213,12 +4746,6 @@ top_radius = 0.35
 bottom_radius = 0.35
 height = 0.045
 radial_segments = 24
-
-[sub_resource type="SphereMesh" id="SphereMesh_wfgbk"]
-radius = 0.045
-height = 0.09
-radial_segments = 12
-rings = 6
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_2ch0x"]
 top_radius = 0.18
@@ -5463,7 +4990,7 @@ texture_filter = 5
 size = Vector3(11.4, 3.3, 0.16)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_cjrly"]
-size = Vector3(11.4, 3.3, 0.16)
+size = Vector3(12.203943, 3.3, 0.16)
 
 [sub_resource type="BoxMesh" id="BoxMesh_7atwi"]
 size = Vector3(10.85, 0.09, 0.36)
@@ -6741,7 +6268,7 @@ current = true
 script = ExtResource("3_models")
 
 [node name="MainChandelier_01" type="Node3D" parent="ModelInteriors"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.4, 4.18, -6.8)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.4, 4.449299, -6.8)
 script = ExtResource("6_editor_anchor")
 asset_id = "Chandelier_02"
 target_height = 1.55
@@ -6757,7 +6284,7 @@ metadata/asset_id = "Chandelier_01"
 metadata/placement_group = "CeilingChandelier"
 
 [node name="CeilingChandelier_02" type="Node3D" parent="ModelInteriors"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.5, 4.47, -6.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.5, 4.774713, -6.5)
 script = ExtResource("6_editor_anchor")
 asset_id = "Chandelier_01"
 target_height = 1.25
@@ -6765,7 +6292,7 @@ metadata/asset_id = "Chandelier_01"
 metadata/placement_group = "CeilingChandelier"
 
 [node name="CeilingChandelier_03" type="Node3D" parent="ModelInteriors"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31, 4.47, -6.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31, 4.7489505, -6.5)
 script = ExtResource("6_editor_anchor")
 asset_id = "Chandelier_01"
 target_height = 1.25
@@ -6773,7 +6300,7 @@ metadata/asset_id = "Chandelier_01"
 metadata/placement_group = "CeilingChandelier"
 
 [node name="CeilingChandelier_04" type="Node3D" parent="ModelInteriors"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -41, 4.47, -6.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -41, 4.757898, -6.5)
 script = ExtResource("6_editor_anchor")
 asset_id = "Chandelier_01"
 target_height = 1.25
@@ -6896,7 +6423,7 @@ metadata/asset_id = "brass_candleholders"
 metadata/placement_group = "SingleBrassCandleholder"
 
 [node name="LoungeSofa_01" type="Node3D" parent="ModelInteriors"]
-transform = Transform3D(-1, 0, -3.2584137e-07, 0, 1, 0, 3.2584137e-07, 0, -1, -18.4, 0.005, -1.14)
+transform = Transform3D(-1, 0, -3.2584137e-07, 0, 1, 0, 3.2584137e-07, 0, -1, -18.4, 0.005, -0.76486325)
 script = ExtResource("6_editor_anchor")
 asset_id = "sofa_02"
 target_height = 1.08
@@ -6914,7 +6441,7 @@ metadata/asset_id = "round_wooden_table_01"
 metadata/placement_group = "LoungeCoffeeTable"
 
 [node name="LoungeSofa_02" type="Node3D" parent="ModelInteriors"]
-transform = Transform3D(-1, 0, -3.2584137e-07, 0, 1, 0, 3.2584137e-07, 0, -1, -23.5, 0.005, -1.14)
+transform = Transform3D(-1, 0, -3.2584137e-07, 0, 1, 0, 3.2584137e-07, 0, -1, -23.5, 0.005, -0.76486325)
 script = ExtResource("6_editor_anchor")
 asset_id = "sofa_02"
 target_height = 1.08
@@ -6932,7 +6459,7 @@ metadata/asset_id = "round_wooden_table_01"
 metadata/placement_group = "LoungeCoffeeTable"
 
 [node name="LoungeSofa_03" type="Node3D" parent="ModelInteriors"]
-transform = Transform3D(-1, 0, -3.2584137e-07, 0, 1, 0, 3.2584137e-07, 0, -1, -28.6, 0.005, -1.14)
+transform = Transform3D(-1, 0, -3.2584137e-07, 0, 1, 0, 3.2584137e-07, 0, -1, -28.6, 0.005, -0.76486325)
 script = ExtResource("6_editor_anchor")
 asset_id = "sofa_02"
 target_height = 1.08
@@ -6950,7 +6477,7 @@ metadata/asset_id = "round_wooden_table_01"
 metadata/placement_group = "LoungeCoffeeTable"
 
 [node name="LoungeSofa_04" type="Node3D" parent="ModelInteriors"]
-transform = Transform3D(-1, 0, -3.2584137e-07, 0, 1, 0, 3.2584137e-07, 0, -1, -33.7, 0.005, -1.14)
+transform = Transform3D(-1, 0, -3.2584137e-07, 0, 1, 0, 3.2584137e-07, 0, -1, -33.7, 0.005, -0.69584846)
 script = ExtResource("6_editor_anchor")
 asset_id = "sofa_02"
 target_height = 1.08
@@ -6968,7 +6495,7 @@ metadata/asset_id = "round_wooden_table_01"
 metadata/placement_group = "LoungeCoffeeTable"
 
 [node name="LoungeSofa_05" type="Node3D" parent="ModelInteriors"]
-transform = Transform3D(-1, 0, -3.2584137e-07, 0, 1, 0, 3.2584137e-07, 0, -1, -38.8, 0.005, -1.14)
+transform = Transform3D(-1, 0, -3.2584137e-07, 0, 1, 0, 3.2584137e-07, 0, -1, -38.8, 0.005, -0.69584846)
 script = ExtResource("6_editor_anchor")
 asset_id = "sofa_02"
 target_height = 1.08
@@ -6995,7 +6522,7 @@ metadata/asset_id = "chess_set"
 metadata/placement_group = "LoungeChessSet"
 
 [node name="ConcreteCatDisplay_01" type="Node3D" parent="ModelInteriors"]
-transform = Transform3D(-1, 0, -3.2584137e-07, 0, 1, 0, 3.2584137e-07, 0, -1, -8.45, 0.625, -1.04)
+transform = Transform3D(-0.6360783, 0, -0.77162457, 0, 1, 0, 0.77162457, 0, -0.6360783, 5.4185386, 1.2692931, -0.95544946)
 script = ExtResource("6_editor_anchor")
 asset_id = "concrete_cat_statue"
 target_height = 0.49
@@ -7029,7 +6556,7 @@ metadata/asset_id = "marble_bust_01"
 metadata/placement_group = "MarbleBust"
 
 [node name="FramedPainting_01" type="Node3D" parent="ModelInteriors"]
-transform = Transform3D(-1, 0, -3.2584137e-07, 0, 1, 0, 3.2584137e-07, 0, -1, -17.4, 2.65, -0.16)
+transform = Transform3D(-1, 0, -3.2584137e-07, 0, 1, 0, 3.2584137e-07, 0, -1, -17.4, 2.65, -0.026692092)
 script = ExtResource("6_editor_anchor")
 asset_id = "fancy_picture_frame_01"
 target_height = 1.22
@@ -7038,7 +6565,7 @@ metadata/asset_id = "fancy_picture_frame_01"
 metadata/placement_group = "FramedPainting"
 
 [node name="FramedPainting_02" type="Node3D" parent="ModelInteriors"]
-transform = Transform3D(-1, 0, -3.2584137e-07, 0, 1, 0, 3.2584137e-07, 0, -1, -29.4, 2.65, -0.16)
+transform = Transform3D(-1, 0, -3.2584137e-07, 0, 1, 0, 3.2584137e-07, 0, -1, -29.4, 2.65, -0.022778422)
 script = ExtResource("6_editor_anchor")
 asset_id = "fancy_picture_frame_01"
 target_height = 1.22
@@ -7047,7 +6574,7 @@ metadata/asset_id = "fancy_picture_frame_01"
 metadata/placement_group = "FramedPainting"
 
 [node name="FramedPainting_03" type="Node3D" parent="ModelInteriors"]
-transform = Transform3D(-1, 0, -3.2584137e-07, 0, 1, 0, 3.2584137e-07, 0, -1, -40.7, 2.65, -0.16)
+transform = Transform3D(-1, 0, -3.2584137e-07, 0, 1, 0, 3.2584137e-07, 0, -1, -40.7, 2.65, -0.023266166)
 script = ExtResource("6_editor_anchor")
 asset_id = "fancy_picture_frame_01"
 target_height = 1.22
@@ -7056,7 +6583,7 @@ metadata/asset_id = "fancy_picture_frame_01"
 metadata/placement_group = "FramedPainting"
 
 [node name="EntranceSecurityCamera_01" type="Node3D" parent="ModelInteriors"]
-transform = Transform3D(3.1391647e-07, 0, -1, 0, 1, 0, 1, 0, 3.1391647e-07, 5.8, 4.75, 10.8)
+transform = Transform3D(-4.371139e-08, -0.6238796, -0.7815205, 0, 0.7815205, -0.6238796, 1, -2.7270644e-08, -3.4161346e-08, 5.8, 4.75, 10.8)
 script = ExtResource("6_editor_anchor")
 asset_id = "security_camera_01"
 target_height = 0.42
@@ -7064,7 +6591,7 @@ metadata/asset_id = "security_camera_01"
 metadata/placement_group = "EntranceSecurityCamera"
 
 [node name="WestSecurityCamera_01" type="Node3D" parent="ModelInteriors"]
-transform = Transform3D(0.31532237, 0, 0.9489846, 0, 1, 0, -0.9489846, 0, 0.31532237, -44.7, 4.7, -12.64)
+transform = Transform3D(0.98927236, 0.03261305, 0.14239606, 0, 0.9747612, -0.2232501, -0.14608303, 0.22085516, 0.96430427, -44.7, 4.7, -12.652057)
 script = ExtResource("6_editor_anchor")
 asset_id = "security_camera_01"
 target_height = 0.42
@@ -7072,7 +6599,7 @@ metadata/asset_id = "security_camera_01"
 metadata/placement_group = "WestSecurityCamera"
 
 [node name="CoffeeServiceCart_01" type="Node3D" parent="ModelInteriors"]
-transform = Transform3D(-1, 0, -3.2584137e-07, 0, 1, 0, 3.2584137e-07, 0, -1, -15.85, 0.005, -0.54)
+transform = Transform3D(-1, 0, -3.2584137e-07, 0, 1, 0, 3.2584137e-07, 0, -1, -15.85, 0.005, -0.46148396)
 script = ExtResource("6_editor_anchor")
 asset_id = "CoffeeCart_01"
 target_height = 1.33
@@ -7080,7 +6607,7 @@ metadata/asset_id = "CoffeeCart_01"
 metadata/placement_group = "CoffeeServiceCart"
 
 [node name="BarServiceCabinet_01" type="Node3D" parent="ModelInteriors"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.45, 0.245, -12.03)
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 5.465916, 0.245, -2.3831377)
 script = ExtResource("6_editor_anchor")
 asset_id = "modern_wooden_cabinet"
 target_height = 1.02
@@ -7092,6 +6619,16 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.4, 4.5, -6.8)
 light_color = Color(0.9529412, 0.7764706, 0.57254905, 1)
 light_energy = 0.48
 light_volumetric_fog_energy = 0.12
+omni_range = 4.103
+
+[node name="ChandelierWarmLight_01" type="OmniLight3D" parent="ModelInteriors/ChandelierWarmLight_01"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.42194104, -0.58491945, -2.890192)
+light_color = Color(0.9529412, 0.7764706, 0.57254905, 1)
+light_energy = 1.979
+light_indirect_energy = 0.835
+light_volumetric_fog_energy = 3.089
+light_specular = 0.0
+shadow_enabled = true
 omni_range = 6.3
 
 [node name="ChandelierWarmLight_02" type="OmniLight3D" parent="ModelInteriors"]
@@ -7099,38 +6636,27 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3, 4.4, 5.8)
 light_color = Color(0.9529412, 0.7764706, 0.57254905, 1)
 light_energy = 0.26
 light_volumetric_fog_energy = 0.12
-omni_range = 5.8
-
-[node name="ChandelierWarmLight_03" type="OmniLight3D" parent="ModelInteriors"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.5, 4.4, -6.5)
-light_color = Color(0.9529412, 0.7764706, 0.57254905, 1)
-light_energy = 0.26
-light_volumetric_fog_energy = 0.12
+shadow_enabled = true
 omni_range = 5.8
 
 [node name="ChandelierWarmLight_04" type="OmniLight3D" parent="ModelInteriors"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31, 4.4, -6.5)
 light_color = Color(0.9529412, 0.7764706, 0.57254905, 1)
-light_energy = 0.26
+light_energy = 0.425
 light_volumetric_fog_energy = 0.12
-omni_range = 5.8
+shadow_enabled = true
+omni_range = 6.319
 
 [node name="ChandelierWarmLight_05" type="OmniLight3D" parent="ModelInteriors"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -41, 4.4, -6.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -41, 5.324433, -6.5)
 light_color = Color(0.9529412, 0.7764706, 0.57254905, 1)
-light_energy = 0.26
-light_volumetric_fog_energy = 0.12
-omni_range = 5.8
+light_energy = 0.59
+light_volumetric_fog_energy = 0.945
+shadow_enabled = true
+omni_range = 10.571
 
 [node name="DecorativeStatuePlinth_01" type="StaticBody3D" parent="ModelInteriors"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.45, 0.315, -1.04)
-
-[node name="StonePlinthMesh" type="MeshInstance3D" parent="ModelInteriors/DecorativeStatuePlinth_01"]
-material_override = SubResource("StandardMaterial3D_jx0wj")
-mesh = SubResource("BoxMesh_kkkcx")
-
-[node name="PlinthCollision" type="CollisionShape3D" parent="ModelInteriors/DecorativeStatuePlinth_01"]
-shape = SubResource("BoxShape3D_34ol3")
 
 [node name="DecorativeStatuePlinth_02" type="StaticBody3D" parent="ModelInteriors"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -44.2, 0.375, -1.35)
@@ -7166,10 +6692,12 @@ shape = SubResource("BoxShape3D_ovcoh")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.45, 0.12, -12.03)
 
 [node name="CabinetPolishedWoodBase" type="MeshInstance3D" parent="ModelInteriors/BarCabinetPlinth"]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 8.915916, 0, 9.646862)
 material_override = SubResource("StandardMaterial3D_ppx11")
 mesh = SubResource("BoxMesh_1yv1y")
 
 [node name="@CollisionShape3D@325" type="CollisionShape3D" parent="ModelInteriors/BarCabinetPlinth"]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 8.915916, 0, 9.646862)
 shape = SubResource("BoxShape3D_5yh34")
 
 [node name="SketchfabFurniture" type="Node3D" parent="."]
@@ -7206,73 +6734,53 @@ cast_shadow = 0
 mesh = SubResource("BoxMesh_n5t1e")
 
 [node name="EntrySignTop" type="MeshInstance3D" parent="CasinoAtmosphere"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.57, 13.73)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.57, 13.969153)
 material_override = SubResource("StandardMaterial3D_h6isl")
 cast_shadow = 0
+gi_mode = 0
 mesh = SubResource("BoxMesh_53bls")
 
 [node name="EntrySignBottom" type="MeshInstance3D" parent="CasinoAtmosphere"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.73, 13.73)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.73, 13.97333)
 material_override = SubResource("StandardMaterial3D_h6isl")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_lwnsi")
 
 [node name="EntrySignLeft" type="MeshInstance3D" parent="CasinoAtmosphere"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.8, 4.15, 13.73)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.7734466, 4.15, 13.971127)
 material_override = SubResource("StandardMaterial3D_h6isl")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_41lik")
 
 [node name="EntrySignRight" type="MeshInstance3D" parent="CasinoAtmosphere"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.8, 4.15, 13.73)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.7760117, 4.15, 13.970769)
 material_override = SubResource("StandardMaterial3D_h6isl")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_jbvwl")
 
 [node name="BarSignTop" type="MeshInstance3D" parent="CasinoAtmosphere"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.33, 5.24, -12.3)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.3326194, 5.4875855, -12.880569)
 material_override = SubResource("StandardMaterial3D_sn1fb")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_yvsr8")
 
 [node name="BarSignBottom" type="MeshInstance3D" parent="CasinoAtmosphere"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.33, 4.2, -12.3)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.3389223, 4.4591465, -12.872567)
 material_override = SubResource("StandardMaterial3D_sn1fb")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_vieuh")
 
 [node name="BarSignLeft" type="MeshInstance3D" parent="CasinoAtmosphere"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.505, 4.72, -12.3)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.4796205, 4.9834228, -12.886663)
 material_override = SubResource("StandardMaterial3D_sn1fb")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_yjja3")
 
 [node name="BarSignRight" type="MeshInstance3D" parent="CasinoAtmosphere"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15499997, 4.72, -12.3)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.17822003, 4.9911957, -12.875173)
 material_override = SubResource("StandardMaterial3D_sn1fb")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_l0gw7")
-
-[node name="CatHighlight" type="SpotLight3D" parent="CasinoAtmosphere"]
-transform = Transform3D(-1, 7.5053755e-08, -4.4829402e-08, 0, 0.5127886, 0.8585149, 8.742278e-08, 0.8585149, -0.5127886, -8.45, 4.7, -3.25)
-light_color = Color(1, 0.8745098, 0.7137255, 1)
-light_energy = 1.05
-light_volumetric_fog_energy = 0.85
-shadow_enabled = true
-shadow_bias = 0.08
-shadow_blur = 1.3
-spot_range = 6.2
-spot_attenuation = 1.8
-spot_angle = 32.0
-
-[node name="ChessHighlight" type="SpotLight3D" parent="CasinoAtmosphere"]
-transform = Transform3D(-1, 8.19806e-08, -3.0363175e-08, 0, 0.34731424, 0.9377488, 8.742278e-08, 0.9377488, -0.34731424, -28.6, 4.7, -4.25)
-light_color = Color(1, 0.8745098, 0.7137255, 1)
-light_energy = 0.85
-light_volumetric_fog_energy = 0.85
-spot_range = 6.2
-spot_attenuation = 1.8
-spot_angle = 32.0
 
 [node name="HorseHighlight" type="SpotLight3D" parent="CasinoAtmosphere"]
 transform = Transform3D(-0.99837124, -0.05155803, 0.024425339, 0, 0.42813092, 0.90371674, -0.057051096, 0.9022448, -0.4274336, -44.1, 4.8, -3.1)
@@ -7300,6 +6808,11 @@ mesh = SubResource("ArrayMesh_jcxqu")
 [node name="OakWestWing" type="MeshInstance3D" parent="Architecture"]
 mesh = SubResource("ArrayMesh_0arob")
 
+[node name="WestCeilingTrim_0172" type="MeshInstance3D" parent="Architecture/OakWestWing"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.00068, 5.865, -6.5)
+material_override = SubResource("StandardMaterial3D_cit2p")
+mesh = SubResource("BoxMesh_46ndd")
+
 [node name="MainWingFloorCollider" type="MeshInstance3D" parent="Architecture"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.12, 0.5)
 visible = false
@@ -7324,6 +6837,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, -0.12, -6.5)
 metadata/collision_for = "WestWingFloorCollider"
 
 [node name="@CollisionShape3D@3" type="CollisionShape3D" parent="Architecture/WestWingFloorCollider_Collision"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5050378)
 shape = SubResource("BoxShape3D_m74q3")
 
 [node name="EntryBackWall" type="MeshInstance3D" parent="Architecture"]
@@ -7429,7 +6943,7 @@ material_override = SubResource("StandardMaterial3D_bnk2o")
 mesh = SubResource("BoxMesh_oosfy")
 
 [node name="MainCeiling" type="MeshInstance3D" parent="Architecture"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.1, 0.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15223312, 6.1, 0.5)
 material_override = SubResource("StandardMaterial3D_nf4f2")
 mesh = SubResource("BoxMesh_xkvoa")
 
@@ -7451,6 +6965,7 @@ mesh = SubResource("BoxMesh_5s44m")
 [node name="@MeshInstance3D@11" type="MeshInstance3D" parent="Architecture"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 1.02, -12.99)
 material_override = SubResource("StandardMaterial3D_ibca3")
+lod_bias = 0.001
 mesh = SubResource("BoxMesh_g3y5b")
 
 [node name="@MeshInstance3D@12" type="MeshInstance3D" parent="Architecture"]
@@ -7480,16 +6995,6 @@ metadata/collision_for = "FlutedPillar"
 
 [node name="@CollisionShape3D@15" type="CollisionShape3D" parent="Architecture/FlutedPillar_Collision"]
 shape = SubResource("BoxShape3D_6seew")
-
-[node name="PillarBase_0032" type="MeshInstance3D" parent="Architecture"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.65, 0.145, 12)
-material_override = SubResource("StandardMaterial3D_3ox4t")
-mesh = SubResource("BoxMesh_4fmho")
-
-[node name="PillarBaseCollar_0032" type="MeshInstance3D" parent="Architecture"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.65, 0.315, 12)
-material_override = SubResource("StandardMaterial3D_aivy6")
-mesh = SubResource("BoxMesh_bil4k")
 
 [node name="PillarCapitalCollar_0032" type="MeshInstance3D" parent="Architecture"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.65, 5.67, 12)
@@ -7910,16 +7415,6 @@ metadata/collision_for = "FlutedPillar"
 [node name="@CollisionShape3D@53" type="CollisionShape3D" parent="Architecture/@StaticBody3D@54"]
 shape = SubResource("BoxShape3D_130bj")
 
-[node name="PillarBase_0110" type="MeshInstance3D" parent="Architecture"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -43, 0.145, 0.2)
-material_override = SubResource("StandardMaterial3D_xa7an")
-mesh = SubResource("BoxMesh_dk42n")
-
-[node name="PillarBaseCollar_0110" type="MeshInstance3D" parent="Architecture"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -43, 0.315, 0.2)
-material_override = SubResource("StandardMaterial3D_4dwmn")
-mesh = SubResource("BoxMesh_swdh1")
-
 [node name="PillarCapitalCollar_0110" type="MeshInstance3D" parent="Architecture"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -43, 5.67, 0.2)
 material_override = SubResource("StandardMaterial3D_8v027")
@@ -7942,16 +7437,6 @@ metadata/collision_for = "FlutedPillar"
 
 [node name="@CollisionShape3D@56" type="CollisionShape3D" parent="Architecture/@StaticBody3D@57"]
 shape = SubResource("BoxShape3D_ecwfn")
-
-[node name="PillarBase_0116" type="MeshInstance3D" parent="Architecture"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -37, 0.145, 0.2)
-material_override = SubResource("StandardMaterial3D_ip2l3")
-mesh = SubResource("BoxMesh_s14wm")
-
-[node name="PillarBaseCollar_0116" type="MeshInstance3D" parent="Architecture"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -37, 0.315, 0.2)
-material_override = SubResource("StandardMaterial3D_q4gy1")
-mesh = SubResource("BoxMesh_cnw22")
 
 [node name="PillarCapitalCollar_0116" type="MeshInstance3D" parent="Architecture"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -37, 5.67, 0.2)
@@ -7976,16 +7461,6 @@ metadata/collision_for = "FlutedPillar"
 [node name="@CollisionShape3D@59" type="CollisionShape3D" parent="Architecture/@StaticBody3D@60"]
 shape = SubResource("BoxShape3D_d1vw0")
 
-[node name="PillarBase_0122" type="MeshInstance3D" parent="Architecture"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31, 0.145, 0.2)
-material_override = SubResource("StandardMaterial3D_pmrog")
-mesh = SubResource("BoxMesh_pbe4p")
-
-[node name="PillarBaseCollar_0122" type="MeshInstance3D" parent="Architecture"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31, 0.315, 0.2)
-material_override = SubResource("StandardMaterial3D_8ldsf")
-mesh = SubResource("BoxMesh_f4177")
-
 [node name="PillarCapitalCollar_0122" type="MeshInstance3D" parent="Architecture"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31, 5.67, 0.2)
 material_override = SubResource("StandardMaterial3D_nckbc")
@@ -8008,16 +7483,6 @@ metadata/collision_for = "FlutedPillar"
 
 [node name="@CollisionShape3D@62" type="CollisionShape3D" parent="Architecture/@StaticBody3D@63"]
 shape = SubResource("BoxShape3D_d8xcs")
-
-[node name="PillarBase_0128" type="MeshInstance3D" parent="Architecture"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25, 0.145, 0.2)
-material_override = SubResource("StandardMaterial3D_2ixj2")
-mesh = SubResource("BoxMesh_t6w6j")
-
-[node name="PillarBaseCollar_0128" type="MeshInstance3D" parent="Architecture"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25, 0.315, 0.2)
-material_override = SubResource("StandardMaterial3D_itvpi")
-mesh = SubResource("BoxMesh_4jpym")
 
 [node name="PillarCapitalCollar_0128" type="MeshInstance3D" parent="Architecture"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25, 5.67, 0.2)
@@ -8042,16 +7507,6 @@ metadata/collision_for = "FlutedPillar"
 [node name="@CollisionShape3D@65" type="CollisionShape3D" parent="Architecture/@StaticBody3D@66"]
 shape = SubResource("BoxShape3D_1h7wj")
 
-[node name="PillarBase_0134" type="MeshInstance3D" parent="Architecture"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 0.145, 0.2)
-material_override = SubResource("StandardMaterial3D_p03h6")
-mesh = SubResource("BoxMesh_ypkft")
-
-[node name="PillarBaseCollar_0134" type="MeshInstance3D" parent="Architecture"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 0.315, 0.2)
-material_override = SubResource("StandardMaterial3D_tdfff")
-mesh = SubResource("BoxMesh_l0fe1")
-
 [node name="PillarCapitalCollar_0134" type="MeshInstance3D" parent="Architecture"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 5.67, 0.2)
 material_override = SubResource("StandardMaterial3D_tmofn")
@@ -8075,16 +7530,6 @@ metadata/collision_for = "FlutedPillar"
 [node name="@CollisionShape3D@68" type="CollisionShape3D" parent="Architecture/@StaticBody3D@69"]
 shape = SubResource("BoxShape3D_nrh2l")
 
-[node name="PillarBase_0140" type="MeshInstance3D" parent="Architecture"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 0.145, 0.2)
-material_override = SubResource("StandardMaterial3D_cuixb")
-mesh = SubResource("BoxMesh_bwis2")
-
-[node name="PillarBaseCollar_0140" type="MeshInstance3D" parent="Architecture"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 0.315, 0.2)
-material_override = SubResource("StandardMaterial3D_lyu6w")
-mesh = SubResource("BoxMesh_prs1d")
-
 [node name="PillarCapitalCollar_0140" type="MeshInstance3D" parent="Architecture"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 5.67, 0.2)
 material_override = SubResource("StandardMaterial3D_klk0y")
@@ -8101,22 +7546,18 @@ material_override = SubResource("StandardMaterial3D_3try8")
 mesh = SubResource("BoxMesh_3c47a")
 metadata/decor_type = "pillar"
 
+[node name="_MeshInstance3D_70" type="MeshInstance3D" parent="Architecture/@MeshInstance3D@70"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7452006, -0.028523445, -0.21450074)
+material_override = SubResource("StandardMaterial3D_3try8")
+mesh = SubResource("BoxMesh_3c47a")
+metadata/decor_type = "pillar"
+
 [node name="@StaticBody3D@72" type="StaticBody3D" parent="Architecture"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 2.955, 0.2)
 metadata/collision_for = "FlutedPillar"
 
 [node name="@CollisionShape3D@71" type="CollisionShape3D" parent="Architecture/@StaticBody3D@72"]
 shape = SubResource("BoxShape3D_wvadq")
-
-[node name="PillarBase_0146" type="MeshInstance3D" parent="Architecture"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0.145, 0.2)
-material_override = SubResource("StandardMaterial3D_g3g33")
-mesh = SubResource("BoxMesh_o86rh")
-
-[node name="PillarBaseCollar_0146" type="MeshInstance3D" parent="Architecture"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0.315, 0.2)
-material_override = SubResource("StandardMaterial3D_rh1eg")
-mesh = SubResource("BoxMesh_5i5n0")
 
 [node name="PillarCapitalCollar_0146" type="MeshInstance3D" parent="Architecture"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 5.67, 0.2)
@@ -8235,7 +7676,7 @@ material_override = SubResource("StandardMaterial3D_kcnd4")
 mesh = SubResource("BoxMesh_fgks3")
 
 [node name="WestCeilingTrim_0172" type="MeshInstance3D" parent="Architecture"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 5.865, -6.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.009029, 5.8561106, -6.4904566)
 material_override = SubResource("StandardMaterial3D_cit2p")
 mesh = SubResource("BoxMesh_46ndd")
 
@@ -8255,7 +7696,7 @@ material_override = SubResource("StandardMaterial3D_swcop")
 mesh = SubResource("BoxMesh_ico27")
 
 [node name="Sign_CASINO_ANOMALY" type="Label3D" parent="Architecture"]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 4.14, 13.7)
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 4.14, 13.997473)
 modulate = Color(0.88235295, 0.7607843, 0.5568628, 1)
 text = "CASINO ANOMALY"
 font_size = 64
@@ -8403,10 +7844,10 @@ material_override = SubResource("StandardMaterial3D_sa5b4")
 mesh = SubResource("BoxMesh_6h8os")
 
 [node name="Sign_GOLD_RUSH" type="Label3D" parent="SlotMachines/Slot_01"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.959, 0.465)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.9073486e-06, 1.9997745, 0.46500015)
 modulate = Color(0.38039216, 0.8117647, 0.9098039, 1)
 text = "GOLD RUSH"
-font_size = 24
+font_size = 22
 
 [node name="TopGlow" type="MeshInstance3D" parent="SlotMachines/Slot_01"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.133, 0.395)
@@ -8686,7 +8127,7 @@ material_override = SubResource("StandardMaterial3D_e06bn")
 mesh = SubResource("BoxMesh_pb33p")
 
 [node name="Sign_LUCKY_7" type="Label3D" parent="SlotMachines/Slot_02"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.959, 0.465)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.536743e-07, 2.0017147, 0.46500015)
 modulate = Color(0.88235295, 0.63529414, 1, 1)
 text = "LUCKY 7"
 font_size = 24
@@ -8969,7 +8410,7 @@ material_override = SubResource("StandardMaterial3D_1tvrs")
 mesh = SubResource("BoxMesh_7sb4c")
 
 [node name="Sign_NOVA" type="Label3D" parent="SlotMachines/Slot_03"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.959, 0.465)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.998922, 0.46500015)
 modulate = Color(1, 0.36862746, 0.4392157, 1)
 text = "NOVA"
 font_size = 24
@@ -9054,7 +8495,7 @@ material_override = SubResource("StandardMaterial3D_on70b")
 mesh = SubResource("BoxMesh_3wpod")
 
 [node name="ReelGlyph_2" type="Label3D" parent="SlotMachines/Slot_03"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.219, 1.366, 0.503)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.21900034, 1.3743352, 0.5029998)
 pixel_size = 0.0026
 modulate = Color(0.20392157, 0.18039216, 0.19215687, 1)
 text = "★"
@@ -9252,7 +8693,7 @@ material_override = SubResource("StandardMaterial3D_5eihh")
 mesh = SubResource("BoxMesh_ymi3n")
 
 [node name="Sign_ROYAL" type="Label3D" parent="SlotMachines/Slot_04"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.959, 0.465)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.3841858e-07, 1.9976124, 0.46500015)
 modulate = Color(1, 0.61960787, 0.33333334, 1)
 text = "ROYAL"
 font_size = 24
@@ -9535,7 +8976,7 @@ material_override = SubResource("StandardMaterial3D_7e000")
 mesh = SubResource("BoxMesh_gd7c4")
 
 [node name="Sign_MIDNIGHT" type="Label3D" parent="SlotMachines/Slot_05"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.959, 0.465)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9896449, 0.46500015)
 modulate = Color(0.38039216, 0.8117647, 0.9098039, 1)
 text = "MIDNIGHT"
 font_size = 24
@@ -9593,7 +9034,7 @@ material_override = SubResource("StandardMaterial3D_rnnoi")
 mesh = SubResource("BoxMesh_4jns6")
 
 [node name="ReelGlyph_1" type="Label3D" parent="SlotMachines/Slot_05"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.366, 0.503)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.009568855, 1.366, 0.5029998)
 pixel_size = 0.0026
 modulate = Color(0.20392157, 0.18039216, 0.19215687, 1)
 text = "★"
@@ -9818,13 +9259,13 @@ material_override = SubResource("StandardMaterial3D_dm6d6")
 mesh = SubResource("BoxMesh_t0f8l")
 
 [node name="Sign_GOLD_RUSH" type="Label3D" parent="SlotMachines/Slot_06"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.959, 0.465)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.536743e-07, 1.9906572, 0.46500015)
 modulate = Color(0.88235295, 0.63529414, 1, 1)
 text = "GOLD RUSH"
-font_size = 24
+font_size = 22
 
 [node name="TopGlow" type="MeshInstance3D" parent="SlotMachines/Slot_06"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.133, 0.395)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.536743e-07, 2.1234093, 0.39499998)
 material_override = SubResource("StandardMaterial3D_ijx6y")
 mesh = SubResource("BoxMesh_kcodi")
 
@@ -10101,13 +9542,13 @@ material_override = SubResource("StandardMaterial3D_deegn")
 mesh = SubResource("BoxMesh_leuxt")
 
 [node name="Sign_LUCKY_7" type="Label3D" parent="SlotMachines/Slot_07"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.959, 0.465)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.988396, 0.46500015)
 modulate = Color(1, 0.36862746, 0.4392157, 1)
 text = "LUCKY 7"
 font_size = 24
 
 [node name="TopGlow" type="MeshInstance3D" parent="SlotMachines/Slot_07"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.133, 0.395)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1234093, 0.39499998)
 material_override = SubResource("StandardMaterial3D_cqmm2")
 mesh = SubResource("BoxMesh_sv7en")
 
@@ -10132,7 +9573,7 @@ material_override = SubResource("StandardMaterial3D_k15ow")
 mesh = SubResource("BoxMesh_2xk7r")
 
 [node name="ReelGlyph_0" type="Label3D" parent="SlotMachines/Slot_07"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.219, 1.366, 0.503)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.21474314, 1.366, 0.5029998)
 pixel_size = 0.0026
 modulate = Color(0.20392157, 0.18039216, 0.19215687, 1)
 text = "★"
@@ -10186,7 +9627,7 @@ material_override = SubResource("StandardMaterial3D_k15ow")
 mesh = SubResource("BoxMesh_tg1il")
 
 [node name="ReelGlyph_2" type="Label3D" parent="SlotMachines/Slot_07"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.219, 1.366, 0.503)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.21899986, 1.3608891, 0.50300026)
 pixel_size = 0.0026
 modulate = Color(0.20392157, 0.18039216, 0.19215687, 1)
 text = "BAR"
@@ -10384,13 +9825,13 @@ material_override = SubResource("StandardMaterial3D_gu555")
 mesh = SubResource("BoxMesh_5t100")
 
 [node name="Sign_NOVA" type="Label3D" parent="SlotMachines/Slot_08"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.959, 0.465)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.988396, 0.46500015)
 modulate = Color(1, 0.61960787, 0.33333334, 1)
 text = "NOVA"
 font_size = 24
 
 [node name="TopGlow" type="MeshInstance3D" parent="SlotMachines/Slot_08"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.133, 0.395)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1234093, 0.39499998)
 material_override = SubResource("StandardMaterial3D_teekd")
 mesh = SubResource("BoxMesh_4bcgx")
 
@@ -10469,7 +9910,7 @@ material_override = SubResource("StandardMaterial3D_p12x4")
 mesh = SubResource("BoxMesh_l83ff")
 
 [node name="ReelGlyph_2" type="Label3D" parent="SlotMachines/Slot_08"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.219, 1.366, 0.503)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.21899986, 1.3708506, 0.50300026)
 pixel_size = 0.0026
 modulate = Color(0.20392157, 0.18039216, 0.19215687, 1)
 text = "★"
@@ -10667,13 +10108,13 @@ material_override = SubResource("StandardMaterial3D_2xt2v")
 mesh = SubResource("BoxMesh_7eng5")
 
 [node name="Sign_ROYAL" type="Label3D" parent="SlotMachines/Slot_09"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.959, 0.465)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.1920929e-07, 1.988396, 0.46500015)
 modulate = Color(0.38039216, 0.8117647, 0.9098039, 1)
 text = "ROYAL"
 font_size = 24
 
 [node name="TopGlow" type="MeshInstance3D" parent="SlotMachines/Slot_09"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.133, 0.395)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1234093, 0.39499998)
 material_override = SubResource("StandardMaterial3D_jgjkd")
 mesh = SubResource("BoxMesh_lhqnn")
 
@@ -10698,7 +10139,7 @@ material_override = SubResource("StandardMaterial3D_1ut2p")
 mesh = SubResource("BoxMesh_v4x2o")
 
 [node name="ReelGlyph_0" type="Label3D" parent="SlotMachines/Slot_09"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.219, 1.366, 0.503)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.22136188, 1.366, 0.48872948)
 pixel_size = 0.0026
 modulate = Color(0.20392157, 0.18039216, 0.19215687, 1)
 text = "♣"
@@ -10725,7 +10166,7 @@ material_override = SubResource("StandardMaterial3D_1ut2p")
 mesh = SubResource("BoxMesh_h52gx")
 
 [node name="ReelGlyph_1" type="Label3D" parent="SlotMachines/Slot_09"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.366, 0.503)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0081733465, 1.366, 0.5029998)
 pixel_size = 0.0026
 modulate = Color(0.20392157, 0.18039216, 0.19215687, 1)
 text = "BAR"
@@ -10790,7 +10231,7 @@ mesh = SubResource("SphereMesh_xbshx")
 
 [node name="ControlLamp_1" type="MeshInstance3D" parent="SlotMachines/Slot_09"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.991, 0.516)
-material_override = SubResource("StandardMaterial3D_jgjkd")
+material_override = SubResource("ShaderMaterial_come4")
 mesh = SubResource("SphereMesh_1kag8")
 
 [node name="ControlLamp_2" type="MeshInstance3D" parent="SlotMachines/Slot_09"]
@@ -10882,285 +10323,21 @@ shape = SubResource("CylinderShape3D_8qede")
 [node name="Slot_10" type="Node3D" parent="SlotMachines"]
 transform = Transform3D(3.1391647e-07, 0, -1, 0, 1, 0, 1, 0, 3.1391647e-07, 4.65, 0, 11.85)
 
-[node name="Body" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-material_override = SubResource("StandardMaterial3D_0inuk")
-mesh = SubResource("BoxMesh_d4i0y")
-
 [node name="Body_Collision" type="StaticBody3D" parent="SlotMachines/Slot_10"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 metadata/collision_for = "Body"
 
-[node name="@CollisionShape3D@122" type="CollisionShape3D" parent="SlotMachines/Slot_10/Body_Collision"]
-shape = SubResource("BoxShape3D_mto8i")
-
-[node name="FootSocle" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.14, 0)
-material_override = SubResource("StandardMaterial3D_yc6xu")
-mesh = SubResource("BoxMesh_o3cey")
-
-[node name="SideVeneerLeft" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.424, 1.1, 0.005)
-material_override = SubResource("StandardMaterial3D_ao7r0")
-mesh = SubResource("BoxMesh_i31w3")
-
-[node name="SideVeneerRight" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.424, 1.1, 0.005)
-material_override = SubResource("StandardMaterial3D_ao7r0")
-mesh = SubResource("BoxMesh_e5l3g")
-
-[node name="VerticalChrome_L" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.384, 1.35, 0.381)
-material_override = SubResource("StandardMaterial3D_vdjed")
-mesh = SubResource("BoxMesh_weq6e")
-
-[node name="LowSideGilt_L" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.345, 0.4, 0.375)
-material_override = SubResource("StandardMaterial3D_gdlar")
-mesh = SubResource("BoxMesh_jlgx8")
-
-[node name="VerticalChrome_R" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.384, 1.35, 0.381)
-material_override = SubResource("StandardMaterial3D_vdjed")
-mesh = SubResource("BoxMesh_87gla")
-
-[node name="LowSideGilt_R" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.345, 0.4, 0.375)
-material_override = SubResource("StandardMaterial3D_gdlar")
-mesh = SubResource("BoxMesh_hckku")
-
-[node name="MarqueeBody" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.92, 0.055)
-material_override = SubResource("StandardMaterial3D_ao7r0")
-mesh = SubResource("BoxMesh_mwuh8")
-
-[node name="RoundedMarqueeTop" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 0, 2.092, 0.06)
-material_override = SubResource("StandardMaterial3D_ao7r0")
-mesh = SubResource("CapsuleMesh_vgwel")
-
-[node name="MarqueeBrassFrame" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.99, 0.425)
-material_override = SubResource("StandardMaterial3D_vdjed")
-mesh = SubResource("BoxMesh_tupss")
-
-[node name="MarqueeInlay" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.99, 0.448)
-material_override = SubResource("StandardMaterial3D_jsanw")
-mesh = SubResource("BoxMesh_kmxe1")
-
-[node name="Sign_MIDNIGHT" type="Label3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.959, 0.465)
-modulate = Color(0.88235295, 0.63529414, 1, 1)
-text = "MIDNIGHT"
-font_size = 24
-
-[node name="TopGlow" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.133, 0.395)
-material_override = SubResource("StandardMaterial3D_6duxw")
-mesh = SubResource("BoxMesh_k5jcy")
-
-[node name="ReelOuterFrame" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.357, 0.383)
-material_override = SubResource("StandardMaterial3D_vdjed")
-mesh = SubResource("BoxMesh_6jbc1")
-
-[node name="ReelDarkBezel" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.357, 0.432)
-material_override = SubResource("StandardMaterial3D_yc6xu")
-mesh = SubResource("BoxMesh_70ph4")
-
-[node name="ReelWell_0" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.219, 1.366, 0.457)
-material_override = SubResource("StandardMaterial3D_deirx")
-mesh = SubResource("BoxMesh_i0sxi")
-
-[node name="ReelDivider_0" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.112, 1.366, 0.47)
-material_override = SubResource("StandardMaterial3D_gdlar")
-mesh = SubResource("BoxMesh_38rlb")
-
-[node name="ReelGlyph_0" type="Label3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.219, 1.366, 0.503)
-pixel_size = 0.0026
-modulate = Color(0.20392157, 0.18039216, 0.19215687, 1)
-text = "7"
-font_size = 35
-
-[node name="ReelTopMask_0" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.219, 1.63, 0.479)
-material_override = SubResource("StandardMaterial3D_yc6xu")
-mesh = SubResource("BoxMesh_lwbm8")
-
-[node name="ReelBottomMask_0" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.219, 1.105, 0.479)
-material_override = SubResource("StandardMaterial3D_yc6xu")
-mesh = SubResource("BoxMesh_vuw1a")
-
-[node name="ReelWell_1" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.366, 0.457)
-material_override = SubResource("StandardMaterial3D_deirx")
-mesh = SubResource("BoxMesh_733g7")
-
-[node name="ReelDivider_1" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.107, 1.366, 0.47)
-material_override = SubResource("StandardMaterial3D_gdlar")
-mesh = SubResource("BoxMesh_41tu7")
-
-[node name="ReelGlyph_1" type="Label3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.366, 0.503)
-pixel_size = 0.0026
-modulate = Color(0.20392157, 0.18039216, 0.19215687, 1)
-text = "★"
-font_size = 35
-
-[node name="ReelTopMask_1" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.63, 0.479)
-material_override = SubResource("StandardMaterial3D_yc6xu")
-mesh = SubResource("BoxMesh_bmor6")
-
-[node name="ReelBottomMask_1" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.105, 0.479)
-material_override = SubResource("StandardMaterial3D_yc6xu")
-mesh = SubResource("BoxMesh_8d3tx")
-
-[node name="ReelWell_2" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.219, 1.366, 0.457)
-material_override = SubResource("StandardMaterial3D_deirx")
-mesh = SubResource("BoxMesh_v44vg")
-
-[node name="ReelDivider_2" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.326, 1.366, 0.47)
-material_override = SubResource("StandardMaterial3D_gdlar")
-mesh = SubResource("BoxMesh_7qcj0")
-
-[node name="ReelGlyph_2" type="Label3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.219, 1.366, 0.503)
-pixel_size = 0.0026
-modulate = Color(0.20392157, 0.18039216, 0.19215687, 1)
-text = "♣"
-font_size = 35
-
-[node name="ReelTopMask_2" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.219, 1.63, 0.479)
-material_override = SubResource("StandardMaterial3D_yc6xu")
-mesh = SubResource("BoxMesh_g1hat")
-
-[node name="ReelBottomMask_2" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.219, 1.105, 0.479)
-material_override = SubResource("StandardMaterial3D_yc6xu")
-mesh = SubResource("BoxMesh_qm1do")
-
-[node name="ReelGlass" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.357, 0.492)
-material_override = SubResource("StandardMaterial3D_igxt4")
-mesh = SubResource("BoxMesh_4rxau")
-
-[node name="ButtonDesk" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.87, 0.442)
-material_override = SubResource("StandardMaterial3D_ao7r0")
-mesh = SubResource("BoxMesh_npitx")
-
-[node name="ButtonDeskTop" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.959, 0.455)
-material_override = SubResource("StandardMaterial3D_vdjed")
-mesh = SubResource("BoxMesh_2r0wp")
-
-[node name="ControlLamp_0" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.22, 0.991, 0.516)
-material_override = SubResource("StandardMaterial3D_t54ub")
-mesh = SubResource("SphereMesh_s0svm")
-
-[node name="ControlLamp_1" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.991, 0.516)
-material_override = SubResource("StandardMaterial3D_6duxw")
-mesh = SubResource("SphereMesh_pn17s")
-
-[node name="ControlLamp_2" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.22, 0.991, 0.516)
-material_override = SubResource("StandardMaterial3D_t54ub")
-mesh = SubResource("SphereMesh_bfvw4")
-
-[node name="FrontStatus" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.677, 0.362)
-material_override = SubResource("StandardMaterial3D_t54ub")
-mesh = SubResource("BoxMesh_035bi")
-
-[node name="CoinPlate" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.165, 0.485, 0.368)
-material_override = SubResource("StandardMaterial3D_vdjed")
-mesh = SubResource("BoxMesh_k78lf")
-
-[node name="CoinSlot" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.165, 0.5, 0.385)
-material_override = SubResource("StandardMaterial3D_yc6xu")
-mesh = SubResource("BoxMesh_2b4i7")
-
-[node name="SpeakerSlot_0" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.236, 0.465, 0.361)
-material_override = SubResource("StandardMaterial3D_yc6xu")
-mesh = SubResource("BoxMesh_dci15")
-
-[node name="SpeakerSlot_1" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.179, 0.465, 0.361)
-material_override = SubResource("StandardMaterial3D_yc6xu")
-mesh = SubResource("BoxMesh_qio4e")
-
-[node name="SpeakerSlot_2" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.122, 0.465, 0.361)
-material_override = SubResource("StandardMaterial3D_yc6xu")
-mesh = SubResource("BoxMesh_5ng4k")
-
-[node name="SpeakerSlot_3" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.065, 0.465, 0.361)
-material_override = SubResource("StandardMaterial3D_yc6xu")
-mesh = SubResource("BoxMesh_eb7x7")
-
-[node name="SpeakerSlot_4" type="MeshInstance3D" parent="SlotMachines/Slot_10"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.008, 0.465, 0.361)
-material_override = SubResource("StandardMaterial3D_yc6xu")
-mesh = SubResource("BoxMesh_6x7q2")
-
 [node name="PlayerStool" type="Node3D" parent="SlotMachines/Slot_10"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.24)
-
-[node name="StoolStem" type="MeshInstance3D" parent="SlotMachines/Slot_10/PlayerStool"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.315, 0)
-material_override = SubResource("StandardMaterial3D_gdlar")
-mesh = SubResource("CylinderMesh_lyrb1")
 
 [node name="StoolStem_Collision" type="StaticBody3D" parent="SlotMachines/Slot_10/PlayerStool"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.315, 0)
 
-[node name="@CollisionShape3D@123" type="CollisionShape3D" parent="SlotMachines/Slot_10/PlayerStool/StoolStem_Collision"]
-shape = SubResource("CylinderShape3D_5w8wo")
-
-[node name="StoolFoot" type="MeshInstance3D" parent="SlotMachines/Slot_10/PlayerStool"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.077, 0)
-material_override = SubResource("StandardMaterial3D_vdjed")
-mesh = SubResource("CylinderMesh_qifeb")
-
 [node name="StoolFoot_Collision" type="StaticBody3D" parent="SlotMachines/Slot_10/PlayerStool"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.077, 0)
 
-[node name="@CollisionShape3D@124" type="CollisionShape3D" parent="SlotMachines/Slot_10/PlayerStool/StoolFoot_Collision"]
-shape = SubResource("CylinderShape3D_kwio7")
-
-[node name="StoolSeatRim" type="MeshInstance3D" parent="SlotMachines/Slot_10/PlayerStool"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.632, 0)
-material_override = SubResource("StandardMaterial3D_vdjed")
-mesh = SubResource("CylinderMesh_k01oo")
-
-[node name="StoolSeat" type="MeshInstance3D" parent="SlotMachines/Slot_10/PlayerStool"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.677, 0)
-material_override = SubResource("StandardMaterial3D_mlki8")
-mesh = SubResource("CylinderMesh_0ubvw")
-
 [node name="StoolSeat_Collision" type="StaticBody3D" parent="SlotMachines/Slot_10/PlayerStool"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.677, 0)
-
-[node name="@CollisionShape3D@125" type="CollisionShape3D" parent="SlotMachines/Slot_10/PlayerStool/StoolSeat_Collision"]
-shape = SubResource("CylinderShape3D_6sj4b")
 
 [node name="GamingTables" type="Node3D" parent="."]
 
@@ -11247,11 +10424,6 @@ mesh = SubResource("CylinderMesh_brxxn")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.17, 0)
 material_override = SubResource("StandardMaterial3D_i88v0")
 mesh = SubResource("CylinderMesh_0xwly")
-
-[node name="IvoryBall" type="MeshInstance3D" parent="GamingTables/Roulette2"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.24, 1.24, 0.14)
-material_override = SubResource("StandardMaterial3D_7lydy")
-mesh = SubResource("SphereMesh_eaanh")
 
 [node name="Blackjack3" type="Node3D" parent="GamingTables"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20.3, 0, -10.15)
@@ -11436,11 +10608,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.17, 0)
 material_override = SubResource("StandardMaterial3D_i88v0")
 mesh = SubResource("CylinderMesh_15c8g")
 
-[node name="IvoryBall" type="MeshInstance3D" parent="GamingTables/Roulette4"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.24, 1.24, 0.14)
-material_override = SubResource("StandardMaterial3D_7lydy")
-mesh = SubResource("SphereMesh_wlka2")
-
 [node name="Cards5" type="Node3D" parent="GamingTables"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34.2, 0, -10.15)
 
@@ -11624,11 +10791,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.17, 0)
 material_override = SubResource("StandardMaterial3D_i88v0")
 mesh = SubResource("CylinderMesh_37lv0")
 
-[node name="IvoryBall" type="MeshInstance3D" parent="GamingTables/Roulette6"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.24, 1.24, 0.14)
-material_override = SubResource("StandardMaterial3D_7lydy")
-mesh = SubResource("SphereMesh_wfgbk")
-
 [node name="Cards7" type="Node3D" parent="GamingTables"]
 transform = Transform3D(0.68, 0, 0, 0, 1, 0, 0, 0, 0.68, -11.5, 0, -1.95)
 
@@ -11745,7 +10907,7 @@ shape = SubResource("BoxShape3D_tly6u")
 
 [node name="BarCounterFront" type="MeshInstance3D" parent="CornerBar"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 1.22, -9.46)
-material_override = SubResource("StandardMaterial3D_swcop")
+material_override = ExtResource("37_0cp0l")
 mesh = SubResource("BoxMesh_e352w")
 
 [node name="BarCounterFrontInset" type="MeshInstance3D" parent="CornerBar"]
@@ -11759,8 +10921,8 @@ material_override = SubResource("StandardMaterial3D_6lyrq")
 mesh = SubResource("BoxMesh_8d4h6")
 
 [node name="BarFrontRail" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0.84, -8.99)
-material_override = SubResource("StandardMaterial3D_b5naq")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0.84, -9.006035)
+material_override = ExtResource("41_d2t1y")
 mesh = SubResource("BoxMesh_7k4tx")
 
 [node name="BarRunAlongTurn" type="MeshInstance3D" parent="CornerBar"]
@@ -11777,7 +10939,7 @@ shape = SubResource("BoxShape3D_fhkbe")
 
 [node name="BarCounterSide" type="MeshInstance3D" parent="CornerBar"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.69, 1.22, -7.05)
-material_override = SubResource("StandardMaterial3D_swcop")
+material_override = ExtResource("37_0cp0l")
 mesh = SubResource("BoxMesh_fi8do")
 
 [node name="BarCounterSideInset" type="MeshInstance3D" parent="CornerBar"]
@@ -11786,8 +10948,8 @@ material_override = SubResource("StandardMaterial3D_7h0nl")
 mesh = SubResource("BoxMesh_h4m7f")
 
 [node name="BarSideRail" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.23, 0.84, -7.05)
-material_override = SubResource("StandardMaterial3D_b5naq")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.2353435, 0.84, -7.05)
+material_override = ExtResource("41_d2t1y")
 mesh = SubResource("BoxMesh_eh4qr")
 
 [node name="BarRoundedCorner" type="MeshInstance3D" parent="CornerBar"]
@@ -11803,16 +10965,16 @@ shape = SubResource("CylinderShape3D_wh5ph")
 
 [node name="BarRoundedGoldCap" type="MeshInstance3D" parent="CornerBar"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.31, 1.22, -9.12)
-material_override = SubResource("StandardMaterial3D_swcop")
+material_override = ExtResource("37_0cp0l")
 mesh = SubResource("CylinderMesh_d1w57")
 
 [node name="BarRoundedWoodInset" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.31, 1.305, -9.12)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.31, 1.3046714, -9.12)
 material_override = SubResource("StandardMaterial3D_6yfoc")
 mesh = SubResource("CylinderMesh_y1l4s")
 
 [node name="BarBackboard" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.4, 2.75, -12.76)
+transform = Transform3D(1.2, 0, 0, 0, 1, 0, 0, 0, 1, 0.021745741, 2.75, -12.76)
 material_override = SubResource("StandardMaterial3D_dhue0")
 mesh = SubResource("BoxMesh_venge")
 
@@ -11821,11 +10983,12 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.4, 2.75, -12.76)
 metadata/collision_for = "BarBackboard"
 
 [node name="@CollisionShape3D@129" type="CollisionShape3D" parent="CornerBar/BarBackboard_Collision"]
+transform = Transform3D(1.2, 0, 0, 0, 1, 0, 0, 0, 1, 1.9411595, 0, 0)
 shape = SubResource("BoxShape3D_cjrly")
 
 [node name="BottleShelf" type="MeshInstance3D" parent="CornerBar"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.38, 1.9, -12.52)
-material_override = SubResource("StandardMaterial3D_swcop")
+material_override = ExtResource("42_gngh3")
 mesh = SubResource("BoxMesh_7atwi")
 
 [node name="BottleShelf_Collision" type="StaticBody3D" parent="CornerBar"]
@@ -11837,7 +11000,7 @@ shape = SubResource("BoxShape3D_76r5q")
 
 [node name="@MeshInstance3D@131" type="MeshInstance3D" parent="CornerBar"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.38, 2.75, -12.52)
-material_override = SubResource("StandardMaterial3D_swcop")
+material_override = ExtResource("42_gngh3")
 mesh = SubResource("BoxMesh_4hav4")
 
 [node name="@StaticBody3D@133" type="StaticBody3D" parent="CornerBar"]
@@ -11849,7 +11012,7 @@ shape = SubResource("BoxShape3D_pxkj6")
 
 [node name="@MeshInstance3D@134" type="MeshInstance3D" parent="CornerBar"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.38, 3.6, -12.52)
-material_override = SubResource("StandardMaterial3D_swcop")
+material_override = ExtResource("42_gngh3")
 mesh = SubResource("BoxMesh_y2rtt")
 
 [node name="@StaticBody3D@136" type="StaticBody3D" parent="CornerBar"]
@@ -12450,12 +11613,12 @@ material_override = SubResource("StandardMaterial3D_ivdk3")
 mesh = SubResource("CylinderMesh_6i5fn")
 
 [node name="BarSignPanel" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.38, 4.72, -12.51)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.3699014, 4.999528, -12.925201)
 material_override = SubResource("StandardMaterial3D_i88v0")
 mesh = SubResource("BoxMesh_0nuox")
 
 [node name="Sign_MIDNIGHT_BAR" type="Label3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.38, 4.72, -12.408)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.3799999, 4.9871593, -12.84936)
 pixel_size = 0.0045
 modulate = Color(0.88235295, 0.7607843, 0.5568628, 1)
 text = "MIDNIGHT BAR"
@@ -12467,7 +11630,7 @@ metadata/replaced_by_polyhaven = true
 [node name="Decor" type="Node3D" parent="."]
 
 [node name="Sign_TABLE_GAMES" type="Label3D" parent="Decor"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 3.55, -12.89)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.234682, 3.55, -12.933745)
 modulate = Color(0.88235295, 0.7607843, 0.5568628, 1)
 text = "TABLE GAMES"
 font_size = 57
@@ -13146,7 +12309,7 @@ mesh = SubResource("ArrayMesh_cx0bg")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -41.4, 0, -0.78)
 
 [node name="PlantPot_05" type="MeshInstance3D" parent="Decor/Plant_05"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.32, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.0252457, 0.32, 0)
 material_override = SubResource("StandardMaterial3D_8qdtx")
 mesh = SubResource("CylinderMesh_oug7n")
 metadata/decor_type = "plant"
@@ -13155,189 +12318,179 @@ metadata/decor_type = "plant"
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.32, 0)
 
 [node name="@CollisionShape3D@324" type="CollisionShape3D" parent="Decor/Plant_05/PlantPot_05_Collision"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.0226212, 0, 0)
 shape = SubResource("CylinderShape3D_c36vo")
 
 [node name="PlantFoliage_05" type="Node3D" parent="Decor/Plant_05"]
 
 [node name="CeramicLip" type="MeshInstance3D" parent="Decor/Plant_05/PlantFoliage_05"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.614, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.0097198, 0.614, 0)
 material_override = SubResource("StandardMaterial3D_8qdtx")
 mesh = SubResource("CylinderMesh_wc757")
 
 [node name="PotSoil" type="MeshInstance3D" parent="Decor/Plant_05/PlantFoliage_05"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.652, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.0097198, 0.652, 0)
 material_override = SubResource("StandardMaterial3D_56u20")
 mesh = SubResource("CylinderMesh_c0pe1")
 
 [node name="LowStem" type="MeshInstance3D" parent="Decor/Plant_05/PlantFoliage_05"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.97, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.0097198, 0.97, 0)
 material_override = SubResource("StandardMaterial3D_56u20")
 mesh = SubResource("CylinderMesh_e1k08")
 
 [node name="Leaf_00" type="MeshInstance3D" parent="Decor/Plant_05/PlantFoliage_05"]
-transform = Transform3D(0.18030752, -0.11692791, 0.9757234, 0.4935086, 0.890682, 0, -0.8033101, 0.5209398, 0.21900666, 0.007665234, 0.795, 0.034150317)
+transform = Transform3D(0.18030752, -0.11692791, 0.9757234, 0.4935086, 0.890682, 0, -0.8033101, 0.5209398, 0.21900666, -1.0020561, 0.795, 0.034150302)
 material_override = SubResource("StandardMaterial3D_wyerf")
 mesh = SubResource("ArrayMesh_cx0bg")
 
 [node name="Leaf_01" type="MeshInstance3D" parent="Decor/Plant_05/PlantFoliage_05"]
-transform = Transform3D(-0.62012523, 0.44433513, -0.5715312, 0.62965643, 0.6498965, 0, 0.43191496, -0.30947778, -0.82058036, -0.051696565, 0.943, -0.03600646)
+transform = Transform3D(-0.62012523, 0.44433513, -0.5715312, 0.62965643, 0.6498965, 0, 0.43191496, -0.30947778, -0.82058036, -1.0878296, 0.943, -0.03600645)
 material_override = SubResource("StandardMaterial3D_ob2ol")
 mesh = SubResource("ArrayMesh_cx0bg")
 
 [node name="Leaf_02" type="MeshInstance3D" parent="Decor/Plant_05/PlantFoliage_05"]
-transform = Transform3D(0.7883641, -0.3179158, -0.1328646, 0.39480186, 0.6462414, 0, 0.10568264, -0.04261759, 0.9911342, 0.09019321, 1.091, -0.012090697)
+transform = Transform3D(0.7883641, -0.3179158, -0.1328646, 0.39480186, 0.6462414, 0, 0.10568264, -0.04261759, 0.9911342, -0.91952515, 1.091, -0.012090683)
 material_override = SubResource("StandardMaterial3D_ob2ol")
 mesh = SubResource("ArrayMesh_cx0bg")
 
 [node name="Leaf_03" type="MeshInstance3D" parent="Decor/Plant_05/PlantFoliage_05"]
-transform = Transform3D(-0.42916393, 0.24282154, 0.76747197, 0.3037707, 0.834712, 0, -0.5137736, 0.29069382, -0.6410825, -0.022437891, 0.795, 0.026861515)
+transform = Transform3D(-0.42916393, 0.24282154, 0.76747197, 0.3037707, 0.834712, 0, -0.5137736, 0.29069382, -0.6410825, -1.0321579, 0.795, 0.026861489)
 material_override = SubResource("StandardMaterial3D_wyerf")
 mesh = SubResource("ArrayMesh_cx0bg")
 
 [node name="Leaf_04" type="MeshInstance3D" parent="Decor/Plant_05/PlantFoliage_05"]
-transform = Transform3D(-0.022232914, 0.025717113, -0.99895495, 0.3915386, 0.6990508, 0, 0.48593107, -0.56208295, -0.045705415, -0.0028794426, 0.943, -0.06293416)
+transform = Transform3D(-0.022232914, 0.025717113, -0.99895495, 0.3915386, 0.6990508, 0, 0.48593107, -0.56208295, -0.045705415, -1.0126, 0.943, -0.06293416)
 material_override = SubResource("StandardMaterial3D_ob2ol")
 mesh = SubResource("ArrayMesh_cx0bg")
 
 [node name="Leaf_05" type="MeshInstance3D" parent="Decor/Plant_05/PlantFoliage_05"]
-transform = Transform3D(0.3712757, -0.32726204, 0.70572484, 0.34589735, 0.69981354, 0, -0.3698287, 0.3259866, 0.708486, 0.06447224, 1.091, 0.06422095)
+transform = Transform3D(0.3712757, -0.32726204, 0.70572484, 0.34589735, 0.69981354, 0, -0.3698287, 0.3259866, 0.708486, -0.94524765, 1.091, 0.064220965)
 material_override = SubResource("StandardMaterial3D_ob2ol")
 mesh = SubResource("ArrayMesh_cx0bg")
 
 [node name="Leaf_06" type="MeshInstance3D" parent="Decor/Plant_05/PlantFoliage_05"]
-transform = Transform3D(-0.68964285, 0.31411707, -0.041804247, 0.27570865, 0.7870911, 0, 0.028855223, -0.013142917, -0.99912584, -0.034969404, 0.795, -0.0014631375)
+transform = Transform3D(-0.68964285, 0.31411707, -0.041804247, 0.27570865, 0.7870911, 0, 0.028855223, -0.013142917, -0.99912584, -1.0446892, 0.795, -0.0014631152)
 material_override = SubResource("StandardMaterial3D_wyerf")
 mesh = SubResource("ArrayMesh_cx0bg")
 
 [node name="Leaf_07" type="MeshInstance3D" parent="Decor/Plant_05/PlantFoliage_05"]
-transform = Transform3D(0.57354146, -0.30139822, -0.6440753, 0.48971912, 0.60322386, 0, 0.48290473, -0.2537683, 0.76496214, 0.048192635, 0.943, -0.04057672)
+transform = Transform3D(0.57354146, -0.30139822, -0.6440753, 0.48971912, 0.60322386, 0, 0.48290473, -0.2537683, 0.76496214, -0.9615288, 0.943, -0.040576696)
 material_override = SubResource("StandardMaterial3D_ob2ol")
 mesh = SubResource("ArrayMesh_cx0bg")
 
 [node name="Leaf_08" type="MeshInstance3D" parent="Decor/Plant_05/PlantFoliage_05"]
-transform = Transform3D(-0.09884804, 0.09190469, 0.9916455, 0.61993, 0.88070804, 0, -0.7599044, 0.7065267, -0.12899283, -0.011738378, 1.091, 0.09023974)
+transform = Transform3D(-0.09884804, 0.09190469, 0.9916455, 0.61993, 0.88070804, 0, -0.7599044, 0.7065267, -0.12899283, -1.0478706, 1.091, 0.09023976)
 material_override = SubResource("StandardMaterial3D_ob2ol")
 mesh = SubResource("ArrayMesh_cx0bg")
 
 [node name="Leaf_09" type="MeshInstance3D" parent="Decor/Plant_05/PlantFoliage_05"]
-transform = Transform3D(-0.49904808, 0.17404023, -0.81834203, 0.39774063, 0.66109216, 0, 0.71057874, -0.24781036, -0.5747315, -0.020115597, 0.795, -0.028641975)
+transform = Transform3D(-0.49904808, 0.17404023, -0.81834203, 0.39774063, 0.66109216, 0, 0.71057874, -0.24781036, -0.5747315, -1.0298347, 0.795, -0.028641999)
 material_override = SubResource("StandardMaterial3D_wyerf")
 mesh = SubResource("ArrayMesh_cx0bg")
 
 [node name="Leaf_10" type="MeshInstance3D" parent="Decor/Plant_05/PlantFoliage_05"]
-transform = Transform3D(0.72200924, -0.3601874, 0.21519454, 0.36301962, 0.7511616, 0, -0.15909997, 0.0793699, 0.9765712, 0.061523985, 0.943, 0.013557258)
+transform = Transform3D(0.72200924, -0.3601874, 0.21519454, 0.36301962, 0.7511616, 0, -0.15909997, 0.0793699, 0.9765712, -0.9481964, 0.943, 0.013557255)
 material_override = SubResource("StandardMaterial3D_ob2ol")
 mesh = SubResource("ArrayMesh_cx0bg")
 
 [node name="Leaf_11" type="MeshInstance3D" parent="Decor/Plant_05/PlantFoliage_05"]
-transform = Transform3D(-0.4505433, 0.46968302, 0.50098646, 0.43255654, 0.6531448, 0, -0.26080626, 0.2718857, -0.8654551, -0.07875641, 1.091, 0.04558978)
+transform = Transform3D(-0.4505433, 0.46968302, 0.50098646, 0.43255654, 0.6531448, 0, -0.26080626, 0.2718857, -0.8654551, -1.0884781, 1.091, 0.045589805)
 material_override = SubResource("StandardMaterial3D_ob2ol")
 mesh = SubResource("ArrayMesh_cx0bg")
 
 [node name="Leaf_12" type="MeshInstance3D" parent="Decor/Plant_05/PlantFoliage_05"]
-transform = Transform3D(0.15638943, -0.13819453, -0.9540183, 0.31628847, 0.7605038, 0, 0.49774554, -0.43983603, 0.2997483, 0.010491182, 0.795, -0.033390645)
+transform = Transform3D(0.15638943, -0.13819453, -0.9540183, 0.31628847, 0.7605038, 0, 0.49774554, -0.43983603, 0.2997483, -0.99922943, 0.795, -0.03339064)
 material_override = SubResource("StandardMaterial3D_wyerf")
 mesh = SubResource("ArrayMesh_cx0bg")
 
 [node name="Leaf_13" type="MeshInstance3D" parent="Decor/Plant_05/PlantFoliage_05"]
-transform = Transform3D(0.26177716, -0.14541885, 0.90594053, 0.24991845, 0.84965456, 0, -0.5601129, 0.3111462, 0.4234049, 0.026674533, 0.943, 0.057074245)
+transform = Transform3D(0.26177716, -0.14541885, 0.90594053, 0.24991845, 0.84965456, 0, -0.5601129, 0.3111462, 0.4234049, -0.9830437, 0.943, 0.05707425)
 material_override = SubResource("StandardMaterial3D_ob2ol")
 mesh = SubResource("ArrayMesh_cx0bg")
 
 [node name="Leaf_14" type="MeshInstance3D" parent="Decor/Plant_05/PlantFoliage_05"]
-transform = Transform3D(-0.6115886, 0.3882634, -0.3820066, 0.46738532, 0.59486276, 0, 0.2528036, -0.16049087, -0.9241596, -0.08409854, 1.091, -0.034762554)
+transform = Transform3D(-0.6115886, 0.3882634, -0.3820066, 0.46738532, 0.59486276, 0, 0.2528036, -0.16049087, -0.9241596, -1.1202316, 1.091, -0.03476256)
 material_override = SubResource("StandardMaterial3D_ob2ol")
 mesh = SubResource("ArrayMesh_cx0bg")
 
 [node name="Leaf_15" type="MeshInstance3D" parent="Decor/Plant_05/PlantFoliage_05"]
-transform = Transform3D(0.7041482, -0.47947007, -0.3425809, 0.578642, 0.66104776, 0, 0.256765, -0.17483698, 0.93948835, 0.032882083, 0.795, -0.011990355)
+transform = Transform3D(0.7041482, -0.47947007, -0.3425809, 0.578642, 0.66104776, 0, 0.256765, -0.17483698, 0.93948835, -0.97683716, 0.795, -0.011990368)
 material_override = SubResource("StandardMaterial3D_wyerf")
 mesh = SubResource("ArrayMesh_cx0bg")
 
 [node name="Leaf_16" type="MeshInstance3D" parent="Decor/Plant_05/PlantFoliage_05"]
-transform = Transform3D(-0.41897976, 0.19109438, 0.88722366, 0.3892045, 0.96654445, 0, -0.80575967, 0.36750257, -0.4613395, -0.02906434, 0.943, 0.055895116)
+transform = Transform3D(-0.41897976, 0.19109438, 0.88722366, 0.3892045, 0.96654445, 0, -0.80575967, 0.36750257, -0.4613395, -1.038784, 0.943, 0.05589509)
 material_override = SubResource("StandardMaterial3D_ob2ol")
 mesh = SubResource("ArrayMesh_cx0bg")
 
 [node name="Leaf_17" type="MeshInstance3D" parent="Decor/Plant_05/PlantFoliage_05"]
-transform = Transform3D(-0.20716895, 0.08793849, -0.96584153, 0.42828915, 0.6334606, 0, 0.7721596, -0.32776406, -0.25913346, -0.023581233, 1.091, -0.08789156)
+transform = Transform3D(-0.20716895, 0.08793849, -0.96584153, 0.42828915, 0.6334606, 0, 0.7721596, -0.32776406, -0.25913346, -1.0333023, 1.091, -0.08789158)
 material_override = SubResource("StandardMaterial3D_ob2ol")
 mesh = SubResource("ArrayMesh_cx0bg")
 
 [node name="Leaf_18" type="MeshInstance3D" parent="Decor/Plant_05/PlantFoliage_05"]
-transform = Transform3D(0.4879955, -0.4978136, 0.5371395, 0.4871257, 0.7009356, 0, -0.3107572, 0.3170094, 0.84349346, 0.029522292, 0.795, 0.018799847)
+transform = Transform3D(0.4879955, -0.4978136, 0.5371395, 0.4871257, 0.7009356, 0, -0.3107572, 0.3170094, 0.84349346, -0.9801979, 0.795, 0.018799841)
 material_override = SubResource("StandardMaterial3D_wyerf")
 mesh = SubResource("ArrayMesh_cx0bg")
 
 [node name="Leaf_19" type="MeshInstance3D" parent="Decor/Plant_05/PlantFoliage_05"]
-transform = Transform3D(-0.5461, 0.3483161, 0.17370155, 0.3074627, 0.63790905, 0, -0.09632269, 0.061436996, -0.9847983, -0.06204228, 0.943, 0.010943279)
+transform = Transform3D(-0.5461, 0.3483161, 0.17370155, 0.3074627, 0.63790905, 0, -0.09632269, 0.061436996, -0.9847983, -1.0717621, 0.943, 0.010943294)
 material_override = SubResource("StandardMaterial3D_ob2ol")
 mesh = SubResource("ArrayMesh_cx0bg")
 
 [node name="Leaf_20" type="MeshInstance3D" parent="Decor/Plant_05/PlantFoliage_05"]
-transform = Transform3D(0.34788802, -0.24275832, -0.7933037, 0.23988605, 0.9497782, 0, 0.45330003, -0.31631544, 0.60882604, 0.055403065, 1.091, -0.072190724)
+transform = Transform3D(0.34788802, -0.24275832, -0.7933037, 0.23988605, 0.9497782, 0, 0.45330003, -0.31631544, 0.60882604, -0.98072815, 1.091, -0.0721907)
 material_override = SubResource("StandardMaterial3D_ob2ol")
 mesh = SubResource("ArrayMesh_cx0bg")
 
 [node name="Leaf_21" type="MeshInstance3D" parent="Decor/Plant_05/PlantFoliage_05"]
-transform = Transform3D(0.05013333, -0.04466094, 0.9962136, 0.4354691, 0.6802417, 0, -0.57446307, 0.51175654, 0.086939454, 0.0030429368, 0.795, 0.03486747)
+transform = Transform3D(0.05013333, -0.04466094, 0.9962136, 0.4354691, 0.6802417, 0, -0.57446307, 0.51175654, 0.086939454, -1.0066757, 0.795, 0.034867465)
 material_override = SubResource("StandardMaterial3D_wyerf")
 mesh = SubResource("ArrayMesh_cx0bg")
 
 [node name="Leaf_22" type="MeshInstance3D" parent="Decor/Plant_05/PlantFoliage_05"]
-transform = Transform3D(-0.5224322, 0.31070766, -0.6758503, 0.5144071, 0.58089024, 0, 0.4790601, -0.28491282, -0.73703897, -0.04643353, 0.943, -0.042578485)
+transform = Transform3D(-0.5224322, 0.31070766, -0.6758503, 0.5144071, 0.58089024, 0, 0.4790601, -0.28491282, -0.73703897, -1.0825653, 0.943, -0.04257846)
 material_override = SubResource("StandardMaterial3D_ob2ol")
 mesh = SubResource("ArrayMesh_cx0bg")
 
 [node name="Leaf_23" type="MeshInstance3D" parent="Decor/Plant_05/PlantFoliage_05"]
-transform = Transform3D(0.90682745, -0.34678078, 0.0004884243, 0.37084714, 0.8479785, 0, -0.00044291661, 0.0001693762, 0.9999999, 0.09099999, 1.091, 4.427381e-05)
+transform = Transform3D(0.90682745, -0.34678078, 0.0004884243, 0.37084714, 0.8479785, 0, -0.00044291661, 0.0001693762, 0.9999999, -0.91872025, 1.091, 4.428625e-05)
 material_override = SubResource("StandardMaterial3D_ob2ol")
 mesh = SubResource("ArrayMesh_cx0bg")
 
 [node name="Lighting" type="Node3D" parent="."]
 
 [node name="WarmCasinoLamp_01" type="OmniLight3D" parent="Lighting"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.8, 9.2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.906445, 9.2)
 light_color = Color(1, 0.854902, 0.654902, 1)
 light_energy = 1.38
 light_volumetric_fog_energy = 0.85
-shadow_enabled = true
 shadow_bias = 0.055
 shadow_blur = 1.1
 omni_range = 10.2
 
 [node name="WarmCasinoLamp_02" type="OmniLight3D" parent="Lighting"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.8, 2.3)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.148512, 2.3)
 light_color = Color(1, 0.854902, 0.654902, 1)
 light_energy = 1.38
 light_volumetric_fog_energy = 0.85
-shadow_enabled = true
 shadow_bias = 0.055
 shadow_blur = 1.1
 omni_range = 10.2
 
 [node name="WarmCasinoLamp_03" type="OmniLight3D" parent="Lighting"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.3, 4.8, -7)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.3789831, 4.7458696, -6.790151)
 light_color = Color(1, 0.854902, 0.654902, 1)
-light_energy = 1.38
+light_energy = 1.71
 light_volumetric_fog_energy = 0.85
 shadow_enabled = true
 shadow_bias = 0.055
 shadow_blur = 1.1
 omni_range = 10.2
-
-[node name="WarmCasinoLamp_04" type="OmniLight3D" parent="Lighting"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 4.8, -6)
-light_color = Color(1, 0.854902, 0.654902, 1)
-light_energy = 1.38
-light_volumetric_fog_energy = 0.85
-shadow_enabled = true
-shadow_bias = 0.055
-shadow_blur = 1.1
-omni_range = 10.2
+omni_attenuation = 1.26
 
 [node name="WarmCasinoLamp_05" type="OmniLight3D" parent="Lighting"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17, 4.8, -6)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.500437, 5.080225, -6.5090013)
 light_color = Color(1, 0.854902, 0.654902, 1)
 light_energy = 1.38
 light_volumetric_fog_energy = 0.85
@@ -13347,37 +12500,31 @@ shadow_blur = 1.1
 omni_range = 10.2
 
 [node name="WarmCasinoLamp_06" type="OmniLight3D" parent="Lighting"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 4.8, -6)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25.380278, 3.094406, -6)
 light_color = Color(1, 0.854902, 0.654902, 1)
 light_energy = 1.38
 light_volumetric_fog_energy = 0.85
-shadow_enabled = true
 shadow_bias = 0.055
 shadow_blur = 1.1
 omni_range = 10.2
 
 [node name="WarmCasinoLamp_07" type="OmniLight3D" parent="Lighting"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35, 4.8, -6)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35, 3.3078485, -6)
 light_color = Color(1, 0.854902, 0.654902, 1)
 light_energy = 1.38
 light_volumetric_fog_energy = 0.85
-shadow_enabled = true
-shadow_bias = 0.055
-shadow_blur = 1.1
-omni_range = 10.2
-
-[node name="WarmCasinoLamp_08" type="OmniLight3D" parent="Lighting"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -43, 4.8, -6)
-light_color = Color(1, 0.854902, 0.654902, 1)
-light_energy = 1.38
-light_volumetric_fog_energy = 0.85
-shadow_enabled = true
 shadow_bias = 0.055
 shadow_blur = 1.1
 omni_range = 10.2
 
 [node name="WarmCasinoLamp_09" type="OmniLight3D" parent="Lighting"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 3.35, -9.8)
-light_color = Color(1, 0.729412, 0.443137, 1)
-light_energy = 0.65
-light_volumetric_fog_energy = 0.14
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.3607187, 4.9637866, -13.02405)
+light_color = Color(0.7176471, 1, 1, 1)
+light_energy = 1.64
+light_volumetric_fog_energy = 1.295
+light_size = 0.32
+shadow_enabled = true
+shadow_bias = 0.615
+shadow_normal_bias = 2.134
+shadow_transmittance_bias = -1.27
+distance_fade_enabled = true
