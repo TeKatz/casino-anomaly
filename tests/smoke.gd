@@ -40,8 +40,18 @@ func _run_smoke() -> void:
         push_error("Poly Haven PBR textures are incomplete")
         quit(1)
         return
-    if slots.get_child_count() < 10 or tables.get_child_count() < 4 or lounge.get_child_count() < 10:
-        push_error("The visual casino furnishing pass is incomplete")
+    # Sketchfab furniture replaces prototype nodes; count replacements as
+    # furnishings, not as missing old whitebox meshes.
+    var sketchfab: Node3D = world.get_node_or_null("SketchfabFurniture") as Node3D
+    var slot_replacements := 0
+    var table_replacements := 0
+    if sketchfab != null:
+        slot_replacements = int(sketchfab.get("replaced_slots"))
+        table_replacements = int(sketchfab.get("replaced_roulette")) + int(sketchfab.get("replaced_blackjack"))
+    var total_slots := slots.get_child_count() + slot_replacements
+    var total_tables := tables.get_child_count() + table_replacements
+    if total_slots < 10 or total_tables < 6 or lounge.get_child_count() < 35:
+        push_error("Casino furnishing incomplete: slots=%d, tables=%d, lounge=%d" % [total_slots, total_tables, lounge.get_child_count()])
         quit(1)
         return
     if not bar.has_node("BarRunFacingApproach") or not bar.has_node("BarRunAlongTurn"):
@@ -61,10 +71,6 @@ func _run_smoke() -> void:
     var far_wall: MeshInstance3D = architecture.get_node_or_null("FarExitWall") as MeshInstance3D
     if far_wall == null or far_wall.position.x > -45.9:
         push_error("The exit end wall was not relocated with the extended wing")
-        quit(1)
-        return
-    if tables.get_child_count() < 6 or lounge.get_child_count() < 35:
-        push_error("The extended wing needs evenly distributed visual details")
         quit(1)
         return
     var models: Node3D = world.get_node_or_null("ModelInteriors") as Node3D
