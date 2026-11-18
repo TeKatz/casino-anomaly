@@ -1,0 +1,22 @@
+name: Inspect Poly Haven 3D Model Sources
+
+on:
+  push:
+    branches:
+      - feature/polyhaven-interior-models
+    paths:
+      - '.github/workflows/model-source-probe.yml'
+      - 'tools/model_source_probe.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect all requested source files and estimated 1K size
+        run: python3 tools/model_source_probe.py
