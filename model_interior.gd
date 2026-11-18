@@ -58,31 +58,37 @@ func _populate() -> void:
                 or child.name.begins_with("SideBarStool") or child.name.begins_with("SideStoolStem"):
                 child.queue_free()
         for x in [-7.1, -5.45, -3.75, -2.05, -0.3, 1.48, 3.05]:
-            _place("bar_chair_round_01", "CounterStool", Vector3(x, 0.005, -8.30), 0.75, 0.0, true)
+            var stool := _place("bar_chair_round_01", "CounterStool", Vector3(x, 0.005, -8.30), 1.03, 0.0, true)
+            if stool != null:
+                _stool_cushion(stool)
         for z in [-5.02, -6.65, -8.10]:
-            _place("bar_chair_round_01", "SideStool", Vector3(3.50, 0.005, z), 0.75, PI / 2.0, true)
+            var stool := _place("bar_chair_round_01", "SideStool", Vector3(3.50, 0.005, z), 1.03, PI / 2.0, true)
+            if stool != null:
+                _stool_cushion(stool)
 
-    # Real grouped wine bottles, placed sparingly rather than repeated across
-    # every shelf; the original placeholder bottles retain shelf density.
-    for entry in [
-        [Vector3(-6.0, 1.35, -9.42), 0.42],
-        [Vector3(-3.0, 1.35, -9.42), 0.39],
-        [Vector3(1.1, 1.35, -9.42), 0.40]
-    ]:
-        _place("wine_bottles_01", "BarWine", entry[0], entry[1])
+    # Remove label-flickering wine-bottle groups from the COUNTER. One small
+    # set sits on a cleared display shelf, away from the patron's viewpoint
+    # and from the original block-shaped bottle placeholders.
+    _place("wine_bottles_01", "ShelfWine", Vector3(-5.85, 1.96, -12.38), 0.45)
 
+    # This Poly Haven glTF contains THREE physically separate candleholders.
+    # Select only the tall third variant; never put a complete trio on a
+    # single coffee table again.
     for entry in [
-        [Vector3(-18.4, 0.49, -2.75), 0.48],
-        [Vector3(-28.6, 0.49, -2.75), 0.46],
-        [Vector3(-38.8, 0.49, -2.75), 0.48],
-        [Vector3(-0.45, 1.35, -9.42), 0.46]
+        [Vector3(-18.4, 0.49, -2.75), 0.77],
+        [Vector3(-28.6, 0.49, -2.75), 0.76],
+        [Vector3(-38.8, 0.49, -2.75), 0.77],
+        [Vector3(-0.45, 1.35, -9.42), 0.68]
     ]:
-        _place("brass_candleholders", "BrassCandles", entry[0], entry[1])
+        _place("brass_candleholders", "SingleBrassCandleholder",
+            entry[0], entry[1], 0.0, false, false, "brass_candleholder_03")
 
     # Statues get actual pedestals so their bases are not floating or sunken.
     for pos in [Vector3(-2.75, 0.005, 12.15), Vector3(-40.5, 0.005, -1.2)]:
         _pedestal(pos)
-        _place("marble_bust_01", "MarbleBust", pos + Vector3(0, 1.02, 0), 0.87, 0.0, false)
+        # Imported bust faces the side wall at yaw 0. A half turn faces into
+        # the casino route at both locations.
+        _place("marble_bust_01", "MarbleBust", pos + Vector3(0, 1.02, 0), 0.87, PI, false)
 
     # South wall paintings, oriented toward the walking route.
     for x in [-17.4, -29.4, -40.7]:
@@ -98,13 +104,61 @@ func _populate() -> void:
 
     # Smaller service furnishings belong at the bar edge and never obstruct
     # the 3.14-meter-wide main carpet corridor.
+    # Park the coffee cart flush with the lounge-side wall, its service face
+    # toward the player area rather than side-on into the corner.
     _place("CoffeeCart_01", "CoffeeServiceCart",
-        Vector3(-8.5, 0.005, -1.05), 1.33, -PI / 2.0, true)
+        Vector3(-9.0, 0.005, -1.15), 1.33, PI, true)
+
+    # The donor cabinet is a LOW WIDE sideboard (2.44 x 0.68 m originally).
+    # Its old 1.4m normalization made it almost 5m wide and put it directly
+    # on the floor. Restore credible dimensions and raise on a solid plinth.
+    _cabinet_plinth(Vector3(-2.5, 0.0, -12.03))
     _place("modern_wooden_cabinet", "BarServiceCabinet",
-        Vector3(-5.95, 0.005, -11.72), 1.40, 0.0, true)
+        Vector3(-2.5, 0.245, -12.03), 1.02, 0.0, true)
 
     print("Poly Haven 3D interior: ", placed_model_count, " model instances from ",
         successful_model_ids.size(), " source assets")
+
+func _stool_cushion(stool: Node3D) -> void:
+    # The original mesh has a hard wooden seat. Provide uniform upholstery
+    # on EVERY stool, including the two end stools.
+    var cushion := MeshInstance3D.new()
+    cushion.name = "VelvetSeatCushion"
+    var pad := CylinderMesh.new()
+    pad.top_radius = 0.32
+    pad.bottom_radius = 0.32
+    pad.height = 0.095
+    pad.radial_segments = 24
+    cushion.mesh = pad
+    cushion.position = Vector3(0, 1.045, 0)
+    var material := StandardMaterial3D.new()
+    material.albedo_color = Color("#793c49")
+    material.roughness = 0.91
+    cushion.material_override = material
+    stool.add_child(cushion)
+
+
+func _cabinet_plinth(ground: Vector3) -> void:
+    var plinth := StaticBody3D.new()
+    plinth.name = "BarCabinetPlinth"
+    plinth.position = ground + Vector3(0, 0.12, 0)
+    var mesh := MeshInstance3D.new()
+    mesh.name = "CabinetPolishedWoodBase"
+    var box := BoxMesh.new()
+    box.size = Vector3(3.78, 0.24, 0.93)
+    mesh.mesh = box
+    var mat := StandardMaterial3D.new()
+    mat.albedo_color = Color("#302017")
+    mat.roughness = 0.66
+    mesh.material_override = mat
+    plinth.add_child(mesh)
+    var shape := CollisionShape3D.new()
+    var collision := BoxShape3D.new()
+    collision.size = box.size
+    shape.shape = collision
+    plinth.add_child(shape)
+    add_child(plinth)
+
 
 func _pedestal(pos: Vector3) -> void:
     var holder := StaticBody3D.new()
@@ -173,7 +227,7 @@ func _bounds_for(model: Node3D) -> AABB:
 
 func _place(identifier: String, label: String, anchor: Vector3,
         target_height: float, yaw: float = 0.0, add_collision: bool = false,
-        wall_mount: bool = false) -> Node3D:
+        wall_mount: bool = false, mesh_variant: String = "") -> Node3D:
     var packed := _resource(identifier)
     if packed == null:
         return null
@@ -190,6 +244,21 @@ func _place(identifier: String, label: String, anchor: Vector3,
         push_error("Poly Haven glTF does not instantiate as Node3D: " + identifier)
         return null
     wrapper.add_child(imported)
+
+    if not mesh_variant.is_empty():
+        var variant_found := false
+        for candidate in imported.find_children("*", "MeshInstance3D", true, false):
+            var mesh_node: MeshInstance3D = candidate as MeshInstance3D
+            if mesh_node.name.begins_with(mesh_variant):
+                variant_found = true
+            else:
+                var node_parent: Node = mesh_node.get_parent()
+                node_parent.remove_child(mesh_node)
+                mesh_node.free()
+        if not variant_found:
+            wrapper.queue_free()
+            push_error("Requested candleholder variant is missing: " + mesh_variant)
+            return null
 
     var bounds := _bounds_for(imported)
     if bounds.size.y <= 0.0001:
@@ -211,14 +280,19 @@ func _place(identifier: String, label: String, anchor: Vector3,
         imported.position.y -= target_height * 0.5
 
     if add_collision:
+        # Use actual imported geometry extents, rather than a tiny cylinder
+        # which allowed the player to walk through most of the sideboard.
         var body := StaticBody3D.new()
-        body.name = "ApproximateSolidBody"
+        body.name = "ModelSolidBody"
         body.position = Vector3(0, target_height * 0.5, 0)
         var shape := CollisionShape3D.new()
-        var cylinder := CylinderShape3D.new()
-        cylinder.height = target_height
-        cylinder.radius = 0.28 if target_height < 1.0 else 0.48
-        shape.shape = cylinder
+        var collision := BoxShape3D.new()
+        collision.size = Vector3(
+            maxf(bounds.size.x * height_scale, 0.23),
+            target_height,
+            maxf(bounds.size.z * height_scale, 0.23)
+        )
+        shape.shape = collision
         body.add_child(shape)
         wrapper.add_child(body)
 

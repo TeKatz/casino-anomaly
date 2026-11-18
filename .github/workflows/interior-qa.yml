@@ -1,0 +1,33 @@
+name: Casino Anomaly Interior QA
+
+on:
+  push:
+    branches: [fix/interior-qa-seven]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  interior-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate pinned Poly Haven source files
+        run: |
+          python3 tools/ensure_assets.py
+          python3 tools/import_model_assets.py
+      - name: Test Godot scene structure, material tangents and furniture fixes
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 --output /tmp/godot.zip "https://github.com/godotengine/godot-builds/releases/download/4.5.1-stable/Godot_v4.5.1-stable_linux.x86_64.zip"
+          unzip -q /tmp/godot.zip -d /tmp/godot-bin
+          chmod +x /tmp/godot-bin/Godot_v4.5.1-stable_linux.x86_64
+          /tmp/godot-bin/Godot_v4.5.1-stable_linux.x86_64 --headless --path . --editor --import 2>&1 | tee /tmp/interior-import.log
+          if grep -Eq "SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:" /tmp/interior-import.log; then exit 1; fi
+          /tmp/godot-bin/Godot_v4.5.1-stable_linux.x86_64 --headless --path . --script res://tests/smoke.gd 2>&1 | tee /tmp/interior-smoke.log
+          grep -q "Casino Anomaly scenes and PBR floor smoke PASS" /tmp/interior-smoke.log
+          if grep -Eq "SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:" /tmp/interior-smoke.log; then exit 1; fi
+          echo "Seven interior fixes validated on Godot"

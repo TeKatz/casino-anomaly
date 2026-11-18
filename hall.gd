@@ -175,6 +175,9 @@ func _floor_quad(name: String, left: float, right: float, back: float, front: fl
         surface.set_normal(Vector3.UP)
         surface.set_uv(Vector2(corner.x / texture_meters, corner.z / texture_meters))
         surface.add_vertex(corner)
+    # Normalmapped materials require tangents. Omitting these can make
+    # textured floors render almost black or distort PBR lighting.
+    surface.generate_tangents()
     var node := MeshInstance3D.new()
     node.name = name
     node.mesh = surface.commit()
@@ -267,7 +270,8 @@ func _make_carpet() -> void:
     _box(carpeting, "EndTrim", Vector3(-44.9, 0.045, -5.05), Vector3(0.13, 0.035, 3.14), gold)
 
 func _carpet_patch(label: String, x0: float, x1: float, z0: float, z1: float) -> void:
-    _floor_quad(label, x0, x1, z0, z1, FLOOR_Y, fabric, 0.52, carpeting)
+    # Show the jacquard motif at readable floor scale instead of tiny noise.
+    _floor_quad(label, x0, x1, z0, z1, FLOOR_Y, fabric, 0.95, carpeting)
 
 func _slot_machine(pos: Vector3, yaw: float, accent: Color, number: int) -> void:
     var unit := Node3D.new()
@@ -357,6 +361,10 @@ func _make_bar() -> void:
     ]
     for row in range(3):
         for i in range(21):
+            # Leave a distinct area for the detailed wine-bottle model on the
+            # lower shelf; overlapping bottles used to flicker at close range.
+            if row == 0 and i in [0, 1, 2, 3]:
+                continue
             var x := -6.44 + float(i) * 0.50
             var y := 2.13 + float(row) * 0.85
             var color := _material(bottles[(i + row) % bottles.size()], 0.24)

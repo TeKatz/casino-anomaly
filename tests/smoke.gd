@@ -68,7 +68,7 @@ func _run_smoke() -> void:
         quit(1)
         return
     var models: Node3D = world.get_node_or_null("ModelInteriors") as Node3D
-    if models == null or models.get("successful_model_ids").size() != 10 or int(models.get("placed_model_count")) < 31:
+    if models == null or models.get("successful_model_ids").size() != 10 or int(models.get("placed_model_count")) < 29:
         push_error("All 10 requested Poly Haven models must be placed in the room")
         quit(1)
         return
@@ -82,6 +82,74 @@ func _run_smoke() -> void:
             push_error("Missing imported model: " + asset_id)
             quit(1)
             return
+    # Material tangent basis is essential for correct normalmapped PBR floors.
+    for floor in [main_floor, west_floor, first_runner, bend, second_runner]:
+        var surface_arrays: Array = floor.mesh.surface_get_arrays(0)
+        var tangents: PackedFloat32Array = surface_arrays[Mesh.ARRAY_TANGENT]
+        var vertices: PackedVector3Array = surface_arrays[Mesh.ARRAY_VERTEX]
+        if tangents.size() != vertices.size() * 4:
+            push_error("Floor surface missing valid normal-map tangents: " + floor.name)
+            quit(1)
+            return
+
+    var interior: Node3D = models
+    var count_busts := 0
+    var count_stools := 0
+    var count_candles := 0
+    var wine_on_shelf := false
+    var coffee_correct := false
+    var cabinet_correct := false
+    for item in interior.get_children():
+        if item.name.begins_with("MarbleBust"):
+            count_busts += 1
+            if absf(absf(item.rotation.y) - PI) > 0.05:
+                push_error("A marble bust still faces the wall")
+                quit(1)
+                return
+        elif item.name.begins_with("CounterStool") or item.name.begins_with("SideStool"):
+            count_stools += 1
+            var cushion: MeshInstance3D = item.get_node_or_null("VelvetSeatCushion") as MeshInstance3D
+            if cushion == null or cushion.position.y < 1.0:
+                push_error("An imported barstool is missing its full-height upholstered seat")
+                quit(1)
+                return
+            if item.get_node_or_null("ModelSolidBody") == null:
+                push_error("An imported stool has no collision")
+                quit(1)
+                return
+        elif item.name.begins_with("BarWine"):
+            push_error("Flickering labelled bottles remain on the bar counter")
+            quit(1)
+            return
+        elif item.name.begins_with("ShelfWine"):
+            wine_on_shelf = true
+        elif item.name.begins_with("SingleBrassCandleholder"):
+            count_candles += 1
+            var actual_candles := 0
+            for piece in item.find_children("*", "MeshInstance3D", true, false):
+                actual_candles += 1
+                if not piece.name.begins_with("brass_candleholder_03"):
+                    push_error("Candleholder trio was not split into individual meshes")
+                    quit(1)
+                    return
+            if actual_candles != 1:
+                push_error("A coffee table must have precisely one candleholder model")
+                quit(1)
+                return
+        elif item.name == "CoffeeServiceCart":
+            coffee_correct = absf(absf(item.rotation.y) - PI) < 0.05
+        elif item.name == "BarServiceCabinet":
+            var body: StaticBody3D = item.get_node_or_null("ModelSolidBody") as StaticBody3D
+            if body != null:
+                var shape_node: CollisionShape3D = body.get_node_or_null("CollisionShape3D") as CollisionShape3D
+                var shape: BoxShape3D = shape_node.shape as BoxShape3D if shape_node != null else null
+                cabinet_correct = item.position.y >= 0.24 and shape != null and shape.size.x >= 3.0
+    if count_busts != 2 or count_stools != 10 or count_candles != 4 or not wine_on_shelf \
+        or not coffee_correct or not cabinet_correct or interior.get_node_or_null("BarCabinetPlinth") == null:
+        push_error("The seven interior QA corrections are incomplete")
+        quit(1)
+        return
+
     world.queue_free()
     print("Casino Anomaly scenes and PBR floor smoke PASS")
     quit(0)
