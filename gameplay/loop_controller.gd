@@ -2,20 +2,22 @@ extends Node3D
 ## Seamless Exit-8-style spatial streaming.
 ## At most two authored casino rooms coexist briefly: active + next.
 ## All edits to walls/doors and all connector meshes are runtime-only.
-## The player walks through one of the original EXIT apertures, never fades,
-## and keeps the same world transform when the old scene is freed.
+## The two EXITs turn away from each other behind opaque corners. Once the
+## player commits, both exits are sealed behind them, and the selected
+## connector stays with the new room after the old hall has been freed.
+## No camera teleports, fades or extra button presses.
 
 const DemoAnomalies = preload("res://gameplay/demo_anomalies.gd")
 const StreamPortals = preload("res://gameplay/stream_portals.gd")
 const ROOM = preload("res://main.tscn")
 
 const PRELOAD_AT_X := -31.0
-const CHOICE_AT_X := -46.42
-const HANDOFF_AT_X := -55.05
-const NEXT_ENTRY_WORLD_X := -54.50
+const CHOICE_AT_X := -49.10
+const HANDOFF_AFTER_TURN := 4.20
+const LANE_HALF_WIDTH := 1.07
+const TURN_X_TOLERANCE := 1.60
 const EXIT_Z_LEFT := -3.70
 const EXIT_Z_RIGHT := -9.65
-const LANE_HALF_WIDTH := 1.07
 
 var room: Node3D
 var player: CharacterBody3D
@@ -155,22 +157,30 @@ func _process(_delta: float) -> void:
         _stage_next(_candidate_lane(local.z))
 
     if not choice_taken:
-        prompt.text = "LINKER AUSGANG: ANOMALIE   |   RECHTER AUSGANG: NORMAL   –   einfach hindurchgehen"
+        prompt.text = "LINKS: ANOMALIE   |   RECHTS: NORMAL   –   durch den Ausgang und um die Ecke"
         var lane := _candidate_lane(local.z)
         if local.x < CHOICE_AT_X and absf(local.z - _lane_z(lane)) <= LANE_HALF_WIDTH:
             _commit_choice(lane)
-    elif local.x < HANDOFF_AT_X and absf(local.z - _lane_z(staged_lane)) <= LANE_HALF_WIDTH:
-        _handoff()
+    elif not staged_lane.is_empty():
+        # The player first walks west through an EXIT, then turns left (+Z)
+        # or right (-Z). Hand off well inside the NEXT hall, when its
+        # entrance is behind the player. Never rely on an X-only threshold.
+        var turned_distance: float = (local.z - _lane_z(staged_lane)) * portals.lane_sign(staged_lane)
+        if absf(local.x - portals.BEND_X) <= TURN_X_TOLERANCE                 and turned_distance >= portals.TURN_LENGTH + HANDOFF_AFTER_TURN:
+            _handoff()
 
 
 func _stage_transform(lane: String) -> Transform3D:
-    # The new hall's local entrance faces -Z. Rotating +90 degrees
-    # makes that direction point straight west, in line with the connector.
-    # local entrance wall z=14.18 -> active-local x=-54.50.
-    return room.global_transform * Transform3D(
-        Basis(Vector3.UP, PI * 0.5),
-        Vector3(NEXT_ENTRY_WORLD_X - 14.18, 0.0, _lane_z(lane))
-    )
+    # The first leg moves west, then LEFT heads +Z and RIGHT heads -Z
+    # in room-local coordinates. Align the new hall's actual entrance
+    # to the END of the bent corridor, not the beginning of the turn.
+    # A 180-degree rotation sends the left entrance's inward -Z to +Z;
+    # the right entrance's inward -Z already points along the right leg.
+    var yaw := PI if lane == "left" else 0.0
+    var basis := Basis(Vector3.UP, yaw)
+    var desired_entrance := Vector3(portals.BEND_X, 0, portals.end_z(lane))
+    var offset := desired_entrance - basis * Vector3(0, 0, portals.ENTRY_Z)
+    return room.global_transform * Transform3D(basis, offset)
 
 
 func _stage_next(lane: String) -> void:
@@ -209,13 +219,20 @@ func _commit_choice(lane: String) -> void:
     _stage_next(lane)
     if staged == null or not is_instance_valid(staged):
         return # Keep the current loop safe if staging fails.
-    choice_taken = true
     var state = get_node_or_null("/root/LoopState")
     if state == null:
         return
     var verdict: Dictionary = state.decide(lane == "left")
     if not bool(verdict.get("valid", false)):
         return
+    # By now the character is safely beyond x=-49.1. Both physical gates
+    # appear behind at x=-47.7, closing the chosen path and the other exit.
+    # This prevents switching the decision or reaching the void outside a
+    # preloaded hall, even if the player immediately turns around.
+    if not portals.lock_departure(room, lane):
+        push_error("Failed to seal the departure corridors")
+        return
+    choice_taken = true
     demo.clear()
     if bool(verdict.get("finished", false)):
         _show_victory()
@@ -228,7 +245,7 @@ func _commit_choice(lane: String) -> void:
     demo.apply(staged, str(state.anomaly_id))
     _update_hud()
     feedback.text = "RICHTIG." if bool(verdict.get("correct", false)) else "FALSCH – Serie zurückgesetzt."
-    prompt.text = "Folge dem Gang. Der nächste Durchlauf beginnt ohne Ladebildschirm."
+    prompt.text = "Folge dem Gang um die Ecke. Der nächste Durchlauf ist bereits vorbereitet."
 
 
 func _handoff() -> void:
@@ -237,6 +254,13 @@ func _handoff() -> void:
     transitioning = true
     var previous := room
     var upcoming := staged
+    # The chosen bent connector must survive the old hall's destruction.
+    # Its closed far end remains visible and collidable when looking back
+    # from the new hall; no outside-the-level view is ever exposed.
+    if not portals.adopt_arrival_connector(previous, upcoming, staged_lane):
+        push_error("Failed to retain the sealed arrival corridor")
+        transitioning = false
+        return
     staged = null
     staged_lane = ""
     choice_taken = false
