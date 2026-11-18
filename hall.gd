@@ -107,7 +107,10 @@ func _ready() -> void:
     # choice doors exist only in a started/continued run, not in editor mode.
     if not Engine.is_editor_hint():
         var state = get_node_or_null("/root/LoopState")
-        if state != null and state.active and state.tutorial_done and not state.finished:
+        if state != null and state.active and state.tutorial_done and not state.finished \
+                and not has_meta("_streaming_standby"):
+            # Staged instances have no Player or HUD until the live character
+            # and controller are transferred into them at the portal seam.
             var controller := Node3D.new()
             controller.name = "LoopController"
             controller.set_script(load("res://gameplay/loop_controller.gd"))
