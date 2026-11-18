@@ -145,13 +145,15 @@ func _run() -> void:
 
     # Plant pots/leaves must not share the same footprint as sofa seats.
     var pot_count := 0
-    for item in decor.get_children():
-        if not (item is MeshInstance3D) or item.get_meta("decor_type", "") != "plant":
+    for plant in decor.get_children():
+        if not plant is Node3D or not plant.name.begins_with("Plant_"):
+            continue
+        var pot := plant.get_node_or_null("PlantPot_%s" % plant.name.trim_prefix("Plant_")) as MeshInstance3D
+        if pot == null or pot.get_meta("decor_type", "") != "plant":
             continue
         pot_count += 1
         for sofa_pos in sofa_positions:
-            if absf(item.position.x - sofa_pos.x) < 1.70 \
-                and absf(item.position.z - sofa_pos.z) < 1.20:
+            if absf(plant.position.x - sofa_pos.x) < 1.70 and absf(plant.position.z - sofa_pos.z) < 1.20:
                 _fail("Decorative topiary intersects lounge sofa at " + str(sofa_pos))
                 return
     if pot_count != 6:
