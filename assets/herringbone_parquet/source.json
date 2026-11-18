@@ -4,13 +4,19 @@
   "license": "CC0-1.0",
   "maps": {
     "herringbone_parquet_diff_2k.jpg": {
-      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/herringbone_parquet/herringbone_parquet_diff_2k.jpg"
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/herringbone_parquet/herringbone_parquet_diff_2k.jpg",
+      "sha256": "8305c12adf1da61f4d267611948bfdc9293c9b9915da64e41cc1ab68c0167ff1",
+      "bytes": 3482793
     },
     "herringbone_parquet_rough_2k.jpg": {
-      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/herringbone_parquet/herringbone_parquet_rough_2k.jpg"
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/herringbone_parquet/herringbone_parquet_rough_2k.jpg",
+      "sha256": "9fd86e1c5bff348625bab72091d7ea2fa80d197f8e4a5452b378ce8ae0abd9e5",
+      "bytes": 2285252
     },
     "herringbone_parquet_nor_gl_2k.jpg": {
-      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/herringbone_parquet/herringbone_parquet_nor_gl_2k.jpg"
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/herringbone_parquet/herringbone_parquet_nor_gl_2k.jpg",
+      "sha256": "8891325197ab8a77689506118fade7bc812944a03bcce47b802e4b8742e590cd",
+      "bytes": 1854683
     }
   }
 }

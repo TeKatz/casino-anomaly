@@ -4,13 +4,19 @@
   "license": "CC0-1.0",
   "maps": {
     "bi_stretch_diff_2k.jpg": {
-      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/bi_stretch/bi_stretch_diff_2k.jpg"
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/bi_stretch/bi_stretch_diff_2k.jpg",
+      "sha256": "67cd1633c6417a39448eb03b76c15b974f728691e95429d86cd493276f20f6b0",
+      "bytes": 3249605
     },
     "bi_stretch_rough_2k.jpg": {
-      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/bi_stretch/bi_stretch_rough_2k.jpg"
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/bi_stretch/bi_stretch_rough_2k.jpg",
+      "sha256": "bf04b6f037688dd155568b7582df52d7bf1555d1873daf2f0d1b59c3d77ecbec",
+      "bytes": 3516108
     },
     "bi_stretch_nor_gl_2k.jpg": {
-      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/bi_stretch/bi_stretch_nor_gl_2k.jpg"
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/bi_stretch/bi_stretch_nor_gl_2k.jpg",
+      "sha256": "3db5483f9e99481a0724f96d4a10161c6efc3c4129111e4030e1484222fd2545",
+      "bytes": 3163878
     }
   }
 }
