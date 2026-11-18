@@ -116,7 +116,7 @@ func _run() -> void:
         if shape_node == null or shape_node.disabled:
             _fail("%s gate has no enabled blocking shape" % lane)
             return
-    var score := state.visited_loops
+    var score: int = int(state.visited_loops)
     controller.call("_stage_next", "right")
     if state.visited_loops != score or str(controller.get("staged_lane")) != "left"             or not second.global_transform.is_equal_approx(second_transform):
         _fail("A committed player can switch the already selected EXIT")
