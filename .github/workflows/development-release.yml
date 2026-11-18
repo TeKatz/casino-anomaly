@@ -31,6 +31,8 @@ jobs:
         run: |
           python tools/ensure_assets.py
           if ($LASTEXITCODE -ne 0) { throw 'Source textures unavailable or invalid' }
+          python tools/ensure_fabric037.py
+          if ($LASTEXITCODE -ne 0) { throw 'ambientCG Fabric037 source unavailable or invalid' }
           python tools/import_model_assets.py
           if ($LASTEXITCODE -ne 0) { throw '3D model dependencies unavailable or invalid' }
           python tools/unpack_sketchfab_assets.py --require-all
@@ -112,6 +114,8 @@ jobs:
           if ($LASTEXITCODE -ne 0 -or (Get-Content sketchfab-smoke.log -Raw) -notmatch 'Casino Anomaly Sketchfab model smoke PASS') { throw 'Sketchfab model smoke failed' }
           & "$env:GODOT_EDITOR" --headless --path . --script res://tests/architecture_qa.gd 2>&1 | Tee-Object -FilePath architecture-qa.log
           if ($LASTEXITCODE -ne 0 -or (Get-Content architecture-qa.log -Raw) -notmatch 'Casino Anomaly architectural PBR finishes PASS') { throw 'Architecture finish test failed' }
+          & "$env:GODOT_EDITOR" --headless --path . --script res://tests/spatial_qa.gd 2>&1 | Tee-Object -FilePath spatial-qa.log
+          if ($LASTEXITCODE -ne 0 -or (Get-Content spatial-qa.log -Raw) -notmatch 'Casino Anomaly spatial QA PASS') { throw 'Spatial QA failed' }
           New-Item -ItemType Directory -Force artifacts/game | Out-Null
           $exe = Join-Path (Get-Location) 'artifacts/game/CasinoAnomaly.exe'
           & "$env:GODOT_EDITOR" --headless --path . --export-release 'Windows Desktop' $exe 2>&1 | Tee-Object -FilePath export.log

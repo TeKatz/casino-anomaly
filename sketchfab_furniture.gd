@@ -4,6 +4,7 @@ extends Node3D
 # complete glTF scene has been loaded and placed successfully.
 
 const FOLDER := "res://models/sketchfab/"
+const ROULETTE_PBR: StandardMaterial3D = preload("res://roulette_wood_material.tres")
 var assets: Dictionary = {}
 var replaced_slots := 0
 var replaced_roulette := 0
@@ -140,41 +141,44 @@ func _roulette_table(spot: Vector3) -> Node3D:
     table.set_meta("furniture_kind", "roulette_table")
     table.position = spot
     add_child(table)
-    var timber := _finish(Color("#40251d"), 0.59)
+    var timber := ROULETTE_PBR.duplicate() as StandardMaterial3D
+    timber.uv1_scale = Vector3(2.15, 1.0, 1.35)
     var brass := _finish(Color("#c4a05c"), 0.34, 0.62)
     var felt := _finish(Color("#175444"), 0.96)
     var white := _finish(Color("#e5d3ae"), 0.8)
     var red := _finish(Color("#9c2e30"), 0.9)
     var black := _finish(Color("#242629"), 0.89)
 
-    _block(table, "SolidTableTop", Vector3(0, 1.015, 0),
+    # Top reduced by 15 cm to match the imported blackjack table.
+    # Wheel inset is wide enough for a 1.28 m wheel, not a toy roulette dish.
+    _block(table, "SolidTableTop", Vector3(0, 0.865, 0),
         Vector3(3.50, 0.18, 1.62), timber, true)
-    _block(table, "OuterBrassRim", Vector3(0, 1.107, 0),
+    _block(table, "OuterBrassRim", Vector3(0, 0.957, 0),
         Vector3(3.54, 0.042, 1.66), brass)
-    _block(table, "WheelAreaInset", Vector3(-1.02, 1.134, 0),
-        Vector3(1.13, 0.015, 1.39), timber)
-    _block(table, "BettingFelt", Vector3(0.64, 1.134, 0),
+    _block(table, "WheelAreaInset", Vector3(-1.02, 0.984, 0),
+        Vector3(1.47, 0.015, 1.43), timber)
+    _block(table, "BettingFelt", Vector3(0.64, 0.984, 0),
         Vector3(1.94, 0.017, 1.37), felt)
     for x in [-1.54, 1.54]:
         for z in [-0.58, 0.58]:
-            _block(table, "TableLeg", Vector3(x, 0.48, z),
-                Vector3(0.17, 0.94, 0.17), timber)
+            _block(table, "TableLeg", Vector3(x, 0.405, z),
+                Vector3(0.17, 0.79, 0.17), timber)
             _block(table, "LegFootGold", Vector3(x, 0.085, z),
                 Vector3(0.22, 0.12, 0.22), brass)
-    _block(table, "DealerRail", Vector3(0, 0.92, -0.78),
+    _block(table, "DealerRail", Vector3(0, 0.77, -0.78),
         Vector3(3.36, 0.095, 0.09), timber)
     # Thin, level betting-number grid, not emissive graphics or hovering
     # objects. Cards/chips can replace this simple first-pass layout later.
     for i in range(5):
         var x := -0.29 + float(i) * 0.46
-        _block(table, "GridVertical", Vector3(x, 1.149, 0),
+        _block(table, "GridVertical", Vector3(x, 0.999, 0),
             Vector3(0.012, 0.007, 1.15), white)
     for i in range(4):
         var z := -0.57 + float(i) * 0.38
-        _block(table, "GridHorizontal", Vector3(0.64, 1.149, z),
+        _block(table, "GridHorizontal", Vector3(0.64, 0.999, z),
             Vector3(1.87, 0.007, 0.012), white)
     for i in range(4):
-        _block(table, "BettingTile", Vector3(-0.05 + float(i)*0.45, 1.153, -0.18),
+        _block(table, "BettingTile", Vector3(-0.05 + float(i)*0.45, 1.003, -0.18),
             Vector3(0.27, 0.007, 0.22), red if i % 2 == 0 else black)
     return table
 
@@ -211,8 +215,8 @@ func _populate() -> void:
             # Reduce its diameter to ~1 m and set it on the new 3.5 m
             # mahogany-and-felt roulette table with player collision.
             var replacement := _spawn("roulette_table", "SketchfabRoulette",
-                table_node.position + Vector3(-1.02, 1.17, 0),
-                0.98, 0.36, -PI * 0.5, "scene.gltf", false)
+                table_node.position + Vector3(-1.02, 1.010, 0),
+                1.28, 0.49, -PI * 0.5, "scene.gltf", false)
             if replacement != null:
                 replacement.set_meta("placement_type", "roulette_wheel")
                 _roulette_table(table_node.position)

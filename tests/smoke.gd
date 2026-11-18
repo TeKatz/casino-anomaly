@@ -50,7 +50,7 @@ func _run_smoke() -> void:
         table_replacements = int(sketchfab.get("replaced_roulette")) + int(sketchfab.get("replaced_blackjack"))
     var total_slots := slots.get_child_count() + slot_replacements
     var total_tables := tables.get_child_count() + table_replacements
-    if total_slots < 10 or total_tables < 6 or lounge.get_child_count() < 35:
+    if total_slots < 10 or total_tables < 6:
         push_error("Casino furnishing incomplete: slots=%d, tables=%d, lounge=%d" % [total_slots, total_tables, lounge.get_child_count()])
         quit(1)
         return
@@ -74,7 +74,7 @@ func _run_smoke() -> void:
         quit(1)
         return
     var models: Node3D = world.get_node_or_null("ModelInteriors") as Node3D
-    if models == null or models.get("successful_model_ids").size() != 10 or int(models.get("placed_model_count")) < 29:
+    if models == null or models.get("successful_model_ids").size() != 15 or int(models.get("placed_model_count")) < 40:
         push_error("All 10 requested Poly Haven models must be placed in the room")
         quit(1)
         return
@@ -82,12 +82,29 @@ func _run_smoke() -> void:
         "Chandelier_02", "Chandelier_01", "brass_candleholders",
         "marble_bust_01", "fancy_picture_frame_01",
         "security_camera_01", "wine_bottles_01",
-        "bar_chair_round_01", "CoffeeCart_01", "modern_wooden_cabinet"
+        "bar_chair_round_01", "CoffeeCart_01", "modern_wooden_cabinet",
+        "round_wooden_table_01", "sofa_02", "chess_set",
+        "concrete_cat_statue", "horse_statue_01"
     ]:
         if not bool(models.get("successful_model_ids").has(asset_id)):
             push_error("Missing imported model: " + asset_id)
             quit(1)
             return
+    var sofa_count := 0
+    var coffee_count := 0
+    var decoration_count := 0
+    for child in models.get_children():
+        var group: String = str(child.get_meta("placement_group", ""))
+        if group == "LoungeSofa":
+            sofa_count += 1
+        elif group == "LoungeCoffeeTable":
+            coffee_count += 1
+        elif group in ["LoungeChessSet", "ConcreteCatDisplay", "HorseStatueDisplay"]:
+            decoration_count += 1
+    if sofa_count != 5 or coffee_count != 5 or decoration_count != 3:
+        push_error("Imported lounge incomplete: sofas=%d tables=%d decor=%d" % [sofa_count, coffee_count, decoration_count])
+        quit(1)
+        return
     # Material tangent basis is essential for correct normalmapped PBR floors.
     for floor in [main_floor, west_floor, first_runner, bend, second_runner]:
         var surface_arrays: Array = floor.mesh.surface_get_arrays(0)
@@ -151,7 +168,7 @@ func _run_smoke() -> void:
                 var shape_node: CollisionShape3D = body.get_node_or_null("ModelCollisionShape") as CollisionShape3D
                 var shape: BoxShape3D = shape_node.shape as BoxShape3D if shape_node != null else null
                 cabinet_correct = item.position.y >= 0.24 and shape != null and shape.size.x >= 3.0
-    if count_busts != 2 or count_stools != 10 or count_candles != 4 or not wine_on_shelf \
+    if count_busts != 2 or count_stools != 10 or count_candles != 3 or not wine_on_shelf \
         or not coffee_correct or not cabinet_correct or interior.get_node_or_null("BarCabinetPlinth") == null:
         push_error("Interior QA failed: busts=%d stools=%d candles=%d shelfWine=%s coffee=%s cabinet=%s plinth=%s" % [count_busts, count_stools, count_candles, str(wine_on_shelf), str(coffee_correct), str(cabinet_correct), str(interior.get_node_or_null("BarCabinetPlinth") != null)])
         quit(1)

@@ -32,3 +32,18 @@ License: https://creativecommons.org/licenses/by/4.0/
 The original Sketchfab Roulette Table model is used as a smaller roulette
 **wheel** mounted on a new custom game table; the author/license remain
 unchanged. The retro slot model is placed on a custom elevated stand.
+
+## New user-selected materials and 3D models
+
+All new materials and objects below are CC0, legally redistributable and retained under their original names. Source models are 1K original glTFs; source textures are 2K JPG PBR maps.
+
+- [ambientCG Fabric037](https://ambientcg.com/view?id=Fabric037) — CC0; user supplied ZIP `Fabric037_2K-JPG.zip`; original color, OpenGL normal and roughness maps preserved verbatim, verified by SHA-256.
+- [Poly Haven Wood Table 001](https://polyhaven.com/a/wood_table_001) — CC0; roulette cabinet timber.
+- [Poly Haven Wood Table Worn](https://polyhaven.com/a/wood_table_worn) — CC0; bar counter top.
+- [Poly Haven Dark Wood](https://polyhaven.com/a/dark_wood) — CC0; bar body and backboard.
+- [Poly Haven Smoke Speckled Veneer](https://polyhaven.com/a/smoke_speckled_veneer) — CC0; pilasters and decorative pillars.
+- [Poly Haven Round Wooden Table 01](https://polyhaven.com/a/round_wooden_table_01) — CC0; replaces five lounge coffee tables.
+- [Poly Haven Sofa 02](https://polyhaven.com/a/sofa_02) — CC0; replaces five lounge sofas.
+- [Poly Haven Chess Set](https://polyhaven.com/a/chess_set) — CC0; one chess display.
+- [Poly Haven Concrete Cat Statue](https://polyhaven.com/a/concrete_cat_statue) — CC0; sculptural accent.
+- [Poly Haven Horse Statue 01](https://polyhaven.com/a/horse_statue_01) — CC0; sculptural accent.

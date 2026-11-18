@@ -2,7 +2,7 @@ name: Casino Anomaly Architecture / Roulette QA
 
 on:
   push:
-    branches: [feature/architecture-textures-table-fix]
+    branches: [feature/lounge-fabric-roulette-bar]
   workflow_dispatch:
 
 permissions:
@@ -19,6 +19,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 tools/ensure_assets.py
+          python3 tools/ensure_fabric037.py
           python3 tools/import_model_assets.py
           python3 tools/unpack_sketchfab_assets.py --require-all
       - name: Install Godot 4.5.1
@@ -40,6 +41,8 @@ jobs:
           grep -q 'Casino Anomaly scenes and PBR floor smoke PASS' /tmp/smoke.log
           "$GODOT" --headless --path . --script res://tests/sketchfab_smoke.gd 2>&1 | tee /tmp/sketchfab.log
           grep -q 'Casino Anomaly Sketchfab model smoke PASS' /tmp/sketchfab.log
+          "$GODOT" --headless --path . --script res://tests/spatial_qa.gd 2>&1 | tee /tmp/spatial.log
+          grep -q 'Casino Anomaly spatial QA PASS' /tmp/spatial.log
           "$GODOT" --headless --path . --script res://tests/architecture_qa.gd 2>&1 | tee /tmp/finishes.log
           grep -q 'Casino Anomaly architectural PBR finishes PASS' /tmp/finishes.log
-          if grep -Eh 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' /tmp/smoke.log /tmp/sketchfab.log /tmp/finishes.log; then exit 1; fi
+          if grep -Eh 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' /tmp/smoke.log /tmp/sketchfab.log /tmp/spatial.log /tmp/finishes.log; then exit 1; fi

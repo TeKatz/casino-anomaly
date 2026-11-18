@@ -43,6 +43,26 @@
     {
       "id": "modern_wooden_cabinet",
       "role": "wooden storage furniture behind bar"
+    },
+    {
+      "id": "round_wooden_table_01",
+      "role": "lounge coffee tables"
+    },
+    {
+      "id": "sofa_02",
+      "role": "lounge sofas"
+    },
+    {
+      "id": "chess_set",
+      "role": "chess on selected lounge table"
+    },
+    {
+      "id": "concrete_cat_statue",
+      "role": "small display statue"
+    },
+    {
+      "id": "horse_statue_01",
+      "role": "decorative equestrian statue"
     }
   ]
 }

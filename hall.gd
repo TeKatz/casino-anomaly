@@ -7,6 +7,9 @@ const JACQUARD: StandardMaterial3D = preload("res://carpet_material.tres")
 const LOWER_WALL: StandardMaterial3D = preload("res://lower_wall_material.tres")
 const UPPER_WALL: StandardMaterial3D = preload("res://upper_wall_material.tres")
 const ROOF_PLANKS: StandardMaterial3D = preload("res://ceiling_material.tres")
+const BAR_COUNTER_WOOD: StandardMaterial3D = preload("res://bar_top_material.tres")
+const BAR_PANEL_WOOD: StandardMaterial3D = preload("res://bar_side_material.tres")
+const PILLAR_VENEER: StandardMaterial3D = preload("res://pillar_material.tres")
 const FLOOR_Y := 0.035
 const WALL_HEIGHT := 6.0
 
@@ -21,6 +24,7 @@ var velvet: StandardMaterial3D
 var green_felt: StandardMaterial3D
 var screen_black: StandardMaterial3D
 var stone: StandardMaterial3D
+var pillar_wood: StandardMaterial3D
 var dark_ceiling: StandardMaterial3D
 var warm_white: StandardMaterial3D
 var red_light: StandardMaterial3D
@@ -52,6 +56,7 @@ func _ready() -> void:
     green_felt = _material(Color("#194c3e"), 0.98)
     screen_black = _material(Color("#101720"), 0.25)
     stone = _material(Color("#3b3b43"), 0.72)
+    pillar_wood = PILLAR_VENEER.duplicate() as StandardMaterial3D
     dark_ceiling = ROOF_PLANKS.duplicate() as StandardMaterial3D
     warm_white = _glow(Color("#ffd5a1"), 1.55)
     red_light = _glow(Color("#f2545d"), 1.3)
@@ -102,23 +107,29 @@ func _box(parent: Node3D, label: String, position_3d: Vector3,
     var mesh := BoxMesh.new()
     mesh.size = dimensions
     mesh_node.mesh = mesh
-    if mat is StandardMaterial3D and (
-        label == "WoodWainscoting" or label.ends_with("Wall")
-        or label == "MainCeiling" or label == "WestCeiling"
-    ):
-        # BoxMesh uses local UVs, which would otherwise stretch a single
-        # texture over the entire 52 m wall. Repeat according to real
-        # dimensions instead of the number of rooms.
+    if mat is StandardMaterial3D and (mat as StandardMaterial3D).albedo_texture != null:
+        # Every PBR-clad surface gets its own sensible UV repetition: no
+        # stretched 52 m walls or 12 m bar textures. Fabric has a finer repeat.
         var pbr: StandardMaterial3D = (mat as StandardMaterial3D).duplicate()
+        var length: float = maxf(dimensions.x, dimensions.z)
         if label == "MainCeiling" or label == "WestCeiling":
             pbr.uv1_scale = Vector3(
                 maxf(1.0, dimensions.x / 1.75),
-                maxf(1.0, dimensions.z / 1.75), 1.0
-            )
+                maxf(1.0, dimensions.z / 1.75), 1.0)
+        elif label.ends_with("Wall"):
+            pbr.uv1_scale = Vector3(
+                maxf(1.0, length / 1.15),
+                maxf(1.0, dimensions.y / 1.15), 1.0)
+        elif label == "WoodWainscoting":
+            pbr.uv1_scale = Vector3(
+                maxf(1.0, length / 2.0),
+                maxf(1.0, dimensions.y / 1.4), 1.0)
+        elif label == "FlutedPillar":
+            pbr.uv1_scale = Vector3(1.0, 3.0, 1.0)
         else:
-            var length: float = maxf(dimensions.x, dimensions.z)
-            pbr.uv1_scale = Vector3(maxf(1.0, length / 2.1),
-                maxf(1.0, dimensions.y / 2.0), 1.0)
+            pbr.uv1_scale = Vector3(
+                maxf(1.0, dimensions.x / 1.45),
+                maxf(1.0, dimensions.z / 1.45), 1.0)
         pbr.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
         mesh_node.material_override = pbr
     else:
@@ -276,7 +287,7 @@ func _wall(label: String, pos: Vector3, size: Vector3) -> void:
         _box(architecture, label + "_Crown", Vector3(pos.x, 5.63, pos.z), Vector3(0.42, 0.13, size.z), gold)
 
 func _column(pos: Vector3) -> void:
-    var pillar := _box(architecture, "FlutedPillar", pos + Vector3(0, 2.78, 0), Vector3(0.52, 5.3, 0.52), dark_wood, true)
+    var pillar := _box(architecture, "FlutedPillar", pos + Vector3(0, 2.78, 0), Vector3(0.52, 5.3, 0.52), pillar_wood, true)
     pillar.set_meta("decor_type", "pillar")
     for y in [0.19, 5.36, 5.55]:
         _box(architecture, "PillarGoldRing", pos + Vector3(0, y, 0), Vector3(0.52, 0.13, 0.52), gold)
@@ -347,8 +358,8 @@ func _make_bar() -> void:
     # playtest screenshot, but is now ONE continuous corner counter.
     # It reaches back into the second wing so it can be seen after turning.
     # Patron-facing sides stay north (+Z) and west (-X) of the counter.
-    var top_wood := _material(Color("#513024"), 0.49)
-    var bar_front := _material(Color("#4c2525"), 0.76)
+    var top_wood := BAR_COUNTER_WOOD.duplicate() as StandardMaterial3D
+    var bar_front := BAR_PANEL_WOOD.duplicate() as StandardMaterial3D
     var metal_detail := _material(Color("#d6b879"), 0.34, 0.68)
 
     # Long counter: across the visible bend and along the start of the west wing.
@@ -383,7 +394,7 @@ func _make_bar() -> void:
 
     # Bottle wall stays behind the bar; extend its shelving toward the bend.
     _box(bar_area, "BarBackboard", Vector3(-1.40, 2.75, -12.76),
-        Vector3(11.4, 3.30, 0.16), dark_wood)
+        Vector3(11.4, 3.30, 0.16), bar_front)
     for y in [1.9, 2.75, 3.60]:
         _box(bar_area, "BottleShelf", Vector3(-1.38, y, -12.52),
             Vector3(10.85, 0.09, 0.36), gold)
@@ -449,16 +460,9 @@ func _make_tables() -> void:
     _game_table(Vector3(-11.5, 0, -1.95), "Cards", 7)
 
 func _make_lounge() -> void:
-    for i in range(5):
-        var x := -18.4 - float(i) * 5.1
-        var sofa := _box(lounge, "SofaBase", Vector3(x, 0.39, -1.17), Vector3(2.25, 0.57, 1.05), velvet, true)
-        sofa.set_meta("decor_type", "sofa")
-        _box(lounge, "SofaBack", Vector3(x, 0.85, -0.67), Vector3(2.25, 0.95, 0.23), velvet)
-        for dx in [-1.04, 1.04]:
-            _box(lounge, "SofaArm", Vector3(x + dx, 0.62, -1.2),
-                Vector3(0.20, 0.58, 1.08), velvet)
-        _cylinder(lounge, "CoffeeTable", Vector3(x, 0.42, -2.75), 0.53, 0.12, dark_wood, true)
-        _cylinder(lounge, "CoffeeTableLeg", Vector3(x, 0.21, -2.75), 0.10, 0.35, brass)
+    # This section is reserved for imported Poly Haven furniture in
+    # model_interior.gd. Do not instantiate old cube sofas or coffee tables.
+    lounge.set_meta("replaced_by_polyhaven", true)
 
 func _make_details() -> void:
     _text(decor, "SLOTS", Vector3(0, 4.54, 13.7), 0, 62)

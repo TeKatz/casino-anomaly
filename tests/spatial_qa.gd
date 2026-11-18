@@ -107,10 +107,11 @@ func _run() -> void:
     # No obsolete spherical emissive dots remain on any lounge coffee table.
     var sofa_positions: Array[Vector3] = []
     for child in lounge.get_children():
-        if child.name.begins_with("Lamp"):
-            _fail("Old glowing coffee-table spheres are still visible")
+        if child is MeshInstance3D:
+            _fail("Primitive whitebox lounge furniture is still present")
             return
-        if child is MeshInstance3D and child.get_meta("decor_type", "") == "sofa":
+    for child in models.get_children():
+        if child.get_meta("placement_group", "") == "LoungeSofa":
             sofa_positions.append(child.position)
     if sofa_positions.size() != 5:
         _fail("Unexpected lounge seating layout")

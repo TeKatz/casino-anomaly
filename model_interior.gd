@@ -23,7 +23,8 @@ func _populate() -> void:
         return
     var bar: Node3D = hall.get_node_or_null("CornerBar") as Node3D
     var decor: Node3D = hall.get_node_or_null("Decor") as Node3D
-    if bar == null or decor == null:
+    var lounge: Node3D = hall.get_node_or_null("Lounge") as Node3D
+    if bar == null or decor == null or lounge == null:
         push_error("The room must exist before the Poly Haven models are positioned")
         return
 
@@ -74,13 +75,33 @@ func _populate() -> void:
     # Select only the tall third variant; never put a complete trio on a
     # single coffee table again.
     for entry in [
-        [Vector3(-18.4, 0.49, -2.75), 0.77],
-        [Vector3(-28.6, 0.49, -2.75), 0.76],
-        [Vector3(-38.8, 0.49, -2.75), 0.77],
+        [Vector3(-18.4, 0.56, -2.75), 0.63],
+        [Vector3(-38.8, 0.56, -2.75), 0.63],
         [Vector3(-0.45 + BAR_SHIFT_X, 1.35, -9.42), 0.68]
     ]:
         _place("brass_candleholders", "SingleBrassCandleholder",
             entry[0], entry[1], 0.0, false, false, "brass_candleholder_03")
+
+    # Replace all five primitive lounge sofas and tables rather than
+    # stacking detailed models over the old cube/cylinder placeholders.
+    for i in range(5):
+        var x := -18.4 - float(i) * 5.1
+        _place("sofa_02", "LoungeSofa",
+            Vector3(x, 0.005, -1.14), 1.08, 0.0, true, false, "", 2.42)
+        _place("round_wooden_table_01", "LoungeCoffeeTable",
+            Vector3(x, 0.005, -2.75), 0.56, 0.0, true, false, "", 1.22)
+    # The complete chessboard is deliberately unique; no repeated identical
+    # board on every table. It has its own small reserved table.
+    _place("chess_set", "LoungeChessSet",
+        Vector3(-28.6, 0.565, -2.75), 0.19, 0.0, false, false, "", 0.70)
+    # Two small animal sculptures mark distinct landmarks for future
+    # anomaly spotting. Their plinths are away from the carpet corridor.
+    _display_plinth(Vector3(-9.15, 0.005, -1.05), 0.62, 0.72)
+    _place("concrete_cat_statue", "ConcreteCatDisplay",
+        Vector3(-9.15, 0.625, -1.05), 0.49, PI, false, false, "", 0.58)
+    _display_plinth(Vector3(-44.20, 0.005, -1.35), 0.74, 0.88)
+    _place("horse_statue_01", "HorseStatueDisplay",
+        Vector3(-44.20, 0.745, -1.35), 1.10, -PI / 2.0, false, false, "", 0.85)
 
     # Statues get actual pedestals so their bases are not floating or sunken.
     for pos in [Vector3(-2.75, 0.005, 12.15), Vector3(-40.5, 0.005, -1.2)]:
@@ -117,6 +138,29 @@ func _populate() -> void:
 
     print("Poly Haven 3D interior: ", placed_model_count, " model instances from ",
         successful_model_ids.size(), " source assets")
+
+func _display_plinth(ground: Vector3, height: float, width: float) -> void:
+    var body := StaticBody3D.new()
+    body.name = "DecorativeStatuePlinth"
+    body.position = ground + Vector3(0, height * 0.5, 0)
+    var surface := MeshInstance3D.new()
+    surface.name = "StonePlinthMesh"
+    var cube := BoxMesh.new()
+    cube.size = Vector3(width, height, width)
+    surface.mesh = cube
+    var stone_mat := StandardMaterial3D.new()
+    stone_mat.albedo_color = Color("#aaa8a2")
+    stone_mat.roughness = 0.60
+    surface.material_override = stone_mat
+    body.add_child(surface)
+    var collision := CollisionShape3D.new()
+    collision.name = "PlinthCollision"
+    var shape := BoxShape3D.new()
+    shape.size = cube.size
+    collision.shape = shape
+    body.add_child(collision)
+    add_child(body)
+
 
 func _stool_cushion(stool: Node3D) -> void:
     # The original mesh has a hard wooden seat. Provide uniform upholstery
@@ -226,7 +270,8 @@ func _bounds_for(model: Node3D) -> AABB:
 
 func _place(identifier: String, label: String, anchor: Vector3,
         target_height: float, yaw: float = 0.0, add_collision: bool = false,
-        wall_mount: bool = false, mesh_variant: String = "") -> Node3D:
+        wall_mount: bool = false, mesh_variant: String = "",
+        max_footprint: float = 0.0) -> Node3D:
     var packed := _resource(identifier)
     if packed == null:
         return null
@@ -270,6 +315,9 @@ func _place(identifier: String, label: String, anchor: Vector3,
     # Most donor scenes use Blender-origin pivots. Normalize once, then
     # align the bottom to the requested supporting surface or wall center.
     var height_scale := target_height / bounds.size.y
+    if max_footprint > 0.0:
+        height_scale = minf(height_scale,
+            max_footprint / maxf(bounds.size.x, bounds.size.z))
     imported.scale = Vector3.ONE * height_scale
     imported.position = Vector3(
         -(bounds.position.x + bounds.size.x * 0.5) * height_scale,
@@ -285,13 +333,13 @@ func _place(identifier: String, label: String, anchor: Vector3,
         # which allowed the player to walk through most of the sideboard.
         var body := StaticBody3D.new()
         body.name = "ModelSolidBody"
-        body.position = Vector3(0, target_height * 0.5, 0)
+        body.position = Vector3(0, bounds.size.y * height_scale * 0.5, 0)
         var shape := CollisionShape3D.new()
         shape.name = "ModelCollisionShape"
         var collision := BoxShape3D.new()
         collision.size = Vector3(
             maxf(bounds.size.x * height_scale, 0.23),
-            target_height,
+            maxf(bounds.size.y * height_scale, 0.23),
             maxf(bounds.size.z * height_scale, 0.23)
         )
         shape.shape = collision

@@ -36,7 +36,7 @@ func _test() -> void:
                         push_error("Roulette model must now be the resized wheel")
                         quit(1)
                         return
-                    if node.position.y < 1.13:
+                    if node.position.y < 1.00:
                         push_error("Roulette wheel is still lying on the floor")
                         quit(1)
                         return

@@ -26,7 +26,7 @@ func _run() -> void:
         return
     for item in [
         ["lower_wall_material.tres", "wooden_panels"],
-        ["upper_wall_material.tres", "book_pattern"],
+        ["upper_wall_material.tres", "Fabric037"],
         ["ceiling_material.tres", "roof_planks"]
     ]:
         var material: StandardMaterial3D = load("res://" + item[0]) as StandardMaterial3D
@@ -40,7 +40,7 @@ func _run() -> void:
     var ceiling: MeshInstance3D = structure.get_node_or_null("WestCeiling") as MeshInstance3D
     var lower: MeshInstance3D = structure.get_node_or_null("WoodWainscoting") as MeshInstance3D
     for entry in [
-        [upper, "book_pattern", 10.0],
+        [upper, "Fabric037", 10.0],
         [ceiling, "roof_planks", 10.0],
         [lower, "wooden_panels", 2.0]
     ]:
@@ -57,6 +57,50 @@ func _run() -> void:
             _bad("Surface lost PBR normal/roughness maps: " + node.name)
             return
 
+    var bar: Node3D = world.get_node_or_null("CornerBar") as Node3D
+    var roulette: Node3D = world.get_node_or_null("SketchfabFurniture") as Node3D
+    if bar == null or roulette == null:
+        _bad("Bar and roulette sections missing")
+        return
+    var bar_pbr := 0
+    for item in bar.get_children():
+        if item is MeshInstance3D and (
+                item.name.begins_with("BarRunFacingApproach")
+                or item.name.begins_with("BarCounterFrontInset")):
+            var mat: StandardMaterial3D = item.get_active_material(0) as StandardMaterial3D
+            if mat == null or mat.albedo_texture == null:
+                _bad("Bar surface missing PBR wood: " + item.name)
+                return
+            bar_pbr += 1
+    if bar_pbr != 2:
+        _bad("Countertop or bar panel missing")
+        return
+    var pillars := 0
+    for item in structure.get_children():
+        if item is MeshInstance3D and item.get_meta("decor_type", "") == "pillar":
+            var mat: StandardMaterial3D = item.get_active_material(0) as StandardMaterial3D
+            if mat == null or mat.albedo_texture == null:
+                _bad("Pillar missing smoke speckled veneer")
+                return
+            pillars += 1
+    if pillars < 20:
+        _bad("Missing pillar veneer")
+        return
+    var roulette_tables := 0
+    for item in roulette.get_children():
+        if item.get_meta("furniture_kind", "") == "roulette_table":
+            roulette_tables += 1
+            var top: MeshInstance3D = item.get_node_or_null("SolidTableTop") as MeshInstance3D
+            if top == null or top.position.y > 0.89:
+                _bad("Roulette table still too high")
+                return
+            var mat: StandardMaterial3D = top.get_active_material(0) as StandardMaterial3D
+            if mat == null or mat.albedo_texture == null:
+                _bad("Roulette table missing wood_table_001")
+                return
+    if roulette_tables != 3:
+        _bad("Expected three roulette cabinets")
+        return
     world.queue_free()
     print("Casino Anomaly architectural PBR finishes PASS")
     quit(0)

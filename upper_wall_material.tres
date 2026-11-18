@@ -1,16 +1,16 @@
 [gd_resource type="StandardMaterial3D" load_steps=4 format=3]
 
-[ext_resource type="Texture2D" path="res://assets/book_pattern/book_pattern_col1_2k.jpg" id="1"]
-[ext_resource type="Texture2D" path="res://assets/book_pattern/book_pattern_rough_2k.jpg" id="2"]
-[ext_resource type="Texture2D" path="res://assets/book_pattern/book_pattern_nor_gl_2k.jpg" id="3"]
+[ext_resource type="Texture2D" path="res://assets/fabric037/Fabric037_2K-JPG_Color.jpg" id="1"]
+[ext_resource type="Texture2D" path="res://assets/fabric037/Fabric037_2K-JPG_Roughness.jpg" id="2"]
+[ext_resource type="Texture2D" path="res://assets/fabric037/Fabric037_2K-JPG_NormalGL.jpg" id="3"]
 
 [resource]
-resource_name = "Poly Haven book_pattern Casino Interior PBR"
-albedo_color = Color(0.73, 0.75, 0.70, 1)
+resource_name = "ambientCG Fabric037 2K woven green fabric"
+albedo_color = Color(1, 1, 1, 1)
 albedo_texture = ExtResource("1")
-roughness = 0.93
+roughness = 0.92
 roughness_texture = ExtResource("2")
 normal_enabled = true
-normal_scale = 0.42
+normal_scale = 0.22
 normal_texture = ExtResource("3")
 texture_filter = 1

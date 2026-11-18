@@ -65,3 +65,14 @@ pillars and collisions remain, and the Oak floor and Jacquard runner are unchang
 `tests/architecture_qa.gd` and the enhanced Sketchfab smoke check verify
 materials, textured surfaces and furniture. No Sketchfab models were modified
 or duplicated for this pass.
+
+## Lounge renovation and roulette polishing
+
+User-directed pass on `casino-anomaly/dev`:
+- Replaced oversized Book Pattern upper-wall fabric with ambientCG **Fabric037 2K JPG**, from the user-supplied archive; all three PBR maps are checked against the uploaded file's SHA-256 values. Source: https://ambientcg.com/view?id=Fabric037 (CC0).
+- Changed bar counter surfaces to Poly Haven `wood_table_worn` (tops) and `dark_wood` (facades/backboard).
+- Pillar surfaces are Poly Haven `smoke_speckled_veneer`, keeping their existing collision shapes and gold ring trim.
+- All three roulette cabinets use Poly Haven `wood_table_001`; top lowered about 15 cm, roulette wheel enlarged about 30 percent.
+- Replaced all five primitive sofas and coffee tables with original Poly Haven `sofa_02` and `round_wooden_table_01` glTFs, individually aligned and collidable.
+- Added one chess set and two animal sculptures (concrete cat, horse), each as a unique environmental landmark with pedestal collisions and without blocking the red runner.
+- Added reproducible offline checks for imported material maps, model types and placement counts. The longstanding Gold/wood architecture and previous Sketchfab credits remain intact.

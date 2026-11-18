@@ -186,7 +186,7 @@ def main() -> None:
 
     # Stable ordering and immutable checksums are committed with asset binaries.
     INDEX.write_text(json.dumps(existing, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    print("All 10 Poly Haven models verified:", round(total / 1e6, 2), "MB", flush=True)
+    print("All", len(spec["models"]), "Poly Haven models verified:", round(total / 1e6, 2), "MB", flush=True)
 
 
 if __name__ == "__main__":
