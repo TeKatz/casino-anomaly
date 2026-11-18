@@ -45,3 +45,23 @@ GitHub web-upload limit. Checksums are pinned in `catalog.json`.
 The CI workflow extracts them before Godot import; no Godot authoring or
 manual asset processing is required. The `dev` release workflow is not
 modified until this feature branch is validated and merged.
+
+## Room material and casino furniture pass
+
+After the first Sketchfab playtest, the retro slot has a purpose-built raised
+mahogany platform and collision. The roulette download is just a roulette WHEEL;
+each wheel is now scaled to approximately a 1 m diameter and mounted on a
+custom 3.5 m mahogany table with a green betting felt/grid and top collision.
+The three roulette replacements preserve the existing main corridor clearance.
+
+The lower wall is covered by Poly Haven **Wooden Panels** (CC0); the upper
+wall by the olive-green woven **Book Pattern** material (CC0); the ceiling by
+**Roof Planks** (CC0). All have diffuse, roughness and OpenGL normal maps.
+The long wall and ceiling meshes repeat their UVs in world-proportional steps
+rather than stretching one image over the entire room. Existing gold trim,
+pillars and collisions remain, and the Oak floor and Jacquard runner are unchanged.
+
+`tools/ensure_assets.py` pins all new CC0 maps on first verified download;
+`tests/architecture_qa.gd` and the enhanced Sketchfab smoke check verify
+materials, textured surfaces and furniture. No Sketchfab models were modified
+or duplicated for this pass.

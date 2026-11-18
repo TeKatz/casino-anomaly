@@ -4,6 +4,9 @@ extends Node3D
 # the whitebox furniture later without rebuilding the room or its collision layout.
 const OAK: StandardMaterial3D = preload("res://floor_material.tres")
 const JACQUARD: StandardMaterial3D = preload("res://carpet_material.tres")
+const LOWER_WALL: StandardMaterial3D = preload("res://lower_wall_material.tres")
+const UPPER_WALL: StandardMaterial3D = preload("res://upper_wall_material.tres")
+const ROOF_PLANKS: StandardMaterial3D = preload("res://ceiling_material.tres")
 const FLOOR_Y := 0.035
 const WALL_HEIGHT := 6.0
 
@@ -38,8 +41,10 @@ func _ready() -> void:
     fabric = JACQUARD.duplicate() as StandardMaterial3D
     fabric.uv1_scale = Vector3.ONE
     fabric.cull_mode = BaseMaterial3D.CULL_DISABLED
-    wall_paint = _material(Color("#202a35"), 0.82)
-    wall_panel = _material(Color("#4a2a2b"), 0.8)
+    # Poly Haven PBR surfaces: dark recessed wood below, olive woven
+    # book-cover fabric above. Keep original structural walls/colliders.
+    wall_paint = UPPER_WALL.duplicate() as StandardMaterial3D
+    wall_panel = LOWER_WALL.duplicate() as StandardMaterial3D
     dark_wood = _material(Color("#37221b"), 0.65)
     gold = _material(Color("#b88d4d"), 0.34, 0.7)
     brass = _material(Color("#86643d"), 0.32, 0.65)
@@ -47,7 +52,7 @@ func _ready() -> void:
     green_felt = _material(Color("#194c3e"), 0.98)
     screen_black = _material(Color("#101720"), 0.25)
     stone = _material(Color("#3b3b43"), 0.72)
-    dark_ceiling = _material(Color("#171d27"), 0.88)
+    dark_ceiling = ROOF_PLANKS.duplicate() as StandardMaterial3D
     warm_white = _glow(Color("#ffd5a1"), 1.55)
     red_light = _glow(Color("#f2545d"), 1.3)
 
@@ -97,7 +102,27 @@ func _box(parent: Node3D, label: String, position_3d: Vector3,
     var mesh := BoxMesh.new()
     mesh.size = dimensions
     mesh_node.mesh = mesh
-    mesh_node.material_override = mat
+    if mat is StandardMaterial3D and (
+        label == "WoodWainscoting" or label.ends_with("Wall")
+        or label == "MainCeiling" or label == "WestCeiling"
+    ):
+        # BoxMesh uses local UVs, which would otherwise stretch a single
+        # texture over the entire 52 m wall. Repeat according to real
+        # dimensions instead of the number of rooms.
+        var pbr: StandardMaterial3D = (mat as StandardMaterial3D).duplicate()
+        if label == "MainCeiling" or label == "WestCeiling":
+            pbr.uv1_scale = Vector3(
+                maxf(1.0, dimensions.x / 1.75),
+                maxf(1.0, dimensions.z / 1.75), 1.0
+            )
+        else:
+            var length: float = maxf(dimensions.x, dimensions.z)
+            pbr.uv1_scale = Vector3(maxf(1.0, length / 2.1),
+                maxf(1.0, dimensions.y / 2.0), 1.0)
+        pbr.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+        mesh_node.material_override = pbr
+    else:
+        mesh_node.material_override = mat
     mesh_node.position = position_3d
     parent.add_child(mesh_node)
     if solid:
@@ -439,7 +464,7 @@ func _make_details() -> void:
     _text(decor, "SLOTS", Vector3(0, 4.54, 13.7), 0, 62)
     _text(decor, "TABLE GAMES", Vector3(-15, 3.55, -12.89), 0, 57)
     # Space decorative topiary between sofa groups instead of inside cushions.
-    for pos in [Vector3(3.7, 0, 11.2), Vector3(-3.65, 0, 12),
+    for pos in [Vector3(2.9, 0, 12.2), Vector3(-3.65, 0, 12),
                 Vector3(-20.95, 0, -0.78), Vector3(-7.2, 0, -1.25),
                 Vector3(-31.15, 0, -0.78), Vector3(-41.4, 0, -0.78)]:
         var pot := _cylinder(decor, "PlantPot", pos + Vector3(0, 0.32, 0), 0.29, 0.65, stone, true, 12)

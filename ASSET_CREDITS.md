@@ -22,3 +22,13 @@ game or models are shared.
 - **Casino_2** — [crittaa](https://sketchfab.com/crittaa), [original](https://sketchfab.com/3d-models/casino-2-3f0e1cca9a3e46ba89f849e62df289ad). CC BY 4.0. This is a **complete room** and is kept in a separate preview rather than layered into the L-shaped hall.
 
 License: https://creativecommons.org/licenses/by/4.0/
+
+## New Poly Haven CC0 textures (architectural finish pass)
+
+- **Wooden Panels** — [Poly Haven](https://polyhaven.com/a/wooden_panels), by Dimitrios Savva, CC0. Dark timber lower wall, 2K PBR maps.
+- **Book Pattern** — [Poly Haven](https://polyhaven.com/a/book_pattern), by Rob Tuytel, CC0. Olive woven-fabric upper wall, 2K PBR maps.
+- **Roof Planks** — [Poly Haven](https://polyhaven.com/a/roof_planks), by Rob Tuytel, CC0. Ceiling, 2K PBR maps.
+
+The original Sketchfab Roulette Table model is used as a smaller roulette
+**wheel** mounted on a new custom game table; the author/license remain
+unchanged. The retro slot model is placed on a custom elevated stand.

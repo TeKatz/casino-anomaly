@@ -85,6 +85,99 @@ func _spawn(slug: String, label: String, spot: Vector3, max_width: float,
         wrapper.add_child(body)
     return wrapper
 
+func _finish(color: Color, roughness: float = 0.72, metallic: float = 0.0) -> StandardMaterial3D:
+    var material := StandardMaterial3D.new()
+    material.albedo_color = color
+    material.roughness = roughness
+    material.metallic = metallic
+    return material
+
+func _block(parent: Node3D, label: String, pos: Vector3, size: Vector3,
+        material: Material, solid: bool = false) -> MeshInstance3D:
+    var mesh_node := MeshInstance3D.new()
+    mesh_node.name = label
+    var box := BoxMesh.new()
+    box.size = size
+    mesh_node.mesh = box
+    mesh_node.position = pos
+    mesh_node.material_override = material
+    parent.add_child(mesh_node)
+    if solid:
+        var body := StaticBody3D.new()
+        body.name = label + "Collider"
+        body.position = pos
+        var collision := CollisionShape3D.new()
+        var shape := BoxShape3D.new()
+        shape.size = size
+        collision.shape = shape
+        body.add_child(collision)
+        parent.add_child(body)
+    return mesh_node
+
+func _retro_plinth(spot: Vector3) -> Node3D:
+    # A modest raised and collision-equipped display platform, not an empty
+    # floating grey plate. The actual imported mesh rests on its top.
+    var stand := Node3D.new()
+    stand.name = "RetroSlotPlinth"
+    stand.position = spot
+    add_child(stand)
+    var mahogany := _finish(Color("#482820"), 0.56)
+    var satin_brass := _finish(Color("#b39158"), 0.32, 0.65)
+    var dark_top := _finish(Color("#282326"), 0.80)
+    _block(stand, "PedestalBody", Vector3(0, 0.155, 0),
+        Vector3(1.88, 0.31, 1.68), mahogany, true)
+    _block(stand, "GoldInlay", Vector3(0, 0.314, 0),
+        Vector3(1.90, 0.025, 1.70), satin_brass)
+    _block(stand, "DisplaySurface", Vector3(0, 0.339, 0),
+        Vector3(1.79, 0.025, 1.59), dark_top)
+    return stand
+
+func _roulette_table(spot: Vector3) -> Node3D:
+    # The donated Sketchfab "roulette_table" geometry is a WHEEL only.
+    # Make a readable casino table with a real betting layout beneath it.
+    var table := Node3D.new()
+    table.name = "RouletteTableCabinet"
+    table.set_meta("furniture_kind", "roulette_table")
+    table.position = spot
+    add_child(table)
+    var timber := _finish(Color("#40251d"), 0.59)
+    var brass := _finish(Color("#c4a05c"), 0.34, 0.62)
+    var felt := _finish(Color("#175444"), 0.96)
+    var white := _finish(Color("#e5d3ae"), 0.8)
+    var red := _finish(Color("#9c2e30"), 0.9)
+    var black := _finish(Color("#242629"), 0.89)
+
+    _block(table, "SolidTableTop", Vector3(0, 1.015, 0),
+        Vector3(3.50, 0.18, 1.62), timber, true)
+    _block(table, "OuterBrassRim", Vector3(0, 1.107, 0),
+        Vector3(3.54, 0.042, 1.66), brass)
+    _block(table, "WheelAreaInset", Vector3(-1.02, 1.134, 0),
+        Vector3(1.13, 0.015, 1.39), timber)
+    _block(table, "BettingFelt", Vector3(0.64, 1.134, 0),
+        Vector3(1.94, 0.017, 1.37), felt)
+    for x in [-1.54, 1.54]:
+        for z in [-0.58, 0.58]:
+            _block(table, "TableLeg", Vector3(x, 0.48, z),
+                Vector3(0.17, 0.94, 0.17), timber)
+            _block(table, "LegFootGold", Vector3(x, 0.085, z),
+                Vector3(0.22, 0.12, 0.22), brass)
+    _block(table, "DealerRail", Vector3(0, 0.92, -0.78),
+        Vector3(3.36, 0.095, 0.09), timber)
+    # Thin, level betting-number grid, not emissive graphics or hovering
+    # objects. Cards/chips can replace this simple first-pass layout later.
+    for i in range(5):
+        var x := -0.29 + float(i) * 0.46
+        _block(table, "GridVertical", Vector3(x, 1.149, 0),
+            Vector3(0.012, 0.007, 1.15), white)
+    for i in range(4):
+        var z := -0.57 + float(i) * 0.38
+        _block(table, "GridHorizontal", Vector3(0.64, 1.149, z),
+            Vector3(1.87, 0.007, 0.012), white)
+    for i in range(4):
+        _block(table, "BettingTile", Vector3(-0.05 + float(i)*0.45, 1.153, -0.18),
+            Vector3(0.27, 0.007, 0.22), red if i % 2 == 0 else black)
+    return table
+
 func _populate() -> void:
     var hall: Node3D = get_parent() as Node3D
     if hall == null:
@@ -99,9 +192,12 @@ func _populate() -> void:
     # not ten copies: the existing prototypes stay in other places.
     var retro := slots.get_node_or_null("Slot_01") as Node3D
     if retro != null:
+        # Place the imported slot on a raised mahogany display stand.
         var hero := _spawn("retro_slot_machine", "RetroSlotHero",
-            retro.position, 1.42, 1.72, retro.rotation.y)
+            retro.position + Vector3(0, 0.365, 0),
+            1.42, 1.72, retro.rotation.y)
         if hero != null:
+            _retro_plinth(retro.position)
             retro.queue_free()
             replaced_slots += 1
 
@@ -111,9 +207,15 @@ func _populate() -> void:
         var table_node: Node3D = table as Node3D
         var name_lower := table_node.name.to_lower()
         if name_lower.begins_with("roulette"):
+            # Original Sketchfab download is a wheel with no tabletop.
+            # Reduce its diameter to ~1 m and set it on the new 3.5 m
+            # mahogany-and-felt roulette table with player collision.
             var replacement := _spawn("roulette_table", "SketchfabRoulette",
-                table_node.position, 2.75, 1.18, -PI * 0.5)
+                table_node.position + Vector3(-1.02, 1.17, 0),
+                0.98, 0.36, -PI * 0.5, "scene.gltf", false)
             if replacement != null:
+                replacement.set_meta("placement_type", "roulette_wheel")
+                _roulette_table(table_node.position)
                 table_node.queue_free()
                 replaced_roulette += 1
         elif name_lower.begins_with("blackjack"):
