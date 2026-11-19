@@ -214,7 +214,8 @@ func _build_wood_exit_frame(parent: Node3D, label: String,
     # Inboard of the front wall, yet clear of the corridor side-wall
     # termini; oak posts are a unified frame instead of floating trim.
     for side in [-1.0, 1.0]:
-        _box(frame, "Jamb", Vector3(-45.88, 1.74, z + side * 1.13),
+        var side_name := "South" if side < 0.0 else "North"
+        _box(frame, "Jamb_" + side_name, Vector3(-45.88, 1.74, z + side * 1.13),
             Vector3(0.28, 3.48, 0.20), material, false)
     _box(frame, "Header", Vector3(-45.88, 3.50, z),
         Vector3(0.28, 0.22, 2.48), material, false)
@@ -232,13 +233,14 @@ func _build_entry_sleeve(parent: Node3D,
     collar.name = "EntrySleeve"
     parent.add_child(collar)
     for side in [-1.0, 1.0]:
-        _box(collar, "SideReturn",
+        var side_name := "South" if side < 0.0 else "North"
+        _box(collar, "SideReturn_" + side_name,
             Vector3(side * 1.45, 1.77, 14.32),
             Vector3(0.46, 3.54, 0.98), material)
-        _box(collar, "SillWing",
+        _box(collar, "SillWing_" + side_name,
             Vector3(side * 1.45, -0.08, 14.32),
             Vector3(0.47, 0.16, 1.00), floor_mat, false)
-        _box(collar, "EntryJamb",
+        _box(collar, "EntryJamb_" + side_name,
             Vector3(side * 1.67, 1.75, 13.96),
             Vector3(0.20, 3.50, 0.25), material, false)
     _box(collar, "RoofSoffit",
