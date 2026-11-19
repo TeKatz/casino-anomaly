@@ -4,6 +4,7 @@ signal options_changed(key: String)
 
 const FILE_PATH := "user://casino_settings.cfg"
 const DEFAULTS := {
+    "language": "en",
     "window_mode": "windowed",
     "resolution": "1280x720",
     "vsync": true,
@@ -46,6 +47,8 @@ func set_option(key: String, value: Variant) -> void:
 
 func _sanitize(key: String, value: Variant) -> Variant:
     match key:
+        "language":
+            return str(value) if str(value) in ["en", "de"] else "en"
         "window_mode":
             return str(value) if str(value) in ["windowed", "borderless", "fullscreen"] else "windowed"
         "resolution":

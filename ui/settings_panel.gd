@@ -1,4 +1,5 @@
 extends PanelContainer
+const Loc = preload("res://gameplay/localization.gd")
 ## Reusable tabbed settings UI. Functions both while SceneTree is paused
 ## and in the normal main menu; changes apply and persist immediately.
 signal back_pressed
@@ -6,13 +7,16 @@ signal back_pressed
 const GOLD := Color("#dbad6b")
 const PALE := Color("#f5e4ce")
 const BACKGROUND := Color("#111924")
-const CATEGORIES := ["Grafik", "Audio", "Steuerung", "Gameplay"]
+const CATEGORIES := ["settings.graphics", "settings.audio", "settings.controls", "settings.gameplay"]
 
 var tab_row: HBoxContainer
 var options_box: VBoxContainer
 var tabs: Array[Button] = []
 var selected_tab := 0
 var settings_node: Variant = null
+var title_label: Label
+var footer_note: Label
+var back_button: Button
 
 
 func _ready() -> void:
@@ -35,8 +39,9 @@ func _ready() -> void:
     layout.add_theme_constant_override("separation", 14)
     margin.add_child(layout)
 
-    var title := Label.new()
-    title.text = "EINSTELLUNGEN"
+    title_label = Label.new()
+    var title := title_label
+    title.text = Loc.t("settings.title", self)
     title.add_theme_font_size_override("font_size", 29)
     title.add_theme_color_override("font_color", GOLD)
     layout.add_child(title)
@@ -46,7 +51,7 @@ func _ready() -> void:
     layout.add_child(tab_row)
     for i in range(CATEGORIES.size()):
         var tab := Button.new()
-        tab.text = CATEGORIES[i]
+        tab.text = Loc.t(CATEGORIES[i], self)
         tab.custom_minimum_size = Vector2(126, 39)
         tab.size_flags_horizontal = Control.SIZE_EXPAND_FILL
         tab.focus_mode = Control.FOCUS_NONE
@@ -68,18 +73,38 @@ func _ready() -> void:
     var footer := HBoxContainer.new()
     footer.add_theme_constant_override("separation", 10)
     layout.add_child(footer)
-    var note := Label.new()
-    note.text = "Änderungen werden automatisch gespeichert."
+    footer_note = Label.new()
+    var note := footer_note
+    note.text = Loc.t("settings.changes_saved", self)
     note.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     note.add_theme_color_override("font_color", Color("#96a2ab"))
     footer.add_child(note)
-    var back := Button.new()
-    back.text = "ZURÜCK"
+    back_button = Button.new()
+    var back := back_button
+    back.text = Loc.t("settings.back", self)
     back.custom_minimum_size = Vector2(142, 44)
     back.add_theme_stylebox_override("normal", _style(Color("#483529"), GOLD, 1))
     back.pressed.connect(func() -> void: back_pressed.emit())
     footer.add_child(back)
     _switch_tab(0)
+    if settings_node != null:
+        settings_node.options_changed.connect(_on_setting_changed)
+
+
+func _on_setting_changed(key: String) -> void:
+    if key == "language":
+        call_deferred("_refresh_language")
+
+
+func _refresh_language() -> void:
+    if not is_inside_tree():
+        return
+    title_label.text = Loc.t("settings.title", self)
+    footer_note.text = Loc.t("settings.changes_saved", self)
+    back_button.text = Loc.t("settings.back", self)
+    for i in range(tabs.size()):
+        tabs[i].text = Loc.t(CATEGORIES[i], self)
+    _switch_tab(selected_tab)
 
 
 func _style(bg: Color, border_color: Color, border_width: int) -> StyleBoxFlat:
@@ -127,39 +152,42 @@ func _switch_tab(index: int) -> void:
         child.queue_free()
     match index:
         0:
-            _section("Anzeige")
-            _select("Fenstermodus", "window_mode", [
-                ["Fenster", "windowed"], ["Randlos", "borderless"], ["Vollbild", "fullscreen"]
+            _section(Loc.t("settings.display", self))
+            _select(Loc.t("settings.window_mode", self), "window_mode", [
+                [Loc.t("settings.windowed", self), "windowed"], [Loc.t("settings.borderless", self), "borderless"], [Loc.t("settings.fullscreen", self), "fullscreen"]
             ])
-            _select("Auflösung (Fenstermodus)", "resolution", [
+            _select(Loc.t("settings.resolution", self), "resolution", [
                 ["1280 × 720", "1280x720"], ["1600 × 900", "1600x900"],
                 ["1920 × 1080", "1920x1080"], ["2560 × 1440", "2560x1440"]
             ])
-            _select("FPS-Begrenzung", "fps_limit", [
-                ["Unbegrenzt", 0], ["30 FPS", 30], ["60 FPS", 60],
+            _select(Loc.t("settings.fps_limit", self), "fps_limit", [
+                [Loc.t("settings.unlimited", self), 0], ["30 FPS", 30], ["60 FPS", 60],
                 ["90 FPS", 90], ["120 FPS", 120], ["144 FPS", 144], ["240 FPS", 240]
             ])
             _toggle("VSync", "vsync")
-            _toggle("Zeitliches Anti-Aliasing (TAA)", "taa")
-            _slider("3D-Auflösungsskalierung", "render_scale", 0.5, 1.0, 0.05, "×")
+            _toggle(Loc.t("settings.taa", self), "taa")
+            _slider(Loc.t("settings.render_scale", self), "render_scale", 0.5, 1.0, 0.05, "×")
         1:
-            _section("Lautstärke")
-            _slider("Gesamt", "master_volume", 0.0, 1.0, 0.05, "%")
-            _slider("Musik", "music_volume", 0.0, 1.0, 0.05, "%")
-            _slider("Effekte", "sfx_volume", 0.0, 1.0, 0.05, "%")
-            _slider("Menü / UI", "ui_volume", 0.0, 1.0, 0.05, "%")
+            _section(Loc.t("settings.volume", self))
+            _slider(Loc.t("settings.master", self), "master_volume", 0.0, 1.0, 0.05, "%")
+            _slider(Loc.t("settings.music", self), "music_volume", 0.0, 1.0, 0.05, "%")
+            _slider(Loc.t("settings.sfx", self), "sfx_volume", 0.0, 1.0, 0.05, "%")
+            _slider(Loc.t("settings.ui", self), "ui_volume", 0.0, 1.0, 0.05, "%")
         2:
-            _section("Maus und Bewegung")
-            _slider("Mausempfindlichkeit", "mouse_sensitivity", 0.25, 3.0, 0.05, "×")
-            _toggle("Vertikale Mausachse umkehren", "invert_y")
-            _select("Sprinten mit Shift", "sprint_mode", [
-                ["Gedrückt halten", "hold"], ["Ein/Aus umschalten", "toggle"]
+            _section(Loc.t("settings.mouse_movement", self))
+            _slider(Loc.t("settings.mouse_sensitivity", self), "mouse_sensitivity", 0.25, 3.0, 0.05, "×")
+            _toggle(Loc.t("settings.invert_y", self), "invert_y")
+            _select(Loc.t("settings.sprint", self), "sprint_mode", [
+                [Loc.t("settings.hold", self), "hold"], [Loc.t("settings.toggle", self), "toggle"]
             ])
         3:
-            _section("Spielansicht")
-            _slider("Sichtfeld (FOV)", "fov", 60.0, 105.0, 1.0, "°")
-            _toggle("Kamerabewegung beim Gehen / Atmen", "camera_motion")
-            _toggle("Fortschritts-HUD anzeigen", "hud_visible")
+            _section(Loc.t("settings.game_view", self))
+            _slider(Loc.t("settings.fov", self), "fov", 60.0, 105.0, 1.0, "°")
+            _toggle(Loc.t("settings.camera_motion", self), "camera_motion")
+            _section(Loc.t("settings.language", self))
+            _select(Loc.t("settings.language", self), "language", [
+                ["English", "en"], ["Deutsch", "de"]
+            ])
 
 
 func _section(text: String) -> void:
