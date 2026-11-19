@@ -12,6 +12,7 @@ var streaming_active := true
 
 
 func _ready() -> void:
+    _ensure_volumes()
     streaming_active = not get_parent().has_meta("_streaming_standby")
     for item in get_children():
         if item is VoxelGI:
@@ -20,6 +21,25 @@ func _ready() -> void:
     if settings != null:
         settings.options_changed.connect(_on_setting_changed)
     call_deferred("_load_baked_data")
+
+
+func _ensure_volumes() -> void:
+    _ensure_volume("MainWingGI", Vector3(0, 3.15, 0.5),
+        Vector3(12.8, 7.6, 27.9))
+    _ensure_volume("WestWingGI", Vector3(-26, 3.15, -6.5),
+        Vector3(40.8, 7.6, 13.7))
+
+
+func _ensure_volume(label: String, center: Vector3, extents: Vector3) -> void:
+    if has_node(label):
+        return
+    var volume := VoxelGI.new()
+    volume.name = label
+    volume.position = center
+    volume.size = extents
+    volume.subdiv = VoxelGI.SUBDIV_128
+    volume.visible = false
+    add_child(volume)
 
 
 func _load_baked_data() -> void:

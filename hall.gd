@@ -4,6 +4,7 @@ extends Node3D
 # First room-design pass. Everything is intentionally modular so assets may replace
 # the whitebox furniture later without rebuilding the room or its collision layout.
 const OAK: StandardMaterial3D = preload("res://floor_material.tres")
+const VoxelRig = preload("res://lighting/voxel_gi_rig.gd")
 const JACQUARD: StandardMaterial3D = preload("res://carpet_material.tres")
 const LOWER_WALL: StandardMaterial3D = preload("res://lower_wall_material.tres")
 const UPPER_WALL: StandardMaterial3D = preload("res://upper_wall_material.tres")
@@ -102,6 +103,14 @@ func _ready() -> void:
         _make_details()
     if lights.get_child_count() == 0:
         _make_lights()
+
+    # Headless PackedScene loading can discard VoxelGI editor children.
+    # Build the identical room-local rig programmatically to guarantee
+    # streaming rooms have both volumes regardless of display backend.
+    if not Engine.is_editor_hint() and not has_node("VoxelGIRig"):
+        var gi_rig := VoxelRig.new() as Node3D
+        gi_rig.name = "VoxelGIRig"
+        add_child(gi_rig)
 
     # Keep the designer-authored scene untouched. The game controller and
     # choice doors exist only in a started/continued run, not in editor mode.
