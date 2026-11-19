@@ -53,6 +53,10 @@ func prepare_room(room: Node3D) -> bool:
     var entry_mat: Material = entry_wall.material_override
     var trim_mat: Material = wall_mat
     var floor_mat: Material = wall_mat
+    var wooden_frame: Material = wall_mat
+    var wainscot := architecture.get_node_or_null("WoodWainscoting") as MeshInstance3D
+    if wainscot != null and wainscot.material_override != null:
+        wooden_frame = wainscot.material_override
     var trim := architecture.get_node_or_null("ExitFrameTop") as MeshInstance3D
     var floor := architecture.get_node_or_null("OakWestWing") as MeshInstance3D
     if trim != null and trim.material_override != null:
@@ -68,11 +72,30 @@ func prepare_room(room: Node3D) -> bool:
     _disable_collision(architecture.get_node_or_null("EntryBackWall_Collision"))
 
     for node in architecture.get_children():
+        if node is Label3D:
+            var sign := node as Label3D
+            if sign.text == "EXIT":
+                # Left = Anomalie (+Z), right = Normal (-Z).
+                sign.text = "ANOMALIE" if absf(sign.position.z - EXIT_Z_LEFT) < 0.6 else "NORMAL"
+            continue
         if not node is MeshInstance3D:
             continue
         var part := node as MeshInstance3D
-        # Remove the original decorative door panels but retain EXIT labels
-        # and the gold surrounding frames.
+        # Replace the original solid decorative panels AND the thin gold
+        # placeholder strips with a single wooden 3-piece frame per opening.
+        # The old strips were interpenetrating the new corridor wall faces,
+        # causing the screenshot's heavily flickering doorway edges.
+        if absf(part.position.x + 45.84) < 0.10 \
+                and (absf(part.position.y - 1.7) < 0.16 \
+                or absf(part.position.y - 3.35) < 0.16) \
+                and part.position.z > -12.3 and part.position.z < -2.2:
+            part.visible = false
+        # The old gold rails on the other side of the stream seam are
+        # placeholders too; the new, textured entrance frame replaces them.
+        if absf(part.position.z - 13.8) < 0.15 \
+                and absf(part.position.y - 1.7) < 0.2 \
+                and absf(absf(part.position.x) - 1.64) < 0.16:
+            part.visible = false
         if absf(part.position.x + 45.94) < 0.15                 and absf(part.position.y - 1.62) < 0.2                 and (absf(part.position.z - EXIT_Z_LEFT) < 0.25                 or absf(part.position.z - EXIT_Z_RIGHT) < 0.25):
             part.visible = false
         if part.name == "EntryDoor":
@@ -97,6 +120,7 @@ func prepare_room(room: Node3D) -> bool:
         _box(generated, "ExitOverdoor_" + portal_id,
             Vector3(EXIT_X, 4.76, z),
             Vector3(0.36, 2.48, 2.24), wall_mat)
+        _build_wood_exit_frame(generated, portal_id, z, wooden_frame)
 
     for span in [Vector2(-6.20, -1.68), Vector2(1.68, 6.20)]:
         _box(generated, "EntryWallPier",
@@ -104,6 +128,7 @@ func prepare_room(room: Node3D) -> bool:
             Vector3(span.y - span.x, HALL_HEIGHT, 0.36), entry_mat)
     _box(generated, "EntryOverdoor", Vector3(0, 4.76, ENTRY_Z),
         Vector3(3.36, 2.48, 0.36), entry_mat)
+    _build_entry_sleeve(generated, wooden_frame, floor_mat, trim_mat)
 
     # Solid corner walls hide everything beyond the bend from someone
     # looking straight through either of the casino EXIT signs.
@@ -123,7 +148,9 @@ func _build_bent_connector(parent: Node3D, lane: String,
     var finish_z := end_z(lane)
     var inner_x := BEND_X + HALF_WIDTH
     var outer_x := BEND_X - HALF_WIDTH
-    var opening_x := EXIT_X + 0.12
+    # The connector ends behind the new wooden jambs, not inside their
+    # visible front faces. Adjacent meshes no longer share coplanar faces.
+    var opening_x := EXIT_X - 0.08
     var horizontal_length := opening_x - inner_x
     var horizontal_mid := (opening_x + inner_x) * 0.5
 
@@ -179,6 +206,49 @@ func _build_bent_connector(parent: Node3D, lane: String,
     corridor.add_child(second_light)
 
 
+func _build_wood_exit_frame(parent: Node3D, label: String,
+        z: float, material: Material) -> void:
+    var frame := Node3D.new()
+    frame.name = "WoodExitFrame_" + label
+    parent.add_child(frame)
+    # Inboard of the front wall, yet clear of the corridor side-wall
+    # termini; oak posts are a unified frame instead of floating trim.
+    for side in [-1.0, 1.0]:
+        _box(frame, "Jamb", Vector3(-45.88, 1.74, z + side * 1.13),
+            Vector3(0.28, 3.48, 0.20), material, false)
+    _box(frame, "Header", Vector3(-45.88, 3.50, z),
+        Vector3(0.28, 0.22, 2.48), material, false)
+    _box(frame, "Threshold", Vector3(-45.90, 0.04, z),
+        Vector3(0.30, 0.07, 2.32), material, false)
+
+
+func _build_entry_sleeve(parent: Node3D,
+        material: Material, floor_mat: Material, ceiling_mat: Material) -> void:
+    # The original entry opening is 3.36m wide, while the selected bend is
+    # 2.44m wide. Both side gaps formerly opened directly onto the level void
+    # after the old hall was deleted. These returns physically tie the
+    # preserved arrival connector to the NEW hall's entrance at every angle.
+    var collar := Node3D.new()
+    collar.name = "EntrySleeve"
+    parent.add_child(collar)
+    for side in [-1.0, 1.0]:
+        _box(collar, "SideReturn",
+            Vector3(side * 1.45, 1.77, 14.32),
+            Vector3(0.46, 3.54, 0.98), material)
+        _box(collar, "SillWing",
+            Vector3(side * 1.45, -0.08, 14.32),
+            Vector3(0.47, 0.16, 1.00), floor_mat, false)
+        _box(collar, "EntryJamb",
+            Vector3(side * 1.67, 1.75, 13.96),
+            Vector3(0.20, 3.50, 0.25), material, false)
+    _box(collar, "RoofSoffit",
+        Vector3(0.0, 3.54, 14.25),
+        Vector3(3.34, 0.16, 0.96), ceiling_mat)
+    _box(collar, "EntryHeader",
+        Vector3(0.0, 3.53, 13.96),
+        Vector3(3.48, 0.24, 0.25), material, false)
+
+
 func lock_departure(room: Node3D, chosen_lane: String) -> bool:
     # Place both barriers BEHIND the committed player. They physically block
     # returning to the decision area or slipping through the other passage.
@@ -206,7 +276,10 @@ func adopt_arrival_connector(old_room: Node3D, new_room: Node3D,
     # without this, looking back through the new entrance reveals the void.
     connector.reparent(new_room, true)
     connector.name = "ArrivalConnector"
-    return true
+    # Its retained walls, floor, ceiling and locked back end now meet the
+    # new scene's permanent-in-runtime EntrySleeve; none of the old corridor
+    # is lost when the previous casino root is freed.
+    return new_room.has_node("StreamingPortals/EntrySleeve")
 
 
 func _wall_along_x(parent: Node3D, name: String, z: float,
