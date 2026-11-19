@@ -42,6 +42,35 @@ func _run() -> void:
     if portal == null:
         _fail("The casino did not create runtime streaming portals")
         return
+    var architecture := first.get_node("Architecture") as Node3D
+    var original_gold := architecture.get_node_or_null("ExitFrameTop") as MeshInstance3D
+    if original_gold == null or original_gold.visible:
+        _fail("Old placeholder gold side/top trim was not removed")
+        return
+    var wood := architecture.get_node("WoodWainscoting") as MeshInstance3D
+    for label in ["Left", "Right"]:
+        var frame := portal.get_node_or_null("WoodExitFrame_" + label) as Node3D
+        if frame == null or not frame.has_node("Jamb_North") \
+                or not frame.has_node("Jamb_South") or not frame.has_node("Header"):
+            _fail("A proper two-post wooden %s door frame was not constructed" % label)
+            return
+        if (frame.get_node("Header") as MeshInstance3D).material_override != wood.material_override:
+            _fail("Wooden EXIT frame must reuse the existing wainscoting PBR material")
+            return
+    var entry := portal.get_node_or_null("EntrySleeve") as Node3D
+    if entry == null or not entry.has_node("SideReturn_North_Collision") \
+            or not entry.has_node("SideReturn_South_Collision") \
+            or not entry.has_node("RoofSoffit_Collision"):
+        _fail("The old corridor's entrance still leaks into the exterior void")
+        return
+    var signs := {}
+    for child in architecture.get_children():
+        if child is Label3D and (child.text == "ANOMALIE" or child.text == "NORMAL"):
+            signs[child.text] = child.position.z
+    if signs.size() != 2 or absf(float(signs["ANOMALIE"]) - shape.EXIT_Z_LEFT) > 0.5 \
+            or absf(float(signs["NORMAL"]) - shape.EXIT_Z_RIGHT) > 0.5:
+        _fail("The physical left/right door labels disagree with the game's choices")
+        return
     for lane in ["left", "right"]:
         var corridor := shape.get_connector(first, lane)
         if corridor == null:
