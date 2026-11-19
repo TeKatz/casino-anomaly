@@ -85,48 +85,71 @@ func _run() -> void:
     if gaming == null:
         _fail("Casino tables are missing")
         return
-    # The scene may auto-rename duplicate generated nodes. Match each
-    # light to the closest actual table by position, not a hardcoded name.
+    # Sketchfab replaces three roulette tables and one blackjack table
+    # after the first scene frame. Shadows must follow their ACTUAL
+    # visible meshes, not the now-deleted placeholder nodes.
+    var imported := hall.get_node_or_null("SketchfabFurniture") as Node3D
+    if imported == null:
+        _fail("Missing imported furniture root")
+        return
+    var actual_tables: Array[Node3D] = []
+    for table_node in gaming.get_children():
+        var table := table_node as Node3D
+        if table != null and (table.name.begins_with("Roulette") \
+                or table.name.begins_with("Blackjack") \
+                or table.name.begins_with("Cards")):
+            actual_tables.append(table)
+            var support := table.get_node_or_null("TableSupport") as MeshInstance3D
+            if support == null or support.cast_shadow != \
+                    GeometryInstance3D.SHADOW_CASTING_SETTING_ON:
+                _fail("Retained table must cast shadows")
+                return
+    var replacement_count := 0
+    for child in imported.get_children():
+        var table := child as Node3D
+        if table == null:
+            continue
+        var is_replacement: bool = table.name.begins_with("RouletteTableCabinet") \
+                or str(table.get_meta("source_asset", "")) == "blackjack_table"
+        if not is_replacement:
+            continue
+        replacement_count += 1
+        actual_tables.append(table)
+        var models := table.find_children("*", "MeshInstance3D", true, false)
+        if models.is_empty():
+            _fail("Replacement table has no renderable mesh")
+            return
+        for model in models:
+            if (model as MeshInstance3D).cast_shadow != \
+                    GeometryInstance3D.SHADOW_CASTING_SETTING_ON:
+                _fail("Imported replacement table disabled its shadow caster")
+                return
+    if replacement_count < 4 or actual_tables.size() != 6:
+        _fail("Expected 6 real playable table meshes, including 4 replacements")
+        return
     for light_node in table_spots:
         var key_light := light_node as SpotLight3D
         var nearest_table: Node3D = null
         var nearest_distance := INF
-        for table_node in gaming.get_children():
-            var table := table_node as Node3D
-            if table == null or not (table.name.begins_with("Roulette") \
-                    or table.name.begins_with("Blackjack") \
-                    or table.name.begins_with("Cards")):
-                continue
+        for table in actual_tables:
             var horizontal := Vector2(
                 key_light.position.x - table.position.x,
                 key_light.position.z - table.position.z)
-            if horizontal.length() < nearest_distance:
-                nearest_distance = horizontal.length()
+            var separation := horizontal.length()
+            if separation < nearest_distance:
+                nearest_distance = separation
                 nearest_table = table
         if nearest_table == null or nearest_distance > 2.1:
-            var names := PackedStringArray()
-            for table_node in gaming.get_children():
-                var t := table_node as Node3D
-                if t != null:
-                    names.append("%s:%s" % [t.name, t.position])
-            _fail("Shadow key %s at %s not near any playable table (distance %s). Actual table positions: %s" % [
-                key_light.name, key_light.position, nearest_distance,
-                ", ".join(names)
-            ])
+            _fail("Table shadow key is not aligned with visible replacement")
             return
         var aisle_offset: float = key_light.position.z - nearest_table.position.z
         if absf(aisle_offset) < 1.2:
             _fail("Table key must rake in from the aisle, not overhead")
             return
-    for table_node in gaming.get_children():
-        if not (table_node.name.begins_with("Roulette") \
-                or table_node.name.begins_with("Blackjack") \
-                or table_node.name.begins_with("Cards")):
-            continue
-        var shadow_caster := table_node.get_node_or_null("TableSupport") as MeshInstance3D
-        if shadow_caster == null or shadow_caster.cast_shadow != \
-                GeometryInstance3D.SHADOW_CASTING_SETTING_ON:
-            _fail("Table geometry does not cast real shadows")
+        var target_world := nearest_table.to_global(Vector3(0.0, 0.42, 0.0))
+        var towards := (target_world - key_light.global_position).normalized()
+        if (-key_light.global_transform.basis.z).dot(towards) < 0.985:
+            _fail("Table spotlight does not point at the actual replacement")
             return
 
     if not atmosphere.find_children(
