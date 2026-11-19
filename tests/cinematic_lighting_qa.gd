@@ -69,7 +69,8 @@ func _run() -> void:
         var key_light := table_spot as SpotLight3D
         if key_light == null or not key_light.shadow_enabled \
                 or key_light.light_energy < 1.3 \
-                or key_light.spot_range > 6.1 \
+                or key_light.spot_range < 7.0 \
+                or key_light.spot_range > 7.6 \
                 or key_light.shadow_normal_bias > 0.18 \
                 or key_light.shadow_blur > 0.6 \
                 or key_light.distance_fade_shadow < 21.0 \

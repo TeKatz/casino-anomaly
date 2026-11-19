@@ -89,8 +89,11 @@ func _ensure_table_key_lights() -> void:
             # silhouettes; the previous offset and huge bias washed them out.
             lamp.position = table.position + Vector3(0.0, 5.60, 0.0)
             lamp.light_color = Color("#ffdda8")
-            lamp.light_energy = 1.95
-            lamp.spot_range = 5.95
+            # The beam must reach PAST the oak floor (5.6 m below the
+            # source), otherwise attenuation extinguishes floor shadows
+            # before the light gets to the table legs.
+            lamp.light_energy = 2.30
+            lamp.spot_range = 7.35
             lamp.spot_angle = 29.0
             lamp.spot_attenuation = 1.42
             lamp.light_specular = 0.88
