@@ -79,21 +79,18 @@ func _run() -> void:
             _fail("Table lights must create real, local, budgeted shadows")
             return
     var gaming := hall.get_node_or_null("GamingTables") as Node3D
-    if table_spots.size() >= 2:
-        # Aimed at the floor from the aisle, not straight down where the
-        # tabletop occludes its own support/seat shadows.
-        var test_key := table_spots[0] as SpotLight3D
-        var first_table := gaming.get_node_or_null("Roulette2") as Node3D
-        if first_table == null or test_key == null:
-            _fail("Missing near-table key/geometry")
-            return
-        var key_pos: Vector3 = test_key.position
-        var near_table_z: float = (atmosphere.get_node("TableKey_Roulette2") as SpotLight3D).position.z
-        if near_table_z - first_table.position.z < 1.2:
-            _fail("Near-table spotlight must rake in from the aisle")
-            return
     if gaming == null:
         _fail("Casino tables are missing")
+        return
+    # Aimed at the floor from the aisle, not straight down where the
+    # tabletop obscures its own supports/seat shadows.
+    var first_table := gaming.get_node_or_null("Roulette2") as Node3D
+    var first_key := atmosphere.get_node_or_null("TableKey_Roulette2") as SpotLight3D
+    if first_table == null or first_key == null:
+        _fail("Missing near-table key/geometry")
+        return
+    if first_key.position.z - first_table.position.z < 1.2:
+        _fail("Near-table spotlight must rake in from the aisle")
         return
     for table_node in gaming.get_children():
         if not (table_node.name.begins_with("Roulette") \
