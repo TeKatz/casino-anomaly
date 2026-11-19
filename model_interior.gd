@@ -403,10 +403,12 @@ func _place(identifier: String, label: String, anchor: Vector3,
         # which allowed the player to walk through most of the sideboard.
         var body := StaticBody3D.new()
         body.name = "ModelSolidBody"
-        var solid_bounds: AABB = imported.transform * bounds if has_authored_model else AABB(
+        var solid_bounds := AABB(
             Vector3(-bounds.size.x * height_scale * 0.5, 0.0,
                 -bounds.size.z * height_scale * 0.5),
             bounds.size * height_scale)
+        if has_authored_model:
+            solid_bounds = imported.transform * bounds
         body.position = solid_bounds.get_center()
         var shape := CollisionShape3D.new()
         shape.name = "ModelCollisionShape"
