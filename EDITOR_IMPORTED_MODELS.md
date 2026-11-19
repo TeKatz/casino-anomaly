@@ -25,10 +25,12 @@ For lighting changes that need to persist, edit the actual authored
 procedural/editor preview models are reference geometry; gameplay
 still creates its real furniture and collisions when a run begins.
 
-A small caveat: hiding placeholders inside an open authoring scene
-temporarily changes their visible property. If you save `main.tscn`
-while preview is enabled, check that the original placeholder nodes
-are not accidentally saved with `visible = false`. You can disable
-the preview in Inspector just before saving and enable it again afterward.
+The built-in `Casino Model Preview` editor plugin (enabled by default)
+temporarily restores the original placeholder visibility just before
+the editor saves the scene, then regenerates the imported preview afterward.
+This prevents temporary hidden placeholder states from being serialized
+into `main.tscn`. If you manually disable the plugin in Project Settings,
+toggle the `SketchfabFurniture` preview **off before saving** and back on
+afterward.
 
 Tested with `tests/sketchfab_editor_preview_qa.gd`.

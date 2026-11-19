@@ -3,6 +3,9 @@ extends SceneTree
 ## authored positions as runtime, but never serialize/import collision
 ## bodies or permanently hide the placeholders in the saved scene.
 const ROOM = preload("res://main.tscn")
+# Verify the editor save hook compiles in CI even though the editor GUI is
+# not running in the headless test process.
+const EDITOR_SAVE_GUARD = preload("res://addons/casino_model_preview/plugin.gd")
 
 func _initialize() -> void:
     call_deferred("_run")
@@ -27,7 +30,8 @@ func _run() -> void:
         _fail("Original hero placeholder is missing")
         return
     var preview := imported.call("create_editor_preview_for_test") as Node3D
-    if preview == null or preview.owner != null:
+    if preview == null or preview.owner != null \
+            or not bool(imported.call("has_active_editor_preview")):
         _fail("Editor preview must exist as an unsaved, ownerless node")
         return
     var roles := {"retro_slot_machine": 0, "roulette_table": 0, "blackjack_table": 0, "poker_set": 0}
@@ -60,6 +64,9 @@ func _run() -> void:
     imported.call("clear_editor_preview_for_test")
     if not retro.visible or not tables.get_node("Roulette2").visible:
         _fail("Disabling preview did not restore saved placeholder visibility")
+        return
+    if bool(imported.call("has_active_editor_preview")):
+        _fail("Preview state was not cleared before scene save")
         return
     if imported.get_children(true).size() != 0:
         _fail("An internal preview model was accidentally left in the scene")

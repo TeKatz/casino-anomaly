@@ -103,6 +103,10 @@ func create_editor_preview_for_test() -> Node3D:
 func clear_editor_preview_for_test() -> void:
     _clear_editor_preview()
 
+
+func has_active_editor_preview() -> bool:
+    return is_instance_valid(_editor_preview_root)
+
 func _load_scene(slug: String, filename: String = "scene.gltf") -> PackedScene:
     var path := FOLDER + slug + "/" + filename
     if not ResourceLoader.exists(path):
