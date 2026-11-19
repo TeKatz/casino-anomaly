@@ -26,6 +26,7 @@ func _build() -> void:
     if not active:
         return
     set_meta("ambient_fx_only", true)
+    _ensure_reflection_probes()
     if not has_node("EntrySignTop"):
         _architecture()
         _spot("CatHighlight", Vector3(-8.45, 4.7, -3.25),
@@ -45,6 +46,36 @@ func _build() -> void:
     _slots()
     _plants()
     _dust()
+
+func _ensure_reflection_probes() -> void:
+    # Some PackedScene imports skip a hand-added first probe. Re-create only
+    # missing ones; never duplicate a designer-authored probe. Crucially,
+    # newly built standby halls must NOT issue GPU reflection captures.
+    var enabled := not get_parent().has_meta("_streaming_standby")
+    _ensure_probe("MainWingReflection", Vector3(0, 3, 0.5),
+        Vector3(11.8, 5.7, 26.6), 0.72, enabled)
+    _ensure_probe("WestWingReflection", Vector3(-26, 3, -6.5),
+        Vector3(39.2, 5.7, 12.5), 0.68, enabled)
+
+
+func _ensure_probe(label: String, center: Vector3, extents: Vector3,
+        power: float, enabled: bool) -> void:
+    var probe := get_node_or_null(label) as ReflectionProbe
+    if probe == null:
+        probe = ReflectionProbe.new()
+        probe.name = label
+        probe.position = center
+        probe.size = extents
+        probe.blend_distance = 0.6
+        probe.box_projection = true
+        probe.interior = true
+        probe.intensity = power
+        probe.max_distance = 25.0
+        probe.enable_shadows = false
+        probe.update_mode = ReflectionProbe.UPDATE_ONCE
+        add_child(probe)
+    probe.visible = enabled
+
 
 func _glow(color: Color, power: float) -> StandardMaterial3D:
     var mat := StandardMaterial3D.new()
