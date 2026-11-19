@@ -114,7 +114,8 @@ func _ready() -> void:
 
     # Keep the designer-authored scene untouched. The game controller and
     # choice doors exist only in a started/continued run, not in editor mode.
-    if not Engine.is_editor_hint():
+    # The offline VoxelGI bake must never generate a live run controller.
+    if not Engine.is_editor_hint() and not has_meta("_baking_room"):
         var state = get_node_or_null("/root/LoopState")
         if state != null and state.active and state.tutorial_done and not state.finished \
                 and not has_meta("_streaming_standby"):
