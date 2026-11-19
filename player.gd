@@ -1,8 +1,10 @@
 extends CharacterBody3D
 
 const WALK_SPEED := 4.0
+const SPRINT_SPEED := 6.3
 const MOUSE_SENSITIVITY := 0.002
 const GRAVITY := 18.0
+const PauseMenu = preload("res://ui/pause_menu.gd")
 
 # Camera motion is cosmetic and can be disabled for motion-sensitive players.
 # Mouse look keeps full control of pitch; no step-induced camera pitching.
@@ -17,19 +19,43 @@ var _camera_roll_home: float
 var _step_clock: float = 0.0
 var _breath_clock: float = 0.0
 var _walk_blend: float = 0.0
+var _sprint_toggled := false
+var _options: Node
 
 func _ready() -> void:
     _camera_home = camera.position
     _camera_roll_home = camera.rotation.z
+    _options = get_node_or_null("/root/GameSettings")
+    if _options != null:
+        _options.options_changed.connect(_on_option_changed)
+        _on_option_changed("")
+    var pause_menu := PauseMenu.new()
+    pause_menu.name = "InGameMenu"
+    add_child(pause_menu)
     Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+
+func _on_option_changed(_key: String) -> void:
+    if _options == null:
+        return
+    camera_motion_enabled = bool(_options.get_option("camera_motion"))
+    camera.fov = float(_options.get_option("fov"))
+
+
+func _setting(key: String, fallback: Variant) -> Variant:
+    return _options.get_option(key) if _options != null else fallback
+
 
 func _unhandled_input(event: InputEvent) -> void:
     if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-        rotate_y(-event.relative.x * MOUSE_SENSITIVITY)
-        camera.rotate_x(-event.relative.y * MOUSE_SENSITIVITY)
+        var sensitivity := MOUSE_SENSITIVITY * float(_setting("mouse_sensitivity", 1.0))
+        rotate_y(-event.relative.x * sensitivity)
+        var invert := -1.0 if bool(_setting("invert_y", false)) else 1.0
+        camera.rotate_x(-event.relative.y * sensitivity * invert)
         camera.rotation.x = clamp(camera.rotation.x, -1.25, 1.25)
-    elif event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
-        get_tree().change_scene_to_file("res://menu.tscn")
+    elif event is InputEventKey and event.pressed and not event.echo \
+            and event.keycode == KEY_SHIFT and str(_setting("sprint_mode", "hold")) == "toggle":
+        _sprint_toggled = not _sprint_toggled
     elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
         Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
@@ -74,9 +100,21 @@ func _physics_process(delta: float) -> void:
         axis.x -= 1.0
     if Input.is_physical_key_pressed(KEY_D):
         axis.x += 1.0
-    var direction := (basis * Vector3(axis.x, 0.0, axis.y)).normalized()
-    velocity.x = direction.x * WALK_SPEED
-    velocity.z = direction.z * WALK_SPEED
+    # Movement MUST be world-space relative to the live view.
+    # Reparenting to a hall rotated by 180 degrees must not reverse WASD.
+    var camera_basis := camera.global_transform.basis
+    var right := camera_basis.x
+    right.y = 0.0
+    right = right.normalized()
+    var forward := -camera_basis.z
+    forward.y = 0.0
+    forward = forward.normalized()
+    var direction := (right * axis.x - forward * axis.y).normalized()
+    var sprint := _sprint_toggled if str(_setting("sprint_mode", "hold")) == "toggle" \
+        else Input.is_physical_key_pressed(KEY_SHIFT)
+    var speed := SPRINT_SPEED if sprint else WALK_SPEED
+    velocity.x = direction.x * speed
+    velocity.z = direction.z * speed
     move_and_slide()
 
 func _exit_tree() -> void:
