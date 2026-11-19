@@ -58,6 +58,9 @@ func _ready() -> void:
         push_error("Casino needs both original EXIT signs as portal markers")
         queue_free()
         return
+    var settings = get_node_or_null("/root/GameSettings")
+    if settings != null:
+        settings.options_changed.connect(_on_language_changed)
     var state = get_node_or_null("/root/LoopState")
     if state == null:
         queue_free()
@@ -97,6 +100,31 @@ func _place_markers() -> bool:
         var local := room.to_local(signs[i].global_position)
         marker.global_position = room.to_global(Vector3(local.x, 1.6, local.z))
     return true
+
+
+func _on_language_changed(key: String) -> void:
+    if key != "language":
+        return
+    _refresh_exit_signs(room)
+    if staged != null and is_instance_valid(staged):
+        _refresh_exit_signs(staged)
+    var victory := get_node_or_null("VictoryOverlay") as CanvasLayer
+    if victory != null:
+        var label := victory.get_node_or_null("VictoryLabel") as Label
+        if label != null:
+            label.text = Loc.t("victory", self)
+
+
+func _refresh_exit_signs(target_room: Node3D) -> void:
+    if target_room == null:
+        return
+    var architecture := target_room.get_node_or_null("Architecture") as Node3D
+    if architecture == null:
+        return
+    for node in architecture.get_children():
+        if node is Label3D and (node.text in ["ANOMALIE", "ANOMALY", "NORMAL"]):
+            var left_side: bool = absf(node.position.z - EXIT_Z_LEFT) < 0.6
+            node.text = Loc.t("world.anomaly", self) if left_side else Loc.t("world.normal", self)
 
 
 func _candidate_lane(local_z: float) -> String:
@@ -248,6 +276,7 @@ func _show_victory() -> void:
     layer.layer = 2
     add_child(layer)
     var panel := Label.new()
+    panel.name = "VictoryLabel"
     panel.position = Vector2(145, 225)
     panel.add_theme_font_size_override("font_size", 32)
     panel.add_theme_color_override("font_color", Color("#f1d39d"))
