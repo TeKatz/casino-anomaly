@@ -100,6 +100,14 @@ func bake_editable_models() -> bool:
     if _load_scene("poker_set", "poker_props.glb") == null:
         return false
     _clear_editor_preview()
+    var visibility_before := {}
+    for source_path in ["SlotMachines/Slot_01",
+            "GamingTables/Roulette2", "GamingTables/Roulette4",
+            "GamingTables/Roulette6", "GamingTables/Blackjack1",
+            "GamingTables/Blackjack3", "GamingTables/Blackjack5"]:
+        var source := hall.get_node_or_null(source_path) as Node3D
+        if source != null:
+            visibility_before[source] = source.visible
     var group := Node3D.new()
     group.name = AUTHORED_GROUP
     add_child(group)
@@ -115,12 +123,9 @@ func bake_editable_models() -> bool:
     if replaced_slots != 1 or replaced_roulette != 3 or replaced_blackjack != 1:
         push_error("Sketchfab authoring incomplete; please check the imported assets")
         # Preserve the original scene if an asset failed half-way through.
-        for source in [hall.get_node_or_null("SlotMachines/Slot_01"),
-                hall.get_node_or_null("GamingTables/Roulette2"),
-                hall.get_node_or_null("GamingTables/Roulette4"),
-                hall.get_node_or_null("GamingTables/Roulette6")]:
-            if source is Node3D:
-                source.visible = true
+        for source in visibility_before:
+            if is_instance_valid(source):
+                source.visible = visibility_before[source]
         group.queue_free()
         return false
     return true
