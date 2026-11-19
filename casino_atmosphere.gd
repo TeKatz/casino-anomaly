@@ -548,6 +548,22 @@ func _dust() -> void:
         particles.emitting = true
         add_child(particles)
 
+func _unhandled_key_input(event: InputEvent) -> void:
+    # Development diagnostic only, invisible during normal play: F10 shows
+    # the active shadow atlas (F10 again restores the regular rendering).
+    # It lets us distinguish missing shadow-map captures from weak lighting
+    # without a permanent HUD or extra scene geometry.
+    if event is InputEventKey and event.pressed and not event.echo \
+            and event.keycode == KEY_F10:
+        var view := get_viewport()
+        view.debug_draw = (
+            Viewport.DEBUG_DRAW_DISABLED
+            if view.debug_draw == Viewport.DEBUG_DRAW_SHADOW_ATLAS
+            else Viewport.DEBUG_DRAW_SHADOW_ATLAS
+        )
+        view.set_input_as_handled()
+
+
 func _process(delta: float) -> void:
     if not active:
         return
