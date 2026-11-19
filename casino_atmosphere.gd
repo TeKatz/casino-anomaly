@@ -80,7 +80,7 @@ func _frame(label: String, pos: Vector3, width: float, height: float,
 
 func _architecture() -> void:
     # Warm cornice lines sit flush against wall; no light strips in passage.
-    var cove := _glow(GOLD, 1.15)
+    var cove := _glow(GOLD, 0.92)
     _bar("EastCove", Vector3(5.88, 5.53, 4.6),
         Vector3(0.035, 0.034, 18.1), cove)
     _bar("EntryCove", Vector3(-5.88, 5.53, 7.0),
@@ -90,8 +90,8 @@ func _architecture() -> void:
     _bar("SouthCove", Vector3(-26.0, 5.53, -0.19),
         Vector3(39.0, 0.034, 0.035), cove)
     # Frames light the already existing labels; no duplicate text.
-    var front := _glow(GOLD, 1.8)
-    var counter := _glow(CYAN, 1.55)
+    var front := _glow(GOLD, 1.60)
+    var counter := _glow(CYAN, 1.32)
     signs.append(front)
     signs.append(counter)
     _frame("EntrySign", Vector3(0, 4.15, 13.73), 5.6, 0.84, front)
@@ -104,16 +104,16 @@ func _spot(label: String, pos: Vector3, target: Vector3, power: float) -> void:
     lamp.position = pos
     lamp.light_color = WARM
     lamp.light_energy = power
-    lamp.spot_range = 6.2
-    lamp.spot_angle = 32.0
+    lamp.spot_range = 4.9
+    lamp.spot_angle = 25.0
     lamp.spot_attenuation = 1.8
     # Controlled cones of light become visible in the Forward+ fog.
-    lamp.light_volumetric_fog_energy = 0.85
+    lamp.light_volumetric_fog_energy = 0.38
     # Only the cat's display spot casts additional shadows; the other
     # spotlights remain shadowless to limit rendering cost.
-    lamp.shadow_enabled = label == "CatHighlight"
+    lamp.shadow_enabled = label == "CatHighlight" or label == "HorseHighlight"
     if lamp.shadow_enabled:
-        lamp.shadow_bias = 0.08
+        lamp.shadow_bias = 0.06
         lamp.shadow_blur = 1.30
     add_child(lamp)
     lamp.look_at(target, Vector3.UP)
@@ -143,8 +143,8 @@ func _slots() -> void:
             light.name = "SlotSpill%02d" % i
             light.position = unit.position + unit.transform.basis * Vector3(0, 1.55, 0.70)
             light.light_color = material.emission.lerp(WARM, 0.3)
-            light.light_energy = 0.24
-            light.omni_range = 2.7
+            light.light_energy = 0.18
+            light.omni_range = 2.25
             # Animated slot washes should not smear through fog reprojection.
             light.light_volumetric_fog_energy = 0.0
             light.shadow_enabled = false
@@ -219,15 +219,15 @@ func _process(delta: float) -> void:
     elapsed += delta
     # Slow ambient breathing, never an anomaly-like sudden flicker.
     for i in range(slot_glows.size()):
-        slot_glows[i].emission_energy_multiplier = 2.0 + (
-            0.28 * sin(elapsed * 1.1 + slot_phases[i]))
+        slot_glows[i].emission_energy_multiplier = 1.85 + (
+            0.20 * sin(elapsed * 1.1 + slot_phases[i]))
     for i in range(slot_spills.size()):
-        slot_spills[i].light_energy = 0.24 + (
-            0.055 * sin(elapsed * 1.1 + float(i) * 1.44))
+        slot_spills[i].light_energy = 0.18 + (
+            0.035 * sin(elapsed * 1.1 + float(i) * 1.44))
     for i in range(signs.size()):
         signs[i].emission_energy_multiplier = (
-            (1.8 if i == 0 else 1.55) +
-            0.12 * sin(elapsed * 0.58 + float(i)))
+            (1.6 if i == 0 else 1.32) +
+            0.08 * sin(elapsed * 0.58 + float(i)))
     for i in range(plant_crowns.size()):
         # Slow <1-degree sway, deliberately subtle for an indoor casino.
         plant_crowns[i].rotation.z = 0.009 * sin(elapsed * 0.47 + float(i) * 1.7)

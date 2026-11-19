@@ -945,24 +945,23 @@ func _omni(pos: Vector3, tint: Color, energy: float, reach: float,
     light.shadow_enabled = cast_shadows
     # Warm chandelier light can scatter through the volume, but keep
     # low-energy fill lamps out of the fog to prevent overbright haze.
-    light.light_volumetric_fog_energy = 0.85 if cast_shadows else 0.14
+    light.light_volumetric_fog_energy = 0.38 if cast_shadows else 0.12
+    light.light_specular = 0.85
     if cast_shadows:
-        light.shadow_bias = 0.055
+        light.shadow_bias = 0.05
         light.shadow_blur = 1.10
     lights.add_child(light)
 
 func _make_lights() -> void:
-    # Each main ceiling bay now casts real shadows; keep the pool size
-    # compact so adjacent unshadowed lights don't wash the details away.
-    var ceiling_positions := [
-        Vector3(0, 4.8, 9.2), Vector3(0, 4.8, 2.3),
-        Vector3(1.3, 4.8, -7.0), Vector3(-8, 4.8, -6.0),
-        Vector3(-17, 4.8, -6.0), Vector3(-26, 4.8, -6.0),
-        Vector3(-35, 4.8, -6.0), Vector3(-43, 4.8, -6.0)
-    ]
-    for pos in ceiling_positions:
-        _omni(pos, Color("#ffdaa7"), 1.38, 10.2, true)
-    # A single small warm bar fill remains, with no shadow map.
-    _omni(Vector3(1.2, 3.35, -9.8), Color("#ffba71"), 0.65, 5.0)
-    # The floating white wall globes (WallSconce) and their six
-    # unshadowed point lights were intentionally removed.
+    # Keep this fallback in sync with the authored cinematic rig. Distinct,
+    # smaller pools of amber light leave believable shadows between bays.
+    _omni(Vector3(0, 4.8, 9.2), Color("#ffdaa7"), 1.10, 5.6)
+    _omni(Vector3(0, 4.8, 2.3), Color("#ffdaa7"), 1.08, 5.8)
+    _omni(Vector3(1.3, 4.8, -7.0), Color("#ffdaa7"), 1.32, 6.4, true)
+    _omni(Vector3(-8, 4.8, -6.0), Color("#ffdaa7"), 1.15, 6.4, true)
+    _omni(Vector3(-17, 4.8, -6.0), Color("#ffdaa7"), 1.26, 6.8, true)
+    _omni(Vector3(-26, 4.8, -6.0), Color("#ffdaa7"), 1.03, 5.7)
+    _omni(Vector3(-35, 4.8, -6.0), Color("#ffdaa7"), 1.03, 5.7)
+    _omni(Vector3(-43, 4.8, -6.0), Color("#ffdaa7"), 0.85, 5.7, true)
+    # The bar is a small warm accent, not another room-wide fill.
+    _omni(Vector3(1.2, 3.35, -9.8), Color("#ffba71"), 0.42, 3.7)
