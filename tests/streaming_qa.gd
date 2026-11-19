@@ -128,6 +128,14 @@ func _run() -> void:
     if second.has_node("StreamingPortals/InitialEntryCap"):
         _fail("Staged rooms must NOT seal their arrival doors")
         return
+    var staged_gi := second.get_node_or_null("VoxelGIRig") as Node3D
+    if staged_gi == null:
+        _fail("Staged hall lost its room-local VoxelGI rig")
+        return
+    for child in staged_gi.get_children():
+        if child is VoxelGI and child.visible:
+            _fail("Standby hall is rendering VoxelGI before handoff")
+            return
     var stage_fx := second.get_node_or_null("CasinoAtmosphere") as Node3D
     if stage_fx == null:
         _fail("Staged hall lost its reflection rig")

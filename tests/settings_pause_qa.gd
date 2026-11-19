@@ -27,6 +27,7 @@ func _run() -> void:
     var saved_fov = settings.get_option("fov")
     var saved_language = settings.get_option("language")
     var saved_fps = settings.get_option("fps_limit")
+    var saved_gi = settings.get_option("voxel_gi")
 
     settings.set_option("mouse_sensitivity", 1.35)
     settings.set_option("fov", 86.0)
@@ -119,6 +120,17 @@ func _run() -> void:
     if settings.get_option("language") != "en" or tabs[0].text != "Graphics":
         _fail("English language choice was not applied without restarting")
         return
+    subpanel.call("_switch_tab", 0)
+    settings.set_option("voxel_gi", false)
+    await process_frame
+    var gi_rig := room.get_node_or_null("VoxelGIRig")
+    if settings.get_option("voxel_gi") != false or gi_rig == null:
+        _fail("VoxelGI toggle is missing from persistent graphics options")
+        return
+    for probe in gi_rig.get_children():
+        if probe is VoxelGI and probe.visible:
+            _fail("VoxelGI is still rendering after switching it off")
+            return
     pause_menu.call("_close_settings")
     pause_menu.call("_resume")
     if paused or bool(pause_menu.get("open")) or pause_menu.visible or current_scene != room:
@@ -129,6 +141,7 @@ func _run() -> void:
     settings.set_option("fov", saved_fov)
     settings.set_option("language", saved_language)
     settings.set_option("fps_limit", saved_fps)
+    settings.set_option("voxel_gi", saved_gi)
     room.queue_free()
     await process_frame
     DirAccess.remove_absolute(ProjectSettings.globalize_path(state.save_path))

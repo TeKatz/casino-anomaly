@@ -121,7 +121,8 @@ jobs:
             @('tests/streaming_qa.gd', 'Casino Anomaly seamless two-room streaming QA PASS'),
             @('tests/settings_pause_qa.gd', 'Casino Anomaly pause, persistent settings and world-camera input QA PASS'),
             @('tests/localization_intro_qa.gd', 'Casino Anomaly bilingual intro and door interaction QA PASS'),
-            @('tests/cinematic_lighting_qa.gd', 'Casino Anomaly cinematic lighting and reflection QA PASS')
+            @('tests/cinematic_lighting_qa.gd', 'Casino Anomaly cinematic lighting and reflection QA PASS'),
+            @('tests/voxel_gi_qa.gd', 'Casino Anomaly VoxelGI bake and streaming contract QA PASS')
           )) {
             $name = $spec[0]
             $expected = $spec[1]
