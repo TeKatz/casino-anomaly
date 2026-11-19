@@ -71,7 +71,7 @@ func _on_furniture_finalized() -> void:
         var piece := candidate as Node3D
         if piece == null:
             continue
-        var is_table := piece.name.begins_with("RouletteTableCabinet") \
+        var is_table := str(piece.get_meta("furniture_kind", "")) == "roulette_table" \
                 or str(piece.get_meta("source_asset", "")) == "blackjack_table"
         if not is_table:
             continue
