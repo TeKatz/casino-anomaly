@@ -333,15 +333,20 @@ func _place(identifier: String, label: String, anchor: Vector3,
     wrapper.set_meta("asset_id", identifier)
     wrapper.set_meta("placement_group", label)
 
-    var imported: Node3D = packed.instantiate() as Node3D
-    if imported == null:
-        if generated:
-            wrapper.queue_free()
-        push_error("Poly Haven glTF does not instantiate as Node3D: " + identifier)
-        return null
-    wrapper.add_child(imported)
+    # The authored glTF remains in the scene after the editor bake. Reuse it,
+    # including the designer's saved scale and rotation; no runtime duplicate.
+    var imported := wrapper.get_node_or_null("EditableImportedModel") as Node3D
+    var has_authored_model := imported != null
+    if not has_authored_model:
+        imported = packed.instantiate() as Node3D
+        if imported == null:
+            if generated:
+                wrapper.queue_free()
+            push_error("Poly Haven glTF does not instantiate as Node3D: " + identifier)
+            return null
+        wrapper.add_child(imported)
 
-    if not mesh_variant.is_empty():
+    if not has_authored_model and not mesh_variant.is_empty():
         var variant_found := false
         for candidate in imported.find_children("*", "MeshInstance3D", true, false):
             var mesh_node: MeshInstance3D = candidate as MeshInstance3D
@@ -358,6 +363,18 @@ func _place(identifier: String, label: String, anchor: Vector3,
             return null
 
     var bounds := _bounds_for(imported)
+    if has_authored_model and not mesh_variant.is_empty():
+        # The editor preview hides unused mesh variants instead of deleting
+        # them. Only the visible candleholder contributes to its collider.
+        var found_visible := false
+        bounds = AABB()
+        for candidate in imported.find_children("*", "MeshInstance3D", true, false):
+            var piece := candidate as MeshInstance3D
+            if piece.mesh == null or not piece.visible:
+                continue
+            var transformed: AABB = (imported.global_transform.affine_inverse() * piece.global_transform) * piece.get_aabb()
+            bounds = bounds.merge(transformed) if found_visible else transformed
+            found_visible = true
     if bounds.size.y <= 0.0001:
         if generated:
             wrapper.queue_free()
@@ -370,29 +387,34 @@ func _place(identifier: String, label: String, anchor: Vector3,
     if max_footprint > 0.0:
         height_scale = minf(height_scale,
             max_footprint / maxf(bounds.size.x, bounds.size.z))
-    imported.scale = Vector3.ONE * height_scale
-    imported.position = Vector3(
-        -(bounds.position.x + bounds.size.x * 0.5) * height_scale,
-        -bounds.position.y * height_scale,
-        -(bounds.position.z + bounds.size.z * 0.5) * height_scale
-    )
-    if wall_mount:
-        # Wall art should be centered around its mounting point, not its foot.
-        imported.position.y -= target_height * 0.5
+    if not has_authored_model:
+        imported.scale = Vector3.ONE * height_scale
+        imported.position = Vector3(
+            -(bounds.position.x + bounds.size.x * 0.5) * height_scale,
+            -bounds.position.y * height_scale,
+            -(bounds.position.z + bounds.size.z * 0.5) * height_scale
+        )
+        if wall_mount:
+            # Wall art should be centered around its mounting point, not its foot.
+            imported.position.y -= target_height * 0.5
 
     if add_collision:
         # Use actual imported geometry extents, rather than a tiny cylinder
         # which allowed the player to walk through most of the sideboard.
         var body := StaticBody3D.new()
         body.name = "ModelSolidBody"
-        body.position = Vector3(0, bounds.size.y * height_scale * 0.5, 0)
+        var solid_bounds: AABB = imported.transform * bounds if has_authored_model else AABB(
+            Vector3(-bounds.size.x * height_scale * 0.5, 0.0,
+                -bounds.size.z * height_scale * 0.5),
+            bounds.size * height_scale)
+        body.position = solid_bounds.get_center()
         var shape := CollisionShape3D.new()
         shape.name = "ModelCollisionShape"
         var collision := BoxShape3D.new()
         collision.size = Vector3(
-            maxf(bounds.size.x * height_scale, 0.23),
-            maxf(bounds.size.y * height_scale, 0.23),
-            maxf(bounds.size.z * height_scale, 0.23)
+            maxf(solid_bounds.size.x, 0.23),
+            maxf(solid_bounds.size.y, 0.23),
+            maxf(solid_bounds.size.z, 0.23)
         )
         shape.shape = collision
         body.add_child(shape)
