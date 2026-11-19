@@ -1,3 +1,4 @@
+@tool
 extends Node3D
 # Imported user-provided Sketchfab CC BY 4.0 models.
 # Low-poly original placeholders only disappear after the corresponding
@@ -12,11 +13,95 @@ var replaced_roulette := 0
 var replaced_blackjack := 0
 var poker_props_placed := 0
 
+# The editor preview is an INTERNAL, ownerless node. Saving main.tscn never
+# bakes a second copy of the imported meshes into the playable scene.
+@export var show_imported_models_in_editor := true:
+    set(value):
+        show_imported_models_in_editor = value
+        if Engine.is_editor_hint() and is_inside_tree():
+            call_deferred("_refresh_editor_preview")
+
+var _editor_preview_root: Node3D = null
+var _editor_hidden_sources: Dictionary = {}
+
+
 func _ready() -> void:
-    # Bake original authorable slots/tables, not their runtime replacements.
+    # Geometry for the GI bake stays authored and deliberately excludes
+    # runtime furniture replacement (as before).
     if get_parent().has_meta("_baking_room"):
         return
-    call_deferred("_populate")
+    if Engine.is_editor_hint():
+        call_deferred("_refresh_editor_preview")
+    else:
+        call_deferred("_populate")
+
+
+func _exit_tree() -> void:
+    if Engine.is_editor_hint():
+        _clear_editor_preview()
+
+
+func _refresh_editor_preview() -> void:
+    _clear_editor_preview()
+    if not Engine.is_editor_hint() or not is_inside_tree() \
+            or not show_imported_models_in_editor:
+        return
+    _build_editor_preview()
+
+
+func _build_editor_preview() -> Node3D:
+    # Only populated after the final scene exists. The same _populate()
+    # placement functions are used for editor and game, preventing model
+    # scale, offset, or material drift while adjusting lighting.
+    var hall := get_parent() as Node3D
+    if hall == null or hall.has_meta("_baking_room"):
+        return null
+    _clear_editor_preview()
+    var preview := Node3D.new()
+    preview.name = "_EditorOnlyImportedFurniturePreview"
+    add_child(preview, false, Node.INTERNAL_MODE_BACK)
+    _editor_preview_root = preview
+    _populate()
+    return preview
+
+
+func _clear_editor_preview() -> void:
+    # Undo temporary visibility overrides before the authoring scene exits.
+    for source in _editor_hidden_sources:
+        if is_instance_valid(source):
+            (source as Node3D).visible = bool(_editor_hidden_sources[source])
+    _editor_hidden_sources.clear()
+    if is_instance_valid(_editor_preview_root):
+        remove_child(_editor_preview_root)
+        _editor_preview_root.free()
+    _editor_preview_root = null
+    replaced_slots = 0
+    replaced_roulette = 0
+    replaced_blackjack = 0
+    poker_props_placed = 0
+
+
+func _replacement_parent() -> Node3D:
+    return _editor_preview_root if is_instance_valid(_editor_preview_root) else self
+
+
+func _hide_or_replace_source(original: Node3D) -> void:
+    if is_instance_valid(_editor_preview_root):
+        if not _editor_hidden_sources.has(original):
+            _editor_hidden_sources[original] = original.visible
+        original.visible = false
+    else:
+        original.queue_free()
+
+
+# Exercised from headless CI to validate preview meshes without opening the
+# graphical Godot editor; never called by normal gameplay.
+func create_editor_preview_for_test() -> Node3D:
+    return _build_editor_preview()
+
+
+func clear_editor_preview_for_test() -> void:
+    _clear_editor_preview()
 
 func _load_scene(slug: String, filename: String = "scene.gltf") -> PackedScene:
     var path := FOLDER + slug + "/" + filename
@@ -55,7 +140,7 @@ func _spawn(slug: String, label: String, spot: Vector3, max_width: float,
     wrapper.position = spot
     wrapper.rotation.y = yaw
     wrapper.set_meta("source_asset", slug)
-    add_child(wrapper)
+    _replacement_parent().add_child(wrapper)
     var model: Node3D = packed.instantiate() as Node3D
     if model == null:
         wrapper.queue_free()
@@ -74,7 +159,7 @@ func _spawn(slug: String, label: String, spot: Vector3, max_width: float,
         -size.position.y * factor,
         -(size.position.z + size.size.z * 0.5) * factor
     )
-    if add_collision:
+    if add_collision and _editor_preview_root == null:
         var body := StaticBody3D.new()
         body.name = "FurnitureCollider"
         body.position.y = size.size.y * factor * 0.5
@@ -107,7 +192,7 @@ func _block(parent: Node3D, label: String, pos: Vector3, size: Vector3,
     mesh_node.position = pos
     mesh_node.material_override = material
     parent.add_child(mesh_node)
-    if solid:
+    if solid and _editor_preview_root == null:
         var body := StaticBody3D.new()
         body.name = label + "Collider"
         body.position = pos
@@ -125,7 +210,7 @@ func _retro_plinth(spot: Vector3) -> Node3D:
     var stand := Node3D.new()
     stand.name = "RetroSlotPlinth"
     stand.position = spot
-    add_child(stand)
+    _replacement_parent().add_child(stand)
     var mahogany := _finish(Color("#482820"), 0.56)
     var satin_brass := _finish(Color("#b39158"), 0.32, 0.65)
     var dark_top := _finish(Color("#282326"), 0.80)
@@ -144,7 +229,7 @@ func _roulette_table(spot: Vector3) -> Node3D:
     table.name = "RouletteTableCabinet"
     table.set_meta("furniture_kind", "roulette_table")
     table.position = spot
-    add_child(table)
+    _replacement_parent().add_child(table)
     var timber := ROULETTE_PBR.duplicate() as StandardMaterial3D
     timber.uv1_scale = Vector3(2.15, 1.0, 1.35)
     var brass := _finish(Color("#c4a05c"), 0.34, 0.62)
@@ -206,7 +291,7 @@ func _populate() -> void:
             1.42, 1.72, retro.rotation.y)
         if hero != null:
             _retro_plinth(retro.position)
-            retro.queue_free()
+            _hide_or_replace_source(retro)
             replaced_slots += 1
 
     for table in tables.get_children():
@@ -224,13 +309,13 @@ func _populate() -> void:
             if replacement != null:
                 replacement.set_meta("placement_type", "roulette_wheel")
                 _roulette_table(table_node.position)
-                table_node.queue_free()
+                _hide_or_replace_source(table_node)
                 replaced_roulette += 1
         elif name_lower.begins_with("blackjack"):
             var replacement := _spawn("blackjack_table", "SketchfabBlackjack",
                 table_node.position, 2.60, 0.94, 0.0)
             if replacement != null:
-                table_node.queue_free()
+                _hide_or_replace_source(table_node)
                 replaced_blackjack += 1
                 var cards := _spawn("poker_set", "PokerCardAndChips",
                     table_node.position + Vector3(0, 0.95, 0), 0.90, 0.20, 0.0,
@@ -240,6 +325,8 @@ func _populate() -> void:
     # Atmosphere is built from the original authorable scene, but several
     # roulette/blackjack meshes are REPLACED here. Rebind shadow casters
     # once the actual imported meshes are in the tree.
+    if _editor_preview_root != null:
+        return
     furniture_finalized.emit()
     print("Sketchfab furniture imported: slots=", replaced_slots,
         ", roulette=", replaced_roulette, ", blackjack=", replaced_blackjack,

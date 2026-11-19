@@ -133,6 +133,8 @@ jobs:
           if ($LASTEXITCODE -ne 0 -or (Get-Content visual-fx-qa.log -Raw) -notmatch 'Casino Anomaly visual FX QA PASS') { throw 'Visual FX QA failed' }
           & "$env:GODOT_EDITOR" --headless --path . --script res://tests/sketchfab_smoke.gd 2>&1 | Tee-Object -FilePath sketchfab-smoke.log
           if ($LASTEXITCODE -ne 0 -or (Get-Content sketchfab-smoke.log -Raw) -notmatch 'Casino Anomaly Sketchfab model smoke PASS') { throw 'Sketchfab model smoke failed' }
+          & "$env:GODOT_EDITOR" --headless --path . --script res://tests/sketchfab_editor_preview_qa.gd 2>&1 | Tee-Object -FilePath sketchfab-editor-preview-qa.log
+          if ($LASTEXITCODE -ne 0 -or (Get-Content sketchfab-editor-preview-qa.log -Raw) -notmatch 'Casino Anomaly Sketchfab editor preview QA PASS') { throw 'Sketchfab editor preview failed' }
           & "$env:GODOT_EDITOR" --headless --path . --script res://tests/architecture_qa.gd 2>&1 | Tee-Object -FilePath architecture-qa.log
           if ($LASTEXITCODE -ne 0 -or (Get-Content architecture-qa.log -Raw) -notmatch 'Casino Anomaly architectural PBR finishes PASS') { throw 'Architecture finish test failed' }
           & "$env:GODOT_EDITOR" --headless --path . --script res://tests/spatial_qa.gd 2>&1 | Tee-Object -FilePath spatial-qa.log
