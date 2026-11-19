@@ -4,6 +4,28 @@ The casino has two **room-local** `VoxelGI` volumes, `MainWingGI` and
 `WestWingGI`, at 128 subdivisions each. Their transforms follow each
 streamed room, including 180° rotations, and are disabled in standby halls.
 
+## See baked VoxelGI in the Godot 3D editor
+
+Open `main.tscn` with Godot 4.5.1 and the Forward+ renderer.
+The `@tool` scene script creates a **temporary, ownerless** `VoxelGIRig`
+in the editor. Both probes load the same already baked binary data used
+in the running game, and are enabled in the editor independently of the
+player's saved graphics setting.
+
+You should see the indirect, warm bounced lighting even while using
+`Player/Camera3D` camera preview. Scene-specific editor lighting and
+environment must also remain enabled. There is **no editor rebake** and
+the transient probes are never saved into `main.tscn`.
+
+Godot editor rendering is still not an exact game screenshot: graphics
+settings and runtime effects such as image contrast, animated slot lights,
+and any dynamically generated objects may differ. Reopen `main.tscn`
+after pulling code changes if its previous preview is still open.
+
+Regression: `tests/voxel_gi_editor_preview_qa.gd` executed under
+`--headless --editor` verifies both pre-baked probe resources are loaded
+and their editor instances are visible and ownerless.
+
 **The nodes alone provide no GI.** They require nonempty baked binary
 resources in `lighting/main_wing.res` and `lighting/west_wing.res`.
 Without both resources, the game safely retains its existing Forward+
@@ -47,6 +69,7 @@ rendered during gameplay. The script never saves over the authored
 - The CI build uses `--headless` and **cannot generate** the binary GI
   resource. It verifies the rig and exports any committed .res files.
 
-**Current status:** infrastructure is present; visible GI requires the
-two actual baked .res files. Do not describe the unbaked build as active
-VoxelGI.
+**Current status:** both baked binary assets are present in
+`lighting/` on `dev`. Real-time VoxelGI is available during gameplay and
+now also previewed in the Godot editor. Regenerate the bake only after
+changing geometry or lighting that contributes to the static bake.
