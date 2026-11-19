@@ -13,8 +13,8 @@ var replaced_roulette := 0
 var replaced_blackjack := 0
 var poker_props_placed := 0
 
-# The editor preview is an INTERNAL, ownerless node. Saving main.tscn never
-# bakes a second copy of the imported meshes into the playable scene.
+# Temporary previews are ownerless; the optional authored group is saved in
+# main.tscn and reused at runtime rather than spawning duplicate furniture.
 @export var show_imported_models_in_editor := true:
     set(value):
         show_imported_models_in_editor = value
@@ -23,6 +23,8 @@ var poker_props_placed := 0
 
 var _editor_preview_root: Node3D = null
 var _editor_hidden_sources: Dictionary = {}
+var _baking_editor_models := false
+const AUTHORED_GROUP := "EditableImportedModels"
 
 
 func _ready() -> void:
@@ -44,7 +46,7 @@ func _exit_tree() -> void:
 func _refresh_editor_preview() -> void:
     _clear_editor_preview()
     if not Engine.is_editor_hint() or not is_inside_tree() \
-            or not show_imported_models_in_editor:
+            or not show_imported_models_in_editor or has_node(AUTHORED_GROUP):
         return
     _build_editor_preview()
 
@@ -54,7 +56,7 @@ func _build_editor_preview() -> Node3D:
     # placement functions are used for editor and game, preventing model
     # scale, offset, or material drift while adjusting lighting.
     var hall := get_parent() as Node3D
-    if hall == null or hall.has_meta("_baking_room"):
+    if hall == null or hall.has_meta("_baking_room") or has_node(AUTHORED_GROUP):
         return null
     _clear_editor_preview()
     var preview := Node3D.new()
@@ -81,13 +83,65 @@ func _clear_editor_preview() -> void:
     poker_props_placed = 0
 
 
+## Convert transient Sketchfab previews into real, saved, selectable scene
+## nodes. Called once from the editor's Project > Tools menu.
+func bake_editable_models() -> bool:
+    if not Engine.is_editor_hint() or not is_inside_tree():
+        return false
+    var hall := get_parent() as Node3D
+    if hall == null or hall != get_tree().edited_scene_root:
+        return false
+    if has_node(AUTHORED_GROUP):
+        return true
+    for slug in ["retro_slot_machine", "roulette_table", "blackjack_table", "poker_set"]:
+        if _load_scene(slug) == null:
+            push_warning("Cannot make Sketchfab furniture editable: missing " + slug)
+            return false
+    if _load_scene("poker_set", "poker_props.glb") == null:
+        return false
+    _clear_editor_preview()
+    var group := Node3D.new()
+    group.name = AUTHORED_GROUP
+    add_child(group)
+    group.owner = hall
+    _editor_preview_root = group
+    _baking_editor_models = true
+    _populate()
+    _baking_editor_models = false
+    _editor_preview_root = null
+    # Keep the original procedural placeholders hidden in the saved scene.
+    _editor_hidden_sources.clear()
+    _own_generated_nodes(group, hall)
+    if replaced_slots != 1 or replaced_roulette != 3 or replaced_blackjack != 1:
+        push_error("Sketchfab authoring incomplete; please check the imported assets")
+        # Preserve the original scene if an asset failed half-way through.
+        for source in [hall.get_node_or_null("SlotMachines/Slot_01"),
+                hall.get_node_or_null("GamingTables/Roulette2"),
+                hall.get_node_or_null("GamingTables/Roulette4"),
+                hall.get_node_or_null("GamingTables/Roulette6")]:
+            if source is Node3D:
+                source.visible = true
+        group.queue_free()
+        return false
+    return true
+
+
+func _own_generated_nodes(parent: Node, scene_root: Node) -> void:
+    for child in parent.get_children():
+        child.owner = scene_root
+        # A packed glTF instance owns its own subscene. Never re-own the
+        # imported mesh hierarchy: Godot saves it by its source scene path.
+        if child.scene_file_path.is_empty():
+            _own_generated_nodes(child, scene_root)
+
+
 func _replacement_parent() -> Node3D:
     return _editor_preview_root if is_instance_valid(_editor_preview_root) else self
 
 
 func _hide_or_replace_source(original: Node3D) -> void:
     if is_instance_valid(_editor_preview_root):
-        if not _editor_hidden_sources.has(original):
+        if not _baking_editor_models and not _editor_hidden_sources.has(original):
             _editor_hidden_sources[original] = original.visible
         original.visible = false
     else:
@@ -163,7 +217,7 @@ func _spawn(slug: String, label: String, spot: Vector3, max_width: float,
         -size.position.y * factor,
         -(size.position.z + size.size.z * 0.5) * factor
     )
-    if add_collision and _editor_preview_root == null:
+    if add_collision and (_editor_preview_root == null or _baking_editor_models):
         var body := StaticBody3D.new()
         body.name = "FurnitureCollider"
         body.position.y = size.size.y * factor * 0.5
@@ -196,7 +250,7 @@ func _block(parent: Node3D, label: String, pos: Vector3, size: Vector3,
     mesh_node.position = pos
     mesh_node.material_override = material
     parent.add_child(mesh_node)
-    if solid and _editor_preview_root == null:
+    if solid and (_editor_preview_root == null or _baking_editor_models):
         var body := StaticBody3D.new()
         body.name = label + "Collider"
         body.position = pos
@@ -278,6 +332,12 @@ func _roulette_table(spot: Vector3) -> Node3D:
 func _populate() -> void:
     var hall: Node3D = get_parent() as Node3D
     if hall == null:
+        return
+    # A level designer has authored the imported instances in main.tscn.
+    # They are the source of truth; don't create copies on game startup.
+    if not _baking_editor_models and has_node(AUTHORED_GROUP):
+        if not Engine.is_editor_hint():
+            furniture_finalized.emit()
         return
     var slots: Node3D = hall.get_node_or_null("SlotMachines") as Node3D
     var tables: Node3D = hall.get_node_or_null("GamingTables") as Node3D
