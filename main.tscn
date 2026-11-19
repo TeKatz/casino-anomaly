@@ -92,7 +92,7 @@ background_mode = 1
 background_color = Color(0.034, 0.033, 0.04, 1)
 ambient_light_source = 2
 ambient_light_color = Color(0.69, 0.63, 0.56, 1)
-ambient_light_energy = 0.12
+ambient_light_energy = 0.165
 reflected_light_source = 1
 tonemap_mode = 2
 ssao_enabled = true
@@ -102,32 +102,32 @@ ssao_power = 1.4
 ssao_sharpness = 0.94
 ssao_light_affect = 0.06
 glow_enabled = true
-glow_intensity = 0.28
-glow_bloom = 0.018
+glow_intensity = 0.30
+glow_bloom = 0.023
 glow_hdr_threshold = 1.20
 fog_enabled = true
 fog_light_color = Color(0.27, 0.235, 0.20, 1)
 fog_light_energy = 0.21
-fog_density = 0.0022
+fog_density = 0.0016
 volumetric_fog_enabled = true
-volumetric_fog_density = 0.005
+volumetric_fog_density = 0.0038
 volumetric_fog_albedo = Color(0.61, 0.54, 0.46, 1)
 volumetric_fog_anisotropy = 0.36
 volumetric_fog_length = 50.0
 volumetric_fog_detail_spread = 2.2
-volumetric_fog_ambient_inject = 0.025
+volumetric_fog_ambient_inject = 0.035
 volumetric_fog_temporal_reprojection_amount = 0.84
-tonemap_exposure = 0.92
+tonemap_exposure = 1.02
 ssil_enabled = true
 ssil_radius = 2.2
-ssil_intensity = 0.65
+ssil_intensity = 0.80
 ssil_sharpness = 0.95
 ssr_enabled = true
 ssr_max_steps = 32
 ssr_fade_in = 0.15
 ssr_fade_out = 1.2
 adjustment_enabled = true
-adjustment_contrast = 1.07
+adjustment_contrast = 1.035
 adjustment_saturation = 0.96
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pjuso"]
@@ -6629,14 +6629,14 @@ metadata/placement_group = "BarServiceCabinet"
 [node name="ChandelierWarmLight_01" type="OmniLight3D" parent="ModelInteriors"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.4, 4.5, -6.8)
 light_color = Color(0.9529412, 0.7764706, 0.57254905, 1)
-light_energy = 0.48
+light_energy = 0.53
 light_volumetric_fog_energy = 0.16
 omni_range = 4.1
 light_specular = 0.90
 [node name="ChandelierWarmLight_01" type="OmniLight3D" parent="ModelInteriors/ChandelierWarmLight_01"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.42194104, -0.58491945, -2.890192)
 light_color = Color(0.9529412, 0.7764706, 0.57254905, 1)
-light_energy = 0.70
+light_energy = 0.77
 light_indirect_energy = 0.835
 light_volumetric_fog_energy = 0.26
 light_specular = 0.84
@@ -6646,7 +6646,7 @@ shadow_bias = 0.06
 [node name="ChandelierWarmLight_02" type="OmniLight3D" parent="ModelInteriors"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3, 4.4, 5.8)
 light_color = Color(0.9529412, 0.7764706, 0.57254905, 1)
-light_energy = 0.43
+light_energy = 0.48
 light_volumetric_fog_energy = 0.16
 shadow_enabled = true
 omni_range = 5.1
@@ -6654,7 +6654,7 @@ light_specular = 0.9
 [node name="ChandelierWarmLight_04" type="OmniLight3D" parent="ModelInteriors"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31, 4.4, -6.5)
 light_color = Color(0.9529412, 0.7764706, 0.57254905, 1)
-light_energy = 0.50
+light_energy = 0.56
 light_volumetric_fog_energy = 0.18
 shadow_enabled = true
 omni_range = 5.7
@@ -6662,7 +6662,7 @@ light_specular = 0.9
 [node name="ChandelierWarmLight_05" type="OmniLight3D" parent="ModelInteriors"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -41, 5.324433, -6.5)
 light_color = Color(0.9529412, 0.7764706, 0.57254905, 1)
-light_energy = 0.64
+light_energy = 0.70
 light_volumetric_fog_energy = 0.25
 shadow_enabled = true
 omni_range = 6.6
@@ -6744,6 +6744,28 @@ intensity = 0.68
 max_distance = 25.0
 enable_shadows = false
 update_mode = 0
+
+
+# Local bounce at bottle shelves and counter; no broad room-wide fill.
+[node name="BarShelfFill" type="OmniLight3D" parent="CasinoAtmosphere"]
+position = Vector3(-1.7, 2.85, -11.66)
+light_color = Color(1, 0.78, 0.55, 1)
+light_energy = 0.43
+omni_range = 3.9
+omni_attenuation = 1.55
+light_specular = 0.55
+light_volumetric_fog_energy = 0.0
+shadow_enabled = false
+
+[node name="BarCounterFill" type="OmniLight3D" parent="CasinoAtmosphere"]
+position = Vector3(2.2, 2.2, -9.75)
+light_color = Color(1, 0.81, 0.61, 1)
+light_energy = 0.34
+omni_range = 4.1
+omni_attenuation = 1.6
+light_specular = 0.5
+light_volumetric_fog_energy = 0.0
+shadow_enabled = false
 
 [node name="EastCove" type="MeshInstance3D" parent="CasinoAtmosphere"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.88, 5.53, 4.6)
@@ -12499,66 +12521,66 @@ mesh = SubResource("ArrayMesh_cx0bg")
 [node name="WarmCasinoLamp_01" type="OmniLight3D" parent="Lighting"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.906445, 9.2)
 light_color = Color(1, 0.854902, 0.654902, 1)
-light_energy = 1.10
+light_energy = 1.20
 light_volumetric_fog_energy = 0.13
 shadow_bias = 0.055
 shadow_blur = 1.1
-omni_range = 5.6
+omni_range = 6.1
 light_specular = 0.75
 [node name="WarmCasinoLamp_02" type="OmniLight3D" parent="Lighting"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.148512, 2.3)
 light_color = Color(1, 0.854902, 0.654902, 1)
-light_energy = 1.08
+light_energy = 1.18
 light_volumetric_fog_energy = 0.13
 shadow_bias = 0.055
 shadow_blur = 1.1
-omni_range = 5.8
+omni_range = 6.25
 light_specular = 0.75
 [node name="WarmCasinoLamp_03" type="OmniLight3D" parent="Lighting"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.3789831, 4.7458696, -6.790151)
 light_color = Color(1, 0.854902, 0.654902, 1)
-light_energy = 1.32
+light_energy = 1.46
 light_volumetric_fog_energy = 0.38
 shadow_enabled = true
 shadow_bias = 0.05
 shadow_blur = 1.1
-omni_range = 6.4
+omni_range = 6.85
 omni_attenuation = 1.26
 light_specular = 0.85
 shadow_normal_bias = 1.0
 [node name="WarmCasinoLamp_05" type="OmniLight3D" parent="Lighting"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.500437, 5.080225, -6.5090013)
 light_color = Color(1, 0.854902, 0.654902, 1)
-light_energy = 1.26
+light_energy = 1.41
 light_volumetric_fog_energy = 0.40
 shadow_enabled = true
 shadow_bias = 0.05
 shadow_blur = 1.1
-omni_range = 6.8
+omni_range = 7.15
 light_specular = 0.90
 shadow_normal_bias = 1.0
 [node name="WarmCasinoLamp_06" type="OmniLight3D" parent="Lighting"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25.380278, 3.094406, -6)
 light_color = Color(1, 0.854902, 0.654902, 1)
-light_energy = 1.03
+light_energy = 1.17
 light_volumetric_fog_energy = 0.13
 shadow_bias = 0.055
 shadow_blur = 1.1
-omni_range = 5.7
+omni_range = 6.35
 light_specular = 0.75
 [node name="WarmCasinoLamp_07" type="OmniLight3D" parent="Lighting"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35, 3.3078485, -6)
 light_color = Color(1, 0.854902, 0.654902, 1)
-light_energy = 1.03
+light_energy = 1.17
 light_volumetric_fog_energy = 0.13
 shadow_bias = 0.055
 shadow_blur = 1.1
-omni_range = 5.7
+omni_range = 6.35
 light_specular = 0.75
 [node name="WarmCasinoLamp_09" type="OmniLight3D" parent="Lighting"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.3607187, 4.9637866, -13.02405)
 light_color = Color(0.7176471, 1, 1, 1)
-light_energy = 0.76
+light_energy = 0.88
 light_volumetric_fog_energy = 0.36
 light_size = 0.32
 shadow_enabled = true
@@ -12566,5 +12588,5 @@ shadow_bias = 0.05
 shadow_normal_bias = 1.0
 shadow_transmittance_bias = 0.05
 distance_fade_enabled = false
-omni_range = 4.6
+omni_range = 5.05
 light_specular = 0.92
