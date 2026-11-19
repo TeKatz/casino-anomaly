@@ -24,14 +24,21 @@ func _run() -> void:
         _fail("Missing WorldEnvironment")
         return
     var e := world.environment
-    if e.ambient_light_energy < 0.18 or e.ambient_light_energy > 0.20:
+    if e.ambient_light_energy < 0.20 or e.ambient_light_energy > 0.22:
         _fail("Ambient illumination is not balanced for dark casino corners")
         return
-    if e.tonemap_exposure < 1.05 or e.tonemap_exposure > 1.09:
+    if e.tonemap_exposure < 1.02 or e.tonemap_exposure > 1.06:
         _fail("Cinematic exposure is outside the restrained night range")
         return
     if e.ssao_radius > 0.90 or e.ssao_light_affect < 0.18:
         _fail("Tight tabletop/floor contact occlusion must affect lit areas")
+        return
+    if not e.adjustment_enabled or e.adjustment_contrast > 0.95 \
+            or e.adjustment_contrast < 0.70:
+        _fail("Night casino needs compressed contrast, not elevated black crush")
+        return
+    if e.glow_intensity > 0.25 or e.glow_bloom > 0.02:
+        _fail("Light halos must not overexpose the bright casino signs")
         return
     if not e.ssao_enabled or not e.ssil_enabled or not e.ssr_enabled:
         _fail("Forward+ contact shadows, indirect light or reflections missing")

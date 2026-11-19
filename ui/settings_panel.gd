@@ -171,6 +171,7 @@ func _switch_tab(index: int) -> void:
                     or not ResourceLoader.exists("res://lighting/west_wing.res"):
                 _section(Loc.t("settings.voxel_gi_unbaked", self))
             _slider(Loc.t("settings.render_scale", self), "render_scale", 0.5, 1.0, 0.05, "×")
+            _slider(Loc.t("settings.image_contrast", self), "image_contrast", 0.70, 1.05, 0.05, "×")
         1:
             _section(Loc.t("settings.volume", self))
             _slider(Loc.t("settings.master", self), "master_volume", 0.0, 1.0, 0.05, "%")

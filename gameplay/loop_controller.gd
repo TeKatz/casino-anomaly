@@ -289,6 +289,8 @@ func _handoff() -> void:
     var environment_node := upcoming.get_node_or_null("WorldEnvironment") as WorldEnvironment
     if environment_node != null:
         environment_node.environment = staged_environment
+    if upcoming.has_method("apply_image_contrast"):
+        upcoming.call("apply_image_contrast")
     upcoming.remove_meta("_streaming_standby")
     get_tree().current_scene = upcoming
     previous.queue_free()

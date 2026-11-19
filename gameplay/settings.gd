@@ -10,6 +10,7 @@ const DEFAULTS := {
     "vsync": true,
     "fps_limit": 0,
     "render_scale": 1.0,
+    "image_contrast": 0.85,
     "taa": true,
     "voxel_gi": true,
     "master_volume": 1.0,
@@ -58,6 +59,8 @@ func _sanitize(key: String, value: Variant) -> Variant:
             return int(value) if int(value) in [0, 30, 60, 90, 120, 144, 240] else 0
         "render_scale":
             return clampf(float(value), 0.5, 1.0)
+        "image_contrast":
+            return clampf(float(value), 0.70, 1.05)
         "master_volume", "music_volume", "sfx_volume", "ui_volume":
             return clampf(float(value), 0.0, 1.0)
         "mouse_sensitivity":

@@ -104,6 +104,13 @@ func _ready() -> void:
     if lights.get_child_count() == 0:
         _make_lights()
 
+    # Keep contrast controllable live, including in newly streamed rooms.
+    if not Engine.is_editor_hint():
+        var game_settings = get_node_or_null("/root/GameSettings")
+        if game_settings != null:
+            game_settings.options_changed.connect(_on_contrast_option_changed)
+            apply_image_contrast()
+
     # Headless PackedScene loading can discard VoxelGI editor children.
     # Build the identical room-local rig programmatically to guarantee
     # streaming rooms have both volumes regardless of display backend.
@@ -125,6 +132,22 @@ func _ready() -> void:
             controller.name = "LoopController"
             controller.set_script(load("res://gameplay/loop_controller.gd"))
             add_child(controller)
+
+
+func _on_contrast_option_changed(key: String) -> void:
+    if key == "image_contrast":
+        apply_image_contrast()
+
+
+func apply_image_contrast() -> void:
+    var world := get_node_or_null("WorldEnvironment") as WorldEnvironment
+    var game_settings = get_node_or_null("/root/GameSettings")
+    # During streaming the WorldEnvironment is intentionally detached;
+    # the handoff reapplies the current setting once it is restored.
+    if world != null and world.environment != null and game_settings != null:
+        world.environment.adjustment_enabled = true
+        world.environment.adjustment_contrast = float(
+            game_settings.get_option("image_contrast"))
 
 
 func _section(label: String) -> Node3D:

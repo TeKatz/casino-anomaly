@@ -28,6 +28,7 @@ func _run() -> void:
     var saved_language = settings.get_option("language")
     var saved_fps = settings.get_option("fps_limit")
     var saved_gi = settings.get_option("voxel_gi")
+    var saved_contrast = settings.get_option("image_contrast")
 
     settings.set_option("mouse_sensitivity", 1.35)
     settings.set_option("fov", 86.0)
@@ -121,6 +122,14 @@ func _run() -> void:
         _fail("English language choice was not applied without restarting")
         return
     subpanel.call("_switch_tab", 0)
+    settings.set_option("image_contrast", 0.75)
+    await process_frame
+    var current_environment := room.get_node("WorldEnvironment") as WorldEnvironment
+    if absf(float(settings.get_option("image_contrast")) - 0.75) > 0.001 \
+            or current_environment.environment == null \
+            or absf(current_environment.environment.adjustment_contrast - 0.75) > 0.001:
+        _fail("Image contrast must apply immediately in the active casino")
+        return
     settings.set_option("voxel_gi", false)
     await process_frame
     var gi_rig := room.get_node_or_null("VoxelGIRig")
@@ -142,6 +151,7 @@ func _run() -> void:
     settings.set_option("language", saved_language)
     settings.set_option("fps_limit", saved_fps)
     settings.set_option("voxel_gi", saved_gi)
+    settings.set_option("image_contrast", saved_contrast)
     room.queue_free()
     await process_frame
     DirAccess.remove_absolute(ProjectSettings.globalize_path(state.save_path))
