@@ -104,7 +104,15 @@ func _run() -> void:
                 nearest_distance = horizontal.length()
                 nearest_table = table
         if nearest_table == null or nearest_distance > 2.1:
-            _fail("Table shadow key is not near any playable table")
+            var names := PackedStringArray()
+            for table_node in gaming.get_children():
+                var t := table_node as Node3D
+                if t != null:
+                    names.append("%s:%s" % [t.name, t.position])
+            _fail("Shadow key %s at %s not near any playable table (distance %s). Actual table positions: %s" % [
+                key_light.name, key_light.position, nearest_distance,
+                ", ".join(names)
+            ])
             return
         var aisle_offset: float = key_light.position.z - nearest_table.position.z
         if absf(aisle_offset) < 1.2:
