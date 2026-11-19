@@ -1,10 +1,11 @@
-[gd_scene load_steps=1280 format=4 uid="uid://3qbt7lcevocj"]
+[gd_scene load_steps=1281 format=4 uid="uid://3qbt7lcevocj"]
 
 [ext_resource type="Script" uid="uid://2cb8gajthh70" path="res://hall.gd" id="1_hall"]
 [ext_resource type="Script" uid="uid://b80bl20jsqir5" path="res://player.gd" id="2_player"]
 [ext_resource type="Script" uid="uid://u327arp55gfv" path="res://model_interior.gd" id="3_models"]
 [ext_resource type="Script" uid="uid://4yi1518yf4mn" path="res://sketchfab_furniture.gd" id="4_sketchfab"]
 [ext_resource type="Script" uid="uid://i4ar7s7uokb2" path="res://casino_atmosphere.gd" id="5_atmosphere"]
+[ext_resource type="Script" path="res://lighting/voxel_gi_rig.gd" id="25_voxel_rig"]
 [ext_resource type="Script" uid="uid://kkvw3d4wcyw5" path="res://editor/model_placement_preview.gd" id="6_editor_anchor"]
 [ext_resource type="Texture2D" uid="uid://b6igd7kkrs3ke" path="res://assets/oak_wood_planks/oak_wood_planks_diff_2k.jpg" id="7_come4"]
 [ext_resource type="Texture2D" uid="uid://km7gbh2we8vr" path="res://assets/oak_wood_planks/oak_wood_planks_nor_gl_2k.png" id="8_h8e4i"]
@@ -6717,6 +6718,24 @@ script = ExtResource("4_sketchfab")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_casino")
+
+# These volumes follow the room's local transform, including the 180-degree
+# turns used by streamed halls. Their binary GI data is loaded only if present.
+# In the unbaked development build they remain disabled (no extra GPU cost).
+[node name="VoxelGIRig" type="Node3D" parent="."]
+script = ExtResource("25_voxel_rig")
+
+[node name="MainWingGI" type="VoxelGI" parent="VoxelGIRig"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.15, 0.5)
+visible = false
+size = Vector3(12.8, 7.6, 27.9)
+subdiv = 1
+
+[node name="WestWingGI" type="VoxelGI" parent="VoxelGIRig"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 3.15, -6.5)
+visible = false
+size = Vector3(40.8, 7.6, 13.7)
+subdiv = 1
 
 [node name="CasinoAtmosphere" type="Node3D" parent="."]
 script = ExtResource("5_atmosphere")

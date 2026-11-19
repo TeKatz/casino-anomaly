@@ -225,6 +225,15 @@ func _activate_reflections_sequentially(target_room: Node3D) -> void:
         (child as ReflectionProbe).visible = true
 
 
+func _activate_voxel_gi_after_handoff(target_room: Node3D) -> void:
+    await get_tree().process_frame
+    if not is_instance_valid(target_room) or not target_room.is_inside_tree():
+        return
+    var rig := target_room.get_node_or_null("VoxelGIRig")
+    if rig != null:
+        rig.call("set_streaming_active", true)
+
+
 func _commit_choice(lane: String) -> void:
     _stage_next(lane)
     if staged == null or not is_instance_valid(staged):
@@ -283,6 +292,9 @@ func _handoff() -> void:
     upcoming.remove_meta("_streaming_standby")
     get_tree().current_scene = upcoming
     previous.queue_free()
+    # Reuse pre-baked, room-local GI data after the previous room has
+    # actually left the tree. Never bake when a new run is entered.
+    _activate_voxel_gi_after_handoff(upcoming)
     # Render interior probes only after the old hall is gone. Each capture
     # occurs on a separate frame; no room geometry or camera is teleported.
     _activate_reflections_sequentially(upcoming)

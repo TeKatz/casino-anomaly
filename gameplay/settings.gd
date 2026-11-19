@@ -11,6 +11,7 @@ const DEFAULTS := {
     "fps_limit": 0,
     "render_scale": 1.0,
     "taa": true,
+    "voxel_gi": true,
     "master_volume": 1.0,
     "music_volume": 0.8,
     "sfx_volume": 0.9,
@@ -65,7 +66,7 @@ func _sanitize(key: String, value: Variant) -> Variant:
             return clampf(float(value), 60.0, 105.0)
         "sprint_mode":
             return str(value) if str(value) in ["hold", "toggle"] else "hold"
-        "vsync", "taa", "invert_y", "camera_motion", "hud_visible":
+        "vsync", "taa", "voxel_gi", "invert_y", "camera_motion", "hud_visible":
             return bool(value)
     return value
 

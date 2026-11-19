@@ -166,6 +166,10 @@ func _switch_tab(index: int) -> void:
             ])
             _toggle("VSync", "vsync")
             _toggle(Loc.t("settings.taa", self), "taa")
+            _toggle(Loc.t("settings.voxel_gi", self), "voxel_gi")
+            if not ResourceLoader.exists("res://lighting/main_wing.res") \
+                    or not ResourceLoader.exists("res://lighting/west_wing.res"):
+                _section(Loc.t("settings.voxel_gi_unbaked", self))
             _slider(Loc.t("settings.render_scale", self), "render_scale", 0.5, 1.0, 0.05, "×")
         1:
             _section(Loc.t("settings.volume", self))
