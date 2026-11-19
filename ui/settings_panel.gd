@@ -12,7 +12,7 @@ var tab_row: HBoxContainer
 var options_box: VBoxContainer
 var tabs: Array[Button] = []
 var selected_tab := 0
-var settings_node: Node
+var settings_node: Variant = null
 
 
 func _ready() -> void:
