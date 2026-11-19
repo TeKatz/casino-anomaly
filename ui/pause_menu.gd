@@ -3,6 +3,7 @@ extends CanvasLayer
 ## while the SceneTree is paused and follows the same player across handoffs.
 
 const SettingsPanel = preload("res://ui/settings_panel.gd")
+const Loc = preload("res://gameplay/localization.gd")
 const GOLD := Color("#dcb477")
 
 var panel_root: Control
@@ -10,6 +11,9 @@ var pause_panel: PanelContainer
 var settings_panel: PanelContainer
 var confirmation: ConfirmationDialog
 var open := false
+var subtitle_label: Label
+var localized_buttons: Array[Button] = []
+var confirmation_action := ""
 
 
 func _ready() -> void:
@@ -56,18 +60,19 @@ func _ready() -> void:
     title.add_theme_color_override("font_color", GOLD)
     title.add_theme_font_size_override("font_size", 29)
     stack.add_child(title)
-    var subtitle := Label.new()
+    subtitle_label = Label.new()
+    var subtitle := subtitle_label
     subtitle.text = "PAUSE"
     subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     subtitle.add_theme_color_override("font_color", Color("#a5aeb7"))
     stack.add_child(subtitle)
 
-    _add_button(stack, "SPIEL FORTSETZEN", _resume)
-    _add_button(stack, "EINSTELLUNGEN", _open_settings)
-    _add_button(stack, "NEUES SPIEL", func() -> void: _confirm_action("new"))
-    _add_button(stack, "SPIELSTAND LADEN", func() -> void: _confirm_action("load"))
-    _add_button(stack, "HAUPTMENÜ", _go_to_main_menu)
-    _add_button(stack, "SPIEL BEENDEN", get_tree().quit)
+    _add_button(stack, "pause.resume", _resume)
+    _add_button(stack, "pause.settings", _open_settings)
+    _add_button(stack, "pause.new_game", func() -> void: _confirm_action("new"))
+    _add_button(stack, "pause.load", func() -> void: _confirm_action("load"))
+    _add_button(stack, "pause.menu", _go_to_main_menu)
+    _add_button(stack, "pause.quit", get_tree().quit)
 
     settings_panel = SettingsPanel.new()
     settings_panel.visible = false
@@ -75,21 +80,46 @@ func _ready() -> void:
     center.add_child(settings_panel)
 
     confirmation = ConfirmationDialog.new()
-    confirmation.title = "Spielstand"
-    confirmation.dialog_text = "Das aktuelle Spiel verlassen?"
-    confirmation.ok_button_text = "Bestätigen"
-    confirmation.cancel_button_text = "Abbrechen"
+    confirmation.title = Loc.t("pause.save_title", self)
+    confirmation.dialog_text = Loc.t("pause.leave", self)
+    confirmation.ok_button_text = Loc.t("pause.confirm", self)
+    confirmation.cancel_button_text = Loc.t("pause.cancel", self)
     confirmation.process_mode = Node.PROCESS_MODE_ALWAYS
     panel_root.add_child(confirmation)
     visible = false
+    var game_settings = get_node_or_null("/root/GameSettings")
+    if game_settings != null:
+        game_settings.options_changed.connect(_on_setting_changed)
+    _refresh_localization()
 
 
-func _add_button(parent: VBoxContainer, title: String, action: Callable) -> void:
+func _add_button(parent: VBoxContainer, key: String, action: Callable) -> void:
     var button := Button.new()
-    button.text = title
+    button.text = Loc.t(key, self)
+    button.set_meta("translation_key", key)
     button.custom_minimum_size = Vector2(0, 43)
     button.pressed.connect(action)
     parent.add_child(button)
+    localized_buttons.append(button)
+
+
+func _on_setting_changed(key: String) -> void:
+    if key == "language":
+        _refresh_localization()
+
+
+func _refresh_localization() -> void:
+    for button in localized_buttons:
+        button.text = Loc.t(str(button.get_meta("translation_key")), self)
+    confirmation.title = Loc.t("pause.save_title", self)
+    confirmation.ok_button_text = Loc.t("pause.confirm", self)
+    confirmation.cancel_button_text = Loc.t("pause.cancel", self)
+    var key := "pause.leave"
+    if confirmation_action == "new":
+        key = "pause.confirm_new"
+    elif confirmation_action == "load":
+        key = "pause.confirm_load"
+    confirmation.dialog_text = Loc.t(key, self)
 
 
 func _input(event: InputEvent) -> void:
@@ -138,10 +168,8 @@ func _confirm_action(action: String) -> void:
     var state := get_node_or_null("/root/LoopState")
     if action == "load" and (state == null or not state.has_continue()):
         return
-    confirmation.dialog_text = (
-        "Neues Spiel beginnen? Der aktuelle Spielstand wird überschrieben."
-        if action == "new" else "Spielstand neu laden? Nicht gespeicherter Fortschritt geht verloren."
-    )
+    confirmation_action = action
+    _refresh_localization()
     for connection in confirmation.confirmed.get_connections():
         confirmation.confirmed.disconnect(connection["callable"])
     confirmation.confirmed.connect(_run_action.bind(action), CONNECT_ONE_SHOT)

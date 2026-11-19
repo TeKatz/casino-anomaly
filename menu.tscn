@@ -98,40 +98,40 @@ custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.92, 0.75, 1)
 theme_override_font_sizes/font_size = 19
-text = "NEUES SPIEL"
+text = "NEW GAME"
 
 [node name="ContinueButton" type="Button" parent="CenterPanel/Content/Stack"]
 custom_minimum_size = Vector2(0, 43)
 layout_mode = 2
-text = "SPIELSTAND FORTSETZEN"
+text = "CONTINUE"
 disabled = true
 
 [node name="SettingsButton" type="Button" parent="CenterPanel/Content/Stack"]
 custom_minimum_size = Vector2(0, 43)
 layout_mode = 2
-text = "EINSTELLUNGEN"
+text = "SETTINGS"
 
 [node name="Casino2PreviewButton" type="Button" parent="CenterPanel/Content/Stack"]
 custom_minimum_size = Vector2(0, 43)
 layout_mode = 2
-text = "CASINO 2 – MODELLVORSCHAU"
+text = "CASINO 2 – MODEL PREVIEW"
 
 [node name="UpdateButton" type="Button" parent="CenterPanel/Content/Stack"]
 custom_minimum_size = Vector2(0, 43)
 layout_mode = 2
-text = "Auf Updates prüfen"
+text = "Check for updates"
 
 [node name="InstallButton" type="Button" parent="CenterPanel/Content/Stack"]
 visible = false
 custom_minimum_size = Vector2(0, 43)
 layout_mode = 2
 disabled = true
-text = "Update installieren"
+text = "Install update"
 
 [node name="QuitButton" type="Button" parent="CenterPanel/Content/Stack"]
 custom_minimum_size = Vector2(0, 43)
 layout_mode = 2
-text = "Beenden"
+text = "Quit"
 
 [node name="Separator" type="HSeparator" parent="CenterPanel/Content/Stack"]
 layout_mode = 2
@@ -140,7 +140,7 @@ layout_mode = 2
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.74, 0.74, 1)
 theme_override_font_sizes/font_size = 13
-text = "Offline spielbar"
+text = "Playable offline"
 horizontal_alignment = 1
 autowrap_mode = 3
 
@@ -162,7 +162,7 @@ grow_horizontal = 2
 grow_vertical = 0
 theme_override_colors/font_color = Color(0.45, 0.48, 0.52, 1)
 theme_override_font_sizes/font_size = 12
-text = "WASD / Maus · E im Tutorial · Ausgänge automatisch · ESC Menü    |    Poly Haven CC0 · Sketchfab CC BY 4.0"
+text = "WASD / Mouse · E at the starting door · Exits automatic · ESC menu    |    Poly Haven CC0 · Sketchfab CC BY 4.0"
 horizontal_alignment = 1
 
 [node name="UpdateRequest" type="HTTPRequest" parent="."]
