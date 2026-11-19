@@ -1,8 +1,8 @@
 @tool
 extends Node3D
 ## A stable placement marker in main.tscn. Move/rotate/scale this node in
-## Godot's regular 3D viewport. Its imported glTF preview only exists in the
-## editor; model_interior.gd builds the collidable version during gameplay.
+## Godot's regular 3D viewport. Before baking, glTF is preview-only;
+## after baking, the selectable glTF child persists into gameplay.
 
 @export var asset_id: String = ""
 @export var target_height: float = 1.0
@@ -19,7 +19,8 @@ func _ready() -> void:
 
 
 func _create_preview() -> void:
-    if not Engine.is_editor_hint() or not is_inside_tree():
+    if not Engine.is_editor_hint() or not is_inside_tree() \
+            or has_node("EditableImportedModel"):
         return
     if _preview != null and is_instance_valid(_preview):
         remove_child(_preview)
@@ -64,3 +65,24 @@ func _create_preview() -> void:
     )
     if wall_mount:
         imported.position.y -= target_height * 0.5
+
+
+## Promote the imported mesh to a normal scene instance. This preserves
+## its current normalized placement while making the model itself selectable
+## and its transform persistent in main.tscn.
+func bake_editable_model(scene_root: Node) -> bool:
+    if not Engine.is_editor_hint() or not is_inside_tree():
+        return false
+    if has_node("EditableImportedModel"):
+        return true
+    if not is_instance_valid(_preview):
+        _create_preview()
+    if not is_instance_valid(_preview):
+        return false
+    var model := _preview
+    remove_child(model)
+    model.name = "EditableImportedModel"
+    add_child(model)
+    model.owner = scene_root
+    _preview = null
+    return true
