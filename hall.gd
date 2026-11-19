@@ -111,13 +111,17 @@ func _ready() -> void:
             game_settings.options_changed.connect(_on_contrast_option_changed)
             apply_image_contrast()
 
-    # Headless PackedScene loading can discard VoxelGI editor children.
-    # Build the identical room-local rig programmatically to guarantee
-    # streaming rooms have both volumes regardless of display backend.
-    if not Engine.is_editor_hint() and not has_node("VoxelGIRig"):
+    # Share the exact same pre-baked VoxelGI rig between the game and Godot's
+    # scene viewport. Editor previews are transient, internal, and ownerless:
+    # no duplicate probe nodes are serialized into main.tscn. Gameplay still
+    # receives one room-local rig per active/streamed room.
+    if not has_node("VoxelGIRig"):
         var gi_rig := VoxelRig.new() as Node3D
         gi_rig.name = "VoxelGIRig"
-        add_child(gi_rig)
+        if Engine.is_editor_hint():
+            add_child(gi_rig, false, Node.INTERNAL_MODE_BACK)
+        else:
+            add_child(gi_rig)
 
     # Keep the designer-authored scene untouched. The game controller and
     # choice doors exist only in a started/continued run, not in editor mode.
