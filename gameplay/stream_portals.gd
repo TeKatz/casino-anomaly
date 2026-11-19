@@ -150,9 +150,18 @@ func _build_bent_connector(parent: Node3D, lane: String,
     var outer_x := BEND_X - HALF_WIDTH
     # The connector ends behind the new wooden jambs, not inside their
     # visible front faces. Adjacent meshes no longer share coplanar faces.
-    var opening_x := EXIT_X - 0.08
+    # Butt the connector walls against the OUTSIDE face of the existing
+    # portal piers. Their former 10 cm penetration created overlapping
+    # patterned wall surfaces on all four inner doorway edges.
+    var opening_x := EXIT_X - 0.18
     var horizontal_length := opening_x - inner_x
     var horizontal_mid := (opening_x + inner_x) * 0.5
+
+    # Bridge the full thickness of the original exit wall. The threshold
+    # sits slightly below the authored floor so it cannot flicker.
+    _box(corridor, "DoorwayFloor",
+        Vector3(EXIT_X, -0.115, start_z),
+        Vector3(0.68, 0.23, 2.22), floor_mat, false)
 
     # Straight first leg, ending flush at the corner's inner edge.
     _box(corridor, "StraightFloor",
@@ -165,26 +174,34 @@ func _build_bent_connector(parent: Node3D, lane: String,
     # Second leg turns LEFT (+Z) or RIGHT (-Z) and meets the next hall's
     # entrance at z=finish_z. The outer wall forms an opaque blind corner.
     var bottom_z := start_z - turn_dir * HALF_WIDTH
-    var top_z := finish_z + turn_dir * 0.15
-    var vertical_length := absf(top_z - bottom_z)
-    var vertical_mid := (top_z + bottom_z) * 0.5
+    # The entry sleeve starts 0.63 m outside the next room's entrance.
+    # Stop wall faces BEFORE its front plane: no wall mesh overlaps the
+    # sleeve's side returns, regardless of whether the hall is rotated.
+    var wall_end_z := finish_z - turn_dir * 0.63
+    # Floors instead extend UNDER the next room's oak floor, bridging the
+    # entrance without coplanar polygons or gaps near the threshold.
+    var floor_end_z := finish_z + turn_dir * 0.55
+    var floor_mid_z := (floor_end_z + bottom_z) * 0.5
+    var roof_end_z := finish_z - turn_dir * 0.55
+    var roof_mid_z := (roof_end_z + bottom_z) * 0.5
     _box(corridor, "TurnFloor",
-        Vector3(BEND_X, -0.11, vertical_mid),
-        Vector3(HALF_WIDTH * 2.0, 0.22, vertical_length), floor_mat)
+        Vector3(BEND_X, -0.115, floor_mid_z),
+        Vector3(HALF_WIDTH * 2.0 + 0.18, 0.23, absf(floor_end_z - bottom_z)), floor_mat)
     _box(corridor, "TurnCeiling",
-        Vector3(BEND_X, 3.60, vertical_mid),
-        Vector3(HALF_WIDTH * 2.0, 0.18, vertical_length), trim_mat)
+        Vector3(BEND_X, 3.60, roof_mid_z),
+        Vector3(HALF_WIDTH * 2.0 + 0.18, 0.18, absf(roof_end_z - bottom_z)), trim_mat)
 
-    # Outer wall on the first leg continues all the way into the corner.
+    # Keep the finished passage's inner faces flush with the sleeve's inner
+    # opening (1.22 m); centered 0.09 m outside the nominal floor edges.
+    var side_offset := HALF_WIDTH + 0.09
     _wall_along_x(corridor, "StraightOuterWall",
-        start_z - turn_dir * HALF_WIDTH, opening_x, outer_x, wall_mat)
-    # Inner wall must END at the bend, otherwise it blocks the turn.
+        start_z - turn_dir * side_offset, opening_x, outer_x - 0.09, wall_mat)
     _wall_along_x(corridor, "StraightInnerWall",
-        start_z + turn_dir * HALF_WIDTH, opening_x, inner_x, wall_mat)
+        start_z + turn_dir * side_offset, opening_x, inner_x + 0.09, wall_mat)
     _wall_along_z(corridor, "TurnOuterWall",
-        outer_x, bottom_z, top_z, wall_mat)
+        outer_x - 0.09, bottom_z, wall_end_z, wall_mat)
     _wall_along_z(corridor, "TurnInnerWall",
-        inner_x, start_z + turn_dir * HALF_WIDTH, top_z, wall_mat)
+        inner_x + 0.09, start_z + turn_dir * side_offset, wall_end_z, wall_mat)
 
     var light := OmniLight3D.new()
     light.name = "PassageLight"
@@ -250,6 +267,43 @@ func _build_entry_sleeve(parent: Node3D,
         Vector3(0.0, 3.53, 13.96),
         Vector3(3.48, 0.24, 0.25), material, false)
 
+
+
+func seal_initial_entrance(room: Node3D) -> bool:
+    # Only the very first hall has no predecessor. Later halls get a real
+    # arrival connector instead; sealing those would block seamless travel.
+    var generated := room.get_node_or_null("StreamingPortals") as Node3D
+    var architecture := room.get_node_or_null("Architecture") as Node3D
+    if generated == null or architecture == null:
+        return false
+    if generated.has_node("InitialEntryCap"):
+        return true
+    var cap := Node3D.new()
+    cap.name = "InitialEntryCap"
+    generated.add_child(cap)
+    var old_door := architecture.get_node_or_null("EntryDoor") as MeshInstance3D
+    var wainscot := architecture.get_node_or_null("WoodWainscoting") as MeshInstance3D
+    var oak := architecture.get_node_or_null("OakMainWing") as MeshInstance3D
+    var door_mat: Material = old_door.material_override if old_door != null else null
+    var timber: Material = wainscot.material_override if wainscot != null else door_mat
+    var floor_mat: Material = oak.get_active_material(0) if oak != null else timber
+
+    # A real closed timber door replaces the exposed blank void. The leaf
+    # sits inside the entrance collar, and is fully solid.
+    _box(cap, "SolidDoor", Vector3(0, 1.77, 14.58),
+        Vector3(2.44, 3.54, 0.17), door_mat)
+    for side in [-1.0, 1.0]:
+        _box(cap, "DoorStile", Vector3(side * 0.99, 1.76, 14.475),
+            Vector3(0.14, 3.32, 0.065), timber, false)
+        for height in [0.92, 2.45]:
+            _box(cap, "InsetPanel", Vector3(side * 0.49, height, 14.474),
+                Vector3(0.77, 1.20, 0.05), timber, false)
+    for height in [0.18, 1.75, 3.37]:
+        _box(cap, "DoorRail", Vector3(0, height, 14.47),
+            Vector3(2.16, 0.14, 0.07), timber, false)
+    _box(cap, "SolidSill", Vector3(0, -0.115, 14.28),
+        Vector3(2.45, 0.23, 0.66), floor_mat, false)
+    return true
 
 func lock_departure(room: Node3D, chosen_lane: String) -> bool:
     # Place both barriers BEHIND the committed player. They physically block

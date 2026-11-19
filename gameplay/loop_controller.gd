@@ -47,6 +47,10 @@ func _ready() -> void:
         push_error("Could not open the authored casino's exit portals")
         queue_free()
         return
+    if not portals.seal_initial_entrance(room):
+        push_error("Could not cap the initial casino entrance")
+        queue_free()
+        return
 
     demo = DemoAnomalies.new()
     doors = Node3D.new()
