@@ -190,6 +190,9 @@ func _stage_next(lane: String) -> void:
     if not portals.prepare_room(next):
         next.free()
         return
+    # UPDATE_ONCE probes would otherwise capture the next casino's six views
+    # while the previous hall is still visible, causing a loading hitch.
+    _set_reflections_visible(next, false)
     var environment_node := next.get_node_or_null("WorldEnvironment") as WorldEnvironment
     staged_environment = environment_node.environment if environment_node != null else null
     if environment_node != null:
@@ -198,6 +201,28 @@ func _stage_next(lane: String) -> void:
     get_tree().root.add_child(next)
     staged = next
     staged_lane = lane
+
+
+func _set_reflections_visible(target_room: Node3D, enabled: bool) -> void:
+    var atmosphere := target_room.get_node_or_null("CasinoAtmosphere") as Node3D
+    if atmosphere == null:
+        return
+    for child in atmosphere.get_children():
+        if child is ReflectionProbe:
+            (child as ReflectionProbe).visible = enabled
+
+
+func _activate_reflections_sequentially(target_room: Node3D) -> void:
+    var atmosphere := target_room.get_node_or_null("CasinoAtmosphere") as Node3D
+    if atmosphere == null:
+        return
+    for child in atmosphere.get_children():
+        if not (child is ReflectionProbe):
+            continue
+        await get_tree().process_frame
+        if not is_instance_valid(target_room) or not target_room.is_inside_tree():
+            return
+        (child as ReflectionProbe).visible = true
 
 
 func _commit_choice(lane: String) -> void:
@@ -258,6 +283,9 @@ func _handoff() -> void:
     upcoming.remove_meta("_streaming_standby")
     get_tree().current_scene = upcoming
     previous.queue_free()
+    # Render interior probes only after the old hall is gone. Each capture
+    # occurs on a separate frame; no room geometry or camera is teleported.
+    _activate_reflections_sequentially(upcoming)
     _place_markers()
     Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
     transitioning = false

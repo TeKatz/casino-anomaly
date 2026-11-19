@@ -263,8 +263,10 @@ func _soft_light(pos: Vector3, power: float, reach: float) -> void:
     lamp.name = stable_name
     lamp.position = pos
     lamp.light_color = Color("#f3c692")
-    lamp.light_energy = power
-    lamp.omni_range = reach
+    lamp.light_energy = power * 0.85
+    lamp.omni_range = minf(reach, 6.6)
+    lamp.light_specular = 0.9
+    lamp.light_volumetric_fog_energy = 0.18
     # The eight structural ceiling lights already cast the shadows.
     # Keep these imported chandelier highlights faint and local so their
     # unshadowed contribution doesn't flatten the room's contrast.

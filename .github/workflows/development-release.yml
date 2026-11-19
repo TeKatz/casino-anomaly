@@ -120,7 +120,8 @@ jobs:
             @('tests/loop_gameplay_qa.gd', 'Casino Anomaly playable tutorial, save and loop gameplay QA PASS'),
             @('tests/streaming_qa.gd', 'Casino Anomaly seamless two-room streaming QA PASS'),
             @('tests/settings_pause_qa.gd', 'Casino Anomaly pause, persistent settings and world-camera input QA PASS'),
-            @('tests/localization_intro_qa.gd', 'Casino Anomaly bilingual intro and door interaction QA PASS')
+            @('tests/localization_intro_qa.gd', 'Casino Anomaly bilingual intro and door interaction QA PASS'),
+            @('tests/cinematic_lighting_qa.gd', 'Casino Anomaly cinematic lighting and reflection QA PASS')
           )) {
             $name = $spec[0]
             $expected = $spec[1]

@@ -128,6 +128,14 @@ func _run() -> void:
     if second.has_node("StreamingPortals/InitialEntryCap"):
         _fail("Staged rooms must NOT seal their arrival doors")
         return
+    var stage_fx := second.get_node_or_null("CasinoAtmosphere") as Node3D
+    if stage_fx == null:
+        _fail("Staged hall lost its reflection rig")
+        return
+    for child in stage_fx.get_children():
+        if child is ReflectionProbe and child.visible:
+            _fail("Standby rooms must not capture reflection probes")
+            return
     if second.has_node("Player") or second.has_node("LoopController"):
         _fail("Standby hall generated a second player or controller")
         return
@@ -183,6 +191,11 @@ func _run() -> void:
         return
     await process_frame
     await process_frame
+    await process_frame
+    for child in (second.get_node("CasinoAtmosphere") as Node3D).get_children():
+        if child is ReflectionProbe and not child.visible:
+            _fail("Active hall should restore its reflections after handoff")
+            return
     if is_instance_valid(first):
         _fail("The previous full casino room was not freed")
         return

@@ -208,8 +208,9 @@ func _build_bent_connector(parent: Node3D, lane: String,
     light.name = "PassageLight"
     light.position = Vector3(BEND_X, 3.04, start_z + turn_dir * 1.4)
     light.light_color = Color(1.0, 0.78, 0.51)
-    light.light_energy = 0.75
-    light.omni_range = 7.0
+    light.light_energy = 0.52
+    light.omni_range = 5.2
+    light.light_volumetric_fog_energy = 0.12
     corridor.add_child(light)
 
     # A short side-facing light makes the corner leg readable without
@@ -219,8 +220,9 @@ func _build_bent_connector(parent: Node3D, lane: String,
     second_light.position = Vector3(BEND_X, 3.04,
         start_z + turn_dir * (TURN_LENGTH - 2.2))
     second_light.light_color = Color(1.0, 0.76, 0.48)
-    second_light.light_energy = 0.58
-    second_light.omni_range = 5.8
+    second_light.light_energy = 0.39
+    second_light.omni_range = 4.4
+    second_light.light_volumetric_fog_energy = 0.10
     corridor.add_child(second_light)
 
 
