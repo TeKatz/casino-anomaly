@@ -30,6 +30,9 @@ func _run() -> void:
     if e.tonemap_exposure < 0.98 or e.tonemap_exposure > 1.05:
         _fail("Cinematic exposure is outside the restrained night range")
         return
+    if e.ssao_radius > 0.90 or e.ssao_light_affect < 0.18:
+        _fail("Tight tabletop/floor contact occlusion must affect lit areas")
+        return
     if not e.ssao_enabled or not e.ssil_enabled or not e.ssr_enabled:
         _fail("Forward+ contact shadows, indirect light or reflections missing")
         return
