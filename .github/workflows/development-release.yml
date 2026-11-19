@@ -200,11 +200,19 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: casino-anomaly-win-x64
-          path: artifacts/casino-anomaly-win-x64.zip
+          path: |
+            artifacts/casino-anomaly-win-x64.zip
+            artifacts/casino-anomaly-win-x64.zip.sha256
+            artifacts/update-manifest.json
           retention-days: 7
           if-no-files-found: error
 
       - name: Publish independent Development release
+        id: publish_release
+        # A restricted GitHub App installation can return HTTP 403 for
+        # release edits. This must not invalidate a tested, uploaded build.
+        # The artifact remains available, with a prominent warning below.
+        continue-on-error: true
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.CASINO_RELEASE_TOKEN || github.token }}
@@ -223,7 +231,23 @@ jobs:
             if ($LASTEXITCODE -ne 0) { throw 'Could not create development release: check Actions contents permissions or CASINO_RELEASE_TOKEN' }
           }
 
+      - name: Report release permission fallback
+        if: steps.publish_release.outcome == 'failure'
+        shell: pwsh
+        run: |
+          Write-Host "::warning::Development Release konnte wegen fehlender GitHub-Berechtigung nicht vollstaendig aktualisiert werden. Windows-ZIP, SHA256 und Manifest sind im Workflow-Artefakt verfuegbar. CASINO_RELEASE_TOKEN mit Release-Schreibrechten erforderlich."
+          @'
+          ### Development Release nicht aktualisiert
+          Der Windows-Build und alle Tests waren erfolgreich, aber die GitHub-API
+          hat das Veröffentlichen/Bearbeiten des Development-Releases abgelehnt.
+          Nutze bis zur Korrektur der Berechtigungen das Workflow-Artefakt
+          **casino-anomaly-win-x64** (ZIP, SHA256, Manifest).
+          Für automatische Releases benötigt **CASINO_RELEASE_TOKEN** ein
+          Token mit Contents-/Release-Schreibzugriff.
+          '@ | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+
       - name: Verify public release download
+        if: steps.publish_release.outcome == 'success'
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
