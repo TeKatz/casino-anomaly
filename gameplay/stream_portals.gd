@@ -255,18 +255,17 @@ func _build_entry_sleeve(parent: Node3D,
         _box(collar, "SideReturn_" + side_name,
             Vector3(side * 1.45, 1.77, 14.32),
             Vector3(0.46, 3.54, 0.98), material)
-        _box(collar, "SillWing_" + side_name,
-            Vector3(side * 1.45, -0.08, 14.32),
-            Vector3(0.47, 0.16, 1.00), floor_mat, false)
+        # Decorative jamb is deliberately in front of the structural return
+        # instead of nested into it, so its textured faces never compete.
         _box(collar, "EntryJamb_" + side_name,
-            Vector3(side * 1.67, 1.75, 13.96),
-            Vector3(0.20, 3.50, 0.25), material, false)
+            Vector3(side * 1.67, 1.75, 13.71),
+            Vector3(0.20, 3.50, 0.12), material, false)
     _box(collar, "RoofSoffit",
         Vector3(0.0, 3.54, 14.25),
         Vector3(3.34, 0.16, 0.96), ceiling_mat)
     _box(collar, "EntryHeader",
-        Vector3(0.0, 3.53, 13.96),
-        Vector3(3.48, 0.24, 0.25), material, false)
+        Vector3(0.0, 3.53, 13.71),
+        Vector3(3.48, 0.24, 0.12), material, false)
 
 
 
