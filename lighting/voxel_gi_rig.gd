@@ -1,3 +1,4 @@
+@tool
 extends Node3D
 ## Pre-baked VoxelGI volumes for a rotated/streamed Casino Anomaly hall.
 ## No bake is performed at runtime. Exported builds only enable validated
@@ -13,13 +14,18 @@ var streaming_active := true
 
 func _ready() -> void:
     _ensure_volumes()
-    streaming_active = not get_parent().has_meta("_streaming_standby")
+    # The editor has no live run or user graphics state. Always preview
+    # validated baked GI there. In game, keep the streaming and settings
+    # gates exactly as before.
+    streaming_active = true if Engine.is_editor_hint() else \
+            not get_parent().has_meta("_streaming_standby")
     for item in get_children():
         if item is VoxelGI:
             (item as VoxelGI).visible = false
-    var settings = get_node_or_null("/root/GameSettings")
-    if settings != null:
-        settings.options_changed.connect(_on_setting_changed)
+    if not Engine.is_editor_hint():
+        var settings = get_node_or_null("/root/GameSettings")
+        if settings != null:
+            settings.options_changed.connect(_on_setting_changed)
     call_deferred("_load_baked_data")
 
 
@@ -81,17 +87,19 @@ func set_streaming_active(enabled: bool) -> void:
 
 func _apply_visibility() -> void:
     var enabled := baked_data_ready and streaming_active
-    var settings = get_node_or_null("/root/GameSettings")
-    if settings != null:
-        enabled = enabled and bool(settings.get_option("voxel_gi"))
+    if not Engine.is_editor_hint():
+        var settings = get_node_or_null("/root/GameSettings")
+        if settings != null:
+            enabled = enabled and bool(settings.get_option("voxel_gi"))
     for item in get_children():
         if item is VoxelGI:
             (item as VoxelGI).visible = enabled
-    # The neon fallback must respond to a completed GI load or an option
-    # change immediately, not after the next half-second polling interval.
-    var atmosphere := get_parent().get_node_or_null("CasinoAtmosphere") as Node3D
-    if atmosphere != null and atmosphere.has_method("_sync_hybrid_lights"):
-        atmosphere.call_deferred("_sync_hybrid_lights")
+    # In the editor the decorative atmosphere script is intentionally not
+    # running. Never trigger its gameplay-only fallback synchronization.
+    if not Engine.is_editor_hint():
+        var atmosphere := get_parent().get_node_or_null("CasinoAtmosphere") as Node3D
+        if atmosphere != null and atmosphere.has_method("_sync_hybrid_lights"):
+            atmosphere.call_deferred("_sync_hybrid_lights")
 
 
 func has_complete_bake() -> bool:
