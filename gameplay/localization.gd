@@ -158,7 +158,7 @@ static func t(key: String, context: Node) -> String:
     var language := "en"
     # Streaming prepares the next scene before adding it to SceneTree.
     # Absolute get_node() on such an off-tree scene logs an engine ERROR.
-    var settings: Node = null
+    var settings: Variant = null
     if context != null and context.is_inside_tree():
         settings = context.get_node_or_null("/root/GameSettings")
     else:
