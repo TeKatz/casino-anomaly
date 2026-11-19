@@ -26,6 +26,9 @@ func _ready() -> void:
     # Do not build transient particle/spill effects during that process.
     if get_parent().has_meta("_baking_room"):
         return
+    var imported := get_parent().get_node_or_null("SketchfabFurniture")
+    if imported != null and imported.has_signal("furniture_finalized"):
+        imported.connect("furniture_finalized", _on_furniture_finalized)
     call_deferred("_build")
 
 func _build() -> void:
@@ -54,6 +57,27 @@ func _build() -> void:
     _slots()
     _plants()
     _dust()
+
+
+func _on_furniture_finalized() -> void:
+    # Replaceable Sketchfab meshes arrive AFTER the first table-light pass.
+    # The keys already target the authorable table coordinates, but the
+    # original casters have been queued for deletion. Turn shadow casting
+    # on for the real visible roulette cabinets and imported blackjack.
+    var imported := get_parent().get_node_or_null("SketchfabFurniture") as Node3D
+    if imported == null:
+        return
+    for candidate in imported.get_children():
+        var piece := candidate as Node3D
+        if piece == null:
+            continue
+        var is_table := piece.name.begins_with("RouletteTableCabinet") \
+                or str(piece.get_meta("source_asset", "")) == "blackjack_table"
+        if not is_table:
+            continue
+        for mesh_node in piece.find_children("*", "MeshInstance3D", true, false):
+            var mesh := mesh_node as MeshInstance3D
+            mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 
 
 func _ensure_practical_lights() -> void:
@@ -114,7 +138,9 @@ func _ensure_table_key_lights() -> void:
             lamp.distance_fade_length = 8.0
             lamp.distance_fade_shadow = 28.0
             add_child(lamp)
-            lamp.look_at(table.position + Vector3(0.0, 0.42, 0.0), Vector3.UP)
+            # look_at requires a GLOBAL target. The old local target aimed
+            # spotlights into empty space after a streamed room rotated.
+            lamp.look_at(table.to_global(Vector3(0.0, 0.42, 0.0)), Vector3.UP)
             _create_recessed_fixture(name, lamp.position)
         # Ensure the same rendered meshes that form the actual tables and
         # stools also cast light-dependent shadows on the PBR oak floor.
@@ -451,7 +477,7 @@ func _spot(label: String, pos: Vector3, target: Vector3, power: float) -> void:
         lamp.shadow_bias = 0.06
         lamp.shadow_blur = 1.30
     add_child(lamp)
-    lamp.look_at(target, Vector3.UP)
+    lamp.look_at(get_parent().to_global(target), Vector3.UP)
 
 func _slots() -> void:
     var slots: Node3D = get_parent().get_node_or_null("SlotMachines") as Node3D

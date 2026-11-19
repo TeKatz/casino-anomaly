@@ -5,6 +5,7 @@ extends Node3D
 
 const FOLDER := "res://models/sketchfab/"
 const ROULETTE_PBR: StandardMaterial3D = preload("res://roulette_wood_material.tres")
+signal furniture_finalized
 var assets: Dictionary = {}
 var replaced_slots := 0
 var replaced_roulette := 0
@@ -236,6 +237,10 @@ func _populate() -> void:
                     "poker_props.glb", false)
                 if cards != null:
                     poker_props_placed += 1
+    # Atmosphere is built from the original authorable scene, but several
+    # roulette/blackjack meshes are REPLACED here. Rebind shadow casters
+    # once the actual imported meshes are in the tree.
+    furniture_finalized.emit()
     print("Sketchfab furniture imported: slots=", replaced_slots,
         ", roulette=", replaced_roulette, ", blackjack=", replaced_blackjack,
         ", poker props=", poker_props_placed)
