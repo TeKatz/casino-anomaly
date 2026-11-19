@@ -24,6 +24,14 @@ func _run() -> void:
         _fail("English translations are unavailable")
         return
 
+    # Translation must be safe for the next hall even BEFORE it is attached
+    # to the tree; streaming opens translated exit signs at that stage.
+    var loose_node := Node3D.new()
+    if Loc.t("world.anomaly", loose_node) != "ANOMALY":
+        _fail("Off-tree staged translation did not use the current language")
+        return
+    loose_node.free()
+
     var intro := INTRO.instantiate() as Node3D
     root.add_child(intro)
     await process_frame

@@ -156,10 +156,17 @@ const TRANSLATIONS := {
 
 static func t(key: String, context: Node) -> String:
     var language := "en"
-    if context != null:
-        var settings = context.get_node_or_null("/root/GameSettings")
-        if settings != null:
-            language = str(settings.get_option("language"))
+    # Streaming prepares the next scene before adding it to SceneTree.
+    # Absolute get_node() on such an off-tree scene logs an engine ERROR.
+    var settings: Node = null
+    if context != null and context.is_inside_tree():
+        settings = context.get_node_or_null("/root/GameSettings")
+    else:
+        var scene_tree := Engine.get_main_loop() as SceneTree
+        if scene_tree != null:
+            settings = scene_tree.root.get_node_or_null("GameSettings")
+    if settings != null:
+        language = str(settings.get_option("language"))
     var vocabulary: Dictionary = TRANSLATIONS.get(language, TRANSLATIONS["en"])
     var fallback: Dictionary = TRANSLATIONS["en"]
     return str(vocabulary.get(key, fallback.get(key, key)))

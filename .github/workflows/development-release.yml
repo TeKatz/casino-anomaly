@@ -185,18 +185,34 @@ jobs:
           "$hash  casino-anomaly-win-x64.zip" | Set-Content artifacts/casino-anomaly-win-x64.zip.sha256 -Encoding ascii
           "Independent Casino Anomaly Development $env:VERSION" | Set-Content artifacts/release-notes.md -Encoding utf8
 
+      # Keep a downloadable standalone ZIP even when repository policy
+      # prevents the GitHub Actions token from creating a Release.
+      - name: Preserve downloadable Windows build
+        uses: actions/upload-artifact@v4
+        with:
+          name: casino-anomaly-win-x64
+          path: artifacts/casino-anomaly-win-x64.zip
+          retention-days: 7
+          if-no-files-found: error
+
       - name: Publish independent Development release
         shell: pwsh
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.CASINO_RELEASE_TOKEN || github.token }}
         run: |
+          # Never delete a functioning release before ensuring the replacement
+          # can be published. Release-token restrictions must not destroy the
+          # user's last downloadable version.
           gh release view development --repo "$env:GITHUB_REPOSITORY" *> $null
           if ($LASTEXITCODE -eq 0) {
-            gh release delete development --repo "$env:GITHUB_REPOSITORY" --yes --cleanup-tag
-            if ($LASTEXITCODE -ne 0) { throw 'Previous release deletion failed' }
+            gh release upload development --repo "$env:GITHUB_REPOSITORY" --clobber artifacts/casino-anomaly-win-x64.zip artifacts/casino-anomaly-win-x64.zip.sha256 artifacts/update-manifest.json
+            if ($LASTEXITCODE -ne 0) { throw 'Could not upload the development artifacts' }
+            gh release edit development --repo "$env:GITHUB_REPOSITORY" --target "$env:PUBLISHED_COMMIT" --prerelease --title "Casino Anomaly Development $env:VERSION" --notes-file artifacts/release-notes.md
+            if ($LASTEXITCODE -ne 0) { throw 'Could not update the development release' }
+          } else {
+            gh release create development --repo "$env:GITHUB_REPOSITORY" --target "$env:PUBLISHED_COMMIT" --prerelease --title "Casino Anomaly Development $env:VERSION" --notes-file artifacts/release-notes.md artifacts/casino-anomaly-win-x64.zip artifacts/casino-anomaly-win-x64.zip.sha256 artifacts/update-manifest.json
+            if ($LASTEXITCODE -ne 0) { throw 'Could not create development release: check Actions contents permissions or CASINO_RELEASE_TOKEN' }
           }
-          gh release create development --repo "$env:GITHUB_REPOSITORY" --target "$env:PUBLISHED_COMMIT" --prerelease --title "Casino Anomaly Development $env:VERSION" --notes-file artifacts/release-notes.md artifacts/casino-anomaly-win-x64.zip artifacts/casino-anomaly-win-x64.zip.sha256 artifacts/update-manifest.json
-          if ($LASTEXITCODE -ne 0) { throw 'Could not publish Casino Anomaly' }
 
       - name: Verify public release download
         shell: pwsh
