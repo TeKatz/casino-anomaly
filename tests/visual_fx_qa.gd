@@ -28,8 +28,7 @@ func _run() -> void:
     var all_spots := fx.find_children("*", "SpotLight3D", true, false)
     var display_spots: Array[Node] = []
     for spot in all_spots:
-        if not (spot.name.begins_with("TableKey_") \
-                or spot.name.begins_with("NeonWallWash_")):
+        if not spot.name.begins_with("TableKey_"):
             display_spots.append(spot)
     if display_spots.size() > 16 or all_spots.size() > 45:
         push_error("Casino spotlight budgets exceeded")

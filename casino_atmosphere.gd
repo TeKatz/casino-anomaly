@@ -14,6 +14,12 @@ var slot_phases: Array[float] = []
 var slot_spills: Array[OmniLight3D] = []
 var signs: Array[StandardMaterial3D] = []
 var plant_crowns: Array[Node3D] = []
+var strip_fills: Array[OmniLight3D] = []
+var furniture_fills: Array[OmniLight3D] = []
+var hybrid_sync_elapsed := 0.0
+var last_gi_lighting := false
+var last_standby := false
+var hybrid_mode_initialized := false
 
 func _ready() -> void:
     # The one-time scene baker captures static neon frames and spotlights.
@@ -55,8 +61,10 @@ func _ensure_practical_lights() -> void:
     # light into nearby meshes. These actual lights connect the glowing
     # architecture with the surrounding wood, tables and floor.
     _ensure_table_key_lights()
-    _ensure_neon_wall_washes()
+    _ensure_neon_strip_fills()
     _ensure_neon_sign_spills()
+    _ensure_furniture_fills()
+    _sync_hybrid_lights()
 
 
 func _ensure_table_key_lights() -> void:
@@ -77,26 +85,28 @@ func _ensure_table_key_lights() -> void:
         if not has_node(name):
             var lamp := SpotLight3D.new()
             lamp.name = name
-            lamp.position = table.position + Vector3(0.52, 5.72, 0.34)
+            # Centered over the table for predictable tabletop and floor
+            # silhouettes; the previous offset and huge bias washed them out.
+            lamp.position = table.position + Vector3(0.0, 5.60, 0.0)
             lamp.light_color = Color("#ffdda8")
-            lamp.light_energy = 2.1
-            lamp.spot_range = 6.25
-            lamp.spot_angle = 33.0
-            lamp.spot_attenuation = 1.30
+            lamp.light_energy = 1.95
+            lamp.spot_range = 5.95
+            lamp.spot_angle = 29.0
+            lamp.spot_attenuation = 1.42
             lamp.light_specular = 0.88
             lamp.light_size = 0.15
             lamp.shadow_enabled = true
             lamp.shadow_opacity = 0.90
-            lamp.shadow_bias = 0.025
-            lamp.shadow_normal_bias = 0.40
-            lamp.shadow_blur = 1.1
+            lamp.shadow_bias = 0.014
+            lamp.shadow_normal_bias = 0.12
+            lamp.shadow_blur = 0.46
             lamp.light_volumetric_fog_energy = 0.12
             # Expensive shadows are relevant to the nearby player, not to
             # tables forty meters down the long corridor.
             lamp.distance_fade_enabled = true
-            lamp.distance_fade_begin = 18.0
+            lamp.distance_fade_begin = 25.0
             lamp.distance_fade_length = 10.0
-            lamp.distance_fade_shadow = 16.0
+            lamp.distance_fade_shadow = 23.0
             add_child(lamp)
             lamp.look_at(table.position + Vector3(0.0, 1.03, 0.0), Vector3.UP)
             _create_recessed_fixture(name, lamp.position)
@@ -148,43 +158,120 @@ func _create_recessed_fixture(light_name: String, light_pos: Vector3) -> void:
     ring.add_child(diode)
 
 
-func _ensure_neon_wall_washes() -> void:
-    # Cove strips follow the two wings. Downward-directed spots produce
-    # a warm gradient on wall panels and nearby floor, not broad ambient fill.
-    # Their low cost and camera-distance fade preserve streaming performance.
-    for z in [11.0, 5.0, -1.0, -7.0]:
-        _wall_wash("East_%d" % int(z), Vector3(5.58, 5.34, z),
-            Vector3(5.96, 3.45, z))
-    for z in [11.0, 6.0, 1.0]:
-        _wall_wash("Entry_%d" % int(z), Vector3(-5.58, 5.34, z),
-            Vector3(-5.96, 3.45, z))
-    for x in [-10.0, -16.0, -22.0, -28.0, -34.0, -40.0]:
-        _wall_wash("North_%d" % int(x), Vector3(x, 5.34, -12.55),
-            Vector3(x, 3.45, -12.96))
-        _wall_wash("South_%d" % int(x), Vector3(x, 5.34, -0.48),
-            Vector3(x, 3.45, -0.07))
+func _ensure_neon_strip_fills() -> void:
+    # Continuous real emissive strips already contribute to the baked
+    # VoxelGI. For GI-off mode, use inexpensive overlapping OmniLights
+    # rather than separate spot cones that looked like round downlights.
+    # At runtime with valid VoxelGI they are fully disabled (no double
+    # lighting); only the GI color bounce illuminates these wall edges.
+    for i in range(6):
+        var z := 11.45 - float(i) * 3.25
+        _strip_fill("East_%02d" % i, Vector3(5.44, 5.28, z))
+    for i in range(4):
+        var z := 11.5 - float(i) * 3.15
+        _strip_fill("Entry_%02d" % i, Vector3(-5.44, 5.28, z))
+    for i in range(10):
+        var x := -9.0 - float(i) * 3.72
+        _strip_fill("North_%02d" % i, Vector3(x, 5.28, -12.45))
+        _strip_fill("South_%02d" % i, Vector3(x, 5.28, -0.62))
 
 
-func _wall_wash(label: String, origin: Vector3, target: Vector3) -> void:
-    var node_name := "NeonWallWash_" + label
-    if has_node(node_name):
+func _strip_fill(label: String, at: Vector3) -> void:
+    var name := "NeonStripFill_" + label
+    var lamp := get_node_or_null(name) as OmniLight3D
+    if lamp == null:
+        lamp = OmniLight3D.new()
+        lamp.name = name
+        lamp.position = at
+        lamp.light_color = Color("#efc17d")
+        lamp.light_energy = 0.17
+        lamp.omni_range = 3.35
+        lamp.omni_attenuation = 1.30
+        lamp.light_specular = 0.32
+        lamp.light_volumetric_fog_energy = 0.0
+        lamp.shadow_enabled = false
+        lamp.distance_fade_enabled = true
+        lamp.distance_fade_begin = 22.0
+        lamp.distance_fade_length = 9.0
+        add_child(lamp)
+    strip_fills.append(lamp)
+
+
+func _ensure_furniture_fills() -> void:
+    # Extra readability belongs to the LOWER half of the room. Each
+    # weak fill reveals furniture contours while remaining too small to
+    # turn the corridor into a flat, uniformly lit exhibition space.
+    # Counter/patron side (not inside the solid rear bar wall).
+    for index in range(3):
+        _furniture_fill("BarFoot_%02d" % index,
+            Vector3(-5.0 + float(index) * 3.55, 1.48, -8.24),
+            Color("#f0b47a"), 0.36, 3.55)
+    _furniture_fill("BarTurn", Vector3(3.72, 1.50, -5.85),
+        Color("#f0b47a"), 0.30, 3.35)
+
+    # The opposite wing has dark chairs and small props that are actual
+    # anomaly targets. Small fills from the walkable side retain detail.
+    for index in range(5):
+        _furniture_fill("Lounge_%02d" % index,
+            Vector3(-12.6 - float(index) * 7.1, 1.55, -3.35),
+            Color("#eac09a"), 0.33, 3.95)
+
+    # Just three faint bounce anchors: the carpet remains a dark central
+    # line, rather than glowing like a track of obvious point lights.
+    for index in range(3):
+        _furniture_fill("Aisle_%02d" % index,
+            Vector3(-11.5 - float(index) * 14.1, 1.83, -6.35),
+            Color("#dfb99b"), 0.17, 4.4)
+
+
+func _furniture_fill(label: String, at: Vector3, tint: Color,
+        power: float, reach: float) -> void:
+    var name := "FurnitureFill_" + label
+    var lamp := get_node_or_null(name) as OmniLight3D
+    if lamp == null:
+        lamp = OmniLight3D.new()
+        lamp.name = name
+        lamp.position = at
+        lamp.light_color = tint
+        lamp.light_energy = power
+        lamp.omni_range = reach
+        lamp.omni_attenuation = 1.55
+        lamp.light_specular = 0.38
+        lamp.light_volumetric_fog_energy = 0.0
+        lamp.shadow_enabled = false
+        lamp.distance_fade_enabled = true
+        lamp.distance_fade_begin = 24.0
+        lamp.distance_fade_length = 9.0
+        add_child(lamp)
+    furniture_fills.append(lamp)
+
+
+func _sync_hybrid_lights() -> void:
+    var room := get_parent() as Node3D
+    if room == null:
         return
-    var lamp := SpotLight3D.new()
-    lamp.name = node_name
-    lamp.position = origin
-    lamp.light_color = Color("#ffce7d")
-    lamp.light_energy = 0.66
-    lamp.spot_range = 4.9
-    lamp.spot_angle = 48.0
-    lamp.spot_attenuation = 1.55
-    lamp.light_specular = 0.62
-    lamp.light_volumetric_fog_energy = 0.0
-    lamp.shadow_enabled = false
-    lamp.distance_fade_enabled = true
-    lamp.distance_fade_begin = 19.0
-    lamp.distance_fade_length = 9.0
-    add_child(lamp)
-    lamp.look_at(target, Vector3.UP)
+    var standby := room.has_meta("_streaming_standby")
+    var gi_active := false
+    var rig := room.get_node_or_null("VoxelGIRig") as Node3D
+    if rig != null:
+        for child in rig.get_children():
+            if child is VoxelGI and child.visible:
+                gi_active = true
+                break
+    if hybrid_mode_initialized and standby == last_standby \
+            and gi_active == last_gi_lighting:
+        return
+    # Disable simulated linear emitters whenever the REAL pre-baked
+    # emission bounce becomes active. Do not dim lower-floor readability.
+    for lamp in strip_fills:
+        if is_instance_valid(lamp):
+            lamp.visible = not gi_active and not standby
+    for lamp in furniture_fills:
+        if is_instance_valid(lamp):
+            lamp.visible = not standby
+    hybrid_mode_initialized = true
+    last_gi_lighting = gi_active
+    last_standby = standby
 
 
 func _ensure_neon_sign_spills() -> void:
@@ -440,6 +527,12 @@ func _process(delta: float) -> void:
     if not active:
         return
     elapsed += delta
+    hybrid_sync_elapsed += delta
+    # The GI rig loads asynchronously, and the player may toggle VoxelGI
+    # at any time. Keep the fake strip lights mutually exclusive with it.
+    if hybrid_sync_elapsed >= 0.50:
+        hybrid_sync_elapsed = 0.0
+        _sync_hybrid_lights()
     # Slow ambient breathing, never an anomaly-like sudden flicker.
     for i in range(slot_glows.size()):
         slot_glows[i].emission_energy_multiplier = 1.85 + (

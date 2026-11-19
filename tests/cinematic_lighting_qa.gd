@@ -69,7 +69,10 @@ func _run() -> void:
         var key_light := table_spot as SpotLight3D
         if key_light == null or not key_light.shadow_enabled \
                 or key_light.light_energy < 1.3 \
-                or key_light.spot_range > 7.0 \
+                or key_light.spot_range > 6.1 \
+                or key_light.shadow_normal_bias > 0.18 \
+                or key_light.shadow_blur > 0.6 \
+                or key_light.distance_fade_shadow < 21.0 \
                 or not key_light.distance_fade_enabled:
             _fail("Table lights must create real, local, budgeted shadows")
             return
@@ -88,17 +91,42 @@ func _run() -> void:
             _fail("Table geometry does not cast real shadows")
             return
 
-    var cove_spots := atmosphere.find_children(
-        "NeonWallWash_*", "SpotLight3D", false, false)
-    if cove_spots.size() != 19:
-        _fail("Emissive cove lacks 19 local light sources")
+    if not atmosphere.find_children(
+            "NeonWallWash_*", "SpotLight3D", false, false).is_empty():
+        _fail("Old round neon wall spotlight cones returned")
         return
-    for cove in cove_spots:
-        var wall_light := cove as SpotLight3D
-        if wall_light == null or wall_light.shadow_enabled \
-                or wall_light.spot_range > 5.0 \
-                or not wall_light.distance_fade_enabled:
-            _fail("Cove illumination must stay directional and efficient")
+    var strip_fills := atmosphere.find_children(
+        "NeonStripFill_*", "OmniLight3D", false, false)
+    if strip_fills.size() != 30:
+        _fail("Need a continuous, budgeted strip-light fallback")
+        return
+    var rig := hall.get_node_or_null("VoxelGIRig") as Node3D
+    if rig == null:
+        _fail("Missing GI rig for mutual-exclusion lighting check")
+        return
+    var gi_active := false
+    for volume in rig.get_children():
+        if volume is VoxelGI and volume.visible:
+            gi_active = true
+    for strip in strip_fills:
+        var light := strip as OmniLight3D
+        if light == null or light.shadow_enabled or light.omni_range > 3.6 \
+                or not light.distance_fade_enabled \
+                or light.visible == gi_active:
+            _fail("Strip fallback must be inexpensive and off when GI is on")
+            return
+    var furniture_fills := atmosphere.find_children(
+        "FurnitureFill_*", "OmniLight3D", false, false)
+    if furniture_fills.size() != 12:
+        _fail("Need local lower-floor and bar furniture readability")
+        return
+    for fill in furniture_fills:
+        var light := fill as OmniLight3D
+        if light == null or light.shadow_enabled or light.light_energy > 0.4 \
+                or light.omni_range > 4.5 \
+                or light.light_volumetric_fog_energy > 0.0 \
+                or not light.distance_fade_enabled:
+            _fail("Furniture fill must stay gentle and cheap")
             return
     for sign_name in ["BarSignSpill", "EntrySignSpill"]:
         var sign_light := atmosphere.get_node_or_null(sign_name) as OmniLight3D
