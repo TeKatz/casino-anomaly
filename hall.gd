@@ -955,13 +955,13 @@ func _omni(pos: Vector3, tint: Color, energy: float, reach: float,
 func _make_lights() -> void:
     # Keep this fallback in sync with the authored cinematic rig. Distinct,
     # smaller pools of amber light leave believable shadows between bays.
-    _omni(Vector3(0, 4.8, 9.2), Color("#ffdaa7"), 1.10, 5.6)
-    _omni(Vector3(0, 4.8, 2.3), Color("#ffdaa7"), 1.08, 5.8)
-    _omni(Vector3(1.3, 4.8, -7.0), Color("#ffdaa7"), 1.32, 6.4, true)
-    _omni(Vector3(-8, 4.8, -6.0), Color("#ffdaa7"), 1.15, 6.4, true)
-    _omni(Vector3(-17, 4.8, -6.0), Color("#ffdaa7"), 1.26, 6.8, true)
-    _omni(Vector3(-26, 4.8, -6.0), Color("#ffdaa7"), 1.03, 5.7)
-    _omni(Vector3(-35, 4.8, -6.0), Color("#ffdaa7"), 1.03, 5.7)
-    _omni(Vector3(-43, 4.8, -6.0), Color("#ffdaa7"), 0.85, 5.7, true)
+    _omni(Vector3(0, 4.8, 9.2), Color("#ffdaa7"), 1.20, 6.1)
+    _omni(Vector3(0, 4.8, 2.3), Color("#ffdaa7"), 1.18, 6.25)
+    _omni(Vector3(1.3, 4.8, -7.0), Color("#ffdaa7"), 1.46, 6.85, true)
+    _omni(Vector3(-8, 4.8, -6.0), Color("#ffdaa7"), 1.29, 6.9, true)
+    _omni(Vector3(-17, 4.8, -6.0), Color("#ffdaa7"), 1.41, 7.15, true)
+    _omni(Vector3(-26, 4.8, -6.0), Color("#ffdaa7"), 1.17, 6.35)
+    _omni(Vector3(-35, 4.8, -6.0), Color("#ffdaa7"), 1.17, 6.35)
+    _omni(Vector3(-43, 4.8, -6.0), Color("#ffdaa7"), 0.95, 6.2, true)
     # The bar is a small warm accent, not another room-wide fill.
-    _omni(Vector3(1.2, 3.35, -9.8), Color("#ffba71"), 0.42, 3.7)
+    _omni(Vector3(1.2, 3.35, -9.8), Color("#ffba71"), 0.49, 4.0)

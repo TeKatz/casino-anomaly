@@ -24,28 +24,40 @@ func _run() -> void:
         _fail("Missing WorldEnvironment")
         return
     var e := world.environment
-    if e.ambient_light_energy < 0.08 or e.ambient_light_energy > 0.18:
+    if e.ambient_light_energy < 0.15 or e.ambient_light_energy > 0.18:
         _fail("Ambient illumination is not balanced for dark casino corners")
         return
-    if e.tonemap_exposure < 0.8 or e.tonemap_exposure > 1.0:
+    if e.tonemap_exposure < 0.98 or e.tonemap_exposure > 1.05:
         _fail("Cinematic exposure is outside the restrained night range")
         return
     if not e.ssao_enabled or not e.ssil_enabled or not e.ssr_enabled:
         _fail("Forward+ contact shadows, indirect light or reflections missing")
         return
-    if e.ssil_radius > 3.0 or e.ssr_max_steps > 40:
+    if e.ssil_radius > 3.0 or e.ssr_max_steps > 40 or e.ssil_intensity < 0.75:
         _fail("Screen-space effects exceed the reasonable performance budget")
         return
     if not e.volumetric_fog_enabled or e.volumetric_fog_density > 0.008:
         _fail("Volumetric haze must remain subtle")
         return
-    if e.fog_density > 0.003 or e.glow_bloom > 0.025:
+    if e.fog_density > 0.002 or e.glow_bloom > 0.025:
         _fail("Fog or bloom is washing away the new contrast")
         return
     var atmosphere := hall.get_node_or_null("CasinoAtmosphere") as Node3D
     if atmosphere == null:
         _fail("Missing atmosphere node")
         return
+    # Dark corners are retained; two local, shadowless fills bring back
+    # shelf bottles, the counter edge and nearby stool silhouettes.
+    for name in ["BarShelfFill", "BarCounterFill"]:
+        var bar_fill := atmosphere.get_node_or_null(name) as OmniLight3D
+        if bar_fill == null:
+            _fail("Missing local bar fill: " + name)
+            return
+        if bar_fill.light_energy <= 0.2 or bar_fill.light_energy > 0.5 \
+                or bar_fill.omni_range > 4.5 or bar_fill.shadow_enabled \
+                or bar_fill.light_volumetric_fog_energy != 0.0:
+            _fail("Bar fill washes out the shadows or adds undue cost: " + name)
+            return
     var probe_count := 0
     for node in atmosphere.get_children():
         var probe := node as ReflectionProbe

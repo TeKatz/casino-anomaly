@@ -27,6 +27,7 @@ func _build() -> void:
         return
     set_meta("ambient_fx_only", true)
     _ensure_reflection_probes()
+    _ensure_bar_fill_lights()
     if not has_node("EntrySignTop"):
         _architecture()
         _spot("CatHighlight", Vector3(-8.45, 4.7, -3.25),
@@ -75,6 +76,32 @@ func _ensure_probe(label: String, center: Vector3, extents: Vector3,
         probe.update_mode = ReflectionProbe.UPDATE_ONCE
         add_child(probe)
     probe.visible = enabled
+
+
+func _ensure_bar_fill_lights() -> void:
+    # The authored scene owns these two accents; only reconstruct missing
+    # lights for legacy/editor-generated variants. Both are deliberately cheap.
+    _ensure_bar_light("BarShelfFill", Vector3(-1.7, 2.85, -11.66),
+        Color(1.0, 0.78, 0.55), 0.43, 3.9, 1.55, 0.55)
+    _ensure_bar_light("BarCounterFill", Vector3(2.2, 2.2, -9.75),
+        Color(1.0, 0.81, 0.61), 0.34, 4.1, 1.6, 0.5)
+
+
+func _ensure_bar_light(label: String, location: Vector3, tint: Color,
+        energy: float, reach: float, attenuation: float, specular: float) -> void:
+    if has_node(label):
+        return
+    var lamp := OmniLight3D.new()
+    lamp.name = label
+    lamp.position = location
+    lamp.light_color = tint
+    lamp.light_energy = energy
+    lamp.omni_range = reach
+    lamp.omni_attenuation = attenuation
+    lamp.light_specular = specular
+    lamp.light_volumetric_fog_energy = 0.0
+    lamp.shadow_enabled = false
+    add_child(lamp)
 
 
 func _glow(color: Color, power: float) -> StandardMaterial3D:
