@@ -1,4 +1,5 @@
 extends RefCounted
+const Loc = preload("res://gameplay/localization.gd")
 ## Runtime geometry for two physically separated L-shaped exit passages.
 ## The next hall remains out of sight behind a solid corner. All geometry,
 ## including one-way locking gates, exists only in the running game.
@@ -76,7 +77,7 @@ func prepare_room(room: Node3D) -> bool:
             var sign := node as Label3D
             if sign.text == "EXIT":
                 # Left = Anomalie (+Z), right = Normal (-Z).
-                sign.text = "ANOMALIE" if absf(sign.position.z - EXIT_Z_LEFT) < 0.6 else "NORMAL"
+                sign.text = Loc.t("world.anomaly", room) if absf(sign.position.z - EXIT_Z_LEFT) < 0.6 else Loc.t("world.normal", room)
             continue
         if not node is MeshInstance3D:
             continue

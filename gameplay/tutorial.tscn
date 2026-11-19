@@ -1,7 +1,9 @@
-[gd_scene load_steps=16 format=3]
+[gd_scene load_steps=22 format=3]
 
 [ext_resource type="Script" path="res://gameplay/tutorial.gd" id="1"]
 [ext_resource type="Script" path="res://player.gd" id="2"]
+[ext_resource type="Material" path="res://brown_planks_05_material.tres" id="3"]
+[ext_resource type="Material" path="res://lower_wall_material.tres" id="4"]
 
 [sub_resource type="StandardMaterial3D" id="FloorMat"]
 albedo_color = Color(0.22, 0.13, 0.105, 1)
@@ -42,6 +44,24 @@ size = Vector3(1.85, 3.15, 0.13)
 
 [sub_resource type="BoxMesh" id="Trim"]
 size = Vector3(2.24, 0.14, 0.20)
+
+[sub_resource type="BoxMesh" id="DoorPost"]
+size = Vector3(0.20, 3.36, 0.24)
+
+[sub_resource type="BoxMesh" id="DoorPanel"]
+size = Vector3(0.65, 1.15, 0.055)
+
+[sub_resource type="BoxMesh" id="DoorRail"]
+size = Vector3(1.86, 0.15, 0.13)
+
+[sub_resource type="BoxMesh" id="DoorStile"]
+size = Vector3(0.13, 3.1, 0.13)
+
+[sub_resource type="BoxMesh" id="DoorPlate"]
+size = Vector3(0.15, 0.32, 0.07)
+
+[sub_resource type="BoxMesh" id="DoorHandle"]
+size = Vector3(0.15, 0.11, 0.14)
 
 [sub_resource type="BoxMesh" id="Ceiling"]
 size = Vector3(7.4, 0.2, 9.5)
@@ -130,20 +150,77 @@ position = Vector3(0, 0, -4.48)
 [node name="Door" type="MeshInstance3D" parent="ExitDoor"]
 position = Vector3(0, 1.575, 0)
 mesh = SubResource("Door")
-material_override = SubResource("DoorMat")
+material_override = ExtResource("3")
+
+[node name="FrameLeft" type="MeshInstance3D" parent="ExitDoor"]
+position = Vector3(-1.00, 1.69, 0.07)
+mesh = SubResource("DoorPost")
+material_override = ExtResource("4")
+
+[node name="FrameRight" type="MeshInstance3D" parent="ExitDoor"]
+position = Vector3(1.00, 1.69, 0.07)
+mesh = SubResource("DoorPost")
+material_override = ExtResource("4")
+
+[node name="DoorStileLeft" type="MeshInstance3D" parent="ExitDoor"]
+position = Vector3(-0.84, 1.575, 0.12)
+mesh = SubResource("DoorStile")
+material_override = ExtResource("4")
+
+[node name="DoorStileRight" type="MeshInstance3D" parent="ExitDoor"]
+position = Vector3(0.84, 1.575, 0.12)
+mesh = SubResource("DoorStile")
+material_override = ExtResource("4")
+
+[node name="BottomRail" type="MeshInstance3D" parent="ExitDoor"]
+position = Vector3(0, 0.15, 0.13)
+mesh = SubResource("DoorRail")
+material_override = ExtResource("4")
+
+[node name="MidRail" type="MeshInstance3D" parent="ExitDoor"]
+position = Vector3(0, 1.57, 0.13)
+mesh = SubResource("DoorRail")
+material_override = ExtResource("4")
+
+[node name="UpperRail" type="MeshInstance3D" parent="ExitDoor"]
+position = Vector3(0, 3.07, 0.13)
+mesh = SubResource("DoorRail")
+material_override = ExtResource("4")
+
+[node name="PanelBottomLeft" type="MeshInstance3D" parent="ExitDoor"]
+position = Vector3(-0.43, 0.83, 0.107)
+mesh = SubResource("DoorPanel")
+material_override = ExtResource("4")
+
+[node name="PanelBottomRight" type="MeshInstance3D" parent="ExitDoor"]
+position = Vector3(0.43, 0.83, 0.107)
+mesh = SubResource("DoorPanel")
+material_override = ExtResource("4")
+
+[node name="PanelTopLeft" type="MeshInstance3D" parent="ExitDoor"]
+position = Vector3(-0.43, 2.32, 0.107)
+mesh = SubResource("DoorPanel")
+material_override = ExtResource("4")
+
+[node name="PanelTopRight" type="MeshInstance3D" parent="ExitDoor"]
+position = Vector3(0.43, 2.32, 0.107)
+mesh = SubResource("DoorPanel")
+material_override = ExtResource("4")
+
+[node name="HandlePlate" type="MeshInstance3D" parent="ExitDoor"]
+position = Vector3(0.77, 1.57, 0.22)
+mesh = SubResource("DoorPlate")
+material_override = SubResource("GoldMat")
+
+[node name="Handle" type="MeshInstance3D" parent="ExitDoor"]
+position = Vector3(0.77, 1.55, 0.32)
+mesh = SubResource("DoorHandle")
+material_override = SubResource("GoldMat")
 
 [node name="TopTrim" type="MeshInstance3D" parent="ExitDoor"]
 position = Vector3(0, 3.19, 0.06)
 mesh = SubResource("Trim")
 material_override = SubResource("GoldMat")
-
-[node name="EnterLabel" type="Label3D" parent="ExitDoor"]
-position = Vector3(0, 2.3, 0.12)
-billboard = 1
-pixel_size = 0.006
-font_size = 36
-text = "DURCHLAUF 01"
-modulate = Color(1, 0.84, 0.61, 1)
 
 [node name="Player" type="CharacterBody3D" parent="."]
 position = Vector3(0, 1.02, 2.7)

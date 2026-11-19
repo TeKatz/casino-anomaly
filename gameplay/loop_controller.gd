@@ -9,6 +9,7 @@ extends Node3D
 
 const DemoAnomalies = preload("res://gameplay/demo_anomalies.gd")
 const StreamPortals = preload("res://gameplay/stream_portals.gd")
+const Loc = preload("res://gameplay/localization.gd")
 const ROOM = preload("res://main.tscn")
 
 const PRELOAD_AT_X := -31.0
@@ -24,9 +25,6 @@ var player: CharacterBody3D
 var doors: Node3D
 var demo: RefCounted
 var portals: RefCounted
-var hud: Label
-var prompt: Label
-var feedback: Label
 var staged: Node3D
 var staged_environment: Environment
 var staged_lane := ""
@@ -60,12 +58,6 @@ func _ready() -> void:
         push_error("Casino needs both original EXIT signs as portal markers")
         queue_free()
         return
-    _build_hud()
-    var settings = get_node_or_null("/root/GameSettings")
-    if settings != null:
-        settings.options_changed.connect(_on_setting_changed)
-        _on_setting_changed("hud_visible")
-
     var state = get_node_or_null("/root/LoopState")
     if state == null:
         queue_free()
@@ -73,7 +65,6 @@ func _ready() -> void:
     var available: Array[String] = demo.available_ids(room)
     state.prepare_round(available)
     demo.apply(room, str(state.anomaly_id))
-    _update_hud()
 
 
 func _exit_tree() -> void:
@@ -92,7 +83,7 @@ func _place_markers() -> bool:
     if architecture == null:
         return false
     for part in architecture.get_children():
-        if part is Label3D and (part as Label3D).text in ["EXIT", "ANOMALIE", "NORMAL"]:
+        if part is Label3D and (part as Label3D).text in ["EXIT", "ANOMALIE", "ANOMALY", "NORMAL"]:
             signs.append(part as Label3D)
     if signs.size() != 2:
         return false
@@ -106,56 +97,6 @@ func _place_markers() -> bool:
         var local := room.to_local(signs[i].global_position)
         marker.global_position = room.to_global(Vector3(local.x, 1.6, local.z))
     return true
-
-
-func _build_hud() -> void:
-    var layer := CanvasLayer.new()
-    layer.name = "GameHUD"
-    layer.layer = 2
-    add_child(layer)
-    hud = Label.new()
-    hud.position = Vector2(23, 20)
-    hud.add_theme_font_size_override("font_size", 19)
-    hud.add_theme_color_override("font_color", Color("#f4d59e"))
-    layer.add_child(hud)
-
-    feedback = Label.new()
-    feedback.position = Vector2(23, 58)
-    feedback.add_theme_font_size_override("font_size", 18)
-    feedback.add_theme_color_override("font_color", Color("#ffe9bd"))
-    layer.add_child(feedback)
-
-    prompt = Label.new()
-    prompt.anchor_top = 1.0
-    prompt.anchor_bottom = 1.0
-    prompt.offset_left = 23
-    prompt.offset_top = -60
-    prompt.offset_right = 900
-    prompt.offset_bottom = -25
-    prompt.add_theme_font_size_override("font_size", 20)
-    prompt.add_theme_color_override("font_color", Color("#f5e5c6"))
-    layer.add_child(prompt)
-
-
-func _on_setting_changed(key: String) -> void:
-    if key != "" and key != "hud_visible":
-        return
-    var config = get_node_or_null("/root/GameSettings")
-    var game_layer := get_node_or_null("GameHUD") as CanvasLayer
-    if config != null and game_layer != null:
-        game_layer.visible = bool(config.get_option("hud_visible"))
-
-
-func _update_hud() -> void:
-    var state = get_node_or_null("/root/LoopState")
-    if state == null:
-        return
-    hud.text = "DURCHLAUF %02d     |     FORTSCHRITT %d/%d     |     FEHLER %d" % [
-        state.visited_loops + 1,
-        state.correct_streak,
-        state.REQUIRED_CORRECT,
-        state.mistakes
-    ]
 
 
 func _candidate_lane(local_z: float) -> String:
@@ -174,7 +115,6 @@ func _process(_delta: float) -> void:
         _stage_next(_candidate_lane(local.z))
 
     if not choice_taken:
-        prompt.text = "LINKS: ANOMALIE   |   RECHTS: NORMAL   –   durch den Ausgang und um die Ecke"
         var lane := _candidate_lane(local.z)
         if local.x < CHOICE_AT_X and absf(local.z - _lane_z(lane)) <= LANE_HALF_WIDTH:
             _commit_choice(lane)
@@ -260,9 +200,6 @@ func _commit_choice(lane: String) -> void:
     var candidates: Array[String] = demo.available_ids(staged)
     state.prepare_round(candidates)
     demo.apply(staged, str(state.anomaly_id))
-    _update_hud()
-    feedback.text = "RICHTIG." if bool(verdict.get("correct", false)) else "FALSCH – Serie zurückgesetzt."
-    prompt.text = "Folge dem Gang um die Ecke. Der nächste Durchlauf ist bereits vorbereitet."
 
 
 func _handoff() -> void:
@@ -282,7 +219,7 @@ func _handoff() -> void:
     staged_lane = ""
     choice_taken = false
 
-    # Preserve the single CharacterBody3D and the live HUD/controller.
+    # Preserve the single CharacterBody3D and its live controller.
     # No camera cut, teleport, or orientation change occurs at handoff.
     player.reparent(upcoming, true)
     reparent(upcoming, true)
@@ -294,7 +231,6 @@ func _handoff() -> void:
     get_tree().current_scene = upcoming
     previous.queue_free()
     _place_markers()
-    _update_hud()
     Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
     transitioning = false
 
@@ -303,13 +239,17 @@ func _show_victory() -> void:
     won = true
     player.set_physics_process(false)
     Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-    prompt.text = ""
     if staged != null and is_instance_valid(staged):
         staged.queue_free()
         staged = null
+    # Only the end-of-run screen shows information; no HUD remains during play.
+    var layer := CanvasLayer.new()
+    layer.name = "VictoryOverlay"
+    layer.layer = 2
+    add_child(layer)
     var panel := Label.new()
     panel.position = Vector2(145, 225)
     panel.add_theme_font_size_override("font_size", 32)
     panel.add_theme_color_override("font_color", Color("#f1d39d"))
-    panel.text = "DU HAST DEN AUSGANG GEFUNDEN\n\nAcht richtige Entscheidungen hintereinander.\n\nESC – Zurück zum Hauptmenü"
-    get_node("GameHUD").add_child(panel)
+    panel.text = Loc.t("victory", self)
+    layer.add_child(panel)
