@@ -50,9 +50,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -295.0
-offset_top = -286.0
+offset_top = -314.0
 offset_right = 295.0
-offset_bottom = 286.0
+offset_bottom = 314.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("MenuPanel")
@@ -66,7 +66,7 @@ theme_override_constants/margin_bottom = 27
 
 [node name="Stack" type="VBoxContainer" parent="CenterPanel/Content"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 9
 
 [node name="Kicker" type="Label" parent="CenterPanel/Content/Stack"]
 layout_mode = 2
@@ -105,6 +105,11 @@ custom_minimum_size = Vector2(0, 43)
 layout_mode = 2
 text = "SPIELSTAND FORTSETZEN"
 disabled = true
+
+[node name="SettingsButton" type="Button" parent="CenterPanel/Content/Stack"]
+custom_minimum_size = Vector2(0, 43)
+layout_mode = 2
+text = "EINSTELLUNGEN"
 
 [node name="Casino2PreviewButton" type="Button" parent="CenterPanel/Content/Stack"]
 custom_minimum_size = Vector2(0, 43)

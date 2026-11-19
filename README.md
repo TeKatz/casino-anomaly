@@ -16,6 +16,20 @@ The main menu checks this repo's Development channel for updates. It runs a sepa
 
 `dev` publishes Development releases; `main` remains the reviewed integration baseline. Verified Windows builds use Godot 4.5.1, .NET 10 for the updater, and original CC0 asset sources. No checkout, terminal, editor or asset import is required for playtesting.
 
+## Aktuelles Bedienungs- und Übergangsupdate
+
+Die Casinoflur-Ausgänge sind jetzt **links „ANOMALIE“** und **rechts „NORMAL“** beschriftet. Die alten goldenen Platzhalterstreben wurden zur Laufzeit durch echte Holzrahmen aus dem bereits vorhandenen `WoodWainscoting`-Material ersetzt. Der Eingang des nächsten Flurs besitzt eine bündige, seitlich und oben geschlossene Anschlussmanschette (`EntrySleeve`); der vorige Gang bleibt nach dem Entladen als `ArrivalConnector` erhalten. Die Türinnenseiten wurden gegeneinander versetzt, damit sich keine Flächen überlagern. Die eigentliche `main.tscn` bleibt unverändert.
+
+**WASD richtet sich an der globalen Kamera aus**, sodass der Bewegungsvektor durch gedrehte Elternräume nicht mehr invertiert wird. Mit **ESC** pausiert man nun den aktuellen Run, statt ihn zu verlassen. **Spiel fortsetzen** bringt die Spielfigur ohne Reload zurück. Im Pause-Menü sind auch Neues Spiel, Spielstand laden, Hauptmenü und Beenden verfügbar; folgenschwere Optionen werden bestätigt.
+
+**Einstellungen** stehen im Haupt- und Pause-Menü bereit, mit vier als Buttons implementierten, hervorgehobenen Tabs:
+- **Grafik:** Fenstermodus, Auflösung, VSync, FPS-Grenze, TAA und 3D-Auflösungsskalierung
+- **Audio:** Gesamt-, Musik-, Effekt- und UI-Buslautstärke (für die zukünftigen Streams bereits vorbereitete Busse)
+- **Steuerung:** Mausempfindlichkeit, vertikale Umkehr, Sprinten halten/umschalten
+- **Gameplay:** FOV, Kamerabewegung und HUD-Sichtbarkeit
+
+Alle Optionen werden sofort angewandt und in `user://casino_settings.cfg` gespeichert – getrennt vom Spielstand. Die Einstellungen können geändert werden, während die Spielwelt angehalten ist.
+
 ## Spielbarer Anomalie-Loop mit nahtlosem Raum-Streaming
 
 **Neues Spiel** führt zuerst in den separat editierbaren Tutorialraum (`gameplay/tutorial.tscn`). Dort mit **E** durch die Tür gehen. Danach läuft das Spiel **ohne weitere Interaktionstaste**: Am westlichen Ende des L-förmigen Casinos führt die **linke, nun offene Ausgangspassage** zu „Anomalie“, die **rechte** zu „normal“. Die ursprünglichen Schilder und goldenen Rahmen werden weiterverwendet, die vorher durchgehende Wand und die dekorativen geschlossenen Türfüllungen werden nur zur Laufzeit passend geöffnet.

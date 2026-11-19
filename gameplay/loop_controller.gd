@@ -57,6 +57,10 @@ func _ready() -> void:
         queue_free()
         return
     _build_hud()
+    var settings = get_node_or_null("/root/GameSettings")
+    if settings != null:
+        settings.options_changed.connect(_on_setting_changed)
+        _on_setting_changed("hud_visible")
 
     var state = get_node_or_null("/root/LoopState")
     if state == null:
@@ -84,7 +88,7 @@ func _place_markers() -> bool:
     if architecture == null:
         return false
     for part in architecture.get_children():
-        if part is Label3D and (part as Label3D).text == "EXIT":
+        if part is Label3D and (part as Label3D).text in ["EXIT", "ANOMALIE", "NORMAL"]:
             signs.append(part as Label3D)
     if signs.size() != 2:
         return false
@@ -127,6 +131,15 @@ func _build_hud() -> void:
     prompt.add_theme_font_size_override("font_size", 20)
     prompt.add_theme_color_override("font_color", Color("#f5e5c6"))
     layer.add_child(prompt)
+
+
+func _on_setting_changed(key: String) -> void:
+    if key != "" and key != "hud_visible":
+        return
+    var config = get_node_or_null("/root/GameSettings")
+    var game_layer := get_node_or_null("GameHUD") as CanvasLayer
+    if config != null and game_layer != null:
+        game_layer.visible = bool(config.get_option("hud_visible"))
 
 
 func _update_hud() -> void:
