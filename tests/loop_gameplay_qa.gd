@@ -115,8 +115,11 @@ func _run() -> void:
     if left == null or right == null or left.global_position.z <= right.global_position.z:
         _fail("Casino exit markers must be physically arranged left / right")
         return
-    if not state.round_ready or loop.get_node_or_null("GameHUD") == null:
-        _fail("Gameplay HUD and first random round were not initialized")
+    if not state.round_ready or loop.get_node_or_null("GameHUD") != null:
+        _fail("First round must be ready without a persistent gameplay HUD")
+        return
+    if scene.get_node_or_null("StreamingPortals/InitialEntryCap/SolidDoor_Collision") == null:
+        _fail("First hall entrance is open to the void")
         return
     if scene.get_node_or_null("Player/Camera3D") == null:
         _fail("Player camera was lost after starting a run")

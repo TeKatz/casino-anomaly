@@ -25,7 +25,7 @@ func _run() -> void:
 
     var saved_sensitivity = settings.get_option("mouse_sensitivity")
     var saved_fov = settings.get_option("fov")
-    var saved_hud = settings.get_option("hud_visible")
+    var saved_language = settings.get_option("language")
     var saved_fps = settings.get_option("fps_limit")
 
     settings.set_option("mouse_sensitivity", 1.35)
@@ -104,12 +104,21 @@ func _run() -> void:
         _fail("Selected settings tab is not highlighted")
         return
 
-    settings.set_option("hud_visible", false)
     var loop := room.get_node_or_null("LoopController")
-    if loop == null or (loop.get_node("GameHUD") as CanvasLayer).visible:
-        _fail("HUD visibility preference is not applied to current run")
+    if loop == null or loop.get_node_or_null("GameHUD") != null:
+        _fail("Gameplay must not expose progress, mistakes, or helper HUD text")
         return
-    settings.set_option("hud_visible", true)
+    subpanel.call("_switch_tab", 3)
+    settings.set_option("language", "de")
+    await process_frame
+    if settings.get_option("language") != "de" or tabs[0].text != "Grafik":
+        _fail("German language choice was not applied to the settings UI")
+        return
+    settings.set_option("language", "en")
+    await process_frame
+    if settings.get_option("language") != "en" or tabs[0].text != "Graphics":
+        _fail("English language choice was not applied without restarting")
+        return
     pause_menu.call("_close_settings")
     pause_menu.call("_resume")
     if paused or bool(pause_menu.get("open")) or pause_menu.visible or current_scene != room:
@@ -118,7 +127,7 @@ func _run() -> void:
 
     settings.set_option("mouse_sensitivity", saved_sensitivity)
     settings.set_option("fov", saved_fov)
-    settings.set_option("hud_visible", saved_hud)
+    settings.set_option("language", saved_language)
     settings.set_option("fps_limit", saved_fps)
     room.queue_free()
     await process_frame

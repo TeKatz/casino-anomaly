@@ -60,15 +60,17 @@ func _update_status() -> void:
 
 func _localize_ui() -> void:
     var stack := $CenterPanel/Content/Stack
-    stack.get_node("Subtitle").text = Loc.t("menu.subtitle", self)
-    for key in ["new_game", "continue", "settings", "preview", "check_updates", "install_update", "quit"]:
-        var node_name := {
-            "new_game": "PlayButton", "continue": "ContinueButton",
-            "settings": "SettingsButton", "preview": "Casino2PreviewButton",
-            "check_updates": "UpdateButton", "install_update": "InstallButton",
-            "quit": "QuitButton"
-        }[key]
-        stack.get_node(node_name).text = Loc.t("menu." + key, self)
+    var subtitle := stack.get_node("Subtitle") as Label
+    subtitle.text = Loc.t("menu.subtitle", self)
+    var buttons := {
+        "new_game": "PlayButton", "continue": "ContinueButton",
+        "settings": "SettingsButton", "preview": "Casino2PreviewButton",
+        "check_updates": "UpdateButton", "install_update": "InstallButton",
+        "quit": "QuitButton"
+    }
+    for key in buttons:
+        var button := stack.get_node(str(buttons[key])) as Button
+        button.text = Loc.t("menu." + key, self)
     $Footnote.text = Loc.t("menu.footnote", self)
     _update_status()
 

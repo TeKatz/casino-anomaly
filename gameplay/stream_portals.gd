@@ -161,8 +161,8 @@ func _build_bent_connector(parent: Node3D, lane: String,
     # Bridge the full thickness of the original exit wall. The threshold
     # sits slightly below the authored floor so it cannot flicker.
     _box(corridor, "DoorwayFloor",
-        Vector3(EXIT_X, -0.115, start_z),
-        Vector3(0.68, 0.23, 2.22), floor_mat, false)
+        Vector3(-46.13, -0.115, start_z),
+        Vector3(0.46, 0.23, 2.22), floor_mat, false)
 
     # Straight first leg, ending flush at the corner's inner edge.
     _box(corridor, "StraightFloor",

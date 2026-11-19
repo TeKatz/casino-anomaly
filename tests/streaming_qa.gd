@@ -63,11 +63,14 @@ func _run() -> void:
             or not entry.has_node("RoofSoffit_Collision"):
         _fail("The old corridor's entrance still leaks into the exterior void")
         return
+    if portal.get_node_or_null("InitialEntryCap/SolidDoor_Collision") == null:
+        _fail("Initial casino is missing a closed entry behind the player")
+        return
     var signs := {}
     for child in architecture.get_children():
-        if child is Label3D and (child.text == "ANOMALIE" or child.text == "NORMAL"):
+        if child is Label3D and (child.text == "ANOMALY" or child.text == "NORMAL"):
             signs[child.text] = child.position.z
-    if signs.size() != 2 or absf(float(signs["ANOMALIE"]) - shape.EXIT_Z_LEFT) > 0.5 \
+    if signs.size() != 2 or absf(float(signs["ANOMALY"]) - shape.EXIT_Z_LEFT) > 0.5 \
             or absf(float(signs["NORMAL"]) - shape.EXIT_Z_RIGHT) > 0.5:
         _fail("The physical left/right door labels disagree with the game's choices")
         return
@@ -77,12 +80,18 @@ func _run() -> void:
             _fail("Missing the separate L-shaped %s corridor" % lane)
             return
         for name in [
-            "StraightFloor", "StraightCeiling", "TurnFloor", "TurnCeiling",
+            "DoorwayFloor", "StraightFloor", "StraightCeiling", "TurnFloor", "TurnCeiling",
             "StraightOuterWall", "StraightInnerWall", "TurnOuterWall", "TurnInnerWall"
         ]:
-            if corridor.get_node_or_null(name) == null                     or corridor.get_node_or_null(name + "_Collision") == null:
+            if corridor.get_node_or_null(name) == null                     or (name != "DoorwayFloor" and corridor.get_node_or_null(name + "_Collision") == null):
                 _fail("%s corridor does not contain collidable %s" % [lane, name])
                 return
+        var side_wall := corridor.get_node("TurnOuterWall") as MeshInstance3D
+        var wall_box := side_wall.mesh as BoxMesh
+        var wall_end: float = side_wall.position.z + shape.lane_sign(lane) * wall_box.size.z * 0.5
+        if absf(wall_end - (shape.end_z(lane) - shape.lane_sign(lane) * 0.63)) > 0.02:
+            _fail("Corridor wall crosses the next room's sleeve: " + lane)
+            return
         if corridor.has_node("OneWayGate"):
             _fail("Departure was locked before the player made a decision")
             return
@@ -115,6 +124,9 @@ func _run() -> void:
     var second := controller.get("staged") as Node3D
     if second == null or second == first or second.get_parent() != root:
         _fail("The next independent hall was not preloaded")
+        return
+    if second.has_node("StreamingPortals/InitialEntryCap"):
+        _fail("Staged rooms must NOT seal their arrival doors")
         return
     if second.has_node("Player") or second.has_node("LoopController"):
         _fail("Standby hall generated a second player or controller")
