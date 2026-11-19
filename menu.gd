@@ -1,5 +1,8 @@
 extends Control
 
+const SettingsPanel = preload("res://ui/settings_panel.gd")
+var settings_overlay: Control
+
 const UPDATE_MANIFEST_URL := "https://github.com/TeKatz/casino-anomaly/releases/download/development/update-manifest.json"
 
 @onready var status_label: Label = $CenterPanel/Content/Stack/StatusLabel
@@ -24,6 +27,8 @@ func _ready() -> void:
     $CenterPanel/Content/Stack/PlayButton.pressed.connect(_on_play)
     $CenterPanel/Content/Stack/ContinueButton.pressed.connect(_on_continue)
     $CenterPanel/Content/Stack/Casino2PreviewButton.pressed.connect(_on_preview)
+    $CenterPanel/Content/Stack/SettingsButton.pressed.connect(_open_settings)
+    _create_settings_overlay()
     $CenterPanel/Content/Stack/QuitButton.pressed.connect(_on_quit)
     update_button.pressed.connect(_check_update)
     install_button.pressed.connect(_install_update)
@@ -46,6 +51,34 @@ func _on_continue() -> void:
     get_tree().change_scene_to_file(
         "res://main.tscn" if state.tutorial_done else "res://gameplay/tutorial.tscn"
     )
+
+
+func _create_settings_overlay() -> void:
+    settings_overlay = Control.new()
+    settings_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+    add_child(settings_overlay)
+    var shade := ColorRect.new()
+    shade.color = Color(0.01, 0.014, 0.019, 0.88)
+    shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+    settings_overlay.add_child(shade)
+    var center := CenterContainer.new()
+    center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+    settings_overlay.add_child(center)
+    var panel := SettingsPanel.new()
+    panel.back_pressed.connect(func() -> void: settings_overlay.visible = false)
+    center.add_child(panel)
+    settings_overlay.visible = false
+
+
+func _open_settings() -> void:
+    settings_overlay.visible = true
+
+
+func _unhandled_input(event: InputEvent) -> void:
+    if settings_overlay != null and settings_overlay.visible and event is InputEventKey \
+            and event.pressed and event.keycode == KEY_ESCAPE:
+        settings_overlay.visible = false
+        get_viewport().set_input_as_handled()
 
 
 func _on_preview() -> void:
