@@ -21,6 +21,13 @@ func _fail(message: String) -> void:
     quit(1)
 
 
+# Godot 4.5 names this property light_bake_mode, not bake_mode.
+# Kept in a helper so headless regression tests exercise the exact code
+# executed when baking real lights on a developer's GPU.
+static func configure_baked_light(light: Light3D) -> void:
+    light.light_bake_mode = Light3D.BAKE_STATIC
+
+
 func _emissive_proxy(parent: Node3D, label: String, pos: Vector3,
         size: Vector3, color: Color, energy: float) -> void:
     # The actual 3-cm cove is thinner than a voxel. Bake-only, thicker
@@ -88,7 +95,7 @@ func _bake() -> void:
                 and instance.gi_mode != GeometryInstance3D.GI_MODE_DISABLED:
             instance.gi_mode = GeometryInstance3D.GI_MODE_STATIC
     for light in hall.find_children("*", "Light3D", true, false):
-        (light as Light3D).bake_mode = Light3D.BAKE_STATIC
+        configure_baked_light(light as Light3D)
     await process_frame
 
     var rig := hall.get_node_or_null("VoxelGIRig") as Node3D

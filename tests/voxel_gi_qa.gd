@@ -22,6 +22,16 @@ func _run() -> void:
     if settings == null:
         _fail("No settings singleton")
         return
+    # Catch invalid Light3D property names even though CI cannot run
+    # GPU-backed VoxelGI.bake(). This executes the same helper as the
+    # developer-facing offline bake script.
+    var test_light := OmniLight3D.new()
+    BAKE_SCRIPT.configure_baked_light(test_light)
+    if test_light.light_bake_mode != Light3D.BAKE_STATIC:
+        test_light.free()
+        _fail("VoxelGI baking must set light_bake_mode to BAKE_STATIC")
+        return
+    test_light.free()
     var previous: bool = bool(settings.get_option("voxel_gi"))
     settings.set_option("voxel_gi", true)
     var room := ROOM.instantiate() as Node3D
