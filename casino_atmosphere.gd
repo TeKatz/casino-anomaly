@@ -28,6 +28,7 @@ func _build() -> void:
     set_meta("ambient_fx_only", true)
     _ensure_reflection_probes()
     _ensure_bar_fill_lights()
+    _ensure_practical_lights()
     if not has_node("EntrySignTop"):
         _architecture()
         _spot("CatHighlight", Vector3(-8.45, 4.7, -3.25),
@@ -47,6 +48,170 @@ func _build() -> void:
     _slots()
     _plants()
     _dust()
+
+
+func _ensure_practical_lights() -> void:
+    # Emissive materials and SSIL alone do not emit dependable realtime
+    # light into nearby meshes. These actual lights connect the glowing
+    # architecture with the surrounding wood, tables and floor.
+    _ensure_table_key_lights()
+    _ensure_neon_wall_washes()
+    _ensure_neon_sign_spills()
+
+
+func _ensure_table_key_lights() -> void:
+    var tables := get_parent().get_node_or_null("GamingTables") as Node3D
+    if tables == null:
+        return
+    for table_node in tables.get_children():
+        var table := table_node as Node3D
+        if table == null:
+            continue
+        if not (table.name.begins_with("Roulette") or
+                table.name.begins_with("Blackjack") or
+                table.name.begins_with("Cards")):
+            continue
+        # The small ceiling downlights are placed above the six existing
+        # tables, with the light source INSIDE the room, below the ceiling.
+        var name := "TableKey_" + str(table.name)
+        if not has_node(name):
+            var lamp := SpotLight3D.new()
+            lamp.name = name
+            lamp.position = table.position + Vector3(0.52, 5.72, 0.34)
+            lamp.light_color = Color("#ffdda8")
+            lamp.light_energy = 2.1
+            lamp.spot_range = 6.25
+            lamp.spot_angle = 33.0
+            lamp.spot_attenuation = 1.30
+            lamp.light_specular = 0.88
+            lamp.light_size = 0.15
+            lamp.shadow_enabled = true
+            lamp.shadow_opacity = 0.90
+            lamp.shadow_bias = 0.025
+            lamp.shadow_normal_bias = 0.40
+            lamp.shadow_blur = 1.1
+            lamp.light_volumetric_fog_energy = 0.12
+            # Expensive shadows are relevant to the nearby player, not to
+            # tables forty meters down the long corridor.
+            lamp.distance_fade_enabled = true
+            lamp.distance_fade_begin = 18.0
+            lamp.distance_fade_length = 10.0
+            lamp.distance_fade_shadow = 16.0
+            add_child(lamp)
+            lamp.look_at(table.position + Vector3(0.0, 1.03, 0.0), Vector3.UP)
+            _create_recessed_fixture(name, lamp.position)
+        # Ensure the same rendered meshes that form the actual tables and
+        # stools also cast light-dependent shadows on the PBR oak floor.
+        for obj in table.get_children():
+            if obj is MeshInstance3D:
+                (obj as MeshInstance3D).cast_shadow = (
+                    GeometryInstance3D.SHADOW_CASTING_SETTING_ON)
+
+
+func _create_recessed_fixture(light_name: String, light_pos: Vector3) -> void:
+    var label := "Fixture_" + light_name
+    if has_node(label):
+        return
+    # Thin recessed brass bezel, not a floating white lamp.
+    var ring := MeshInstance3D.new()
+    ring.name = label
+    var ring_mesh := CylinderMesh.new()
+    ring_mesh.top_radius = 0.135
+    ring_mesh.bottom_radius = 0.135
+    ring_mesh.height = 0.018
+    ring_mesh.radial_segments = 16
+    ring.mesh = ring_mesh
+    ring.position = Vector3(light_pos.x, 5.936, light_pos.z)
+    var ring_mat := StandardMaterial3D.new()
+    ring_mat.albedo_color = Color("#654b34")
+    ring_mat.metallic = 0.70
+    ring_mat.roughness = 0.43
+    ring.material_override = ring_mat
+    ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+    add_child(ring)
+    var diode := MeshInstance3D.new()
+    diode.name = "Diode"
+    var face := CylinderMesh.new()
+    face.top_radius = 0.092
+    face.bottom_radius = 0.092
+    face.height = 0.01
+    face.radial_segments = 16
+    diode.mesh = face
+    diode.position = Vector3(0, -0.013, 0)
+    var glow := StandardMaterial3D.new()
+    glow.albedo_color = Color("#c19b68")
+    glow.emission_enabled = true
+    glow.emission = Color("#ffdba6")
+    glow.emission_energy_multiplier = 1.4
+    diode.material_override = glow
+    diode.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+    ring.add_child(diode)
+
+
+func _ensure_neon_wall_washes() -> void:
+    # Cove strips follow the two wings. Downward-directed spots produce
+    # a warm gradient on wall panels and nearby floor, not broad ambient fill.
+    # Their low cost and camera-distance fade preserve streaming performance.
+    for z in [11.0, 5.0, -1.0, -7.0]:
+        _wall_wash("East_%d" % int(z), Vector3(5.58, 5.34, z),
+            Vector3(5.96, 3.45, z))
+    for z in [11.0, 6.0, 1.0]:
+        _wall_wash("Entry_%d" % int(z), Vector3(-5.58, 5.34, z),
+            Vector3(-5.96, 3.45, z))
+    for x in [-10.0, -16.0, -22.0, -28.0, -34.0, -40.0]:
+        _wall_wash("North_%d" % int(x), Vector3(x, 5.34, -12.55),
+            Vector3(x, 3.45, -12.96))
+        _wall_wash("South_%d" % int(x), Vector3(x, 5.34, -0.48),
+            Vector3(x, 3.45, -0.07))
+
+
+func _wall_wash(label: String, origin: Vector3, target: Vector3) -> void:
+    var node_name := "NeonWallWash_" + label
+    if has_node(node_name):
+        return
+    var lamp := SpotLight3D.new()
+    lamp.name = node_name
+    lamp.position = origin
+    lamp.light_color = Color("#ffce7d")
+    lamp.light_energy = 0.66
+    lamp.spot_range = 4.9
+    lamp.spot_angle = 48.0
+    lamp.spot_attenuation = 1.55
+    lamp.light_specular = 0.62
+    lamp.light_volumetric_fog_energy = 0.0
+    lamp.shadow_enabled = false
+    lamp.distance_fade_enabled = true
+    lamp.distance_fade_begin = 19.0
+    lamp.distance_fade_length = 9.0
+    add_child(lamp)
+    lamp.look_at(target, Vector3.UP)
+
+
+func _ensure_neon_sign_spills() -> void:
+    # Cyan sign bleeds onto the bottle wall; warm entrance sign projects
+    # matching gold light. Neither introduces extra shadow-map passes.
+    _neon_sign_light("BarSignSpill", Vector3(-2.33, 4.45, -11.94),
+        CYAN, 0.70, 3.25)
+    _neon_sign_light("EntrySignSpill", Vector3(0, 4.02, 13.32),
+        GOLD, 0.55, 3.15)
+
+
+func _neon_sign_light(label: String, at: Vector3, tint: Color,
+        energy: float, reach: float) -> void:
+    if has_node(label):
+        return
+    var lamp := OmniLight3D.new()
+    lamp.name = label
+    lamp.position = at
+    lamp.light_color = tint
+    lamp.light_energy = energy
+    lamp.omni_range = reach
+    lamp.omni_attenuation = 1.7
+    lamp.light_specular = 0.7
+    lamp.light_volumetric_fog_energy = 0.0
+    lamp.shadow_enabled = false
+    add_child(lamp)
+
 
 func _ensure_reflection_probes() -> void:
     # Some PackedScene imports skip a hand-added first probe. Re-create only
@@ -201,8 +366,8 @@ func _slots() -> void:
             light.name = "SlotSpill%02d" % i
             light.position = unit.position + unit.transform.basis * Vector3(0, 1.55, 0.70)
             light.light_color = material.emission.lerp(WARM, 0.3)
-            light.light_energy = 0.18
-            light.omni_range = 2.25
+            light.light_energy = 0.29
+            light.omni_range = 2.60
             # Animated slot washes should not smear through fog reprojection.
             light.light_volumetric_fog_energy = 0.0
             light.shadow_enabled = false
@@ -280,8 +445,8 @@ func _process(delta: float) -> void:
         slot_glows[i].emission_energy_multiplier = 1.85 + (
             0.20 * sin(elapsed * 1.1 + slot_phases[i]))
     for i in range(slot_spills.size()):
-        slot_spills[i].light_energy = 0.18 + (
-            0.035 * sin(elapsed * 1.1 + float(i) * 1.44))
+        slot_spills[i].light_energy = 0.29 + (
+            0.04 * sin(elapsed * 1.1 + float(i) * 1.44))
     for i in range(signs.size()):
         signs[i].emission_energy_multiplier = (
             (1.6 if i == 0 else 1.32) +

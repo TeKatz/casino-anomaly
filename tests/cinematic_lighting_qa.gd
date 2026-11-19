@@ -58,6 +58,54 @@ func _run() -> void:
                 or bar_fill.light_volumetric_fog_energy != 0.0:
             _fail("Bar fill washes out the shadows or adds undue cost: " + name)
             return
+    # Every playable table needs an actual shadow-casting source. Emissive
+    # strips and SSAO alone cannot generate these floor silhouettes.
+    var table_spots := atmosphere.find_children(
+        "TableKey_*", "SpotLight3D", false, false)
+    if table_spots.size() != 6:
+        _fail("Expected six shadow-casting table keys, got %d" % table_spots.size())
+        return
+    for table_spot in table_spots:
+        var key_light := table_spot as SpotLight3D
+        if key_light == null or not key_light.shadow_enabled \
+                or key_light.light_energy < 1.3 \
+                or key_light.spot_range > 7.0 \
+                or not key_light.distance_fade_enabled:
+            _fail("Table lights must create real, local, budgeted shadows")
+            return
+    var gaming := hall.get_node_or_null("GamingTables") as Node3D
+    if gaming == null:
+        _fail("Casino tables are missing")
+        return
+    for table_node in gaming.get_children():
+        if not (table_node.name.begins_with("Roulette") \
+                or table_node.name.begins_with("Blackjack") \
+                or table_node.name.begins_with("Cards")):
+            continue
+        var shadow_caster := table_node.get_node_or_null("TableSupport") as MeshInstance3D
+        if shadow_caster == null or shadow_caster.cast_shadow != \
+                GeometryInstance3D.SHADOW_CASTING_SETTING_ON:
+            _fail("Table geometry does not cast real shadows")
+            return
+
+    var cove_spots := atmosphere.find_children(
+        "NeonWallWash_*", "SpotLight3D", false, false)
+    if cove_spots.size() != 19:
+        _fail("Emissive cove lacks 19 local light sources")
+        return
+    for cove in cove_spots:
+        var wall_light := cove as SpotLight3D
+        if wall_light == null or wall_light.shadow_enabled \
+                or wall_light.spot_range > 5.0 \
+                or not wall_light.distance_fade_enabled:
+            _fail("Cove illumination must stay directional and efficient")
+            return
+    for sign_name in ["BarSignSpill", "EntrySignSpill"]:
+        var sign_light := atmosphere.get_node_or_null(sign_name) as OmniLight3D
+        if sign_light == null or sign_light.light_energy <= 0.4 \
+                or sign_light.shadow_enabled:
+            _fail("Glowing signage must illuminate the nearby wall: " + sign_name)
+            return
     var probe_count := 0
     for node in atmosphere.get_children():
         var probe := node as ReflectionProbe
@@ -92,7 +140,7 @@ func _run() -> void:
             shadows += 1
         if lamp.light_energy > 0.8:
             bright += 1
-    if bright < 4 or shadows < 2:
+    if bright < 4 or shadows < 4:
         _fail("Need readable, shadow-casting light pools between casino bays")
         return
     var parent_lamps := hall.get_node_or_null("ModelInteriors") as Node3D

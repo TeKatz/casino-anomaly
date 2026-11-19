@@ -25,9 +25,14 @@ func _run() -> void:
         return
     # The room is editable: artist-removed or artist-added spotlights
     # are valid. Check only runaway counts and broken light resources.
-    var display_spots := fx.find_children("*", "SpotLight3D", true, false)
-    if display_spots.size() > 16:
-        push_error("Too many display spotlights (%d > 16)" % display_spots.size())
+    var all_spots := fx.find_children("*", "SpotLight3D", true, false)
+    var display_spots: Array[Node] = []
+    for spot in all_spots:
+        if not (spot.name.begins_with("TableKey_") \
+                or spot.name.begins_with("NeonWallWash_")):
+            display_spots.append(spot)
+    if display_spots.size() > 16 or all_spots.size() > 45:
+        push_error("Casino spotlight budgets exceeded")
         quit(1)
         return
     for spot in display_spots:

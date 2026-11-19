@@ -65,7 +65,7 @@ func _run() -> void:
     stool.position += Vector3(-0.25, 0, 0)
     (fx.get_node("EntrySignTop") as Node3D).position += Vector3(0, 0.10, 0)
     var models_before := models.get_child_count()
-    var fx_static_before := fx.find_children("*", "SpotLight3D", true, false).size()
+    var fx_static_before := fx.find_children("*Highlight", "SpotLight3D", true, false).size()
     root.add_child(world)
     await process_frame
     await process_frame
@@ -73,8 +73,10 @@ func _run() -> void:
     if not plant.position.is_equal_approx(original_plant + Vector3(0.25, 0, 0))             or not stool.position.is_equal_approx(original_stool + Vector3(-0.25, 0, 0))             or not (fx.get_node("EntrySignTop") as Node3D).position.is_equal_approx(original_neon + Vector3(0, 0.10, 0)):
         _fail("Runtime generator overwrote designer edits")
         return
-    if fx.find_children("*", "SpotLight3D", true, false).size() != fx_static_before:
-        _fail("Duplicate spotlights were spawned")
+    # Gameplay may add new practical spots for table shadows and neon; the
+    # previously-authored display highlights must never be duplicated.
+    if fx.find_children("*Highlight", "SpotLight3D", true, false).size() != fx_static_before:
+        _fail("Designer-authored display spotlights were duplicated")
         return
     if models.get_child_count() != models_before:
         _fail("Duplicate saved model support/placement nodes were spawned")

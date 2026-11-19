@@ -12568,6 +12568,15 @@ shadow_bias = 0.055
 shadow_blur = 1.1
 omni_range = 6.35
 light_specular = 0.75
+shadow_enabled = true
+shadow_bias = 0.043
+shadow_normal_bias = 0.48
+shadow_blur = 1.15
+distance_fade_enabled = true
+distance_fade_begin = 21.0
+distance_fade_length = 9.0
+distance_fade_shadow = 16.0
+
 [node name="WarmCasinoLamp_07" type="OmniLight3D" parent="Lighting"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35, 3.3078485, -6)
 light_color = Color(1, 0.854902, 0.654902, 1)
@@ -12577,6 +12586,15 @@ shadow_bias = 0.055
 shadow_blur = 1.1
 omni_range = 6.35
 light_specular = 0.75
+shadow_enabled = true
+shadow_bias = 0.043
+shadow_normal_bias = 0.48
+shadow_blur = 1.15
+distance_fade_enabled = true
+distance_fade_begin = 21.0
+distance_fade_length = 9.0
+distance_fade_shadow = 16.0
+
 [node name="WarmCasinoLamp_09" type="OmniLight3D" parent="Lighting"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.3607187, 4.9637866, -13.02405)
 light_color = Color(0.7176471, 1, 1, 1)
