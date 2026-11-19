@@ -85,16 +85,31 @@ func _run() -> void:
     if gaming == null:
         _fail("Casino tables are missing")
         return
-    # Aimed at the floor from the aisle, not straight down where the
-    # tabletop obscures its own supports/seat shadows.
-    var first_table := gaming.get_node_or_null("Roulette2") as Node3D
-    var first_key := atmosphere.get_node_or_null("TableKey_Roulette2") as SpotLight3D
-    if first_table == null or first_key == null:
-        _fail("Missing near-table key/geometry")
-        return
-    if first_key.position.z - first_table.position.z < 1.2:
-        _fail("Near-table spotlight must rake in from the aisle")
-        return
+    # The scene may auto-rename duplicate generated nodes. Match each
+    # light to the closest actual table by position, not a hardcoded name.
+    for light_node in table_spots:
+        var key_light := light_node as SpotLight3D
+        var nearest_table: Node3D = null
+        var nearest_distance := INF
+        for table_node in gaming.get_children():
+            var table := table_node as Node3D
+            if table == null or not (table.name.begins_with("Roulette") \
+                    or table.name.begins_with("Blackjack") \
+                    or table.name.begins_with("Cards")):
+                continue
+            var horizontal := Vector2(
+                key_light.position.x - table.position.x,
+                key_light.position.z - table.position.z)
+            if horizontal.length() < nearest_distance:
+                nearest_distance = horizontal.length()
+                nearest_table = table
+        if nearest_table == null or nearest_distance > 2.1:
+            _fail("Table shadow key is not near any playable table")
+            return
+        var aisle_offset: float = key_light.position.z - nearest_table.position.z
+        if absf(aisle_offset) < 1.2:
+            _fail("Table key must rake in from the aisle, not overhead")
+            return
     for table_node in gaming.get_children():
         if not (table_node.name.begins_with("Roulette") \
                 or table_node.name.begins_with("Blackjack") \
