@@ -116,6 +116,17 @@ jobs:
           if ($LASTEXITCODE -ne 0 -or (Get-Content import.log -Raw) -match '(?m)(SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:)') { throw 'Godot import failed' }
           & "$env:GODOT_EDITOR" --headless --path . --script res://tests/smoke.gd 2>&1 | Tee-Object -FilePath smoke.log
           if ($LASTEXITCODE -ne 0 -or (Get-Content smoke.log -Raw) -notmatch 'Casino Anomaly scenes and PBR floor smoke PASS') { throw 'Godot scene smoke failed' }
+          foreach ($spec in @(
+            @('tests/loop_gameplay_qa.gd', 'Casino Anomaly playable tutorial, save and loop gameplay QA PASS'),
+            @('tests/streaming_qa.gd', 'Casino Anomaly seamless two-room streaming QA PASS'),
+            @('tests/settings_pause_qa.gd', 'Casino Anomaly pause, persistent settings and world-camera input QA PASS'),
+            @('tests/localization_intro_qa.gd', 'Casino Anomaly bilingual intro and door interaction QA PASS')
+          )) {
+            $name = $spec[0]
+            $expected = $spec[1]
+            & "$env:GODOT_EDITOR" --headless --path . --script "res://$name" 2>&1 | Tee-Object -FilePath regression.log
+            if ($LASTEXITCODE -ne 0 -or (Get-Content regression.log -Raw) -notmatch [regex]::Escape($expected)) { throw "Godot regression failed: $name" }
+          }
           & "$env:GODOT_EDITOR" --headless --path . --script res://tests/visual_fx_qa.gd 2>&1 | Tee-Object -FilePath visual-fx-qa.log
           if ($LASTEXITCODE -ne 0 -or (Get-Content visual-fx-qa.log -Raw) -notmatch 'Casino Anomaly visual FX QA PASS') { throw 'Visual FX QA failed' }
           & "$env:GODOT_EDITOR" --headless --path . --script res://tests/sketchfab_smoke.gd 2>&1 | Tee-Object -FilePath sketchfab-smoke.log
