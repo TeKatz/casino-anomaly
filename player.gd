@@ -20,7 +20,7 @@ var _step_clock: float = 0.0
 var _breath_clock: float = 0.0
 var _walk_blend: float = 0.0
 var _sprint_toggled := false
-var _options: Node
+var _options: Variant = null
 
 func _ready() -> void:
     _camera_home = camera.position
