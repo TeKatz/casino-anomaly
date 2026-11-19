@@ -56,7 +56,12 @@ func _run() -> void:
             _fail("Probe must be an inexpensive one-shot interior box capture")
             return
     if probe_count != 2:
-        _fail("Expected one reflection capture for each casino wing")
+        var child_names := PackedStringArray()
+        for child in atmosphere.get_children():
+            child_names.append("%s (%s)" % [child.name, child.get_class()])
+        _fail("Expected two ReflectionProbes, got %d. Atmosphere children: %s" % [
+            probe_count, ", ".join(child_names)
+        ])
         return
     var light_rig := hall.get_node_or_null("Lighting") as Node3D
     if light_rig == null:
