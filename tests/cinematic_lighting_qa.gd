@@ -109,7 +109,7 @@ func _run() -> void:
         var table := child as Node3D
         if table == null:
             continue
-        var is_replacement: bool = table.name.begins_with("RouletteTableCabinet") \
+        var is_replacement: bool = str(table.get_meta("furniture_kind", "")) == "roulette_table" \
                 or str(table.get_meta("source_asset", "")) == "blackjack_table"
         if not is_replacement:
             continue
@@ -125,7 +125,14 @@ func _run() -> void:
                 _fail("Imported replacement table disabled its shadow caster")
                 return
     if replacement_count < 4 or actual_tables.size() != 6:
-        _fail("Expected 6 real playable table meshes, including 4 replacements")
+        var notes := PackedStringArray()
+        for child in imported.get_children():
+            notes.append("%s[kind=%s,source=%s]" % [child.name,
+                str(child.get_meta("furniture_kind", "")),
+                str(child.get_meta("source_asset", ""))])
+        _fail("Expected 6 actual tables with 4 replacements; got %d/%d. Nodes: %s" % [
+            actual_tables.size(), replacement_count, ", ".join(notes)
+        ])
         return
     for light_node in table_spots:
         var key_light := light_node as SpotLight3D
