@@ -102,6 +102,15 @@ func _physics_process(delta: float) -> void:
         axis.x += 1.0
     # Movement MUST be world-space relative to the live view.
     # Reparenting to a hall rotated by 180 degrees must not reverse WASD.
+    var direction := _movement_direction(axis)
+    var sprint := _sprint_toggled if str(_setting("sprint_mode", "hold")) == "toggle" \
+        else Input.is_physical_key_pressed(KEY_SHIFT)
+    var speed := SPRINT_SPEED if sprint else WALK_SPEED
+    velocity.x = direction.x * speed
+    velocity.z = direction.z * speed
+    move_and_slide()
+
+func _movement_direction(axis: Vector2) -> Vector3:
     var camera_basis := camera.global_transform.basis
     var right := camera_basis.x
     right.y = 0.0
@@ -109,13 +118,8 @@ func _physics_process(delta: float) -> void:
     var forward := -camera_basis.z
     forward.y = 0.0
     forward = forward.normalized()
-    var direction := (right * axis.x - forward * axis.y).normalized()
-    var sprint := _sprint_toggled if str(_setting("sprint_mode", "hold")) == "toggle" \
-        else Input.is_physical_key_pressed(KEY_SHIFT)
-    var speed := SPRINT_SPEED if sprint else WALK_SPEED
-    velocity.x = direction.x * speed
-    velocity.z = direction.z * speed
-    move_and_slide()
+    return (right * axis.x - forward * axis.y).normalized()
+
 
 func _exit_tree() -> void:
     Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
