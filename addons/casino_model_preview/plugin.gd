@@ -2,6 +2,7 @@
 extends EditorPlugin
 
 const SketchfabImport = preload("res://addons/casino_model_preview/asset_installer.gd")
+const BAKE_MENU_NAME := "Casino: Importierte Modelle bearbeitbar machen"
 var _waiting_for_model_import := false
 var _model_import_refresh_pending := false
 ## Guard the authored main.tscn when the in-editor Sketchfab preview hides
@@ -12,6 +13,7 @@ var _pending_restore: WeakRef
 
 
 func _enter_tree() -> void:
+    add_tool_menu_item(BAKE_MENU_NAME, _make_imported_models_editable)
     scene_saved.connect(_on_scene_saved)
     scene_changed.connect(_on_scene_changed)
     var fs := EditorInterface.get_resource_filesystem()
@@ -22,6 +24,7 @@ func _enter_tree() -> void:
 
 
 func _exit_tree() -> void:
+    remove_tool_menu_item(BAKE_MENU_NAME)
     if scene_saved.is_connected(_on_scene_saved):
         scene_saved.disconnect(_on_scene_saved)
     if scene_changed.is_connected(_on_scene_changed):
@@ -58,6 +61,33 @@ func _ensure_local_editor_models() -> void:
             _request_editor_scan()
         else:
             _refresh_edited_preview()
+
+
+## One-time conversion: replaces ownerless, unselectable previews with true
+## instances owned by main.tscn. Future editor and runtime sessions reuse them.
+func _make_imported_models_editable() -> void:
+    var root := EditorInterface.get_edited_scene_root()
+    if root == null or root.scene_file_path != "res://main.tscn":
+        push_warning("Casino: open main.tscn before converting imported models.")
+        return
+    if not _all_scenes_imported():
+        push_warning("Casino: wait until the imported Sketchfab models are available, then retry.")
+        return
+    var sketchfab := root.get_node_or_null("SketchfabFurniture")
+    if sketchfab == null or not sketchfab.has_method("bake_editable_models") \
+            or not bool(sketchfab.call("bake_editable_models")):
+        push_warning("Casino: Sketchfab furniture could not be converted.")
+        return
+    var model_layer := root.get_node_or_null("ModelInteriors")
+    var converted := 0
+    if model_layer != null:
+        for marker in model_layer.get_children():
+            if marker.has_method("bake_editable_model") \
+                    and bool(marker.call("bake_editable_model", root)):
+                converted += 1
+    EditorInterface.mark_scene_as_unsaved()
+    print("Casino: Sketchfab furniture and ", converted,
+        " Poly Haven instances are now editable. Save main.tscn (Ctrl+S).")
 
 
 func _request_editor_scan() -> void:
