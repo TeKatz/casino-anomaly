@@ -87,6 +87,11 @@ func _apply_visibility() -> void:
     for item in get_children():
         if item is VoxelGI:
             (item as VoxelGI).visible = enabled
+    # The neon fallback must respond to a completed GI load or an option
+    # change immediately, not after the next half-second polling interval.
+    var atmosphere := get_parent().get_node_or_null("CasinoAtmosphere") as Node3D
+    if atmosphere != null and atmosphere.has_method("_sync_hybrid_lights"):
+        atmosphere.call_deferred("_sync_hybrid_lights")
 
 
 func has_complete_bake() -> bool:
