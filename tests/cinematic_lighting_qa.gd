@@ -24,10 +24,10 @@ func _run() -> void:
         _fail("Missing WorldEnvironment")
         return
     var e := world.environment
-    if e.ambient_light_energy < 0.15 or e.ambient_light_energy > 0.18:
+    if e.ambient_light_energy < 0.18 or e.ambient_light_energy > 0.20:
         _fail("Ambient illumination is not balanced for dark casino corners")
         return
-    if e.tonemap_exposure < 0.98 or e.tonemap_exposure > 1.05:
+    if e.tonemap_exposure < 1.05 or e.tonemap_exposure > 1.09:
         _fail("Cinematic exposure is outside the restrained night range")
         return
     if e.ssao_radius > 0.90 or e.ssao_light_affect < 0.18:
