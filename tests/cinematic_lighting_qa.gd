@@ -69,15 +69,29 @@ func _run() -> void:
         var key_light := table_spot as SpotLight3D
         if key_light == null or not key_light.shadow_enabled \
                 or key_light.light_energy < 1.3 \
-                or key_light.spot_range < 7.0 \
-                or key_light.spot_range > 7.6 \
+                or key_light.spot_range < 8.0 \
+                or key_light.spot_range > 8.5 \
                 or key_light.shadow_normal_bias > 0.18 \
                 or key_light.shadow_blur > 0.6 \
-                or key_light.distance_fade_shadow < 21.0 \
+                or key_light.shadow_opacity < 0.99 \
+                or key_light.distance_fade_shadow < 27.0 \
                 or not key_light.distance_fade_enabled:
             _fail("Table lights must create real, local, budgeted shadows")
             return
     var gaming := hall.get_node_or_null("GamingTables") as Node3D
+    if table_spots.size() >= 2:
+        # Aimed at the floor from the aisle, not straight down where the
+        # tabletop occludes its own support/seat shadows.
+        var test_key := table_spots[0] as SpotLight3D
+        var first_table := gaming.get_node_or_null("Roulette2") as Node3D
+        if first_table == null or test_key == null:
+            _fail("Missing near-table key/geometry")
+            return
+        var key_pos: Vector3 = test_key.position
+        var near_table_z: float = (atmosphere.get_node("TableKey_Roulette2") as SpotLight3D).position.z
+        if near_table_z - first_table.position.z < 1.2:
+            _fail("Near-table spotlight must rake in from the aisle")
+            return
     if gaming == null:
         _fail("Casino tables are missing")
         return
@@ -118,13 +132,13 @@ func _run() -> void:
             return
     var furniture_fills := atmosphere.find_children(
         "FurnitureFill_*", "OmniLight3D", false, false)
-    if furniture_fills.size() != 12:
-        _fail("Need local lower-floor and bar furniture readability")
+    if furniture_fills.size() != 23:
+        _fail("Need local lower-floor, gaming wall and bar furniture readability")
         return
     for fill in furniture_fills:
         var light := fill as OmniLight3D
         if light == null or light.shadow_enabled or light.light_energy > 0.4 \
-                or light.omni_range > 4.5 \
+                or light.omni_range > 4.9 \
                 or light.light_volumetric_fog_energy > 0.0 \
                 or not light.distance_fade_enabled:
             _fail("Furniture fill must stay gentle and cheap")

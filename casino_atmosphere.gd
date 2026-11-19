@@ -64,6 +64,7 @@ func _ensure_practical_lights() -> void:
     _ensure_neon_strip_fills()
     _ensure_neon_sign_spills()
     _ensure_furniture_fills()
+    _ensure_lower_wall_fills()
     _sync_hybrid_lights()
 
 
@@ -87,31 +88,33 @@ func _ensure_table_key_lights() -> void:
             lamp.name = name
             # Centered over the table for predictable tabletop and floor
             # silhouettes; the previous offset and huge bias washed them out.
-            lamp.position = table.position + Vector3(0.0, 5.60, 0.0)
+            # Lighting from dead center hides every chair/leg silhouette
+            # directly beneath the rim. Put the source toward the aisle.
+            var aisle_z := 1.55 if table.position.z < -6.0 else -1.55
+            lamp.position = table.position + Vector3(0.40, 5.45, aisle_z)
             lamp.light_color = Color("#ffdda8")
-            # The beam must reach PAST the oak floor (5.6 m below the
-            # source), otherwise attenuation extinguishes floor shadows
-            # before the light gets to the table legs.
-            lamp.light_energy = 2.30
-            lamp.spot_range = 7.35
-            lamp.spot_angle = 29.0
-            lamp.spot_attenuation = 1.42
+            # Raking down from the aisle lets floor silhouettes extend
+            # beyond the tabletop. The full falloff range clears the floor.
+            lamp.light_energy = 2.65
+            lamp.spot_range = 8.25
+            lamp.spot_angle = 34.0
+            lamp.spot_attenuation = 1.05
             lamp.light_specular = 0.88
-            lamp.light_size = 0.15
+            lamp.light_size = 0.035
             lamp.shadow_enabled = true
-            lamp.shadow_opacity = 0.90
+            lamp.shadow_opacity = 1.0
             lamp.shadow_bias = 0.014
-            lamp.shadow_normal_bias = 0.12
-            lamp.shadow_blur = 0.46
+            lamp.shadow_normal_bias = 0.10
+            lamp.shadow_blur = 0.38
             lamp.light_volumetric_fog_energy = 0.12
             # Expensive shadows are relevant to the nearby player, not to
             # tables forty meters down the long corridor.
             lamp.distance_fade_enabled = true
-            lamp.distance_fade_begin = 25.0
-            lamp.distance_fade_length = 10.0
-            lamp.distance_fade_shadow = 23.0
+            lamp.distance_fade_begin = 29.0
+            lamp.distance_fade_length = 8.0
+            lamp.distance_fade_shadow = 28.0
             add_child(lamp)
-            lamp.look_at(table.position + Vector3(0.0, 1.03, 0.0), Vector3.UP)
+            lamp.look_at(table.position + Vector3(0.0, 0.42, 0.0), Vector3.UP)
             _create_recessed_fixture(name, lamp.position)
         # Ensure the same rendered meshes that form the actual tables and
         # stools also cast light-dependent shadows on the PBR oak floor.
@@ -225,6 +228,25 @@ func _ensure_furniture_fills() -> void:
         _furniture_fill("Aisle_%02d" % index,
             Vector3(-11.5 - float(index) * 14.1, 1.83, -6.35),
             Color("#dfb99b"), 0.17, 4.4)
+
+
+func _ensure_lower_wall_fills() -> void:
+    # The cove lights the UPPER green wall, but the game objects live at
+    # eye/floor level. These low, very weak warm fills reveal the gaming
+    # wall and distant corners without flattening the shadowed aisle.
+    for index in range(6):
+        var x := -10.5 - float(index) * 6.9
+        _furniture_fill("GameWall_%02d" % index,
+            Vector3(x, 1.95, -11.58),
+            Color("#e2b58b"), 0.37, 4.75)
+    for index in range(3):
+        _furniture_fill("LoungeWall_%02d" % index,
+            Vector3(-15.5 - float(index) * 13.0, 1.85, -1.25),
+            Color("#ddba9d"), 0.31, 4.35)
+    _furniture_fill("FarGameCorner", Vector3(-44.2, 1.90, -11.15),
+        Color("#e0b18a"), 0.39, 4.65)
+    _furniture_fill("FarLoungeCorner", Vector3(-43.7, 1.90, -1.12),
+        Color("#ddba9d"), 0.37, 4.50)
 
 
 func _furniture_fill(label: String, at: Vector3, tint: Color,
