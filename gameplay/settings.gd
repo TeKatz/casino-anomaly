@@ -108,7 +108,7 @@ func apply_options() -> void:
     viewport.use_taa = bool(get_option("taa"))
     _ensure_audio_buses()
     for volume_key in ["master_volume", "music_volume", "sfx_volume", "ui_volume"]:
-        var bus_name := "Master" if volume_key == "master_volume" else volume_key.trim_suffix("_volume").to_upper()
+        var bus_name: String = "Master" if volume_key == "master_volume" else str(volume_key).trim_suffix("_volume").to_upper()
         var bus_idx := AudioServer.get_bus_index(bus_name)
         if bus_idx >= 0:
             var volume := float(get_option(volume_key))
