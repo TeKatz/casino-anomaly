@@ -86,8 +86,13 @@ func _run() -> void:
     if pillars < 20:
         _bad("Missing pillar veneer")
         return
+    # Converted editor scenes keep the same cabinets under a permanent
+    # authoring group instead of spawning them directly under the script.
+    var roulette_models := roulette.get_node_or_null("EditableImportedModels") as Node3D
+    if roulette_models == null:
+        roulette_models = roulette
     var roulette_tables := 0
-    for item in roulette.get_children():
+    for item in roulette_models.get_children():
         if item.get_meta("furniture_kind", "") == "roulette_table":
             roulette_tables += 1
             var top: MeshInstance3D = item.get_node_or_null("SolidTableTop") as MeshInstance3D
