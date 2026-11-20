@@ -9,6 +9,7 @@ extends Node3D
 
 const DemoAnomalies = preload("res://gameplay/demo_anomalies.gd")
 const NeonLevelSign = preload("res://gameplay/neon_level_sign.gd")
+const AnomalyDevMenu = preload("res://ui/anomaly_dev_menu.gd")
 const StreamPortals = preload("res://gameplay/stream_portals.gd")
 const Loc = preload("res://gameplay/localization.gd")
 const ROOM = preload("res://main.tscn")
@@ -71,6 +72,47 @@ func _ready() -> void:
     state.prepare_round(available)
     demo.apply(room, str(state.anomaly_id))
     _update_level_sign(room, int(state.correct_streak), false)
+    # Parent to the persistent player so the developer overlay follows all
+    # no-teleport room handoffs without ever appearing in the normal HUD.
+    if player.get_node_or_null("AnomalyDevMenu") == null:
+        var dev_menu := AnomalyDevMenu.new()
+        dev_menu.name = "AnomalyDevMenu"
+        player.add_child(dev_menu)
+
+
+func debug_available_ids() -> Array[String]:
+    var target_room := staged if staged != null and is_instance_valid(staged) else room
+    return demo.available_ids(target_room)
+
+
+func debug_select_next_anomaly(id: String) -> bool:
+    if won or finishing or transitioning:
+        return false
+    var state = get_node_or_null("/root/LoopState")
+    if state == null:
+        return false
+    var available := debug_available_ids()
+    if choice_taken:
+        # The next room has already been populated. Replace its effect and
+        # saved verdict together, without mutating the current casino room.
+        if not state.debug_replace_prepared_round(id, available):
+            return false
+        return demo.apply(staged, id)
+    return state.debug_queue_next_round(id, available)
+
+
+func debug_restore_random() -> bool:
+    if won or finishing or transitioning:
+        return false
+    var state = get_node_or_null("/root/LoopState")
+    if state == null:
+        return false
+    if choice_taken:
+        if not state.debug_reroll_prepared_round(debug_available_ids()):
+            return false
+        return demo.apply(staged, str(state.anomaly_id))
+    state.debug_clear_next_round()
+    return true
 
 
 func _exit_tree() -> void:

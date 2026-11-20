@@ -123,6 +123,10 @@ func _refresh_localization() -> void:
 
 
 func _input(event: InputEvent) -> void:
+    # Do not open the normal pause overlay on top of the private G menu.
+    var dev_menu := get_parent().get_node_or_null("AnomalyDevMenu")
+    if dev_menu != null and dev_menu.visible:
+        return
     if event is InputEventKey and event.pressed and not event.echo             and event.keycode == KEY_ESCAPE:
         if confirmation.visible:
             confirmation.hide()
