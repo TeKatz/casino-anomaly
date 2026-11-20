@@ -15,7 +15,25 @@ var _preview: Node3D
 
 func _ready() -> void:
     if Engine.is_editor_hint():
-        call_deferred("_create_preview")
+        if has_node("EditableImportedModel"):
+            call_deferred("_sync_authored_variant")
+        else:
+            call_deferred("_create_preview")
+
+
+## The editable instance is the complete imported glTF scene. Only the
+## designated variant belongs on this placement marker, just as in runtime.
+## Hide the unused siblings without changing the saved scene or donor asset.
+func _sync_authored_variant() -> void:
+    if not Engine.is_editor_hint() or mesh_variant.is_empty():
+        return
+    var imported := get_node_or_null("EditableImportedModel") as Node3D
+    if imported == null:
+        return
+    for candidate in imported.find_children("*", "MeshInstance3D", true, false):
+        var part := candidate as MeshInstance3D
+        if part.mesh != null:
+            part.visible = part.name.begins_with(mesh_variant)
 
 
 func _create_preview() -> void:
