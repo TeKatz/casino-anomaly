@@ -60,8 +60,14 @@ func _run() -> void:
         return
 
     local.prepare_round(available)
-    if not local.round_ready:
-        _fail("Random round was not prepared")
+    if not local.round_ready or not local.anomaly_id.is_empty():
+        _fail("The first playable casino hall must always be anomaly-free")
+        return
+    # A legacy save with a pre-rolled first anomaly is sanitized as well.
+    local.anomaly_id = "bar_label"
+    local.prepare_round(available)
+    if not local.anomaly_id.is_empty():
+        _fail("The baseline first room can never contain an anomaly")
         return
     var answer_was_anomaly := not local.anomaly_id.is_empty()
     var result: Dictionary = local.decide(answer_was_anomaly)
@@ -83,12 +89,12 @@ func _run() -> void:
         _fail("Continue save does not survive a new state instance")
         return
 
-    restored.correct_streak = 7
+    restored.correct_streak = 11
     restored.anomaly_id = ""
     restored.round_ready = true
     var victory: Dictionary = restored.decide(false)
     if not bool(victory.get("finished", false)) or restored.active or restored.has_continue():
-        _fail("Eight consecutive correct decisions must end the run")
+        _fail("Twelve consecutive correct decisions must end the run")
         return
     DirAccess.remove_absolute(ProjectSettings.globalize_path(local.save_path))
 
@@ -115,8 +121,16 @@ func _run() -> void:
     if left == null or right == null or left.global_position.z <= right.global_position.z:
         _fail("Casino exit markers must be physically arranged left / right")
         return
-    if not state.round_ready or loop.get_node_or_null("GameHUD") != null:
-        _fail("First round must be ready without a persistent gameplay HUD")
+    if not state.round_ready or not state.anomaly_id.is_empty() \
+            or loop.get_node_or_null("GameHUD") != null:
+        _fail("First round must be anomaly-free and have no gameplay HUD")
+        return
+    var progress := scene.get_node_or_null("NeonLevelSign") as Node3D
+    if progress == null or progress.get_node_or_null("NeonGlow") == null \
+            or not (progress.get_node_or_null("Number") is MeshInstance3D) \
+            or not ((progress.get_node("Number") as MeshInstance3D).mesh is TextMesh) \
+            or ((progress.get_node("Number") as MeshInstance3D).mesh as TextMesh).text != "0":
+        _fail("A new run needs a world-space emissive neon zero, not an overlay")
         return
     if scene.get_node_or_null("StreamingPortals/InitialEntryCap/SolidDoor_Collision") == null:
         _fail("First hall entrance is open to the void")
@@ -139,11 +153,42 @@ func _run() -> void:
         _fail("Next hall was not preloaded as a passive playerless instance")
         return
     loop.call("_commit_choice", "left")
-    if state.visited_loops != 1 or not state.round_ready:
-        _fail("Walking through the left doorway did not score and prepare a round")
+    if state.visited_loops != 1 or not state.round_ready or state.correct_streak != 0:
+        _fail("Walking through left in the guaranteed normal first room must reset progress")
+        return
+    var stage_sign := staged.get_node_or_null("NeonLevelSign/Number") as MeshInstance3D
+    if stage_sign == null or (stage_sign.mesh as TextMesh).text != "0":
+        _fail("Next room did not receive the updated diegetic progress")
+        return
+
+    # The same streamed-room path must deliver a real final room at 12.
+    loop.call("_handoff")
+    var second := loop.get("room") as Node3D
+    state.correct_streak = 11
+    state.anomaly_id = ""
+    state.round_ready = true
+    loop.call("_stage_next", "right")
+    loop.call("_commit_choice", "right")
+    if not state.finished or not bool(loop.get("finishing")) \
+            or loop.get_node_or_null("VictoryOverlay") != null:
+        _fail("Victory must trigger on the twelfth decision with no screen-space overlay")
+        return
+    var final_room := loop.get("staged") as Node3D
+    var final_number := final_room.get_node_or_null("NeonLevelSign/Number") as MeshInstance3D
+    var final_caption := final_room.get_node_or_null("NeonLevelSign/CompletionText") as MeshInstance3D
+    if final_number == null or (final_number.mesh as TextMesh).text != "12" \
+            or final_caption == null or (final_caption.mesh as TextMesh).text.is_empty():
+        _fail("The final hall must display its completion in world-space neon")
+        return
+    loop.call("_handoff")
+    if not bool(loop.get("won")) or loop.get("room") != final_room \
+            or final_room.get_node_or_null("StreamingPortals/Connector_Left/OneWayGate_Collision") == null:
+        _fail("Winning must hand off seamlessly into a physically capped final hall")
         return
 
     scene.queue_free()
+    second.queue_free()
+    final_room.queue_free()
     await process_frame
     local.free()
     restored.free()

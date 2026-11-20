@@ -2,7 +2,7 @@ extends Node
 ## Persistent run state. One local save slot for the first playable prototype.
 ## Never writes into res:// or the designer-authored casino scene.
 
-const REQUIRED_CORRECT := 8
+const REQUIRED_CORRECT := 12
 const SAVE_VERSION := 1
 const DEFAULT_SAVE_PATH := "user://anomaly_run.cfg"
 
@@ -51,6 +51,14 @@ func complete_tutorial() -> void:
 func prepare_round(available_anomalies: Array[String]) -> void:
     if not active or finished or not tutorial_done:
         return
+    # The first playable casino room is a guaranteed reference room.
+    # This also sanitizes old/incomplete saves that had already rolled a
+    # random anomaly before this rule was introduced.
+    if visited_loops == 0:
+        anomaly_id = ""
+        round_ready = true
+        save_run()
+        return
     if round_ready and (anomaly_id.is_empty() or available_anomalies.has(anomaly_id)):
         return
     # The 'normal' outcome is a real state with round_ready=true.
@@ -69,6 +77,9 @@ func prepare_round(available_anomalies: Array[String]) -> void:
 func decide(choose_anomaly: bool) -> Dictionary:
     if not active or not tutorial_done or not round_ready or finished:
         return {"valid": false, "correct": false, "finished": false}
+    # Do not allow a legacy first-room save to bypass the safe baseline.
+    if visited_loops == 0:
+        anomaly_id = ""
     var correct := choose_anomaly == not anomaly_id.is_empty()
     visited_loops += 1
     if correct:
@@ -124,6 +135,8 @@ func load_run() -> bool:
     mistakes = maxi(0, int(config.get_value("run", "mistakes", 0)))
     anomaly_id = str(config.get_value("run", "anomaly_id", ""))
     last_anomaly_id = str(config.get_value("run", "last_anomaly_id", ""))
+    if visited_loops == 0 and round_ready:
+        anomaly_id = ""
     if finished:
         active = false
     return true

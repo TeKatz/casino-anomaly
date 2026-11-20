@@ -38,7 +38,7 @@ func _run() -> void:
     var door := intro.get_node_or_null("ExitDoor") as Node3D
     var camera := intro.get_node_or_null("Player/Camera3D") as Camera3D
     var player := intro.get_node_or_null("Player") as CharacterBody3D
-    var prompt := intro.get_node_or_null("DoorInteractionHUD/DoorHint") as Label
+    var prompt := intro.get_node_or_null("ExitDoor/DoorHint") as Label3D
     var leaf := intro.get_node_or_null("ExitDoor/Door") as MeshInstance3D
     if door == null or camera == null or player == null or prompt == null or leaf == null:
         _fail("Starting room is missing the interaction or door")
@@ -48,17 +48,20 @@ func _run() -> void:
         _fail("Starting door must have textured wood, hardware and detailing")
         return
 
+    if intro.get_node_or_null("DoorInteractionHUD") != null or prompt.get_parent() != door:
+        _fail("The intro hint must be a physical label on the door, not a screen HUD")
+        return
     player.position = Vector3(0, 1.02, -2.15)
     camera.look_at(door.global_position + Vector3(0, 1.6, 0), Vector3.UP)
     await process_frame
     if not bool(intro.call("_is_looking_at_door")) or prompt.text != "Press E to start":
-        _fail("English E prompt must appear only while aiming at the nearby door")
+        _fail("English text must appear directly on the start door")
         return
 
     camera.rotate_y(PI)
     await process_frame
-    if bool(intro.call("_is_looking_at_door")) or not prompt.text.is_empty():
-        _fail("Looking away must remove the interaction prompt")
+    if bool(intro.call("_is_looking_at_door")) or prompt.text != "Press E to start":
+        _fail("The world-space door sign should persist, not pop up on gaze")
         return
 
     settings.set_option("language", "de")

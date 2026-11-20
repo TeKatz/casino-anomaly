@@ -8,6 +8,7 @@ extends Node3D
 ## No camera teleports, fades or extra button presses.
 
 const DemoAnomalies = preload("res://gameplay/demo_anomalies.gd")
+const NeonLevelSign = preload("res://gameplay/neon_level_sign.gd")
 const StreamPortals = preload("res://gameplay/stream_portals.gd")
 const Loc = preload("res://gameplay/localization.gd")
 const ROOM = preload("res://main.tscn")
@@ -30,6 +31,7 @@ var staged_environment: Environment
 var staged_lane := ""
 var choice_taken := false
 var transitioning := false
+var finishing := false
 var won := false
 
 
@@ -68,6 +70,7 @@ func _ready() -> void:
     var available: Array[String] = demo.available_ids(room)
     state.prepare_round(available)
     demo.apply(room, str(state.anomaly_id))
+    _update_level_sign(room, int(state.correct_streak), false)
 
 
 func _exit_tree() -> void:
@@ -108,11 +111,23 @@ func _on_language_changed(key: String) -> void:
     _refresh_exit_signs(room)
     if staged != null and is_instance_valid(staged):
         _refresh_exit_signs(staged)
-    var victory := get_node_or_null("VictoryOverlay") as CanvasLayer
-    if victory != null:
-        var label := victory.get_node_or_null("VictoryLabel") as Label
-        if label != null:
-            label.text = Loc.t("victory", self)
+    var state = get_node_or_null("/root/LoopState")
+    if state != null:
+        _update_level_sign(room, int(state.correct_streak), won)
+        if staged != null and is_instance_valid(staged):
+            _update_level_sign(staged, int(state.correct_streak), finishing)
+
+
+func _update_level_sign(target_room: Node3D, level: int, complete: bool) -> void:
+    if target_room == null or not is_instance_valid(target_room):
+        return
+    var sign := target_room.get_node_or_null("NeonLevelSign") as Node3D
+    if sign == null:
+        sign = NeonLevelSign.new() as Node3D
+        sign.name = "NeonLevelSign"
+        target_room.add_child(sign)
+    sign.call("set_progress", level, complete,
+        Loc.t("world.victory", self) if complete else "")
 
 
 func _refresh_exit_signs(target_room: Node3D) -> void:
@@ -199,6 +214,9 @@ func _stage_next(lane: String) -> void:
         environment_node.environment = null
     next.transform = _stage_transform(lane)
     get_tree().root.add_child(next)
+    var state = get_node_or_null("/root/LoopState")
+    if state != null:
+        _update_level_sign(next, int(state.correct_streak), false)
     staged = next
     staged_lane = lane
 
@@ -253,8 +271,11 @@ func _commit_choice(lane: String) -> void:
         return
     choice_taken = true
     demo.clear()
-    if bool(verdict.get("finished", false)):
-        _show_victory()
+    finishing = bool(verdict.get("finished", false))
+    _update_level_sign(staged, int(verdict.get("streak", 0)), finishing)
+    if finishing:
+        # Enter the final hall naturally; never stop the character inside
+        # a connector or cover their view with a victory overlay.
         return
 
     # Populate the NEXT room while the player is still in the connector.
@@ -301,26 +322,11 @@ func _handoff() -> void:
     # occurs on a separate frame; no room geometry or camera is teleported.
     _activate_reflections_sequentially(upcoming)
     _place_markers()
+    if finishing:
+        # Both dead-end connectors are physically closed in the final room.
+        # The player is free to look around and see the neon 12.
+        portals.lock_departure(upcoming, "left")
+        won = true
+        finishing = false
     Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
     transitioning = false
-
-
-func _show_victory() -> void:
-    won = true
-    player.set_physics_process(false)
-    Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-    if staged != null and is_instance_valid(staged):
-        staged.queue_free()
-        staged = null
-    # Only the end-of-run screen shows information; no HUD remains during play.
-    var layer := CanvasLayer.new()
-    layer.name = "VictoryOverlay"
-    layer.layer = 2
-    add_child(layer)
-    var panel := Label.new()
-    panel.name = "VictoryLabel"
-    panel.position = Vector2(145, 225)
-    panel.add_theme_font_size_override("font_size", 32)
-    panel.add_theme_color_override("font_color", Color("#f1d39d"))
-    panel.text = Loc.t("victory", self)
-    layer.add_child(panel)

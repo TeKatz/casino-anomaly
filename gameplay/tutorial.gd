@@ -1,36 +1,40 @@
 extends Node3D
-## Minimal diegetic intro: interaction only when looking directly at the
-## starting door. No permanent tutorial text or gameplay status overlay.
+## The introduction uses only world-space cues: the starting door carries
+## its own text, rather than projecting an interaction hint onto the screen.
 const Loc = preload("res://gameplay/localization.gd")
 
 @onready var player: CharacterBody3D = $Player
 @onready var camera: Camera3D = $Player/Camera3D
 @onready var door: Node3D = $ExitDoor
 
-var hint: Label
+var hint: Label3D
 var changing := false
 
 
 func _ready() -> void:
     Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-    var layer := CanvasLayer.new()
-    layer.name = "DoorInteractionHUD"
-    layer.layer = 2
-    add_child(layer)
-    hint = Label.new()
+    hint = Label3D.new()
     hint.name = "DoorHint"
-    hint.anchor_left = 0.5
-    hint.anchor_right = 0.5
-    hint.anchor_top = 1.0
-    hint.anchor_bottom = 1.0
-    hint.offset_left = -240
-    hint.offset_right = 240
-    hint.offset_top = -95
-    hint.offset_bottom = -48
+    hint.position = Vector3(0, 3.60, 0.24)
+    hint.font_size = 54
+    hint.pixel_size = 0.0035
     hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-    hint.add_theme_font_size_override("font_size", 23)
-    hint.add_theme_color_override("font_color", Color("#f1c987"))
-    layer.add_child(hint)
+    hint.modulate = Color("#f1c987")
+    hint.double_sided = false
+    door.add_child(hint)
+    var settings = get_node_or_null("/root/GameSettings")
+    if settings != null:
+        settings.options_changed.connect(_on_settings_changed)
+    _refresh_hint()
+
+
+func _refresh_hint() -> void:
+    hint.text = Loc.t("tutorial.start", self)
+
+
+func _on_settings_changed(key: String) -> void:
+    if key == "language":
+        _refresh_hint()
 
 
 func _is_looking_at_door() -> bool:
@@ -43,13 +47,6 @@ func _is_looking_at_door() -> bool:
     if door.to_local(camera.global_position).z < 0.15:
         return false
     return (-camera.global_transform.basis.z).dot(towards / distance) >= 0.985
-
-
-func _process(_delta: float) -> void:
-    if changing:
-        hint.text = ""
-        return
-    hint.text = Loc.t("tutorial.start", self) if _is_looking_at_door() else ""
 
 
 func _unhandled_input(event: InputEvent) -> void:
