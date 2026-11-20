@@ -25,6 +25,35 @@ func _run() -> void:
     for i in range(5):
         await process_frame
     var imported := world.get_node_or_null("SketchfabFurniture")
+    # A converted Godot authoring scene has real saved furniture, so the
+    # legacy transient-preview assertion must not fire.
+    var authored := imported.get_node_or_null("EditableImportedModels") as Node3D if imported != null else null
+    if authored != null:
+        if bool(imported.call("has_active_editor_preview")):
+            _fail("Converted scene unexpectedly creates an internal duplicate")
+            return
+        var roles := {"retro_slot_machine": 0, "roulette_table": 0,
+            "blackjack_table": 0, "poker_set": 0}
+        var cabinets := 0
+        for item in authored.get_children():
+            var source := str(item.get_meta("source_asset", ""))
+            if roles.has(source):
+                roles[source] = int(roles[source]) + 1
+            if str(item.get_meta("furniture_kind", "")) == "roulette_table":
+                cabinets += 1
+        if roles["retro_slot_machine"] != 1 or roles["roulette_table"] != 3 \
+                or roles["blackjack_table"] != 1 or roles["poker_set"] != 1 \
+                or cabinets != 3:
+            _fail("Authored imported furniture missing in the editor: " + str(roles))
+            return
+        var original_saved := world.get_node_or_null("SlotMachines/Slot_01") as Node3D
+        if original_saved == null or original_saved.visible:
+            _fail("Converted slot model overlaps its procedural placeholder")
+            return
+        world.queue_free()
+        print("Casino Anomaly true Godot editor model preview QA PASS")
+        quit(0)
+        return
     if imported == null or not imported.has_method("has_active_editor_preview") \
             or not bool(imported.call("has_active_editor_preview")):
         _fail("@tool editor _ready did not create the transient imported preview")
