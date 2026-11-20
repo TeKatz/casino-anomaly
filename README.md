@@ -48,7 +48,7 @@ Alle Wände, Sperren und Verbindungen existieren nur zur Laufzeit. **Die manuell
 
 Die provisorischen drei Test-Anomalien verändern ausschließlich vorhandene 3D-Schilder und werden pro Durchlauf zurückgesetzt. Die endgültige Anomalienliste ist noch offen.
 
-Der erste Prototyp verlangt acht richtige Entscheidungen hintereinander; ein Fehler setzt die Serie auf null, aber nicht den Spielstand. Die laufende Runde wird unter `user://anomaly_run.cfg` gespeichert. Beim Fortsetzen startet man am Beginn des aktuellen Durchlaufs, nicht mitten im Übergang.
+Der Prototyp verlangt **zwölf richtige Entscheidungen hintereinander**. Der **erste Casinoraum eines neuen Spiels enthält niemals eine Anomalie** und dient als sichere Referenz. Eine falsche Entscheidung setzt den Fortschritt auf **0** zurück, aber nicht den Spielstand; spätere Räume können auch bei Fortschritt 0 Anomalien enthalten. Die aktuelle Stufe erscheint als **emissive 3D-Neonzahl an der Wand**, nicht als Bildschirm-HUD. Auch der Start-Hinweis hängt direkt an der Tür; beim Sieg betritt man ohne Überblendung den finalen Raum mit der leuchtenden **12**. Die laufende Runde wird unter `user://anomaly_run.cfg` gespeichert. Beim Fortsetzen startet man am Beginn des aktuellen Durchlaufs, nicht mitten im Übergang.
 
 **Für Leveldesign wichtig:** `main.tscn` bleibt unverändert und vollständig im Godot-Editor bearbeitbar. `gameplay/stream_portals.gd` erzeugt die Öffnungen, Boden-, Decken- und Wandsegmente der Übergänge **nur im laufenden Spiel**. Für spätere grafische Gestaltung der Übergänge können wir daraus eigene `.tscn`-Szenen machen, ohne die Spiellogik zu ändern. Die Streaming- und Handoff-Logik liegt in `gameplay/loop_controller.gd`.
 
