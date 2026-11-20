@@ -79,8 +79,8 @@ func _run() -> void:
     if loop == null or menu == null or menu.visible or state.anomaly_id != "":
         _fail("The hidden menu must exist only during gameplay and start closed")
         return
-    if Catalog.entries().size() != 3 or (loop.call("debug_available_ids") as Array).size() != 3:
-        _fail("Catalog does not expose all three demo effects")
+    if Catalog.entries().size() != 13 or (loop.call("debug_available_ids") as Array).size() != 13:
+        _fail("Catalog must expose the 3 original + 10 new effects")
         return
     var g := InputEventKey.new()
     g.keycode = KEY_G
@@ -92,7 +92,9 @@ func _run() -> void:
     var list := menu.get("listing") as VBoxContainer
     var search := menu.get("search") as LineEdit
     if list == null or search == null or list.get_node_or_null("Anomaly_bar_label") == null \
-            or list.get_node_or_null("Anomaly_table_label") == null:
+            or list.get_node_or_null("Anomaly_table_label") == null \
+            or list.get_node_or_null("Anomaly_crooked_painting") == null \
+            or list.get_node_or_null("Anomaly_horse_spotlight_off") == null:
         _fail("All catalog entries must appear in the generated list")
         return
     search.text = "Bar"

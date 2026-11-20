@@ -3,6 +3,8 @@ extends RefCounted
 ## effect module with can_apply(room, definition), apply(room, definition),
 ## clear(). The game and the developer picker discover it automatically.
 const LabelSwap = preload("res://gameplay/anomalies/label_swap.gd")
+const PropTransform = preload("res://gameplay/anomalies/prop_transform.gd")
+const LightVariation = preload("res://gameplay/anomalies/light_variation.gd")
 const DEFINITIONS := [
     {
         "id": "bar_label",
@@ -33,6 +35,113 @@ const DEFINITIONS := [
         "handler": LabelSwap,
         "target_path": "Decor/Sign_TABLE_GAMES",
         "replacement_text": "TABLE G4MES"
+    },
+
+    # Six small misplaced/rotated props. The original model, authored
+    # collider, and relative child transforms remain intact.
+    {
+        "id": "stool_out_of_line",
+        "category_en": "Objects", "category_de": "Gegenstände",
+        "title_en": "Bar stool out of line", "title_de": "Verrückter Barhocker",
+        "description_en": "One counter stool stands a little farther into the room.",
+        "description_de": "Ein Barhocker steht etwas weiter im Raum.",
+        "handler": PropTransform,
+        "target_path": "ModelInteriors/CounterStool_04",
+        "position_offset": Vector3(0.25, 0.0, 0.78)
+    },
+    {
+        "id": "plant_forward",
+        "category_en": "Objects", "category_de": "Gegenstände",
+        "title_en": "Plant farther forward", "title_de": "Vorgezogene Pflanze",
+        "description_en": "A lounge plant is closer to the walkway.",
+        "description_de": "Eine Pflanze steht näher am Gang.",
+        "handler": PropTransform,
+        "target_path": "Decor/Plant_02",
+        "position_offset": Vector3(0.0, 0.0, -0.90)
+    },
+    {
+        "id": "plant_misplaced",
+        "category_en": "Objects", "category_de": "Gegenstände",
+        "title_en": "Plant shifted sideways", "title_de": "Seitlich versetzte Pflanze",
+        "description_en": "Another planter is no longer in its usual spot.",
+        "description_de": "Ein anderer Pflanzkübel steht seitlich versetzt.",
+        "handler": PropTransform,
+        "target_path": "Decor/Plant_04",
+        "position_offset": Vector3(1.40, 0.0, -0.12)
+    },
+    {
+        "id": "crooked_painting",
+        "category_en": "Objects", "category_de": "Gegenstände",
+        "title_en": "Crooked painting", "title_de": "Schiefes Gemälde",
+        "description_en": "A framed picture hangs at a slight angle.",
+        "description_de": "Ein gerahmtes Gemälde hängt leicht schief.",
+        "handler": PropTransform,
+        "target_path": "ModelInteriors/FramedPainting_02",
+        "rotation_degrees": Vector3(0.0, 0.0, 9.0)
+    },
+    {
+        "id": "candleholder_shifted",
+        "category_en": "Objects", "category_de": "Gegenstände",
+        "title_en": "Moved candleholder", "title_de": "Verrückter Kerzenhalter",
+        "description_en": "A brass candleholder sits off-center on its table.",
+        "description_de": "Ein Messingkerzenhalter steht nicht mehr mittig.",
+        "handler": PropTransform,
+        "target_path": "ModelInteriors/SingleBrassCandleholder_02",
+        "position_offset": Vector3(0.42, 0.0, 0.0)
+    },
+    {
+        "id": "bust_turned",
+        "category_en": "Objects", "category_de": "Gegenstände",
+        "title_en": "Turned marble bust", "title_de": "Verdrehte Marmorbüste",
+        "description_en": "The statue's head faces a different direction.",
+        "description_de": "Eine Marmorbüste blickt in eine andere Richtung.",
+        "handler": PropTransform,
+        "target_path": "ModelInteriors/MarbleBust_02",
+        "rotation_degrees": Vector3(0.0, 35.0, 0.0)
+    },
+
+    # Four mild lighting changes: no new lights, flashes or sharp jumps.
+    {
+        "id": "west_chandelier_dim",
+        "category_en": "Lighting", "category_de": "Beleuchtung",
+        "title_en": "Dim chandelier", "title_de": "Gedimmter Kronleuchter",
+        "description_en": "One chandelier illuminates its section much more weakly.",
+        "description_de": "Ein Kronleuchter beleuchtet seinen Bereich schwächer.",
+        "handler": LightVariation,
+        "target_path": "Lighting/WarmCasinoLamp_05",
+        "energy_scale": 0.16
+    },
+    {
+        "id": "cool_ceiling_light",
+        "category_en": "Lighting", "category_de": "Beleuchtung",
+        "title_en": "Cool ceiling light", "title_de": "Kühles Deckenlicht",
+        "description_en": "One warm overhead light has a bluish tint.",
+        "description_de": "Ein warmes Deckenlicht wirkt plötzlich bläulich.",
+        "handler": LightVariation,
+        "target_path": "Lighting/WarmCasinoLamp_06",
+        "color": Color("#a6d2ff"),
+        "energy_scale": 1.15
+    },
+    {
+        "id": "amber_ceiling_light",
+        "category_en": "Lighting", "category_de": "Beleuchtung",
+        "title_en": "Amber ceiling light", "title_de": "Bernsteinfarbenes Licht",
+        "description_en": "One section of the hall is lit in a deeper amber.",
+        "description_de": "Ein Gangabschnitt leuchtet wärmer als gewöhnlich.",
+        "handler": LightVariation,
+        "target_path": "Lighting/WarmCasinoLamp_07",
+        "color": Color("#ffac7a"),
+        "energy_scale": 1.20
+    },
+    {
+        "id": "horse_spotlight_off",
+        "category_en": "Lighting", "category_de": "Beleuchtung",
+        "title_en": "Unlit horse statue", "title_de": "Unbeleuchtete Pferdestatue",
+        "description_en": "The small spotlight over the horse display is off.",
+        "description_de": "Der Spot über der Pferdestatue ist ausgeschaltet.",
+        "handler": LightVariation,
+        "target_path": "CasinoAtmosphere/HorseHighlight",
+        "visible": false
     }
 ]
 
