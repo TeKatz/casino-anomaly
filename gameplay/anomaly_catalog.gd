@@ -5,6 +5,7 @@ extends RefCounted
 const LabelSwap = preload("res://gameplay/anomalies/label_swap.gd")
 const PropTransform = preload("res://gameplay/anomalies/prop_transform.gd")
 const LightVariation = preload("res://gameplay/anomalies/light_variation.gd")
+const ChandelierBlackout = preload("res://gameplay/anomalies/chandelier_blackout.gd")
 const DEFINITIONS := [
     {
         "id": "bar_label",
@@ -67,7 +68,9 @@ const DEFINITIONS := [
         "description_de": "Ein anderer Pflanzkübel steht seitlich versetzt.",
         "handler": PropTransform,
         "target_path": "Decor/Plant_04",
-        "position_offset": Vector3(0.55, 0.0, 0.60)
+        # In the gap between sofas 03/04, towards the aisle rather than
+        # towards the north wall (the old +Z offset caused clipping).
+        "position_offset": Vector3(0.45, 0.0, -0.80)
     },
     {
         "id": "crooked_painting",
@@ -88,7 +91,7 @@ const DEFINITIONS := [
         "description_de": "Ein Messingkerzenhalter steht nicht mehr mittig.",
         "handler": PropTransform,
         "target_path": "ModelInteriors/SingleBrassCandleholder_02",
-        "position_offset": Vector3(0.26, -0.035, 0.12)
+        "position_offset": Vector3(0.26, 0.0, 0.12)
     },
     {
         "id": "bust_turned",
@@ -101,17 +104,18 @@ const DEFINITIONS := [
         "rotation_degrees": Vector3(0.0, 35.0, 0.0)
     },
 
-    # Four readable lighting changes: deliberately strong enough to stand out
-    # against the baked GI and the surrounding ambient lighting.
+    # Four readable lighting changes: a full chandelier blackout, stronger
+    # color shifts, and a powerful red statue spotlight.
     {
         "id": "west_chandelier_dim",
         "category_en": "Lighting", "category_de": "Beleuchtung",
-        "title_en": "Dim chandelier", "title_de": "Gedimmter Kronleuchter",
-        "description_en": "One chandelier illuminates its section much more weakly.",
-        "description_de": "Ein Kronleuchter beleuchtet seinen Bereich schwächer.",
-        "handler": LightVariation,
-        "target_path": "Lighting/WarmCasinoLamp_05",
-        "energy_scale": 0.03
+        "title_en": "Chandeliers switched off", "title_de": "Alle Kronleuchter ausgeschaltet",
+        "description_en": "Every chandelier light in the casino is extinguished.",
+        "description_de": "Sämtliche Kronleuchter im Casino sind unbeleuchtet.",
+        "handler": ChandelierBlackout,
+        # Retained for catalog/UI test compatibility. The handler disables
+        # all real chandelier lights, including additional nested lights.
+        "target_path": "Lighting/WarmCasinoLamp_05"
     },
     {
         "id": "cool_ceiling_light",
@@ -128,24 +132,24 @@ const DEFINITIONS := [
         "id": "amber_ceiling_light",
         "category_en": "Lighting", "category_de": "Beleuchtung",
         "title_en": "Amber ceiling light", "title_de": "Bernsteinfarbenes Licht",
-        "description_en": "One section of the hall is lit in a much deeper amber.",
-        "description_de": "Ein Gangabschnitt leuchtet deutlich wärmer als gewöhnlich.",
+        "description_en": "A corridor section glows in a strong orange-red light.",
+        "description_de": "Ein Gangabschnitt leuchtet deutlich kräftiger orange-rot.",
         "handler": LightVariation,
         "target_path": "Lighting/WarmCasinoLamp_03",
-        "color": Color("#ff8a42"),
-        "energy_scale": 1.85
+        "color": Color("#ff641e"),
+        "energy_scale": 3.40
     },
     {
         "id": "horse_spotlight_off",
         "category_en": "Lighting", "category_de": "Beleuchtung",
         "title_en": "Red horse spotlight", "title_de": "Roter Pferde-Spot",
-        "description_en": "The horse statue is lit by an unusual red spotlight.",
-        "description_de": "Die Pferdestatue wird von einem unnatürlich roten Spot angestrahlt.",
+        "description_en": "The horse statue is brightly lit by a red spotlight.",
+        "description_de": "Die Pferdestatue wird von einem sehr hellen roten Spot angestrahlt.",
         "handler": LightVariation,
         # Keep the stable ID so existing saves/debug selections do not break.
         "target_path": "CasinoAtmosphere/HorseHighlight",
-        "color": Color("#ff6b6b"),
-        "energy_scale": 2.20,
+        "color": Color("#ff7777"),
+        "energy_scale": 5.60,
         "visible": true
     }
 ]

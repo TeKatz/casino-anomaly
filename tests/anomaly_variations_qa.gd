@@ -63,7 +63,7 @@ func _verify_adjusted_definitions() -> bool:
     var expect := {
         "plant_misplaced": {
             "target_path": "Decor/Plant_04",
-            "position_offset": Vector3(0.55, 0.0, 0.60)
+            "position_offset": Vector3(0.45, 0.0, -0.80)
         },
         "crooked_painting": {
             "target_path": "ModelInteriors/FramedPainting_02",
@@ -72,21 +72,23 @@ func _verify_adjusted_definitions() -> bool:
         },
         "candleholder_shifted": {
             "target_path": "ModelInteriors/SingleBrassCandleholder_02",
-            "position_offset": Vector3(0.26, -0.035, 0.12)
+            "position_offset": Vector3(0.26, 0.0, 0.12)
         },
-        "west_chandelier_dim": {"energy_scale": 0.03},
+        "west_chandelier_dim": {
+            "target_path": "Lighting/WarmCasinoLamp_05"
+        },
         "cool_ceiling_light": {
             "color": Color("#72bfff"),
             "energy_scale": 1.90
         },
         "amber_ceiling_light": {
             "target_path": "Lighting/WarmCasinoLamp_03",
-            "color": Color("#ff8a42"),
-            "energy_scale": 1.85
+            "color": Color("#ff641e"),
+            "energy_scale": 3.40
         },
         "horse_spotlight_off": {
-            "color": Color("#ff6b6b"),
-            "energy_scale": 2.20,
+            "color": Color("#ff7777"),
+            "energy_scale": 5.60,
             "visible": true
         }
     }
@@ -110,6 +112,50 @@ func _run() -> void:
     await process_frame
     await process_frame
     await process_frame
+
+    # Real room geometry: pot 04 must stay between both sofas and away
+    # from the green wall. Its authored Z was -0.78 and the earlier +0.60
+    # moved it through the wall; keep it well within the walkable lounge.
+    var plant := room.get_node("Decor/Plant_04") as Node3D
+    var left_sofa := room.get_node("ModelInteriors/LoungeSofa_04") as Node3D
+    var right_sofa := room.get_node("ModelInteriors/LoungeSofa_03") as Node3D
+    var moved_pos: Vector3 = plant.position + Catalog.get_entry("plant_misplaced")["position_offset"]
+    if moved_pos.z > -1.35 or moved_pos.z < -2.25             or moved_pos.x <= left_sofa.position.x + 1.7             or moved_pos.x >= right_sofa.position.x - 1.7:
+        _fail("Plant 04 must move into the clear aisle-side gap, not into wall or sofas")
+        return
+
+    # The new group blackout must affect EVERY fixture light, including
+    # nested imported-model lights, and restore each individual intensity.
+    var blackout_entry := Catalog.get_entry("west_chandelier_dim")
+    var blackout: RefCounted = blackout_entry["handler"].new()
+    var chandelier_lights: Array = blackout.call("lights_for", room)
+    if chandelier_lights.size() < 7:
+        _fail("Chandelier anomaly missed one of the real authored lights")
+        return
+    var before: Array[Dictionary] = []
+    for fixture in chandelier_lights:
+        var light := fixture as Light3D
+        before.append({"energy": light.light_energy, "visible": light.visible})
+    var unrelated := room.get_node("Lighting/WarmCasinoLamp_06") as Light3D
+    var unrelated_energy := unrelated.light_energy
+    var unrelated_visible := unrelated.visible
+    if not bool(blackout.call("apply", room, blackout_entry)):
+        _fail("Could not disable chandelier group")
+        return
+    for fixture in chandelier_lights:
+        var light := fixture as Light3D
+        if not is_zero_approx(light.light_energy) or light.visible:
+            _fail("At least one chandelier still shines during blackout")
+            return
+    if unrelated.light_energy != unrelated_energy or unrelated.visible != unrelated_visible:
+        _fail("Chandelier blackout also disabled unrelated ceiling lighting")
+        return
+    blackout.call("clear")
+    for i in range(chandelier_lights.size()):
+        var light := chandelier_lights[i] as Light3D
+        if not is_equal_approx(light.light_energy, float(before[i]["energy"]))                 or light.visible != bool(before[i]["visible"]):
+            _fail("Chandelier blackout did not restore every original light")
+            return
 
     var definitions: Array[Dictionary] = Catalog.entries()
     var available: Array[String] = Catalog.available_ids(room)
