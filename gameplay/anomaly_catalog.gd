@@ -67,7 +67,7 @@ const DEFINITIONS := [
         "description_de": "Ein anderer Pflanzkübel steht seitlich versetzt.",
         "handler": PropTransform,
         "target_path": "Decor/Plant_04",
-        "position_offset": Vector3(1.40, 0.0, -0.12)
+        "position_offset": Vector3(0.55, 0.0, 0.60)
     },
     {
         "id": "crooked_painting",
@@ -77,7 +77,8 @@ const DEFINITIONS := [
         "description_de": "Ein gerahmtes Gemälde hängt leicht schief.",
         "handler": PropTransform,
         "target_path": "ModelInteriors/FramedPainting_02",
-        "rotation_degrees": Vector3(0.0, 0.0, 9.0)
+        "position_offset": Vector3(0.0, 0.22, 0.0),
+        "rotation_degrees": Vector3(0.0, 0.0, 7.0)
     },
     {
         "id": "candleholder_shifted",
@@ -87,7 +88,7 @@ const DEFINITIONS := [
         "description_de": "Ein Messingkerzenhalter steht nicht mehr mittig.",
         "handler": PropTransform,
         "target_path": "ModelInteriors/SingleBrassCandleholder_02",
-        "position_offset": Vector3(0.42, 0.0, 0.0)
+        "position_offset": Vector3(0.26, -0.035, 0.12)
     },
     {
         "id": "bust_turned",
@@ -100,7 +101,8 @@ const DEFINITIONS := [
         "rotation_degrees": Vector3(0.0, 35.0, 0.0)
     },
 
-    # Four mild lighting changes: no new lights, flashes or sharp jumps.
+    # Four readable lighting changes: deliberately strong enough to stand out
+    # against the baked GI and the surrounding ambient lighting.
     {
         "id": "west_chandelier_dim",
         "category_en": "Lighting", "category_de": "Beleuchtung",
@@ -109,39 +111,42 @@ const DEFINITIONS := [
         "description_de": "Ein Kronleuchter beleuchtet seinen Bereich schwächer.",
         "handler": LightVariation,
         "target_path": "Lighting/WarmCasinoLamp_05",
-        "energy_scale": 0.16
+        "energy_scale": 0.03
     },
     {
         "id": "cool_ceiling_light",
         "category_en": "Lighting", "category_de": "Beleuchtung",
         "title_en": "Cool ceiling light", "title_de": "Kühles Deckenlicht",
-        "description_en": "One warm overhead light has a bluish tint.",
-        "description_de": "Ein warmes Deckenlicht wirkt plötzlich bläulich.",
+        "description_en": "One warm overhead light has a strong bluish tint.",
+        "description_de": "Ein warmes Deckenlicht wirkt plötzlich deutlich bläulich.",
         "handler": LightVariation,
         "target_path": "Lighting/WarmCasinoLamp_06",
-        "color": Color("#a6d2ff"),
-        "energy_scale": 1.15
+        "color": Color("#72bfff"),
+        "energy_scale": 1.90
     },
     {
         "id": "amber_ceiling_light",
         "category_en": "Lighting", "category_de": "Beleuchtung",
         "title_en": "Amber ceiling light", "title_de": "Bernsteinfarbenes Licht",
-        "description_en": "One section of the hall is lit in a deeper amber.",
-        "description_de": "Ein Gangabschnitt leuchtet wärmer als gewöhnlich.",
+        "description_en": "One section of the hall is lit in a much deeper amber.",
+        "description_de": "Ein Gangabschnitt leuchtet deutlich wärmer als gewöhnlich.",
         "handler": LightVariation,
-        "target_path": "Lighting/WarmCasinoLamp_07",
-        "color": Color("#ffac7a"),
-        "energy_scale": 1.20
+        "target_path": "Lighting/WarmCasinoLamp_03",
+        "color": Color("#ff8a42"),
+        "energy_scale": 1.85
     },
     {
         "id": "horse_spotlight_off",
         "category_en": "Lighting", "category_de": "Beleuchtung",
-        "title_en": "Unlit horse statue", "title_de": "Unbeleuchtete Pferdestatue",
-        "description_en": "The small spotlight over the horse display is off.",
-        "description_de": "Der Spot über der Pferdestatue ist ausgeschaltet.",
+        "title_en": "Red horse spotlight", "title_de": "Roter Pferde-Spot",
+        "description_en": "The horse statue is lit by an unusual red spotlight.",
+        "description_de": "Die Pferdestatue wird von einem unnatürlich roten Spot angestrahlt.",
         "handler": LightVariation,
+        # Keep the stable ID so existing saves/debug selections do not break.
         "target_path": "CasinoAtmosphere/HorseHighlight",
-        "visible": false
+        "color": Color("#ff6b6b"),
+        "energy_scale": 2.20,
+        "visible": true
     }
 ]
 

@@ -57,7 +57,51 @@ func _same(a: Dictionary, b: Dictionary) -> bool:
     return true
 
 
+func _verify_adjusted_definitions() -> bool:
+    # These are explicit tuning requirements from visual review. Protect
+    # against slipping back to clipped furniture or barely visible lighting.
+    var expect := {
+        "plant_misplaced": {
+            "target_path": "Decor/Plant_04",
+            "position_offset": Vector3(0.55, 0.0, 0.60)
+        },
+        "crooked_painting": {
+            "target_path": "ModelInteriors/FramedPainting_02",
+            "position_offset": Vector3(0.0, 0.22, 0.0),
+            "rotation_degrees": Vector3(0.0, 0.0, 7.0)
+        },
+        "candleholder_shifted": {
+            "target_path": "ModelInteriors/SingleBrassCandleholder_02",
+            "position_offset": Vector3(0.26, -0.035, 0.12)
+        },
+        "west_chandelier_dim": {"energy_scale": 0.03},
+        "cool_ceiling_light": {
+            "color": Color("#72bfff"),
+            "energy_scale": 1.90
+        },
+        "amber_ceiling_light": {
+            "target_path": "Lighting/WarmCasinoLamp_03",
+            "color": Color("#ff8a42"),
+            "energy_scale": 1.85
+        },
+        "horse_spotlight_off": {
+            "color": Color("#ff6b6b"),
+            "energy_scale": 2.20,
+            "visible": true
+        }
+    }
+    for id in expect:
+        var entry: Dictionary = Catalog.get_entry(str(id))
+        for key in expect[id]:
+            if not entry.has(key) or entry[key] != expect[id][key]:
+                _fail("Visual-review tuning regressed: %s / %s" % [id, key])
+                return false
+    return true
+
+
 func _run() -> void:
+    if not _verify_adjusted_definitions():
+        return
     var room := ROOM.instantiate() as Node3D
     if room == null:
         _fail("Casino room cannot be instantiated")
