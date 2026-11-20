@@ -346,7 +346,11 @@ func _place(identifier: String, label: String, anchor: Vector3,
             return null
         wrapper.add_child(imported)
 
-    if not has_authored_model and not mesh_variant.is_empty():
+    # A saved, editable glTF instance still contains every source mesh.
+    # Apply the same variant filtering to both authored and generated models.
+    # This only removes unused meshes from the runtime instance; it does
+    # not rewrite main.tscn or the imported source scene.
+    if not mesh_variant.is_empty():
         var variant_found := false
         for candidate in imported.find_children("*", "MeshInstance3D", true, false):
             var mesh_node: MeshInstance3D = candidate as MeshInstance3D
@@ -363,18 +367,6 @@ func _place(identifier: String, label: String, anchor: Vector3,
             return null
 
     var bounds := _bounds_for(imported)
-    if has_authored_model and not mesh_variant.is_empty():
-        # The editor preview hides unused mesh variants instead of deleting
-        # them. Only the visible candleholder contributes to its collider.
-        var found_visible := false
-        bounds = AABB()
-        for candidate in imported.find_children("*", "MeshInstance3D", true, false):
-            var piece := candidate as MeshInstance3D
-            if piece.mesh == null or not piece.visible:
-                continue
-            var transformed: AABB = (imported.global_transform.affine_inverse() * piece.global_transform) * piece.get_aabb()
-            bounds = bounds.merge(transformed) if found_visible else transformed
-            found_visible = true
     if bounds.size.y <= 0.0001:
         if generated:
             wrapper.queue_free()
