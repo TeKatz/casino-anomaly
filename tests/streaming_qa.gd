@@ -132,9 +132,12 @@ func _run() -> void:
     if staged_gi == null:
         _fail("Staged hall lost its room-local VoxelGI rig")
         return
+    if bool(staged_gi.get("streaming_active")):
+        _fail("The preloaded room must defer expensive GI activation until approach")
+        return
     for child in staged_gi.get_children():
         if child is VoxelGI and child.visible:
-            _fail("Standby hall is rendering VoxelGI before handoff")
+            _fail("Standby hall is rendering VoxelGI before the GI prewarm point")
             return
     var stage_fx := second.get_node_or_null("CasinoAtmosphere") as Node3D
     if stage_fx == null:
@@ -153,12 +156,31 @@ func _run() -> void:
         return
     var second_transform := second.global_transform
 
+    # The next room remains beyond the L-shaped sightline, but its baked
+    # GPU lighting must be prepared BEFORE the player can see its entrance.
+    player.global_position = first.to_global(Vector3(-44.0, 1.02, shape.EXIT_Z_LEFT))
+    controller.call("_process", 0.016)
+    if not bool(staged_gi.get("streaming_active"))             or not bool(controller.get("staged_gi_warmed"))             or bool(controller.get("choice_taken")):
+        _fail("Approach did not prewarm next-room VoxelGI before the exit choice")
+        return
+    await process_frame
+    var next_baked: bool = bool(staged_gi.call("has_complete_bake"))
+    var gi_setting: bool = bool(root.get_node("GameSettings").get_option("voxel_gi"))
+    for probe in staged_gi.get_children():
+        if probe is VoxelGI and (probe as VoxelGI).visible != (next_baked and gi_setting):
+            _fail("A hidden staged room did not activate available baked GI on approach")
+            return
+
     controller.call("_commit_choice", "left")
     if state.visited_loops != 1 or not state.round_ready:
         _fail("Crossing the left passage did not prepare the next round")
         return
     if not bool(controller.get("choice_taken")):
         _fail("The left choice was not permanently committed")
+        return
+    var old_rig := first.get_node("VoxelGIRig") as Node3D
+    if bool(old_rig.get("streaming_active")) or not bool(staged_gi.get("streaming_active")):
+        _fail("Committed departure must transfer the GI budget to the next room")
         return
     for lane in ["left", "right"]:
         var corridor := shape.get_connector(first, lane)
@@ -184,6 +206,10 @@ func _run() -> void:
         Vector3(shape.BEND_X, 1.02, shape.end_z("left") + 4.4)
     )
     var old_pose := player.global_transform
+    var lit_before_handoff: Array[bool] = []
+    for probe in staged_gi.get_children():
+        if probe is VoxelGI:
+            lit_before_handoff.append((probe as VoxelGI).visible)
     controller.call("_handoff")
     if current_scene != second or player.get_parent() != second             or controller.get_parent() != second:
         _fail("The staged room did not take over the original player/controller")
@@ -197,6 +223,16 @@ func _run() -> void:
     if second.get_node("WorldEnvironment").environment == null:
         _fail("The new room did not activate its original lighting")
         return
+    if not bool(staged_gi.get("streaming_active")):
+        _fail("Handoff switched off the prewarmed GI")
+        return
+    var index := 0
+    for probe in staged_gi.get_children():
+        if probe is VoxelGI:
+            if (probe as VoxelGI).visible != lit_before_handoff[index]:
+                _fail("VoxelGI visibility jumped exactly when the room was revealed")
+                return
+            index += 1
     await process_frame
     await process_frame
     await process_frame
@@ -225,6 +261,10 @@ func _run() -> void:
         _fail("Right turn is spatially misaligned after a rotated hall")
         return
     controller.call("_commit_choice", "right")
+    var third_rig := third.get_node_or_null("VoxelGIRig") as Node3D
+    if third_rig == null or not bool(third_rig.get("streaming_active")):
+        _fail("A rapid second loop missed its mandatory GI prewarm")
+        return
     if state.visited_loops != 2:
         _fail("The second left/right choice was not counted")
         return

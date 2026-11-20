@@ -92,12 +92,27 @@ func _run() -> void:
         if child is VoxelGI and child.visible:
             _fail("Standby VoxelGI is active during preloading")
             return
+    # Being tagged as standby prevents the second player and costly
+    # reflection captures, but must NOT prevent the renderer from
+    # prewarming already-loaded baked GI while the next hall is still hidden.
+    next_rig.call("set_streaming_active", true)
+    await process_frame
+    if not standby.has_meta("_streaming_standby") or not bool(next_rig.get("streaming_active")):
+        _fail("GI prewarm discarded standby safeguards")
+        return
+    for child in next_rig.get_children():
+        if child is VoxelGI and child.visible != baked:
+            _fail("Prewarmed GI failed to illuminate a still-hidden next room")
+            return
+
+    # The room handoff must not toggle the probes and create a bright/dark
+    # first frame when the casino is finally visible through the entrance.
     standby.remove_meta("_streaming_standby")
     next_rig.call("set_streaming_active", true)
     await process_frame
     for child in next_rig.get_children():
         if child is VoxelGI and child.visible != baked:
-            _fail("Handoff did not restore valid VoxelGI data")
+            _fail("Handoff interrupted already-prewarmed VoxelGI")
             return
 
     standby.queue_free()

@@ -15,6 +15,9 @@ const Loc = preload("res://gameplay/localization.gd")
 const ROOM = preload("res://main.tscn")
 
 const PRELOAD_AT_X := -31.0
+# Prepare GPU-backed baked GI while the next casino is still hidden by the
+# opaque L-bend. There is enough corridor before the entrance for upload.
+const GI_PREWARM_AT_X := -43.0
 const CHOICE_AT_X := -49.10
 const HANDOFF_AFTER_TURN := 4.20
 const LANE_HALF_WIDTH := 1.07
@@ -30,6 +33,7 @@ var portals: RefCounted
 var staged: Node3D
 var staged_environment: Environment
 var staged_lane := ""
+var staged_gi_warmed := false
 var choice_taken := false
 var transitioning := false
 var finishing := false
@@ -198,6 +202,10 @@ func _process(_delta: float) -> void:
     var local := room.to_local(player.global_position)
     if local.x < PRELOAD_AT_X and not choice_taken:
         _stage_next(_candidate_lane(local.z))
+    # The second room is still completely out of view here. Enabling its
+    # already-loaded VoxelGI data now avoids the obvious post-entry pop.
+    if local.x < GI_PREWARM_AT_X and not choice_taken:
+        _prewarm_next_gi()
 
     if not choice_taken:
         var lane := _candidate_lane(local.z)
@@ -261,6 +269,20 @@ func _stage_next(lane: String) -> void:
         _update_level_sign(next, int(state.correct_streak), false)
     staged = next
     staged_lane = lane
+    staged_gi_warmed = false
+
+
+func _prewarm_next_gi() -> void:
+    if staged_gi_warmed or staged == null or not is_instance_valid(staged):
+        return
+    var rig := staged.get_node_or_null("VoxelGIRig") as Node3D
+    if rig == null:
+        return
+    # The standby metadata intentionally stays set to suppress the second
+    # player, reflection captures and furniture fills. The GI streaming gate
+    # is independent: we can render cached probes before the room handoff.
+    rig.call("set_streaming_active", true)
+    staged_gi_warmed = true
 
 
 func _set_reflections_visible(target_room: Node3D, enabled: bool) -> void:
@@ -285,15 +307,6 @@ func _activate_reflections_sequentially(target_room: Node3D) -> void:
         (child as ReflectionProbe).visible = true
 
 
-func _activate_voxel_gi_after_handoff(target_room: Node3D) -> void:
-    await get_tree().process_frame
-    if not is_instance_valid(target_room) or not target_room.is_inside_tree():
-        return
-    var rig := target_room.get_node_or_null("VoxelGIRig")
-    if rig != null:
-        rig.call("set_streaming_active", true)
-
-
 func _commit_choice(lane: String) -> void:
     _stage_next(lane)
     if staged == null or not is_instance_valid(staged):
@@ -311,6 +324,14 @@ func _commit_choice(lane: String) -> void:
     if not portals.lock_departure(room, lane):
         push_error("Failed to seal the departure corridors")
         return
+    # The player is now behind the departure gates. Ensure the next hall's
+    # GI has been initialized even if they rushed past the prewarm trigger.
+    _prewarm_next_gi()
+    # Avoid keeping four high-resolution GI volumes active simultaneously
+    # through the connector. The departure room is no longer in view.
+    var departing_rig := room.get_node_or_null("VoxelGIRig") as Node3D
+    if departing_rig != null:
+        departing_rig.call("set_streaming_active", false)
     choice_taken = true
     demo.clear()
     finishing = bool(verdict.get("finished", false))
@@ -342,6 +363,7 @@ func _handoff() -> void:
         return
     staged = null
     staged_lane = ""
+    staged_gi_warmed = false
     choice_taken = false
 
     # Preserve the single CharacterBody3D and its live controller.
@@ -357,9 +379,11 @@ func _handoff() -> void:
     upcoming.remove_meta("_streaming_standby")
     get_tree().current_scene = upcoming
     previous.queue_free()
-    # Reuse pre-baked, room-local GI data after the previous room has
-    # actually left the tree. Never bake when a new run is entered.
-    _activate_voxel_gi_after_handoff(upcoming)
+    # Reuse the ALREADY ACTIVE baked GI. Never turn it off/on at the scene
+    # swap: even one deferred frame would create a visible light pop.
+    var arrival_rig := upcoming.get_node_or_null("VoxelGIRig") as Node3D
+    if arrival_rig != null:
+        arrival_rig.call("set_streaming_active", true)
     # Render interior probes only after the old hall is gone. Each capture
     # occurs on a separate frame; no room geometry or camera is teleported.
     _activate_reflections_sequentially(upcoming)
