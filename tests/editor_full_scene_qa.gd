@@ -70,6 +70,14 @@ func _run() -> void:
     await process_frame
     await process_frame
     await process_frame
+    # Even when opening main.tscn directly with no saved gameplay run,
+    # the artist must see the physical neon sign in the scene.
+    var sign := world.get_node_or_null("NeonLevelSign") as Node3D
+    if sign == null or sign.get_node_or_null("EnamelBackplate") == null \
+            or sign.get_node_or_null("Number") == null \
+            or not sign.visible:
+        _fail("The neon level sign is missing when viewing the casino scene directly")
+        return
     if not plant.position.is_equal_approx(original_plant + Vector3(0.25, 0, 0))             or not stool.position.is_equal_approx(original_stool + Vector3(-0.25, 0, 0))             or not (fx.get_node("EntrySignTop") as Node3D).position.is_equal_approx(original_neon + Vector3(0, 0.10, 0)):
         _fail("Runtime generator overwrote designer edits")
         return

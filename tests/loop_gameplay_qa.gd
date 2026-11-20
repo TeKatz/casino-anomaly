@@ -132,6 +132,12 @@ func _run() -> void:
             or ((progress.get_node("Number") as MeshInstance3D).mesh as TextMesh).text != "0":
         _fail("A new run needs a world-space emissive neon zero, not an overlay")
         return
+    var neon_number := progress.get_node("Number") as MeshInstance3D
+    if absf(progress.position.x + 45.94) > 0.01 \
+            or absf(progress.position.z + 6.68) > 0.01 \
+            or neon_number.global_transform.basis.z.dot(scene.global_transform.basis.x) < 0.95:
+        _fail("Neon number must face into the room between the two exit doors")
+        return
     if scene.get_node_or_null("StreamingPortals/InitialEntryCap/SolidDoor_Collision") == null:
         _fail("First hall entrance is open to the void")
         return

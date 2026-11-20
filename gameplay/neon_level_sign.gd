@@ -1,9 +1,12 @@
+@tool
 extends Node3D
 ## A physical, wall-mounted progress display. No CanvasLayer or screen-space
 ## text: the mesh uses actual emissive geometry and a local accent light.
 ## Room-local transform keeps it in the same authored spot after streaming.
 
-const WALL_POSITION := Vector3(5.88, 4.12, 3.25)
+# Central solid pier on the western far wall, between the two exits.
+# The player approaches it looking west, so the front must face +X.
+const WALL_POSITION := Vector3(-45.94, 4.45, -6.68)
 const ACTIVE_COLOR := Color("#ff735c")
 const FINISH_COLOR := Color("#ffe1a0")
 
@@ -15,6 +18,7 @@ var accent: OmniLight3D
 
 func _ready() -> void:
     position = WALL_POSITION
+    rotation.y = PI # Turn the mesh/front light from -X to +X, into the hall.
 
     var backing := StandardMaterial3D.new()
     backing.albedo_color = Color("#141012")
@@ -76,6 +80,8 @@ func _ready() -> void:
     accent.light_energy = 0.72
     accent.omni_range = 3.25
     accent.shadow_enabled = false
+    # Do not alter the established pre-baked casino GI when artists rebake.
+    accent.light_bake_mode = Light3D.BAKE_DISABLED
     add_child(accent)
 
 

@@ -5,6 +5,7 @@ extends Node3D
 # the whitebox furniture later without rebuilding the room or its collision layout.
 const OAK: StandardMaterial3D = preload("res://floor_material.tres")
 const VoxelRig = preload("res://lighting/voxel_gi_rig.gd")
+const NeonLevelSign = preload("res://gameplay/neon_level_sign.gd")
 const JACQUARD: StandardMaterial3D = preload("res://carpet_material.tres")
 const LOWER_WALL: StandardMaterial3D = preload("res://lower_wall_material.tres")
 const UPPER_WALL: StandardMaterial3D = preload("res://upper_wall_material.tres")
@@ -103,6 +104,18 @@ func _ready() -> void:
         _make_details()
     if lights.get_child_count() == 0:
         _make_lights()
+
+    # The number belongs to the casino itself, not to the run controller.
+    # Also show it when artists preview/play main.tscn directly in Godot.
+    # It remains a generated, ownerless node; the authored scene and the
+    # carefully tuned baked lighting stay untouched.
+    if not has_node("NeonLevelSign") and not has_meta("_baking_room"):
+        var neon := NeonLevelSign.new() as Node3D
+        neon.name = "NeonLevelSign"
+        if Engine.is_editor_hint():
+            add_child(neon, false, Node.INTERNAL_MODE_BACK)
+        else:
+            add_child(neon)
 
     # Keep contrast controllable live, including in newly streamed rooms.
     if not Engine.is_editor_hint():
