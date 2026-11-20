@@ -27,7 +27,9 @@ func _run() -> void:
     var imported := world.get_node_or_null("SketchfabFurniture")
     # A converted Godot authoring scene has real saved furniture, so the
     # legacy transient-preview assertion must not fire.
-    var authored := imported.get_node_or_null("EditableImportedModels") as Node3D if imported != null else null
+    var authored: Node3D = null
+    if imported != null:
+        authored = imported.get_node_or_null("EditableImportedModels") as Node3D
     if authored != null:
         if bool(imported.call("has_active_editor_preview")):
             _fail("Converted scene unexpectedly creates an internal duplicate")
