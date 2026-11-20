@@ -21,9 +21,14 @@ func _test() -> void:
         push_error("Sketchfab model replacements are incomplete")
         quit(1)
         return
+    # Generated instances and permanently authored editor instances share
+    # the same metadata/collision contract, but have different parents.
+    var placed_models := layer.get_node_or_null("EditableImportedModels") as Node3D
+    if placed_models == null:
+        placed_models = layer
     for asset in ["retro_slot_machine", "roulette_table", "blackjack_table", "poker_set"]:
         var match_found := false
-        for node in layer.get_children():
+        for node in placed_models.get_children():
             if node.get_meta("source_asset", "") == asset:
                 match_found = true
                 if asset != "poker_set" and asset != "roulette_table" \
@@ -46,7 +51,7 @@ func _test() -> void:
             return
     var roulette_tables := 0
     var raised_retro := 0
-    for node in layer.get_children():
+    for node in placed_models.get_children():
         if node.get_meta("furniture_kind", "") == "roulette_table":
             roulette_tables += 1
             var tabletop: StaticBody3D = node.get_node_or_null("SolidTableTopCollider") as StaticBody3D
