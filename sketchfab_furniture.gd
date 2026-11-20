@@ -341,6 +341,25 @@ func _populate() -> void:
     # A level designer has authored the imported instances in main.tscn.
     # They are the source of truth; don't create copies on game startup.
     if not _baking_editor_models and has_node(AUTHORED_GROUP):
+        # The editor conversion persists the imported geometry, so no
+        # instances are spawned here. Keep the public replacement counters
+        # consistent with the old runtime-generated path for gameplay, UI
+        # and regression checks.
+        replaced_slots = 0
+        replaced_roulette = 0
+        replaced_blackjack = 0
+        poker_props_placed = 0
+        var saved := get_node(AUTHORED_GROUP)
+        for child in saved.get_children():
+            match str(child.get_meta("source_asset", "")):
+                "retro_slot_machine":
+                    replaced_slots += 1
+                "roulette_table":
+                    replaced_roulette += 1
+                "blackjack_table":
+                    replaced_blackjack += 1
+                "poker_set":
+                    poker_props_placed += 1
         if not Engine.is_editor_hint():
             furniture_finalized.emit()
         return
