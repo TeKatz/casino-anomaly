@@ -102,7 +102,7 @@ func _run() -> void:
     var actual_tables: Array[Node3D] = []
     for table_node in gaming.get_children():
         var table := table_node as Node3D
-        if table != null and (table.name.begins_with("Roulette") \
+        if table != null and table.visible and (table.name.begins_with("Roulette") \
                 or table.name.begins_with("Blackjack") \
                 or table.name.begins_with("Cards")):
             actual_tables.append(table)
@@ -111,8 +111,14 @@ func _run() -> void:
                     GeometryInstance3D.SHADOW_CASTING_SETTING_ON:
                 _fail("Retained table must cast shadows")
                 return
+    # After the one-time editor conversion the real furniture is stored
+    # beneath EditableImportedModels. Legacy scenes still spawn directly
+    # below SketchfabFurniture; both paths must be checked.
+    var imported_models := imported.get_node_or_null("EditableImportedModels") as Node3D
+    if imported_models == null:
+        imported_models = imported
     var replacement_count := 0
-    for child in imported.get_children():
+    for child in imported_models.get_children():
         var table := child as Node3D
         if table == null:
             continue
@@ -133,7 +139,7 @@ func _run() -> void:
                 return
     if replacement_count < 4 or actual_tables.size() != 6:
         var notes := PackedStringArray()
-        for child in imported.get_children():
+        for child in imported_models.get_children():
             notes.append("%s[kind=%s,source=%s]" % [child.name,
                 str(child.get_meta("furniture_kind", "")),
                 str(child.get_meta("source_asset", ""))])
