@@ -282,6 +282,9 @@ func _prewarm_next_gi() -> void:
     # player, reflection captures and furniture fills. The GI streaming gate
     # is independent: we can render cached probes before the room handoff.
     rig.call("set_streaming_active", true)
+    var atmosphere := staged.get_node_or_null("CasinoAtmosphere") as Node3D
+    if atmosphere != null and atmosphere.has_method("prewarm_streaming_lights"):
+        atmosphere.call("prewarm_streaming_lights")
     staged_gi_warmed = true
 
 
@@ -295,6 +298,9 @@ func _set_reflections_visible(target_room: Node3D, enabled: bool) -> void:
 
 
 func _activate_reflections_sequentially(target_room: Node3D) -> void:
+    # This is launched from the committed, still-opaque connector, NEVER
+    # from the visible-room handoff. Capture one probe per frame to avoid
+    # a two-probe GPU spike when entering the casino.
     var atmosphere := target_room.get_node_or_null("CasinoAtmosphere") as Node3D
     if atmosphere == null:
         return
@@ -333,6 +339,10 @@ func _commit_choice(lane: String) -> void:
     if departing_rig != null:
         departing_rig.call("set_streaming_active", false)
     choice_taken = true
+    # Reflection probes used to turn on one/two frames AFTER the handoff;
+    # reflected ceiling/bar highlights visibly popped into view. Start
+    # their one-shot capture while hidden around the blind L-corner.
+    _activate_reflections_sequentially(staged)
     demo.clear()
     finishing = bool(verdict.get("finished", false))
     _update_level_sign(staged, int(verdict.get("streak", 0)), finishing)
@@ -377,6 +387,7 @@ func _handoff() -> void:
     if upcoming.has_method("apply_image_contrast"):
         upcoming.call("apply_image_contrast")
     upcoming.remove_meta("_streaming_standby")
+    upcoming.remove_meta("_streaming_lighting_prepared")
     get_tree().current_scene = upcoming
     previous.queue_free()
     # Reuse the ALREADY ACTIVE baked GI. Never turn it off/on at the scene
@@ -384,9 +395,8 @@ func _handoff() -> void:
     var arrival_rig := upcoming.get_node_or_null("VoxelGIRig") as Node3D
     if arrival_rig != null:
         arrival_rig.call("set_streaming_active", true)
-    # Render interior probes only after the old hall is gone. Each capture
-    # occurs on a separate frame; no room geometry or camera is teleported.
-    _activate_reflections_sequentially(upcoming)
+    # Both reflection captures and all furniture fills were prepared in
+    # the blind connector; neither is toggled after the room is visible.
     _place_markers()
     if finishing:
         # Both dead-end connectors are physically closed in the final room.

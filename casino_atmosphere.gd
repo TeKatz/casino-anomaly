@@ -297,11 +297,29 @@ func _furniture_fill(label: String, at: Vector3, tint: Color,
     furniture_fills.append(lamp)
 
 
+func prewarm_streaming_lights() -> void:
+    # The next casino is still hidden behind the connector's opaque turn.
+    # Make all real furniture and wall fills ready NOW rather than enabling
+    # them after the player sees the bar. The standby tag remains in place
+    # for the other costly streaming safeguards (player/scene/controller).
+    var room := get_parent() as Node3D
+    if room == null or not room.has_meta("_streaming_standby"):
+        return
+    room.set_meta("_streaming_lighting_prepared", true)
+    # _build() runs deferred. If it has not populated its arrays yet,
+    # _ensure_practical_lights() will synchronize after construction.
+    if not strip_fills.is_empty() and not furniture_fills.is_empty():
+        _sync_hybrid_lights()
+
+
 func _sync_hybrid_lights() -> void:
     var room := get_parent() as Node3D
     if room == null:
         return
-    var standby := room.has_meta("_streaming_standby")
+    # A fully prewarmed standby hall already has its final visible lighting.
+    # Removing "_streaming_standby" at handoff must not switch any lamps.
+    var standby := room.has_meta("_streaming_standby") \
+        and not room.has_meta("_streaming_lighting_prepared")
     var gi_active := false
     var rig := room.get_node_or_null("VoxelGIRig") as Node3D
     if rig != null:

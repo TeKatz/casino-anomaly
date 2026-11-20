@@ -147,6 +147,11 @@ func _run() -> void:
         if child is ReflectionProbe and child.visible:
             _fail("Standby rooms must not capture reflection probes")
             return
+    for child in stage_fx.get_children():
+        if child is OmniLight3D and child.name.begins_with("FurnitureFill_") \
+                and child.visible:
+            _fail("Uncommitted standby furniture fills must remain dark")
+            return
     if second.has_node("Player") or second.has_node("LoopController"):
         _fail("Standby hall generated a second player or controller")
         return
@@ -170,6 +175,14 @@ func _run() -> void:
         if probe is VoxelGI and (probe as VoxelGI).visible != (next_baked and gi_setting):
             _fail("A hidden staged room did not activate available baked GI on approach")
             return
+    if not second.has_meta("_streaming_lighting_prepared"):
+        _fail("The next hall's furniture and bar lights were not prewarmed")
+        return
+    for child in stage_fx.get_children():
+        if child is OmniLight3D and child.name.begins_with("FurnitureFill_") \
+                and not child.visible:
+            _fail("A standby furniture light remained dark until room entry")
+            return
 
     controller.call("_commit_choice", "left")
     if state.visited_loops != 1 or not state.round_ready:
@@ -181,6 +194,20 @@ func _run() -> void:
     var old_rig := first.get_node("VoxelGIRig") as Node3D
     if bool(old_rig.get("streaming_active")) or not bool(staged_gi.get("streaming_active")):
         _fail("Committed departure must transfer the GI budget to the next room")
+        return
+    # Captures run across frames while we are still behind the opaque turn.
+    await process_frame
+    await process_frame
+    await process_frame
+    var staged_probe_count := 0
+    for child in stage_fx.get_children():
+        if child is ReflectionProbe:
+            staged_probe_count += 1
+            if not child.visible:
+                _fail("A reflection probe still waits until room entry to switch on")
+                return
+    if staged_probe_count != 2:
+        _fail("Expected both prewarmed casino reflection probes")
         return
     for lane in ["left", "right"]:
         var corridor := shape.get_connector(first, lane)
@@ -210,6 +237,16 @@ func _run() -> void:
     for probe in staged_gi.get_children():
         if probe is VoxelGI:
             lit_before_handoff.append((probe as VoxelGI).visible)
+    var fills_before: Dictionary = {}
+    var reflections_before: Dictionary = {}
+    for child in stage_fx.get_children():
+        if child is OmniLight3D and child.name.begins_with("FurnitureFill_"):
+            fills_before[child.name] = child.visible
+        if child is ReflectionProbe:
+            reflections_before[child.name] = child.visible
+    if fills_before.size() != 23 or reflections_before.size() != 2:
+        _fail("Missing prewarmed atmosphere effects")
+        return
     controller.call("_handoff")
     if current_scene != second or player.get_parent() != second             or controller.get_parent() != second:
         _fail("The staged room did not take over the original player/controller")
@@ -226,6 +263,17 @@ func _run() -> void:
     if not bool(staged_gi.get("streaming_active")):
         _fail("Handoff switched off the prewarmed GI")
         return
+    if second.has_meta("_streaming_lighting_prepared"):
+        _fail("Temporary streaming light metadata leaked into the active room")
+        return
+    for child in stage_fx.get_children():
+        if child is OmniLight3D and child.name.begins_with("FurnitureFill_") \
+                and child.visible != bool(fills_before[child.name]):
+            _fail("Bar or furniture light switched on during visible-room handoff")
+            return
+        if child is ReflectionProbe and child.visible != bool(reflections_before[child.name]):
+            _fail("Reflected bar lighting switched on during visible-room handoff")
+            return
     var index := 0
     for probe in staged_gi.get_children():
         if probe is VoxelGI:
