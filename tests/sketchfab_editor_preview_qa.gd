@@ -29,6 +29,65 @@ func _run() -> void:
     if retro == null:
         _fail("Original hero placeholder is missing")
         return
+    # After the editor converts the temporary models into authored scene
+    # instances, there must be no transient preview at all. Test those
+    # permanent children and the unchanged runtime replacement contract.
+    var authored := imported.get_node_or_null("EditableImportedModels") as Node3D
+    if authored != null:
+        var expected := {
+            "retro_slot_machine": 1,
+            "roulette_table": 3,
+            "blackjack_table": 1,
+            "poker_set": 1
+        }
+        var found := {
+            "retro_slot_machine": 0,
+            "roulette_table": 0,
+            "blackjack_table": 0,
+            "poker_set": 0
+        }
+        var cabinets := 0
+        var plinths := 0
+        for item in authored.get_children():
+            var slug := str(item.get_meta("source_asset", ""))
+            if found.has(slug):
+                found[slug] = int(found[slug]) + 1
+            if str(item.get_meta("furniture_kind", "")) == "roulette_table":
+                cabinets += 1
+                if item.get_node_or_null("SolidTableTopCollider") == null:
+                    _fail("Authored roulette table has no physical tabletop")
+                    return
+            if item.name.begins_with("RetroSlotPlinth"):
+                plinths += 1
+                if item.get_node_or_null("PedestalBodyCollider") == null:
+                    _fail("Authored retro pedestal lacks collision")
+                    return
+        if found != expected or cabinets != 3 or plinths != 1:
+            _fail("Authored furniture count is incorrect: %s, cabinets=%d, plinths=%d" % [str(found), cabinets, plinths])
+            return
+        if retro.visible or tables.get_node("Roulette2").visible:
+            _fail("Authored imported models overlap visible placeholders")
+            return
+        var authored_count := authored.get_child_count()
+        root.add_child(world)
+        await process_frame
+        await process_frame
+        if bool(imported.call("has_active_editor_preview")) \
+                or authored.get_child_count() != authored_count \
+                or imported.get_child_count() != 1:
+            _fail("Runtime unexpectedly recreated the saved imported models")
+            return
+        if int(imported.get("replaced_slots")) != 1 \
+                or int(imported.get("replaced_roulette")) != 3 \
+                or int(imported.get("replaced_blackjack")) != 1 \
+                or int(imported.get("poker_props_placed")) != 1:
+            _fail("Saved furniture metadata did not update runtime counters")
+            return
+        print("Casino Anomaly Sketchfab editor preview QA PASS")
+        world.queue_free()
+        quit(0)
+        return
+
     var preview := imported.call("create_editor_preview_for_test") as Node3D
     if preview == null or preview.owner != null \
             or not bool(imported.call("has_active_editor_preview")):
