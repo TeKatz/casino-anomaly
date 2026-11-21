@@ -56,7 +56,19 @@ func _add(slug: String, title: String, center: Vector3, envelope: Vector3) -> bo
         return false
     model.scale = Vector3.ONE*fit
     bound = _bounds(model)
-    model.position = center - bound.get_center()
+    # Exact contact with the receiving surface, not an approximate centre:
+    # imported Sketchfab coordinates vary considerably between assets.
+    var anchored_y := center.y - bound.get_center().y
+    match slug:
+        "books_with_magnifier", "desk_bell":
+            anchored_y = 1.144 - bound.position.y # Existing reception top
+        "vintage_gramophone":
+            anchored_y = 0.970 - bound.position.y # New sideboard top
+    model.position = Vector3(
+        center.x - bound.get_center().x,
+        anchored_y,
+        center.z - bound.get_center().z
+    )
     return true
 
 func _bounds(model: Node3D) -> AABB:

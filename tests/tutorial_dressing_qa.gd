@@ -53,6 +53,28 @@ func _run() -> void:
         if old_register == null or old_register.visible:
             _fail("Real books model must replace the old register placeholder")
             return
+        # Check the actual glTF mesh vertices in world space, not just the
+        # importer wrapper. The desk is 1.144 m tall at this point.
+        var books_bound := _bounds_in_room(room, books)
+        if absf(books_bound.position.y - 1.144) > .008:
+            _fail("Books float over or clip through reception: " + str(books_bound))
+            return
+        if books_bound.position.x < -2.60 or books_bound.end.x > -1.70 \
+                or books_bound.position.z < .75 or books_bound.end.z > 1.50:
+            _fail("Books extend beyond their reception-desk placement: " + str(books_bound))
+            return
+        var textured := false
+        for child in books.find_children("*", "MeshInstance3D", true, false):
+            var mesh := child as MeshInstance3D
+            if mesh.mesh == null:
+                continue
+            var material := mesh.get_active_material(0) as StandardMaterial3D
+            if material != null and material.albedo_texture != null:
+                textured = true
+                break
+        if not textured:
+            _fail("Sketchfab books are missing their original PBR textures")
+            return
     if ResourceLoader.exists("res://gameplay/tutorial_sketchfab_props.gd") == false:
         _fail("Tutorial Sketchfab integration script must parse")
         return
