@@ -58,7 +58,7 @@ func _run() -> void:
     if Input.mouse_mode != Input.MOUSE_MODE_VISIBLE:
         _fail("Dialogue must release the mouse for its buttons")
         return
-    var response := dialogue.get_node("CroupierOverlay/DialoguePanel/MarginContainer/VBoxContainer/Response") as Label
+    var response := dialogue.get("response_label") as Label
     if response == null or not response.text.contains("Willkommen"):
         _fail("German welcome must be concise and visible")
         return
