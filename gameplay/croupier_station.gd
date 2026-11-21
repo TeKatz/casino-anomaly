@@ -29,6 +29,7 @@ var _talking := false
 
 func _ready() -> void:
     _ensure_croupier_collision()
+    _ensure_counter_collision()
     _try_load_model()
     _sync_placeholder()
     if Engine.is_editor_hint():
@@ -49,7 +50,7 @@ func _ensure_croupier_collision() -> void:
     if body == null:
         body = StaticBody3D.new()
         body.name = "CroupierCollision"
-        body.position = Vector3(0.0, 0.86, -0.39)
+        body.position = Vector3(0.0, 0.86, -0.52)
         add_child(body)
     var shape := body.get_node_or_null("BodyShape") as CollisionShape3D
     if shape == null:
@@ -61,6 +62,30 @@ func _ensure_croupier_collision() -> void:
         capsule.radius = 0.38
         capsule.height = 1.7
         shape.shape = capsule
+
+
+func _ensure_counter_collision() -> void:
+    # Defensive Godot PackedScene fallback; the collision shapes are also
+    # authored in the scene so the booth is editable in the 3D inspector.
+    var body := get_node_or_null("CounterCollision") as StaticBody3D
+    if body == null:
+        body = StaticBody3D.new()
+        body.name = "CounterCollision"
+        add_child(body)
+    for entry in [
+        ["CounterShape", Vector3(-0.185, 0.52, 0.44), Vector3(3.75, 1.04, 0.63)],
+        ["ReturnShape", Vector3(-2.055, 0.52, -0.615), Vector3(0.63, 1.04, 1.65)]
+    ]:
+        var item := body.get_node_or_null(str(entry[0])) as CollisionShape3D
+        if item == null:
+            item = CollisionShape3D.new()
+            item.name = str(entry[0])
+            body.add_child(item)
+        item.position = entry[1]
+        if not (item.shape is BoxShape3D):
+            var collider := BoxShape3D.new()
+            collider.size = entry[2]
+            item.shape = collider
 
 
 func _try_load_model() -> void:
@@ -93,7 +118,10 @@ func _process(delta: float) -> void:
     var target_yaw := 0.0
     var player := get_parent().get_node_or_null("Player") as Node3D
     if player != null and player.global_position.distance_to(global_position) < 4.5:
-        var delta_position: Vector3 = player.global_position - character_pivot.global_position
+        # Follow in station-local axes: this booth is rotated into the
+        # left/front corner. World-space atan2 would turn his face away.
+        var local_player := to_local(player.global_position)
+        var delta_position: Vector3 = local_player - character_pivot.position
         target_yaw = clampf(atan2(delta_position.x, delta_position.z), -0.32, 0.32)
     character_pivot.rotation.y = lerpf(character_pivot.rotation.y, target_yaw, minf(delta * 3.0, 1.0))
     if model_anchor.get_child_count() == 0:

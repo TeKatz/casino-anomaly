@@ -23,6 +23,11 @@ func _run() -> void:
 
     var desk := room.get_node_or_null("CroupierStation") as Node3D
     var collision := room.get_node_or_null("CroupierStation/CounterCollision/CounterShape") as CollisionShape3D
+    var return_collision := room.get_node_or_null("CroupierStation/CounterCollision/ReturnShape") as CollisionShape3D
+    var main_face := room.get_node_or_null("CroupierStation/Counter/MainFacing") as MeshInstance3D
+    var main_top := room.get_node_or_null("CroupierStation/Counter/MainCounterTop") as MeshInstance3D
+    var return_face := room.get_node_or_null("CroupierStation/Counter/ReturnFacing") as MeshInstance3D
+    var return_top := room.get_node_or_null("CroupierStation/Counter/ReturnCounterTop") as MeshInstance3D
     var croupier_body := room.get_node_or_null("CroupierStation/CroupierCollision") as StaticBody3D
     var croupier_shape := room.get_node_or_null("CroupierStation/CroupierCollision/BodyShape") as CollisionShape3D
     var anchor := room.get_node_or_null("CroupierStation/CharacterPivot/ModelAnchor") as Node3D
@@ -31,30 +36,75 @@ func _run() -> void:
     var player := room.get_node_or_null("Player") as CharacterBody3D
     var camera := room.get_node_or_null("Player/Camera3D") as Camera3D
     var dialogue := room.get_node_or_null("CroupierDialogue") as CanvasLayer
-    if desk == null or collision == null or croupier_body == null \
-            or croupier_shape == null or anchor == null or proxy == null \
-            or hint == null or player == null or camera == null or dialogue == null:
-        _fail("Missing nodes: desk=%s counter=%s npcBody=%s npcShape=%s anchor=%s proxy=%s hint=%s player=%s camera=%s dialogue=%s" % [
-            str(desk != null), str(collision != null),
-            str(croupier_body != null), str(croupier_shape != null),
-            str(anchor != null), str(proxy != null), str(hint != null),
-            str(player != null), str(camera != null), str(dialogue != null)])
+    if desk == null or collision == null or return_collision == null \
+            or main_face == null or main_top == null or return_face == null \
+            or return_top == null or croupier_body == null or croupier_shape == null \
+            or anchor == null or proxy == null or hint == null \
+            or player == null or camera == null or dialogue == null:
+        _fail("Missing corner booth nodes: station=%s mainShape=%s returnShape=%s front=%s top=%s return=%s returnTop=%s NPC=%s NPCshape=%s" % [
+            str(desk != null), str(collision != null), str(return_collision != null),
+            str(main_face != null), str(main_top != null), str(return_face != null),
+            str(return_top != null), str(croupier_body != null),
+            str(croupier_shape != null)])
         return
-    if desk.position.x > -1.5:
-        _fail("The welcome counter obstructs the main exit route")
+    if desk.position.distance_to(Vector3(-2.4, 0.0, -3.15)) > 0.08 \
+            or absf(desk.rotation.y - PI * 0.5) > 0.03:
+        _fail("The corner booth is not rotated and positioned by the left/front walls")
+        return
+    if room.get_node_or_null("CroupierStation/Counter/WoodFront") != null \
+            or room.get_node_or_null("CroupierStation/Counter/ChipOne") != null:
+        _fail("The old placeholder table must be removed, not hidden underneath")
+        return
+    var main_shape := collision.shape as BoxShape3D
+    var side_shape := return_collision.shape as BoxShape3D
+    if main_shape == null or side_shape == null \
+            or main_shape.size.x < 3.6 or side_shape.size.z < 1.5:
+        _fail("The new L-shaped counter needs two substantial solid sections")
+        return
+    # The customer-facing long end overlaps the front wall, and the side
+    # return overlaps the left wall. No player-sized path behind the counter.
+    var front_end := desk.to_global(Vector3(1.69, 0.52, 0.44))
+    var left_end := desk.to_global(Vector3(-2.055, 0.52, -1.44))
+    if front_end.z > -4.67 or left_end.x > -3.65:
+        _fail("Counter ends do not connect to both walls: front=%s left=%s" % [
+            str(front_end), str(left_end)])
+        return
+    for piece in [main_face, main_top, return_face, return_top]:
+        var surface := piece.get_active_material(0) as StandardMaterial3D
+        if surface == null or surface.albedo_texture == null \
+                or not surface.normal_enabled or surface.normal_texture == null \
+                or surface.roughness_texture == null:
+            _fail("Corner counter lost project PBR wood texture on " + piece.name)
+            return
+    await physics_frame
+    var physics := room.get_world_3d().direct_space_state
+    var booth_collision := collision.get_parent() as StaticBody3D
+    var across_front := PhysicsRayQueryParameters3D.create(
+            desk.to_global(Vector3(0.0, 0.7, 1.25)),
+            desk.to_global(Vector3(0.0, 0.7, -1.0)))
+    var front_hit := physics.intersect_ray(across_front)
+    if front_hit.is_empty() or front_hit.get("collider") != booth_collision:
+        _fail("The new front counter does not block the player's path")
+        return
+    var across_return := PhysicsRayQueryParameters3D.create(
+            desk.to_global(Vector3(-2.75, 0.7, -0.65)),
+            desk.to_global(Vector3(-1.25, 0.7, -0.65)))
+    var return_hit := physics.intersect_ray(across_return)
+    if return_hit.is_empty() or return_hit.get("collider") != booth_collision:
+        _fail("The return counter is open and players can walk behind the NPC")
         return
     var capsule := croupier_shape.shape as CapsuleShape3D
     if capsule == null or capsule.radius < 0.33 or capsule.radius > 0.47 \
             or capsule.height < 1.6 or capsule.height > 1.85:
         _fail("The croupier requires a human-sized solid capsule collision")
         return
-    if croupier_body.position.distance_to(Vector3(0.0, 0.86, -0.39)) > 0.06:
+    if croupier_body.position.distance_to(Vector3(0.0, 0.86, -0.52)) > 0.06:
         _fail("NPC collision is displaced from the character behind the counter")
         return
     await physics_frame
     var collision_query := PhysicsRayQueryParameters3D.create(
-            croupier_body.global_position + Vector3(-1.05, 0.0, 0.0),
-            croupier_body.global_position + Vector3(1.05, 0.0, 0.0))
+            desk.to_global(Vector3(-0.75, 0.86, -0.52)),
+            desk.to_global(Vector3(0.75, 0.86, -0.52)))
     var hit := room.get_world_3d().direct_space_state.intersect_ray(collision_query)
     if hit.is_empty() or hit.get("collider") != croupier_body:
         _fail("Physics ray passes through the croupier instead of hitting his capsule")
@@ -125,14 +175,30 @@ func _run() -> void:
         _fail("German interaction cue is missing or over-sized")
         return
 
-    player.position = Vector3(-2.0, 1.02, 1.4)
-    camera.look_at(desk.global_position + Vector3(0, 1.48, -0.38), Vector3.UP)
+    # Stand at the customer side of the real L booth, not at the old desk.
+    player.position = desk.to_global(Vector3(0.0, 1.02, 1.60))
+    camera.look_at(desk.to_global(Vector3(0, 1.48, -0.52)), Vector3.UP)
     await process_frame
     if not bool(room.call("_is_looking_at_croupier")):
         _fail("Looking at the croupier from the customer side must allow interaction")
         return
     if bool(room.call("_is_looking_at_door")):
         _fail("The start door must not steal the croupier interaction")
+        return
+    # Confirm looking at the NPC from inside the blocked pocket cannot
+    # masquerade as an accessible customer-side interaction.
+    var candidate := player.position
+    player.position = desk.to_global(Vector3(0, 1.02, -0.72))
+    camera.look_at(desk.to_global(Vector3(0, 1.48, -0.52)), Vector3.UP)
+    await process_frame
+    if bool(room.call("_is_looking_at_croupier")):
+        _fail("The talking prompt must only be available in front of the counter")
+        return
+    player.position = candidate
+    camera.look_at(desk.to_global(Vector3(0, 1.48, -0.52)), Vector3.UP)
+    await process_frame
+    if not bool(room.call("_is_looking_at_croupier")):
+        _fail("Returning to the customer side must restore the talking trigger")
         return
 
     var idle_hands := _hand_positions(anchor, character) if model_installed else PackedVector3Array()

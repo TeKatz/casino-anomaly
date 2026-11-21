@@ -68,3 +68,31 @@ AnimationTree facial blending remains unchanged. The intro QA performs a
 physics-space side raycast to verify a real collision, plus a skeleton
 landmark check for the corrected height and shoulder proportions.
 The large head prompt has also been reduced in size.
+
+## Customer-facing corner counter (21 November 2026)
+
+The small free-standing placeholder counter has been **removed**. The
+replacement is a corner-mounted, L-shaped reception counter inside the
+intro scene, using the existing `bar_side_material.tres` (Poly Haven dark
+wood), `bar_top_material.tres` (Poly Haven worn tabletop) and
+`roulette_wood_material.tres` (Poly Haven wood) including PBR normal
+and roughness maps, plus restrained brass-colored trim.
+
+In `gameplay/tutorial.tscn`, CroupierStation is placed at
+`(-2.4, 0, -3.15)`, facing the room by a +90-degree Y rotation. The
+main 3.75-meter counter runs toward the front wall at z = -4.72.
+Its perpendicular return is joined to the left wall at x = -3.7.
+Both have solid, joined collision shapes with physical overlap at the
+wall endpoints so players cannot slip behind either end. The NPC is
+station-local z = -0.52 and faces the customer side (+local Z, +world X).
+The counter height is approximately 1.12 m relative to the 1.77 m NPC.
+
+Conversation targeting is transformed into the station's local
+coordinates, so the existing `E` dialogue still starts only from the
+customer side. The imported `Rig|idle` animation, facial speech
+AnimationTree filter and model scale remain unchanged. The existing
+exit-door trigger and original player spawn stay in place.
+
+The intro QA verifies both wall seams, both real physics collisions,
+PBR material maps, NPC capsule, customer-only talking trigger, facial
+animation mask, movement lock and original exit interaction.

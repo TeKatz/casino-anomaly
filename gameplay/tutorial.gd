@@ -60,12 +60,14 @@ func _is_looking_at_door() -> bool:
 
 
 func _is_looking_at_croupier() -> bool:
-    var center := croupier.global_position + Vector3(0, 1.53, -0.39)
+    # The corner booth faces +X in world space. Transform the croupier's
+    # face from station-local coordinates; do not aim at the counter root.
+    var center := croupier.to_global(Vector3(0, 1.53, -0.52))
     var towards: Vector3 = center - camera.global_position
     var distance := towards.length()
     if distance < 0.2 or distance > 3.35:
         return false
-    if croupier.to_local(camera.global_position).z < 0.65:
+    if croupier.to_local(camera.global_position).z < 0.78:
         return false
     return (-camera.global_transform.basis.z).dot(towards / distance) >= 0.925
 

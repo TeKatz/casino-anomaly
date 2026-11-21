@@ -1,20 +1,14 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://gameplay/croupier_station.gd" id="1"]
-
-[sub_resource type="StandardMaterial3D" id="CounterWood"]
-albedo_color = Color(0.15, 0.077, 0.058, 1)
-metallic = 0.07
-roughness = 0.46
+[ext_resource type="Material" path="res://bar_side_material.tres" id="2"]
+[ext_resource type="Material" path="res://bar_top_material.tres" id="3"]
+[ext_resource type="Material" path="res://roulette_wood_material.tres" id="4"]
 
 [sub_resource type="StandardMaterial3D" id="CounterGold"]
-albedo_color = Color(0.65, 0.42, 0.17, 1)
-metallic = 0.72
-roughness = 0.29
-
-[sub_resource type="StandardMaterial3D" id="CounterFelt"]
-albedo_color = Color(0.095, 0.22, 0.17, 1)
-roughness = 0.89
+albedo_color = Color(0.61, 0.42, 0.2, 1)
+metallic = 0.75
+roughness = 0.31
 
 [sub_resource type="StandardMaterial3D" id="Jacket"]
 albedo_color = Color(0.08, 0.1, 0.125, 1)
@@ -35,20 +29,18 @@ roughness = 0.9
 [sub_resource type="BoxMesh" id="UnitCube"]
 size = Vector3(1, 1, 1)
 
-[sub_resource type="CylinderMesh" id="Chip"]
-top_radius = 0.12
-bottom_radius = 0.12
-height = 0.045
-radial_segments = 20
-
 [sub_resource type="SphereMesh" id="Head"]
 radius = 0.23
 height = 0.46
 radial_segments = 18
 rings = 9
 
-[sub_resource type="BoxShape3D" id="CounterShape"]
-size = Vector3(2.44, 1.1, 0.89)
+
+[sub_resource type="BoxShape3D" id="MainBarShape"]
+size = Vector3(3.75, 1.04, 0.63)
+
+[sub_resource type="BoxShape3D" id="ReturnBarShape"]
+size = Vector3(0.63, 1.04, 1.65)
 
 [sub_resource type="CapsuleShape3D" id="CroupierCapsule"]
 radius = 0.38
@@ -57,81 +49,111 @@ height = 1.7
 [node name="CroupierStation" type="Node3D"]
 script = ExtResource("1")
 
+# Corner booth: when this station is rotated 90 degrees by the tutorial,
+# +Z faces the room. The 3.75 m main counter reaches the front wall.
+# Its perpendicular return reaches the left wall: there is NO rear aisle.
 [node name="Counter" type="Node3D" parent="."]
 
-[node name="WoodFront" type="MeshInstance3D" parent="Counter"]
-position = Vector3(0, 0.52, 0.55)
-scale = Vector3(2.43, 1.04, 0.86)
+[node name="MainFacing" type="MeshInstance3D" parent="Counter"]
+position = Vector3(-0.185, 0.52, 0.44)
+scale = Vector3(3.75, 1.04, 0.63)
 mesh = SubResource("UnitCube")
-material_override = SubResource("CounterWood")
+material_override = ExtResource("2")
 
-[node name="CounterTop" type="MeshInstance3D" parent="Counter"]
-position = Vector3(0, 1.06, 0.55)
-scale = Vector3(2.56, 0.12, 1.06)
+[node name="MainCounterTop" type="MeshInstance3D" parent="Counter"]
+position = Vector3(-0.185, 1.059, 0.44)
+scale = Vector3(3.89, 0.13, 0.77)
 mesh = SubResource("UnitCube")
-material_override = SubResource("CounterWood")
+material_override = ExtResource("3")
 
-[node name="FeltInset" type="MeshInstance3D" parent="Counter"]
-position = Vector3(0, 1.129, 0.53)
-scale = Vector3(2.24, 0.012, 0.78)
+[node name="MainTopFrontLip" type="MeshInstance3D" parent="Counter"]
+position = Vector3(-0.185, 1.075, 0.83)
+scale = Vector3(3.89, 0.055, 0.07)
 mesh = SubResource("UnitCube")
-material_override = SubResource("CounterFelt")
+material_override = ExtResource("4")
 
-[node name="GoldFrontTrim" type="MeshInstance3D" parent="Counter"]
-position = Vector3(0, 0.89, 0.988)
-scale = Vector3(2.45, 0.055, 0.023)
-mesh = SubResource("UnitCube")
-material_override = SubResource("CounterGold")
-
-[node name="GoldTopRim" type="MeshInstance3D" parent="Counter"]
-position = Vector3(0, 1.125, 1.069)
-scale = Vector3(2.56, 0.033, 0.038)
+[node name="MainGoldTopLine" type="MeshInstance3D" parent="Counter"]
+position = Vector3(-0.185, 0.996, 0.761)
+scale = Vector3(3.78, 0.028, 0.026)
 mesh = SubResource("UnitCube")
 material_override = SubResource("CounterGold")
 
-[node name="GoldLeftRim" type="MeshInstance3D" parent="Counter"]
-position = Vector3(-1.268, 1.125, 0.55)
-scale = Vector3(0.035, 0.033, 1.04)
+[node name="MainGoldBottomLine" type="MeshInstance3D" parent="Counter"]
+position = Vector3(-0.185, 0.115, 0.764)
+scale = Vector3(3.78, 0.022, 0.026)
 mesh = SubResource("UnitCube")
 material_override = SubResource("CounterGold")
 
-[node name="GoldRightRim" type="MeshInstance3D" parent="Counter"]
-position = Vector3(1.268, 1.125, 0.55)
-scale = Vector3(0.035, 0.033, 1.04)
+[node name="MainPanelLeft" type="MeshInstance3D" parent="Counter"]
+position = Vector3(-1.40, 0.55, 0.764)
+scale = Vector3(1.05, 0.69, 0.035)
+mesh = SubResource("UnitCube")
+material_override = ExtResource("4")
+
+[node name="MainPanelMiddle" type="MeshInstance3D" parent="Counter"]
+position = Vector3(-0.18, 0.55, 0.764)
+scale = Vector3(1.05, 0.69, 0.035)
+mesh = SubResource("UnitCube")
+material_override = ExtResource("4")
+
+[node name="MainPanelRight" type="MeshInstance3D" parent="Counter"]
+position = Vector3(1.04, 0.55, 0.764)
+scale = Vector3(1.05, 0.69, 0.035)
+mesh = SubResource("UnitCube")
+material_override = ExtResource("4")
+
+[node name="ReturnFacing" type="MeshInstance3D" parent="Counter"]
+position = Vector3(-2.055, 0.52, -0.615)
+scale = Vector3(0.63, 1.04, 1.65)
+mesh = SubResource("UnitCube")
+material_override = ExtResource("2")
+
+# Return top ends exactly where the main top starts: no overlapping
+# coplanar wood surfaces or flickering UVs at the inside corner.
+[node name="ReturnCounterTop" type="MeshInstance3D" parent="Counter"]
+position = Vector3(-2.055, 1.059, -0.695)
+scale = Vector3(0.78, 0.13, 1.50)
+mesh = SubResource("UnitCube")
+material_override = ExtResource("3")
+
+[node name="ReturnFrontInset" type="MeshInstance3D" parent="Counter"]
+position = Vector3(-2.383, 0.55, -0.69)
+scale = Vector3(0.025, 0.69, 1.31)
+mesh = SubResource("UnitCube")
+material_override = ExtResource("4")
+
+[node name="ReturnGoldTopLine" type="MeshInstance3D" parent="Counter"]
+position = Vector3(-2.383, 0.997, -0.695)
+scale = Vector3(0.029, 0.028, 1.47)
 mesh = SubResource("UnitCube")
 material_override = SubResource("CounterGold")
 
-[node name="ChipOne" type="MeshInstance3D" parent="Counter"]
-position = Vector3(-0.74, 1.163, 0.48)
-mesh = SubResource("Chip")
+[node name="ReturnGoldBottomLine" type="MeshInstance3D" parent="Counter"]
+position = Vector3(-2.383, 0.115, -0.695)
+scale = Vector3(0.029, 0.022, 1.47)
+mesh = SubResource("UnitCube")
 material_override = SubResource("CounterGold")
 
-[node name="ChipTwo" type="MeshInstance3D" parent="Counter"]
-position = Vector3(-0.74, 1.207, 0.48)
-mesh = SubResource("Chip")
-material_override = SubResource("CounterGold")
-
-[node name="ChipThree" type="MeshInstance3D" parent="Counter"]
-position = Vector3(-0.74, 1.251, 0.48)
-mesh = SubResource("Chip")
-material_override = SubResource("CounterGold")
-
+# Both collision shapes belong to the same solid counter body.
+# The long end enters the front wall, the return enters the left wall.
 [node name="CounterCollision" type="StaticBody3D" parent="."]
-position = Vector3(0, 0.55, 0.55)
 
 [node name="CounterShape" type="CollisionShape3D" parent="CounterCollision"]
-shape = SubResource("CounterShape")
+position = Vector3(-0.185, 0.52, 0.44)
+shape = SubResource("MainBarShape")
 
-# A separate, stable solid capsule blocks the player from walking through
-# the NPC. It sits behind (not inside) the casino counter's collision box.
+[node name="ReturnShape" type="CollisionShape3D" parent="CounterCollision"]
+position = Vector3(-2.055, 0.52, -0.615)
+shape = SubResource("ReturnBarShape")
+
 [node name="CroupierCollision" type="StaticBody3D" parent="."]
-position = Vector3(0, 0.86, -0.39)
+position = Vector3(0, 0.86, -0.52)
 
 [node name="BodyShape" type="CollisionShape3D" parent="CroupierCollision"]
 shape = SubResource("CroupierCapsule")
 
 [node name="CharacterPivot" type="Node3D" parent="."]
-position = Vector3(0, 0, -0.39)
+position = Vector3(0, 0, -0.52)
 
 [node name="ModelAnchor" type="Node3D" parent="CharacterPivot"]
 # Add the imported character as a child here. The proxy is hidden automatically.
@@ -204,7 +226,7 @@ mesh = SubResource("Head")
 material_override = SubResource("Hair")
 
 [node name="InteractionHint" type="Label3D" parent="."]
-position = Vector3(0, 2.13, 0.24)
+position = Vector3(0, 2.15, -0.45)
 modulate = Color(0.94, 0.77, 0.49, 1)
 text = "E · Talk"
 font_size = 48
@@ -215,7 +237,7 @@ outline_modulate = Color(0, 0, 0, 1)
 outline_size = 10
 
 [node name="CounterLight" type="OmniLight3D" parent="."]
-position = Vector3(0, 2.62, 0.05)
+position = Vector3(-0.20, 2.65, 0.05)
 light_color = Color(1, 0.79, 0.54, 1)
 light_energy = 0.6
 omni_range = 3.2
