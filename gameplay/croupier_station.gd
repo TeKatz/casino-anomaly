@@ -12,7 +12,7 @@ const MODEL_PATH := "res://models/croupier/scene.gltf"
 # This FBX-to-glTF import renders unnaturally narrow in Godot (both from
 # the front and the side). Correct width/depth at the outer model root; keep
 # the original height and the skeleton/animations intact.
-@export var imported_model_proportions := Vector3(1.6, 1.0, 2.05)
+@export var imported_model_proportions := Vector3(1.95, 1.24, 2.1)
 @export_range(0.5, 1.5, 0.05) var imported_model_scale := 1.0
 @export var imported_model_offset := Vector3.ZERO
 
@@ -22,8 +22,8 @@ const MODEL_PATH := "res://models/croupier/scene.gltf"
 
 var _idle_clock := 0.0
 var _animator: AnimationPlayer
+var _animation_tree: AnimationTree
 var _talking := false
-var _active_animation := ""
 
 
 func _ready() -> void:
@@ -36,7 +36,7 @@ func _ready() -> void:
     if settings != null:
         settings.options_changed.connect(_on_settings_changed)
     _refresh_language()
-    _play_character_animation()
+    _setup_character_animations()
 
 
 func _try_load_model() -> void:
@@ -86,23 +86,61 @@ func _sync_placeholder() -> void:
 
 
 func set_talking(value: bool) -> void:
-    if _talking == value:
-        return
     _talking = value
-    _play_character_animation()
+    if _animation_tree != null:
+        # The idle body pose must remain active. Only mouth/jaw tracks are
+        # layered onto it, otherwise this face-only clip produces a T-pose.
+        _animation_tree.set("parameters/Speech/blend_amount", 1.0 if value else 0.0)
 
 
-func _play_character_animation() -> void:
+func _setup_character_animations() -> void:
     if _animator == null or Engine.is_editor_hint():
         return
-    var selected := _pick_animation("talk" if _talking else "idle")
-    if selected.is_empty() or selected == _active_animation:
+    var idle_name := _pick_animation("idle")
+    if idle_name.is_empty():
         return
-    var clip := _animator.get_animation(selected)
-    if clip != null:
-        clip.loop_mode = Animation.LOOP_LINEAR
-    _animator.play(selected, 0.2)
-    _active_animation = selected
+    var idle_clip := _animator.get_animation(idle_name)
+    idle_clip.loop_mode = Animation.LOOP_LINEAR
+
+    var talk_name := _pick_animation("talk")
+    if talk_name.is_empty():
+        # For other optional NPC models, do not drop the body's idle pose
+        # just because a facial animation is not present.
+        _animator.play(idle_name)
+        return
+    var speech_clip := _animator.get_animation(talk_name)
+    speech_clip.loop_mode = Animation.LOOP_LINEAR
+
+    var idle_node := AnimationNodeAnimation.new()
+    idle_node.animation = idle_name
+    var speech_node := AnimationNodeAnimation.new()
+    speech_node.animation = talk_name
+
+    var speech_mix := AnimationNodeBlend2.new()
+    speech_mix.filter_enabled = true
+    speech_mix.sync = true
+    # The source 'Rig|cycle_talking' contains only facial-bone tracks.
+    # In particular it has NO arms, torso or leg animation at all.
+    for index in range(speech_clip.get_track_count()):
+        speech_mix.set_filter_path(speech_clip.track_get_path(index), true)
+
+    var graph := AnimationNodeBlendTree.new()
+    graph.add_node("Idle", idle_node, Vector2(0, 0))
+    graph.add_node("TalkingFace", speech_node, Vector2(0, 160))
+    graph.add_node("Speech", speech_mix, Vector2(240, 90))
+    graph.connect_node("Speech", 0, "Idle")
+    graph.connect_node("Speech", 1, "TalkingFace")
+    graph.connect_node("output", 0, "Speech")
+
+    _animation_tree = AnimationTree.new()
+    _animation_tree.name = "CroupierAnimationTree"
+    model_anchor.add_child(_animation_tree)
+    _animation_tree.anim_player = _animation_tree.get_path_to(_animator)
+    _animation_tree.tree_root = graph
+    # Keep idle running throughout the conversation, even while the
+    # talking overlay is at full weight.
+    _animation_tree.active = true
+    _animation_tree.set("parameters/Speech/blend_amount", 1.0 if _talking else 0.0)
 
 
 func _pick_animation(kind: String) -> String:

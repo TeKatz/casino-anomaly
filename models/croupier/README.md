@@ -29,13 +29,25 @@ upright. The intro QA checks animated skeleton landmarks (head, feet, face)
 and requires a human-height upright character facing the player.
 
 
-## Body proportions (November 2026)
+## Human-scale proportions and facial-only talking (November 2026)
 
-The original model, once imported with the FBX rig, appeared stretched
-vertically and paper-thin horizontally in the actual Godot room despite
-passing the bone-pose tests. The croupier script applies an outer-root
-width/depth correction of (1.6, 1.0, 2.05), preserving height, textures,
-skeleton and original animation files. This is adjustable in the scene's
-inspector for later art direction. The QA check instead measures **animated bone landmarks** (shoulders,
-head, face and feet). Unskinned mesh AABBs are misleading for this model:
-the bind pose lies along the wrong axis despite the displayed rig being upright.
+Sketchfab's model contains nested FBX-to-glTF axis/scale corrections.
+Godot correctly imports the standing rig, but the character looks too
+small and narrow beside the counter and oversized intro door. The visual
+model root now uses editor-adjustable proportions (1.95, 1.24, 2.1),
+bringing the animated crown/head to approximately adult height without
+moving the table or affecting the first-room gameplay.
+
+The source "Rig|idle" animation drives the full body (97 tracks). In
+contrast "Rig|cycle_talking" has only 11 facial tracks (lips, tongue,
+jaw): *playing that clip directly* resets unanimated arm/torso bones to
+rest, which visibly creates a T-pose. Godot now uses an AnimationTree
+with a filtered Blend2 node. The full-body idle loops permanently;
+when the optional conversation opens, only the facial bone tracks are
+blended on top. Closing the conversation returns the facial blend to
+zero while the idle body is never stopped.
+
+The CI intro QA verifies actual animated skeletal landmarks and checks
+that the hand positions do not jump when the facial overlay is active.
+Unskinned mesh bounding boxes are misleading for this particular asset
+because its bind-pose axes differ from the displayed rig.

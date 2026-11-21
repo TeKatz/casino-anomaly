@@ -37,15 +37,31 @@ func _run() -> void:
         _fail("The welcome counter obstructs the main exit route")
         return
     var model_installed := ResourceLoader.exists("res://models/croupier/scene.gltf", "PackedScene")
+    var character: Node3D = null
     if model_installed:
-        var character := anchor.get_node_or_null("BusinessMan") as Node3D
+        character = anchor.get_node_or_null("BusinessMan") as Node3D
         var animator := desk.get("_animator") as AnimationPlayer
         if character == null or proxy.visible or animator == null:
             _fail("Imported business man, animation player or proxy switch missing")
             return
-        if str(desk.call("_pick_animation", "idle")).is_empty() \
-                or str(desk.call("_pick_animation", "talk")).is_empty():
+        var idle_name := str(desk.call("_pick_animation", "idle"))
+        var talk_name := str(desk.call("_pick_animation", "talk"))
+        if idle_name.is_empty() or talk_name.is_empty():
             _fail("The imported model needs idle and talking clips")
+            return
+        var speech := animator.get_animation(talk_name)
+        var idle := animator.get_animation(idle_name)
+        if speech.get_track_count() > 16 or idle.get_track_count() < 70:
+            _fail("The talking clip only animates facial bones and must be layered onto full-body idle")
+            return
+        var anim_tree := desk.get("_animation_tree") as AnimationTree
+        if anim_tree == null or not anim_tree.active:
+            _fail("The imported model must have an active facial-overlay AnimationTree")
+            return
+        var graph := anim_tree.tree_root as AnimationNodeBlendTree
+        var speech_mix := graph.get_node("Speech") as AnimationNodeBlend2
+        if speech_mix == null or not speech_mix.filter_enabled:
+            _fail("Talking animation must be masked to facial tracks")
             return
         var pose_error := _validate_model_pose(desk, character)
         if not pose_error.is_empty():
@@ -74,8 +90,20 @@ func _run() -> void:
         _fail("The start door must not steal the croupier interaction")
         return
 
+    var idle_hands := _hand_positions(anchor, character) if model_installed else PackedVector3Array()
     room.call("_open_conversation")
     await process_frame
+    await process_frame
+    if model_installed:
+        var active_tree := desk.get("_animation_tree") as AnimationTree
+        if not is_equal_approx(float(active_tree.get("parameters/Speech/blend_amount")), 1.0):
+            _fail("The facial overlay did not activate during conversation")
+            return
+        var talk_hands := _hand_positions(anchor, character)
+        print("CROUPIER_DIALOGUE_BODY_TEST: idle_hands=", idle_hands, " talk_hands=", talk_hands)
+        if idle_hands.size() != 2 or talk_hands.size() != 2                 or idle_hands[0].distance_to(talk_hands[0]) > 0.34                 or idle_hands[1].distance_to(talk_hands[1]) > 0.34:
+            _fail("Body animation reset when speaking: the croupier enters a T-pose")
+            return
     if not bool(dialogue.get("active")) or not bool(player.get("interaction_locked")):
         _fail("Opening dialogue must activate the panel and lock movement")
         return
@@ -95,6 +123,11 @@ func _run() -> void:
         _fail("Bilingual text did not update live")
         return
     dialogue.call("close_conversation")
+    if model_installed:
+        var idle_tree := desk.get("_animation_tree") as AnimationTree
+        if not is_equal_approx(float(idle_tree.get("parameters/Speech/blend_amount")), 0.0):
+            _fail("The facial overlay must stop after dialogue while idle continues")
+            return
     # The headless display server cannot hold OS-level mouse capture; it
     # reports VISIBLE even after correctly requesting CAPTURED.
     var mouse_failed := DisplayServer.get_name() != "headless" \
@@ -194,3 +227,17 @@ func _validate_model_proportions(character: Node3D) -> String:
     if foot_width < 0.25 or foot_width > 0.85:
         return "Croupier leg spacing is implausible: %.2f" % foot_width
     return ""
+
+
+func _hand_positions(anchor: Node3D, character: Node3D) -> PackedVector3Array:
+    if character == null:
+        return PackedVector3Array()
+    var skeleton := _find_skeleton(character)
+    if skeleton == null:
+        return PackedVector3Array()
+    var points := PackedVector3Array()
+    for name in ["Hand_L_029", "Hand_R_048"]:
+        if skeleton.find_bone(name) < 0:
+            return PackedVector3Array()
+        points.append(_bone_anchor_position(skeleton, anchor, name))
+    return points
