@@ -75,3 +75,13 @@ func set_menu_music_enabled(enabled: bool) -> void:
 func _exit_tree() -> void:
     if _fade != null and _fade.is_running():
         _fade.kill()
+    _fade = null
+    # Release the stream decoders before Godot closes AudioServer. This also
+    # avoids headless QA's 'resources still in use at exit' warning once the
+    # verified real Ogg assets have been uploaded.
+    if menu_player != null:
+        menu_player.stop()
+        menu_player.stream = null
+    if room_player != null:
+        room_player.stop()
+        room_player.stream = null

@@ -76,5 +76,14 @@ func _run() -> void:
     if has_music and not ambience.playing:
         _fail("Room tone stopped during menu to gameplay transition")
         return
+    # Close the real Ogg decoder/playback objects before quitting headless.
+    # Otherwise Godot 4.5.1 reports four live Ogg/audio resources on exit,
+    # even though the functional assertions have already passed.
+    music.stop()
+    ambience.stop()
+    director.queue_free()
+    await process_frame
+    await process_frame
+    await create_timer(0.15).timeout
     print("Casino Anomaly persistent audio and menu-only loop QA PASS")
     quit(0)
