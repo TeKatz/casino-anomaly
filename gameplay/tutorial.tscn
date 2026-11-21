@@ -1,4 +1,4 @@
-[gd_scene load_steps=49 format=3 uid="uid://e3engt017thr"]
+[gd_scene load_steps=51 format=3 uid="uid://e3engt017thr"]
 
 [ext_resource type="Script" uid="uid://bql5dmlifsh5g" path="res://gameplay/tutorial.gd" id="1"]
 [ext_resource type="Script" uid="uid://ddd0bf0443g2o" path="res://player.gd" id="2"]
@@ -16,6 +16,8 @@
 [ext_resource type="Texture2D" uid="uid://cciufycic5yd7" path="res://assets/brown_planks_05/brown_planks_05_diff_2k.jpg" id="13_risjm"]
 [ext_resource type="Texture2D" uid="uid://cub67xewield5" path="res://assets/brown_planks_05/brown_planks_05_nor_gl_2k.jpg" id="14_eabh4"]
 [ext_resource type="Texture2D" uid="uid://c1hf21s5jb2lm" path="res://assets/brown_planks_05/brown_planks_05_rough_2k.jpg" id="15_0tfhg"]
+[ext_resource type="PackedScene" path="res://gameplay/tutorial_decor.tscn" id="16_decor"]
+[ext_resource type="Material" path="res://floor_material.tres" id="17_floor"]
 
 [sub_resource type="Environment" id="IntroEnv"]
 background_mode = 1
@@ -167,6 +169,8 @@ height = 1.87
 [node name="TutorialRoom" type="Node3D"]
 script = ExtResource("1")
 
+[node name="Decoration" parent="." instance=ExtResource("16_decor")]
+
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("IntroEnv")
 
@@ -179,7 +183,7 @@ omni_range = 9.0
 
 [node name="Floor" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.12, 0)
-material_override = SubResource("FloorMat")
+material_override = ExtResource("17_floor")
 mesh = SubResource("Floor")
 
 [node name="Ceiling" type="MeshInstance3D" parent="."]

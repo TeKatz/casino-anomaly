@@ -130,6 +130,7 @@ jobs:
             @('tests/loading_transition_qa.gd', 'Casino Anomaly threaded scene loading QA PASS'),
             @('tests/audio_loop_qa.gd', 'Casino Anomaly persistent audio and menu-only loop QA PASS'),
             @('tests/localization_intro_qa.gd', 'Casino Anomaly bilingual intro and door interaction QA PASS'),
+            @('tests/tutorial_dressing_qa.gd', 'Casino Anomaly tutorial set dressing spatial QA PASS'),
             @('tests/cinematic_lighting_qa.gd', 'Casino Anomaly cinematic lighting and reflection QA PASS'),
             @('tests/voxel_gi_qa.gd', 'Casino Anomaly VoxelGI bake and streaming contract QA PASS')
           )) {

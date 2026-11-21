@@ -1,0 +1,620 @@
+[gd_scene load_steps=57 format=3]
+
+[ext_resource type="Material" path="res://upper_wall_material.tres" id="fabric"]
+[ext_resource type="Material" path="res://lower_wall_material.tres" id="panel"]
+[ext_resource type="Material" path="res://brown_planks_05_material.tres" id="trim"]
+[ext_resource type="Material" path="res://bar_side_material.tres" id="dark"]
+[ext_resource type="Material" path="res://bar_top_material.tres" id="polish"]
+[ext_resource type="Material" path="res://carpet_material.tres" id="carpet"]
+[ext_resource type="PackedScene" path="res://models/sofa_02/sofa_02_1k.gltf" id="sofa"]
+[ext_resource type="PackedScene" path="res://models/round_wooden_table_01/round_wooden_table_01_1k.gltf" id="table"]
+[ext_resource type="PackedScene" path="res://models/marble_bust_01/marble_bust_01_1k.gltf" id="bust"]
+[ext_resource type="PackedScene" path="res://models/fancy_picture_frame_01/fancy_picture_frame_01_1k.gltf" id="frame"]
+[ext_resource type="PackedScene" path="res://models/Chandelier_02/Chandelier_02_1k.gltf" id="chandelier"]
+
+[sub_resource type="StandardMaterial3D" id="SatinBrass"]
+resource_name = "SatinBrass"
+albedo_color = Color(0.74, 0.56, 0.31, 1)
+metallic = 0.73
+roughness = 0.29
+
+[sub_resource type="StandardMaterial3D" id="IvoryLedger"]
+resource_name = "IvoryLedger"
+albedo_color = Color(0.83, 0.74, 0.58, 1)
+metallic = 0
+roughness = 0.91
+
+[sub_resource type="StandardMaterial3D" id="FrostedGlass"]
+resource_name = "FrostedGlass"
+albedo_color = Color(0.97, 0.82, 0.62, 1)
+metallic = 0
+roughness = 0.33
+emission_enabled = true
+emission = Color(0.88, 0.54, 0.25, 1)
+emission_energy_multiplier = 0.65
+
+[sub_resource type="BoxMesh" id="Box1"]
+size = Vector3(0.075, 2.46, 9.04)
+
+[sub_resource type="BoxMesh" id="Box2"]
+size = Vector3(0.075, 1.31, 9.04)
+
+[sub_resource type="BoxMesh" id="Box3"]
+size = Vector3(0.11, 0.11, 9.04)
+
+[sub_resource type="BoxMesh" id="Box4"]
+size = Vector3(0.11, 0.27, 9.08)
+
+[sub_resource type="BoxMesh" id="Box5"]
+size = Vector3(0.11, 0.15, 9.02)
+
+[sub_resource type="BoxMesh" id="Box6"]
+size = Vector3(0.095, 2.39, 0.078)
+
+[sub_resource type="BoxMesh" id="Box7"]
+size = Vector3(6.8, 2.45, 0.08)
+
+[sub_resource type="BoxMesh" id="Box8"]
+size = Vector3(6.8, 1.3, 0.08)
+
+[sub_resource type="BoxMesh" id="Box9"]
+size = Vector3(6.7, 0.11, 0.11)
+
+[sub_resource type="BoxMesh" id="Box10"]
+size = Vector3(6.68, 0.27, 0.11)
+
+[sub_resource type="BoxMesh" id="Box11"]
+size = Vector3(6.74, 0.15, 0.11)
+
+[sub_resource type="BoxMesh" id="Box12"]
+size = Vector3(1.79, 2.45, 0.075)
+
+[sub_resource type="BoxMesh" id="Box13"]
+size = Vector3(1.79, 1.27, 0.075)
+
+[sub_resource type="BoxMesh" id="Box14"]
+size = Vector3(1.8, 0.105, 0.085)
+
+[sub_resource type="BoxMesh" id="Box15"]
+size = Vector3(1.8, 0.3, 0.09)
+
+[sub_resource type="BoxMesh" id="Box16"]
+size = Vector3(1.58, 0.028, 6.12)
+
+[sub_resource type="BoxMesh" id="Box17"]
+size = Vector3(0.021, 0.01, 6.01)
+
+[sub_resource type="BoxMesh" id="Box18"]
+size = Vector3(0.42, 0.05, 0.33)
+
+[sub_resource type="BoxMesh" id="Box19"]
+size = Vector3(0.385, 0.019, 0.302)
+
+[sub_resource type="BoxMesh" id="Box20"]
+size = Vector3(0.031, 0.061, 0.355)
+
+[sub_resource type="CylinderMesh" id="Cylinder21"]
+top_radius = 0.1
+bottom_radius = 0.1
+height = 0.021
+radial_segments = 20
+
+[sub_resource type="SphereMesh" id="Sphere22"]
+radius = 0.054
+height = 0.108
+radial_segments = 20
+rings = 12
+
+[sub_resource type="CylinderMesh" id="Cylinder23"]
+top_radius = 0.013
+bottom_radius = 0.013
+height = 0.014
+radial_segments = 20
+
+[sub_resource type="CylinderMesh" id="Cylinder24"]
+top_radius = 0.18
+bottom_radius = 0.18
+height = 0.02
+radial_segments = 20
+
+[sub_resource type="SphereMesh" id="Sphere25"]
+radius = 0.034
+height = 0.068
+radial_segments = 20
+rings = 12
+
+[sub_resource type="BoxMesh" id="Box26"]
+size = Vector3(0.62, 0.11, 0.62)
+
+[sub_resource type="BoxMesh" id="Box27"]
+size = Vector3(0.5, 0.79, 0.5)
+
+[sub_resource type="BoxMesh" id="Box28"]
+size = Vector3(0.6, 0.045, 0.6)
+
+[sub_resource type="BoxMesh" id="Box29"]
+size = Vector3(0.05, 1.02, 1.25)
+
+[sub_resource type="BoxMesh" id="Box30"]
+size = Vector3(0.05, 1, 1.25)
+
+[sub_resource type="CylinderMesh" id="Cylinder31"]
+top_radius = 0.065
+bottom_radius = 0.065
+height = 0.115
+radial_segments = 20
+
+[sub_resource type="BoxMesh" id="Box32"]
+size = Vector3(0.09, 0.27, 0.22)
+
+[sub_resource type="BoxMesh" id="Box33"]
+size = Vector3(0.2, 0.046, 0.05)
+
+[sub_resource type="SphereMesh" id="Sphere34"]
+radius = 0.1
+height = 0.2
+radial_segments = 20
+rings = 12
+
+[sub_resource type="SphereMesh" id="Sphere35"]
+radius = 0.1
+height = 0.2
+radial_segments = 20
+rings = 12
+
+[sub_resource type="BoxMesh" id="Box36"]
+size = Vector3(0.23, 0.27, 0.09)
+
+[sub_resource type="BoxMesh" id="Box37"]
+size = Vector3(0.05, 0.046, 0.2)
+
+[sub_resource type="SphereMesh" id="Sphere38"]
+radius = 0.105
+height = 0.21
+radial_segments = 20
+rings = 12
+
+[sub_resource type="SphereMesh" id="Sphere39"]
+radius = 0.105
+height = 0.21
+radial_segments = 20
+rings = 12
+
+[sub_resource type="BoxShape3D" id="SofaSolid"]
+size = Vector3(1.8, 0.715, 0.85)
+
+[sub_resource type="BoxShape3D" id="TeaTableSolid"]
+size = Vector3(0.84, 0.61, 0.84)
+
+[sub_resource type="BoxShape3D" id="PedestalSolid"]
+size = Vector3(0.62, 0.93, 0.62)
+[node name="TutorialDecor" type="Node3D"]
+
+[node name="ArchitecturalJoinery" type="Node3D" parent="."]
+
+
+[node name="RightUpperFabric" type="MeshInstance3D" parent="ArchitecturalJoinery"]
+position = Vector3(3.52, 2.62, 0)
+mesh = SubResource("Box1")
+material_override = ExtResource("fabric")
+
+[node name="RightLowerWainscoting" type="MeshInstance3D" parent="ArchitecturalJoinery"]
+position = Vector3(3.52, 0.67, 0)
+mesh = SubResource("Box2")
+material_override = ExtResource("panel")
+
+[node name="RightDadoRail" type="MeshInstance3D" parent="ArchitecturalJoinery"]
+position = Vector3(3.43, 1.35, 0)
+mesh = SubResource("Box3")
+material_override = ExtResource("trim")
+
+[node name="RightBaseboard" type="MeshInstance3D" parent="ArchitecturalJoinery"]
+position = Vector3(3.43, 0.135, 0)
+mesh = SubResource("Box4")
+material_override = ExtResource("dark")
+
+[node name="RightCrownMoulding" type="MeshInstance3D" parent="ArchitecturalJoinery"]
+position = Vector3(3.43, 3.91, 0)
+mesh = SubResource("Box5")
+material_override = ExtResource("trim")
+
+[node name="RightBayDivider1" type="MeshInstance3D" parent="ArchitecturalJoinery"]
+position = Vector3(3.44, 2.61, -3.67)
+mesh = SubResource("Box6")
+material_override = ExtResource("trim")
+
+[node name="RightBayDivider2" type="MeshInstance3D" parent="ArchitecturalJoinery"]
+position = Vector3(3.44, 2.61, -2.21)
+mesh = SubResource("Box6")
+material_override = ExtResource("trim")
+
+[node name="RightBayDivider3" type="MeshInstance3D" parent="ArchitecturalJoinery"]
+position = Vector3(3.44, 2.61, -0.75)
+mesh = SubResource("Box6")
+material_override = ExtResource("trim")
+
+[node name="RightBayDivider4" type="MeshInstance3D" parent="ArchitecturalJoinery"]
+position = Vector3(3.44, 2.61, 0.71)
+mesh = SubResource("Box6")
+material_override = ExtResource("trim")
+
+[node name="RightBayDivider5" type="MeshInstance3D" parent="ArchitecturalJoinery"]
+position = Vector3(3.44, 2.61, 2.17)
+mesh = SubResource("Box6")
+material_override = ExtResource("trim")
+
+[node name="RightBayDivider6" type="MeshInstance3D" parent="ArchitecturalJoinery"]
+position = Vector3(3.44, 2.61, 3.63)
+mesh = SubResource("Box6")
+material_override = ExtResource("trim")
+
+[node name="LeftUpperFabric" type="MeshInstance3D" parent="ArchitecturalJoinery"]
+position = Vector3(-3.52, 2.62, 0)
+mesh = SubResource("Box1")
+material_override = ExtResource("fabric")
+
+[node name="LeftLowerWainscoting" type="MeshInstance3D" parent="ArchitecturalJoinery"]
+position = Vector3(-3.52, 0.67, 0)
+mesh = SubResource("Box2")
+material_override = ExtResource("panel")
+
+[node name="LeftDadoRail" type="MeshInstance3D" parent="ArchitecturalJoinery"]
+position = Vector3(-3.43, 1.35, 0)
+mesh = SubResource("Box3")
+material_override = ExtResource("trim")
+
+[node name="LeftBaseboard" type="MeshInstance3D" parent="ArchitecturalJoinery"]
+position = Vector3(-3.43, 0.135, 0)
+mesh = SubResource("Box4")
+material_override = ExtResource("dark")
+
+[node name="LeftCrownMoulding" type="MeshInstance3D" parent="ArchitecturalJoinery"]
+position = Vector3(-3.43, 3.91, 0)
+mesh = SubResource("Box5")
+material_override = ExtResource("trim")
+
+[node name="LeftBayDivider1" type="MeshInstance3D" parent="ArchitecturalJoinery"]
+position = Vector3(-3.44, 2.61, -3.67)
+mesh = SubResource("Box6")
+material_override = ExtResource("trim")
+
+[node name="LeftBayDivider2" type="MeshInstance3D" parent="ArchitecturalJoinery"]
+position = Vector3(-3.44, 2.61, -2.21)
+mesh = SubResource("Box6")
+material_override = ExtResource("trim")
+
+[node name="LeftBayDivider3" type="MeshInstance3D" parent="ArchitecturalJoinery"]
+position = Vector3(-3.44, 2.61, -0.75)
+mesh = SubResource("Box6")
+material_override = ExtResource("trim")
+
+[node name="LeftBayDivider4" type="MeshInstance3D" parent="ArchitecturalJoinery"]
+position = Vector3(-3.44, 2.61, 0.71)
+mesh = SubResource("Box6")
+material_override = ExtResource("trim")
+
+[node name="LeftBayDivider5" type="MeshInstance3D" parent="ArchitecturalJoinery"]
+position = Vector3(-3.44, 2.61, 2.17)
+mesh = SubResource("Box6")
+material_override = ExtResource("trim")
+
+[node name="LeftBayDivider6" type="MeshInstance3D" parent="ArchitecturalJoinery"]
+position = Vector3(-3.44, 2.61, 3.63)
+mesh = SubResource("Box6")
+material_override = ExtResource("trim")
+
+[node name="RearUpperFabric" type="MeshInstance3D" parent="ArchitecturalJoinery"]
+position = Vector3(0, 2.61, 4.535)
+mesh = SubResource("Box7")
+material_override = ExtResource("fabric")
+
+[node name="RearLowerWainscoting" type="MeshInstance3D" parent="ArchitecturalJoinery"]
+position = Vector3(0, 0.67, 4.535)
+mesh = SubResource("Box8")
+material_override = ExtResource("panel")
+
+[node name="RearDadoRail" type="MeshInstance3D" parent="ArchitecturalJoinery"]
+position = Vector3(0, 1.35, 4.44)
+mesh = SubResource("Box9")
+material_override = ExtResource("trim")
+
+[node name="RearBaseboard" type="MeshInstance3D" parent="ArchitecturalJoinery"]
+position = Vector3(0, 0.135, 4.44)
+mesh = SubResource("Box10")
+material_override = ExtResource("dark")
+
+[node name="RearCrownMoulding" type="MeshInstance3D" parent="ArchitecturalJoinery"]
+position = Vector3(0, 3.91, 4.43)
+mesh = SubResource("Box11")
+material_override = ExtResource("trim")
+
+[node name="ExitLeftFabric" type="MeshInstance3D" parent="ArchitecturalJoinery"]
+position = Vector3(-2.46, 2.6, -4.535)
+mesh = SubResource("Box12")
+material_override = ExtResource("fabric")
+
+[node name="ExitLeftWood" type="MeshInstance3D" parent="ArchitecturalJoinery"]
+position = Vector3(-2.46, 0.68, -4.535)
+mesh = SubResource("Box13")
+material_override = ExtResource("panel")
+
+[node name="ExitLeftDado" type="MeshInstance3D" parent="ArchitecturalJoinery"]
+position = Vector3(-2.46, 1.34, -4.44)
+mesh = SubResource("Box14")
+material_override = ExtResource("trim")
+
+[node name="ExitLeftBase" type="MeshInstance3D" parent="ArchitecturalJoinery"]
+position = Vector3(-2.46, 0.15, -4.44)
+mesh = SubResource("Box15")
+material_override = ExtResource("dark")
+
+[node name="ExitRightFabric" type="MeshInstance3D" parent="ArchitecturalJoinery"]
+position = Vector3(2.46, 2.6, -4.535)
+mesh = SubResource("Box12")
+material_override = ExtResource("fabric")
+
+[node name="ExitRightWood" type="MeshInstance3D" parent="ArchitecturalJoinery"]
+position = Vector3(2.46, 0.68, -4.535)
+mesh = SubResource("Box13")
+material_override = ExtResource("panel")
+
+[node name="ExitRightDado" type="MeshInstance3D" parent="ArchitecturalJoinery"]
+position = Vector3(2.46, 1.34, -4.44)
+mesh = SubResource("Box14")
+material_override = ExtResource("trim")
+
+[node name="ExitRightBase" type="MeshInstance3D" parent="ArchitecturalJoinery"]
+position = Vector3(2.46, 0.15, -4.44)
+mesh = SubResource("Box15")
+material_override = ExtResource("dark")
+
+[node name="CeremonialPath" type="Node3D" parent="."]
+
+
+[node name="BurgundyRunner" type="MeshInstance3D" parent="CeremonialPath"]
+position = Vector3(0, 0.016, -0.45)
+mesh = SubResource("Box16")
+material_override = ExtResource("carpet")
+
+[node name="RunnerBindingLeft" type="MeshInstance3D" parent="CeremonialPath"]
+position = Vector3(-0.715, 0.032, -0.45)
+mesh = SubResource("Box17")
+material_override = SubResource("SatinBrass")
+
+[node name="RunnerBindingRight" type="MeshInstance3D" parent="CeremonialPath"]
+position = Vector3(0.715, 0.032, -0.45)
+mesh = SubResource("Box17")
+material_override = SubResource("SatinBrass")
+
+[node name="ReceptionDetails" type="Node3D" parent="."]
+
+
+[node name="GuestRegisterCover" type="MeshInstance3D" parent="ReceptionDetails"]
+position = Vector3(-2.15, 1.172, 1.12)
+mesh = SubResource("Box18")
+material_override = ExtResource("dark")
+
+[node name="RegisterPages" type="MeshInstance3D" parent="ReceptionDetails"]
+position = Vector3(-2.15, 1.207, 1.12)
+mesh = SubResource("Box19")
+material_override = SubResource("IvoryLedger")
+
+[node name="RegisterSpine" type="MeshInstance3D" parent="ReceptionDetails"]
+position = Vector3(-2.365, 1.186, 1.12)
+mesh = SubResource("Box20")
+material_override = ExtResource("trim")
+
+[node name="ServiceBellBase" type="MeshInstance3D" parent="ReceptionDetails"]
+position = Vector3(-2.15, 1.155, -1.07)
+mesh = SubResource("Cylinder21")
+material_override = SubResource("SatinBrass")
+
+[node name="ServiceBellDome" type="MeshInstance3D" parent="ReceptionDetails"]
+position = Vector3(-2.15, 1.204, -1.07)
+mesh = SubResource("Sphere22")
+material_override = SubResource("SatinBrass")
+
+[node name="ServiceBellButton" type="MeshInstance3D" parent="ReceptionDetails"]
+position = Vector3(-2.15, 1.26, -1.07)
+mesh = SubResource("Cylinder23")
+material_override = SubResource("SatinBrass")
+
+[node name="WaitingLounge" type="Node3D" parent="."]
+
+
+[node name="UpholsteredSofa" parent="WaitingLounge" instance=ExtResource("sofa")]
+position = Vector3(2.3, 0.004, 3.72)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(1, 1, 1)
+
+[node name="TeaTable" parent="WaitingLounge" instance=ExtResource("table")]
+position = Vector3(2.48, 0.004, 2.17)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(0.61, 0.61, 0.61)
+
+[node name="TeaTray" type="MeshInstance3D" parent="WaitingLounge"]
+position = Vector3(2.48, 0.622, 2.17)
+mesh = SubResource("Cylinder24")
+material_override = SubResource("SatinBrass")
+
+[node name="TeaTrayGlass" type="MeshInstance3D" parent="WaitingLounge"]
+position = Vector3(2.48, 0.665, 2.17)
+mesh = SubResource("Sphere25")
+material_override = SubResource("FrostedGlass")
+
+[node name="EntranceDisplay" type="Node3D" parent="."]
+
+
+[node name="PedestalFoot" type="MeshInstance3D" parent="EntranceDisplay"]
+position = Vector3(2.82, 0.055, -3.35)
+mesh = SubResource("Box26")
+material_override = ExtResource("dark")
+
+[node name="PedestalBody" type="MeshInstance3D" parent="EntranceDisplay"]
+position = Vector3(2.82, 0.49, -3.35)
+mesh = SubResource("Box27")
+material_override = ExtResource("trim")
+
+[node name="PedestalCap" type="MeshInstance3D" parent="EntranceDisplay"]
+position = Vector3(2.82, 0.908, -3.35)
+mesh = SubResource("Box28")
+material_override = SubResource("SatinBrass")
+
+[node name="MarblePortraitBust" parent="EntranceDisplay" instance=ExtResource("bust")]
+position = Vector3(2.82, 0.932, -3.35)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(1.5, 1.5, 1.5)
+
+[node name="Gallery" type="Node3D" parent="."]
+
+
+[node name="RightFrameMount" type="MeshInstance3D" parent="Gallery"]
+position = Vector3(3.464, 2.45, -1.22)
+mesh = SubResource("Box29")
+material_override = ExtResource("dark")
+
+[node name="RightHistoricPainting" parent="Gallery" instance=ExtResource("frame")]
+position = Vector3(3.444, 2.45, -1.22)
+rotation = Vector3(0, -1.5708, 0)
+scale = Vector3(1.82, 1.82, 1.82)
+
+[node name="LeftFrameMount" type="MeshInstance3D" parent="Gallery"]
+position = Vector3(-3.463, 2.4, 0.2)
+mesh = SubResource("Box30")
+material_override = ExtResource("dark")
+
+[node name="LeftHistoricPainting" parent="Gallery" instance=ExtResource("frame")]
+position = Vector3(-3.444, 2.4, 0.2)
+rotation = Vector3(0, 1.5708, 0)
+scale = Vector3(1.82, 1.82, 1.82)
+
+[node name="LightingAndCeiling" type="Node3D" parent="."]
+
+
+[node name="CentralChandelier" parent="LightingAndCeiling" instance=ExtResource("chandelier")]
+position = Vector3(0, 2.74, -0.55)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(1.35, 1.35, 1.35)
+
+[node name="CeilingMount" type="MeshInstance3D" parent="LightingAndCeiling"]
+position = Vector3(0, 3.985, -0.55)
+mesh = SubResource("Cylinder31")
+material_override = SubResource("SatinBrass")
+
+[node name="RightSconceA" type="Node3D" parent="."]
+
+
+[node name="Mount" type="MeshInstance3D" parent="RightSconceA"]
+position = Vector3(3.438, 2.66, -2.65)
+mesh = SubResource("Box32")
+material_override = SubResource("SatinBrass")
+
+[node name="Arm" type="MeshInstance3D" parent="RightSconceA"]
+position = Vector3(3.33, 2.57, -2.65)
+mesh = SubResource("Box33")
+material_override = SubResource("SatinBrass")
+
+[node name="Shade" type="MeshInstance3D" parent="RightSconceA"]
+position = Vector3(3.2, 2.49, -2.65)
+mesh = SubResource("Sphere34")
+material_override = SubResource("FrostedGlass")
+
+[node name="WarmLight" type="OmniLight3D" parent="RightSconceA"]
+position = Vector3(3.18, 2.49, -2.65)
+light_color = Color(1, 0.71, 0.45, 1)
+light_energy = 0.28
+omni_range = 2.85
+shadow_enabled = false
+
+[node name="RightSconceB" type="Node3D" parent="."]
+
+
+[node name="Mount" type="MeshInstance3D" parent="RightSconceB"]
+position = Vector3(3.438, 2.66, 0.75)
+mesh = SubResource("Box32")
+material_override = SubResource("SatinBrass")
+
+[node name="Arm" type="MeshInstance3D" parent="RightSconceB"]
+position = Vector3(3.33, 2.57, 0.75)
+mesh = SubResource("Box33")
+material_override = SubResource("SatinBrass")
+
+[node name="Shade" type="MeshInstance3D" parent="RightSconceB"]
+position = Vector3(3.2, 2.49, 0.75)
+mesh = SubResource("Sphere35")
+material_override = SubResource("FrostedGlass")
+
+[node name="WarmLight" type="OmniLight3D" parent="RightSconceB"]
+position = Vector3(3.18, 2.49, 0.75)
+light_color = Color(1, 0.71, 0.45, 1)
+light_energy = 0.28
+omni_range = 2.85
+shadow_enabled = false
+
+[node name="ExitSconceLeft" type="Node3D" parent="."]
+
+
+[node name="Mount" type="MeshInstance3D" parent="ExitSconceLeft"]
+position = Vector3(-1.51, 2.67, -4.5)
+mesh = SubResource("Box36")
+material_override = SubResource("SatinBrass")
+
+[node name="Arm" type="MeshInstance3D" parent="ExitSconceLeft"]
+position = Vector3(-1.51, 2.58, -4.38)
+mesh = SubResource("Box37")
+material_override = SubResource("SatinBrass")
+
+[node name="Shade" type="MeshInstance3D" parent="ExitSconceLeft"]
+position = Vector3(-1.51, 2.5, -4.26)
+mesh = SubResource("Sphere38")
+material_override = SubResource("FrostedGlass")
+
+[node name="WarmLight" type="OmniLight3D" parent="ExitSconceLeft"]
+position = Vector3(-1.51, 2.51, -4.22)
+light_color = Color(1, 0.71, 0.45, 1)
+light_energy = 0.24
+omni_range = 2.6
+shadow_enabled = false
+
+[node name="ExitSconceRight" type="Node3D" parent="."]
+
+
+[node name="Mount" type="MeshInstance3D" parent="ExitSconceRight"]
+position = Vector3(1.51, 2.67, -4.5)
+mesh = SubResource("Box36")
+material_override = SubResource("SatinBrass")
+
+[node name="Arm" type="MeshInstance3D" parent="ExitSconceRight"]
+position = Vector3(1.51, 2.58, -4.38)
+mesh = SubResource("Box37")
+material_override = SubResource("SatinBrass")
+
+[node name="Shade" type="MeshInstance3D" parent="ExitSconceRight"]
+position = Vector3(1.51, 2.5, -4.26)
+mesh = SubResource("Sphere39")
+material_override = SubResource("FrostedGlass")
+
+[node name="WarmLight" type="OmniLight3D" parent="ExitSconceRight"]
+position = Vector3(1.51, 2.51, -4.22)
+light_color = Color(1, 0.71, 0.45, 1)
+light_energy = 0.24
+omni_range = 2.6
+shadow_enabled = false
+
+[node name="SolidFurniture" type="Node3D" parent="."]
+
+
+[node name="CollisionBody" type="StaticBody3D" parent="SolidFurniture"]
+
+
+[node name="SofaCollision" type="CollisionShape3D" parent="SolidFurniture/CollisionBody"]
+position = Vector3(2.3, 0.357, 3.72)
+shape = SubResource("SofaSolid")
+
+[node name="TeaTableCollision" type="CollisionShape3D" parent="SolidFurniture/CollisionBody"]
+position = Vector3(2.48, 0.305, 2.17)
+shape = SubResource("TeaTableSolid")
+
+[node name="DisplayCollision" type="CollisionShape3D" parent="SolidFurniture/CollisionBody"]
+position = Vector3(2.82, 0.465, -3.35)
+shape = SubResource("PedestalSolid")

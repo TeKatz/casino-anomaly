@@ -158,3 +158,7 @@ The Croupier's world-space 'E · Talk / E · Sprechen' label is now a single, lo
 ### Compact button skin regression (November 2026)
 
 The smallest Settings dropdown is 36px tall. The earlier nine-slice UI used 26px top and bottom texture margins (52px combined), causing visible clipped/duplicated top halves and missing lower edges on 36–43px controls. The shared texture is now authored at 48px height with symmetric 15px vertical caps (30px combined), symmetrical rounded corners and the existing gold/green/red rim palette preserved. Godot QA enforces this constraint for all interaction states, including Settings tabs, dropdowns, and Back.
+
+## Decorated tutorial reception
+
+The tutorial is now a deliberate casino-entry composition with a richly PBR-textured wooden floor, a jacquard ceremonial runner, symmetrical fabric-and-wood wall bays, door sconces, ceiling chandelier, an upholstered waiting niche, wall art, marble bust and reception desk details. The central movement/interaction aisle is kept clear. The entirely editable authored subscene and placement envelope are documented in [gameplay/TUTORIAL_DECOR.md](gameplay/TUTORIAL_DECOR.md); CI validates all imported mesh and support bounds rather than assuming props are grounded.
