@@ -10,6 +10,9 @@ on:
       - 'player.gd'
       - 'ui/pause_menu.gd'
       - 'tests/croupier_intro_qa.gd'
+      - 'models/croupier/**'
+      - 'sketchfab_drop/business_man.zip'
+      - 'tools/import_croupier_asset.py'
       - '.github/workflows/croupier-intro-qa.yml'
   pull_request:
     paths:
@@ -19,6 +22,9 @@ on:
       - 'player.gd'
       - 'ui/pause_menu.gd'
       - 'tests/croupier_intro_qa.gd'
+      - 'models/croupier/**'
+      - 'sketchfab_drop/business_man.zip'
+      - 'tools/import_croupier_asset.py'
       - '.github/workflows/croupier-intro-qa.yml'
 
 permissions:
@@ -38,6 +44,7 @@ jobs:
           python3 tools/ensure_fabric037.py
           python3 tools/import_model_assets.py
           python3 tools/unpack_sketchfab_assets.py --require-all
+          python3 tools/import_croupier_asset.py
       - name: Install Godot 4.5.1
         shell: bash
         run: |

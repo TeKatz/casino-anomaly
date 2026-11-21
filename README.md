@@ -12,10 +12,13 @@ ANOMALY/NORMAL exits, the 12-correct streak goal and subtle casino lore.
 Talk is optional; E at the existing door still begins the run.
 
 The counter and proxy are editable in gameplay/croupier_station.tscn.
-Replace the proxy by importing a licensed GLB/glTF character and placing
-the imported scene under CroupierStation/CharacterPivot/ModelAnchor.
-The proxy hides when a model is attached; an Idle or idle AnimationPlayer
-clip plays if present. No third-party character is required at present.
+The selected character is the CC BY 4.0 Sketchfab Business Man by
+manoeldarochadeoliveira. Its original, checksum-pinned ZIP belongs at
+sketchfab_drop/business_man.zip and is safely imported by
+tools/import_croupier_asset.py during the Development build. Godot places
+the glTF at CroupierStation/CharacterPivot/ModelAnchor, hides the proxy
+automatically, and uses the supplied idle and talking animations. The
+local proxy remains only until the source archive is uploaded.
 Conversations lock movement and camera look, release the mouse, and close
 with Esc without opening the global pause menu. Saves are unchanged.
 

@@ -37,6 +37,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw '3D model dependencies unavailable or invalid' }
           python tools/unpack_sketchfab_assets.py --require-all
           if ($LASTEXITCODE -ne 0) { throw 'Sketchfab CC-BY 4.0 models unavailable or invalid' }
+          python tools/import_croupier_asset.py
+          if ($LASTEXITCODE -ne 0) { throw 'Pinned CC-BY-4.0 croupier archive unavailable or invalid' }
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -- assets/ models/

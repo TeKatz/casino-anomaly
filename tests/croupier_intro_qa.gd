@@ -33,8 +33,22 @@ func _run() -> void:
             or hint == null or player == null or camera == null or dialogue == null:
         _fail("Desk scene, collision, model anchor, proxy or conversation is missing")
         return
-    if desk.position.x > -1.5 or not proxy.visible or anchor.get_child_count() != 0:
-        _fail("The desk must stand aside and retain a clean model replacement anchor")
+    if desk.position.x > -1.5:
+        _fail("The welcome counter obstructs the main exit route")
+        return
+    var model_installed := ResourceLoader.exists("res://models/croupier/scene.gltf", "PackedScene")
+    if model_installed:
+        var character := anchor.get_node_or_null("BusinessMan") as Node3D
+        var animator := desk.get("_animator") as AnimationPlayer
+        if character == null or proxy.visible or animator == null:
+            _fail("Imported business man, animation player or proxy switch missing")
+            return
+        if str(desk.call("_pick_animation", "idle")).is_empty() \
+                or str(desk.call("_pick_animation", "talk")).is_empty():
+            _fail("The imported model needs idle and talking clips")
+            return
+    elif not proxy.visible or anchor.get_child_count() != 0:
+        _fail("A missing source archive must keep the original proxy in the start room")
         return
     if hint.text != "E · Sprechen":
         _fail("German interaction cue is missing")

@@ -79,12 +79,14 @@ func _open_conversation() -> void:
         return
     player.call("set_interaction_locked", true)
     croupier.call("set_hint_visible", false)
+    croupier.call("set_talking", true)
     conversation.call("show_conversation")
 
 
 func _on_conversation_closed() -> void:
     if changing:
         return
+    croupier.call("set_talking", false)
     player.call("set_interaction_locked", false)
     Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
