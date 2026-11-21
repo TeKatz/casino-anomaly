@@ -142,9 +142,14 @@ func _unhandled_input(event: InputEvent) -> void:
         return
     if not _is_looking_at_door():
         return
-    changing = true
-    var state = get_node_or_null("/root/LoopState")
-    if state != null:
-        state.complete_tutorial()
     get_viewport().set_input_as_handled()
-    get_tree().change_scene_to_file("res://main.tscn")
+    var loader = get_node_or_null("/root/SceneLoader")
+    if loader == null or not loader.travel_to("res://main.tscn", true):
+        push_warning("Could not show the casino loading screen.")
+        return
+    changing = true
+    loader.transition_failed.connect(_on_scene_load_failed, CONNECT_ONE_SHOT)
+
+
+func _on_scene_load_failed(_path: String) -> void:
+    changing = false

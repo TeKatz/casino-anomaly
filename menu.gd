@@ -191,7 +191,19 @@ func _fade_to_scene(scene_path: String) -> void:
     screen.modulate.a = 0.0
     var tween := create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
     tween.tween_property(screen, "modulate:a", 1.0, 0.38)
-    tween.tween_callback(func() -> void: get_tree().change_scene_to_file(scene_path))
+    tween.tween_callback(func() -> void:
+        var loader = get_node_or_null("/root/SceneLoader")
+        screen.visible = false
+        if loader == null or not loader.travel_to(scene_path):
+            changing_scene = false
+            _set_status("menu.failed_state")
+            return
+        loader.transition_failed.connect(_on_scene_load_failed, CONNECT_ONE_SHOT)
+    )
+
+
+func _on_scene_load_failed(_path: String) -> void:
+    changing_scene = false
 
 
 func _unhandled_input(event: InputEvent) -> void:

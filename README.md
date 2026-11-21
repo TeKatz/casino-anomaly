@@ -136,3 +136,9 @@ User-directed pass on `casino-anomaly/dev`:
 ## Abstract menu and in-game credits
 
 The main screen uses a lightweight 2D canvas shader instead of loading a second casino environment. Beveled animated buttons, fade transitions and a centralized UI palette are shared with settings and pause screens. Credits are accessible directly beneath Settings in both menus and contain attribution links to the project’s audio, Sketchfab CC BY 4.0 models and CC0 asset sources. The full verified attribution record remains in [ASSET_CREDITS.md](ASSET_CREDITS.md). The unused Casino_2 preview scene, corresponding source ZIP and its build pipeline have been removed; this does not affect the editor-only Sketchfab furniture previews.
+
+## Custom Windows icon and loading transitions
+
+The application and Windows export preset reference `branding/casino_anomaly.svg`, a bespoke portal emblem that Godot 4.5 converts to the native Windows executable icon during export. The same artwork appears on the in-game loading screen. If Explorer initially retains a previous icon after updating, its Windows icon cache may need refreshing.
+
+A persistent `SceneLoader` autoload presents a rendered full-screen transition before requesting target scenes through `ResourceLoader.load_threaded_request`. The bar reflects actual resource progress; a separate final phase covers the main-thread scene activation, which cannot be accurately expressed as a percentage. This applies to New Game, Continue and the tutorial's E-door transition. The controller's seamless in-world casino-room streaming remains unchanged. The first clean casino room rule and persistent audio split remain intact. A separate regression test exercises both entry points in CI.

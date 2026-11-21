@@ -127,6 +127,7 @@ jobs:
             @('tests/streaming_qa.gd', 'Casino Anomaly seamless two-room streaming QA PASS'),
             @('tests/settings_pause_qa.gd', 'Casino Anomaly pause, persistent settings and world-camera input QA PASS'),
             @('tests/menu_visual_qa.gd', 'Casino Anomaly abstract UI and credits QA PASS'),
+            @('tests/loading_transition_qa.gd', 'Casino Anomaly threaded scene loading QA PASS'),
             @('tests/audio_loop_qa.gd', 'Casino Anomaly persistent audio and menu-only loop QA PASS'),
             @('tests/localization_intro_qa.gd', 'Casino Anomaly bilingual intro and door interaction QA PASS'),
             @('tests/cinematic_lighting_qa.gd', 'Casino Anomaly cinematic lighting and reflection QA PASS'),
@@ -166,6 +167,8 @@ jobs:
           & "$env:GODOT_EDITOR" --headless --path . --export-release 'Windows Desktop' $exe 2>&1 | Tee-Object -FilePath export.log
           if ($LASTEXITCODE -ne 0 -or (Get-Content export.log -Raw) -match '(?m)(SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:)') { throw 'Godot export failed' }
           if (!(Test-Path artifacts/game/CasinoAnomaly.exe) -or !(Test-Path artifacts/game/CasinoAnomaly.pck)) { throw 'Missing exported game' }
+          if (-not (Test-Path branding/casino_anomaly.svg)) { throw 'Custom Casino Anomaly icon source missing' }
+          if (-not (Select-String -Path export_presets.cfg -SimpleMatch 'application/icon="res://branding/casino_anomaly.svg"' -Quiet)) { throw 'Windows export preset must include the custom icon' }
 
       - name: Package standalone game and manifest
         shell: pwsh
