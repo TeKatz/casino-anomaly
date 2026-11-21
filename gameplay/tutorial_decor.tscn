@@ -501,100 +501,100 @@ position = Vector3(0, 3.985, -0.55)
 mesh = SubResource("Cylinder31")
 material_override = SubResource("SatinBrass")
 
-[node name="RightSconceA" type="Node3D" parent="."]
+[node name="RightSconceA" type="Node3D" parent="LightingAndCeiling"]
 
 
-[node name="Mount" type="MeshInstance3D" parent="RightSconceA"]
+[node name="Mount" type="MeshInstance3D" parent="LightingAndCeiling/RightSconceA"]
 position = Vector3(3.438, 2.66, -2.65)
 mesh = SubResource("Box32")
 material_override = SubResource("SatinBrass")
 
-[node name="Arm" type="MeshInstance3D" parent="RightSconceA"]
+[node name="Arm" type="MeshInstance3D" parent="LightingAndCeiling/RightSconceA"]
 position = Vector3(3.33, 2.57, -2.65)
 mesh = SubResource("Box33")
 material_override = SubResource("SatinBrass")
 
-[node name="Shade" type="MeshInstance3D" parent="RightSconceA"]
+[node name="Shade" type="MeshInstance3D" parent="LightingAndCeiling/RightSconceA"]
 position = Vector3(3.2, 2.49, -2.65)
 mesh = SubResource("Sphere34")
 material_override = SubResource("FrostedGlass")
 
-[node name="WarmLight" type="OmniLight3D" parent="RightSconceA"]
+[node name="WarmLight" type="OmniLight3D" parent="LightingAndCeiling/RightSconceA"]
 position = Vector3(3.18, 2.49, -2.65)
 light_color = Color(1, 0.71, 0.45, 1)
 light_energy = 0.28
 omni_range = 2.85
 shadow_enabled = false
 
-[node name="RightSconceB" type="Node3D" parent="."]
+[node name="RightSconceB" type="Node3D" parent="LightingAndCeiling"]
 
 
-[node name="Mount" type="MeshInstance3D" parent="RightSconceB"]
+[node name="Mount" type="MeshInstance3D" parent="LightingAndCeiling/RightSconceB"]
 position = Vector3(3.438, 2.66, 0.75)
 mesh = SubResource("Box32")
 material_override = SubResource("SatinBrass")
 
-[node name="Arm" type="MeshInstance3D" parent="RightSconceB"]
+[node name="Arm" type="MeshInstance3D" parent="LightingAndCeiling/RightSconceB"]
 position = Vector3(3.33, 2.57, 0.75)
 mesh = SubResource("Box33")
 material_override = SubResource("SatinBrass")
 
-[node name="Shade" type="MeshInstance3D" parent="RightSconceB"]
+[node name="Shade" type="MeshInstance3D" parent="LightingAndCeiling/RightSconceB"]
 position = Vector3(3.2, 2.49, 0.75)
 mesh = SubResource("Sphere35")
 material_override = SubResource("FrostedGlass")
 
-[node name="WarmLight" type="OmniLight3D" parent="RightSconceB"]
+[node name="WarmLight" type="OmniLight3D" parent="LightingAndCeiling/RightSconceB"]
 position = Vector3(3.18, 2.49, 0.75)
 light_color = Color(1, 0.71, 0.45, 1)
 light_energy = 0.28
 omni_range = 2.85
 shadow_enabled = false
 
-[node name="ExitSconceLeft" type="Node3D" parent="."]
+[node name="ExitSconceLeft" type="Node3D" parent="LightingAndCeiling"]
 
 
-[node name="Mount" type="MeshInstance3D" parent="ExitSconceLeft"]
+[node name="Mount" type="MeshInstance3D" parent="LightingAndCeiling/ExitSconceLeft"]
 position = Vector3(-1.51, 2.67, -4.5)
 mesh = SubResource("Box36")
 material_override = SubResource("SatinBrass")
 
-[node name="Arm" type="MeshInstance3D" parent="ExitSconceLeft"]
+[node name="Arm" type="MeshInstance3D" parent="LightingAndCeiling/ExitSconceLeft"]
 position = Vector3(-1.51, 2.58, -4.38)
 mesh = SubResource("Box37")
 material_override = SubResource("SatinBrass")
 
-[node name="Shade" type="MeshInstance3D" parent="ExitSconceLeft"]
+[node name="Shade" type="MeshInstance3D" parent="LightingAndCeiling/ExitSconceLeft"]
 position = Vector3(-1.51, 2.5, -4.26)
 mesh = SubResource("Sphere38")
 material_override = SubResource("FrostedGlass")
 
-[node name="WarmLight" type="OmniLight3D" parent="ExitSconceLeft"]
+[node name="WarmLight" type="OmniLight3D" parent="LightingAndCeiling/ExitSconceLeft"]
 position = Vector3(-1.51, 2.51, -4.22)
 light_color = Color(1, 0.71, 0.45, 1)
 light_energy = 0.24
 omni_range = 2.6
 shadow_enabled = false
 
-[node name="ExitSconceRight" type="Node3D" parent="."]
+[node name="ExitSconceRight" type="Node3D" parent="LightingAndCeiling"]
 
 
-[node name="Mount" type="MeshInstance3D" parent="ExitSconceRight"]
+[node name="Mount" type="MeshInstance3D" parent="LightingAndCeiling/ExitSconceRight"]
 position = Vector3(1.51, 2.67, -4.5)
 mesh = SubResource("Box36")
 material_override = SubResource("SatinBrass")
 
-[node name="Arm" type="MeshInstance3D" parent="ExitSconceRight"]
+[node name="Arm" type="MeshInstance3D" parent="LightingAndCeiling/ExitSconceRight"]
 position = Vector3(1.51, 2.58, -4.38)
 mesh = SubResource("Box37")
 material_override = SubResource("SatinBrass")
 
-[node name="Shade" type="MeshInstance3D" parent="ExitSconceRight"]
+[node name="Shade" type="MeshInstance3D" parent="LightingAndCeiling/ExitSconceRight"]
 position = Vector3(1.51, 2.5, -4.26)
 mesh = SubResource("Sphere39")
 material_override = SubResource("FrostedGlass")
 
-[node name="WarmLight" type="OmniLight3D" parent="ExitSconceRight"]
+[node name="WarmLight" type="OmniLight3D" parent="LightingAndCeiling/ExitSconceRight"]
 position = Vector3(1.51, 2.51, -4.22)
 light_color = Color(1, 0.71, 0.45, 1)
 light_energy = 0.24
