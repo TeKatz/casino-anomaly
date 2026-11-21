@@ -151,13 +151,7 @@ internal static class Program
         try
         {
             report("Update " + manifest.Version + " wird heruntergeladen ...");
-            using (var packageResponse = await client.GetAsync(manifest.Package.Url, HttpCompletionOption.ResponseHeadersRead))
-            {
-                packageResponse.EnsureSuccessStatusCode();
-                await using var input = await packageResponse.Content.ReadAsStreamAsync();
-                await using var output = File.Create(archive);
-                await input.CopyToAsync(output);
-            }
+            await DownloadPackageWithRetryAsync(client, manifest.Package.Url, archive, report);
             var actualSize = new FileInfo(archive).Length;
             if (actualSize != manifest.Package.SizeBytes)
                 throw new InvalidDataException("Package size does not match the signed release metadata.");
@@ -248,6 +242,58 @@ internal static class Program
             try { if (Directory.Exists(staging)) Directory.Delete(staging, true); } catch { /* Cleanup only. */ }
         }
     }
+
+    // During a GitHub Release replacement, its manifest may propagate before
+    // the large Windows ZIP has become available through the download CDN.
+    // Retrying a short-lived 404 is safe: the release is SHA-256 and size
+    // verified before the existing game installation is ever modified.
+    private static async Task DownloadPackageWithRetryAsync(
+        HttpClient client, string url, string archive, Action<string> report)
+    {
+        const int maxAttempts = 8;
+        for (var attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            string reason;
+            try
+            {
+                using var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+                if (IsRetryablePackageStatus(response.StatusCode) && attempt < maxAttempts)
+                {
+                    reason = "HTTP " + (int)response.StatusCode;
+                    Log("Development package temporarily unavailable (" + reason
+                        + "), download attempt " + attempt + "/" + maxAttempts + ".");
+                }
+                else
+                {
+                    response.EnsureSuccessStatusCode();
+                    await using var input = await response.Content.ReadAsStreamAsync();
+                    await using var output = File.Create(archive);
+                    await input.CopyToAsync(output);
+                    return;
+                }
+            }
+            catch (HttpRequestException error) when (attempt < maxAttempts)
+            {
+                reason = "Netzwerkfehler";
+                Log("Temporary package network error, attempt " + attempt
+                    + "/" + maxAttempts + ": " + error.Message);
+            }
+
+            report("Download vorübergehend nicht verfügbar (" + reason
+                + "). Neuer Versuch " + (attempt + 1) + "/" + maxAttempts + " ...");
+            await Task.Delay(TimeSpan.FromSeconds(Math.Min(5 * attempt, 30)));
+        }
+
+        throw new IOException("The Development package could not be downloaded after retries.");
+    }
+
+    private static bool IsRetryablePackageStatus(System.Net.HttpStatusCode status) =>
+        status == System.Net.HttpStatusCode.NotFound ||
+        status == System.Net.HttpStatusCode.RequestTimeout ||
+        status == (System.Net.HttpStatusCode)429 ||
+        status == System.Net.HttpStatusCode.BadGateway ||
+        status == System.Net.HttpStatusCode.ServiceUnavailable ||
+        status == System.Net.HttpStatusCode.GatewayTimeout;
 
     private static async Task<bool> WaitUntilExitedAsync(Process process, TimeSpan timeout)
     {
@@ -369,6 +415,12 @@ internal static class Program
             try { ValidateManifest(manifest, 1); }
             catch (InvalidDataException) { foreignRejected = true; }
             if (!foreignRejected) throw new InvalidOperationException("Foreign package URL was accepted.");
+            if (!IsRetryablePackageStatus(System.Net.HttpStatusCode.NotFound) ||
+                !IsRetryablePackageStatus(System.Net.HttpStatusCode.ServiceUnavailable) ||
+                !IsRetryablePackageStatus((System.Net.HttpStatusCode)429) ||
+                IsRetryablePackageStatus(System.Net.HttpStatusCode.Unauthorized) ||
+                IsRetryablePackageStatus(System.Net.HttpStatusCode.Forbidden))
+                throw new InvalidOperationException("Temporary download error retry contract changed.");
             VerifyUpdaterDoesNotLockInstallDirectory();
             Console.WriteLine("Casino Anomaly updater contract PASS");
             return 0;

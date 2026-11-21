@@ -221,19 +221,50 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.CASINO_RELEASE_TOKEN || github.token }}
         run: |
-          # Never delete a functioning release before ensuring the replacement
-          # can be published. Release-token restrictions must not destroy the
-          # user's last downloadable version.
+          $ErrorActionPreference = 'Stop'
+          # Publish the large archive FIRST. A new manifest must never
+          # advertise a version while GitHub still returns 404 for its ZIP.
+          $package = 'artifacts/casino-anomaly-win-x64.zip'
+          $checksum = 'artifacts/casino-anomaly-win-x64.zip.sha256'
+          $manifest = 'artifacts/update-manifest.json'
           gh release view development --repo "$env:GITHUB_REPOSITORY" *> $null
           if ($LASTEXITCODE -eq 0) {
-            gh release upload development --repo "$env:GITHUB_REPOSITORY" --clobber artifacts/casino-anomaly-win-x64.zip artifacts/casino-anomaly-win-x64.zip.sha256 artifacts/update-manifest.json
-            if ($LASTEXITCODE -ne 0) { throw 'Could not upload the development artifacts' }
-            gh release edit development --repo "$env:GITHUB_REPOSITORY" --target "$env:PUBLISHED_COMMIT" --prerelease --title "Casino Anomaly Development $env:VERSION" --notes-file artifacts/release-notes.md
-            if ($LASTEXITCODE -ne 0) { throw 'Could not update the development release' }
+            gh release upload development --repo "$env:GITHUB_REPOSITORY" --clobber $package
+            if ($LASTEXITCODE -ne 0) { throw 'Could not upload the Development ZIP' }
           } else {
-            gh release create development --repo "$env:GITHUB_REPOSITORY" --target "$env:PUBLISHED_COMMIT" --prerelease --title "Casino Anomaly Development $env:VERSION" --notes-file artifacts/release-notes.md artifacts/casino-anomaly-win-x64.zip artifacts/casino-anomaly-win-x64.zip.sha256 artifacts/update-manifest.json
-            if ($LASTEXITCODE -ne 0) { throw 'Could not create development release: check Actions contents permissions or CASINO_RELEASE_TOKEN' }
+            gh release create development --repo "$env:GITHUB_REPOSITORY" --target "$env:PUBLISHED_COMMIT" --prerelease --title "Casino Anomaly Development $env:VERSION" --notes-file artifacts/release-notes.md $package
+            if ($LASTEXITCODE -ne 0) { throw 'Could not create Development release: check CASINO_RELEASE_TOKEN' }
           }
+
+          # The GitHub API can already list a new asset while the public
+          # browser download is still missing. Check the exact anonymous URL
+          # consumed by installed versions of CasinoAnomaly.Updater.
+          $publicPackage = "https://github.com/$($env:GITHUB_REPOSITORY)/releases/download/development/casino-anomaly-win-x64.zip?revision=$($env:VERSION)"
+          $ready = $false
+          for ($attempt = 1; $attempt -le 16; $attempt++) {
+            try {
+              $head = Invoke-WebRequest -Method Head -Uri $publicPackage -MaximumRedirection 10 -TimeoutSec 30 -ErrorAction Stop
+              if ([int]$head.StatusCode -ge 200 -and [int]$head.StatusCode -lt 300) {
+                $ready = $true
+                Write-Host "Development ZIP publicly reachable (HEAD $($head.StatusCode)), attempt $attempt."
+                break
+              }
+            } catch {
+              Write-Host "Development ZIP not yet publicly reachable ($attempt/16): $($_.Exception.Message)"
+            }
+            if ($attempt -lt 16) { Start-Sleep -Seconds 7 }
+          }
+          if (-not $ready) { throw 'Public Development ZIP is not available; keeping the previous manifest rather than advertising a broken update' }
+
+          # The checksum goes up next, and the manifest goes up LAST.
+          # Until this final upload, users never see an announced version
+          # whose package does not yet exist.
+          gh release upload development --repo "$env:GITHUB_REPOSITORY" --clobber $checksum
+          if ($LASTEXITCODE -ne 0) { throw 'Could not publish Development checksum' }
+          gh release upload development --repo "$env:GITHUB_REPOSITORY" --clobber $manifest
+          if ($LASTEXITCODE -ne 0) { throw 'Could not publish Development manifest' }
+          gh release edit development --repo "$env:GITHUB_REPOSITORY" --target "$env:PUBLISHED_COMMIT" --prerelease --title "Casino Anomaly Development $env:VERSION" --notes-file artifacts/release-notes.md
+          if ($LASTEXITCODE -ne 0) { throw 'Could not update the Development release metadata' }
 
       - name: Report release permission fallback
         if: steps.publish_release.outcome == 'failure'
