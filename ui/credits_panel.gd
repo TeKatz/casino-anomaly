@@ -91,7 +91,7 @@ Engine: Godot 4.5  ·  [url=https://godotengine.org/license/]MIT License[/url]
 
 [color=#e6bb81][b]MUSIC & AMBIENCE[/b][/color]
 Menu music: "hmm" — Xythe, [url=https://freesound.org/people/Xythe/sounds/115831/]Freesound #115831[/url], CC0 1.0.
-Room tone: project-supplied recording; redistribution rights are awaiting verification.
+Room tone: "Room Tone In An Apartment Living Room 2" — leonelmail, [url=https://freesound.org/people/leonelmail/sounds/329533/]Freesound #329533[/url], CC0 1.0. Edited into a seamless loop for the game.
 
 [color=#e6bb81][b]3D MODELS — SKETCHFAB / CC BY 4.0[/b][/color]
 Roulette Table — [url=https://sketchfab.com/3d-models/roulette-table-18a27b0e326644a0b47887d07e0d0f99]Robilben[/url]

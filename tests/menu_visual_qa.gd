@@ -31,6 +31,21 @@ func _run() -> void:
         if button == null or button.get_script() == null:
             _fail("Custom menu control missing: " + id)
             return
+    if menu.has_node("Footnote") or menu.get_script().source_code.contains("$Footnote"):
+        _fail("Bottom menu help text was not removed")
+        return
+    var play_button := menu_buttons.get_node_or_null("PlayButton") as Button
+    var focus_surface := play_button.get_theme_stylebox("focus")
+    var normal_surface := play_button.get_theme_stylebox("normal")
+    if not (focus_surface is StyleBoxEmpty) or not (normal_surface is StyleBoxTexture):
+        _fail("Main menu buttons must use sculpted skins without sticky mouse focus outlines")
+        return
+    var credits_source := preload("res://ui/credits_panel.gd").new()
+    if not str(credits_source.call("_credit_text")).contains("freesound.org/people/leonelmail/sounds/329533/") \
+            or not str(credits_source.call("_credit_text")).contains("CC0 1.0"):
+        _fail("Room-tone source and CC0 license missing from in-game credits")
+        return
+    credits_source.free()
     if menu_buttons.get_node_or_null("Casino2PreviewButton") != null             or ResourceLoader.exists("res://casino2_preview.tscn"):
         _fail("Deprecated standalone casino preview is still accessible")
         return

@@ -8,10 +8,13 @@ loops with head/tail crossfades:
 | hmm_menu_seamless.ogg | Main menu ONLY | 4.0 s | 92.754 s |
 | casino_room_tone_seamless.ogg | Persistent ambience; all scenes | 1.6 s | 13.219 s |
 
-Original music: Xythe, hmm.wav, Freesound #115831
+Original menu music: "hmm.wav" by Xythe, Freesound #115831, CC0 1.0.
 https://freesound.org/people/Xythe/sounds/115831/
-Its Freesound listing specifies CC0. The room tone was supplied by the user
-without embedded rights metadata; verify original license before redistribution.
+Original room ambience: "Room Tone In An Apartment Living Room 2" by leonelmail,
+Freesound #329533, CC0 1.0.
+https://freesound.org/people/leonelmail/sounds/329533/
+The user-provided recording was crossfaded into the continuous in-game loop.
+Both original Freesound listings identify their sounds as CC0.
 
 ## One-time source import
 
@@ -39,7 +42,7 @@ Music uses the MUSIC volume setting; ambient tone uses the SFX volume setting.
 The main menu plays only the crossfaded hmm music track. The persistent
 AudioDirector never auto-plays white noise on project startup. Ambient tone
 begins when the actual first-person Player enters the world, whether in the
-tutorial, resumed casino hall or 3D preview, and keeps its playback position
+tutorial, resumed casino hall, and keeps its playback position
 when another hall/player is loaded. Returning to menu stops ambience immediately
 and restores the music-only state. The controller continues using the existing
 Music and SFX volume settings.

@@ -102,8 +102,11 @@ func _run() -> void:
         return
     var selected: Button = tabs[2]
     var inactive: Button = tabs[0]
-    if (selected.get_theme_stylebox("normal") as StyleBoxFlat).border_width_left <=             (inactive.get_theme_stylebox("normal") as StyleBoxFlat).border_width_left:
-        _fail("Selected settings tab is not highlighted")
+    var chosen_style := selected.get_theme_stylebox("normal")
+    var inactive_style := inactive.get_theme_stylebox("normal")
+    if not (chosen_style is StyleBoxTexture) or not (inactive_style is StyleBoxTexture) \
+            or chosen_style == inactive_style:
+        _fail("Selected settings tab does not have its own active surface")
         return
 
     var loop := room.get_node_or_null("LoopController")

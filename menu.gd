@@ -90,7 +90,6 @@ func _localize_ui() -> void:
     for key in buttons:
         var button := stack.get_node(str(buttons[key])) as Button
         button.text = Loc.t("menu." + key, self)
-    $Footnote.text = Loc.t("menu.footnote", self)
     _update_status()
 
 func _on_play() -> void:
