@@ -123,15 +123,15 @@ func _run() -> void:
         return
     # Ensure every themed surface can fit vertically in real controls.
     for control in [selected, inactive, dropdown, subpanel.get("back_button") as Button]:
-        for state in ["normal", "hover", "pressed"]:
-            var box := (control as Button).get_theme_stylebox(state) as StyleBoxTexture
+        for button_state in ["normal", "hover", "pressed"]:
+            var box := (control as Button).get_theme_stylebox(button_state) as StyleBoxTexture
             if box == null:
                 _fail("Settings control lost its premium button skin")
                 return
             var source_caps := box.texture_margin_top + box.texture_margin_bottom
             if source_caps > (control as Control).custom_minimum_size.y:
                 _fail("Settings skin overflows %s (%s): caps %.0fpx > height %.0fpx" % [
-                    (control as Node).name, state, source_caps, (control as Control).custom_minimum_size.y])
+                    (control as Node).name, button_state, source_caps, (control as Control).custom_minimum_size.y])
                 return
 
     var loop := room.get_node_or_null("LoopController")
