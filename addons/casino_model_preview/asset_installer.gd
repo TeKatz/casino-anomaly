@@ -35,7 +35,7 @@ static func _ready_on_disk(slug: String, base: String = MODEL_DIR) -> bool:
 
 static func has_all_extracted() -> bool:
     var entries := _records()
-    if entries.size() != 5:
+    if entries.size() != 4:
         return false
     for record in entries:
         if not _ready_on_disk(str(record.get("id", ""))):
@@ -119,8 +119,8 @@ static func unpack_one(record: Dictionary, output_base: String = MODEL_DIR) -> b
 
 static func ensure_local_models() -> bool:
     var entries := _records()
-    if entries.size() != 5:
-        push_error("Sketchfab editor import: expected five pinned ZIP archives")
+    if entries.size() != 4:
+        push_error("Sketchfab editor import: expected four pinned ZIP archives")
         return false
     for item in entries:
         if not unpack_one(item):

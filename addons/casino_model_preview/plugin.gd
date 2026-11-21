@@ -44,13 +44,13 @@ func _ensure_local_editor_models() -> void:
     # GitHub CI extracts the original ZIPs before importing the project,
     # but a fresh local checkout only has sketchfab_drop/*.zip.
     if not SketchfabImport.has_all_extracted():
-        print("Casino Model Preview: unpacking verified Sketchfab models for Godot editor...")
+        print("Casino Editor Furniture: unpacking verified Sketchfab models for Godot editor...")
         if not SketchfabImport.ensure_local_models():
-            push_warning("Casino Model Preview: extraction failed. Run python tools/unpack_sketchfab_assets.py --require-all and reopen main.tscn.")
+            push_warning("Casino Editor Furniture: extraction failed. Run python tools/unpack_sketchfab_assets.py --require-all and reopen main.tscn.")
             return
         _waiting_for_model_import = true
         _model_import_refresh_pending = true
-        print("Casino Model Preview: extracted 5 Sketchfab model packages; importing glTF...")
+        print("Casino Editor Furniture: extracted 4 Sketchfab model packages; importing glTF...")
         _request_editor_scan()
     else:
         # Already extracted, but imported glTF resources may still be
