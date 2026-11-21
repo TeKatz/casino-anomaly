@@ -36,5 +36,6 @@ vertically and paper-thin horizontally in the actual Godot room despite
 passing the bone-pose tests. The croupier script applies an outer-root
 width/depth correction of (2.35, 1.0, 2.6), preserving height, textures,
 skeleton and original animation files. This is adjustable in the scene's
-inspector for later art direction. An additional QA check measures imported
-mesh AABBs in *world units* to detect regressions in visual proportions.
+inspector for later art direction. The QA check instead measures **animated bone landmarks** (shoulders,
+head, face and feet). Unskinned mesh AABBs are misleading for this model:
+the bind pose lies along the wrong axis despite the displayed rig being upright.
