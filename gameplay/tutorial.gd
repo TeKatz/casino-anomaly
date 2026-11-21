@@ -14,12 +14,11 @@ var changing := false
 
 
 func _ready() -> void:
-    # Godot occasionally drops instanced scene transform overrides when a
-    # deeply nested PackedScene is reconstructed by the editor importer.
-    # Re-assert the authored station transform at runtime without touching
-    # any of the model, speech or AnimationTree nodes.
-    croupier.position = Vector3(-2.4, 0.0, -3.15)
+    # The counter occupies the LEFT wall (x=-3.7), not the exit wall.
+    # Keep the NPC inside its enclosed booth and facing the customers (+X).
+    croupier.position = Vector3(-2.56, 0.0, 0.25)
     croupier.rotation.y = PI * 0.5
+    _ensure_reception_collision()
     Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
     hint = Label3D.new()
     hint.name = "DoorHint"
@@ -38,6 +37,39 @@ func _ready() -> void:
     if settings != null:
         settings.options_changed.connect(_on_settings_changed)
     _refresh_hint()
+
+
+func _ensure_reception_collision() -> void:
+    # The three authored collision shapes also exist in tutorial.tscn.
+    # Restoring only missing ones prevents imported-scene node loss from
+    # leaving a gap that lets the player enter the staff-only pocket.
+    var body := get_node_or_null("ReceptionCounterCollision") as StaticBody3D
+    if body == null:
+        body = StaticBody3D.new()
+        body.name = "ReceptionCounterCollision"
+        add_child(body)
+    var specs: Array[Dictionary] = [
+        {"name": "ReceptionLongCollider",
+            "at": Vector3(-2.15, 0.52, 0.25),
+            "size": Vector3(0.64, 1.04, 3.16)},
+        {"name": "ReceptionFrontReturnCollider",
+            "at": Vector3(-2.91, 0.52, -1.33),
+            "size": Vector3(1.6, 1.04, 0.64)},
+        {"name": "ReceptionRearReturnCollider",
+            "at": Vector3(-2.91, 0.52, 1.83),
+            "size": Vector3(1.6, 1.04, 0.64)}
+    ]
+    for spec in specs:
+        var collider := body.get_node_or_null(str(spec["name"])) as CollisionShape3D
+        if collider == null:
+            collider = CollisionShape3D.new()
+            collider.name = str(spec["name"])
+            body.add_child(collider)
+        collider.position = spec["at"]
+        if not (collider.shape is BoxShape3D):
+            var shape := BoxShape3D.new()
+            shape.size = spec["size"]
+            collider.shape = shape
 
 
 func _refresh_hint() -> void:
@@ -66,8 +98,8 @@ func _is_looking_at_door() -> bool:
 
 
 func _is_looking_at_croupier() -> bool:
-    # The corner booth faces +X in world space. Transform the croupier's
-    # face from station-local coordinates; do not aim at the counter root.
+    # Target the face in station-local coordinates: moving the counter must
+    # never detach the E trigger from the actual animated NPC.
     var center := croupier.to_global(Vector3(0, 1.53, -0.52))
     var towards: Vector3 = center - camera.global_position
     var distance := towards.length()

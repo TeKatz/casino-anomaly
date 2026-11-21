@@ -1,12 +1,11 @@
 @tool
 extends Node3D
-## Lightweight editor-visible welcoming NPC; a pinned, local glTF replaces
+## Editor-visible welcoming NPC; reception counter is a separate solid part
+## of tutorial.tscn to avoid inherited-scene geometry and collision mistakes.
+## A pinned local glTF replaces
 ## the primitive proxy as soon as the licensed Sketchfab source is imported.
 const Loc = preload("res://gameplay/localization.gd")
 const MODEL_PATH := "res://models/croupier/scene.gltf"
-const BAR_SIDE := preload("res://bar_side_material.tres")
-const BAR_TOP := preload("res://bar_top_material.tres")
-const BAR_PANEL := preload("res://roulette_wood_material.tres")
 
 
 # Godot resolves the nested Sketchfab/FBX axis transforms during glTF import.
@@ -33,8 +32,6 @@ var _talking := false
 
 func _ready() -> void:
     _ensure_croupier_collision()
-    _ensure_counter_collision()
-    _ensure_counter_visuals()
     _try_load_model()
     _sync_placeholder()
     if Engine.is_editor_hint():
@@ -69,67 +66,6 @@ func _ensure_croupier_collision() -> void:
         shape.shape = capsule
 
 
-func _ensure_counter_collision() -> void:
-    # Defensive Godot PackedScene fallback; the collision shapes are also
-    # authored in the scene so the booth is editable in the 3D inspector.
-    var body := get_node_or_null("CounterCollision") as StaticBody3D
-    if body == null:
-        body = StaticBody3D.new()
-        body.name = "CounterCollision"
-        add_child(body)
-    for entry in [
-        ["CounterShape", Vector3(-0.185, 0.52, 0.44), Vector3(3.75, 1.04, 0.63)],
-        ["ReturnShape", Vector3(-2.055, 0.52, -0.615), Vector3(0.63, 1.04, 1.65)]
-    ]:
-        var item := body.get_node_or_null(str(entry[0])) as CollisionShape3D
-        if item == null:
-            item = CollisionShape3D.new()
-            item.name = str(entry[0])
-            body.add_child(item)
-        item.position = entry[1]
-        if not (item.shape is BoxShape3D):
-            var collider := BoxShape3D.new()
-            collider.size = entry[2]
-            item.shape = collider
-
-
-func _ensure_counter_visuals() -> void:
-    # Godot's nested PackedScene importer has occasionally omitted a few
-    # individual MeshInstance children of the authored station scene.
-    # Re-create only missing pieces, with the same project PBR materials,
-    # so neither the runtime nor the editor ever shows an incomplete desk.
-    var materials := {
-        "side": BAR_SIDE,
-        "top": BAR_TOP,
-        "panel": BAR_PANEL
-    }
-    var specs := [
-        ["MainFacing", Vector3(-0.185, 0.52, 0.44), Vector3(3.75, 1.04, 0.63), "side"],
-        ["MainCounterTop", Vector3(-0.185, 1.059, 0.44), Vector3(3.89, 0.13, 0.77), "top"],
-        ["MainTopFrontLip", Vector3(-0.185, 1.075, 0.83), Vector3(3.89, 0.055, 0.07), "panel"],
-        ["MainPanelLeft", Vector3(-1.40, 0.55, 0.764), Vector3(1.05, 0.69, 0.035), "panel"],
-        ["MainPanelMiddle", Vector3(-0.18, 0.55, 0.764), Vector3(1.05, 0.69, 0.035), "panel"],
-        ["MainPanelRight", Vector3(1.04, 0.55, 0.764), Vector3(1.05, 0.69, 0.035), "panel"],
-        ["ReturnFacing", Vector3(-2.055, 0.52, -0.615), Vector3(0.63, 1.04, 1.65), "side"],
-        ["ReturnCounterTop", Vector3(-2.055, 1.059, -0.695), Vector3(0.78, 0.13, 1.50), "top"],
-        ["ReturnFrontInset", Vector3(-2.383, 0.55, -0.69), Vector3(0.025, 0.69, 1.31), "panel"]
-    ]
-    var restored := 0
-    for entry in specs:
-        if get_node_or_null(str(entry[0])) != null:
-            continue
-        var panel := MeshInstance3D.new()
-        panel.name = str(entry[0])
-        panel.mesh = BoxMesh.new()
-        panel.position = entry[1]
-        panel.scale = entry[2]
-        panel.material_override = materials[str(entry[3])]
-        add_child(panel)
-        restored += 1
-    if restored > 0 and not Engine.is_editor_hint():
-        print("Restored ", restored, " textured corner-counter panels after PackedScene instantiation.")
-
-
 func _try_load_model() -> void:
     if model_anchor.get_child_count() > 0:
         _animator = _find_animator(model_anchor)
@@ -160,8 +96,8 @@ func _process(delta: float) -> void:
     var target_yaw := 0.0
     var player := get_parent().get_node_or_null("Player") as Node3D
     if player != null and player.global_position.distance_to(global_position) < 4.5:
-        # Follow in station-local axes: this booth is rotated into the
-        # left/front corner. World-space atan2 would turn his face away.
+        # Follow in NPC-local axes; his body faces the open room (+X),
+        # independent of the separate reception counter geometry.
         var local_player := to_local(player.global_position)
         var delta_position: Vector3 = local_player - character_pivot.position
         target_yaw = clampf(atan2(delta_position.x, delta_position.z), -0.32, 0.32)

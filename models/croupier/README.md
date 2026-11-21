@@ -69,30 +69,42 @@ physics-space side raycast to verify a real collision, plus a skeleton
 landmark check for the corrected height and shoulder proportions.
 The large head prompt has also been reduced in size.
 
-## Customer-facing corner counter (21 November 2026)
+## Separate, wall-enclosed reception counter (21 November 2026)
 
-The small free-standing placeholder counter has been **removed**. The
-replacement is a corner-mounted, L-shaped reception counter inside the
-intro scene, using the existing `bar_side_material.tres` (Poly Haven dark
-wood), `bar_top_material.tres` (Poly Haven worn tabletop) and
-`roulette_wood_material.tres` (Poly Haven wood) including PBR normal
-and roughness maps, plus restrained brass-colored trim.
+Following the in-game visual review, the counter and the character have
+been separated. The previous corner-counter structure and its camera-facing
+rotation were incorrect: the long desk stretched toward the exit door, and
+the character appeared on the wrong side from the player's viewpoint.
 
-In `gameplay/tutorial.tscn`, CroupierStation is placed at
-`(-2.4, 0, -3.15)`, facing the room by a +90-degree Y rotation. The
-main 3.75-meter counter runs toward the front wall at z = -4.72.
-Its perpendicular return is joined to the left wall at x = -3.7.
-Both have solid, joined collision shapes with physical overlap at the
-wall endpoints so players cannot slip behind either end. The NPC is
-station-local z = -0.52 and faces the customer side (+local Z, +world X).
-The counter height is approximately 1.12 m relative to the 1.77 m NPC.
+- The NPC and his existing AnimationTree live in
+  `gameplay/croupier_station.tscn`, **without** a desk. The NPC scene is
+  at room coordinates `(-2.56, 0, 0.25)` with +90° Y rotation; his
+  animated feet are at world `(-3.08, 0, 0.25)` and his face points
+  toward the room (+world X).
+- The three sections of the counter are authored directly as separately
+  selectable `Reception*` meshes in `gameplay/tutorial.tscn`. They use
+  the existing dark-wood, worn-tabletop and wood-table PBR materials, and
+  a brass-colored accent. **The full-height counter body is solid down
+  to the floor**, not a thin veneer with holes beneath it.
+- Main counter: `x=-2.15, z=0.25`, 3.16 m long in Z, 1.04 m high
+  including its body; the counter top reaches 1.144 m.
+- Both short side returns: `x=-2.91` at `z=-1.33` and `z=1.83`.
+  They extend to `x=-3.71`, overlapping the left wall's solid boundary
+  at `x=-3.575`. Their opposite ends overlap the main counter body.
+  Both ends are physically closed, so the player cannot walk behind
+  the cashier.
+- The entire counter lies on the **left wall**, not along the doorway
+  wall. Its closest end is at `z=-1.65`, leaving roughly 2.83 m
+  of separation from the existing exit door's `z=-4.48` position.
+  The center of the room and the original door interaction remain clear.
 
-Conversation targeting is transformed into the station's local
-coordinates, so the existing `E` dialogue still starts only from the
-customer side. The imported `Rig|idle` animation, facial speech
-AnimationTree filter and model scale remain unchanged. The existing
-exit-door trigger and original player spawn stay in place.
+The human-height character collision, model scale, and facial-speech
+AnimationTree are retained without modification. The `E` gaze check is
+still relative to the animated NPC, with interaction accessible from the
+public side of the wooden counter only.
 
-The intro QA verifies both wall seams, both real physics collisions,
-PBR material maps, NPC capsule, customer-only talking trigger, facial
-animation mask, movement lock and original exit interaction.
+The QA script now measures the actual room layout, checks physical rays
+against all three wood-bodied counter sections, tests both wall joints,
+ensures the croupier stands behind the desk rather than before it,
+checks PBR maps and preserved animation mask, and exercises the existing
+conversation and exit-door logic.
