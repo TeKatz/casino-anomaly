@@ -47,7 +47,10 @@ func _run() -> void:
                 or str(desk.call("_pick_animation", "talk")).is_empty():
             _fail("The imported model needs idle and talking clips")
             return
-        _diagnose_model_geometry(desk, character)
+        var pose_error := _validate_model_pose(desk, character)
+        if not pose_error.is_empty():
+            _fail(pose_error)
+            return
 
     elif not proxy.visible or anchor.get_child_count() != 0:
         _fail("A missing source archive must keep the original proxy in the start room")
@@ -104,42 +107,46 @@ func _run() -> void:
     quit(0)
 
 
-func _diagnose_model_geometry(desk: Node3D, character: Node3D) -> void:
-    var meshes: Array[MeshInstance3D] = []
-    var all: Array[Node] = [character]
-    while not all.is_empty():
-        var node: Node = all.pop_back()
-        if node is MeshInstance3D:
-            meshes.append(node)
-        for child in node.get_children():
-            all.append(child)
-    var low := Vector3(INF, INF, INF)
-    var high := Vector3(-INF, -INF, -INF)
+func _validate_model_pose(desk: Node3D, character: Node3D) -> String:
+    # Mesh AABBs cannot detect a wrongly rotated skinned character: the
+    # bind-pose mesh stays Y-up even when the animated Skeleton3D lies flat.
+    # Validate the actual animated bone landmarks in model-anchor space.
+    var skeleton := _find_skeleton(character)
+    if skeleton == null:
+        return "The imported character lacks an animated Skeleton3D"
     var anchor := desk.get_node("CharacterPivot/ModelAnchor") as Node3D
-    for part in meshes:
-        if part.mesh == null:
-            continue
-        var rect := part.mesh.get_aabb()
-        for xi in range(2):
-            for yi in range(2):
-                for zi in range(2):
-                    var local_point := rect.position + rect.size * Vector3(float(xi), float(yi), float(zi))
-                    var anchored := anchor.to_local(part.to_global(local_point))
-                    low = low.min(anchored)
-                    high = high.max(anchored)
-    print("CROUPIER_DIAGNOSTIC: mesh_count=", meshes.size(), " pose_aabb_min=", low, " max=", high, " dimensions=", high - low)
-    print("CROUPIER_DIAGNOSTIC: character_local=", character.transform, " char_global=", character.global_transform)
-    for part in meshes:
-        print("CROUPIER_DIAGNOSTIC: mesh ", part.name, " aabb=", part.mesh.get_aabb() if part.mesh else "<none>", " global_transform=", part.global_transform)
-    var all_skeletons: Array[Node] = [character]
-    while not all_skeletons.is_empty():
-        var n: Node = all_skeletons.pop_back()
-        if n is Skeleton3D:
-            var skeleton := n as Skeleton3D
-            for bone_i in skeleton.get_bone_count():
-                var name := skeleton.get_bone_name(bone_i)
-                if name.to_lower().contains("hips") or name.to_lower().contains("head") or name.to_lower().contains("foot"):
-                    var pose := skeleton.get_bone_global_pose(bone_i)
-                    print("CROUPIER_DIAGNOSTIC: bone=",name, " position=",anchor.to_local(skeleton.to_global(pose.origin)))
-        for child in n.get_children():
-            all_skeletons.append(child)
+    for name in ["Head_06", "Face_011", "Foot_L_065", "Foot_R_069"]:
+        if skeleton.find_bone(name) < 0:
+            return "The imported croupier is missing landmark bone: " + name
+    var head := _bone_anchor_position(skeleton, anchor, "Head_06")
+    var face := _bone_anchor_position(skeleton, anchor, "Face_011")
+    var left_foot := _bone_anchor_position(skeleton, anchor, "Foot_L_065")
+    var right_foot := _bone_anchor_position(skeleton, anchor, "Foot_R_069")
+    var feet := (left_foot + right_foot) * 0.5
+    var standing_height := head.y - feet.y
+    if head.y < 1.4 or head.y > 2.1 or standing_height < 1.35 \
+            or standing_height > 1.95 or absf(feet.y) > 0.2:
+        return "Croupier rig is not standing on the floor. Head=%s feet=%s height=%.2f" % [
+            str(head), str(feet), standing_height]
+    if absf(head.x) > 0.3 or absf(head.z - feet.z) > 0.45:
+        return "Croupier rig is displaced horizontally: head=%s feet=%s" % [
+            str(head), str(feet)]
+    if face.z <= head.z + 0.035:
+        return "Croupier must face the customers at positive Z: face=%s head=%s" % [
+            str(face), str(head)]
+    return ""
+
+
+func _bone_anchor_position(skeleton: Skeleton3D, anchor: Node3D, name: String) -> Vector3:
+    var index := skeleton.find_bone(name)
+    return anchor.to_local(skeleton.to_global(skeleton.get_bone_global_pose(index).origin))
+
+
+func _find_skeleton(node: Node) -> Skeleton3D:
+    if node is Skeleton3D:
+        return node as Skeleton3D
+    for child in node.get_children():
+        var candidate := _find_skeleton(child)
+        if candidate != null:
+            return candidate
+    return null

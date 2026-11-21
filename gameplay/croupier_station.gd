@@ -5,9 +5,10 @@ extends Node3D
 const Loc = preload("res://gameplay/localization.gd")
 const MODEL_PATH := "res://models/croupier/scene.gltf"
 
-# The Sketchfab glTF root is horizontal and must be stood upright. These are
-# editor-adjustable so the imported character can be fine-tuned visually.
-@export var imported_model_rotation := Vector3(90.0, 180.0, 0.0)
+# Godot resolves the nested Sketchfab/FBX axis transforms during glTF import.
+# The character is already Y-up and faces the customer (+Z): do not rotate
+# it by an additional 90 degrees or the skinned rig lies on the ground.
+@export var imported_model_rotation := Vector3.ZERO
 @export_range(0.5, 1.5, 0.05) var imported_model_scale := 1.0
 @export var imported_model_offset := Vector3.ZERO
 

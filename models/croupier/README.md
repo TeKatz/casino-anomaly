@@ -17,3 +17,13 @@ After extraction Godot loads the model under CroupierStation/CharacterPivot/Mode
 If the archive has not yet been provided the lightweight proxy remains.
 No character is downloaded at runtime. The model's transform is adjustable
 on the CroupierStation node; see gameplay/croupier_station.gd.
+
+
+## Orientation regression guard
+
+The imported scene is already Y-up and its front faces the counter customer
+(+Z). Keep CroupierStation.imported_model_rotation at Vector3.ZERO.
+Do not infer pose from the static mesh AABB; the original bug made its
+Skeleton3D lie horizontally even though the bind-pose mesh bounds looked
+upright. The intro QA checks animated skeleton landmarks (head, feet, face)
+and requires a human-height upright character facing the player.
