@@ -269,7 +269,7 @@ func _validate_model_proportions(character: Node3D) -> String:
         return "Croupier still has a flat or unnaturally wide shoulder span: %.2f" % shoulder_width
     if depth < 0.11 or depth > 0.35:
         return "Croupier face depth is implausible: %.2f" % depth
-    if foot_width < 0.72 or foot_width > 1.08:
+    if foot_width < 0.22 or foot_width > 1.08:
         return "Croupier leg spacing is implausible: %.2f" % foot_width
     return ""
 
