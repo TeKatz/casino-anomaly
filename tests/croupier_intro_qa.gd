@@ -47,6 +47,8 @@ func _run() -> void:
                 or str(desk.call("_pick_animation", "talk")).is_empty():
             _fail("The imported model needs idle and talking clips")
             return
+        _diagnose_model_geometry(desk, character)
+
     elif not proxy.visible or anchor.get_child_count() != 0:
         _fail("A missing source archive must keep the original proxy in the start room")
         return
@@ -100,3 +102,44 @@ func _run() -> void:
     settings.set_option("language", prior)
     print("Casino Anomaly croupier welcome desk and dialogue QA PASS")
     quit(0)
+
+
+func _diagnose_model_geometry(desk: Node3D, character: Node3D) -> void:
+    var meshes: Array[MeshInstance3D] = []
+    var all: Array[Node] = [character]
+    while not all.is_empty():
+        var node := all.pop_back()
+        if node is MeshInstance3D:
+            meshes.append(node)
+        for child in node.get_children():
+            all.append(child)
+    var low := Vector3(INF, INF, INF)
+    var high := Vector3(-INF, -INF, -INF)
+    var anchor := desk.get_node("CharacterPivot/ModelAnchor") as Node3D
+    for part in meshes:
+        if part.mesh == null:
+            continue
+        var rect := part.mesh.get_aabb()
+        for xi in range(2):
+            for yi in range(2):
+                for zi in range(2):
+                    var local_point := rect.position + rect.size * Vector3(float(xi), float(yi), float(zi))
+                    var anchored := anchor.to_local(part.to_global(local_point))
+                    low = low.min(anchored)
+                    high = high.max(anchored)
+    print("CROUPIER_DIAGNOSTIC: mesh_count=", meshes.size(), " pose_aabb_min=", low, " max=", high, " dimensions=", high - low)
+    print("CROUPIER_DIAGNOSTIC: character_local=", character.transform, " char_global=", character.global_transform)
+    for part in meshes:
+        print("CROUPIER_DIAGNOSTIC: mesh ", part.name, " aabb=", part.mesh.get_aabb() if part.mesh else "<none>", " global_transform=", part.global_transform)
+    var all_skeletons: Array[Node] = [character]
+    while not all_skeletons.is_empty():
+        var n := all_skeletons.pop_back()
+        if n is Skeleton3D:
+            var skeleton := n as Skeleton3D
+            for bone_i in skeleton.get_bone_count():
+                var name := skeleton.get_bone_name(bone_i)
+                if name.to_lower().contains("hips") or name.to_lower().contains("head") or name.to_lower().contains("foot"):
+                    var pose := skeleton.get_bone_global_pose(bone_i)
+                    print("CROUPIER_DIAGNOSTIC: bone=",name, " position=",anchor.to_local(skeleton.to_global(pose.origin)))
+        for child in n.get_children():
+            all_skeletons.append(child)
