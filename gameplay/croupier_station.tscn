@@ -35,7 +35,6 @@ height = 0.46
 radial_segments = 18
 rings = 9
 
-
 [sub_resource type="BoxShape3D" id="MainBarShape"]
 size = Vector3(3.75, 1.04, 0.63)
 
@@ -49,9 +48,6 @@ height = 1.7
 [node name="CroupierStation" type="Node3D"]
 script = ExtResource("1")
 
-# Corner booth: when this station is rotated 90 degrees by the tutorial,
-# +Z faces the room. The 3.75 m main counter reaches the front wall.
-# Its perpendicular return reaches the left wall: there is NO rear aisle.
 [node name="MainFacing" type="MeshInstance3D" parent="."]
 position = Vector3(-0.185, 0.52, 0.44)
 scale = Vector3(3.75, 1.04, 0.63)
@@ -106,8 +102,6 @@ scale = Vector3(0.63, 1.04, 1.65)
 mesh = SubResource("UnitCube")
 material_override = ExtResource("2")
 
-# Return top ends exactly where the main top starts: no overlapping
-# coplanar wood surfaces or flickering UVs at the inside corner.
 [node name="ReturnCounterTop" type="MeshInstance3D" parent="."]
 position = Vector3(-2.055, 1.059, -0.695)
 scale = Vector3(0.78, 0.13, 1.50)
@@ -132,8 +126,6 @@ scale = Vector3(0.029, 0.022, 1.47)
 mesh = SubResource("UnitCube")
 material_override = SubResource("CounterGold")
 
-# Both collision shapes belong to the same solid counter body.
-# The long end enters the front wall, the return enters the left wall.
 [node name="CounterCollision" type="StaticBody3D" parent="."]
 
 [node name="CounterShape" type="CollisionShape3D" parent="CounterCollision"]
@@ -154,7 +146,6 @@ shape = SubResource("CroupierCapsule")
 position = Vector3(0, 0, -0.52)
 
 [node name="ModelAnchor" type="Node3D" parent="CharacterPivot"]
-# Add the imported character as a child here. The proxy is hidden automatically.
 
 [node name="LeftLeg" type="MeshInstance3D" parent="CharacterPivot"]
 position = Vector3(-0.17, 0.48, 0)
