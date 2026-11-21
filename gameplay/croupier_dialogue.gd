@@ -3,6 +3,8 @@ extends CanvasLayer
 signal closed
 
 const Loc = preload("res://gameplay/localization.gd")
+const MenuStyle = preload("res://ui/menu_style.gd")
+const LuminousButton = preload("res://ui/luminous_button.gd")
 const GOLD := Color("#d6b176")
 
 var active := false
@@ -37,14 +39,7 @@ func _ready() -> void:
     panel.offset_right = 380.0
     panel.offset_top = -283.0
     panel.offset_bottom = -24.0
-    var style := StyleBoxFlat.new()
-    style.bg_color = Color("#151c23")
-    style.border_color = GOLD
-    style.set_border_width_all(2)
-    style.set_corner_radius_all(10)
-    style.shadow_size = 14
-    style.shadow_color = Color(0, 0, 0, 0.65)
-    panel.add_theme_stylebox_override("panel", style)
+    panel.add_theme_stylebox_override("panel", MenuStyle.panel())
     overlay.add_child(panel)
 
     var padding := MarginContainer.new()
@@ -76,9 +71,9 @@ func _ready() -> void:
     choices.add_theme_constant_override("v_separation", 8)
     stack.add_child(choices)
     for topic in ["rules", "anomalies", "casino", "leave"]:
-        var button := Button.new()
+        var button := LuminousButton.new()
         button.name = topic.capitalize() + "Button"
-        button.custom_minimum_size = Vector2(345, 43)
+        button.custom_minimum_size = Vector2(338, 48)
         button.pressed.connect(_on_choice.bind(topic))
         choices.add_child(button)
         buttons[topic] = button

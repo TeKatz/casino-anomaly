@@ -142,3 +142,9 @@ The main screen uses a lightweight 2D canvas shader instead of loading a second 
 The application and Windows export preset reference `branding/casino_anomaly.svg`, a bespoke portal emblem that Godot 4.5 converts to the native Windows executable icon during export. The same artwork appears on the in-game loading screen. If Explorer initially retains a previous icon after updating, its Windows icon cache may need refreshing.
 
 A persistent `SceneLoader` autoload presents a rendered full-screen transition before requesting target scenes through `ResourceLoader.load_threaded_request`. The bar reflects actual resource progress; a separate final phase covers the main-thread scene activation, which cannot be accurately expressed as a percentage. This applies to New Game, Continue and the tutorial's E-door transition. The controller's seamless in-world casino-room streaming remains unchanged. The first clean casino room rule and persistent audio split remain intact. A separate regression test exercises both entry points in CI.
+
+## Premium UI, original click sound and starting-door interaction
+
+All styled menu and dialogue buttons use the shared sculpted-glass surface (including stateful hover/press/focus animation) and one short original procedural click sound. `UISfx` is a persistent audio controller routed to the already existing `UI` bus, so `Settings → Audio → Menu / UI` independently adjusts it. The croupier conversation now uses the same custom buttons as the main and pause menus instead of default Godot controls.
+
+In the tutorial, the old world-space `ExitDoor/DoorHint` label is removed. A non-intercepting, gaze- and distance-sensitive `DoorInteractionHUD` presents an `E` keycap with translated `Enter the casino / Casino betreten` text only while the player looks at the entrance door. The existing E action continues to run through the threaded scene loader and preserves the tutorial completion logic.

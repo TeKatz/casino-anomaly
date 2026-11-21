@@ -14,23 +14,23 @@ static func button_skin(state: String, featured: bool = false) -> StyleBoxTextur
     if _skin_cache.has(key):
         return _skin_cache[key] as StyleBoxTexture
 
-    var top := Color("#293d51")
-    var bottom := Color("#142235")
+    var top := Color("#30455b")
+    var bottom := Color("#101e30")
     match state:
         "hover":
-            top = Color("#41586b")
-            bottom = Color("#203649")
+            top = Color("#526c83")
+            bottom = Color("#1c364d")
         "pressed":
-            top = Color("#1a2939")
-            bottom = Color("#101d2a")
+            top = Color("#1a283b")
+            bottom = Color("#0b1b2d")
         "disabled":
             top = Color("#18232e")
             bottom = Color("#101923")
     if featured and state == "normal":
-        top = Color("#3a4d66")
-        bottom = Color("#202e45")
+        top = Color("#415a75")
+        bottom = Color("#1b3049")
 
-    var rim := Color("#8faabd")
+    var rim := Color("#b1cad8")
     var image := Image.create_empty(SKIN_WIDTH, SKIN_HEIGHT, false, Image.FORMAT_RGBA8)
     for y in range(SKIN_HEIGHT):
         var v := float(y) / float(SKIN_HEIGHT - 1)
@@ -48,18 +48,26 @@ static func button_skin(state: String, featured: bool = false) -> StyleBoxTextur
                 continue
             if distance >= 0.5:
                 var shadow_alpha := 0.23 * (1.0 - clampf((distance - 0.5) / 5.5, 0.0, 1.0))
-                image.set_pixel(x, y, Color(0.0, 0.0, 0.0, shadow_alpha))
+                if state == "hover":
+                    var aura := (1.0 - clampf((distance - 0.5) / 5.5, 0.0, 1.0)) * 0.12
+                    image.set_pixel(x, y, Color(0.30, 0.67, 0.83, maxf(shadow_alpha, aura)))
+                else:
+                    image.set_pixel(x, y, Color(0.0, 0.0, 0.0, shadow_alpha))
                 continue
 
             var coverage := clampf(0.5 - distance, 0.0, 1.0)
-            var surface := top.lerp(bottom, pow(v, 0.78))
-            # Broad reflected light and an inset luminous core add depth
-            # without little lines, diamonds, or other decorative ornaments.
-            var reflection := exp(-pow((v - 0.20) / 0.28, 2.0)) * 0.14
-            var core := exp(-pow((float(x) / float(SKIN_WIDTH) - 0.37) / 0.43, 2.0)) * 0.07
-            surface = surface.lerp(Color("#a7c6d6"), reflection + core)
+            var surface := top.lerp(bottom, pow(v, 0.82))
+            # Layered, soft rectangular reflections rather than decorative
+            # bars. A broad ambient highlight runs through the entire skin.
+            var nx := float(x) / float(SKIN_WIDTH)
+            var reflection := exp(-pow((v - 0.15) / 0.34, 2.0)) * 0.16
+            var core := exp(-pow((nx - 0.32) / 0.56, 2.0)) * 0.095
+            var shoulder := exp(-pow((nx - 0.78) / 0.40, 2.0)) * 0.055
+            surface = surface.lerp(Color("#c1dce7"), reflection + core + shoulder)
+            var lower_bounce := exp(-pow((v - 0.92) / 0.23, 2.0)) * 0.065
+            surface = surface.lerp(Color("#6699b4"), lower_bounce)
             var edge := clampf(1.0 - (-distance / 2.1), 0.0, 1.0)
-            var edge_strength := 0.34 if state == "hover" else 0.18
+            var edge_strength := 0.44 if state == "hover" else 0.25
             if featured and state == "normal":
                 edge_strength += 0.07
             surface = surface.lerp(rim, edge * edge_strength)
@@ -110,6 +118,15 @@ static func apply_button(button: Button, active: bool = false) -> void:
     button.add_theme_color_override("font_hover_color", Color.WHITE)
     button.add_theme_color_override("font_pressed_color", Color("#d6edf3"))
     button.add_theme_color_override("font_disabled_color", Color("#74818f"))
+    # Bind one consistent UI click to every native Godot Button we style,
+    # including settings tabs, confirmation dialogs and dropdowns.
+    if not button.has_meta("_ui_click_attached"):
+        button.set_meta("_ui_click_attached", true)
+        button.pressed.connect(func() -> void:
+            var sound = button.get_node_or_null("/root/UISfx")
+            if sound != null:
+                sound.call("play_click")
+        )
 
 
 static func apply_dropdown(button: OptionButton) -> void:

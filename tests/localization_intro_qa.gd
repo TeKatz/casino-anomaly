@@ -38,7 +38,8 @@ func _run() -> void:
     var door := intro.get_node_or_null("ExitDoor") as Node3D
     var camera := intro.get_node_or_null("Player/Camera3D") as Camera3D
     var player := intro.get_node_or_null("Player") as CharacterBody3D
-    var prompt := intro.get_node_or_null("ExitDoor/DoorHint") as Label3D
+    var prompt := intro.get_node_or_null("DoorInteractionHUD") as CanvasLayer
+    var old_sign := intro.get_node_or_null("ExitDoor/DoorHint")
     var leaf := intro.get_node_or_null("ExitDoor/Door") as MeshInstance3D
     if door == null or camera == null or player == null or prompt == null or leaf == null:
         _fail("Starting room is missing the interaction or door")
@@ -48,27 +49,31 @@ func _run() -> void:
         _fail("Starting door must have textured wood, hardware and detailing")
         return
 
-    if intro.get_node_or_null("DoorInteractionHUD") != null or prompt.get_parent() != door:
-        _fail("The intro hint must be a physical label on the door, not a screen HUD")
+    if old_sign != null or prompt.get_node_or_null("Root/Prompt") == null:
+        _fail("The old floating door lettering must be replaced by a HUD prompt")
+        return
+    if bool(prompt.get("_shown")):
+        _fail("The door prompt must be hidden outside interaction range")
         return
     player.position = Vector3(0, 1.02, -2.15)
     camera.look_at(door.global_position + Vector3(0, 1.6, 0), Vector3.UP)
     await process_frame
-    if not bool(intro.call("_is_looking_at_door")) or prompt.text != "Press E to start":
-        _fail("English text must appear directly on the start door")
+    if not bool(intro.call("_is_looking_at_door")) or not bool(prompt.get("_shown")) \
+            or (prompt.get("caption") as Label).text != "Enter the casino":
+        _fail("English HUD prompt must only appear when looking at the door")
         return
 
     camera.rotate_y(PI)
     await process_frame
-    if bool(intro.call("_is_looking_at_door")) or prompt.text != "Press E to start":
-        _fail("The world-space door sign should persist, not pop up on gaze")
+    if bool(intro.call("_is_looking_at_door")) or bool(prompt.get("_shown")):
+        _fail("Door HUD prompt must disappear when looking away")
         return
 
     settings.set_option("language", "de")
     camera.look_at(door.global_position + Vector3(0, 1.6, 0), Vector3.UP)
     await process_frame
-    if prompt.text != "E drücken, um zu starten":
-        _fail("Door prompt must translate instantly to German")
+    if (prompt.get("caption") as Label).text != "Casino betreten" or not bool(prompt.get("_shown")):
+        _fail("Door HUD prompt must translate instantly to German")
         return
 
     intro.queue_free()

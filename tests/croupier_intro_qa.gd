@@ -242,6 +242,13 @@ func _run() -> void:
     if response == null or not response.text.contains("Willkommen"):
         _fail("German welcome must be concise and visible")
         return
+    var choices: Dictionary = dialogue.get("buttons")
+    for choice_id in ["rules", "anomalies", "casino", "leave"]:
+        var choice := choices.get(choice_id) as Button
+        if choice == null or choice.get_script() == null or not (choice.get_theme_stylebox("normal") is StyleBoxTexture) \
+                or not choice.has_meta("_ui_click_attached"):
+            _fail("Dialogue buttons must share the premium theme and UI click feedback")
+            return
     dialogue.call("_on_choice", "rules")
     if not response.text.to_lower().contains("zwölf"):
         _fail("Rules must explain the required streak in German")

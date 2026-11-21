@@ -2,13 +2,14 @@ extends Node3D
 ## Optional short conversations; the starting door remains the way forward.
 const Loc = preload("res://gameplay/localization.gd")
 const Conversation = preload("res://gameplay/croupier_dialogue.gd")
+const DoorPrompt = preload("res://ui/door_prompt.gd")
 
 @onready var player: CharacterBody3D = $Player
 @onready var camera: Camera3D = $Player/Camera3D
 @onready var door: Node3D = $ExitDoor
 @onready var croupier: Node3D = $CroupierStation
 
-var hint: Label3D
+var door_prompt: CanvasLayer
 var conversation: CanvasLayer
 var changing := false
 
@@ -20,15 +21,9 @@ func _ready() -> void:
     croupier.rotation.y = PI * 0.5
     _ensure_reception_collision()
     Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-    hint = Label3D.new()
-    hint.name = "DoorHint"
-    hint.position = Vector3(0, 3.60, 0.24)
-    hint.font_size = 54
-    hint.pixel_size = 0.0035
-    hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-    hint.modulate = Color("#f1c987")
-    hint.double_sided = false
-    door.add_child(hint)
+    door_prompt = DoorPrompt.new()
+    door_prompt.name = "DoorInteractionHUD"
+    add_child(door_prompt)
     conversation = Conversation.new()
     conversation.name = "CroupierDialogue"
     add_child(conversation)
@@ -73,7 +68,7 @@ func _ensure_reception_collision() -> void:
 
 
 func _refresh_hint() -> void:
-    hint.text = Loc.t("tutorial.start", self)
+    door_prompt.call("set_prompt_text", Loc.t("tutorial.enter", self))
 
 
 func _on_settings_changed(key: String) -> void:
@@ -82,8 +77,9 @@ func _on_settings_changed(key: String) -> void:
 
 
 func _process(_delta: float) -> void:
-    croupier.call("set_hint_visible", not changing and not is_dialogue_open() \
-            and _is_looking_at_croupier())
+    var can_interact := not changing and not is_dialogue_open() and not get_tree().paused
+    croupier.call("set_hint_visible", can_interact and _is_looking_at_croupier())
+    door_prompt.call("set_prompt_visible", can_interact and _is_looking_at_door())
 
 
 func _is_looking_at_door() -> bool:

@@ -12,6 +12,7 @@ LoopState="*res://gameplay/loop_state.gd"
 GameSettings="*res://gameplay/settings.gd"
 AudioDirector="*res://gameplay/audio_director.gd"
 SceneLoader="*res://gameplay/scene_loader.gd"
+UISfx="*res://ui/ui_sfx.gd"
 
 [editor_plugins]
 enabled=PackedStringArray("res://addons/casino_model_preview/plugin.cfg")

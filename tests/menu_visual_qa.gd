@@ -34,10 +34,17 @@ func _run() -> void:
     if menu.has_node("Footnote") or menu.get_script().source_code.contains("$Footnote"):
         _fail("Bottom menu help text was not removed")
         return
+    var sound = root.get_node_or_null("UISfx")
+    var sound_player := sound.get_node_or_null("Click") as AudioStreamPlayer if sound != null else null
+    if sound == null or sound_player == null or not (sound_player.stream is AudioStreamWAV) \
+            or sound_player.bus != "UI":
+        _fail("Original menu click sound or independent UI bus is missing")
+        return
     var play_button := menu_buttons.get_node_or_null("PlayButton") as Button
     var focus_surface := play_button.get_theme_stylebox("focus")
     var normal_surface := play_button.get_theme_stylebox("normal")
-    if not (focus_surface is StyleBoxEmpty) or not (normal_surface is StyleBoxTexture):
+    if not (focus_surface is StyleBoxEmpty) or not (normal_surface is StyleBoxTexture) \
+            or not play_button.has_meta("_ui_click_attached"):
         _fail("Main menu buttons must use sculpted skins without sticky mouse focus outlines")
         return
     var credits_source := preload("res://ui/credits_panel.gd").new()

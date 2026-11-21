@@ -53,7 +53,7 @@ func _refresh_focus() -> void:
 func _hover_changed(entered: bool) -> void:
     if disabled:
         return
-    _animate_size(Vector2(1.013, 1.013) if entered else Vector2.ONE, 0.19)
+    _animate_size(Vector2(1.017, 1.017) if entered else Vector2.ONE, 0.22)
 
 
 func _press_changed(pressed: bool) -> void:
@@ -65,5 +65,7 @@ func _press_changed(pressed: bool) -> void:
 func _animate_size(target: Vector2, duration: float) -> void:
     if _motion != null and _motion.is_running():
         _motion.kill()
-    _motion = create_tween()
+    _motion = create_tween().set_parallel(true)
     _motion.tween_property(self, "scale", target, duration).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+    var tint := Color(1.06, 1.07, 1.09, 1.0) if target.x > 1.0 else Color.WHITE
+    _motion.tween_property(self, "self_modulate", tint, duration).set_trans(Tween.TRANS_CUBIC)
