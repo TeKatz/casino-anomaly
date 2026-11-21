@@ -57,6 +57,20 @@ func _run() -> void:
     if absf(skin.texture_margin_left - skin.texture_margin_right) > 0.001:
         _fail("Button nine-slice margins are asymmetric")
         return
+    # The smallest live OptionButton is 36px high. The previous 52px
+    # vertical caps caused the clipped upper/lower halves in Settings.
+    var palette = preload("res://ui/menu_style.gd")
+    for type in ["gold", "green", "red"]:
+        for state in ["normal", "hover", "pressed", "disabled"]:
+            var shared_skin := palette.button_skin(state, false, type) as StyleBoxTexture
+            var caps := shared_skin.texture_margin_top + shared_skin.texture_margin_bottom
+            var source_height := shared_skin.texture.get_height()
+            if caps > 36.0 or caps > float(source_height):
+                _fail("Nine-slice caps clip 36px dropdowns: %s/%s: %.0fpx" % [type, state, caps])
+                return
+            if absf(shared_skin.texture_margin_top - shared_skin.texture_margin_bottom) > 0.001:
+                _fail("Nine-slice vertical caps must stay balanced")
+                return
     var credits_source := preload("res://ui/credits_panel.gd").new()
     if not str(credits_source.call("_credit_text")).contains("freesound.org/people/leonelmail/sounds/329533/") \
             or not str(credits_source.call("_credit_text")).contains("CC0 1.0"):

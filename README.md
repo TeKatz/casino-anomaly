@@ -154,3 +154,7 @@ In the tutorial, the old world-space `ExitDoor/DoorHint` label is removed. A non
 The UI's nine-slice skins now use symmetric corners and equal left/right margins, removing the left protrusion visible in the earlier pause menu. Gold is the normal satin-metal border, green belongs to New Game, and red to Quit Game; the same semantic colors apply in both main and pause menus. OptionButton arrows are inset 23 px from the right side, and the dropdown popup follows the same dark/gold palette.
 
 The Croupier's world-space 'E · Talk / E · Sprechen' label is now a single, localized sprite plaque rendered from a small static SubViewport. The actual keycap and caption are part of the same texture, giving a clean gold-bordered plate without overlapping 3D layers. Its authored anchor (0, 2.15, -0.45) is preserved, and it gently floats up/down by only 2.5 cm when visible; the original look-at interaction conditions and NPC animations are unchanged.
+
+### Compact button skin regression (November 2026)
+
+The smallest Settings dropdown is 36px tall. The earlier nine-slice UI used 26px top and bottom texture margins (52px combined), causing visible clipped/duplicated top halves and missing lower edges on 36–43px controls. The shared texture is now authored at 48px height with symmetric 15px vertical caps (30px combined), symmetrical rounded corners and the existing gold/green/red rim palette preserved. Godot QA enforces this constraint for all interaction states, including Settings tabs, dropdowns, and Back.

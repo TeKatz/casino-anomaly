@@ -7,9 +7,9 @@ const GREEN := Color("#75c899")
 const RED := Color("#df8490")
 const PALE := Color("#f5e9dc")
 const SKIN_WIDTH := 256
-const SKIN_HEIGHT := 76
-const INSET := 9.0
-const RADIUS := 17.0
+const SKIN_HEIGHT := 48
+const INSET := 5.0
+const RADIUS := 10.0
 static var _skin_cache: Dictionary = {}
 
 
@@ -92,11 +92,14 @@ static func button_skin(state: String, featured: bool = false, accent: String = 
 
     var style := StyleBoxTexture.new()
     style.texture = ImageTexture.create_from_image(image)
-    # Equal slice margins, so there is no left-edge extension on wide buttons.
-    style.texture_margin_left = 32.0
-    style.texture_margin_right = 32.0
-    style.texture_margin_top = 26.0
-    style.texture_margin_bottom = 26.0
+    # Both vertical caps must fit inside the smallest 36px settings dropdown.
+    # The previous 26+26px caps could not fit in 36–43px controls and
+    # Godot visibly sliced off their lower halves. Equal caps also avoid
+    # asymmetrical side nubs. See settings_pause_qa and menu_visual_qa.
+    style.texture_margin_left = 22.0
+    style.texture_margin_right = 22.0
+    style.texture_margin_top = 15.0
+    style.texture_margin_bottom = 15.0
     style.content_margin_left = 20.0
     style.content_margin_right = 20.0
     style.content_margin_top = 8.0
