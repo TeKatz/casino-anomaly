@@ -24,10 +24,10 @@ func _run() -> void:
     var desk := room.get_node_or_null("CroupierStation") as Node3D
     var collision := room.get_node_or_null("CroupierStation/CounterCollision/CounterShape") as CollisionShape3D
     var return_collision := room.get_node_or_null("CroupierStation/CounterCollision/ReturnShape") as CollisionShape3D
-    var main_face := room.get_node_or_null("CroupierStation/Counter/MainFacing") as MeshInstance3D
-    var main_top := room.get_node_or_null("CroupierStation/Counter/MainCounterTop") as MeshInstance3D
-    var return_face := room.get_node_or_null("CroupierStation/Counter/ReturnFacing") as MeshInstance3D
-    var return_top := room.get_node_or_null("CroupierStation/Counter/ReturnCounterTop") as MeshInstance3D
+    var main_face := room.get_node_or_null("CroupierStation/MainFacing") as MeshInstance3D
+    var main_top := room.get_node_or_null("CroupierStation/MainCounterTop") as MeshInstance3D
+    var return_face := room.get_node_or_null("CroupierStation/ReturnFacing") as MeshInstance3D
+    var return_top := room.get_node_or_null("CroupierStation/ReturnCounterTop") as MeshInstance3D
     var croupier_body := room.get_node_or_null("CroupierStation/CroupierCollision") as StaticBody3D
     var croupier_shape := room.get_node_or_null("CroupierStation/CroupierCollision/BodyShape") as CollisionShape3D
     var anchor := room.get_node_or_null("CroupierStation/CharacterPivot/ModelAnchor") as Node3D
@@ -51,8 +51,8 @@ func _run() -> void:
             or absf(desk.rotation.y - PI * 0.5) > 0.03:
         _fail("The corner booth is not rotated and positioned by the left/front walls")
         return
-    if room.get_node_or_null("CroupierStation/Counter/WoodFront") != null \
-            or room.get_node_or_null("CroupierStation/Counter/ChipOne") != null:
+    if room.get_node_or_null("CroupierStation/WoodFront") != null \
+            or room.get_node_or_null("CroupierStation/ChipOne") != null:
         _fail("The old placeholder table must be removed, not hidden underneath")
         return
     var main_shape := collision.shape as BoxShape3D

@@ -52,57 +52,55 @@ script = ExtResource("1")
 # Corner booth: when this station is rotated 90 degrees by the tutorial,
 # +Z faces the room. The 3.75 m main counter reaches the front wall.
 # Its perpendicular return reaches the left wall: there is NO rear aisle.
-[node name="Counter" type="Node3D" parent="."]
-
-[node name="MainFacing" type="MeshInstance3D" parent="Counter"]
+[node name="MainFacing" type="MeshInstance3D" parent="."]
 position = Vector3(-0.185, 0.52, 0.44)
 scale = Vector3(3.75, 1.04, 0.63)
 mesh = SubResource("UnitCube")
 material_override = ExtResource("2")
 
-[node name="MainCounterTop" type="MeshInstance3D" parent="Counter"]
+[node name="MainCounterTop" type="MeshInstance3D" parent="."]
 position = Vector3(-0.185, 1.059, 0.44)
 scale = Vector3(3.89, 0.13, 0.77)
 mesh = SubResource("UnitCube")
 material_override = ExtResource("3")
 
-[node name="MainTopFrontLip" type="MeshInstance3D" parent="Counter"]
+[node name="MainTopFrontLip" type="MeshInstance3D" parent="."]
 position = Vector3(-0.185, 1.075, 0.83)
 scale = Vector3(3.89, 0.055, 0.07)
 mesh = SubResource("UnitCube")
 material_override = ExtResource("4")
 
-[node name="MainGoldTopLine" type="MeshInstance3D" parent="Counter"]
+[node name="MainGoldTopLine" type="MeshInstance3D" parent="."]
 position = Vector3(-0.185, 0.996, 0.761)
 scale = Vector3(3.78, 0.028, 0.026)
 mesh = SubResource("UnitCube")
 material_override = SubResource("CounterGold")
 
-[node name="MainGoldBottomLine" type="MeshInstance3D" parent="Counter"]
+[node name="MainGoldBottomLine" type="MeshInstance3D" parent="."]
 position = Vector3(-0.185, 0.115, 0.764)
 scale = Vector3(3.78, 0.022, 0.026)
 mesh = SubResource("UnitCube")
 material_override = SubResource("CounterGold")
 
-[node name="MainPanelLeft" type="MeshInstance3D" parent="Counter"]
+[node name="MainPanelLeft" type="MeshInstance3D" parent="."]
 position = Vector3(-1.40, 0.55, 0.764)
 scale = Vector3(1.05, 0.69, 0.035)
 mesh = SubResource("UnitCube")
 material_override = ExtResource("4")
 
-[node name="MainPanelMiddle" type="MeshInstance3D" parent="Counter"]
+[node name="MainPanelMiddle" type="MeshInstance3D" parent="."]
 position = Vector3(-0.18, 0.55, 0.764)
 scale = Vector3(1.05, 0.69, 0.035)
 mesh = SubResource("UnitCube")
 material_override = ExtResource("4")
 
-[node name="MainPanelRight" type="MeshInstance3D" parent="Counter"]
+[node name="MainPanelRight" type="MeshInstance3D" parent="."]
 position = Vector3(1.04, 0.55, 0.764)
 scale = Vector3(1.05, 0.69, 0.035)
 mesh = SubResource("UnitCube")
 material_override = ExtResource("4")
 
-[node name="ReturnFacing" type="MeshInstance3D" parent="Counter"]
+[node name="ReturnFacing" type="MeshInstance3D" parent="."]
 position = Vector3(-2.055, 0.52, -0.615)
 scale = Vector3(0.63, 1.04, 1.65)
 mesh = SubResource("UnitCube")
@@ -110,25 +108,25 @@ material_override = ExtResource("2")
 
 # Return top ends exactly where the main top starts: no overlapping
 # coplanar wood surfaces or flickering UVs at the inside corner.
-[node name="ReturnCounterTop" type="MeshInstance3D" parent="Counter"]
+[node name="ReturnCounterTop" type="MeshInstance3D" parent="."]
 position = Vector3(-2.055, 1.059, -0.695)
 scale = Vector3(0.78, 0.13, 1.50)
 mesh = SubResource("UnitCube")
 material_override = ExtResource("3")
 
-[node name="ReturnFrontInset" type="MeshInstance3D" parent="Counter"]
+[node name="ReturnFrontInset" type="MeshInstance3D" parent="."]
 position = Vector3(-2.383, 0.55, -0.69)
 scale = Vector3(0.025, 0.69, 1.31)
 mesh = SubResource("UnitCube")
 material_override = ExtResource("4")
 
-[node name="ReturnGoldTopLine" type="MeshInstance3D" parent="Counter"]
+[node name="ReturnGoldTopLine" type="MeshInstance3D" parent="."]
 position = Vector3(-2.383, 0.997, -0.695)
 scale = Vector3(0.029, 0.028, 1.47)
 mesh = SubResource("UnitCube")
 material_override = SubResource("CounterGold")
 
-[node name="ReturnGoldBottomLine" type="MeshInstance3D" parent="Counter"]
+[node name="ReturnGoldBottomLine" type="MeshInstance3D" parent="."]
 position = Vector3(-2.383, 0.115, -0.695)
 scale = Vector3(0.029, 0.022, 1.47)
 mesh = SubResource("UnitCube")
