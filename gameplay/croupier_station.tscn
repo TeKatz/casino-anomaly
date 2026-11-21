@@ -124,70 +124,70 @@ position = Vector3(0, 0, -0.39)
 [node name="ModelAnchor" type="Node3D" parent="CharacterPivot"]
 # Add the imported character as a child here. The proxy is hidden automatically.
 
-[node name="Placeholder" type="Node3D" parent="CharacterPivot"]
+[node name="ProxyHuman" type="Node3D" parent="CharacterPivot"]
 
-[node name="LeftLeg" type="MeshInstance3D" parent="CharacterPivot/Placeholder"]
+[node name="LeftLeg" type="MeshInstance3D" parent="CharacterPivot/ProxyHuman"]
 position = Vector3(-0.17, 0.48, 0)
 scale = Vector3(0.24, 0.96, 0.27)
 mesh = SubResource("UnitCube")
 material_override = SubResource("Jacket")
 
-[node name="RightLeg" type="MeshInstance3D" parent="CharacterPivot/Placeholder"]
+[node name="RightLeg" type="MeshInstance3D" parent="CharacterPivot/ProxyHuman"]
 position = Vector3(0.17, 0.48, 0)
 scale = Vector3(0.24, 0.96, 0.27)
 mesh = SubResource("UnitCube")
 material_override = SubResource("Jacket")
 
-[node name="Torso" type="MeshInstance3D" parent="CharacterPivot/Placeholder"]
+[node name="Torso" type="MeshInstance3D" parent="CharacterPivot/ProxyHuman"]
 position = Vector3(0, 1.28, 0)
 scale = Vector3(0.65, 0.72, 0.3)
 mesh = SubResource("UnitCube")
 material_override = SubResource("Jacket")
 
-[node name="ShirtFront" type="MeshInstance3D" parent="CharacterPivot/Placeholder"]
+[node name="ShirtFront" type="MeshInstance3D" parent="CharacterPivot/ProxyHuman"]
 position = Vector3(0, 1.35, 0.16)
 scale = Vector3(0.17, 0.49, 0.025)
 mesh = SubResource("UnitCube")
 material_override = SubResource("Shirt")
 
-[node name="LeftArm" type="MeshInstance3D" parent="CharacterPivot/Placeholder"]
+[node name="LeftArm" type="MeshInstance3D" parent="CharacterPivot/ProxyHuman"]
 position = Vector3(-0.41, 1.25, 0.055)
 rotation = Vector3(-0.25, 0, -0.12)
 scale = Vector3(0.2, 0.7, 0.24)
 mesh = SubResource("UnitCube")
 material_override = SubResource("Jacket")
 
-[node name="RightArm" type="MeshInstance3D" parent="CharacterPivot/Placeholder"]
+[node name="RightArm" type="MeshInstance3D" parent="CharacterPivot/ProxyHuman"]
 position = Vector3(0.41, 1.25, 0.055)
 rotation = Vector3(-0.25, 0, 0.12)
 scale = Vector3(0.2, 0.7, 0.24)
 mesh = SubResource("UnitCube")
 material_override = SubResource("Jacket")
 
-[node name="LeftHand" type="MeshInstance3D" parent="CharacterPivot/Placeholder"]
+[node name="LeftHand" type="MeshInstance3D" parent="CharacterPivot/ProxyHuman"]
 position = Vector3(-0.42, 0.92, 0.2)
 scale = Vector3(0.18, 0.19, 0.18)
 mesh = SubResource("UnitCube")
 material_override = SubResource("Skin")
 
-[node name="RightHand" type="MeshInstance3D" parent="CharacterPivot/Placeholder"]
+[node name="RightHand" type="MeshInstance3D" parent="CharacterPivot/ProxyHuman"]
 position = Vector3(0.42, 0.92, 0.2)
 scale = Vector3(0.18, 0.19, 0.18)
 mesh = SubResource("UnitCube")
 material_override = SubResource("Skin")
 
-[node name="Neck" type="MeshInstance3D" parent="CharacterPivot/Placeholder"]
+[node name="Neck" type="MeshInstance3D" parent="CharacterPivot/ProxyHuman"]
 position = Vector3(0, 1.68, 0)
 scale = Vector3(0.2, 0.17, 0.2)
 mesh = SubResource("UnitCube")
 material_override = SubResource("Skin")
 
-[node name="Face" type="MeshInstance3D" parent="CharacterPivot/Placeholder"]
+[node name="Face" type="MeshInstance3D" parent="CharacterPivot/ProxyHuman"]
 position = Vector3(0, 1.91, 0)
 mesh = SubResource("Head")
 material_override = SubResource("Skin")
 
-[node name="HairCap" type="MeshInstance3D" parent="CharacterPivot/Placeholder"]
+[node name="HairCap" type="MeshInstance3D" parent="CharacterPivot/ProxyHuman"]
 position = Vector3(0, 2.09, -0.025)
 scale = Vector3(1.005, 0.32, 1.0)
 mesh = SubResource("Head")

@@ -24,7 +24,7 @@ func _run() -> void:
     var desk := room.get_node_or_null("CroupierStation") as Node3D
     var collision := room.get_node_or_null("CroupierStation/CounterCollision/CounterShape") as CollisionShape3D
     var anchor := room.get_node_or_null("CroupierStation/CharacterPivot/ModelAnchor") as Node3D
-    var proxy := room.get_node_or_null("CroupierStation/CharacterPivot/Placeholder") as Node3D
+    var proxy := room.get_node_or_null("CroupierStation/CharacterPivot/ProxyHuman") as Node3D
     var hint := room.get_node_or_null("CroupierStation/InteractionHint") as Label3D
     var player := room.get_node_or_null("Player") as CharacterBody3D
     var camera := room.get_node_or_null("Player/Camera3D") as Camera3D

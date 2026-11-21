@@ -7,7 +7,7 @@ const Loc = preload("res://gameplay/localization.gd")
 
 @onready var character_pivot: Node3D = $CharacterPivot
 @onready var model_anchor: Node3D = $CharacterPivot/ModelAnchor
-@onready var placeholder: Node3D = $CharacterPivot/Placeholder
+@onready var placeholder: Node3D = $CharacterPivot/ProxyHuman
 @onready var hint: Label3D = $InteractionHint
 
 var _idle_clock := 0.0
