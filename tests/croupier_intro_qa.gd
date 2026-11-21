@@ -23,18 +23,37 @@ func _run() -> void:
 
     var desk := room.get_node_or_null("CroupierStation") as Node3D
     var collision := room.get_node_or_null("CroupierStation/CounterCollision/CounterShape") as CollisionShape3D
+    var croupier_body := room.get_node_or_null("CroupierStation/CroupierCollision") as StaticBody3D
+    var croupier_shape := room.get_node_or_null("CroupierStation/CroupierCollision/BodyShape") as CollisionShape3D
     var anchor := room.get_node_or_null("CroupierStation/CharacterPivot/ModelAnchor") as Node3D
     var proxy := room.get_node_or_null("CroupierStation/CharacterPivot/Face") as MeshInstance3D
     var hint := room.get_node_or_null("CroupierStation/InteractionHint") as Label3D
     var player := room.get_node_or_null("Player") as CharacterBody3D
     var camera := room.get_node_or_null("Player/Camera3D") as Camera3D
     var dialogue := room.get_node_or_null("CroupierDialogue") as CanvasLayer
-    if desk == null or collision == null or anchor == null or proxy == null \
+    if desk == null or collision == null or croupier_body == null \
+            or croupier_shape == null or anchor == null or proxy == null \
             or hint == null or player == null or camera == null or dialogue == null:
         _fail("Desk scene, collision, model anchor, proxy or conversation is missing")
         return
     if desk.position.x > -1.5:
         _fail("The welcome counter obstructs the main exit route")
+        return
+    var capsule := croupier_shape.shape as CapsuleShape3D
+    if capsule == null or capsule.radius < 0.33 or capsule.radius > 0.47 \
+            or capsule.height < 1.6 or capsule.height > 1.85:
+        _fail("The croupier requires a human-sized solid capsule collision")
+        return
+    if croupier_body.position.distance_to(Vector3(0.0, 0.86, -0.39)) > 0.06:
+        _fail("NPC collision is displaced from the character behind the counter")
+        return
+    await physics_frame
+    var collision_query := PhysicsRayQueryParameters3D.create(
+            croupier_body.global_position + Vector3(-1.05, 0.0, 0.0),
+            croupier_body.global_position + Vector3(1.05, 0.0, 0.0))
+    var hit := room.get_world_3d().direct_space_state.intersect_ray(collision_query)
+    if hit.is_empty() or hit.get("collider") != croupier_body:
+        _fail("Physics ray passes through the croupier instead of hitting his capsule")
         return
     var model_installed := ResourceLoader.exists("res://models/croupier/scene.gltf", "PackedScene")
     var character: Node3D = null
@@ -98,8 +117,8 @@ func _run() -> void:
     elif not proxy.visible or anchor.get_child_count() != 0:
         _fail("A missing source archive must keep the original proxy in the start room")
         return
-    if hint.text != "E · Sprechen":
-        _fail("German interaction cue is missing")
+    if hint.text != "E · Sprechen" or hint.font_size > 54:
+        _fail("German interaction cue is missing or over-sized")
         return
 
     player.position = Vector3(-2.0, 1.02, 1.4)
@@ -240,13 +259,13 @@ func _validate_model_proportions(character: Node3D) -> String:
     print("CROUPIER_ANIMATED_PROPORTIONS: standing_height=", height,
             " shoulder_width=", shoulder_width, " face_depth=", depth,
             " feet_distance=", foot_width, " model_scale=", character.scale)
-    if height < 1.35 or height > 1.95:
+    if height < 1.60 or height > 1.86:
         return "Animated croupier height is implausible: %.2f" % height
-    if shoulder_width < 0.44 or shoulder_width > 0.84:
+    if shoulder_width < 0.80 or shoulder_width > 1.08:
         return "Croupier still has a flat or unnaturally wide shoulder span: %.2f" % shoulder_width
     if depth < 0.11 or depth > 0.35:
         return "Croupier face depth is implausible: %.2f" % depth
-    if foot_width < 0.25 or foot_width > 0.85:
+    if foot_width < 0.72 or foot_width > 1.08:
         return "Croupier leg spacing is implausible: %.2f" % foot_width
     return ""
 

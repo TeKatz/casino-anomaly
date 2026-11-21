@@ -52,3 +52,19 @@ The CI intro QA verifies actual animated skeletal landmarks and checks
 that the hand positions do not jump when the facial overlay is active.
 Unskinned mesh bounding boxes are misleading for this particular asset
 because its bind-pose axes differ from the displayed rig.
+
+
+## Intro-room body collision and final player-facing size pass
+
+The croupier is a stationary character, so the station scene includes a
+separate **StaticBody3D/CapsuleShape3D** behind the counter. Its center is
+(0, 0.86, -0.39) in station coordinates, with radius 0.38 m and height
+1.70 m. This capsule blocks players from walking through the NPC without
+inhibiting dialogue or changing the counter's existing collision.
+
+The model's inspector-adjustable root proportions have been updated to
+(2.32, 1.16, 2.38): a little shorter and visibly wider than before.
+AnimationTree facial blending remains unchanged. The intro QA performs a
+physics-space side raycast to verify a real collision, plus a skeleton
+landmark check for the corrected height and shoulder proportions.
+The large head prompt has also been reduced in size.
