@@ -33,6 +33,12 @@ func _ready() -> void:
     var pause_menu := PauseMenu.new()
     pause_menu.name = "InGameMenu"
     add_child(pause_menu)
+    # A real first-person player is the beginning of the soundscape.
+    # This works in tutorial, casino halls, preview and continued saves;
+    # repeated Player instances during room streaming do not restart tone.
+    var sound := get_node_or_null("/root/AudioDirector")
+    if sound != null:
+        sound.set_world_ambience_enabled(true)
     Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 

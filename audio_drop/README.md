@@ -33,3 +33,13 @@ res://audio/casino_room_tone_seamless.ogg
 Without the source ZIP, the AudioDirector is safe and silent; the test is a
 compatibility check only. Once it is uploaded, tests verify the real streams.
 Music uses the MUSIC volume setting; ambient tone uses the SFX volume setting.
+
+## Correct playback scope
+
+The main menu plays only the crossfaded hmm music track. The persistent
+AudioDirector never auto-plays white noise on project startup. Ambient tone
+begins when the actual first-person Player enters the world, whether in the
+tutorial, resumed casino hall or 3D preview, and keeps its playback position
+when another hall/player is loaded. Returning to menu stops ambience immediately
+and restores the music-only state. The controller continues using the existing
+Music and SFX volume settings.

@@ -2,6 +2,7 @@ extends SceneTree
 ## Verify global ambience persists while only the main menu enables music.
 ## The audio ZIP is user-uploaded separately; until then this is a code test.
 const MENU = preload("res://menu.tscn")
+const TUTORIAL = preload("res://gameplay/tutorial.tscn")
 const MENU_AUDIO := "res://audio/hmm_menu_seamless.ogg"
 const ROOM_AUDIO := "res://audio/casino_room_tone_seamless.ogg"
 
@@ -35,6 +36,10 @@ func _run() -> void:
         _fail("The menu and ambient loops must be imported together")
         return
 
+    if ambience.playing or music.playing:
+        _fail("Neither audio stream may play before a scene enables it")
+        return
+
     if has_music:
         var menu_stream := music.stream as AudioStreamOggVorbis
         var tone_stream := ambience.stream as AudioStreamOggVorbis
@@ -47,8 +52,8 @@ func _run() -> void:
             _fail("Processed loop durations differ: %s / %s" % [
                 str(menu_stream.get_length()), str(tone_stream.get_length())])
             return
-        if not ambience.playing or music.playing:
-            _fail("Ambience must play from startup, and menu music starts only with menu")
+        if ambience.playing or music.playing:
+            _fail("Both streams must remain stopped before menu or first-person entry")
             return
     else:
         print("Casino audio ZIP not uploaded: runtime switching is tested without binary streams.")
@@ -57,25 +62,72 @@ func _run() -> void:
     var menu := MENU.instantiate() as Control
     root.add_child(menu)
     await process_frame
-    if not bool(director.get("menu_enabled")):
-        _fail("Music must be enabled only when menu scene is active")
+    if not bool(director.get("menu_enabled")) \
+            or bool(director.get("world_ambience_enabled")):
+        _fail("In the main menu, only menu music may be enabled")
         return
-    if has_music and (not music.playing or music.stream == ambience.stream):
-        _fail("Main menu is not playing its own music stream")
+    if has_music and (not music.playing or ambience.playing):
+        _fail("The main menu must play music but no ambient white noise")
         return
 
     menu.queue_free()
     await process_frame
     await process_frame
     if bool(director.get("menu_enabled")):
-        _fail("Main menu music remains enabled after scene exit")
+        _fail("Menu music must be disabled after leaving the menu")
         return
-    if not is_instance_valid(initial_ambience) or initial_ambience != ambience:
-        _fail("The global ambience node was destroyed by the menu transition")
+
+    # Enter the actual first-person tutorial. Its real Player script, not an
+    # artificial test-only audio call, must activate ambient playback.
+    var world := TUTORIAL.instantiate() as Node3D
+    root.add_child(world)
+    await process_frame
+    if world.get_node_or_null("Player/Camera3D") == null:
+        _fail("Tutorial has no first-person Player")
+        return
+    if not bool(director.get("world_ambience_enabled")):
+        _fail("Ambient tone did not enable upon entering the first-person world")
         return
     if has_music and not ambience.playing:
-        _fail("Room tone stopped during menu to gameplay transition")
+        _fail("White noise must start once the first-person Player becomes active")
         return
+    if not is_instance_valid(initial_ambience) or ambience != initial_ambience:
+        _fail("The persistent ambient player was recreated on gameplay entry")
+        return
+
+    # A streamed hall's second Player also runs _ready. It must not restart
+    # or recreate the continuous sound.
+    director.set_world_ambience_enabled(true)
+    await process_frame
+    if not bool(director.get("world_ambience_enabled")) \
+            or (has_music and not ambience.playing) \
+            or ambience != initial_ambience:
+        _fail("Repeated world entry must preserve the existing room-tone loop")
+        return
+
+    await create_timer(0.55).timeout
+    if has_music and music.playing:
+        _fail("The menu track must stop after the menu exit crossfade")
+        return
+
+    # Returning to main menu must stop the continuous ambience immediately,
+    # including when the user leaves through the in-game pause menu.
+    world.queue_free()
+    await process_frame
+    await process_frame
+    var returned_menu := MENU.instantiate() as Control
+    root.add_child(returned_menu)
+    await process_frame
+    if bool(director.get("world_ambience_enabled")) \
+            or not bool(director.get("menu_enabled")):
+        _fail("Returning to menu did not switch to music-only mode")
+        return
+    if ambience.playing or (has_music and not music.playing):
+        _fail("Returning to menu must stop ambient white noise and play menu music")
+        return
+    returned_menu.queue_free()
+    await process_frame
+    await process_frame
     # Close the real Ogg decoder/playback objects before quitting headless.
     # Otherwise Godot 4.5.1 reports four live Ogg/audio resources on exit,
     # even though the functional assertions have already passed.

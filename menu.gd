@@ -19,10 +19,11 @@ var status_value := ""
 
 func _ready() -> void:
     Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-    # The persistent audio director plays music only while the menu scene
-    # exists; its low-level room ambience continues across scene changes.
+    # Main menu is music ONLY. Stop any room tone carried from gameplay
+    # before starting the menu track.
     var sound := get_node_or_null("/root/AudioDirector")
     if sound != null:
+        sound.set_world_ambience_enabled(false)
         sound.set_menu_music_enabled(true)
     var version_text := FileAccess.get_file_as_string("res://version.json")
     var parsed = JSON.parse_string(version_text)

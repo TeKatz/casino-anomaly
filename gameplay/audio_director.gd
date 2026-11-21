@@ -1,6 +1,6 @@
 extends Node
-## Persisting 2D audio controller. Ambient tone never restarts during
-## tutorial -> hall -> next hall transitions; music is restricted to menu.tscn.
+## Persistent 2D audio controller. The menu is MUSIC only; room tone begins
+## with a first-person Player and keeps playing through in-world room handoffs.
 const MENU_PATH := "res://audio/hmm_menu_seamless.ogg"
 const ROOM_PATH := "res://audio/casino_room_tone_seamless.ogg"
 const MENU_DB := -7.0
@@ -10,7 +10,9 @@ const FADE_SECONDS := 0.45
 var menu_player: AudioStreamPlayer
 var room_player: AudioStreamPlayer
 var menu_enabled := false
+var world_ambience_enabled := false
 var _fade: Tween
+var _ambience_fade: Tween
 
 
 func _ready() -> void:
@@ -31,8 +33,8 @@ func _ready() -> void:
 
     menu_player.stream = _load_loop(MENU_PATH)
     room_player.stream = _load_loop(ROOM_PATH)
-    if room_player.stream != null:
-        room_player.play()
+    # Startup is the main menu: ambient noise must not play until the player
+    # physically enters a first-person world. An autoload alone is not enough.
 
 
 func _load_loop(path: String) -> AudioStreamOggVorbis:
@@ -47,6 +49,29 @@ func _load_loop(path: String) -> AudioStreamOggVorbis:
     loaded.loop = true
     loaded.loop_offset = 0.0
     return loaded
+
+
+func set_world_ambience_enabled(enabled: bool) -> void:
+    # Called from the first-person Player on entering the world, and from
+    # the main menu on return. Never restart ambience during hall streaming.
+    if world_ambience_enabled == enabled:
+        return
+    world_ambience_enabled = enabled
+    if _ambience_fade != null and _ambience_fade.is_running():
+        _ambience_fade.kill()
+    if room_player == null or room_player.stream == null:
+        return
+    if enabled:
+        if not room_player.playing:
+            room_player.volume_db = -45.0
+            room_player.play()
+        _ambience_fade = create_tween()
+        _ambience_fade.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+        _ambience_fade.tween_property(room_player, "volume_db", ROOM_DB, FADE_SECONDS)
+    else:
+        # Do not let white noise bleed into the music-only menu. Stop it
+        # immediately rather than fading through the first menu seconds.
+        room_player.stop()
 
 
 func set_menu_music_enabled(enabled: bool) -> void:
@@ -75,7 +100,10 @@ func set_menu_music_enabled(enabled: bool) -> void:
 func _exit_tree() -> void:
     if _fade != null and _fade.is_running():
         _fade.kill()
+    if _ambience_fade != null and _ambience_fade.is_running():
+        _ambience_fade.kill()
     _fade = null
+    _ambience_fade = null
     # Release the stream decoders before Godot closes AudioServer. This also
     # avoids headless QA's 'resources still in use at exit' warning once the
     # verified real Ogg assets have been uploaded.

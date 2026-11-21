@@ -9,6 +9,7 @@ on:
       - 'tools/import_audio.py'
       - 'gameplay/audio_director.gd'
       - 'menu.gd'
+      - 'player.gd'
       - 'project.godot'
       - 'tests/audio_loop_qa.gd'
       - '.github/workflows/audio-loop-qa.yml'
@@ -18,6 +19,7 @@ on:
       - 'tools/import_audio.py'
       - 'gameplay/audio_director.gd'
       - 'menu.gd'
+      - 'player.gd'
       - 'project.godot'
       - 'tests/audio_loop_qa.gd'
 
