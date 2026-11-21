@@ -52,3 +52,24 @@ surface materials already documented in `ASSET_CREDITS.md`. Geometry,
 floor support, wall clearances and imported mesh extents are validated by
 `tests/tutorial_dressing_qa.gd`; the development workflow runs it on
 Windows with Godot 4.5.1.
+
+
+## Requested artist-supplied props — optional Sketchfab imports
+
+The following **real source models** are not in the repository until their
+original glTF ZIPs are uploaded. There is no fireplace. The dedicated
+`UserSelectedProps` node loads only existing meshes. Until a corresponding
+model exists, the procedural wall lights, register and desk bell remain visible.
+Once available:
+
+- Wall Light: four carefully bounded mounts, retaining the original
+  low-intensity lights but hiding their simple placeholder geometry
+- Desk Bell: replaces the small brass reception bell on the counter
+- Books with magnifier: replaces the basic guest register at the other end
+- Vintage Gramophone: right wall, on a small wood-finished cabinet with a
+  grounded collider, outside the central passage
+
+Objects are fit from their *actual imported 3D AABB*, so none rely on
+arbitrary default Sketchfab scale. The importer and verified sources are
+documented in `tutorial_assets_drop/README.md`. The exact models and their
+PBR textures are not yet bundled in this commit.

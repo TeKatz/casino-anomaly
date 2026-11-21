@@ -39,6 +39,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Sketchfab CC-BY 4.0 models unavailable or invalid' }
           python tools/import_croupier_asset.py
           if ($LASTEXITCODE -ne 0) { throw 'Pinned CC-BY-4.0 croupier archive unavailable or invalid' }
+          python tools/import_tutorial_sketchfab.py
+          if ($LASTEXITCODE -ne 0) { throw 'Optional Sketchfab tutorial props import failed' }
           python tools/import_audio.py
           if ($LASTEXITCODE -ne 0) { throw 'Pinned Casino Anomaly seamless audio archive unavailable or invalid' }
           git config user.name 'github-actions[bot]'

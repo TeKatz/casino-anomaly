@@ -71,3 +71,15 @@ All three source materials are CC0-1.0 and remain attributed here for clarity.
 - **Continuous ambience: "casino_anomaly_room_tone_clean_loop(1).ogg"** — based on **"Room Tone In An Apartment Living Room 2"** by **leonelmail**, [Freesound #329533](https://freesound.org/people/leonelmail/sounds/329533/), **CC0 1.0** ([Freesound license listing](https://freesound.org/people/leonelmail/sounds/329533/)). User-supplied recording edited into a 13.219-second seamless loop with a 1.6-second crossfade; the original Freesound recording is 17.307 seconds long.
 
 The exact processed file hashes and the accompanying source notes are stored inside `audio_drop/casino_anomaly_seamless_audio.zip`. This package is extracted with `tools/import_audio.py` before Godot export; the source ZIP is not downloaded at runtime. Both streams play through the existing MUSIC/SFX volume buses and are started only from the persistent audio controller.
+
+
+## Proposed tutorial decorations — not yet distributed
+
+The user selected these four models for the tutorial room. Their source ZIPs
+are **not yet part of this repository**; attribution below is recorded for
+integration and does not claim the game currently distributes these assets.
+
+- **Wall Light** — Lucas Garnier, [Sketchfab original](https://sketchfab.com/3d-models/wall-light-c723fa0a1ac3478790192acdb39161b0), CC BY 4.0.
+- **Vintage Gramophone** — Maxim Mavrichev, [Sketchfab original](https://sketchfab.com/3d-models/vintage-gramophone-a7508a4233a344008029d21a2f0024bd), CC BY 4.0.
+- **Books with magnifier** — shuvalov.di, [Sketchfab original](https://sketchfab.com/3d-models/books-with-magnifier-cc153ce6258b4e538d9fc7da5b5d0fe4). License must be verified on download; external citations conflict between CC BY and CC BY-SA.
+- **Desk Bell** — ClintonAbbott.Art, [Sketchfab original](https://sketchfab.com/3d-models/desk-bell-cc21b304c4bb4750bdde7a8fb538b116), CC BY 4.0.

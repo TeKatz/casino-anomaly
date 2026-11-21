@@ -1,4 +1,4 @@
-[gd_scene load_steps=57 format=3]
+[gd_scene load_steps=58 format=3]
 
 [ext_resource type="Material" path="res://upper_wall_material.tres" id="fabric"]
 [ext_resource type="Material" path="res://lower_wall_material.tres" id="panel"]
@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" path="res://models/marble_bust_01/marble_bust_01_1k.gltf" id="bust"]
 [ext_resource type="PackedScene" path="res://models/fancy_picture_frame_01/fancy_picture_frame_01_1k.gltf" id="frame"]
 [ext_resource type="PackedScene" path="res://models/Chandelier_02/Chandelier_02_1k.gltf" id="chandelier"]
+[ext_resource type="Script" path="res://gameplay/tutorial_sketchfab_props.gd" id="user_selected"]
 
 [sub_resource type="StandardMaterial3D" id="SatinBrass"]
 resource_name = "SatinBrass"
@@ -618,3 +619,6 @@ shape = SubResource("TeaTableSolid")
 [node name="DisplayCollision" type="CollisionShape3D" parent="SolidFurniture/CollisionBody"]
 position = Vector3(2.82, 0.465, -3.35)
 shape = SubResource("PedestalSolid")
+
+[node name="UserSelectedProps" type="Node3D" parent="."]
+script = ExtResource("user_selected")

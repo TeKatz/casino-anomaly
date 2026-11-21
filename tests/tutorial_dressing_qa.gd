@@ -37,6 +37,13 @@ func _run() -> void:
         _fail("Decor must be an authored subscene visible in the Godot editor")
         return
 
+    var imported := decor.get_node_or_null("UserSelectedProps") as Node3D
+    if imported == null or imported.get_script() == null:
+        _fail("Optional Sketchfab decoration mount must exist without external ZIPs")
+        return
+    if ResourceLoader.exists("res://gameplay/tutorial_sketchfab_props.gd") == false:
+        _fail("Tutorial Sketchfab integration script must parse")
+        return
     var floor := room.get_node_or_null("Floor") as MeshInstance3D
     var floor_material := floor.get_active_material(0) as StandardMaterial3D if floor != null else null
     if floor_material == null or floor_material.albedo_texture == null or not floor_material.normal_enabled:
