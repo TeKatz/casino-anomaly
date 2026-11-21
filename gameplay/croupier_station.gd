@@ -9,6 +9,10 @@ const MODEL_PATH := "res://models/croupier/scene.gltf"
 # The character is already Y-up and faces the customer (+Z): do not rotate
 # it by an additional 90 degrees or the skinned rig lies on the ground.
 @export var imported_model_rotation := Vector3.ZERO
+# This FBX-to-glTF import renders unnaturally narrow in Godot (both from
+# the front and the side). Correct width/depth at the outer model root; keep
+# the original height and the skeleton/animations intact.
+@export var imported_model_proportions := Vector3(2.35, 1.0, 2.6)
 @export_range(0.5, 1.5, 0.05) var imported_model_scale := 1.0
 @export var imported_model_offset := Vector3.ZERO
 
@@ -51,7 +55,7 @@ func _try_load_model() -> void:
         return
     character.name = "BusinessMan"
     character.rotation_degrees = imported_model_rotation
-    character.scale = Vector3.ONE * imported_model_scale
+    character.scale = imported_model_proportions * imported_model_scale
     character.position = imported_model_offset
     model_anchor.add_child(character)
     _animator = _find_animator(character)

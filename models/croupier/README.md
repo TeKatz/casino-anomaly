@@ -27,3 +27,14 @@ Do not infer pose from the static mesh AABB; the original bug made its
 Skeleton3D lie horizontally even though the bind-pose mesh bounds looked
 upright. The intro QA checks animated skeleton landmarks (head, feet, face)
 and requires a human-height upright character facing the player.
+
+
+## Body proportions (November 2026)
+
+The original model, once imported with the FBX rig, appeared stretched
+vertically and paper-thin horizontally in the actual Godot room despite
+passing the bone-pose tests. The croupier script applies an outer-root
+width/depth correction of (2.35, 1.0, 2.6), preserving height, textures,
+skeleton and original animation files. This is adjustable in the scene's
+inspector for later art direction. An additional QA check measures imported
+mesh AABBs in *world units* to detect regressions in visual proportions.

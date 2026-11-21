@@ -51,6 +51,11 @@ func _run() -> void:
         if not pose_error.is_empty():
             _fail(pose_error)
             return
+        var proportions_error := _validate_model_proportions(character)
+        if not proportions_error.is_empty():
+            _fail(proportions_error)
+            return
+
 
     elif not proxy.visible or anchor.get_child_count() != 0:
         _fail("A missing source archive must keep the original proxy in the start room")
@@ -150,3 +155,42 @@ func _find_skeleton(node: Node) -> Skeleton3D:
         if candidate != null:
             return candidate
     return null
+
+
+func _validate_model_proportions(character: Node3D) -> String:
+    # Rig landmarks alone can pass even when FBX mesh transforms make the
+    # character appear paper-thin. Check *world* bounds (never anchor-local:
+    # that would discard inherited scale corrections).
+    var nodes: Array[Node] = [character]
+    var minimum := Vector3(INF, INF, INF)
+    var maximum := Vector3(-INF, -INF, -INF)
+    var meshes := 0
+    while not nodes.is_empty():
+        var node: Node = nodes.pop_back()
+        if node is MeshInstance3D:
+            var instance := node as MeshInstance3D
+            if instance.mesh != null:
+                meshes += 1
+                var bounds := instance.mesh.get_aabb()
+                for x in range(2):
+                    for y in range(2):
+                        for z in range(2):
+                            var corner := bounds.position + bounds.size * Vector3(
+                                float(x), float(y), float(z))
+                            var world_corner := instance.to_global(corner)
+                            minimum = minimum.min(world_corner)
+                            maximum = maximum.max(world_corner)
+        for child in node.get_children():
+            nodes.append(child)
+    if meshes < 3:
+        return "The imported croupier lost its skinned body meshes"
+    var dimensions := maximum - minimum
+    print("CROUPIER_WORLD_PROPORTIONS: dimensions=", dimensions,
+            " width/height=", dimensions.x / maxf(dimensions.y, 0.01),
+            " depth/height=", dimensions.z / maxf(dimensions.y, 0.01))
+    if dimensions.y < 1.3 or dimensions.y > 2.4:
+        return "Croupier height is no longer realistic: %s" % str(dimensions)
+    if dimensions.x < 0.52 or dimensions.x > 1.4 \
+            or dimensions.z < 0.21 or dimensions.z > 0.9:
+        return "Croupier is still too flat or has become too broad: %s" % str(dimensions)
+    return ""
