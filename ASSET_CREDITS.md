@@ -4,11 +4,11 @@ All ten 3D models in `models/` are supplied by [Poly Haven](https://polyhaven.co
 
 Model source set: Chandelier_02, Chandelier_01, brass_candleholders, marble_bust_01, fancy_picture_frame_01, security_camera_01, wine_bottles_01, bar_chair_round_01, CoffeeCart_01, modern_wooden_cabinet.
 
-The installer does not request assets from Poly Haven at runtime; model imports are downloaded and verified during development. Displayed source credit is provided in the menu.
+The installer does not request assets from Poly Haven at runtime; model imports are downloaded and verified during development. The in-game Credits panel links back to these sources.
 
 ## Sketchfab CC BY 4.0 — user-provided models
 
-The five original casino prop models and the separately selected Business Man NPC use **Creative Commons Attribution 4.0**, not CC0.
+The four original casino prop models and the separately selected Business Man NPC use **Creative Commons Attribution 4.0**, not CC0.
 The official license text is preserved in each extracted `models/sketchfab/*/license.txt`.
 This game includes modified assets: PBR textures were downscaled for performance;
 the *Poker set* was selectively reduced to a small cards/chips/dice prop GLB.
@@ -19,7 +19,6 @@ game or models are shared.
 - **Retro Slot Machine** — [ARTEL_3D](https://sketchfab.com/artel_3D), [original](https://sketchfab.com/3d-models/retro-slot-machine-46f0ae338d984364ac1249451067c1a3). CC BY 4.0.
 - **Poker set** — [Matth_mat](https://sketchfab.com/Matth_mat), [original](https://sketchfab.com/3d-models/poker-set-841e271f392b4b3187b19fbdbb81ef62). CC BY 4.0. In-game use: selected 27,152-triangle display objects.
 - **Blackjack Table** — [Ravi Jangid](https://sketchfab.com/ravijangid.rv), [original](https://sketchfab.com/3d-models/blackjack-table-baf7e3cbd14140ca81ea1a79d28fb635). CC BY 4.0.
-- **Casino_2** — [crittaa](https://sketchfab.com/crittaa), [original](https://sketchfab.com/3d-models/casino-2-3f0e1cca9a3e46ba89f849e62df289ad). CC BY 4.0. This is a **complete room** and is kept in a separate preview rather than layered into the L-shaped hall.
 
 - **Business Man – Low Polygon game character (intro Croupier)** — [manoeldarochadeoliveira](https://sketchfab.com/manoeldarochadeoliveira), [original](https://sketchfab.com/3d-models/business-man-low-polygon-game-character-b6f6740f883b4749abac47af0045a9dd), [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Human NPC with rig, idle/talking animations and source PBR textures. The glTF is reoriented/scaled for the Godot welcome counter; attribution and its original license.txt are preserved in models/croupier/. The pinned Sketchfab ZIP is required before this character is included in a build.
 

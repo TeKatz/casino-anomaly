@@ -1,8 +1,13 @@
 extends Control
 
 const SettingsPanel = preload("res://ui/settings_panel.gd")
+const CreditsPanel = preload("res://ui/credits_panel.gd")
 const Loc = preload("res://gameplay/localization.gd")
 var settings_overlay: Control
+var credits_overlay: Control
+var credits_panel: PanelContainer
+var overlay_tween: Tween
+var changing_scene := false
 
 const UPDATE_MANIFEST_URL := "https://github.com/TeKatz/casino-anomaly/releases/download/development/update-manifest.json"
 
@@ -19,8 +24,6 @@ var status_value := ""
 
 func _ready() -> void:
     Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-    # Main menu is music ONLY. Stop any room tone carried from gameplay
-    # before starting the menu track.
     var sound := get_node_or_null("/root/AudioDirector")
     if sound != null:
         sound.set_world_ambience_enabled(false)
@@ -34,10 +37,11 @@ func _ready() -> void:
     $CenterPanel/Content/Stack/ContinueButton.disabled = state == null or not state.has_continue()
     $CenterPanel/Content/Stack/PlayButton.pressed.connect(_on_play)
     $CenterPanel/Content/Stack/ContinueButton.pressed.connect(_on_continue)
-    $CenterPanel/Content/Stack/Casino2PreviewButton.pressed.connect(_on_preview)
     $CenterPanel/Content/Stack/SettingsButton.pressed.connect(_open_settings)
-    _create_settings_overlay()
+    $CenterPanel/Content/Stack/CreditsButton.pressed.connect(_open_credits)
     $CenterPanel/Content/Stack/QuitButton.pressed.connect(_on_quit)
+    _create_settings_overlay()
+    _create_credits_overlay()
     update_button.pressed.connect(_check_update)
     install_button.pressed.connect(_install_update)
     request.request_completed.connect(_on_request_completed)
@@ -45,8 +49,10 @@ func _ready() -> void:
     if game_settings != null:
         game_settings.options_changed.connect(_on_setting_changed)
     _localize_ui()
+    get_viewport().size_changed.connect(_update_layout)
+    _update_layout()
+    _animate_intro()
     call_deferred("_check_update")
-
 
 func _exit_tree() -> void:
     var sound := get_node_or_null("/root/AudioDirector")
@@ -57,7 +63,8 @@ func _exit_tree() -> void:
 func _on_setting_changed(key: String) -> void:
     if key == "language":
         _localize_ui()
-
+        if credits_panel != null:
+            credits_panel.call("refresh_language")
 
 func _set_status(key: String, value: String = "") -> void:
     status_key = key
@@ -72,11 +79,11 @@ func _update_status() -> void:
 
 func _localize_ui() -> void:
     var stack := $CenterPanel/Content/Stack
-    var subtitle := stack.get_node("Subtitle") as Label
-    subtitle.text = Loc.t("menu.subtitle", self)
+    (stack.get_node("Subtitle") as Label).text = Loc.t("menu.subtitle", self)
+    (stack.get_node("Title") as Label).text = Loc.t("menu.choose", self)
     var buttons := {
         "new_game": "PlayButton", "continue": "ContinueButton",
-        "settings": "SettingsButton", "preview": "Casino2PreviewButton",
+        "settings": "SettingsButton", "credits": "CreditsButton",
         "check_updates": "UpdateButton", "install_update": "InstallButton",
         "quit": "QuitButton"
     }
@@ -92,51 +99,122 @@ func _on_play() -> void:
         _set_status("menu.failed_state")
         return
     state.start_new_run()
-    get_tree().change_scene_to_file("res://gameplay/tutorial.tscn")
-
+    _fade_to_scene("res://gameplay/tutorial.tscn")
 
 func _on_continue() -> void:
     var state = get_node_or_null("/root/LoopState")
     if state == null or not state.has_continue():
         return
-    get_tree().change_scene_to_file(
-        "res://main.tscn" if state.tutorial_done else "res://gameplay/tutorial.tscn"
-    )
-
+    _fade_to_scene("res://main.tscn" if state.tutorial_done else "res://gameplay/tutorial.tscn")
 
 func _create_settings_overlay() -> void:
-    settings_overlay = Control.new()
-    settings_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-    add_child(settings_overlay)
+    var panel := SettingsPanel.new()
+    settings_overlay = _build_overlay(panel)
+    panel.back_pressed.connect(func() -> void: _hide_overlay(settings_overlay))
+
+
+func _create_credits_overlay() -> void:
+    credits_panel = CreditsPanel.new()
+    credits_overlay = _build_overlay(credits_panel)
+    credits_panel.back_pressed.connect(func() -> void: _hide_overlay(credits_overlay))
+
+
+func _build_overlay(content: Control) -> Control:
+    var overlay := Control.new()
+    overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+    overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+    add_child(overlay)
     var shade := ColorRect.new()
-    shade.color = Color(0.01, 0.014, 0.019, 0.88)
+    shade.color = Color(0.015, 0.024, 0.04, 0.94)
     shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-    settings_overlay.add_child(shade)
+    overlay.add_child(shade)
     var center := CenterContainer.new()
     center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-    settings_overlay.add_child(center)
-    var panel := SettingsPanel.new()
-    panel.back_pressed.connect(func() -> void: settings_overlay.visible = false)
-    center.add_child(panel)
-    settings_overlay.visible = false
+    overlay.add_child(center)
+    center.add_child(content)
+    overlay.visible = false
+    return overlay
+
+
+func _show_overlay(overlay: Control) -> void:
+    if overlay_tween != null and overlay_tween.is_running():
+        overlay_tween.kill()
+    overlay.visible = true
+    overlay.modulate.a = 0.0
+    overlay_tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+    overlay_tween.tween_property(overlay, "modulate:a", 1.0, 0.25)
+
+
+func _hide_overlay(overlay: Control) -> void:
+    if overlay_tween != null and overlay_tween.is_running():
+        overlay_tween.kill()
+    overlay_tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+    overlay_tween.tween_property(overlay, "modulate:a", 0.0, 0.18)
+    overlay_tween.tween_callback(func() -> void: overlay.visible = false)
 
 
 func _open_settings() -> void:
-    settings_overlay.visible = true
+    _show_overlay(settings_overlay)
+
+
+func _open_credits() -> void:
+    _show_overlay(credits_overlay)
+
+
+func _update_layout() -> void:
+    var compact := get_viewport_rect().size.x < 980.0
+    $Brand.visible = not compact
+    if compact:
+        $CenterPanel.anchor_left = 0.14
+        $CenterPanel.anchor_right = 0.86
+    else:
+        $CenterPanel.anchor_left = 0.56
+        $CenterPanel.anchor_right = 0.95
+
+
+func _animate_intro() -> void:
+    $Brand.modulate.a = 0.0
+    $CenterPanel.modulate.a = 0.0
+    $CenterPanel.position.y += 12.0
+    var tween := create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+    tween.tween_property($Brand, "modulate:a", 1.0, 0.72)
+    tween.tween_property($CenterPanel, "modulate:a", 1.0, 0.48)
+    tween.tween_property($CenterPanel, "position:y", $CenterPanel.position.y - 12.0, 0.48)
+
+
+func _fade_to_scene(scene_path: String) -> void:
+    if changing_scene:
+        return
+    changing_scene = true
+    var screen := $Transition as ColorRect
+    screen.move_to_front()
+    screen.visible = true
+    screen.modulate.a = 0.0
+    var tween := create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+    tween.tween_property(screen, "modulate:a", 1.0, 0.38)
+    tween.tween_callback(func() -> void: get_tree().change_scene_to_file(scene_path))
 
 
 func _unhandled_input(event: InputEvent) -> void:
-    if settings_overlay != null and settings_overlay.visible and event is InputEventKey \
-            and event.pressed and event.keycode == KEY_ESCAPE:
-        settings_overlay.visible = false
-        get_viewport().set_input_as_handled()
-
-
-func _on_preview() -> void:
-    get_tree().change_scene_to_file("res://casino2_preview.tscn")
+    if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
+        if credits_overlay != null and credits_overlay.visible:
+            _hide_overlay(credits_overlay)
+            get_viewport().set_input_as_handled()
+        elif settings_overlay != null and settings_overlay.visible:
+            _hide_overlay(settings_overlay)
+            get_viewport().set_input_as_handled()
 
 func _on_quit() -> void:
-    get_tree().quit()
+    if changing_scene:
+        return
+    changing_scene = true
+    var screen := $Transition as ColorRect
+    screen.move_to_front()
+    screen.visible = true
+    screen.modulate.a = 0.0
+    var tween := create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+    tween.tween_property(screen, "modulate:a", 1.0, 0.30)
+    tween.tween_callback(get_tree().quit)
 
 func _check_update() -> void:
     if request.get_http_client_status() != HTTPClient.STATUS_DISCONNECTED:

@@ -44,17 +44,6 @@
       "bytes": 1314927,
       "sha256": "2b7dd0ae8fc092ccb6bfa37172961f69d3abfab1965f3b19d9af0c649e39fd1d",
       "triangleCount": 5788
-    },
-    {
-      "id": "casino_2",
-      "title": "Casino_2",
-      "author": "crittaa",
-      "authorUrl": "https://sketchfab.com/crittaa",
-      "sourceUrl": "https://sketchfab.com/3d-models/casino-2-3f0e1cca9a3e46ba89f849e62df289ad",
-      "bytes": 5904307,
-      "sha256": "2769f0a87948953822dbf816386519eb40b319614abfceb8b3a60e68747d1d14",
-      "triangleCount": 42040,
-      "isWholeEnvironment": true
     }
   ]
 }

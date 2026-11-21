@@ -69,8 +69,8 @@ func _test() -> void:
         push_error("Missing roulette tables or retro slot platform: tables=%d platform=%d" % [roulette_tables, raised_retro])
         quit(1)
         return
-    if load("res://casino2_preview.tscn") == null:
-        push_error("Separate Casino_2 preview scene is missing")
+    if ResourceLoader.exists("res://casino2_preview.tscn"):
+        push_error("Unused Casino_2 preview scene must be removed")
         quit(1)
         return
     world.queue_free()

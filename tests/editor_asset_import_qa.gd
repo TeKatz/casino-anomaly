@@ -1,5 +1,5 @@
 extends SceneTree
-## Reproduce a freshly cloned local editor checkout, where the five ZIPs
+## Reproduce a freshly cloned local editor checkout, where the four ZIPs
 ## are checked into git but models/sketchfab is ignored. ZIPReader can
 ## unpack one verified source *without Python*.
 const IMPORTER = preload("res://addons/casino_model_preview/asset_installer.gd")

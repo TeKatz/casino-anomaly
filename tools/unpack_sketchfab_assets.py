@@ -2,7 +2,7 @@
 """Verify and safely extract user-supplied CC BY 4.0 Sketchfab glTF packages.
 
 The archives are prepared outside the repository and placed in sketchfab_drop/.
-All five archives are SHA-256 pinned and keep the original license.txt.
+All four archives are SHA-256 pinned and keep the original license.txt.
 Extraction occurs during CI before the Godot import, never at runtime.
 """
 import argparse
@@ -87,7 +87,7 @@ def unpack(strict: bool) -> int:
         print("Verified Sketchfab model:", slug, "files", len(names), "unpacked bytes", total, flush=True)
         extracted += 1
     if strict and extracted != len(info["models"]):
-        raise ValueError("Five original models are required for the integration build")
+        raise ValueError("Four original models are required for the integration build")
     print("Imported Sketchfab models:", extracted, "/", len(info["models"]))
     return extracted
 

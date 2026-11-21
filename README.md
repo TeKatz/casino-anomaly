@@ -88,16 +88,14 @@ The player-reported defects were fixed in the scene itself: no procedural stools
 
 ## Sketchfab casino objects (feature branch)
 
-The uploaded models have been audited; the five original Sketchfab glTF
+The uploaded models have been audited; the four original Sketchfab glTF
 archives include CC BY 4.0 license files and author attribution. For the
 first pass, the scene attempts to replace three roulette-table prototypes,
 one blackjack table and one retro slot-machine prototype; the poker set
 is reduced to a compact, approximately 27k-triangle cards/chips/dice display.
-The original *Casino_2* file is a whole room, so it has its own model-preview
-button instead of overlapping the established L-shaped casino.
 
-To complete the binary upload to GitHub, place the five verified, compressed
-ZIP files from the Sketchfab asset package in `sketchfab_drop/` on
+To complete the binary upload to GitHub, place the four verified, compressed
+ZIP files for the four in-game props in `sketchfab_drop/` on
 `feature/sketchfab-casino-assets`. They are individually under the 25 MiB
 GitHub web-upload limit. Checksums are pinned in `catalog.json`.
 The CI workflow extracts them before Godot import; no Godot authoring or
@@ -134,3 +132,7 @@ User-directed pass on `casino-anomaly/dev`:
 - Replaced all five primitive sofas and coffee tables with original Poly Haven `sofa_02` and `round_wooden_table_01` glTFs, individually aligned and collidable.
 - Added one chess set and two animal sculptures (concrete cat, horse), each as a unique environmental landmark with pedestal collisions and without blocking the red runner.
 - Added reproducible offline checks for imported material maps, model types and placement counts. The longstanding Gold/wood architecture and previous Sketchfab credits remain intact.
+
+## Abstract menu and in-game credits
+
+The main screen uses a lightweight 2D canvas shader instead of loading a second casino environment. Beveled animated buttons, fade transitions and a centralized UI palette are shared with settings and pause screens. Credits are accessible directly beneath Settings in both menus and contain attribution links to the project’s audio, Sketchfab CC BY 4.0 models and CC0 asset sources. The full verified attribution record remains in [ASSET_CREDITS.md](ASSET_CREDITS.md). The unused Casino_2 preview scene, corresponding source ZIP and its build pipeline have been removed; this does not affect the editor-only Sketchfab furniture previews.

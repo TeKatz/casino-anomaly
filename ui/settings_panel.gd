@@ -1,5 +1,7 @@
 extends PanelContainer
 const Loc = preload("res://gameplay/localization.gd")
+const MenuStyle = preload("res://ui/menu_style.gd")
+const LuminousButton = preload("res://ui/luminous_button.gd")
 ## Reusable tabbed settings UI. Functions both while SceneTree is paused
 ## and in the normal main menu; changes apply and persist immediately.
 signal back_pressed
@@ -23,7 +25,7 @@ func _ready() -> void:
     process_mode = Node.PROCESS_MODE_ALWAYS
     settings_node = get_node_or_null("/root/GameSettings")
     custom_minimum_size = Vector2(720, 580)
-    var panel_style := _style(BACKGROUND, GOLD, 1)
+    var panel_style := MenuStyle.panel()
     panel_style.shadow_color = Color(0.0, 0.0, 0.0, 0.7)
     panel_style.shadow_size = 18
     add_theme_stylebox_override("panel", panel_style)
@@ -51,6 +53,7 @@ func _ready() -> void:
     layout.add_child(tab_row)
     for i in range(CATEGORIES.size()):
         var tab := Button.new()
+        MenuStyle.apply_button(tab)
         tab.text = Loc.t(CATEGORIES[i], self)
         tab.custom_minimum_size = Vector2(126, 39)
         tab.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -79,11 +82,11 @@ func _ready() -> void:
     note.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     note.add_theme_color_override("font_color", Color("#96a2ab"))
     footer.add_child(note)
-    back_button = Button.new()
+    back_button = LuminousButton.new()
     var back := back_button
     back.text = Loc.t("settings.back", self)
     back.custom_minimum_size = Vector2(142, 44)
-    back.add_theme_stylebox_override("normal", _style(Color("#483529"), GOLD, 1))
+    back.add_theme_font_size_override("font_size", 16)
     back.pressed.connect(func() -> void: back_pressed.emit())
     footer.add_child(back)
     _switch_tab(0)
@@ -136,14 +139,7 @@ func _switch_tab(index: int) -> void:
     for i in range(tabs.size()):
         var chosen: bool = i == index
         var button := tabs[i]
-        button.add_theme_stylebox_override("normal", _style(
-            Color("#665036") if chosen else Color("#232c34"),
-            Color("#f5c682") if chosen else Color("#45525c"),
-            2 if chosen else 1
-        ))
-        button.add_theme_stylebox_override("hover", _style(
-            Color("#796043") if chosen else Color("#34404a"), GOLD, 2
-        ))
+        MenuStyle.apply_button(button, chosen)
         button.add_theme_color_override("font_color", PALE if chosen else Color("#c4c6c6"))
         button.modulate = Color("#ffe3ac") if chosen else Color.WHITE
 
@@ -221,6 +217,7 @@ func _select(caption: String, key: String, choices: Array) -> void:
     var line := _line(caption)
     var dropdown := OptionButton.new()
     dropdown.custom_minimum_size = Vector2(230, 36)
+    MenuStyle.apply_dropdown(dropdown)
     for i in range(choices.size()):
         dropdown.add_item(str(choices[i][0]))
         if choices[i][1] == settings_node.get_option(key):
@@ -236,6 +233,7 @@ func _toggle(caption: String, key: String) -> void:
     var checkbox := CheckButton.new()
     checkbox.button_pressed = bool(settings_node.get_option(key))
     checkbox.custom_minimum_size = Vector2(100, 36)
+    checkbox.add_theme_color_override("font_color", PALE)
     checkbox.toggled.connect(func(enabled: bool) -> void:
         settings_node.set_option(key, enabled)
     )
@@ -254,6 +252,17 @@ func _slider(caption: String, key: String, low: float, high: float, step: float,
     var line := _line(caption)
     var slider := HSlider.new()
     slider.custom_minimum_size = Vector2(158, 32)
+    var track := StyleBoxFlat.new()
+    track.bg_color = Color("#0c1623")
+    track.border_color = Color("#607688")
+    track.set_border_width_all(1)
+    track.set_corner_radius_all(5)
+    slider.add_theme_stylebox_override("slider", track)
+    var fill := StyleBoxFlat.new()
+    fill.bg_color = Color("#96775f")
+    fill.set_corner_radius_all(5)
+    slider.add_theme_stylebox_override("grabber_area", fill)
+    slider.add_theme_stylebox_override("grabber_area_highlight", fill)
     slider.min_value = low
     slider.max_value = high
     slider.step = step
