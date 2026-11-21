@@ -158,39 +158,39 @@ func _find_skeleton(node: Node) -> Skeleton3D:
 
 
 func _validate_model_proportions(character: Node3D) -> String:
-    # Rig landmarks alone can pass even when FBX mesh transforms make the
-    # character appear paper-thin. Check *world* bounds (never anchor-local:
-    # that would discard inherited scale corrections).
-    var nodes: Array[Node] = [character]
-    var minimum := Vector3(INF, INF, INF)
-    var maximum := Vector3(-INF, -INF, -INF)
-    var meshes := 0
-    while not nodes.is_empty():
-        var node: Node = nodes.pop_back()
-        if node is MeshInstance3D:
-            var instance := node as MeshInstance3D
-            if instance.mesh != null:
-                meshes += 1
-                var bounds := instance.mesh.get_aabb()
-                for x in range(2):
-                    for y in range(2):
-                        for z in range(2):
-                            var corner := bounds.position + bounds.size * Vector3(
-                                float(x), float(y), float(z))
-                            var world_corner := instance.to_global(corner)
-                            minimum = minimum.min(world_corner)
-                            maximum = maximum.max(world_corner)
-        for child in node.get_children():
-            nodes.append(child)
-    if meshes < 3:
-        return "The imported croupier lost its skinned body meshes"
-    var dimensions := maximum - minimum
-    print("CROUPIER_WORLD_PROPORTIONS: dimensions=", dimensions,
-            " width/height=", dimensions.x / maxf(dimensions.y, 0.01),
-            " depth/height=", dimensions.z / maxf(dimensions.y, 0.01))
-    if dimensions.y < 1.3 or dimensions.y > 2.4:
-        return "Croupier height is no longer realistic: %s" % str(dimensions)
-    if dimensions.x < 0.52 or dimensions.x > 1.4 \
-            or dimensions.z < 0.21 or dimensions.z > 0.9:
-        return "Croupier is still too flat or has become too broad: %s" % str(dimensions)
+    # Imported FBX mesh bind-pose AABBs point along Z even though the animated
+    # skinned character stands upright. Their world-space mesh AABB therefore
+    # measures a lying *bind pose*, not the character seen in the game.
+    # Instead inspect the displayed rig's shoulders, face and feet after the
+    # corrected root-scale has been applied.
+    var skeleton := _find_skeleton(character)
+    if skeleton == null:
+        return "The imported character has no skeleton for proportions QA"
+    var anchor := character.get_parent() as Node3D
+    for name in ["Upper_Arm_L_027", "Upper_Arm_R_046",
+            "Head_06", "Face_011", "Foot_L_065", "Foot_R_069"]:
+        if skeleton.find_bone(name) < 0:
+            return "Missing bone for body proportion QA: " + name
+    var left_shoulder := _bone_anchor_position(skeleton, anchor, "Upper_Arm_L_027")
+    var right_shoulder := _bone_anchor_position(skeleton, anchor, "Upper_Arm_R_046")
+    var head := _bone_anchor_position(skeleton, anchor, "Head_06")
+    var face := _bone_anchor_position(skeleton, anchor, "Face_011")
+    var left_foot := _bone_anchor_position(skeleton, anchor, "Foot_L_065")
+    var right_foot := _bone_anchor_position(skeleton, anchor, "Foot_R_069")
+    var feet := (left_foot + right_foot) * 0.5
+    var height := head.y - feet.y
+    var shoulder_width := absf(left_shoulder.x - right_shoulder.x)
+    var depth := face.z - head.z
+    var foot_width := absf(left_foot.x - right_foot.x)
+    print("CROUPIER_ANIMATED_PROPORTIONS: standing_height=", height,
+            " shoulder_width=", shoulder_width, " face_depth=", depth,
+            " feet_distance=", foot_width, " model_scale=", character.scale)
+    if height < 1.35 or height > 1.95:
+        return "Animated croupier height is implausible: %.2f" % height
+    if shoulder_width < 0.38 or shoulder_width > 1.3:
+        return "Croupier still has a flat or unnaturally wide shoulder span: %.2f" % shoulder_width
+    if depth < 0.07 or depth > 0.6:
+        return "Croupier face depth is implausible: %.2f" % depth
+    if foot_width < 0.2 or foot_width > 1.4:
+        return "Croupier leg spacing is implausible: %.2f" % foot_width
     return ""
