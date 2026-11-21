@@ -49,7 +49,8 @@ func _run() -> void:
         return
     if desk.position.distance_to(Vector3(-2.4, 0.0, -3.15)) > 0.08 \
             or absf(desk.rotation.y - PI * 0.5) > 0.03:
-        _fail("The corner booth is not rotated and positioned by the left/front walls")
+        _fail("The corner booth is not rotated and positioned by the left/front walls: position=%s rotation=%s" % [
+            str(desk.position), str(desk.rotation)])
         return
     if room.get_node_or_null("CroupierStation/WoodFront") != null \
             or room.get_node_or_null("CroupierStation/ChipOne") != null:

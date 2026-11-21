@@ -14,6 +14,12 @@ var changing := false
 
 
 func _ready() -> void:
+    # Godot occasionally drops instanced scene transform overrides when a
+    # deeply nested PackedScene is reconstructed by the editor importer.
+    # Re-assert the authored station transform at runtime without touching
+    # any of the model, speech or AnimationTree nodes.
+    croupier.position = Vector3(-2.4, 0.0, -3.15)
+    croupier.rotation.y = PI * 0.5
     Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
     hint = Label3D.new()
     hint.name = "DoorHint"

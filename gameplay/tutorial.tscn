@@ -223,8 +223,8 @@ position = Vector3(0, 3.19, 0.06)
 mesh = SubResource("Trim")
 material_override = SubResource("GoldMat")
 
+# The L-shaped booth connects the left and front walls.
 [node name="CroupierStation" parent="." instance=ExtResource("5")]
-# Behind the illustrated left-wall corner booth, away from the exit route.
 position = Vector3(-2.4, 0, -3.15)
 rotation = Vector3(0, 1.5707963, 0)
 
