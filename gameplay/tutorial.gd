@@ -1,13 +1,15 @@
 extends Node3D
-## The introduction uses only world-space cues: the starting door carries
-## its own text, rather than projecting an interaction hint onto the screen.
+## Optional short conversations; the starting door remains the way forward.
 const Loc = preload("res://gameplay/localization.gd")
+const Conversation = preload("res://gameplay/croupier_dialogue.gd")
 
 @onready var player: CharacterBody3D = $Player
 @onready var camera: Camera3D = $Player/Camera3D
 @onready var door: Node3D = $ExitDoor
+@onready var croupier: Node3D = $CroupierStation
 
 var hint: Label3D
+var conversation: CanvasLayer
 var changing := false
 
 
@@ -22,6 +24,10 @@ func _ready() -> void:
     hint.modulate = Color("#f1c987")
     hint.double_sided = false
     door.add_child(hint)
+    conversation = Conversation.new()
+    conversation.name = "CroupierDialogue"
+    add_child(conversation)
+    conversation.closed.connect(_on_conversation_closed)
     var settings = get_node_or_null("/root/GameSettings")
     if settings != null:
         settings.options_changed.connect(_on_settings_changed)
@@ -37,22 +43,60 @@ func _on_settings_changed(key: String) -> void:
         _refresh_hint()
 
 
+func _process(_delta: float) -> void:
+    croupier.call("set_hint_visible", not changing and not is_dialogue_open() \
+            and _is_looking_at_croupier())
+
+
 func _is_looking_at_door() -> bool:
     var center := door.global_position + Vector3(0, 1.6, 0)
     var towards: Vector3 = center - camera.global_position
     var distance := towards.length()
     if distance < 0.05 or distance > 3.0:
         return false
-    # The starting door faces +Z; do not allow opening it from behind.
     if door.to_local(camera.global_position).z < 0.15:
         return false
     return (-camera.global_transform.basis.z).dot(towards / distance) >= 0.985
 
 
+func _is_looking_at_croupier() -> bool:
+    var center := croupier.global_position + Vector3(0, 1.53, -0.39)
+    var towards: Vector3 = center - camera.global_position
+    var distance := towards.length()
+    if distance < 0.2 or distance > 3.35:
+        return false
+    if croupier.to_local(camera.global_position).z < 0.65:
+        return false
+    return (-camera.global_transform.basis.z).dot(towards / distance) >= 0.925
+
+
+func is_dialogue_open() -> bool:
+    return conversation != null and bool(conversation.get("active"))
+
+
+func _open_conversation() -> void:
+    if changing or is_dialogue_open():
+        return
+    player.call("set_interaction_locked", true)
+    croupier.call("set_hint_visible", false)
+    conversation.call("show_conversation")
+
+
+func _on_conversation_closed() -> void:
+    if changing:
+        return
+    player.call("set_interaction_locked", false)
+    Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+
 func _unhandled_input(event: InputEvent) -> void:
-    if changing or not (event is InputEventKey):
+    if changing or is_dialogue_open() or not (event is InputEventKey):
         return
     if event.keycode != KEY_E or not event.pressed or event.echo:
+        return
+    if _is_looking_at_croupier():
+        get_viewport().set_input_as_handled()
+        _open_conversation()
         return
     if not _is_looking_at_door():
         return

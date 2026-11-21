@@ -20,6 +20,7 @@ var _step_clock: float = 0.0
 var _breath_clock: float = 0.0
 var _walk_blend: float = 0.0
 var _sprint_toggled := false
+var interaction_locked := false
 var _options: Variant = null
 
 func _ready() -> void:
@@ -46,7 +47,15 @@ func _setting(key: String, fallback: Variant) -> Variant:
     return _options.get_option(key) if _options != null else fallback
 
 
+func set_interaction_locked(locked: bool) -> void:
+    interaction_locked = locked
+    if locked:
+        velocity = Vector3.ZERO
+
+
 func _unhandled_input(event: InputEvent) -> void:
+    if interaction_locked:
+        return
     if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
         var sensitivity := MOUSE_SENSITIVITY * float(_setting("mouse_sensitivity", 1.0))
         rotate_y(-event.relative.x * sensitivity)
@@ -86,6 +95,9 @@ func _process(delta: float) -> void:
     camera.rotation.z = lerpf(camera.rotation.z, roll, smooth)
 
 func _physics_process(delta: float) -> void:
+    if interaction_locked:
+        velocity = Vector3.ZERO
+        return
     if not is_on_floor():
         velocity.y -= GRAVITY * delta
     elif velocity.y < 0.0:

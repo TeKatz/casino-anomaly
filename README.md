@@ -2,6 +2,23 @@
 
 Independent Godot 4.5.1 first-person prototype with a separate Windows updater and the dedicated [Development release](https://github.com/TeKatz/casino-anomaly/releases/tag/development).
 
+## Welcome desk and first-room tutorial
+
+The separately authored start room now includes a small casino counter and a
+stationary croupier on the left of the unobstructed route to the exit door.
+Looking at the croupier from the customer side and pressing E opens four
+short bilingual dialogue options covering the first normal hall, the
+ANOMALY/NORMAL exits, the 12-correct streak goal and subtle casino lore.
+Talk is optional; E at the existing door still begins the run.
+
+The counter and proxy are editable in gameplay/croupier_station.tscn.
+Replace the proxy by importing a licensed GLB/glTF character and placing
+the imported scene under CroupierStation/CharacterPivot/ModelAnchor.
+The proxy hides when a model is attached; an Idle or idle AnimationPlayer
+clip plays if present. No third-party character is required at present.
+Conversations lock movement and camera look, release the mouse, and close
+with Esc without opening the global pause menu. Saves are unchanged.
+
 ## Room design pass
 
 The current walkable hall is **L-shaped**: from the entrance it leads straight past slot-machine groups, turns **left** at the illuminated, wrap-around corner bar, and continues into the second wing, now twice as long after the first visual playtest, with more roulette/blackjack tables, multiple lounge groups and decorative exit doors. The counter is now one continuous rounded-corner L shape, with seating on both sides; the standalone slot machine previously blocking the bar sightline was relocated. The red-and-gold bordered carpet forms an uninterrupted route through the corner. Players can step off the carpet to inspect furniture. This is a first spatial and lighting pass using handcrafted primitive placeholder meshes, not final models or anomaly gameplay.

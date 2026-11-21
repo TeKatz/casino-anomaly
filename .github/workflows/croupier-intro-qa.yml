@@ -1,0 +1,61 @@
+name: Casino Anomaly Croupier Introduction QA
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'gameplay/croupier_*'
+      - 'gameplay/tutorial.*'
+      - 'gameplay/localization.gd'
+      - 'player.gd'
+      - 'ui/pause_menu.gd'
+      - 'tests/croupier_intro_qa.gd'
+      - '.github/workflows/croupier-intro-qa.yml'
+  pull_request:
+    paths:
+      - 'gameplay/croupier_*'
+      - 'gameplay/tutorial.*'
+      - 'gameplay/localization.gd'
+      - 'player.gd'
+      - 'ui/pause_menu.gd'
+      - 'tests/croupier_intro_qa.gd'
+      - '.github/workflows/croupier-intro-qa.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  godot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore pinned model and texture sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/ensure_assets.py
+          python3 tools/ensure_fabric037.py
+          python3 tools/import_model_assets.py
+          python3 tools/unpack_sketchfab_assets.py --require-all
+      - name: Install Godot 4.5.1
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 -o /tmp/godot.zip "https://github.com/godotengine/godot-builds/releases/download/4.5.1-stable/Godot_v4.5.1-stable_linux.x86_64.zip"
+          mkdir -p /tmp/godot
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          chmod +x /tmp/godot/Godot_v4.5.1-stable_linux.x86_64
+      - name: Import and test the croupier and existing intro door
+        shell: bash
+        run: |
+          set -euo pipefail
+          GODOT=/tmp/godot/Godot_v4.5.1-stable_linux.x86_64
+          "$GODOT" --headless --path . --editor --import > /tmp/import.log 2>&1 || { cat /tmp/import.log; exit 1; }
+          if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' /tmp/import.log; then cat /tmp/import.log; exit 1; fi
+          "$GODOT" --headless --path . --script res://tests/croupier_intro_qa.gd > /tmp/test.log 2>&1 || { cat /tmp/test.log; exit 1; }
+          grep -Fq 'Casino Anomaly croupier welcome desk and dialogue QA PASS' /tmp/test.log
+          if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' /tmp/test.log; then cat /tmp/test.log; exit 1; fi
+          "$GODOT" --headless --path . --script res://tests/localization_intro_qa.gd > /tmp/intro.log 2>&1 || { cat /tmp/intro.log; exit 1; }
+          grep -Fq 'Casino Anomaly bilingual intro and door interaction QA PASS' /tmp/intro.log
+          if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' /tmp/intro.log; then cat /tmp/intro.log; exit 1; fi

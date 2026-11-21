@@ -1,9 +1,10 @@
-[gd_scene load_steps=26 format=3]
+[gd_scene load_steps=27 format=3]
 
 [ext_resource type="Script" path="res://gameplay/tutorial.gd" id="1"]
 [ext_resource type="Script" path="res://player.gd" id="2"]
 [ext_resource type="Material" path="res://brown_planks_05_material.tres" id="3"]
 [ext_resource type="Material" path="res://lower_wall_material.tres" id="4"]
+[ext_resource type="PackedScene" path="res://gameplay/croupier_station.tscn" id="5"]
 
 [sub_resource type="StandardMaterial3D" id="FloorMat"]
 albedo_color = Color(0.22, 0.13, 0.105, 1)
@@ -221,6 +222,9 @@ material_override = SubResource("GoldMat")
 position = Vector3(0, 3.19, 0.06)
 mesh = SubResource("Trim")
 material_override = SubResource("GoldMat")
+
+[node name="CroupierStation" parent="." instance=ExtResource("5")]
+position = Vector3(-2, 0, -0.9)
 
 [node name="Player" type="CharacterBody3D" parent="."]
 position = Vector3(0, 1.02, 2.7)

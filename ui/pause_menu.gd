@@ -123,6 +123,11 @@ func _refresh_localization() -> void:
 
 
 func _input(event: InputEvent) -> void:
+    # The introduction owns Escape while a dialogue is open.
+    var owning_scene := get_parent().get_parent()
+    if owning_scene != null and owning_scene.has_method("is_dialogue_open") \
+            and owning_scene.is_dialogue_open():
+        return
     # Do not open the normal pause overlay on top of the private G menu.
     var dev_menu := get_parent().get_node_or_null("AnomalyDevMenu")
     if dev_menu != null and dev_menu.visible:
