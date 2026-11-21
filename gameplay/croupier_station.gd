@@ -12,7 +12,7 @@ const MODEL_PATH := "res://models/croupier/scene.gltf"
 # This FBX-to-glTF import renders unnaturally narrow in Godot (both from
 # the front and the side). Correct width/depth at the outer model root; keep
 # the original height and the skeleton/animations intact.
-@export var imported_model_proportions := Vector3(2.35, 1.0, 2.6)
+@export var imported_model_proportions := Vector3(1.6, 1.0, 2.05)
 @export_range(0.5, 1.5, 0.05) var imported_model_scale := 1.0
 @export var imported_model_offset := Vector3.ZERO
 

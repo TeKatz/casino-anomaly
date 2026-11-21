@@ -187,10 +187,10 @@ func _validate_model_proportions(character: Node3D) -> String:
             " feet_distance=", foot_width, " model_scale=", character.scale)
     if height < 1.35 or height > 1.95:
         return "Animated croupier height is implausible: %.2f" % height
-    if shoulder_width < 0.38 or shoulder_width > 1.3:
+    if shoulder_width < 0.44 or shoulder_width > 0.84:
         return "Croupier still has a flat or unnaturally wide shoulder span: %.2f" % shoulder_width
-    if depth < 0.07 or depth > 0.6:
+    if depth < 0.11 or depth > 0.35:
         return "Croupier face depth is implausible: %.2f" % depth
-    if foot_width < 0.2 or foot_width > 1.4:
+    if foot_width < 0.25 or foot_width > 0.85:
         return "Croupier leg spacing is implausible: %.2f" % foot_width
     return ""
