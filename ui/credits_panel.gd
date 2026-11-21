@@ -59,7 +59,7 @@ func _ready() -> void:
     var bottom := HBoxContainer.new()
     column.add_child(bottom)
     var note := Label.new()
-    note.text = "CC0  /  CC BY 4.0"
+    note.text = "CC0  /  CC BY 4.0  /  CC BY-SA 4.0"
     note.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     note.add_theme_color_override("font_color", Color("#96a3af"))
     bottom.add_child(note)
@@ -100,6 +100,11 @@ Poker set — [url=https://sketchfab.com/3d-models/poker-set-841e271f392b4b3187b
 Blackjack Table — [url=https://sketchfab.com/3d-models/blackjack-table-baf7e3cbd14140ca81ea1a79d28fb635]Ravi Jangid[/url]
 Business Man (Croupier) — [url=https://sketchfab.com/3d-models/business-man-low-polygon-game-character-b6f6740f883b4749abac47af0045a9dd]manoeldarochadeoliveira[/url]
 Assets have been adapted for this game. License: [url=https://creativecommons.org/licenses/by/4.0/]Creative Commons Attribution 4.0[/url].
+
+[color=#e6bb81][b]TUTORIAL RECEPTION — CC BY-SA 4.0[/b][/color]
+Books with magnifier — [url=https://sketchfab.com/3d-models/books-with-magnifier-cc153ce6258b4e538d9fc7da5b5d0fe4]shuvalov.di[/url]
+Licensed under [url=https://creativecommons.org/licenses/by-sa/4.0/]Creative Commons Attribution-ShareAlike 4.0[/url].
+Original model and textures retained; scaled and placed in the game.
 
 [color=#e6bb81][b]MODELS & TEXTURES — CC0[/b][/color]
 [url=https://polyhaven.com/]Poly Haven[/url] — architecture materials, chandeliers, furniture, props and decor.

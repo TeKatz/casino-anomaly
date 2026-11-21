@@ -10,8 +10,10 @@ OUT=ROOT/"models"/"tutorial_user"
 catalog=json.loads((DROP/"catalog.json").read_text("utf-8"))
 
 def install(zip_path, slug):
-    if zip_path.stat().st_size > 24*1024*1024:
-        raise ValueError(f"{slug} ZIP exceeds 24 MiB")
+    # GitHub accepts repository files up to 100 MiB. The uploaded Books
+    # archive is 25,711,884 bytes, so the older 24 MiB limit was wrong.
+    if zip_path.stat().st_size > 80*1024*1024:
+        raise ValueError(f"{slug} ZIP exceeds 80 MiB")
     with zipfile.ZipFile(zip_path) as archive:
         members=[p for p in archive.infolist() if not p.is_dir()]
         if sum(p.file_size for p in members)>160*1024*1024:
@@ -60,7 +62,10 @@ def install(zip_path, slug):
         finally:
             if stage.exists():
                 shutil.rmtree(stage)
-    print("Imported user-provided Sketchfab model:",slug)
+    print("Imported user-provided Sketchfab model:", slug,
+          "| scene:", main,
+          "| archive entries:", len(members),
+          "| model bytes:", zip_path.stat().st_size)
 
 def main():
     imported=0

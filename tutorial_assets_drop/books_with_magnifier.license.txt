@@ -1,0 +1,20 @@
+Books with magnifier — source attribution and license
+==================================================
+Model: Books with magnifier
+Artist: shuvalov.di
+Original source: https://sketchfab.com/3d-models/books-with-magnifier-cc153ce6258b4e538d9fc7da5b5d0fe4
+License: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
+License legal terms: https://creativecommons.org/licenses/by-sa/4.0/legalcode
+License overview: https://creativecommons.org/licenses/by-sa/4.0/
+
+The project owner confirmed that the original Sketchfab model lists a
+Creative Commons Attribution-ShareAlike license.
+
+Changes in Casino Anomaly: imported from the original downloadable glTF
+archive into Godot; uniformly scaled and positioned on the tutorial
+reception desk. Original textures and geometry are retained.
+No endorsement by the creator is implied.
+
+Attribution and ShareAlike obligations apply to this model and to any
+redistributed adapted versions of the model. License compliance for this
+model does not automatically change the license of the independent game.

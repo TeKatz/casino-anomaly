@@ -41,6 +41,18 @@ func _run() -> void:
     if imported == null or imported.get_script() == null:
         _fail("Optional Sketchfab decoration mount must exist without external ZIPs")
         return
+    # Once the books' officially supplied archive has been extracted by CI,
+    # the actual textured model must load and replace the simple ledger.
+    if ResourceLoader.exists("res://models/tutorial_user/books_with_magnifier/scene.gltf") \
+            or ResourceLoader.exists("res://models/tutorial_user/books_with_magnifier/scene.glb"):
+        var books := imported.get_node_or_null("BooksWithMagnifier") as Node3D
+        if books == null:
+            _fail("Supplied Sketchfab Books with magnifier model failed to load")
+            return
+        var old_register := decor.get_node_or_null("ReceptionDetails/GuestRegisterCover") as MeshInstance3D
+        if old_register == null or old_register.visible:
+            _fail("Real books model must replace the old register placeholder")
+            return
     if ResourceLoader.exists("res://gameplay/tutorial_sketchfab_props.gd") == false:
         _fail("Tutorial Sketchfab integration script must parse")
         return

@@ -73,13 +73,14 @@ All three source materials are CC0-1.0 and remain attributed here for clarity.
 The exact processed file hashes and the accompanying source notes are stored inside `audio_drop/casino_anomaly_seamless_audio.zip`. This package is extracted with `tools/import_audio.py` before Godot export; the source ZIP is not downloaded at runtime. Both streams play through the existing MUSIC/SFX volume buses and are started only from the persistent audio controller.
 
 
-## Proposed tutorial decorations — not yet distributed
+## Tutorial decorations — Sketchfab CC BY-SA 4.0 and CC BY 4.0
 
-The user selected these four models for the tutorial room. Their source ZIPs
-are **not yet part of this repository**; attribution below is recorded for
-integration and does not claim the game currently distributes these assets.
+The user selected four models for the tutorial room. The original
+**Books with magnifier ZIP is committed to the repository**, and its PBR
+mesh/texture files are extracted during the Windows build. The other three
+original ZIPs are still pending and will not be substituted by fake meshes.
 
 - **Wall Light** — Lucas Garnier, [Sketchfab original](https://sketchfab.com/3d-models/wall-light-c723fa0a1ac3478790192acdb39161b0), CC BY 4.0.
 - **Vintage Gramophone** — Maxim Mavrichev, [Sketchfab original](https://sketchfab.com/3d-models/vintage-gramophone-a7508a4233a344008029d21a2f0024bd), CC BY 4.0.
-- **Books with magnifier** — shuvalov.di, [Sketchfab original](https://sketchfab.com/3d-models/books-with-magnifier-cc153ce6258b4e538d9fc7da5b5d0fe4). License must be verified on download; external citations conflict between CC BY and CC BY-SA.
+- **Books with magnifier** — **shuvalov.di**, [Sketchfab original](https://sketchfab.com/3d-models/books-with-magnifier-cc153ce6258b4e538d9fc7da5b5d0fe4), **[Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)](https://creativecommons.org/licenses/by-sa/4.0/)** (license confirmed by the project owner). Imported from the original Sketchfab ZIP; model is uniformly scaled and positioned in the reception scene. Geometry and original PBR textures are otherwise retained. If the original asset is further adapted and redistributed, its adapted material must remain under CC BY-SA 4.0 or a permitted compatible license. This game is a collection of separately credited assets and does not assert ownership of the model.
 - **Desk Bell** — ClintonAbbott.Art, [Sketchfab original](https://sketchfab.com/3d-models/desk-bell-cc21b304c4bb4750bdde7a8fb538b116), CC BY 4.0.
