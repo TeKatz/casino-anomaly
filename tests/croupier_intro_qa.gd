@@ -67,7 +67,7 @@ func _run() -> void:
         _fail("Rules must explain the required streak in German")
         return
     settings.set_option("language", "en")
-    if hint.text != "E · Talk" or not response.text.contains("twelve"):
+    if hint.text != "E · Talk" or not response.text.to_lower().contains("twelve"):
         _fail("Bilingual text did not update live")
         return
     dialogue.call("close_conversation")
