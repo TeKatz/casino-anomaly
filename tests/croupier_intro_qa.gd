@@ -34,7 +34,11 @@ func _run() -> void:
     if desk == null or collision == null or croupier_body == null \
             or croupier_shape == null or anchor == null or proxy == null \
             or hint == null or player == null or camera == null or dialogue == null:
-        _fail("Desk scene, collision, model anchor, proxy or conversation is missing")
+        _fail("Missing nodes: desk=%s counter=%s npcBody=%s npcShape=%s anchor=%s proxy=%s hint=%s player=%s camera=%s dialogue=%s" % [
+            str(desk != null), str(collision != null),
+            str(croupier_body != null), str(croupier_shape != null),
+            str(anchor != null), str(proxy != null), str(hint != null),
+            str(player != null), str(camera != null), str(dialogue != null)])
         return
     if desk.position.x > -1.5:
         _fail("The welcome counter obstructs the main exit route")

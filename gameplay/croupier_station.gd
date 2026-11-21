@@ -28,6 +28,7 @@ var _talking := false
 
 
 func _ready() -> void:
+    _ensure_croupier_collision()
     _try_load_model()
     _sync_placeholder()
     if Engine.is_editor_hint():
@@ -38,6 +39,28 @@ func _ready() -> void:
         settings.options_changed.connect(_on_settings_changed)
     _refresh_language()
     _setup_character_animations()
+
+
+func _ensure_croupier_collision() -> void:
+    # Keep a defensive runtime fallback: in some Godot nested PackedScene
+    # instantiations the newly-added stationary collision subtree is absent.
+    # The original model, body animation and counter collider are unaffected.
+    var body := get_node_or_null("CroupierCollision") as StaticBody3D
+    if body == null:
+        body = StaticBody3D.new()
+        body.name = "CroupierCollision"
+        body.position = Vector3(0.0, 0.86, -0.39)
+        add_child(body)
+    var shape := body.get_node_or_null("BodyShape") as CollisionShape3D
+    if shape == null:
+        shape = CollisionShape3D.new()
+        shape.name = "BodyShape"
+        body.add_child(shape)
+    if not (shape.shape is CapsuleShape3D):
+        var capsule := CapsuleShape3D.new()
+        capsule.radius = 0.38
+        capsule.height = 1.7
+        shape.shape = capsule
 
 
 func _try_load_model() -> void:
