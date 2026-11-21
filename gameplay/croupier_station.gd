@@ -7,7 +7,6 @@ const Loc = preload("res://gameplay/localization.gd")
 
 @onready var character_pivot: Node3D = $CharacterPivot
 @onready var model_anchor: Node3D = $CharacterPivot/ModelAnchor
-@onready var placeholder: Node3D = $CharacterPivot/ProxyHuman
 @onready var hint: Label3D = $InteractionHint
 
 var _idle_clock := 0.0
@@ -39,13 +38,17 @@ func _process(delta: float) -> void:
     character_pivot.rotation.y = lerpf(character_pivot.rotation.y, target_yaw, minf(delta * 3.0, 1.0))
     # Only a slight natural posture change; the imported model may supply
     # its own actual skeletal idle clip.
-    if placeholder.visible:
+    if model_anchor.get_child_count() == 0:
         character_pivot.position.y = sin(_idle_clock * 1.45) * 0.006
 
 
 func _sync_placeholder() -> void:
-    if model_anchor != null and placeholder != null:
-        placeholder.visible = model_anchor.get_child_count() == 0
+    if model_anchor == null or character_pivot == null:
+        return
+    var show_proxy := model_anchor.get_child_count() == 0
+    for part in character_pivot.get_children():
+        if part is MeshInstance3D:
+            (part as MeshInstance3D).visible = show_proxy
 
 
 func _play_model_idle() -> void:
