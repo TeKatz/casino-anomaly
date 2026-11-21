@@ -19,6 +19,11 @@ var status_value := ""
 
 func _ready() -> void:
     Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+    # The persistent audio director plays music only while the menu scene
+    # exists; its low-level room ambience continues across scene changes.
+    var sound := get_node_or_null("/root/AudioDirector")
+    if sound != null:
+        sound.set_menu_music_enabled(true)
     var version_text := FileAccess.get_file_as_string("res://version.json")
     var parsed = JSON.parse_string(version_text)
     if parsed is Dictionary:
@@ -40,6 +45,12 @@ func _ready() -> void:
         game_settings.options_changed.connect(_on_setting_changed)
     _localize_ui()
     call_deferred("_check_update")
+
+
+func _exit_tree() -> void:
+    var sound := get_node_or_null("/root/AudioDirector")
+    if sound != null:
+        sound.set_menu_music_enabled(false)
 
 
 func _on_setting_changed(key: String) -> void:

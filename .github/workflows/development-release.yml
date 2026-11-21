@@ -39,6 +39,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Sketchfab CC-BY 4.0 models unavailable or invalid' }
           python tools/import_croupier_asset.py
           if ($LASTEXITCODE -ne 0) { throw 'Pinned CC-BY-4.0 croupier archive unavailable or invalid' }
+          python tools/import_audio.py
+          if ($LASTEXITCODE -ne 0) { throw 'Pinned Casino Anomaly seamless audio archive unavailable or invalid' }
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -- assets/ models/
@@ -124,6 +126,7 @@ jobs:
             @('tests/anomaly_variations_qa.gd', 'Casino Anomaly ten subtle anomalies QA PASS'),
             @('tests/streaming_qa.gd', 'Casino Anomaly seamless two-room streaming QA PASS'),
             @('tests/settings_pause_qa.gd', 'Casino Anomaly pause, persistent settings and world-camera input QA PASS'),
+            @('tests/audio_loop_qa.gd', 'Casino Anomaly persistent audio and menu-only loop QA PASS'),
             @('tests/localization_intro_qa.gd', 'Casino Anomaly bilingual intro and door interaction QA PASS'),
             @('tests/cinematic_lighting_qa.gd', 'Casino Anomaly cinematic lighting and reflection QA PASS'),
             @('tests/voxel_gi_qa.gd', 'Casino Anomaly VoxelGI bake and streaming contract QA PASS')

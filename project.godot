@@ -9,6 +9,7 @@ config/features=PackedStringArray("4.5", "Forward Plus")
 [autoload]
 LoopState="*res://gameplay/loop_state.gd"
 GameSettings="*res://gameplay/settings.gd"
+AudioDirector="*res://gameplay/audio_director.gd"
 
 [editor_plugins]
 enabled=PackedStringArray("res://addons/casino_model_preview/plugin.cfg")

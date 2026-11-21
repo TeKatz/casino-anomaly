@@ -1,0 +1,56 @@
+name: Casino Anomaly Seamless Audio QA
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'audio_drop/**'
+      - 'audio/**'
+      - 'tools/import_audio.py'
+      - 'gameplay/audio_director.gd'
+      - 'menu.gd'
+      - 'project.godot'
+      - 'tests/audio_loop_qa.gd'
+      - '.github/workflows/audio-loop-qa.yml'
+  pull_request:
+    paths:
+      - 'audio_drop/**'
+      - 'tools/import_audio.py'
+      - 'gameplay/audio_director.gd'
+      - 'menu.gd'
+      - 'project.godot'
+      - 'tests/audio_loop_qa.gd'
+
+permissions:
+  contents: read
+
+jobs:
+  audio:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate and import pinned music and ambience
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/import_audio.py
+      - name: Install Godot 4.5.1
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 -o /tmp/godot.zip "https://github.com/godotengine/godot-builds/releases/download/4.5.1-stable/Godot_v4.5.1-stable_linux.x86_64.zip"
+          mkdir -p /tmp/godot
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          chmod +x /tmp/godot/Godot_v4.5.1-stable_linux.x86_64
+      - name: Godot menu-only music and persistent ambient regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          GODOT=/tmp/godot/Godot_v4.5.1-stable_linux.x86_64
+          "$GODOT" --headless --path . --editor --import > /tmp/audio-import.log 2>&1 || { cat /tmp/audio-import.log; exit 1; }
+          if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' /tmp/audio-import.log; then cat /tmp/audio-import.log; exit 1; fi
+          "$GODOT" --headless --path . --script res://tests/audio_loop_qa.gd > /tmp/audio-qa.log 2>&1 || { cat /tmp/audio-qa.log; exit 1; }
+          cat /tmp/audio-qa.log
+          grep -Fq 'Casino Anomaly persistent audio and menu-only loop QA PASS' /tmp/audio-qa.log
+          if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' /tmp/audio-qa.log; then exit 1; fi
