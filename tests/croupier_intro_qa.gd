@@ -348,8 +348,14 @@ func _validate_model_proportions(character: Node3D) -> String:
             " feet_distance=", foot_width, " model_scale=", character.scale)
     if height < 1.60 or height > 1.86:
         return "Animated croupier height is implausible: %.2f" % height
-    if shoulder_width < 0.80 or shoulder_width > 1.08:
-        return "Croupier still has a flat or unnaturally wide shoulder span: %.2f" % shoulder_width
+    # The figure's X and Y proportions are deliberately editable in Godot.
+    # Test a plausible shoulder-to-height ratio instead of hard-coding the
+    # width from an earlier art-direction pass. This still catches a paper-
+    # thin or heavily distorted character without rejecting user edits.
+    var shoulder_ratio := shoulder_width / maxf(height, 0.01)
+    if shoulder_ratio < 0.34 or shoulder_ratio > 0.65:
+        return "Croupier shoulder-to-height ratio is implausible: %.3f (width %.2f, height %.2f)" % [
+            shoulder_ratio, shoulder_width, height]
     if depth < 0.11 or depth > 0.35:
         return "Croupier face depth is implausible: %.2f" % depth
     if foot_width < 0.22 or foot_width > 1.08:
