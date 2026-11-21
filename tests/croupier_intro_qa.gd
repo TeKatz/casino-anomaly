@@ -108,7 +108,7 @@ func _diagnose_model_geometry(desk: Node3D, character: Node3D) -> void:
     var meshes: Array[MeshInstance3D] = []
     var all: Array[Node] = [character]
     while not all.is_empty():
-        var node := all.pop_back()
+        var node: Node = all.pop_back()
         if node is MeshInstance3D:
             meshes.append(node)
         for child in node.get_children():
@@ -133,7 +133,7 @@ func _diagnose_model_geometry(desk: Node3D, character: Node3D) -> void:
         print("CROUPIER_DIAGNOSTIC: mesh ", part.name, " aabb=", part.mesh.get_aabb() if part.mesh else "<none>", " global_transform=", part.global_transform)
     var all_skeletons: Array[Node] = [character]
     while not all_skeletons.is_empty():
-        var n := all_skeletons.pop_back()
+        var n: Node = all_skeletons.pop_back()
         if n is Skeleton3D:
             var skeleton := n as Skeleton3D
             for bone_i in skeleton.get_bone_count():
