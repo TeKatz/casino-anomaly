@@ -53,16 +53,9 @@ func _run() -> void:
         var idle := animator.get_animation(idle_name)
         print("CROUPIER_CLIP_TRACKS: idle=", idle.get_track_count(),
                 " facial_speech=", speech.get_track_count())
-        if speech.get_track_count() < 3                 or idle.get_track_count() < speech.get_track_count() + 10:
-            _fail("The imported full-body idle and facial-only talking clips were not recognized")
+        if speech.get_track_count() < 10 or idle.get_track_count() < 10:
+            _fail("The imported idle or speech clips have no bone tracks")
             return
-        for track in range(speech.get_track_count()):
-            var track_path := str(speech.track_get_path(track)).to_lower()
-            for forbidden in ["upper_arm", "lower_arm", "clavicle", "spine",
-                    "chest", "hips", "foot", "leg"]:
-                if track_path.contains(forbidden):
-                    _fail("Talking animation unexpectedly controls the body: " + track_path)
-                    return
         var anim_tree := desk.get("_animation_tree") as AnimationTree
         if anim_tree == null or not anim_tree.active:
             _fail("The imported model must have an active facial-overlay AnimationTree")
@@ -71,6 +64,26 @@ func _run() -> void:
         var speech_mix := graph.get_node("Speech") as AnimationNodeBlend2
         if speech_mix == null or not speech_mix.filter_enabled:
             _fail("Talking animation must be masked to facial tracks")
+            return
+        # Godot imports 84 tracks into both clips, despite the source
+        # talking clip containing just eleven mouth/jaw channels.
+        var facial_paths := 0
+        for track in range(speech.get_track_count()):
+            var path := speech.track_get_path(track)
+            var name := str(path).to_lower()
+            var intended := bool(desk.call("_is_talking_facial_track", path))
+            if intended:
+                facial_paths += 1
+                if not speech_mix.is_path_filtered(path):
+                    _fail("Missing facial track from mask: " + name)
+                    return
+            elif speech_mix.is_path_filtered(path):
+                _fail("Talking mask wrongly includes a body track: " + name)
+                return
+        print("CROUPIER_FACIAL_MASK: face=", facial_paths,
+                " imported_talking_tracks=", speech.get_track_count())
+        if facial_paths < 5 or facial_paths >= speech.get_track_count():
+            _fail("The talking filter must only include facial tracks, not reset-pose tracks")
             return
         var pose_error := _validate_model_pose(desk, character)
         if not pose_error.is_empty():

@@ -119,10 +119,18 @@ func _setup_character_animations() -> void:
     var speech_mix := AnimationNodeBlend2.new()
     speech_mix.filter_enabled = true
     speech_mix.sync = true
-    # The source 'Rig|cycle_talking' contains only facial-bone tracks.
-    # In particular it has NO arms, torso or leg animation at all.
+    # Godot imports extra rest-pose keys into this facial-only glTF clip.
+    # Never enable arm/spine/leg tracks in this overlay or arms T-pose.
+    var facial_track_count := 0
     for index in range(speech_clip.get_track_count()):
-        speech_mix.set_filter_path(speech_clip.track_get_path(index), true)
+        var path := speech_clip.track_get_path(index)
+        if _is_talking_facial_track(path):
+            speech_mix.set_filter_path(path, true)
+            facial_track_count += 1
+    if facial_track_count < 5:
+        push_warning("Croupier facial tracks not found; keeping full-body idle.")
+        _animator.play(idle_name)
+        return
 
     var graph := AnimationNodeBlendTree.new()
     graph.add_node("Idle", idle_node, Vector2(0, 0))
@@ -141,6 +149,14 @@ func _setup_character_animations() -> void:
     # talking overlay is at full weight.
     _animation_tree.active = true
     _animation_tree.set("parameters/Speech/blend_amount", 1.0 if _talking else 0.0)
+
+
+func _is_talking_facial_track(path: NodePath) -> bool:
+    var name := str(path).to_lower()
+    for mouth_bone in ["lower_lip_", "upper_lip_", "jaw_", "tongue_"]:
+        if name.contains(mouth_bone):
+            return true
+    return false
 
 
 func _pick_animation(kind: String) -> String:

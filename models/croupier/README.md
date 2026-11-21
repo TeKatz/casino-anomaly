@@ -38,14 +38,15 @@ model root now uses editor-adjustable proportions (1.95, 1.24, 2.1),
 bringing the animated crown/head to approximately adult height without
 moving the table or affecting the first-room gameplay.
 
-The source "Rig|idle" animation drives the full body (97 tracks). In
-contrast "Rig|cycle_talking" has only 11 facial tracks (lips, tongue,
-jaw): *playing that clip directly* resets unanimated arm/torso bones to
-rest, which visibly creates a T-pose. Godot now uses an AnimationTree
-with a filtered Blend2 node. The full-body idle loops permanently;
-when the optional conversation opens, only the facial bone tracks are
-blended on top. Closing the conversation returns the facial blend to
-zero while the idle body is never stopped.
+The source "Rig|idle" glTF clip has 97 channels; its
+"Rig|cycle_talking" clip has just 11 (lips, tongue, jaw). Godot **imports
+both as 84 tracks**, filling otherwise unanimated body bones with
+rest-pose channels. Playing the imported talking clip directly, or
+masking all 84 of its tracks, forces the arms to a T-pose. The
+AnimationTree Blend2 filter now **whitelists jaw, upper/lower lips
+and tongue only**, preserving full-body idle without interruption.
+CI tests the facial mask against every imported track and compares
+hand positions before and after opening a conversation.
 
 The CI intro QA verifies actual animated skeletal landmarks and checks
 that the hand positions do not jump when the facial overlay is active.
