@@ -101,6 +101,12 @@ Blackjack Table — [url=https://sketchfab.com/3d-models/blackjack-table-baf7e3c
 Business Man (Croupier) — [url=https://sketchfab.com/3d-models/business-man-low-polygon-game-character-b6f6740f883b4749abac47af0045a9dd]manoeldarochadeoliveira[/url]
 Assets have been adapted for this game. License: [url=https://creativecommons.org/licenses/by/4.0/]Creative Commons Attribution 4.0[/url].
 
+[color=#e6bb81][b]TUTORIAL MODELS — SKETCHFAB / CC BY 4.0[/b][/color]
+Wall Light — [url=https://sketchfab.com/3d-models/wall-light-c723fa0a1ac3478790192acdb39161b0]Lucas Garnier[/url]
+Vintage Gramophone — [url=https://sketchfab.com/3d-models/vintage-gramophone-a7508a4233a344008029d21a2f0024bd]Maxim Mavrichev[/url]
+Desk Bell — [url=https://sketchfab.com/3d-models/desk-bell-cc21b304c4bb4750bdde7a8fb538b116]ClintonAbbott.Art[/url]
+Original geometry fitted to the tutorial. License: [url=https://creativecommons.org/licenses/by/4.0/]CC BY 4.0[/url].
+
 [color=#e6bb81][b]TUTORIAL RECEPTION — CC BY-SA 4.0[/b][/color]
 Books with magnifier — [url=https://sketchfab.com/3d-models/books-with-magnifier-cc153ce6258b4e538d9fc7da5b5d0fe4]shuvalov.di[/url]
 Licensed under [url=https://creativecommons.org/licenses/by-sa/4.0/]Creative Commons Attribution-ShareAlike 4.0[/url].

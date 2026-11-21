@@ -1,9 +1,8 @@
 # Four selected Sketchfab props for Casino Anomaly
 
-**No fireplace.** The original Books with magnifier ZIP has now been uploaded.\nThe other three original model archives are still missing from `dev`.
+**No fireplace.** All four official model ZIPs are now present on `dev`.
 Sketchfab requires a signed-in account for official downloadable geometry.
-Download the **glTF ZIP** for each of these four models from the links below;
-do not upload screenshots, viewer caches, or unlicensed copies.
+All four original glTF ZIPs are committed. The GitHub Action imports the\noriginal geometry and full texture sets before the Windows build.
 
 - `wall_light.zip` — Wall Light by [Lucas Garnier](https://sketchfab.com/3d-models/wall-light-c723fa0a1ac3478790192acdb39161b0) (CC BY 4.0). Replaces four simple wall-sconce meshes, retaining existing lights.
 - `vintage_gramophone.zip` — Vintage Gramophone by [Maxim Mavrichev](https://sketchfab.com/3d-models/vintage-gramophone-a7508a4233a344008029d21a2f0024bd) (CC BY 4.0). Right-hand alcove, on a new wooden cabinet.
@@ -17,8 +16,7 @@ link, attribution and asset modification notice. Adapted versions of this
 model must retain compatible ShareAlike licensing. The license does not
 automatically make an independent game combining it a CC BY-SA adaptation.
 
-Place the downloaded, intact official ZIP archives in this folder via GitHub
-or send them as chat attachments. Each archive must be below 24 MiB (GitHub
+The downloaded, intact official ZIP archives are located in this folder. Each archive must be below 24 MiB (GitHub
 browser limit). The CI importer safely extracts glTF models and PBR textures
 into `models/tutorial_user/<id>/`. In the Godot editor and Windows export,
 `gameplay/tutorial_sketchfab_props.gd` automatically fits available models

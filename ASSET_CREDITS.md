@@ -75,10 +75,13 @@ The exact processed file hashes and the accompanying source notes are stored ins
 
 ## Tutorial decorations — Sketchfab CC BY-SA 4.0 and CC BY 4.0
 
-The user selected four models for the tutorial room. The original
-**Books with magnifier ZIP is committed to the repository**, and its PBR
-mesh/texture files are extracted during the Windows build. The other three
-original ZIPs are still pending and will not be substituted by fake meshes.
+All four original Sketchfab source ZIPs have been committed to the repository,
+including the model meshes, PBR textures and original license files. The
+three CC BY models were uploaded on `main` and copied unchanged to
+`dev/tutorial_assets_drop`; the CC BY-SA books were uploaded directly to
+`dev`. They are imported at build time and used in the tutorial room.
+Original geometry is uniformly scaled, oriented and mounted on existing
+surfaces; the originals and license statements remain available.
 
 - **Wall Light** — Lucas Garnier, [Sketchfab original](https://sketchfab.com/3d-models/wall-light-c723fa0a1ac3478790192acdb39161b0), CC BY 4.0.
 - **Vintage Gramophone** — Maxim Mavrichev, [Sketchfab original](https://sketchfab.com/3d-models/vintage-gramophone-a7508a4233a344008029d21a2f0024bd), CC BY 4.0.

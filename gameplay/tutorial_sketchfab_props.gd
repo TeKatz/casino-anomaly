@@ -46,6 +46,9 @@ func _add(slug: String, title: String, center: Vector3, envelope: Vector3) -> bo
         return false
     model.name = title
     add_child(model)
+    if slug == "wall_light":
+        # Imported lamps face the room, not along the wall.
+        model.rotation.y = PI * 0.5 if center.x > 3.0 else PI
     var bound := _bounds(model)
     if bound.size.x < .0001 or bound.size.y < .0001 or bound.size.z < .0001:
         model.queue_free()
@@ -64,11 +67,16 @@ func _add(slug: String, title: String, center: Vector3, envelope: Vector3) -> bo
             anchored_y = 1.144 - bound.position.y # Existing reception top
         "vintage_gramophone":
             anchored_y = 0.970 - bound.position.y # New sideboard top
-    model.position = Vector3(
-        center.x - bound.get_center().x,
-        anchored_y,
-        center.z - bound.get_center().z
-    )
+    var anchored_x := center.x - bound.get_center().x
+    var anchored_z := center.z - bound.get_center().z
+    if slug == "wall_light":
+        # Flush the fixture's rearmost bound to the real wall face with a
+        # 9mm clearance instead of letting it float several centimetres away.
+        if center.x > 3.0:
+            anchored_x = 3.566 - bound.end.x # Right inner wall at x=3.575
+        else:
+            anchored_z = -4.586 - bound.position.z # Entrance wall z=-4.595
+    model.position = Vector3(anchored_x, anchored_y, anchored_z)
     return true
 
 func _bounds(model: Node3D) -> AABB:

@@ -75,6 +75,50 @@ func _run() -> void:
         if not textured:
             _fail("Sketchfab books are missing their original PBR textures")
             return
+    # Confirm all three other source ZIPs are actually represented by
+    # imported meshes and that their original placeholder pieces are hidden.
+    for model_spec in [
+        ["desk_bell", "DeskBell", "ReceptionDetails/ServiceBellBase"],
+        ["vintage_gramophone", "VintageGramophone", ""],
+        ["wall_light", "WallLightRightSconceA", "LightingAndCeiling/RightSconceA/Shade"]
+    ]:
+        var id := str(model_spec[0])
+        var exists := ResourceLoader.exists("res://models/tutorial_user/" + id + "/scene.gltf") \
+                or ResourceLoader.exists("res://models/tutorial_user/" + id + "/scene.glb")
+        if not exists:
+            continue
+        var model := imported.get_node_or_null(str(model_spec[1])) as Node3D
+        if model == null:
+            _fail("Original imported Sketchfab model is not visible: " + id)
+            return
+        var bounds := _bounds_in_room(room, model)
+        if bounds.size.length() < 0.04:
+            _fail("Imported model is empty: " + id)
+            return
+        if id == "desk_bell" and absf(bounds.position.y - 1.144) > .008:
+            _fail("Desk Bell floats above the reception counter")
+            return
+        if id == "vintage_gramophone":
+            if absf(bounds.position.y - .970) > .008 or bounds.position.x < 2.50 \
+                    or bounds.end.x > 3.50:
+                _fail("Gramophone is unsupported or blocks the aisle")
+                return
+            if imported.get_node_or_null("GramophoneConsole") == null:
+                _fail("Gramophone must stand on its supported wooden console")
+                return
+        if id == "wall_light":
+            if absf(bounds.end.x - 3.566) > .015:
+                _fail("Wall light is not flush-mounted to the right wall")
+                return
+            for fixture in ["RightSconceB", "ExitSconceLeft", "ExitSconceRight"]:
+                if imported.get_node_or_null("WallLight" + fixture) == null:
+                    _fail("Missing wall light: " + fixture)
+                    return
+        if str(model_spec[2]) != "":
+            var original := decor.get_node_or_null(str(model_spec[2])) as VisualInstance3D
+            if original == null or original.visible:
+                _fail("Original placeholder remains visible over Sketchfab model: " + id)
+                return
     if ResourceLoader.exists("res://gameplay/tutorial_sketchfab_props.gd") == false:
         _fail("Tutorial Sketchfab integration script must parse")
         return
