@@ -71,11 +71,14 @@ func _run() -> void:
         _fail("Bilingual text did not update live")
         return
     dialogue.call("close_conversation")
-    if bool(dialogue.get("active")) or bool(player.get("interaction_locked")) \
-            or Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
-        _fail("Closing conversation: active=%s locked=%s mouse_mode=%s expected=%s" % [
+    # The headless display server cannot hold OS-level mouse capture; it
+    # reports VISIBLE even after correctly requesting CAPTURED.
+    var mouse_failed := DisplayServer.get_name() != "headless" \
+            and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED
+    if bool(dialogue.get("active")) or bool(player.get("interaction_locked")) or mouse_failed:
+        _fail("Closing conversation: active=%s locked=%s mouse_mode=%s" % [
             str(dialogue.get("active")), str(player.get("interaction_locked")),
-            str(Input.mouse_mode), str(Input.MOUSE_MODE_CAPTURED)])
+            str(Input.mouse_mode)])
         return
 
     room.queue_free()
