@@ -51,9 +51,18 @@ func _run() -> void:
             return
         var speech := animator.get_animation(talk_name)
         var idle := animator.get_animation(idle_name)
-        if speech.get_track_count() > 16 or idle.get_track_count() < 70:
-            _fail("The talking clip only animates facial bones and must be layered onto full-body idle")
+        print("CROUPIER_CLIP_TRACKS: idle=", idle.get_track_count(),
+                " facial_speech=", speech.get_track_count())
+        if speech.get_track_count() < 3                 or idle.get_track_count() < speech.get_track_count() + 10:
+            _fail("The imported full-body idle and facial-only talking clips were not recognized")
             return
+        for track in range(speech.get_track_count()):
+            var track_path := str(speech.track_get_path(track)).to_lower()
+            for forbidden in ["upper_arm", "lower_arm", "clavicle", "spine",
+                    "chest", "hips", "foot", "leg"]:
+                if track_path.contains(forbidden):
+                    _fail("Talking animation unexpectedly controls the body: " + track_path)
+                    return
         var anim_tree := desk.get("_animation_tree") as AnimationTree
         if anim_tree == null or not anim_tree.active:
             _fail("The imported model must have an active facial-overlay AnimationTree")
