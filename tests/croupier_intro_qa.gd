@@ -73,7 +73,9 @@ func _run() -> void:
     dialogue.call("close_conversation")
     if bool(dialogue.get("active")) or bool(player.get("interaction_locked")) \
             or Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
-        _fail("Closing a conversation must restore first-person controls")
+        _fail("Closing conversation: active=%s locked=%s mouse_mode=%s expected=%s" % [
+            str(dialogue.get("active")), str(player.get("interaction_locked")),
+            str(Input.mouse_mode), str(Input.MOUSE_MODE_CAPTURED)])
         return
 
     room.queue_free()
