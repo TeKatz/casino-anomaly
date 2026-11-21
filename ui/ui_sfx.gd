@@ -42,9 +42,9 @@ func _make_click() -> AudioStreamWAV:
         var frequency := 270.0 + 670.0 * exp(-t * 38.0)
         phase += TAU * frequency / float(SAMPLE_RATE)
         var body := sin(phase) * 0.58 + sin(phase * 1.97) * 0.14
-        var hash_value := sin(float(i) * 91.17) * 43758.5453
-        var noise := (hash_value - floor(hash_value)) * 2.0 - 1.0
-        var transient := noise * exp(-t * 135.0) * 0.12
+        var hash_value: float = sin(float(i) * 91.17) * 43758.5453
+        var noise: float = (hash_value - floorf(hash_value)) * 2.0 - 1.0
+        var transient: float = noise * exp(-t * 135.0) * 0.12
         var value := clampf((body + transient) * envelope * 0.7, -1.0, 1.0)
         var sample := int(round(value * 32767.0))
         pcm[i * 2] = sample & 255
