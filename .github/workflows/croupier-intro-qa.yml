@@ -61,6 +61,7 @@ jobs:
           "$GODOT" --headless --path . --editor --import > /tmp/import.log 2>&1 || { cat /tmp/import.log; exit 1; }
           if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' /tmp/import.log; then cat /tmp/import.log; exit 1; fi
           "$GODOT" --headless --path . --script res://tests/croupier_intro_qa.gd > /tmp/test.log 2>&1 || { cat /tmp/test.log; exit 1; }
+          grep 'CROUPIER_DIAGNOSTIC' /tmp/test.log || true
           grep -Fq 'Casino Anomaly croupier welcome desk and dialogue QA PASS' /tmp/test.log
           if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' /tmp/test.log; then cat /tmp/test.log; exit 1; fi
           "$GODOT" --headless --path . --script res://tests/localization_intro_qa.gd > /tmp/intro.log 2>&1 || { cat /tmp/intro.log; exit 1; }
