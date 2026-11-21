@@ -39,6 +39,8 @@ internal static class Program
             return SelfTest();
         if (args.Length == 2 && args[0] == "--self-test-inherited-cwd")
             return SelfTestInheritedWorkingDirectory(args[1]);
+        if (args.Length == 3 && args[0] == "--self-test-hold-cwd")
+            return SelfTestHoldWorkingDirectory(args[1], args[2]);
 
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
@@ -148,6 +150,7 @@ internal static class Program
         var archive = Path.Combine(downloadDir, "update-" + token + ".zip");
         var activated = false;
         var originalMoved = false;
+        var inPlace = new InPlaceUpdateState();
         try
         {
             report("Update " + manifest.Version + " wird heruntergeladen ...");
@@ -200,10 +203,25 @@ internal static class Program
 
             report("Neue Version wird installiert ...");
             Log("Activating update. Install=" + installDirectory + "; staging=" + staging);
-            MoveDirectoryWithRetry(installDirectory, backup);
-            originalMoved = true;
-            MoveDirectoryWithRetry(staging, installDirectory);
-            activated = true;
+            try
+            {
+                MoveDirectoryWithRetry(installDirectory, backup);
+                originalMoved = true;
+                MoveDirectoryWithRetry(staging, installDirectory);
+                activated = true;
+            }
+            catch (IOException error) when (!originalMoved && Directory.Exists(installDirectory))
+            {
+                // Windows can lock a folder when Explorer, a command prompt,
+                // antivirus or a tool still has its working directory inside.
+                // A directory rename may fail even though *files* are free.
+                // Back up the original files BEFORE changing any of them,
+                // then update each file atomically without renaming the folder.
+                Log("Whole-directory replacement blocked; using transactional file replacement: " + error.Message);
+                report("Installationsordner ist gesperrt – installiere Dateien einzeln ...");
+                ApplyInPlaceUpdate(installDirectory, staging, backup, inPlace);
+                activated = true;
+            }
 
             report("Update abgeschlossen – Spiel startet ...");
             var start = new ProcessStartInfo(Path.Combine(installDirectory, "CasinoAnomaly.exe"))
@@ -234,12 +252,144 @@ internal static class Program
                     throw new IOException("Update and rollback failed; old files are in " + backup, rollbackError);
                 }
             }
+            else if (inPlace.ModificationsStarted)
+            {
+                try
+                {
+                    RestoreInPlaceUpdate(installDirectory, backup, inPlace);
+                    Log("Previous installation restored after failed file replacement.");
+                }
+                catch (Exception rollbackError)
+                {
+                    Log("CRITICAL: in-place rollback failed: " + rollbackError);
+                    throw new IOException("Update and rollback failed; old files are in " + backup, rollbackError);
+                }
+            }
             throw;
         }
         finally
         {
             try { if (File.Exists(archive)) File.Delete(archive); } catch { /* Cleanup only. */ }
             try { if (Directory.Exists(staging)) Directory.Delete(staging, true); } catch { /* Cleanup only. */ }
+        }
+    }
+
+    // The backup is deliberately outside the install directory so a process
+    // with its CWD inside the game does not prevent the recovery copy.
+    private sealed class InPlaceUpdateState
+    {
+        public bool ModificationsStarted { get; set; }
+        public HashSet<string> OriginalFiles { get; } = new(StringComparer.OrdinalIgnoreCase);
+        public HashSet<string> CandidateFiles { get; } = new(StringComparer.OrdinalIgnoreCase);
+    }
+
+    private static void ApplyInPlaceUpdate(
+        string install, string staging, string backup, InPlaceUpdateState state)
+    {
+        if (!Directory.Exists(install) || !Directory.Exists(staging) || Directory.Exists(backup))
+            throw new IOException("Unsafe in-place activation paths.");
+        // A complete backup is prepared before touching any existing file.
+        // This also preserves unexpected user-created files on rollback.
+        Directory.CreateDirectory(backup);
+        foreach (var oldFile in Directory.EnumerateFiles(install, "*", SearchOption.AllDirectories))
+        {
+            var relative = Path.GetRelativePath(install, oldFile);
+            var target = Path.Combine(backup, relative);
+            Directory.CreateDirectory(Path.GetDirectoryName(target)!);
+            CopyFileWithRetry(oldFile, target);
+            state.OriginalFiles.Add(relative);
+        }
+
+        var newFiles = Directory.GetFiles(staging, "*", SearchOption.AllDirectories);
+        foreach (var newFile in newFiles)
+            state.CandidateFiles.Add(Path.GetRelativePath(staging, newFile));
+        if (!state.CandidateFiles.Contains("CasinoAnomaly.exe") ||
+            !state.CandidateFiles.Contains("CasinoAnomaly.pck") ||
+            !state.CandidateFiles.Contains(Path.Combine("tools", "updater", "CasinoAnomaly.Updater.exe")))
+            throw new InvalidDataException("In-place update package is incomplete.");
+
+        // All files in a validated release replace their corresponding
+        // installed counterparts; avoid touching unrelated local files.
+        foreach (var newFile in newFiles)
+        {
+            var relative = Path.GetRelativePath(staging, newFile);
+            var target = Path.Combine(install, relative);
+            Directory.CreateDirectory(Path.GetDirectoryName(target)!);
+            state.ModificationsStarted = true;
+            ReplaceFileWithRetry(newFile, target);
+        }
+        Log("In-place update committed after directory rename was blocked.");
+    }
+
+    private static void RestoreInPlaceUpdate(
+        string install, string backup, InPlaceUpdateState state)
+    {
+        // Backup construction finishes BEFORE ModificationsStarted is set.
+        // Restore every original file, and remove newly introduced files.
+        foreach (var relative in state.OriginalFiles)
+        {
+            var original = Path.Combine(backup, relative);
+            var target = Path.Combine(install, relative);
+            Directory.CreateDirectory(Path.GetDirectoryName(target)!);
+            ReplaceFileWithRetry(original, target);
+        }
+        foreach (var relative in state.CandidateFiles)
+        {
+            if (state.OriginalFiles.Contains(relative))
+                continue;
+            var target = Path.Combine(install, relative);
+            if (File.Exists(target))
+                DeleteFileWithRetry(target);
+        }
+    }
+
+    private static void CopyFileWithRetry(string source, string destination)
+    {
+        for (var attempt = 0; ; attempt++)
+        {
+            try
+            {
+                File.Copy(source, destination, overwrite: true);
+                return;
+            }
+            catch (IOException) when (attempt < 19) { Thread.Sleep(500); }
+            catch (UnauthorizedAccessException) when (attempt < 19) { Thread.Sleep(500); }
+        }
+    }
+
+    private static void DeleteFileWithRetry(string path)
+    {
+        for (var attempt = 0; ; attempt++)
+        {
+            try { File.Delete(path); return; }
+            catch (IOException) when (attempt < 19) { Thread.Sleep(500); }
+            catch (UnauthorizedAccessException) when (attempt < 19) { Thread.Sleep(500); }
+        }
+    }
+
+    private static void ReplaceFileWithRetry(string source, string destination)
+    {
+        // Stage to the target volume first. File.Move(overwrite:true) is an
+        // atomic same-volume rename; no half-written executable can be used.
+        var temporary = destination + ".incoming-" + Guid.NewGuid().ToString("N");
+        try
+        {
+            CopyFileWithRetry(source, temporary);
+            for (var attempt = 0; ; attempt++)
+            {
+                try
+                {
+                    File.Move(temporary, destination, overwrite: true);
+                    return;
+                }
+                catch (IOException) when (attempt < 19) { Thread.Sleep(500); }
+                catch (UnauthorizedAccessException) when (attempt < 19) { Thread.Sleep(500); }
+            }
+        }
+        finally
+        {
+            try { if (File.Exists(temporary)) File.Delete(temporary); }
+            catch (IOException error) { Log("Temporary file cleanup deferred: " + error.Message); }
         }
     }
 
@@ -422,6 +572,7 @@ internal static class Program
                 IsRetryablePackageStatus(System.Net.HttpStatusCode.Forbidden))
                 throw new InvalidOperationException("Temporary download error retry contract changed.");
             VerifyUpdaterDoesNotLockInstallDirectory();
+            VerifyInPlaceUpdateWithLockedDirectory();
             Console.WriteLine("Casino Anomaly updater contract PASS");
             return 0;
         }
@@ -488,6 +639,71 @@ internal static class Program
             Log("Directory-lock regression failed: " + error);
             return 1;
         }
+    }
+
+    // Regression: another process retains CWD inside the installation.
+    // The original directory cannot reliably be renamed on Windows, but
+    // the fallback must still install every release file and keep extras.
+    private static void VerifyInPlaceUpdateWithLockedDirectory()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "CasinoAnomaly-LockedFolder-" + Guid.NewGuid().ToString("N"));
+        var install = Path.Combine(root, "game");
+        var staging = Path.Combine(root, "staging");
+        var backup = Path.Combine(root, "backup");
+        var ready = Path.Combine(root, "locker-ready");
+        Directory.CreateDirectory(install);
+        Directory.CreateDirectory(staging);
+        File.WriteAllText(Path.Combine(install, "CasinoAnomaly.exe"), "old executable");
+        File.WriteAllText(Path.Combine(install, "CasinoAnomaly.pck"), "old package");
+        File.WriteAllText(Path.Combine(install, "user-note.txt"), "preserve local extras");
+        File.WriteAllText(Path.Combine(staging, "CasinoAnomaly.exe"), "new executable");
+        File.WriteAllText(Path.Combine(staging, "CasinoAnomaly.pck"), "new package");
+        Directory.CreateDirectory(Path.Combine(staging, "tools", "updater"));
+        File.WriteAllText(Path.Combine(staging, "tools", "updater", "CasinoAnomaly.Updater.exe"), "new updater");
+        using var locker = Process.Start(new ProcessStartInfo(Environment.ProcessPath!)
+        {
+            UseShellExecute = false,
+            WorkingDirectory = install,
+            CreateNoWindow = true,
+            ArgumentList = { "--self-test-hold-cwd", install, ready }
+        }) ?? throw new InvalidOperationException("Could not start locked-folder regression helper.");
+        try
+        {
+            if (!SpinWait.SpinUntil(() => File.Exists(ready), TimeSpan.FromSeconds(10)))
+                throw new TimeoutException("The directory-lock test helper did not initialize.");
+
+            var state = new InPlaceUpdateState();
+            ApplyInPlaceUpdate(install, staging, backup, state);
+            if (File.ReadAllText(Path.Combine(install, "CasinoAnomaly.exe")) != "new executable" ||
+                File.ReadAllText(Path.Combine(install, "CasinoAnomaly.pck")) != "new package" ||
+                !File.Exists(Path.Combine(install, "tools", "updater", "CasinoAnomaly.Updater.exe")) ||
+                File.ReadAllText(Path.Combine(install, "user-note.txt")) != "preserve local extras")
+                throw new InvalidOperationException("In-place update failed while another process retained the directory.");
+
+            // Exercise rollback after partial activation as well.
+            RestoreInPlaceUpdate(install, backup, state);
+            if (File.ReadAllText(Path.Combine(install, "CasinoAnomaly.exe")) != "old executable" ||
+                File.ReadAllText(Path.Combine(install, "CasinoAnomaly.pck")) != "old package" ||
+                File.Exists(Path.Combine(install, "tools", "updater", "CasinoAnomaly.Updater.exe")))
+                throw new InvalidOperationException("In-place update rollback did not restore the old files.");
+        }
+        finally
+        {
+            if (!locker.HasExited)
+                locker.Kill(entireProcessTree: true);
+            locker.WaitForExit(10000);
+            if (Directory.Exists(root))
+                Directory.Delete(root, true);
+        }
+    }
+
+    private static int SelfTestHoldWorkingDirectory(string install, string ready)
+    {
+        if (!IsWithinDirectory(Environment.CurrentDirectory, install))
+            return 1;
+        File.WriteAllText(ready, "ready");
+        while (true)
+            Thread.Sleep(250);
     }
 
     private static void Log(string message)
