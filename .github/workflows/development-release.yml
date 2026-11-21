@@ -120,6 +120,29 @@ jobs:
           }
           & "$env:GODOT_EDITOR" --headless --path . --editor --import 2>&1 | Tee-Object -FilePath import.log
           if ($LASTEXITCODE -ne 0 -or (Get-Content import.log -Raw) -match '(?m)(SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:)') { throw 'Godot import failed' }
+          # Convert the one-time @tool generated models into actual editable
+          # Godot scene nodes. Do not repeat this after the first successful
+          # bake: re-running would overwrite user edits made in Godot.
+          $decorSource = Get-Content gameplay/tutorial_decor.tscn -Raw
+          if ($decorSource.Contains('script = ExtResource("user_selected")')) {
+            & "$env:GODOT_EDITOR" --headless --path . --script res://tools/bake_tutorial_editor_scene.gd 2>&1 | Tee-Object -FilePath tutorial_bake.log
+            if ($LASTEXITCODE -ne 0 -or (Get-Content tutorial_bake.log -Raw) -notmatch 'Casino Anomaly editable tutorial decoration bake PASS') {
+              throw 'Could not save editable tutorial models'
+            }
+            git add -- gameplay/tutorial_decor.tscn
+            git diff --cached --quiet
+            if ($LASTEXITCODE -eq 1) {
+              git commit -m 'refactor(editor): persist tutorial models as editable Godot scene instances'
+              if ($LASTEXITCODE -ne 0) { throw 'Editor scene commit failed' }
+              git push origin HEAD:refs/heads/dev
+              if ($LASTEXITCODE -ne 0) { throw 'Editor scene upload failed' }
+              "PUBLISHED_COMMIT=$((git rev-parse HEAD).Trim())" >> $env:GITHUB_ENV
+            }
+            & "$env:GODOT_EDITOR" --headless --path . --editor --import 2>&1 | Tee-Object -FilePath tutorial_reimport.log
+            if ($LASTEXITCODE -ne 0 -or (Get-Content tutorial_reimport.log -Raw) -match '(?m)(SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:)') {
+              throw 'Editable tutorial scene could not be imported'
+            }
+          }
           & "$env:GODOT_EDITOR" --headless --path . --script res://tests/smoke.gd 2>&1 | Tee-Object -FilePath smoke.log
           if ($LASTEXITCODE -ne 0 -or (Get-Content smoke.log -Raw) -notmatch 'Casino Anomaly scenes and PBR floor smoke PASS') { throw 'Godot scene smoke failed' }
           foreach ($spec in @(

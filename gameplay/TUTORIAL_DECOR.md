@@ -73,3 +73,25 @@ Objects are fit from their *actual imported 3D AABB*, so none rely on
 arbitrary default Sketchfab scale. The importer and verified sources are
 documented in `tutorial_assets_drop/README.md`. The exact models and their
 PBR textures are not yet bundled in this commit.
+
+## Editing models in Godot (persisted, not runtime-generated)
+
+The old `@tool` script previously created the Sketchfab lamp, gramophone,
+book and bell models after entering the scene. Such unsaved children did not
+appear as normal selectable scene nodes. The first CI import now runs
+`tools/bake_tutorial_editor_scene.gd` **once**, saves the exact original
+model transforms and gramophone cabinet into
+`gameplay/tutorial_decor.tscn`, marks both old Poly Haven and new Sketchfab
+GLTF instances **Editable Children**, and removes the dynamic script.
+The file is committed to `dev`; subsequent builds never regenerate it and
+therefore do not overwrite changes made with the editor.
+
+Open `gameplay/tutorial.tscn` in Godot, expand `Decoration`, then
+`UserSelectedProps`. Every individual model can be selected, moved,
+rotated or rescaled with the 3D handles. Select the GLTF instance to edit its
+transform or expand its editable children to override mesh materials.
+Alternatively open `gameplay/tutorial_decor.tscn` directly to work on every
+wall panel, rug, table, bust, painting, light and collision object.
+The tutorial root explicitly enables editable children for the decoration
+and CroupierStation subscenes. If changing physics-relevant furniture,
+adjust its collision shape alongside the visible model.
