@@ -104,6 +104,10 @@ func _add_button(parent: VBoxContainer, key: String, action: Callable) -> void:
     button.text = Loc.t(key, self)
     button.set_meta("translation_key", key)
     button.custom_minimum_size = Vector2(0, 43)
+    if key == "pause.new_game":
+        button.accent = "green"
+    elif key == "pause.quit":
+        button.accent = "red"
     button.pressed.connect(action)
     parent.add_child(button)
     localized_buttons.append(button)

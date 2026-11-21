@@ -3,6 +3,7 @@ extends Button
 ## The default mouse-click focus outline is suppressed. Keyboard/gamepad
 ## navigation gets a quiet *internal* focus edge instead.
 @export var featured := false
+@export_enum("gold", "green", "red") var accent := "gold"
 
 const MenuStyle = preload("res://ui/menu_style.gd")
 var _motion: Tween
@@ -10,7 +11,7 @@ var _keyboard_navigation := false
 
 
 func _ready() -> void:
-    MenuStyle.apply_button(self, featured)
+    MenuStyle.apply_button(self, featured, accent)
     alignment = HORIZONTAL_ALIGNMENT_CENTER
     add_theme_font_size_override("font_size", 19 if featured else 16)
     mouse_entered.connect(_hover_changed.bind(true))

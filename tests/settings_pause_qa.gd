@@ -108,6 +108,19 @@ func _run() -> void:
             or chosen_style == inactive_style:
         _fail("Selected settings tab does not have its own active surface")
         return
+    subpanel.call("_switch_tab", 0)
+    var options_box := subpanel.get("options_box") as VBoxContainer
+    var dropdown: OptionButton
+    for line in options_box.get_children():
+        for item in line.get_children():
+            if item is OptionButton:
+                dropdown = item as OptionButton
+                break
+        if dropdown != null:
+            break
+    if dropdown == null or dropdown.get_theme_constant("arrow_margin") < 18:
+        _fail("Dropdown arrow must sit well inside the right border")
+        return
 
     var loop := room.get_node_or_null("LoopController")
     if loop == null or loop.get_node_or_null("GameHUD") != null:

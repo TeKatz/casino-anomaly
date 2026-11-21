@@ -22,7 +22,7 @@ const MODEL_PATH := "res://models/croupier/scene.gltf"
 
 @onready var character_pivot: Node3D = $CharacterPivot
 @onready var model_anchor: Node3D = $CharacterPivot/ModelAnchor
-@onready var hint: Label3D = $InteractionHint
+@onready var hint: Node3D = $InteractionHint
 
 var _idle_clock := 0.0
 var _animator: AnimationPlayer
@@ -221,8 +221,8 @@ func _on_settings_changed(key: String) -> void:
 
 
 func _refresh_language() -> void:
-    hint.text = Loc.t("croupier.prompt", self)
+    hint.call("set_prompt_text", Loc.t("croupier.prompt", self))
 
 
 func set_hint_visible(enabled: bool) -> void:
-    hint.visible = enabled
+    hint.call("set_prompt_visible", enabled)

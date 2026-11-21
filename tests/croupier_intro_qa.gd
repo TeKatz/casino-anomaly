@@ -34,7 +34,7 @@ func _run() -> void:
     var npc_shape := room.get_node_or_null("CroupierStation/CroupierCollision/BodyShape") as CollisionShape3D
     var anchor := room.get_node_or_null("CroupierStation/CharacterPivot/ModelAnchor") as Node3D
     var proxy := room.get_node_or_null("CroupierStation/CharacterPivot/Face") as MeshInstance3D
-    var hint := room.get_node_or_null("CroupierStation/InteractionHint") as Label3D
+    var hint := room.get_node_or_null("CroupierStation/InteractionHint") as Node3D
     var player := room.get_node_or_null("Player") as CharacterBody3D
     var camera := room.get_node_or_null("Player/Camera3D") as Camera3D
     var dialogue := room.get_node_or_null("CroupierDialogue") as CanvasLayer
@@ -188,8 +188,15 @@ func _run() -> void:
     elif not proxy.visible or anchor.get_child_count() != 0:
         _fail("A missing source archive must keep the original proxy in the start room")
         return
-    if hint.text != "E · Sprechen" or hint.font_size > 54:
-        _fail("German interaction cue is missing or over-sized")
+    var prompt_sprite := hint.get_node_or_null("PromptSprite") as Sprite3D
+    var prompt_caption := hint.get("caption") as Label
+    if str(hint.get("prompt_text")) != "E · Sprechen" or prompt_caption == null \
+            or prompt_caption.text != "Sprechen" or prompt_sprite == null \
+            or prompt_sprite.texture == null:
+        _fail("German croupier keycap/plaque is missing or not localized")
+        return
+    if hint.position.distance_to(Vector3(0, 2.15, -0.45)) > 0.035:
+        _fail("The upgraded talking plaque moved away from above the NPC")
         return
 
     # Customer side is room-facing (+X), beyond the solid counter.
@@ -254,7 +261,8 @@ func _run() -> void:
         _fail("Rules must explain the required streak in German")
         return
     settings.set_option("language", "en")
-    if hint.text != "E · Talk" or not response.text.to_lower().contains("twelve"):
+    if str(hint.get("prompt_text")) != "E · Talk" or prompt_caption.text != "Talk" \
+            or not response.text.to_lower().contains("twelve"):
         _fail("Bilingual text did not update live")
         return
     dialogue.call("close_conversation")

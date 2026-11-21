@@ -47,6 +47,16 @@ func _run() -> void:
             or not play_button.has_meta("_ui_click_attached"):
         _fail("Main menu buttons must use sculpted skins without sticky mouse focus outlines")
         return
+    var quit_button := menu_buttons.get_node_or_null("QuitButton") as Button
+    var settings_button := menu_buttons.get_node_or_null("SettingsButton") as Button
+    if str(play_button.get("accent")) != "green" or str(quit_button.get("accent")) != "red" \
+            or str(settings_button.get("accent")) != "gold":
+        _fail("Main-menu semantic green, red and gold borders were not applied")
+        return
+    var skin := normal_surface as StyleBoxTexture
+    if absf(skin.texture_margin_left - skin.texture_margin_right) > 0.001:
+        _fail("Button nine-slice margins are asymmetric")
+        return
     var credits_source := preload("res://ui/credits_panel.gd").new()
     if not str(credits_source.call("_credit_text")).contains("freesound.org/people/leonelmail/sounds/329533/") \
             or not str(credits_source.call("_credit_text")).contains("CC0 1.0"):

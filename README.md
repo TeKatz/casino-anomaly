@@ -148,3 +148,9 @@ A persistent `SceneLoader` autoload presents a rendered full-screen transition b
 All styled menu and dialogue buttons use the shared sculpted-glass surface (including stateful hover/press/focus animation) and one short original procedural click sound. `UISfx` is a persistent audio controller routed to the already existing `UI` bus, so `Settings → Audio → Menu / UI` independently adjusts it. The croupier conversation now uses the same custom buttons as the main and pause menus instead of default Godot controls.
 
 In the tutorial, the old world-space `ExitDoor/DoorHint` label is removed. A non-intercepting, gaze- and distance-sensitive `DoorInteractionHUD` presents an `E` keycap with translated `Enter the casino / Casino betreten` text only while the player looks at the entrance door. The existing E action continues to run through the threaded scene loader and preserves the tutorial completion logic.
+
+## Button accent colors and 3D croupier interaction plaque
+
+The UI's nine-slice skins now use symmetric corners and equal left/right margins, removing the left protrusion visible in the earlier pause menu. Gold is the normal satin-metal border, green belongs to New Game, and red to Quit Game; the same semantic colors apply in both main and pause menus. OptionButton arrows are inset 23 px from the right side, and the dropdown popup follows the same dark/gold palette.
+
+The Croupier's world-space 'E · Talk / E · Sprechen' label is now a single, localized sprite plaque rendered from a small static SubViewport. The actual keycap and caption are part of the same texture, giving a clean gold-bordered plate without overlapping 3D layers. Its authored anchor (0, 2.15, -0.45) is preserved, and it gently floats up/down by only 2.5 cm when visible; the original look-at interaction conditions and NPC animations are unchanged.

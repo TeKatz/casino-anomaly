@@ -153,6 +153,7 @@ custom_minimum_size = Vector2(0, 53)
 layout_mode = 2
 text = "NEW GAME"
 script = ExtResource("2")
+accent = "green"
 featured = true
 
 [node name="ContinueButton" type="Button" parent="CenterPanel/Content/Stack"]
@@ -179,6 +180,7 @@ custom_minimum_size = Vector2(0, 46)
 layout_mode = 2
 text = "QUIT"
 script = ExtResource("2")
+accent = "red"
 
 [node name="Separator" type="HSeparator" parent="CenterPanel/Content/Stack"]
 layout_mode = 2
