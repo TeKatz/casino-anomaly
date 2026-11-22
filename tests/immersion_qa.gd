@@ -79,5 +79,10 @@ func _run() -> void:
     director.queue_free()
     await process_frame
     await process_frame
+    # The audio mixer can retain a decoding reference until its next tick.
+    await create_timer(0.20).timeout
+    if AudioServer.get_bus_index("WORLD") >= 0:
+        _fail("WORLD reverb effect remains allocated after shutdown")
+        return
     print("Casino Anomaly immersion QA PASS")
     quit(0)

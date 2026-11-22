@@ -17,6 +17,7 @@ var procedural_loops: Dictionary = {}
 var step_sounds: Dictionary = {}
 var steps_played := 0
 var corridor_target := false
+var _created_world_bus := false
 var menu_enabled := false
 var world_ambience_enabled := false
 var _fade: Tween
@@ -82,6 +83,8 @@ func set_world_ambience_enabled(enabled: bool) -> void:
     else:
         # The main menu must be music-only, including procedural sounds.
         corridor_target = false
+        if world_reverb != null:
+            world_reverb.wet = 0.045
         if room_player != null:
             room_player.stop()
         if pressure_player != null:
@@ -135,11 +138,21 @@ func _exit_tree() -> void:
     if room_player != null:
         room_player.stop()
         room_player.stream = null
+    # Release the effects graph before shutdown; headless Godot otherwise
+    # reports live reverb resources even after all streams have stopped.
+    if _created_world_bus:
+        var index := AudioServer.get_bus_index("WORLD")
+        if index >= 0:
+            AudioServer.remove_bus(index)
+    world_reverb = null
+    procedural_loops.clear()
+    step_sounds.clear()
 
 
 func _prepare_immersion() -> void:
     var index := AudioServer.get_bus_index("WORLD")
     if index < 0:
+        _created_world_bus = true
         index = AudioServer.get_bus_count()
         AudioServer.add_bus(index)
         AudioServer.set_bus_name(index, "WORLD")
