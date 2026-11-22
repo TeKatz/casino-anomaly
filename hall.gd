@@ -5,6 +5,7 @@ extends Node3D
 # the whitebox furniture later without rebuilding the room or its collision layout.
 const OAK: StandardMaterial3D = preload("res://floor_material.tres")
 const VoxelRig = preload("res://lighting/voxel_gi_rig.gd")
+const RoomSoundscape = preload("res://gameplay/room_soundscape.gd")
 const NeonLevelSign = preload("res://gameplay/neon_level_sign.gd")
 const JACQUARD: StandardMaterial3D = preload("res://carpet_material.tres")
 const LOWER_WALL: StandardMaterial3D = preload("res://lower_wall_material.tres")
@@ -135,6 +136,12 @@ func _ready() -> void:
             add_child(gi_rig, false, Node.INTERNAL_MODE_BACK)
         else:
             add_child(gi_rig)
+
+    # Runtime-only positional sound, with no extra editor scene objects.
+    if not Engine.is_editor_hint() and not has_meta("_baking_room"):
+        var soundscape := RoomSoundscape.new() as Node3D
+        soundscape.name = "RoomSoundscape"
+        add_child(soundscape)
 
     # Keep the designer-authored scene untouched. The game controller and
     # choice doors exist only in a started/continued run, not in editor mode.

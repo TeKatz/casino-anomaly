@@ -8,6 +8,11 @@ on:
       - 'audio/**'
       - 'tools/import_audio.py'
       - 'gameplay/audio_director.gd'
+      - 'gameplay/immersion_synth.gd'
+      - 'gameplay/room_soundscape.gd'
+      - 'hall.gd'
+      - 'gameplay/loop_controller.gd'
+      - 'tests/immersion_qa.gd'
       - 'menu.gd'
       - 'player.gd'
       - 'project.godot'
@@ -18,6 +23,11 @@ on:
       - 'audio_drop/**'
       - 'tools/import_audio.py'
       - 'gameplay/audio_director.gd'
+      - 'gameplay/immersion_synth.gd'
+      - 'gameplay/room_soundscape.gd'
+      - 'hall.gd'
+      - 'gameplay/loop_controller.gd'
+      - 'tests/immersion_qa.gd'
       - 'menu.gd'
       - 'player.gd'
       - 'project.godot'
@@ -56,3 +66,13 @@ jobs:
           cat /tmp/audio-qa.log
           grep -Fq 'Casino Anomaly persistent audio and menu-only loop QA PASS' /tmp/audio-qa.log
           if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' /tmp/audio-qa.log; then exit 1; fi
+
+      - name: First-person immersion regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          GODOT=/tmp/godot/Godot_v4.5.1-stable_linux.x86_64
+          "$GODOT" --headless --path . --script res://tests/immersion_qa.gd > /tmp/immersion-qa.log 2>&1 || { cat /tmp/immersion-qa.log; exit 1; }
+          cat /tmp/immersion-qa.log
+          grep -Fq 'Casino Anomaly immersion QA PASS' /tmp/immersion-qa.log
+          if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' /tmp/immersion-qa.log; then exit 1; fi

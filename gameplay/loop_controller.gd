@@ -333,6 +333,10 @@ func _commit_choice(lane: String) -> void:
     # The player is now behind the departure gates. Ensure the next hall's
     # GI has been initialized even if they rushed past the prewarm trigger.
     _prewarm_next_gi()
+    # Open the new room's spatial soundscape before the visual handoff.
+    var soundscape := staged.get_node_or_null("RoomSoundscape") as Node3D
+    if soundscape != null:
+        soundscape.call("activate")
     # Avoid keeping four high-resolution GI volumes active simultaneously
     # through the connector. The departure room is no longer in view.
     var departing_rig := room.get_node_or_null("VoxelGIRig") as Node3D

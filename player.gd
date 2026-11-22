@@ -4,6 +4,8 @@ const WALK_SPEED := 4.0
 const SPRINT_SPEED := 6.3
 const MOUSE_SENSITIVITY := 0.002
 const GRAVITY := 18.0
+const WALK_ACCELERATION := 13.0
+const WALK_DECELERATION := 19.0
 const PauseMenu = preload("res://ui/pause_menu.gd")
 
 # Camera motion is cosmetic and can be disabled for motion-sensitive players.
@@ -20,6 +22,7 @@ var _step_clock: float = 0.0
 var _breath_clock: float = 0.0
 var _walk_blend: float = 0.0
 var _sprint_toggled := false
+var _footstep_distance := 0.80
 var interaction_locked := false
 var _options: Variant = null
 
@@ -57,6 +60,7 @@ func set_interaction_locked(locked: bool) -> void:
     interaction_locked = locked
     if locked:
         velocity = Vector3.ZERO
+        _footstep_distance = 0.80
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -97,7 +101,9 @@ func _process(delta: float) -> void:
     camera.position = camera.position.lerp(target, smooth)
 
     # Extremely slight side-to-side sway while walking; no camera pitch.
-    var roll := _camera_roll_home + 0.003 * sin(_step_clock) * _walk_blend
+    var lateral := velocity.dot(camera.global_transform.basis.x) / SPRINT_SPEED
+    var roll := _camera_roll_home + 0.003 * sin(_step_clock) * _walk_blend \
+            - 0.004 * clampf(lateral, -1.0, 1.0)
     camera.rotation.z = lerpf(camera.rotation.z, roll, smooth)
 
 func _physics_process(delta: float) -> void:
@@ -124,9 +130,46 @@ func _physics_process(delta: float) -> void:
     var sprint := _sprint_toggled if str(_setting("sprint_mode", "hold")) == "toggle" \
         else Input.is_physical_key_pressed(KEY_SHIFT)
     var speed := SPRINT_SPEED if sprint else WALK_SPEED
-    velocity.x = direction.x * speed
-    velocity.z = direction.z * speed
+    var target := direction * speed
+    var acceleration := WALK_ACCELERATION if axis.length_squared() > 0.0 else WALK_DECELERATION
+    velocity.x = move_toward(velocity.x, target.x, acceleration * delta)
+    velocity.z = move_toward(velocity.z, target.z, acceleration * delta)
+    var before := global_position
     move_and_slide()
+    _update_footsteps(global_position.distance_to(before), sprint)
+
+
+func classify_casino_surface(local: Vector3) -> String:
+    # Carpet is a visual quad without a collision layer: match hall.gd.
+    if local.x < -46.0 or local.z > 13.90:
+        return "corridor"
+    var approach := absf(local.x) < 1.49 and local.z >= -6.52 and local.z <= 12.65
+    var west := local.x >= -44.8 and local.x <= -1.49 \
+            and local.z >= -6.52 and local.z <= -3.55
+    return "carpet" if approach or west else "wood"
+
+
+func _surface_underfoot() -> String:
+    var room := get_parent() as Node3D
+    if room == null or not room.has_node("RedCarpet"):
+        return "wood" # Tutorial has no carpet.
+    return classify_casino_surface(room.to_local(global_position))
+
+
+func _update_footsteps(traveled: float, sprinting: bool) -> void:
+    if not is_on_floor() or traveled < 0.001:
+        return
+    _footstep_distance += traveled
+    var stride := 1.95 if sprinting else 1.50
+    if _footstep_distance < stride:
+        return
+    _footstep_distance = fmod(_footstep_distance, stride)
+    var sound := get_node_or_null("/root/AudioDirector")
+    if sound != null:
+        var surface := _surface_underfoot()
+        sound.play_footstep(surface, sprinting)
+        sound.set_corridor_acoustics(surface == "corridor")
+
 
 func _movement_direction(axis: Vector2) -> Vector3:
     var camera_basis := camera.global_transform.basis
