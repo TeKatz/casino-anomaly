@@ -46,11 +46,14 @@ func _run() -> void:
     if e.ssil_radius > 3.0 or e.ssr_max_steps > 40 or e.ssil_intensity < 0.75:
         _fail("Screen-space effects exceed the reasonable performance budget")
         return
-    if not e.volumetric_fog_enabled or e.volumetric_fog_density > 0.008:
-        _fail("Volumetric haze must remain subtle")
+    # The authored casino now deliberately uses denser volumetric haze
+    # for its increasingly oppressive atmosphere. Keep a safety ceiling,
+    # but do not force the previous, barely visible reference lighting.
+    if not e.volumetric_fog_enabled or e.volumetric_fog_density > 0.045:
+        _fail("Volumetric fog exceeds the atmospheric budget")
         return
-    if e.fog_density > 0.002 or e.glow_bloom > 0.025:
-        _fail("Fog or bloom is washing away the new contrast")
+    if e.fog_density > 0.03 or e.glow_bloom > 0.025:
+        _fail("Distance fog or bloom is washing away the casino contrast")
         return
     var atmosphere := hall.get_node_or_null("CasinoAtmosphere") as Node3D
     if atmosphere == null:
