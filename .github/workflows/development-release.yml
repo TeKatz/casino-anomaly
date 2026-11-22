@@ -147,6 +147,7 @@ jobs:
           if ($LASTEXITCODE -ne 0 -or (Get-Content smoke.log -Raw) -notmatch 'Casino Anomaly scenes and PBR floor smoke PASS') { throw 'Godot scene smoke failed' }
           foreach ($spec in @(
             @('tests/loop_gameplay_qa.gd', 'Casino Anomaly playable tutorial, save and loop gameplay QA PASS'),
+            @('tests/profile_archive_qa.gd', 'Casino Anomaly profile archive QA PASS'),
             @('tests/dev_anomaly_tool_qa.gd', 'Casino Anomaly developer anomaly picker QA PASS'),
             @('tests/anomaly_variations_qa.gd', 'Casino Anomaly ten subtle anomalies QA PASS'),
             @('tests/streaming_qa.gd', 'Casino Anomaly seamless two-room streaming QA PASS'),
