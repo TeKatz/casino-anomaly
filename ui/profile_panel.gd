@@ -135,7 +135,7 @@ func refresh() -> void:
     stats_button.text = _word("STATISTIKEN", "STATISTICS")
     delete_button.text = _word("PROFIL LÖSCHEN", "DELETE PROFILE")
     back_button.text = _word("ZURÜCK", "BACK")
-    var active := selected_slot > 0 and profiles.profile_exists(selected_slot)
+    var active: bool = selected_slot > 0 and profiles.profile_exists(selected_slot)
     var summary: Dictionary = profiles.get_summary(selected_slot)
     continue_button.disabled = not active or not bool(summary.get("can_continue", false))
     for button in [new_button, archive_button, stats_button, delete_button, rename_button]:
