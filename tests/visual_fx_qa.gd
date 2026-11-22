@@ -65,8 +65,11 @@ func _run() -> void:
         push_error("Forward+ volume scattering is disabled")
         quit(1)
         return
-    if env.environment.volumetric_fog_density <= 0.0 or env.environment.volumetric_fog_density > 0.025:
-        push_error("Volumetric haze is not configured to stay subtle")
+    # Artist-controlled denser casino fog reinforces the oppressive
+    # atmosphere. Ensure scattering remains bounded without locking the
+    # room to its original low-density appearance.
+    if env.environment.volumetric_fog_density <= 0.0 or env.environment.volumetric_fog_density > 0.045:
+        push_error("Volumetric fog is outside the supported atmosphere range")
         quit(1)
         return
     if not env.environment.ssao_enabled:
