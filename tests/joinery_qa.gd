@@ -35,7 +35,7 @@ func _run() -> void:
         # The authored parquet uses the Oak Wood Planks albedo on the
         # existing Herringbone roughness/normal maps. Preserve that deliberate
         # mixed PBR material, while keeping strict sources for other finishes.
-        var albedo_source := "oak_wood_planks" if source_name == "herringbone_parquet" else source_name
+        var albedo_source: String = "oak_wood_planks" if source_name == "herringbone_parquet" else str(source_name)
         if not mat.albedo_texture.resource_path.contains(albedo_source):
             _fail("Wrong authored Poly Haven albedo: " + source_name)
             return
