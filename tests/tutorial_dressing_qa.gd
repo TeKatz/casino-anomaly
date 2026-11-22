@@ -53,15 +53,27 @@ func _run() -> void:
         if old_register == null or old_register.visible:
             _fail("Real books model must replace the old register placeholder")
             return
-        # Check the actual glTF mesh vertices in world space, not just the
-        # importer wrapper. The desk is 1.144 m tall at this point.
+        # Validate against the artist-authored counter as it is now, not
+        # its original fixed coordinates. The scene's editable transforms
+        # are authoritative after deliberate layout changes in Godot.
         var books_bound := _bounds_in_room(room, books)
-        if absf(books_bound.position.y - 1.144) > .008:
+        var counter_top := room.get_node_or_null("ReceptionMainTop") as MeshInstance3D
+        if counter_top == null or counter_top.mesh == null:
+            _fail("Reception desk is missing its counter-top geometry")
+            return
+        var desk_to_room := room.global_transform.affine_inverse() * counter_top.global_transform
+        var top_bound := desk_to_room * counter_top.get_aabb()
+        if absf(books_bound.position.y - top_bound.end.y) > .008:
             _fail("Books float over or clip through reception: " + str(books_bound))
             return
-        if books_bound.position.x < -2.60 or books_bound.end.x > -1.70 \
-                or books_bound.position.z < .75 or books_bound.end.z > 1.50:
-            _fail("Books extend beyond their reception-desk placement: " + str(books_bound))
+        # Keep the imported mesh fully supported with a small safety margin.
+        var inset := .025
+        if books_bound.position.x < top_bound.position.x + inset \
+                or books_bound.end.x > top_bound.end.x - inset \
+                or books_bound.position.z < top_bound.position.z + inset \
+                or books_bound.end.z > top_bound.end.z - inset:
+            _fail("Books overhang reception desktop: " + str(books_bound) \
+                    + " counter=" + str(top_bound))
             return
         var textured := false
         for child in books.find_children("*", "MeshInstance3D", true, false):
