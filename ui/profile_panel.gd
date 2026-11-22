@@ -124,15 +124,17 @@ func refresh() -> void:
         var button := slot_buttons[i]
         button.disabled = false
         if bool(summary.get("exists", false)):
-            button.text = "%s  ·  %d / %d (%.0f %%)    |    %s: %d / 12    |    %s: %d" % [
+            button.text = "%s · %s: %d / %d (%.0f %%) · %s: %d / 12" % [
                 str(summary.get("name", "Profil %d" % slot)),
+                _word("Entdeckte Anomalien", "Discovered anomalies"),
                 int(summary.get("discovered", 0)), int(summary.get("total", 0)),
                 float(summary.get("percent", 0.0)),
-                _word("Serie", "Streak"), int(summary.get("level", 0)),
-                _word("Abschlüsse", "Wins"), int(summary.get("completions", 0))]
+                _word("Serie", "Streak"), int(summary.get("level", 0))]
         else:
             button.text = _word("SLOT %d · + Neues Profil erstellen",
                 "SLOT %d · + Create new profile") % slot
+        button.clip_text = true
+        button.tooltip_text = button.text
         button.modulate = Color("#f5dfb5") if slot == selected_slot else Color.WHITE
     name_edit.placeholder_text = _word("Profilname (max. 32 Zeichen)",
         "Profile name (max 32 characters)")
@@ -149,8 +151,13 @@ func refresh() -> void:
     for button in [new_button, archive_button, stats_button, delete_button, rename_button]:
         button.disabled = not active
     name_edit.editable = active
-    status.text = _word("Wähle einen Slot. Neue Durchläufe behalten deine Entdeckungen.",
-        "Choose a slot. New runs keep your discoveries.")
+    if active:
+        status.text = _word("Abgeschlossene Durchläufe: %d. Ein neuer Versuch behält den Archivfortschritt.",
+            "Completed runs: %d. A new run keeps archive progress.") \
+            % int(summary.get("completions", 0))
+    else:
+        status.text = _word("Wähle einen Slot. Neue Durchläufe behalten deine Entdeckungen.",
+            "Choose a slot. New runs keep your discoveries.")
 
 
 func _select_slot(slot: int) -> void:

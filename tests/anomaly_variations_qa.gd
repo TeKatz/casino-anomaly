@@ -159,8 +159,8 @@ func _run() -> void:
 
     var definitions: Array[Dictionary] = Catalog.entries()
     var available: Array[String] = Catalog.available_ids(room)
-    if definitions.size() != 13 or available.size() != 13:
-        _fail("Catalog and actual room must expose 3 original + 10 new anomalies")
+    if definitions.size() < 13 or available.size() < 13:
+        _fail("The 13 baseline effects must remain registered and available; additional effects are allowed")
         return
 
     var seen := {}

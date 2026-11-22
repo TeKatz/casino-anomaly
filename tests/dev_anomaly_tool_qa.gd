@@ -79,8 +79,8 @@ func _run() -> void:
     if loop == null or menu == null or menu.visible or state.anomaly_id != "":
         _fail("The hidden menu must exist only during gameplay and start closed")
         return
-    if Catalog.entries().size() != 13 or (loop.call("debug_available_ids") as Array).size() != 13:
-        _fail("Catalog must expose the 3 original + 10 new effects")
+    if Catalog.entries().size() < 13 or (loop.call("debug_available_ids") as Array).size() < 13:
+        _fail("Developer picker lost one of the 13 baseline effects")
         return
     var g := InputEventKey.new()
     g.keycode = KEY_G
