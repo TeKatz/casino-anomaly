@@ -1,13 +1,22 @@
 ; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
 config_version=5
 
 [application]
+
 config/name="Casino Anomaly"
-config/icon="res://branding/casino_anomaly.svg"
 run/main_scene="res://menu.tscn"
 config/features=PackedStringArray("4.5", "Forward Plus")
+config/icon="res://branding/casino_anomaly.svg"
 
 [autoload]
+
 ProfileManager="*res://gameplay/profile_manager.gd"
 LoopState="*res://gameplay/loop_state.gd"
 GameSettings="*res://gameplay/settings.gd"
@@ -15,20 +24,21 @@ AudioDirector="*res://gameplay/audio_director.gd"
 SceneLoader="*res://gameplay/scene_loader.gd"
 UISfx="*res://ui/ui_sfx.gd"
 
-[editor_plugins]
-enabled=PackedStringArray("res://addons/casino_model_preview/plugin.cfg")
-
 [display]
+
 window/size/viewport_width=1280
 window/size/viewport_height=720
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/casino_model_preview/plugin.cfg")
+
 [rendering]
-renderer/rendering_method="forward_plus"
-# Reduce texture shimmering in fine repeating PBR wall, floor and roof patterns.
-anti_aliasing/quality/use_taa=true
+
+renderer/rendering_method.mobile="gl_compatibility"
 textures/default_filters/anisotropic_filtering_level=3
 textures/default_filters/texture_mipmap_bias=0.25
-renderer/rendering_method.mobile="gl_compatibility"
 environment/defaults/default_clear_color=Color(0.07, 0.06, 0.055, 1)
+anti_aliasing/quality/use_taa=true

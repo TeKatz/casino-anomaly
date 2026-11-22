@@ -14,3 +14,8 @@
 *.tscn text eol=lf
 *.tres text eol=lf
 *.py text eol=lf
+
+# Godot editor-generated configuration, import sidecars, and resource IDs.
+project.godot text eol=lf
+*.import text eol=lf
+*.uid text eol=lf
