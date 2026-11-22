@@ -32,8 +32,12 @@ func _run() -> void:
         if mat == null or mat.albedo_texture == null                 or mat.normal_texture == null or mat.roughness_texture == null:
             _fail("Missing full Poly Haven PBR map set: " + source_name)
             return
-        if not mat.albedo_texture.resource_path.contains(source_name):
-            _fail("Wrong Poly Haven material source: " + source_name)
+        # The authored parquet uses the Oak Wood Planks albedo on the
+        # existing Herringbone roughness/normal maps. Preserve that deliberate
+        # mixed PBR material, while keeping strict sources for other finishes.
+        var albedo_source := "oak_wood_planks" if source_name == "herringbone_parquet" else source_name
+        if not mat.albedo_texture.resource_path.contains(albedo_source):
+            _fail("Wrong authored Poly Haven albedo: " + source_name)
             return
 
     var pillar_count := 0
@@ -115,8 +119,10 @@ func _run() -> void:
         return
     var wood_mat: StandardMaterial3D = timber.get_active_material(0) as StandardMaterial3D
     var gold_mat: StandardMaterial3D = inlay.get_active_material(0) as StandardMaterial3D
-    if wood_mat == null or wood_mat.albedo_texture == null             or not wood_mat.albedo_texture.resource_path.contains("herringbone_parquet"):
-        _fail("Beveled timber edging must retain the Herringbone Parquet maps")
+    if wood_mat == null or wood_mat.albedo_texture == null \
+            or not wood_mat.albedo_texture.resource_path.contains("oak_wood_planks") \
+            or wood_mat.normal_texture == null or wood_mat.roughness_texture == null:
+        _fail("Beveled timber edging must retain the artist-approved oak/PBR material")
         return
     if gold_mat == null or gold_mat.albedo_texture == null             or not gold_mat.albedo_texture.resource_path.contains("bi_stretch"):
         _fail("Flush gold fabric inlay must retain the Bi Stretch maps")
