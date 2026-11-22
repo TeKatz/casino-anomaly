@@ -57,6 +57,19 @@ def install(zip_path, slug):
                     if ".." in p.parts or uri.startswith("/") or not (stage/p).is_file():
                         raise ValueError(f"{slug}: missing/unsafe GLTF dependency {uri}")
             if dest.exists():
+                # The archives contain source models/textures, not Godot's
+                # adjacent .import sidecars. Preserve settings and stable UIDs
+                # for every source file that is still present in the archive.
+                # Without this, GitHub Actions deletes the committed sidecars
+                # and Godot regenerates them on every local editor startup.
+                for source in stage.rglob("*"):
+                    if not source.is_file() or source.suffix == ".import":
+                        continue
+                    relative = source.relative_to(stage)
+                    previous_sidecar = dest / (str(relative) + ".import")
+                    if previous_sidecar.is_file():
+                        new_sidecar = stage / (str(relative) + ".import")
+                        shutil.copy2(previous_sidecar, new_sidecar)
                 shutil.rmtree(dest)
             stage.rename(dest)
         finally:
