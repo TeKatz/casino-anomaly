@@ -199,8 +199,11 @@ func _run() -> void:
         return
     for item in [fabric, wainscot, rug]:
         var finish := item.get_active_material(0) as StandardMaterial3D
-        if finish == null or finish.albedo_texture == null or not finish.normal_enabled:
-            _fail("Architectural wood, fabric and runner must have real PBR textures")
+        # Artists may intentionally disable normal-map contribution while
+        # keeping the original PBR source textures assigned to the surface.
+        if finish == null or finish.albedo_texture == null \
+                or finish.normal_texture == null or finish.roughness_texture == null:
+            _fail("Architectural wood, fabric and runner must retain their PBR maps")
             return
 
     # Floor mesh top y=0. Textured runner must rest on it and never share its
