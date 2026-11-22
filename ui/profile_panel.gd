@@ -86,6 +86,10 @@ func _ready() -> void:
     new_run_dialog = ConfirmationDialog.new()
     new_run_dialog.confirmed.connect(_new_run)
     add_child(new_run_dialog)
+    var profiles := get_node_or_null("/root/ProfileManager")
+    if profiles != null and profiles.profile_exists(profiles.active_slot):
+        selected_slot = profiles.active_slot
+        name_edit.text = str(profiles.get_summary(selected_slot).get("name", ""))
     refresh()
 
 
