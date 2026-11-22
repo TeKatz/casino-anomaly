@@ -15,6 +15,6 @@ description_en = "One warm overhead light has a strong bluish tint."
 description_de = "Ein warmes Deckenlicht wirkt plötzlich deutlich bläulich."
 target_path = "Lighting/WarmCasinoLamp_06"
 has_color = true
-color = Color(0.447059, 0.749020, 1.000000, 1)
+color = Color(0.44705882352941179, 0.74901960784313726, 1.0000000000000000, 1)
 has_energy_scale = true
 energy_scale = 1.90

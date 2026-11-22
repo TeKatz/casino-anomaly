@@ -15,6 +15,6 @@ description_en = "A corridor section glows in a strong orange-red light."
 description_de = "Ein Gangabschnitt leuchtet deutlich kräftiger orange-rot."
 target_path = "Lighting/WarmCasinoLamp_03"
 has_color = true
-color = Color(1.000000, 0.392157, 0.117647, 1)
+color = Color(1.0000000000000000, 0.39215686274509803, 0.11764705882352941, 1)
 has_energy_scale = true
 energy_scale = 3.40
