@@ -21,6 +21,7 @@ var stats_button: Button
 var back_button: Button
 var title_label: Label
 var delete_dialog: ConfirmationDialog
+var new_run_dialog: ConfirmationDialog
 
 
 func _ready() -> void:
@@ -61,7 +62,7 @@ func _ready() -> void:
     actions.add_theme_constant_override("separation", 7)
     stack.add_child(actions)
     continue_button = _button(actions, _continue)
-    new_button = _button(actions, _new_run)
+    new_button = _button(actions, _request_new_run)
     var collection_actions := HBoxContainer.new()
     collection_actions.add_theme_constant_override("separation", 7)
     stack.add_child(collection_actions)
@@ -82,6 +83,9 @@ func _ready() -> void:
     delete_dialog = ConfirmationDialog.new()
     delete_dialog.confirmed.connect(_delete_selected)
     add_child(delete_dialog)
+    new_run_dialog = ConfirmationDialog.new()
+    new_run_dialog.confirmed.connect(_new_run)
+    add_child(new_run_dialog)
     refresh()
 
 
@@ -165,6 +169,18 @@ func _rename() -> void:
     var profiles := get_node_or_null("/root/ProfileManager")
     if profiles != null and profiles.rename_profile(selected_slot, name_edit.text):
         refresh()
+
+
+func _request_new_run() -> void:
+    var state := get_node_or_null("/root/LoopState")
+    if state != null and state.has_continue():
+        new_run_dialog.title = _word("Neuer Durchlauf", "New run")
+        new_run_dialog.dialog_text = _word(
+            "Aktuellen Durchlauf überschreiben? Das Anomalie-Archiv bleibt erhalten.",
+            "Overwrite the current run? Your anomaly archive will be preserved.")
+        new_run_dialog.popup_centered()
+    else:
+        _new_run()
 
 
 func _new_run() -> void:

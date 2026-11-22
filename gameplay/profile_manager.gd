@@ -246,9 +246,24 @@ func record_decision(verdict: Dictionary) -> void:
     _save_progress()
 
 
+func _migration_marker() -> String:
+    return ROOT.path_join("legacy_migration_done.flag")
+
+
+func _mark_migrated() -> void:
+    if DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(ROOT)) != OK:
+        return
+    var marker := FileAccess.open(_migration_marker(), FileAccess.WRITE)
+    if marker != null:
+        marker.store_string("1")
+
+
 func _migrate_legacy_run() -> void:
-    # Non-destructive one-time import. Never overwrite an existing slot.
-    if not FileAccess.file_exists(LEGACY_RUN) or profile_exists(1):
+    # Never resurrect a deliberately deleted slot after importing once.
+    if not FileAccess.file_exists(LEGACY_RUN) or FileAccess.file_exists(_migration_marker()):
+        return
+    if profile_exists(1):
+        _mark_migrated()
         return
     var legacy := ConfigFile.new()
     if legacy.load(LEGACY_RUN) != OK or int(legacy.get_value("run", "version", 0)) != 1:
@@ -258,5 +273,7 @@ func _migrate_legacy_run() -> void:
     if DirAccess.copy_absolute(ProjectSettings.globalize_path(LEGACY_RUN),
             ProjectSettings.globalize_path(run_path(1))) != OK:
         return
-    if not _write_profile(1, "Profil 1 (importiert)"):
+    if _write_profile(1, "Profil 1 (importiert)"):
+        _mark_migrated()
+    else:
         push_warning("Legacy anomaly save was copied but profile creation failed")
