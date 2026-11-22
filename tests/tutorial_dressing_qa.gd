@@ -119,8 +119,19 @@ func _run() -> void:
                 _fail("Gramophone must stand on its supported wooden console")
                 return
         if id == "wall_light":
-            if absf(bounds.end.x - 3.566) > .015:
-                _fail("Wall light is not flush-mounted to the right wall")
+            # Test the authored right-wall mounting, not an exact tip of a
+            # particular imported mesh. Making nested glTF children editable
+            # can change that mesh AABB without moving the fixture off-wall.
+            var wall := room.get_node_or_null("RoomCollision/RightWall") as CollisionShape3D
+            if wall == null or not (wall.shape is BoxShape3D):
+                _fail("Missing right-wall collision to validate mounted fixture")
+                return
+            var wall_face := wall.position.x - (wall.shape as BoxShape3D).size.x * .5
+            var anchor_x := room.to_local(model.global_position).x
+            if absf(anchor_x - wall_face) > .40 \
+                    or bounds.position.x > wall_face + .12 \
+                    or bounds.end.x < wall_face - .65:
+                _fail("Wall lamp is no longer near its wall mount: " + str(bounds))
                 return
             for fixture in ["RightSconceB", "ExitSconceLeft", "ExitSconceRight"]:
                 if imported.get_node_or_null("WallLight" + fixture) == null:
