@@ -27,8 +27,16 @@ func _run() -> void:
         if mat == null or mat.albedo_texture == null:
             _fail("Texture material missing: " + path)
             return
-        if mat.texture_filter != BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC:
-            _fail("Texture filtering lacks mipmaps/anisotropy: " + path)
+        # The lower-wall material is artist-edited in Godot and can use the
+        # engine's normal trilinear-mipmap filtering. Do not silently replace
+        # the artist's chosen filter; still reject non-mipmapped materials.
+        if path == "lower_wall_material.tres":
+            if mat.texture_filter != BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS \
+                    and mat.texture_filter != BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC:
+                _fail("Lower wall material lost mipmaps: " + path)
+                return
+        elif mat.texture_filter != BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC:
+            _fail("Texture filtering lacks anisotropic mipmaps: " + path)
             return
 
     var scene: PackedScene = load("res://main.tscn")

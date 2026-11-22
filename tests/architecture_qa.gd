@@ -26,12 +26,15 @@ func _run() -> void:
         return
     for item in [
         ["lower_wall_material.tres", "wooden_panels"],
-        ["upper_wall_material.tres", "Fabric037"],
+        ["upper_wall_material.tres", "artist-authored upper wall"],
         ["ceiling_material.tres", "roof_planks"]
     ]:
         var material: StandardMaterial3D = load("res://" + item[0]) as StandardMaterial3D
+        # A texture may remain assigned while an artist intentionally
+        # disables its normal-map contribution in the material inspector.
+        # Guard the actual PBR source assets without overriding that choice.
         if material == null or material.albedo_texture == null \
-                or not material.normal_enabled or material.normal_texture == null \
+                or material.normal_texture == null \
                 or material.roughness_texture == null:
             _bad("Missing PBR texture maps for " + item[1])
             return
@@ -40,7 +43,7 @@ func _run() -> void:
     var ceiling: MeshInstance3D = structure.get_node_or_null("WestCeiling") as MeshInstance3D
     var lower: MeshInstance3D = structure.get_node_or_null("WoodWainscoting") as MeshInstance3D
     for entry in [
-        [upper, "Fabric037", 10.0],
+        [upper, "upper wall", 10.0],
         [ceiling, "roof_planks", 10.0],
         [lower, "wooden_panels", 2.0]
     ]:
