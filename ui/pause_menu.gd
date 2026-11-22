@@ -4,6 +4,7 @@ extends CanvasLayer
 
 const SettingsPanel = preload("res://ui/settings_panel.gd")
 const CreditsPanel = preload("res://ui/credits_panel.gd")
+const ArchivePanel = preload("res://ui/anomaly_archive_panel.gd")
 const LuminousButton = preload("res://ui/luminous_button.gd")
 const MenuStyle = preload("res://ui/menu_style.gd")
 const Loc = preload("res://gameplay/localization.gd")
@@ -13,6 +14,7 @@ var panel_root: Control
 var pause_panel: PanelContainer
 var settings_panel: PanelContainer
 var credits_panel: PanelContainer
+var archive_panel: PanelContainer
 var intro_tween: Tween
 var confirmation: ConfirmationDialog
 var open := false
@@ -39,7 +41,7 @@ func _ready() -> void:
     center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     panel_root.add_child(center)
     pause_panel = PanelContainer.new()
-    pause_panel.custom_minimum_size = Vector2(475, 555)
+    pause_panel.custom_minimum_size = Vector2(475, 625)
     pause_panel.add_theme_stylebox_override("panel", MenuStyle.panel())
     center.add_child(pause_panel)
 
@@ -50,7 +52,7 @@ func _ready() -> void:
     margin.add_theme_constant_override("margin_bottom", 27)
     pause_panel.add_child(margin)
     var stack := VBoxContainer.new()
-    stack.add_theme_constant_override("separation", 12)
+    stack.add_theme_constant_override("separation", 9)
     margin.add_child(stack)
     var title := Label.new()
     title.text = "CASINO ANOMALY"
@@ -67,6 +69,8 @@ func _ready() -> void:
 
     _add_button(stack, "pause.resume", _resume)
     _add_button(stack, "pause.settings", _open_settings)
+    _add_button(stack, "pause.archive", func() -> void: _open_archive("archive"))
+    _add_button(stack, "pause.stats", func() -> void: _open_archive("stats"))
     _add_button(stack, "pause.credits", _open_credits)
     _add_button(stack, "pause.new_game", func() -> void: _confirm_action("new"))
     _add_button(stack, "pause.load", func() -> void: _confirm_action("load"))
@@ -82,6 +86,11 @@ func _ready() -> void:
     credits_panel.visible = false
     credits_panel.back_pressed.connect(_close_credits)
     center.add_child(credits_panel)
+
+    archive_panel = ArchivePanel.new()
+    archive_panel.visible = false
+    archive_panel.back_pressed.connect(_close_archive)
+    center.add_child(archive_panel)
 
     confirmation = ConfirmationDialog.new()
     confirmation.title = Loc.t("pause.save_title", self)
@@ -123,6 +132,7 @@ func _refresh_localization() -> void:
         button.text = Loc.t(str(button.get_meta("translation_key")), self)
     confirmation.title = Loc.t("pause.save_title", self)
     credits_panel.call("refresh_language")
+    archive_panel.call("refresh_language")
     confirmation.ok_button_text = Loc.t("pause.confirm", self)
     confirmation.cancel_button_text = Loc.t("pause.cancel", self)
     var key := "pause.leave"
@@ -146,6 +156,8 @@ func _input(event: InputEvent) -> void:
     if event is InputEventKey and event.pressed and not event.echo             and event.keycode == KEY_ESCAPE:
         if confirmation.visible:
             confirmation.hide()
+        elif open and archive_panel.visible:
+            _close_archive()
         elif open and credits_panel.visible:
             _close_credits()
         elif open and settings_panel.visible:
@@ -165,6 +177,7 @@ func _pause() -> void:
     pause_panel.visible = true
     settings_panel.visible = false
     credits_panel.visible = false
+    archive_panel.visible = false
     panel_root.modulate.a = 0.0
     if intro_tween != null and intro_tween.is_running():
         intro_tween.kill()
@@ -179,6 +192,7 @@ func _resume() -> void:
     visible = false
     settings_panel.visible = false
     credits_panel.visible = false
+    archive_panel.visible = false
     get_tree().paused = false
     Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
@@ -205,6 +219,21 @@ func _open_credits() -> void:
 
 func _close_credits() -> void:
     credits_panel.visible = false
+    pause_panel.visible = true
+    _fade_panel(pause_panel)
+
+
+func _open_archive(next_mode: String) -> void:
+    archive_panel.call("show_mode", next_mode)
+    archive_panel.visible = true
+    credits_panel.visible = false
+    settings_panel.visible = false
+    pause_panel.visible = false
+    _fade_panel(archive_panel)
+
+
+func _close_archive() -> void:
+    archive_panel.visible = false
     pause_panel.visible = true
     _fade_panel(pause_panel)
 

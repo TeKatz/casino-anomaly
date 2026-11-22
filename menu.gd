@@ -2,10 +2,16 @@ extends Control
 
 const SettingsPanel = preload("res://ui/settings_panel.gd")
 const CreditsPanel = preload("res://ui/credits_panel.gd")
+const ProfilePanel = preload("res://ui/profile_panel.gd")
+const ArchivePanel = preload("res://ui/anomaly_archive_panel.gd")
 const Loc = preload("res://gameplay/localization.gd")
 var settings_overlay: Control
 var credits_overlay: Control
 var credits_panel: PanelContainer
+var profile_panel: PanelContainer
+var profile_overlay: Control
+var archive_panel: PanelContainer
+var archive_overlay: Control
 var overlay_tween: Tween
 var changing_scene := false
 
@@ -34,7 +40,8 @@ func _ready() -> void:
         current_version_code = int(parsed.get("versionCode", 0))
         version_label.text = "Version " + str(parsed.get("version", "0.1.0-dev.0"))
     var state = get_node_or_null("/root/LoopState")
-    $CenterPanel/Content/Stack/ContinueButton.disabled = state == null or not state.has_continue()
+    # Loading a run is a contextual action inside the selected profile.
+    $CenterPanel/Content/Stack/ContinueButton.visible = false
     $CenterPanel/Content/Stack/PlayButton.pressed.connect(_on_play)
     $CenterPanel/Content/Stack/ContinueButton.pressed.connect(_on_continue)
     $CenterPanel/Content/Stack/SettingsButton.pressed.connect(_open_settings)
@@ -42,6 +49,8 @@ func _ready() -> void:
     $CenterPanel/Content/Stack/QuitButton.pressed.connect(_on_quit)
     _create_settings_overlay()
     _create_credits_overlay()
+    _create_profile_overlay()
+    _create_archive_overlay()
     update_button.pressed.connect(_check_update)
     install_button.pressed.connect(_install_update)
     request.request_completed.connect(_on_request_completed)
@@ -65,6 +74,10 @@ func _on_setting_changed(key: String) -> void:
         _localize_ui()
         if credits_panel != null:
             credits_panel.call("refresh_language")
+        if profile_panel != null:
+            profile_panel.call("refresh")
+        if archive_panel != null:
+            archive_panel.call("refresh_language")
 
 func _set_status(key: String, value: String = "") -> void:
     status_key = key
@@ -93,18 +106,39 @@ func _localize_ui() -> void:
     _update_status()
 
 func _on_play() -> void:
-    var state = get_node_or_null("/root/LoopState")
-    if state == null:
-        _set_status("menu.failed_state")
-        return
-    state.start_new_run()
-    _fade_to_scene("res://gameplay/tutorial.tscn")
+    profile_panel.call("refresh")
+    _show_overlay(profile_overlay)
+
 
 func _on_continue() -> void:
-    var state = get_node_or_null("/root/LoopState")
-    if state == null or not state.has_continue():
-        return
-    _fade_to_scene("res://main.tscn" if state.tutorial_done else "res://gameplay/tutorial.tscn")
+    _on_play()
+
+
+func _create_profile_overlay() -> void:
+    profile_panel = ProfilePanel.new()
+    profile_overlay = _build_overlay(profile_panel)
+    profile_panel.back_pressed.connect(func() -> void: _hide_overlay(profile_overlay))
+    profile_panel.launch_requested.connect(_fade_to_scene)
+    profile_panel.archive_requested.connect(_open_profile_archive)
+
+
+func _create_archive_overlay() -> void:
+    archive_panel = ArchivePanel.new()
+    archive_overlay = _build_overlay(archive_panel)
+    archive_panel.back_pressed.connect(_back_from_profile_archive)
+
+
+func _open_profile_archive(next_mode: String) -> void:
+    archive_panel.call("show_mode", next_mode)
+    profile_overlay.visible = false
+    _show_overlay(archive_overlay)
+
+
+func _back_from_profile_archive() -> void:
+    archive_overlay.visible = false
+    profile_panel.call("refresh")
+    _show_overlay(profile_overlay)
+
 
 func _create_settings_overlay() -> void:
     var panel := SettingsPanel.new()
@@ -213,6 +247,12 @@ func _unhandled_input(event: InputEvent) -> void:
             get_viewport().set_input_as_handled()
         elif settings_overlay != null and settings_overlay.visible:
             _hide_overlay(settings_overlay)
+            get_viewport().set_input_as_handled()
+        elif archive_overlay != null and archive_overlay.visible:
+            _back_from_profile_archive()
+            get_viewport().set_input_as_handled()
+        elif profile_overlay != null and profile_overlay.visible:
+            _hide_overlay(profile_overlay)
             get_viewport().set_input_as_handled()
 
 func _on_quit() -> void:

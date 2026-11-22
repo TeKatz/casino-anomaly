@@ -10,6 +10,7 @@ extends Node3D
 const DemoAnomalies = preload("res://gameplay/demo_anomalies.gd")
 const NeonLevelSign = preload("res://gameplay/neon_level_sign.gd")
 const AnomalyDevMenu = preload("res://ui/anomaly_dev_menu.gd")
+const DecisionFeedback = preload("res://ui/decision_feedback.gd")
 const StreamPortals = preload("res://gameplay/stream_portals.gd")
 const Loc = preload("res://gameplay/localization.gd")
 const ROOM = preload("res://main.tscn")
@@ -38,6 +39,7 @@ var choice_taken := false
 var transitioning := false
 var finishing := false
 var won := false
+var pending_verdict: Dictionary = {}
 
 
 func _ready() -> void:
@@ -82,6 +84,10 @@ func _ready() -> void:
         var dev_menu := AnomalyDevMenu.new()
         dev_menu.name = "AnomalyDevMenu"
         player.add_child(dev_menu)
+    if player.get_node_or_null("DecisionFeedback") == null:
+        var feedback := DecisionFeedback.new()
+        feedback.name = "DecisionFeedback"
+        player.add_child(feedback)
 
 
 func debug_available_ids() -> Array[String]:
@@ -323,6 +329,7 @@ func _commit_choice(lane: String) -> void:
     var verdict: Dictionary = state.decide(lane == "left")
     if not bool(verdict.get("valid", false)):
         return
+    pending_verdict = verdict.duplicate(true)
     # By now the character is safely beyond x=-49.1. Both physical gates
     # appear behind at x=-47.7, closing the chosen path and the other exit.
     # This prevents switching the decision or reaching the void outside a
@@ -402,6 +409,11 @@ func _handoff() -> void:
     # Both reflection captures and all furniture fills were prepared in
     # the blind connector; neither is toggled after the room is visible.
     _place_markers()
+    if not pending_verdict.is_empty():
+        var feedback := player.get_node_or_null("DecisionFeedback")
+        if feedback != null:
+            feedback.call("show_verdict", pending_verdict)
+        pending_verdict.clear()
     if finishing:
         # Both dead-end connectors are physically closed in the final room.
         # The player is free to look around and see the neon 12.
