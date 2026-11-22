@@ -32,25 +32,46 @@ Without both resources, the game safely retains its existing Forward+
 lighting with zero VoxelGI shader/probe cost. The graphics setting toggles
 VoxelGI once valid baked resources are included.
 
-## Bake once with a real rendering device
+## Re-bake directly from the Godot editor (recommended)
 
-1. Check out the repository on `dev` with all texture/model dependencies
-   available (the normal asset import scripts are in `tools/`).
-2. Install **Godot 4.5.1** and run, in the project directory:
-   `Godot_v4.5.1-stable_win64_console.exe --path . --script res://tools/bake_voxel_gi.gd`
-   **Do not** use `--headless`. Godot needs Vulkan/D3D12 for GPU-based
-   emission voxelization and baking. Both resources are generated once.
-3. Verify `lighting/main_wing.res` and `lighting/west_wing.res` exist
-   and have nonzero voxel data. Visually inspect the casino in Godot.
-4. Commit those **binary** files to GitHub to include GI in future
-   Windows builds. Re-bake after changing static furniture, geometry,
-   or emissive lighting.
+1. Open **main.tscn** in Godot **4.5.1**, using the Forward+ renderer.
+   Move, rotate or resize the neon strips/sign frames and adjust their
+   emissive material colors/strengths as needed.
+2. Choose **Project → Tools → Casino: VoxelGI neu backen...** (the existing
+   Casino Model Preview editor plugin must be enabled).
+3. Confirm **Speichern und backen**. Godot saves all open scenes, then launches
+   a **separate GPU-backed Godot process** to bake both room-local probes.
+   Do not edit main.tscn again until this process finishes.
+4. Look for `Casino Anomaly VoxelGI OFFLINE BAKE PASS` in that process's
+   output. Reopen main.tscn after the bake to reload the updated editor GI
+   preview. Visually inspect both casino wings.
+5. Commit `lighting/main_wing.res` and `lighting/west_wing.res` alongside
+   any intended scene edits. Do **not** commit generated runtime caches.
 
-The offline script adds temporary *thickened* warm/cyan emissive proxies:
-the actual 3–4 cm light strip meshes are too thin to reliably show up in
-128-subdivision GI voxels. These bake-only meshes are not shipped or
-rendered during gameplay. The script never saves over the authored
-`main.tscn`.
+The baking script now derives thickened **bake-only proxies from each saved
+emissive cove or entry/bar sign frame segment** in CasinoAtmosphere.
+Position, rotation, scale, length, emission color and emission strength follow
+the actual authored MeshInstance3D/BoxMesh. This replaces six fixed-coordinate
+bake placeholders. Each strip's minimum thickness is 0.28 m for reliable
+128-division voxelization. Original thin strips are excluded from the bake
+to avoid double contribution; neither the proxies nor any changes to
+the original strips are saved to main.tscn.
+
+### Console fallback
+
+If the plugin is disabled, close the Godot editor, then run from the project
+directory:
+
+`Godot_v4.5.1-stable_win64_console.exe --path . --script res://tools/bake_voxel_gi.gd`
+
+**Never add `--headless`:** VoxelGI requires a GPU-backed rendering device.
+The script still writes the two external .res resources and prints a PASS
+message after validating nonempty VoxelGI data. The GitHub CI tests the proxy
+mapping and resource contracts but cannot produce a GPU-backed bake.
+
+**Important:** Only emissive geometry that is saved to disk is baked. Unstaged
+scene changes are included if they have been saved; changing a neon in the
+editor after the bake begins does not affect that bake. 
 
 ## Performance and streaming
 

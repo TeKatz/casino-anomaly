@@ -1,5 +1,5 @@
 extends SceneTree
-## One-time GPU-assisted offline bake. Run from a checked-out project using
+## GPU-assisted offline bake of saved main.tscn. Run from a checked-out project using
 ## Godot 4.5.1 with a Vulkan/D3D12-capable display (NOT --headless):
 ## Godot_v4.5.1-stable_win64_console.exe --path . --script res://tools/bake_voxel_gi.gd
 ##
@@ -28,27 +28,74 @@ static func configure_baked_light(light: Light3D) -> void:
     light.light_bake_mode = Light3D.BAKE_STATIC
 
 
-func _emissive_proxy(parent: Node3D, label: String, pos: Vector3,
-        size: Vector3, color: Color, energy: float) -> void:
-    # The actual 3-cm cove is thinner than a voxel. Bake-only, thicker
-    # emitter proxies allow its warm light to contribute at SUBDIV_128.
-    # They never exist in the normal playable scene.
-    var node := MeshInstance3D.new()
-    node.name = label
-    node.position = pos
+# The editor-authored cove strips and neon sign frame segments are the
+# authoritative source for baked emission. Mesh movement, rotation, scaling,
+# size and emission color/intensity all follow the saved main.tscn.
+const MIN_VOXEL_EMITTER_THICKNESS := 0.28
+const EMITTER_SUFFIX := "BakeGI"
+
+
+static func is_neon_bake_source(source: MeshInstance3D) -> bool:
+    var name := str(source.name)
+    return name.ends_with("Cove") or name.begins_with("EntrySign") \
+            or name.begins_with("BarSign")
+
+
+static func proxy_from_source(source: MeshInstance3D,
+        parent: Node3D) -> MeshInstance3D:
+    if source == null or not source.visible or not (source.mesh is BoxMesh):
+        return null
+    var original := source.material_override as StandardMaterial3D
+    if original == null or not original.emission_enabled:
+        return null
+    var box := source.mesh as BoxMesh
+    var thickness := MIN_VOXEL_EMITTER_THICKNESS
+    var proxy := MeshInstance3D.new()
+    proxy.name = str(source.name) + EMITTER_SUFFIX
+    # Convert via global transforms so rotated/scaled/reparented authored
+    # meshes still give the correct bake positions in the room's local space.
+    proxy.transform = parent.global_transform.affine_inverse() * source.global_transform
     var mesh := BoxMesh.new()
-    mesh.size = size
-    node.mesh = mesh
-    var mat := StandardMaterial3D.new()
-    mat.albedo_color = color
-    mat.emission_enabled = true
-    mat.emission = color
-    mat.emission_energy_multiplier = energy
-    mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-    node.material_override = mat
-    node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-    node.gi_mode = GeometryInstance3D.GI_MODE_STATIC
-    parent.add_child(node)
+    mesh.size = Vector3(
+        maxf(box.size.x, thickness),
+        maxf(box.size.y, thickness),
+        maxf(box.size.z, thickness)
+    )
+    proxy.mesh = mesh
+    var color := original.emission
+    var material := StandardMaterial3D.new()
+    material.albedo_color = color
+    material.emission_enabled = true
+    material.emission = color
+    # Match the original thick-proxy brightness without locking the baker
+    # to hardcoded gold/cyan values; the artist's emission multiplier wins.
+    var gain := 2.8 if str(source.name).ends_with("Cove") else 1.6
+    material.emission_energy_multiplier = original.emission_energy_multiplier * gain
+    material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+    proxy.material_override = material
+    proxy.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+    proxy.gi_mode = GeometryInstance3D.GI_MODE_STATIC
+    parent.add_child(proxy)
+    return proxy
+
+
+static func add_editor_neon_proxies(hall: Node3D,
+        proxy_parent: Node3D) -> int:
+    var atmosphere := hall.get_node_or_null("CasinoAtmosphere") as Node3D
+    if atmosphere == null:
+        return 0
+    var count := 0
+    for child in atmosphere.get_children():
+        var source := child as MeshInstance3D
+        if source == null or not is_neon_bake_source(source):
+            continue
+        if proxy_from_source(source, proxy_parent) == null:
+            continue
+        # The actual strips are thinner than a voxel and would otherwise
+        # be captured twice. This changes only the temporary bake copy.
+        source.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+        count += 1
+    return count
 
 
 func _bake() -> void:
@@ -76,19 +123,11 @@ func _bake() -> void:
     var emitters := Node3D.new()
     emitters.name = "VoxelGIEmittersBakeOnly"
     hall.add_child(emitters)
-    var warm := Color("#e8b76f")
-    _emissive_proxy(emitters, "EastCoveGI", Vector3(5.58, 5.45, 4.6),
-        Vector3(0.30, 0.30, 18.1), warm, 3.2)
-    _emissive_proxy(emitters, "EntryCoveGI", Vector3(-5.58, 5.45, 7.0),
-        Vector3(0.30, 0.30, 13.1), warm, 3.2)
-    _emissive_proxy(emitters, "NorthCoveGI", Vector3(-26, 5.45, -12.58),
-        Vector3(39.0, 0.35, 0.34), warm, 3.2)
-    _emissive_proxy(emitters, "SouthCoveGI", Vector3(-26, 5.45, -0.50),
-        Vector3(39.0, 0.35, 0.34), warm, 3.2)
-    _emissive_proxy(emitters, "BarSignGI", Vector3(-2.33, 4.72, -12.15),
-        Vector3(4.2, 0.38, 0.28), Color("#75d5dd"), 2.7)
-    _emissive_proxy(emitters, "EntrySignGI", Vector3(0, 4.15, 13.50),
-        Vector3(5.4, 0.38, 0.28), warm, 2.7)
+    var proxy_count := add_editor_neon_proxies(hall, emitters)
+    if proxy_count < 4:
+        _fail("No usable editor neon source meshes (CasinoAtmosphere); cannot bake stale positions")
+        return
+    print("VoxelGI: ", proxy_count, " bake-only emitters from saved editor meshes")
     for mesh in hall.find_children("*", "MeshInstance3D", true, false):
         var instance := mesh as MeshInstance3D
         if instance.visible and instance.mesh != null \

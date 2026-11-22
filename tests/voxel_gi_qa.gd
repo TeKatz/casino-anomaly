@@ -32,6 +32,56 @@ func _run() -> void:
         _fail("VoxelGI baking must set light_bake_mode to BAKE_STATIC")
         return
     test_light.free()
+    # The offline baker must track actual edited neon transforms, scales
+    # and materials, not fixed legacy coordinates. This runs without a GPU.
+    var baker_fixture := ROOM.instantiate() as Node3D
+    baker_fixture.set_meta("_baking_room", true)
+    for name in ["Player", "LoopController"]:
+        var obsolete := baker_fixture.get_node_or_null(name)
+        if obsolete != null:
+            obsolete.free()
+    root.add_child(baker_fixture)
+    await process_frame
+    var emitters := Node3D.new()
+    emitters.name = "BakeProxyFixture"
+    baker_fixture.add_child(emitters)
+    var count: int = BAKE_SCRIPT.add_editor_neon_proxies(baker_fixture, emitters)
+    if count < 10 or emitters.get_child_count() != count:
+        _fail("Offline baker did not build all authored neon cove/sign strips")
+        return
+    var bar := baker_fixture.get_node_or_null("CasinoAtmosphere/BarSignTop") as MeshInstance3D
+    var proxy := emitters.get_node_or_null("BarSignTopBakeGI") as MeshInstance3D
+    if bar == null or proxy == null:
+        _fail("Baker omitted the authored MIDNIGHT BAR sign")
+        return
+    if bar.gi_mode != GeometryInstance3D.GI_MODE_DISABLED:
+        _fail("Thin sign is still double-contributing alongside its proxy")
+        return
+    var expected := emitters.global_transform.affine_inverse() * bar.global_transform
+    if not proxy.transform.is_equal_approx(expected):
+        _fail("Baked sign transform does not match the editor-authored scene")
+        return
+    var proxy_mesh := proxy.mesh as BoxMesh
+    if proxy_mesh == null or proxy_mesh.size.z < BAKE_SCRIPT.MIN_VOXEL_EMITTER_THICKNESS:
+        _fail("Baked emitter proxy is too thin for SUBDIV_128")
+        return
+    # Simulate a real user moving the sign in Godot: a new bake must follow.
+    bar.position += Vector3(0.7, 0.14, -0.3)
+    bar.rotation.y += 0.19
+    var shifted := BAKE_SCRIPT.proxy_from_source(bar, emitters) as MeshInstance3D
+    expected = emitters.global_transform.affine_inverse() * bar.global_transform
+    if shifted == null or not shifted.transform.is_equal_approx(expected):
+        _fail("Edited neon transform was not transferred to the bake proxy")
+        return
+    var authored := bar.material_override as StandardMaterial3D
+    var replica := shifted.material_override as StandardMaterial3D
+    if authored == null or replica == null \
+            or not replica.emission.is_equal_approx(authored.emission):
+        _fail("The bake proxy lost its edited neon emission color")
+        return
+    baker_fixture.queue_free()
+    await process_frame
+
     var previous: bool = bool(settings.get_option("voxel_gi"))
     settings.set_option("voxel_gi", true)
     var room := ROOM.instantiate() as Node3D
