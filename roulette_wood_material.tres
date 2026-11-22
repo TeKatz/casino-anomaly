@@ -1,14 +1,14 @@
-[gd_resource type="StandardMaterial3D" load_steps=4 format=3]
+[gd_resource type="StandardMaterial3D" load_steps=4 format=3 uid="uid://vqf47ms2j37l"]
 
-[ext_resource type="Texture2D" path="res://assets/wood_table_001/wood_table_001_diff_2k.jpg" id="1"]
-[ext_resource type="Texture2D" path="res://assets/wood_table_001/wood_table_001_rough_2k.jpg" id="2"]
-[ext_resource type="Texture2D" path="res://assets/wood_table_001/wood_table_001_nor_gl_2k.jpg" id="3"]
+[ext_resource type="Texture2D" uid="uid://cm7yn00qosptk" path="res://assets/wood_table_001/wood_table_001_diff_2k.jpg" id="1"]
+[ext_resource type="Texture2D" uid="uid://6k7lt1awapic" path="res://assets/wood_table_001/wood_table_001_rough_2k.jpg" id="2"]
+[ext_resource type="Texture2D" uid="uid://cq8vhm2uunnu4" path="res://assets/wood_table_001/wood_table_001_nor_gl_2k.jpg" id="3"]
 
 [resource]
 resource_name = "Poly Haven wood_table_001 2K PBR"
-albedo_color = Color(1.0, 1.0, 1.0, 1)
 albedo_texture = ExtResource("1")
-roughness = 0.55
+metallic_specular = 0.0
+roughness = 0.0
 roughness_texture = ExtResource("2")
 normal_enabled = true
 normal_scale = 0.55

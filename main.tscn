@@ -1,12 +1,12 @@
 [gd_scene load_steps=1410 format=4 uid="uid://3qbt7lcevocj"]
 
-[ext_resource type="Script" uid="uid://2cb8gajthh70" path="res://hall.gd" id="1_hall"]
-[ext_resource type="Script" uid="uid://b80bl20jsqir5" path="res://player.gd" id="2_player"]
-[ext_resource type="Script" uid="uid://u327arp55gfv" path="res://model_interior.gd" id="3_models"]
-[ext_resource type="Script" uid="uid://4yi1518yf4mn" path="res://sketchfab_furniture.gd" id="4_sketchfab"]
-[ext_resource type="Script" uid="uid://i4ar7s7uokb2" path="res://casino_atmosphere.gd" id="5_atmosphere"]
+[ext_resource type="Script" uid="uid://bfylaxqpynwux" path="res://hall.gd" id="1_hall"]
+[ext_resource type="Script" uid="uid://ddd0bf0443g2o" path="res://player.gd" id="2_player"]
+[ext_resource type="Script" uid="uid://dvnb7t6pscmxq" path="res://model_interior.gd" id="3_models"]
+[ext_resource type="Script" uid="uid://ch0ewcjnanyr5" path="res://sketchfab_furniture.gd" id="4_sketchfab"]
+[ext_resource type="Script" uid="uid://c1ricgmawlcb" path="res://casino_atmosphere.gd" id="5_atmosphere"]
 [ext_resource type="PackedScene" uid="uid://r8hdylwmbv3k" path="res://models/Chandelier_02/Chandelier_02_1k.gltf" id="5_b17eg"]
-[ext_resource type="Script" uid="uid://kkvw3d4wcyw5" path="res://editor/model_placement_preview.gd" id="6_editor_anchor"]
+[ext_resource type="Script" uid="uid://v635831d646q" path="res://editor/model_placement_preview.gd" id="6_editor_anchor"]
 [ext_resource type="PackedScene" uid="uid://ia0finu8avke" path="res://models/Chandelier_01/Chandelier_01_1k.gltf" id="6_ntx8l"]
 [ext_resource type="Texture2D" uid="uid://b6igd7kkrs3ke" path="res://assets/oak_wood_planks/oak_wood_planks_diff_2k.jpg" id="7_come4"]
 [ext_resource type="PackedScene" uid="uid://b10ctf6trdmqy" path="res://models/bar_chair_round_01/bar_chair_round_01_1k.gltf" id="7_uatky"]
@@ -58,7 +58,7 @@
 [ext_resource type="Texture2D" uid="uid://6l5n6wkfgeqe" path="res://assets/dark_wood/dark_wood_diff_2k.jpg" id="34_uatky"]
 [ext_resource type="Texture2D" uid="uid://jbwo1v5gpj24" path="res://assets/dark_wood/dark_wood_nor_gl_2k.jpg" id="35_rqtf5"]
 [ext_resource type="Texture2D" uid="uid://cqjbwuqih3kb7" path="res://assets/dark_wood/dark_wood_rough_2k.jpg" id="36_1vm84"]
-[ext_resource type="Material" path="res://herringbone_parquet_material.tres" id="37_0cp0l"]
+[ext_resource type="Material" uid="uid://ypqadcec5lg6" path="res://herringbone_parquet_material.tres" id="37_0cp0l"]
 [ext_resource type="Texture2D" uid="uid://bh5d6b1u1soxu" path="res://assets/wood_table_worn/wood_table_worn_diff_2k.jpg" id="37_wu3dr"]
 [ext_resource type="Texture2D" uid="uid://1cfqxumtev1u" path="res://assets/wood_table_worn/wood_table_worn_nor_gl_2k.jpg" id="38_cyx1q"]
 [ext_resource type="Texture2D" uid="uid://bnyjbufx6ul5q" path="res://assets/wood_table_worn/wood_table_worn_rough_2k.jpg" id="39_0dhbp"]
@@ -506,11 +506,10 @@ glow_intensity = 0.23
 glow_bloom = 0.017
 glow_hdr_threshold = 1.2
 fog_enabled = true
-fog_light_color = Color(0.27, 0.235, 0.2, 1)
-fog_light_energy = 0.21
-fog_density = 0.0016
+fog_light_color = Color(0.39356208, 0.34656462, 0.29961655, 1)
+fog_light_energy = 0.04
 volumetric_fog_enabled = true
-volumetric_fog_density = 0.0038
+volumetric_fog_density = 0.0292
 volumetric_fog_albedo = Color(0.61, 0.54, 0.46, 1)
 volumetric_fog_anisotropy = 0.36
 volumetric_fog_length = 50.0
@@ -4753,7 +4752,9 @@ radial_segments = 24
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_i88v0"]
 albedo_color = Color(0.0627451, 0.09019608, 0.1254902, 1)
-roughness = 0.25
+metallic_specular = 0.0
+roughness = 0.0
+emission_energy_multiplier = 7.62
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_0xwly"]
 top_radius = 0.35
@@ -7763,7 +7764,7 @@ omni_range = 4.1
 omni_attenuation = 1.6
 
 [node name="EastCove" type="MeshInstance3D" parent="CasinoAtmosphere"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.88, 5.53, 4.6)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1.1, 5.88, 5.53, 5.663967)
 material_override = SubResource("StandardMaterial3D_pjuso")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_23xmf")
@@ -7775,7 +7776,7 @@ cast_shadow = 0
 mesh = SubResource("BoxMesh_swlj1")
 
 [node name="NorthCove" type="MeshInstance3D" parent="CasinoAtmosphere"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 5.53, -12.88)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25.993305, 5.53, -12.88)
 material_override = SubResource("StandardMaterial3D_pjuso")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_yysqy")
@@ -12675,6 +12676,8 @@ mesh = SubResource("CylinderMesh_6i5fn")
 [node name="BarSignPanel" type="MeshInstance3D" parent="CornerBar"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.3699014, 4.999528, -12.925201)
 material_override = SubResource("StandardMaterial3D_i88v0")
+cast_shadow = 0
+gi_mode = 2
 mesh = SubResource("BoxMesh_0nuox")
 
 [node name="Sign_MIDNIGHT_BAR" type="Label3D" parent="CornerBar"]
@@ -13622,7 +13625,7 @@ distance_fade_length = 9.0
 omni_range = 8.948
 
 [node name="WarmCasinoLamp_09" type="OmniLight3D" parent="Lighting"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.3607187, 4.9637866, -13.02405)
+transform = Transform3D(0.9993687, 0, 0.035527427, 0, 1, 0, -0.035527427, 0, 0.9993687, -2.3607187, 4.9637866, -13.510692)
 light_color = Color(0.7176471, 1, 1, 1)
 light_energy = 0.88
 light_volumetric_fog_energy = 0.36
@@ -13633,7 +13636,7 @@ shadow_bias = 0.05
 omni_range = 5.05
 
 [node name="SpotLight3D" type="SpotLight3D" parent="Lighting"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2514096, -9.980265)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6221484, -9.980265)
 spot_range = 8.8
 spot_attenuation = 1.19
 spot_angle = 93.93
