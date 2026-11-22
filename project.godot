@@ -8,6 +8,7 @@ run/main_scene="res://menu.tscn"
 config/features=PackedStringArray("4.5", "Forward Plus")
 
 [autoload]
+ProfileManager="*res://gameplay/profile_manager.gd"
 LoopState="*res://gameplay/loop_state.gd"
 GameSettings="*res://gameplay/settings.gd"
 AudioDirector="*res://gameplay/audio_director.gd"

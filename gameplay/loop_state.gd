@@ -1,5 +1,5 @@
 extends Node
-## Persistent run state. One local save slot for the first playable prototype.
+## Active profile run state; a ProfileManager owns the five save-slot paths.
 ## Never writes into res:// or the designer-authored casino scene.
 
 const REQUIRED_CORRECT := 12
@@ -16,6 +16,8 @@ var visited_loops := 0
 var mistakes := 0
 var anomaly_id := ""
 var last_anomaly_id := ""
+var round_debugged := false
+var last_verdict: Dictionary = {}
 # Developer overrides are one-shot and intentionally not written to saves.
 var debug_next_round_requested := false
 var debug_next_anomaly_id := ""
@@ -24,7 +26,22 @@ var rng := RandomNumberGenerator.new()
 
 func _ready() -> void:
     rng.randomize()
-    load_run()
+    # A run is loaded only after selecting an explicit player profile.
+
+
+func reset_runtime() -> void:
+    active = false
+    tutorial_done = false
+    finished = false
+    round_ready = false
+    correct_streak = 0
+    visited_loops = 0
+    mistakes = 0
+    anomaly_id = ""
+    last_anomaly_id = ""
+    round_debugged = false
+    last_verdict.clear()
+    debug_clear_next_round()
 
 
 func has_continue() -> bool:
@@ -41,6 +58,8 @@ func start_new_run() -> void:
     mistakes = 0
     anomaly_id = ""
     last_anomaly_id = ""
+    round_debugged = false
+    last_verdict.clear()
     debug_clear_next_round()
     save_run()
 
@@ -60,6 +79,7 @@ func prepare_round(available_anomalies: Array[String]) -> void:
     # random anomaly before this rule was introduced.
     if visited_loops == 0:
         anomaly_id = ""
+        round_debugged = false
         round_ready = true
         save_run()
         return
@@ -68,9 +88,11 @@ func prepare_round(available_anomalies: Array[String]) -> void:
     if debug_next_round_requested:
         # Consume once only AFTER the guaranteed clean first casino hall.
         anomaly_id = debug_next_anomaly_id
+        round_debugged = true
         debug_clear_next_round()
     else:
         anomaly_id = _roll_random_anomaly(available_anomalies)
+        round_debugged = false
     if not anomaly_id.is_empty():
         last_anomaly_id = anomaly_id
     round_ready = true
@@ -107,6 +129,7 @@ func debug_replace_prepared_round(id: String, available_anomalies: Array[String]
     if not _debug_allowed(id, available_anomalies) or not round_ready or visited_loops == 0:
         return false
     anomaly_id = id
+    round_debugged = true
     if not id.is_empty():
         last_anomaly_id = id
     save_run()
@@ -117,6 +140,7 @@ func debug_reroll_prepared_round(available_anomalies: Array[String]) -> bool:
     if not active or not tutorial_done or finished or not round_ready or visited_loops == 0:
         return false
     anomaly_id = _roll_random_anomaly(available_anomalies)
+    round_debugged = true
     if not anomaly_id.is_empty():
         last_anomaly_id = anomaly_id
     save_run()
@@ -126,10 +150,11 @@ func debug_reroll_prepared_round(available_anomalies: Array[String]) -> bool:
 func decide(choose_anomaly: bool) -> Dictionary:
     if not active or not tutorial_done or not round_ready or finished:
         return {"valid": false, "correct": false, "finished": false}
-    # Do not allow a legacy first-room save to bypass the safe baseline.
     if visited_loops == 0:
         anomaly_id = ""
-    var correct := choose_anomaly == not anomaly_id.is_empty()
+    var actual_id := anomaly_id
+    var previous_streak := correct_streak
+    var correct := choose_anomaly == not actual_id.is_empty()
     visited_loops += 1
     if correct:
         correct_streak += 1
@@ -139,17 +164,27 @@ func decide(choose_anomaly: bool) -> Dictionary:
     finished = correct_streak >= REQUIRED_CORRECT
     if finished:
         active = false
+    var verdict := {
+        "valid": true, "correct": correct, "finished": finished,
+        "streak": correct_streak, "previous_streak": previous_streak,
+        "visited": visited_loops, "mistakes": mistakes,
+        "anomaly_id": actual_id, "choice_anomaly": choose_anomaly,
+        "expected_anomaly": not actual_id.is_empty(),
+        "debugged": round_debugged
+    }
     round_ready = false
     anomaly_id = ""
+    round_debugged = false
+    last_verdict = verdict.duplicate(true)
     save_run()
-    return {
-        "valid": true,
-        "correct": correct,
-        "finished": finished,
-        "streak": correct_streak,
-        "visited": visited_loops,
-        "mistakes": mistakes
-    }
+    # Local QA instances may use the same script; only the live autoload
+    # can update the selected player's permanent discovery history.
+    if self == get_node_or_null("/root/LoopState"):
+        var profiles := get_node_or_null("/root/ProfileManager")
+        if profiles != null and profiles.active_slot > 0 \
+                and save_path == profiles.run_path(profiles.active_slot):
+            profiles.record_decision(verdict)
+    return verdict
 
 
 func save_run() -> void:
@@ -164,6 +199,8 @@ func save_run() -> void:
     config.set_value("run", "mistakes", mistakes)
     config.set_value("run", "anomaly_id", anomaly_id)
     config.set_value("run", "last_anomaly_id", last_anomaly_id)
+    config.set_value("run", "round_debugged", round_debugged)
+    config.set_value("run", "last_verdict", last_verdict)
     var error := config.save(save_path)
     if error != OK:
         push_warning("Anomaly run could not be saved: %s" % error)
@@ -184,6 +221,9 @@ func load_run() -> bool:
     mistakes = maxi(0, int(config.get_value("run", "mistakes", 0)))
     anomaly_id = str(config.get_value("run", "anomaly_id", ""))
     last_anomaly_id = str(config.get_value("run", "last_anomaly_id", ""))
+    round_debugged = bool(config.get_value("run", "round_debugged", false))
+    var saved_verdict: Variant = config.get_value("run", "last_verdict", {})
+    last_verdict = saved_verdict if saved_verdict is Dictionary else {}
     debug_clear_next_round()
     if visited_loops == 0 and round_ready:
         anomaly_id = ""
