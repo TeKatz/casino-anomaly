@@ -189,6 +189,8 @@ jobs:
           if ($LASTEXITCODE -ne 0 -or (Get-Content joinery-qa.log -Raw) -notmatch 'Casino Anomaly joinery and PBR texture QA PASS') { throw 'Joinery QA failed' }
           & "$env:GODOT_EDITOR" --headless --path . --script res://tests/prop_visuals_qa.gd 2>&1 | Tee-Object -FilePath prop-visuals-qa.log
           if ($LASTEXITCODE -ne 0 -or (Get-Content prop-visuals-qa.log -Raw) -notmatch 'Casino Anomaly prop visuals and orientations QA PASS') { throw 'Prop visuals QA failed' }
+          & "$env:GODOT_EDITOR" --headless --path . --script res://tests/entrance_slot_cabinet_qa.gd 2>&1 | Tee-Object -FilePath entrance-slot-qa.log
+          if ($LASTEXITCODE -ne 0 -or (Get-Content entrance-slot-qa.log -Raw) -notmatch 'Casino Anomaly entrance slot cabinet QA PASS') { throw 'Entrance slot cabinet QA failed' }
           & "$env:GODOT_EDITOR" --headless --path . --script res://tests/screenshot_layout_qa.gd 2>&1 | Tee-Object -FilePath screenshot-layout-qa.log
           if ($LASTEXITCODE -ne 0 -or (Get-Content screenshot-layout-qa.log -Raw) -notmatch 'Casino Anomaly ten screenshot layout QA PASS') { throw 'Screenshot layout QA failed' }
           & "$env:GODOT_EDITOR" --headless --path . --script res://tests/texture_stability_qa.gd 2>&1 | Tee-Object -FilePath texture-stability-qa.log

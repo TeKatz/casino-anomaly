@@ -143,16 +143,33 @@ func _run() -> void:
         if machine.get_node_or_null("Body_Collision") == null:
             _fail("Slot %s lost its existing body collision" % machine.name)
             return
-        # The separately movable stool must keep its complete collision.
+        # The hidden Sketchfab hero still has its original staging seat.
+        # Visible reworked machines use the upholstered, collidable prefab.
         var stool_group := machine.get_node_or_null("PlayerStool") as Node3D
-        if stool_group == null or stool_group.get_node_or_null("StoolSeat") == null:
+        if stool_group == null:
             _fail("Slot stool group missing")
             return
-        for part in ["StoolSeat_Collision", "StoolStem_Collision", "StoolFoot_Collision"]:
-            var physics: StaticBody3D = stool_group.get_node_or_null(part) as StaticBody3D
-            if physics == null or physics.get_child_count() == 0:
-                _fail("Slot stool has no physics: %s" % part)
+        if machine.has_meta("slot_cabinet_revision"):
+            var stool := stool_group.get_node_or_null("GamingStool") as Node3D
+            var stool_body := stool.get_node_or_null("StoolBody") as StaticBody3D if stool != null else null
+            var stool_shape := stool_body.get_node_or_null("StoolCollision") as CollisionShape3D if stool_body != null else null
+            if stool_shape == null or not (stool_shape.shape is CylinderShape3D):
+                _fail("Finished slot stool lacks real collision geometry")
                 return
+            for new_part in ["BackCover", "CabinetContour_L", "CabinetContour_R",
+                    "ReelInset", "MachineTitle", "Console_Collision", "CoinSlot"]:
+                if machine.get_node_or_null(new_part) == null:
+                    _fail("Reworked slot lost integrated cabinet detail: " + new_part)
+                    return
+        else:
+            if stool_group.get_node_or_null("StoolSeat") == null:
+                _fail("Legacy hidden slot stool missing")
+                return
+            for part in ["StoolSeat_Collision", "StoolStem_Collision", "StoolFoot_Collision"]:
+                var physics: StaticBody3D = stool_group.get_node_or_null(part) as StaticBody3D
+                if physics == null or physics.get_child_count() == 0:
+                    _fail("Legacy slot stool has no physics: %s" % part)
+                    return
         for reel in range(3):
             var glyph: Label3D = machine.get_node_or_null("ReelGlyph_%d" % reel) as Label3D
             if glyph == null or glyph.pixel_size > 0.003 or glyph.font_size > 35:

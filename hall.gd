@@ -3,6 +3,7 @@ extends Node3D
 
 # First room-design pass. Everything is intentionally modular so assets may replace
 # the whitebox furniture later without rebuilding the room or its collision layout.
+const SLOT_CABINET = preload("res://models/casino_furniture/heritage_slot_cabinet.tscn")
 const GAME_TABLE_STOOL = preload("res://models/casino_furniture/gaming_stool.tscn")
 const GAME_TABLE_SURFACE = preload("res://models/casino_furniture/detailed_table_surface.tscn")
 const OAK: StandardMaterial3D = preload("res://floor_material.tres")
@@ -586,148 +587,24 @@ func _carpet_patch(label: String, x0: float, x1: float, z0: float, z1: float) ->
     _floor_quad(label, x0, x1, z0, z1, FLOOR_Y, fabric, 0.95, carpeting)
 
 func _slot_machine(pos: Vector3, yaw: float, accent: Color, number: int) -> void:
-    # Detailed, inexpensive retro cabinet for the nine procedural machines.
-    # Slot_01 is still replaced by the licensed Sketchfab hero in its own
-    # layer; keep this instance's layout, collision and TopGlow contract.
+    # The casino's authored cabinets share one complete modular scene.
+    # Never generate a pile of boxes again for a newly created legacy room.
     var stable_name := "Slot_%02d" % number
     var unit := machines.get_node_or_null(stable_name) as Node3D
-    if unit == null:
-        unit = Node3D.new()
-        unit.name = stable_name
-        unit.position = pos
-        unit.rotation.y = yaw
-        machines.add_child(unit)
-    elif unit.get_child_count() > 0:
-        # A designer can delete the visible cabinet but unintentionally
-        # leave its old collision bodies. Never leave invisible obstacles
-        # where the slot was removed in the editor.
+    if unit != null:
+        # Respect the level designer's saved scale, rotation and locations.
         if not Engine.is_editor_hint() and not unit.has_node("Body"):
             unit.queue_free()
-        return # Respect the saved edit; never recreate missing visuals.
+        return
 
-    var lacquer := _material(Color("#261c21"), 0.33, 0.12)
-    var side_wood := _material(Color("#523226"), 0.61)
-    var ebony := _material(Color("#11171b"), 0.31, 0.22)
-    var brushed_metal := _material(Color("#b4945d"), 0.35, 0.72)
-    var bronze := _material(Color("#6b4d36"), 0.43, 0.61)
-    var screen := _material(Color("#0a1520"), 0.15, 0.10)
-    var reel_back := _material(Color("#e8dfc8"), 0.63)
-    var glass := _material(Color(0.45, 0.72, 0.88, 0.13), 0.09, 0.12)
-    glass.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-    glass.cull_mode = BaseMaterial3D.CULL_DISABLED
-    var accent_glow := _glow(accent, 1.65)
-    var dim_glow := _glow(accent.darkened(0.48), 0.55)
-
-    # Body and original collider still define the same walkable footprint.
-    _box(unit, "Body", Vector3(0, 1.00, 0), Vector3(0.86, 1.86, 0.71), lacquer, true)
-    _box(unit, "FootSocle", Vector3(0, 0.14, 0), Vector3(0.88, 0.20, 0.73), ebony)
-    _box(unit, "SideVeneerLeft", Vector3(-0.424, 1.10, 0.005),
-        Vector3(0.025, 1.57, 0.67), side_wood)
-    _box(unit, "SideVeneerRight", Vector3(0.424, 1.10, 0.005),
-        Vector3(0.025, 1.57, 0.67), side_wood)
-    for side in [-1.0, 1.0]:
-        _box(unit, "VerticalChrome_%s" % ("L" if side < 0.0 else "R"),
-            Vector3(side * 0.384, 1.35, 0.381),
-            Vector3(0.034, 1.17, 0.030), brushed_metal)
-        _box(unit, "LowSideGilt_%s" % ("L" if side < 0.0 else "R"),
-            Vector3(side * 0.345, 0.40, 0.375),
-            Vector3(0.026, 0.46, 0.023), bronze)
-
-    # Rounded marquee above the reel housing, not a tall rectangular box.
-    _box(unit, "MarqueeBody", Vector3(0, 1.92, 0.055),
-        Vector3(0.82, 0.34, 0.70), side_wood)
-    var arch := MeshInstance3D.new()
-    arch.name = "RoundedMarqueeTop"
-    var capsule := CapsuleMesh.new()
-    capsule.radius = 0.145
-    capsule.height = 0.80
-    capsule.radial_segments = 18
-    capsule.rings = 6
-    arch.mesh = capsule
-    arch.position = Vector3(0, 2.092, 0.06)
-    arch.rotation.z = PI * 0.5
-    arch.material_override = side_wood
-    unit.add_child(arch)
-    _box(unit, "MarqueeBrassFrame", Vector3(0, 1.99, 0.425),
-        Vector3(0.735, 0.225, 0.029), brushed_metal)
-    _box(unit, "MarqueeInlay", Vector3(0, 1.99, 0.448),
-        Vector3(0.665, 0.170, 0.018), screen)
-    _text(unit,
-        ["MIDNIGHT", "GOLD RUSH", "LUCKY 7", "NOVA", "ROYAL"][number % 5],
-        Vector3(0, 1.959, 0.465), 0, 24, accent)
-    # This exact node and shared emissive material are used by ambience.gd.
-    _box(unit, "TopGlow", Vector3(0, 2.133, 0.395),
-        Vector3(0.67, 0.045, 0.034), accent_glow)
-
-    # Deep-set, separated mechanical reels under a dim reflective glass.
-    _box(unit, "ReelOuterFrame", Vector3(0, 1.357, 0.383),
-        Vector3(0.730, 0.780, 0.072), brushed_metal)
-    _box(unit, "ReelDarkBezel", Vector3(0, 1.357, 0.432),
-        Vector3(0.685, 0.720, 0.036), ebony)
-    var glyphs := ["7", "BAR", "★", "♦", "♣"]
-    for reel_i in range(3):
-        var x := -0.219 + float(reel_i) * 0.219
-        _box(unit, "ReelWell_%d" % reel_i,
-            Vector3(x, 1.366, 0.457),
-            Vector3(0.198, 0.565, 0.022), reel_back)
-        _box(unit, "ReelDivider_%d" % reel_i,
-            Vector3(x + 0.107, 1.366, 0.470),
-            Vector3(0.013, 0.607, 0.020), bronze)
-        # Fixed-size, individually centered glyphs. The shared _text()
-        # pixel scale made 'BAR' larger than a reel and merged symbols.
-        var symbol: String = glyphs[(number + reel_i * 2) % glyphs.size()]
-        var reel_text := Label3D.new()
-        reel_text.name = "ReelGlyph_%d" % reel_i
-        reel_text.text = symbol
-        reel_text.font_size = 18 if symbol == "BAR" else 35
-        reel_text.pixel_size = 0.0026
-        reel_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-        reel_text.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-        reel_text.modulate = Color("#342e31")
-        reel_text.position = Vector3(x, 1.366, 0.503)
-        unit.add_child(reel_text)
-        _box(unit, "ReelTopMask_%d" % reel_i,
-            Vector3(x, 1.630, 0.479), Vector3(0.193, 0.046, 0.008), ebony)
-        _box(unit, "ReelBottomMask_%d" % reel_i,
-            Vector3(x, 1.105, 0.479), Vector3(0.193, 0.046, 0.008), ebony)
-    _box(unit, "ReelGlass", Vector3(0, 1.357, 0.492),
-        Vector3(0.655, 0.656, 0.008), glass)
-
-    # Distinct control desk, status strip, coin slot and padded player seat.
-    _box(unit, "ButtonDesk", Vector3(0, 0.870, 0.442),
-        Vector3(0.77, 0.150, 0.230), side_wood)
-    _box(unit, "ButtonDeskTop", Vector3(0, 0.959, 0.455),
-        Vector3(0.73, 0.037, 0.215), brushed_metal)
-    for i in range(3):
-        _sphere(unit, "ControlLamp_%d" % i,
-            Vector3(-0.22 + float(i) * 0.22, 0.991, 0.516),
-            0.048, accent_glow if i == 1 else dim_glow)
-    _box(unit, "FrontStatus", Vector3(0, 0.677, 0.362),
-        Vector3(0.63, 0.075, 0.028), dim_glow)
-    _box(unit, "CoinPlate", Vector3(0.165, 0.485, 0.368),
-        Vector3(0.25, 0.145, 0.023), brushed_metal)
-    _box(unit, "CoinSlot", Vector3(0.165, 0.500, 0.385),
-        Vector3(0.140, 0.015, 0.014), ebony)
-    for i in range(5):
-        _box(unit, "SpeakerSlot_%d" % i,
-            Vector3(-0.236 + float(i) * 0.057, 0.465, 0.361),
-            Vector3(0.023, 0.090, 0.014), ebony)
-
-    # This child group keeps ALL stool meshes and collision volumes together.
-    # In Godot: move SlotMachines/Slot_XX/PlayerStool independently of the slot.
-    var stool := Node3D.new()
-    stool.name = "PlayerStool"
-    stool.position = Vector3(0, 0, 1.24)
-    unit.add_child(stool)
-    _cylinder(stool, "StoolStem", Vector3(0, 0.315, 0),
-        0.056, 0.49, bronze, true, 16)
-    _cylinder(stool, "StoolFoot", Vector3(0, 0.077, 0),
-        0.255, 0.050, brushed_metal, true, 20)
-    _cylinder(stool, "StoolSeatRim", Vector3(0, 0.632, 0),
-        0.306, 0.067, brushed_metal, false, 24)
-    _cylinder(stool, "StoolSeat", Vector3(0, 0.677, 0),
-        0.283, 0.107, velvet, true, 24)
-
+    unit = SLOT_CABINET.instantiate() as Node3D
+    unit.name = stable_name
+    unit.position = pos
+    unit.rotation.y = yaw
+    unit.set("accent_variant", number % 4)
+    unit.set("cabinet_title", ["MIDNIGHT", "GOLD RUSH", "LUCKY 7", "NOVA", "ROYAL"][number % 5])
+    unit.set("reel_seed", number % 5)
+    machines.add_child(unit)
 
 func _make_slots() -> void:
     var colors := [
