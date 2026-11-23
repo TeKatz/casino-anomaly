@@ -207,7 +207,7 @@ func _select_slot(slot: int) -> void:
     var profiles := get_node_or_null("/root/ProfileManager")
     if profiles == null:
         return
-    var occupied := profiles.profile_exists(slot)
+    var occupied: bool = profiles.profile_exists(slot)
     if occupied and not profiles.select_profile(slot):
         status.text = _word("Profil konnte nicht geöffnet werden.", "Could not open profile.")
         return
