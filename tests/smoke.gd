@@ -74,14 +74,14 @@ func _run_smoke() -> void:
         quit(1)
         return
     var models: Node3D = world.get_node_or_null("ModelInteriors") as Node3D
-    if models == null or models.get("successful_model_ids").size() != 15 or int(models.get("placed_model_count")) < 40:
-        push_error("All 10 requested Poly Haven models must be placed in the room")
+    if models == null or models.get("successful_model_ids").size() != 14 or int(models.get("placed_model_count")) < 40:
+        push_error("The retained Poly Haven donor furniture and bespoke bar bottles must be present")
         quit(1)
         return
     for asset_id in [
         "Chandelier_02", "Chandelier_01", "brass_candleholders",
         "marble_bust_01", "fancy_picture_frame_01",
-        "security_camera_01", "wine_bottles_01",
+        "security_camera_01",
         "bar_chair_round_01", "CoffeeCart_01", "modern_wooden_cabinet",
         "round_wooden_table_01", "sofa_02", "chess_set",
         "concrete_cat_statue", "horse_statue_01"
@@ -119,7 +119,7 @@ func _run_smoke() -> void:
     var count_busts := 0
     var count_stools := 0
     var count_candles := 0
-    var wine_on_shelf := false
+    var legacy_wine_on_shelf := false
     var coffee_correct := false
     var cabinet_correct := false
     for item in interior.get_children():
@@ -146,7 +146,7 @@ func _run_smoke() -> void:
             quit(1)
             return
         elif placement == "ShelfWine":
-            wine_on_shelf = true
+            legacy_wine_on_shelf = true
         elif placement == "SingleBrassCandleholder":
             count_candles += 1
             var actual_candles := 0
@@ -168,9 +168,15 @@ func _run_smoke() -> void:
                 var shape_node: CollisionShape3D = body.get_node_or_null("ModelCollisionShape") as CollisionShape3D
                 var shape: BoxShape3D = shape_node.shape as BoxShape3D if shape_node != null else null
                 cabinet_correct = item.position.y >= 0.24 and shape != null and shape.size.x >= 3.0
-    if count_busts != 2 or count_stools != 10 or count_candles != 3 or not wine_on_shelf \
-        or not coffee_correct or not cabinet_correct or interior.get_node_or_null("BarCabinetPlinth") == null:
-        push_error("Interior QA failed: busts=%d stools=%d candles=%d shelfWine=%s coffee=%s cabinet=%s plinth=%s" % [count_busts, count_stools, count_candles, str(wine_on_shelf), str(coffee_correct), str(cabinet_correct), str(interior.get_node_or_null("BarCabinetPlinth") != null)])
+    var signature_count := 0
+    for item in bar.get_children():
+        if str(item.get_meta("prop_family", "")) == "signature_bar_bottle":
+            signature_count += 1
+    if count_busts != 2 or count_stools != 10 or count_candles != 3 \
+            or signature_count != 39 or legacy_wine_on_shelf \
+            or not coffee_correct or not cabinet_correct \
+            or interior.get_node_or_null("BarCabinetPlinth") == null:
+        push_error("Interior QA failed: busts=%d stools=%d candles=%d signatureBottles=%d legacyWine=%s coffee=%s cabinet=%s plinth=%s" % [count_busts, count_stools, count_candles, signature_count, str(legacy_wine_on_shelf), str(coffee_correct), str(cabinet_correct), str(interior.get_node_or_null("BarCabinetPlinth") != null)])
         quit(1)
         return
 
