@@ -3,17 +3,10 @@ extends SceneTree
 ## The optional imported retro hero can be removed by the artist.
 ## Positions, collisions and independent TopGlow materials must remain stable.
 
-const POSITIONS := {
-    "Slot_02": Vector2(4.85, 8.2),
-    "Slot_03": Vector2(4.85, 5.8),
-    "Slot_04": Vector2(4.85, 3.0),
-    "Slot_05": Vector2(4.85, 0.2),
-    "Slot_06": Vector2(-4.82, 10.1),
-    "Slot_07": Vector2(-4.82, 7.6),
-    "Slot_08": Vector2(-4.82, 4.6),
-    "Slot_09": Vector2(-4.82, 1.9),
-    "Slot_10": Vector2(4.65, 11.85)
-}
+const CABINET_NAMES := [
+    "Slot_02", "Slot_03", "Slot_04", "Slot_05", "Slot_06",
+    "Slot_07", "Slot_08", "Slot_09", "Slot_10"
+]
 
 
 func _initialize() -> void:
@@ -32,13 +25,24 @@ func _run() -> void:
         _fail("Cabinet source or authored casino room missing")
         return
     var world := packed.instantiate() as Node3D
-    root.add_child(world)
-    await process_frame
-    await process_frame
     var group := world.get_node_or_null("SlotMachines") as Node3D
     if group == null:
         _fail("No authored slot machines")
         return
+    # Snapshot the saved artist transforms BEFORE _ready() and room streaming
+    # have any chance to move/replace cabinets. A deliberate editor move of
+    # Slot_10 (or any other cabinet) must not break this regression.
+    var authored_transforms: Dictionary = {}
+    for name in CABINET_NAMES:
+        var saved := group.get_node_or_null(name) as Node3D
+        if saved != null and saved.visible:
+            authored_transforms[name] = saved.transform
+    if authored_transforms.is_empty():
+        _fail("Casino has no visible reworked entrance cabinets")
+        return
+    root.add_child(world)
+    await process_frame
+    await process_frame
     # The old Slot_01 is a hidden procedural placeholder. Its StaticBody3D
     # must NOT survive runtime loading, irrespective of whether the artist
     # kept or removed the separately imported retro hero.
@@ -47,14 +51,14 @@ func _run() -> void:
         return
 
     var glow_ids := {}
-    for name in POSITIONS:
+    for name in authored_transforms:
         var slot := group.get_node_or_null(name) as Node3D
         if slot == null or not slot.is_visible_in_tree() or not slot.has_meta("slot_cabinet_revision"):
-            _fail("Placeholder still visible or cabinet missing: " + name)
+            _fail("Authored cabinet disappeared or reverted to a placeholder: " + name)
             return
-        var at: Vector2 = POSITIONS[name]
-        if Vector2(slot.position.x, slot.position.z).distance_to(at) > 0.001                 or absf(slot.position.y) > 0.001:
-            _fail("Original location changed: " + name)
+        var saved_transform: Transform3D = authored_transforms[name]
+        if not slot.transform.is_equal_approx(saved_transform):
+            _fail("Runtime overwrote the saved editor transform: " + name)
             return
         for detail in ["Body", "FootSocle", "BackCover", "WoodInlay_L",
                 "WoodInlay_R", "CabinetContour_L", "CabinetContour_R",
