@@ -166,6 +166,7 @@ func _make_imported_models_editable() -> void:
             if marker.has_method("bake_editable_model") \
                     and bool(marker.call("bake_editable_model", root)):
                 converted += 1
+    _prepare_saved_furniture(root)
     EditorInterface.mark_scene_as_unsaved()
     print("Casino: Sketchfab furniture and ", converted,
         " Poly Haven instances are now editable. Save main.tscn (Ctrl+S).")
@@ -201,10 +202,21 @@ func _refresh_after_import() -> void:
     call_deferred("_refresh_edited_preview")
 
 
+func _prepare_saved_furniture(root: Node) -> void:
+    if root == null or root.scene_file_path != "res://main.tscn":
+        return
+    var layer := root.get_node_or_null("SketchfabFurniture")
+    if layer != null and layer.has_method("prepare_authored_furniture_for_editor"):
+        if bool(layer.call("prepare_authored_furniture_for_editor", root)):
+            EditorInterface.mark_scene_as_unsaved()
+            print("Casino: table collision/editability migration applied. Save main.tscn.")
+
+
 func _refresh_edited_preview() -> void:
     var root := EditorInterface.get_edited_scene_root()
     if root == null:
         return
+    _prepare_saved_furniture(root)
     var layer := root.get_node_or_null("SketchfabFurniture")
     if layer != null and layer.has_method("_refresh_editor_preview"):
         layer.call_deferred("_refresh_editor_preview")
@@ -232,6 +244,7 @@ func _on_scene_saved(_filepath: String) -> void:
 func _on_scene_changed(scene_root: Node) -> void:
     if scene_root == null:
         return
+    _prepare_saved_furniture(scene_root)
     var layer := scene_root.get_node_or_null("SketchfabFurniture")
     if layer != null and layer.has_method("_refresh_editor_preview"):
         # Rebuild if we switched away during a pending save.

@@ -24,6 +24,8 @@ var _walk_blend: float = 0.0
 var _sprint_toggled := false
 var _footstep_distance := 0.80
 var interaction_locked := false
+var collision_diagnostics := false
+var _reported_contacts: Dictionary = {}
 var _options: Variant = null
 
 func _ready() -> void:
@@ -136,7 +138,42 @@ func _physics_process(delta: float) -> void:
     velocity.z = move_toward(velocity.z, target.z, acceleration * delta)
     var before := global_position
     move_and_slide()
+    if collision_diagnostics:
+        _report_collision_contacts()
     _update_footsteps(global_position.distance_to(before), sprint)
+
+
+func set_collision_diagnostics(enabled: bool) -> void:
+    collision_diagnostics = enabled
+    _reported_contacts.clear()
+    print("[Collision Debug] ", "ON" if enabled else "OFF")
+
+
+func _report_collision_contacts() -> void:
+    var current: Dictionary = {}
+    for i in range(get_slide_collision_count()):
+        var hit := get_slide_collision(i)
+        # Ignore ordinary floor and ceiling contacts.
+        if absf(hit.get_normal().y) >= 0.5:
+            continue
+        var collider := hit.get_collider()
+        if not is_instance_valid(collider):
+            continue
+        var index := hit.get_collider_shape_index()
+        var key := "%s:%d" % [str(hit.get_collider_id()), index]
+        current[key] = true
+        if _reported_contacts.has(key):
+            continue
+        var path := str(collider.get_path()) if collider is Node else str(collider)
+        var shape_description := str(index)
+        if collider is CollisionObject3D:
+            var owner_id: int = collider.shape_find_owner(index)
+            var shape_node := collider.shape_owner_get_owner(owner_id) as CollisionShape3D
+            if shape_node != null and shape_node.shape != null:
+                shape_description = "%s (%s)" % [str(shape_node.get_path()), shape_node.shape.get_class()]
+        print("[Collision Debug] body=", path, " shape=", shape_description,
+            " point=", hit.get_position(), " normal=", hit.get_normal())
+    _reported_contacts = current
 
 
 func classify_casino_surface(local: Vector3) -> String:

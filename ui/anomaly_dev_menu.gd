@@ -45,6 +45,7 @@ var listing: VBoxContainer
 var normal_button: Button
 var random_button: Button
 var close_button: Button
+var collision_toggle: CheckButton
 
 
 func _ready() -> void:
@@ -148,6 +149,10 @@ func _build_ui() -> void:
     stack.add_child(actions)
     normal_button = _action(actions, _force_normal)
     random_button = _action(actions, _restore_random)
+    collision_toggle = CheckButton.new()
+    collision_toggle.name = "CollisionDiagnostics"
+    collision_toggle.toggled.connect(_toggle_collision_diagnostics)
+    stack.add_child(collision_toggle)
     close_button = Button.new()
     close_button.custom_minimum_size.y = 37
     close_button.pressed.connect(_close_menu)
@@ -218,6 +223,12 @@ func _exit_tree() -> void:
         get_tree().paused = false
 
 
+func _toggle_collision_diagnostics(enabled: bool) -> void:
+    var player := get_parent()
+    if player != null and player.has_method("set_collision_diagnostics"):
+        player.call("set_collision_diagnostics", enabled)
+
+
 func _refresh() -> void:
     title_label.text = _word("title")
     subtitle_label.text = _word("subtitle")
@@ -226,6 +237,8 @@ func _refresh() -> void:
     normal_button.text = _word("force_normal")
     random_button.text = _word("restore_random")
     close_button.text = _word("close")
+    collision_toggle.text = "Kollisionsdiagnose (Godot-Konsole)" if _lang() == "de" else "Collision diagnostics (Godot console)"
+    collision_toggle.set_pressed_no_signal(bool(get_parent().get("collision_diagnostics")))
     _refresh_status()
     _rebuild_catalog()
 

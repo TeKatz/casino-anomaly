@@ -243,6 +243,8 @@ func _spawn(slug: String, label: String, spot: Vector3, max_width: float,
         shape.shape = box
         body.add_child(shape)
         wrapper.add_child(body)
+        if slug == "blackjack_table":
+            _fit_blackjack_collision(wrapper)
     return wrapper
 
 func _finish(color: Color, roughness: float = 0.72, metallic: float = 0.0) -> StandardMaterial3D:
@@ -309,6 +311,81 @@ func _roulette_table(spot: Vector3) -> Node3D:
             collision.free()
     return table
 
+# The old rectangular plate blocks empty corners around the curved felt.
+# Build a static triangle collider in wrapper-local coordinates, using the
+# imported meshes (including their nested transforms and normalization).
+# Only migrate the legacy box, preserving subsequent artist edits.
+func _fit_blackjack_collision(wrapper: Node3D) -> bool:
+    var body := wrapper.get_node_or_null("FurnitureCollider") as StaticBody3D
+    if body == null or body.get_child_count() == 0:
+        return false
+    var collider := body.get_child(0) as CollisionShape3D
+    if collider == null or not (collider.shape is BoxShape3D):
+        return false
+    var faces := PackedVector3Array()
+    var inverse := wrapper.global_transform.affine_inverse()
+    for node in wrapper.find_children("*", "MeshInstance3D", true, false):
+        var part := node as MeshInstance3D
+        if part.mesh == null:
+            continue
+        var local_transform := inverse * part.global_transform
+        for vertex in part.mesh.get_faces():
+            faces.append(local_transform * vertex)
+    if faces.size() < 3:
+        push_warning("Casino: Blackjack mesh has no collision triangles; keeping old plate.")
+        return false
+    var fitted := ConcavePolygonShape3D.new()
+    fitted.set_faces(faces)
+    fitted.backface_collision = true
+    fitted.margin = 0.001
+    body.transform = Transform3D.IDENTITY
+    collider.transform = Transform3D.IDENTITY
+    collider.shape = fitted
+    return true
+
+
+# Keep the saved placeholder nodes as layout references, but never let
+# invisible replaced furniture (including its stools) participate in physics.
+func _disable_hidden_table_collisions(hall: Node3D) -> bool:
+    var changed := false
+    var tables := hall.get_node_or_null("GamingTables")
+    if tables == null:
+        return false
+    for child in tables.get_children():
+        var table := child as Node3D
+        if table == null or table.visible:
+            continue
+        var label := str(table.name)
+        if not (label.begins_with("Roulette") or label.begins_with("Blackjack")):
+            continue
+        for node in table.find_children("*", "CollisionShape3D", true, false):
+            var shape := node as CollisionShape3D
+            if not shape.disabled:
+                shape.disabled = true
+                changed = true
+    return changed
+
+
+# Called by the existing editor plugin for the saved main scene.
+# Editable instance flags allow per-table overrides without unpacking
+# the reusable premium table or overwriting artist transforms.
+func prepare_authored_furniture_for_editor(scene_root: Node3D) -> bool:
+    if not Engine.is_editor_hint() or not has_node(AUTHORED_GROUP):
+        return false
+    var changed := _disable_hidden_table_collisions(scene_root)
+    var saved := get_node(AUTHORED_GROUP)
+    for child in saved.get_children():
+        if str(child.get_meta("furniture_kind", "")) == "roulette_table" \
+                and not child.scene_file_path.is_empty():
+            if not scene_root.is_editable_instance(child):
+                scene_root.set_editable_instance(child, true)
+                changed = true
+        elif str(child.get_meta("source_asset", "")) == "blackjack_table":
+            if _fit_blackjack_collision(child as Node3D):
+                changed = true
+    return changed
+
+
 func _populate() -> void:
     var hall: Node3D = get_parent() as Node3D
     if hall == null:
@@ -343,6 +420,10 @@ func _populate() -> void:
             var hidden_source := hall.get_node_or_null("SlotMachines/Slot_01") as Node3D
             if hidden_source != null and not hidden_source.visible:
                 hidden_source.queue_free()
+            _disable_hidden_table_collisions(hall)
+            for child in saved.get_children():
+                if str(child.get_meta("source_asset", "")) == "blackjack_table":
+                    _fit_blackjack_collision(child as Node3D)
             furniture_finalized.emit()
         return
     var slots: Node3D = hall.get_node_or_null("SlotMachines") as Node3D

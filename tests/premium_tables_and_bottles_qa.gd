@@ -61,13 +61,20 @@ func _run() -> void:
     var blackjack := imported.get_node_or_null("SketchfabBlackjack") as Node3D
     var body := blackjack.get_node_or_null("FurnitureCollider") as StaticBody3D if blackjack != null else null
     var collider := body.get_child(0) as CollisionShape3D if body != null and body.get_child_count() > 0 else null
-    if collider == null or not (collider.shape is BoxShape3D):
-        _fail("Blackjack lost its existing gameplay collision")
+    if collider == null or not (collider.shape is ConcavePolygonShape3D):
+        _fail("Blackjack must use fitted mesh collision, not a rectangular plate")
         return
-    var box := collider.shape as BoxShape3D
-    if box.size.y > 0.20 or box.size.x > 2.51 or box.size.z > 1.55             or box.margin > 0.025 or body.position.y < 0.7:
-        _fail("Blackjack still has an oversized all-height bounding cube")
+    var fitted := collider.shape as ConcavePolygonShape3D
+    if fitted.get_faces().size() < 3 or collider.disabled:
+        _fail("Blackjack fitted collision is empty or disabled")
         return
+    var gaming := world.get_node_or_null("GamingTables")
+    for table in gaming.get_children():
+        if table is Node3D and not table.visible and (str(table.name).begins_with("Roulette") or str(table.name).begins_with("Blackjack")):
+            for shape in table.find_children("*", "CollisionShape3D", true, false):
+                if not shape.disabled:
+                    _fail("Hidden table still has an active collider: " + str(shape.get_path()))
+                    return
 
     var bar := world.get_node_or_null("CornerBar") as Node3D
     if bar == null:
