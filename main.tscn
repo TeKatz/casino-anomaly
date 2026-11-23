@@ -1,4 +1,4 @@
-[gd_scene load_steps=695 format=4 uid="uid://3qbt7lcevocj"]
+[gd_scene load_steps=597 format=4 uid="uid://3qbt7lcevocj"]
 
 [ext_resource type="Script" uid="uid://bfylaxqpynwux" path="res://hall.gd" id="1_hall"]
 [ext_resource type="Script" uid="uid://ddd0bf0443g2o" path="res://player.gd" id="2_player"]
@@ -86,6 +86,7 @@
 [ext_resource type="PackedScene" uid="uid://bml51phw77vhx" path="res://models/playing_cards/individual/card_49.gltf" id="92_pc49"]
 [ext_resource type="PackedScene" uid="uid://1bdikfualwci" path="res://models/playing_cards/individual/card_51.gltf" id="92_pc51"]
 [ext_resource type="PackedScene" uid="uid://dqegnqhrl275p" path="res://models/sketchfab_monstera/scene.gltf" id="101_monstera"]
+[ext_resource type="PackedScene" path="res://models/casino_furniture/premium_roulette_table.tscn" id="112_premium_roulette"]
 [ext_resource type="PackedScene" path="res://models/casino_furniture/heritage_slot_cabinet.tscn" id="110_heritage_slot"]
 [ext_resource type="PackedScene" path="res://models/casino_furniture/gaming_stool.tscn" id="110_stool"]
 [ext_resource type="PackedScene" path="res://models/casino_furniture/detailed_table_surface.tscn" id="111_table"]
@@ -162,348 +163,9 @@ roughness = 0.8
 [sub_resource type="BoxMesh" id="BoxMesh_inymm"]
 size = Vector3(1.79, 0.025, 1.59)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jcxqu"]
-resource_name = "Poly Haven wood_table_001 2K PBR"
-albedo_texture = ExtResource("23_f1p13")
-roughness = 0.55
-roughness_texture = ExtResource("25_ovcoh")
-normal_enabled = true
-normal_scale = 0.55
-normal_texture = ExtResource("24_4obbf")
-uv1_scale = Vector3(2.15, 1, 1.35)
-texture_filter = 5
-
-[sub_resource type="BoxMesh" id="BoxMesh_0arob"]
-size = Vector3(3.5, 0.18, 1.62)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_dij0e"]
-size = Vector3(3.5, 0.18, 1.62)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_k1udn"]
-albedo_color = Color(0.76862746, 0.627451, 0.36078432, 1)
-metallic = 0.62
-roughness = 0.34
-
-[sub_resource type="BoxMesh" id="BoxMesh_wat4s"]
-size = Vector3(3.54, 0.042, 1.66)
-
-[sub_resource type="BoxMesh" id="BoxMesh_m74q3"]
-size = Vector3(1.47, 0.015, 1.43)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_am8a1"]
-albedo_color = Color(0.09019608, 0.32941177, 0.26666668, 1)
-roughness = 0.96
-
-[sub_resource type="BoxMesh" id="BoxMesh_8dc3g"]
-size = Vector3(1.94, 0.017, 1.37)
-
-[sub_resource type="BoxMesh" id="BoxMesh_htgcl"]
-size = Vector3(0.17, 0.79, 0.17)
-
-[sub_resource type="BoxMesh" id="BoxMesh_f3y11"]
-size = Vector3(0.22, 0.12, 0.22)
-
-[sub_resource type="BoxMesh" id="BoxMesh_u81y6"]
-size = Vector3(0.17, 0.79, 0.17)
-
-[sub_resource type="BoxMesh" id="BoxMesh_rt5wr"]
-size = Vector3(0.22, 0.12, 0.22)
-
-[sub_resource type="BoxMesh" id="BoxMesh_vjgyh"]
-size = Vector3(0.17, 0.79, 0.17)
-
-[sub_resource type="BoxMesh" id="BoxMesh_asu84"]
-size = Vector3(0.22, 0.12, 0.22)
-
-[sub_resource type="BoxMesh" id="BoxMesh_qwt6e"]
-size = Vector3(0.17, 0.79, 0.17)
-
-[sub_resource type="BoxMesh" id="BoxMesh_tttfs"]
-size = Vector3(0.22, 0.12, 0.22)
-
-[sub_resource type="BoxMesh" id="BoxMesh_g5xqc"]
-size = Vector3(3.36, 0.095, 0.09)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7mmqq"]
-albedo_color = Color(0.8980392, 0.827451, 0.68235296, 1)
-roughness = 0.8
-
-[sub_resource type="BoxMesh" id="BoxMesh_3exxq"]
-size = Vector3(0.012, 0.007, 1.15)
-
-[sub_resource type="BoxMesh" id="BoxMesh_bmvma"]
-size = Vector3(0.012, 0.007, 1.15)
-
-[sub_resource type="BoxMesh" id="BoxMesh_shlp4"]
-size = Vector3(0.012, 0.007, 1.15)
-
-[sub_resource type="BoxMesh" id="BoxMesh_86lig"]
-size = Vector3(0.012, 0.007, 1.15)
-
-[sub_resource type="BoxMesh" id="BoxMesh_qe8ju"]
-size = Vector3(0.012, 0.007, 1.15)
-
-[sub_resource type="BoxMesh" id="BoxMesh_bnk2o"]
-size = Vector3(1.87, 0.007, 0.012)
-
-[sub_resource type="BoxMesh" id="BoxMesh_nf4f2"]
-size = Vector3(1.87, 0.007, 0.012)
-
-[sub_resource type="BoxMesh" id="BoxMesh_t5kpo"]
-size = Vector3(1.87, 0.007, 0.012)
-
-[sub_resource type="BoxMesh" id="BoxMesh_37eu1"]
-size = Vector3(1.87, 0.007, 0.012)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0wkqm"]
-albedo_color = Color(0.6117647, 0.18039216, 0.1882353, 1)
-roughness = 0.9
-
-[sub_resource type="BoxMesh" id="BoxMesh_ve5sr"]
-size = Vector3(0.27, 0.007, 0.22)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5s44m"]
-albedo_color = Color(0.14117648, 0.14901961, 0.16078432, 1)
-roughness = 0.89
-
-[sub_resource type="BoxMesh" id="BoxMesh_ibca3"]
-size = Vector3(0.27, 0.007, 0.22)
-
-[sub_resource type="BoxMesh" id="BoxMesh_1slqb"]
-size = Vector3(0.27, 0.007, 0.22)
-
-[sub_resource type="BoxMesh" id="BoxMesh_y0aao"]
-size = Vector3(0.27, 0.007, 0.22)
-
 [sub_resource type="BoxShape3D" id="BoxShape3D_wm5rm"]
-margin = 0.326
-size = Vector3(2.6, 0.9038913, 1.6544404)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fdpg8"]
-resource_name = "Poly Haven wood_table_001 2K PBR"
-albedo_texture = ExtResource("23_f1p13")
-roughness = 0.55
-roughness_texture = ExtResource("25_ovcoh")
-normal_enabled = true
-normal_scale = 0.55
-normal_texture = ExtResource("24_4obbf")
-uv1_scale = Vector3(2.15, 1, 1.35)
-texture_filter = 5
-
-[sub_resource type="BoxMesh" id="BoxMesh_rpys8"]
-size = Vector3(3.5, 0.18, 1.62)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_6gr3f"]
-size = Vector3(3.5, 0.18, 1.62)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6seew"]
-albedo_color = Color(0.76862746, 0.627451, 0.36078432, 1)
-metallic = 0.62
-roughness = 0.34
-
-[sub_resource type="BoxMesh" id="BoxMesh_3ox4t"]
-size = Vector3(3.54, 0.042, 1.66)
-
-[sub_resource type="BoxMesh" id="BoxMesh_4fmho"]
-size = Vector3(1.47, 0.015, 1.43)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aivy6"]
-albedo_color = Color(0.09019608, 0.32941177, 0.26666668, 1)
-roughness = 0.96
-
-[sub_resource type="BoxMesh" id="BoxMesh_bil4k"]
-size = Vector3(1.94, 0.017, 1.37)
-
-[sub_resource type="BoxMesh" id="BoxMesh_hnquj"]
-size = Vector3(0.17, 0.79, 0.17)
-
-[sub_resource type="BoxMesh" id="BoxMesh_nycv6"]
-size = Vector3(0.22, 0.12, 0.22)
-
-[sub_resource type="BoxMesh" id="BoxMesh_arf1h"]
-size = Vector3(0.17, 0.79, 0.17)
-
-[sub_resource type="BoxMesh" id="BoxMesh_gkfde"]
-size = Vector3(0.22, 0.12, 0.22)
-
-[sub_resource type="BoxMesh" id="BoxMesh_4qxq8"]
-size = Vector3(0.17, 0.79, 0.17)
-
-[sub_resource type="BoxMesh" id="BoxMesh_oy6td"]
-size = Vector3(0.22, 0.12, 0.22)
-
-[sub_resource type="BoxMesh" id="BoxMesh_p5pln"]
-size = Vector3(0.17, 0.79, 0.17)
-
-[sub_resource type="BoxMesh" id="BoxMesh_mldrc"]
-size = Vector3(0.22, 0.12, 0.22)
-
-[sub_resource type="BoxMesh" id="BoxMesh_xxpw2"]
-size = Vector3(3.36, 0.095, 0.09)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wghq8"]
-albedo_color = Color(0.8980392, 0.827451, 0.68235296, 1)
-roughness = 0.8
-
-[sub_resource type="BoxMesh" id="BoxMesh_k08w7"]
-size = Vector3(0.012, 0.007, 1.15)
-
-[sub_resource type="BoxMesh" id="BoxMesh_hp4ct"]
-size = Vector3(0.012, 0.007, 1.15)
-
-[sub_resource type="BoxMesh" id="BoxMesh_lxb2r"]
-size = Vector3(0.012, 0.007, 1.15)
-
-[sub_resource type="BoxMesh" id="BoxMesh_lv1ug"]
-size = Vector3(0.012, 0.007, 1.15)
-
-[sub_resource type="BoxMesh" id="BoxMesh_6kttw"]
-size = Vector3(0.012, 0.007, 1.15)
-
-[sub_resource type="BoxMesh" id="BoxMesh_uor2d"]
-size = Vector3(1.87, 0.007, 0.012)
-
-[sub_resource type="BoxMesh" id="BoxMesh_j6smb"]
-size = Vector3(1.87, 0.007, 0.012)
-
-[sub_resource type="BoxMesh" id="BoxMesh_xp7cv"]
-size = Vector3(1.87, 0.007, 0.012)
-
-[sub_resource type="BoxMesh" id="BoxMesh_ly5pk"]
-size = Vector3(1.87, 0.007, 0.012)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_s0u5n"]
-albedo_color = Color(0.6117647, 0.18039216, 0.1882353, 1)
-roughness = 0.9
-
-[sub_resource type="BoxMesh" id="BoxMesh_8lrju"]
-size = Vector3(0.27, 0.007, 0.22)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5kegx"]
-albedo_color = Color(0.14117648, 0.14901961, 0.16078432, 1)
-roughness = 0.89
-
-[sub_resource type="BoxMesh" id="BoxMesh_afgqn"]
-size = Vector3(0.27, 0.007, 0.22)
-
-[sub_resource type="BoxMesh" id="BoxMesh_jegnu"]
-size = Vector3(0.27, 0.007, 0.22)
-
-[sub_resource type="BoxMesh" id="BoxMesh_31js7"]
-size = Vector3(0.27, 0.007, 0.22)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_i0xsp"]
-resource_name = "Poly Haven wood_table_001 2K PBR"
-albedo_texture = ExtResource("23_f1p13")
-roughness = 0.55
-roughness_texture = ExtResource("25_ovcoh")
-normal_enabled = true
-normal_scale = 0.55
-normal_texture = ExtResource("24_4obbf")
-uv1_scale = Vector3(2.15, 1, 1.35)
-texture_filter = 5
-
-[sub_resource type="BoxMesh" id="BoxMesh_kll2q"]
-size = Vector3(3.5, 0.18, 1.62)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_ft875"]
-size = Vector3(3.5, 0.18, 1.62)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rhlye"]
-albedo_color = Color(0.76862746, 0.627451, 0.36078432, 1)
-metallic = 0.62
-roughness = 0.34
-
-[sub_resource type="BoxMesh" id="BoxMesh_pqvsh"]
-size = Vector3(3.54, 0.042, 1.66)
-
-[sub_resource type="BoxMesh" id="BoxMesh_mo8hc"]
-size = Vector3(1.47, 0.015, 1.43)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gbg58"]
-albedo_color = Color(0.09019608, 0.32941177, 0.26666668, 1)
-roughness = 0.96
-
-[sub_resource type="BoxMesh" id="BoxMesh_le5wj"]
-size = Vector3(1.94, 0.017, 1.37)
-
-[sub_resource type="BoxMesh" id="BoxMesh_2um21"]
-size = Vector3(0.17, 0.79, 0.17)
-
-[sub_resource type="BoxMesh" id="BoxMesh_w7qqv"]
-size = Vector3(0.22, 0.12, 0.22)
-
-[sub_resource type="BoxMesh" id="BoxMesh_h0sjo"]
-size = Vector3(0.17, 0.79, 0.17)
-
-[sub_resource type="BoxMesh" id="BoxMesh_gfi32"]
-size = Vector3(0.22, 0.12, 0.22)
-
-[sub_resource type="BoxMesh" id="BoxMesh_trkoe"]
-size = Vector3(0.17, 0.79, 0.17)
-
-[sub_resource type="BoxMesh" id="BoxMesh_ycw8e"]
-size = Vector3(0.22, 0.12, 0.22)
-
-[sub_resource type="BoxMesh" id="BoxMesh_2gd4m"]
-size = Vector3(0.17, 0.79, 0.17)
-
-[sub_resource type="BoxMesh" id="BoxMesh_lix4w"]
-size = Vector3(0.22, 0.12, 0.22)
-
-[sub_resource type="BoxMesh" id="BoxMesh_c6fgv"]
-size = Vector3(3.36, 0.095, 0.09)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fd6dt"]
-albedo_color = Color(0.8980392, 0.827451, 0.68235296, 1)
-roughness = 0.8
-
-[sub_resource type="BoxMesh" id="BoxMesh_gttkg"]
-size = Vector3(0.012, 0.007, 1.15)
-
-[sub_resource type="BoxMesh" id="BoxMesh_ed5de"]
-size = Vector3(0.012, 0.007, 1.15)
-
-[sub_resource type="BoxMesh" id="BoxMesh_mq14a"]
-size = Vector3(0.012, 0.007, 1.15)
-
-[sub_resource type="BoxMesh" id="BoxMesh_yf6j3"]
-size = Vector3(0.012, 0.007, 1.15)
-
-[sub_resource type="BoxMesh" id="BoxMesh_a1n43"]
-size = Vector3(0.012, 0.007, 1.15)
-
-[sub_resource type="BoxMesh" id="BoxMesh_kcoi7"]
-size = Vector3(1.87, 0.007, 0.012)
-
-[sub_resource type="BoxMesh" id="BoxMesh_um25j"]
-size = Vector3(1.87, 0.007, 0.012)
-
-[sub_resource type="BoxMesh" id="BoxMesh_0abf2"]
-size = Vector3(1.87, 0.007, 0.012)
-
-[sub_resource type="BoxMesh" id="BoxMesh_8tqy7"]
-size = Vector3(1.87, 0.007, 0.012)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_acld0"]
-albedo_color = Color(0.6117647, 0.18039216, 0.1882353, 1)
-roughness = 0.9
-
-[sub_resource type="BoxMesh" id="BoxMesh_kc3cm"]
-size = Vector3(0.27, 0.007, 0.22)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_utcts"]
-albedo_color = Color(0.14117648, 0.14901961, 0.16078432, 1)
-roughness = 0.89
-
-[sub_resource type="BoxMesh" id="BoxMesh_2pm5r"]
-size = Vector3(0.27, 0.007, 0.22)
-
-[sub_resource type="BoxMesh" id="BoxMesh_nkmqd"]
-size = Vector3(0.27, 0.007, 0.22)
-
-[sub_resource type="BoxMesh" id="BoxMesh_0li47"]
-size = Vector3(0.27, 0.007, 0.22)
+margin = 0.012
+size = Vector3(2.48, 0.14, 1.48)
 
 [sub_resource type="Environment" id="Environment_casino"]
 background_mode = 1
@@ -4069,145 +3731,9 @@ metadata/placement_type = "roulette_wheel"
 [node name="Sketchfab_Scene" parent="SketchfabFurniture/EditableImportedModels/SketchfabRoulette" instance=ExtResource("22_birbe")]
 transform = Transform3D(0.30185148, 0, 0, 0, 0.30185148, 0, 0, 0, 0.30185148, 5.03769e-07, -0.1340777, 1.43934e-07)
 
-[node name="RouletteTableCabinet" type="Node3D" parent="SketchfabFurniture/EditableImportedModels"]
+[node name="RouletteTableCabinet" parent="SketchfabFurniture/EditableImportedModels" instance=ExtResource("112_premium_roulette")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.6, 0, -10.05)
 metadata/furniture_kind = "roulette_table"
-
-[node name="SolidTableTop" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/RouletteTableCabinet"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.865, 0)
-material_override = SubResource("StandardMaterial3D_jcxqu")
-mesh = SubResource("BoxMesh_0arob")
-
-[node name="SolidTableTopCollider" type="StaticBody3D" parent="SketchfabFurniture/EditableImportedModels/RouletteTableCabinet"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.865, 0)
-
-[node name="@CollisionShape3D@23490" type="CollisionShape3D" parent="SketchfabFurniture/EditableImportedModels/RouletteTableCabinet/SolidTableTopCollider"]
-shape = SubResource("BoxShape3D_dij0e")
-
-[node name="OuterBrassRim" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/RouletteTableCabinet"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.957, 0)
-material_override = SubResource("StandardMaterial3D_k1udn")
-mesh = SubResource("BoxMesh_wat4s")
-
-[node name="WheelAreaInset" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/RouletteTableCabinet"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.02, 0.984, 0)
-material_override = SubResource("StandardMaterial3D_jcxqu")
-mesh = SubResource("BoxMesh_m74q3")
-
-[node name="BettingFelt" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/RouletteTableCabinet"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.64, 0.984, 0)
-material_override = SubResource("StandardMaterial3D_am8a1")
-mesh = SubResource("BoxMesh_8dc3g")
-
-[node name="TableLeg" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/RouletteTableCabinet"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.54, 0.405, -0.58)
-material_override = SubResource("StandardMaterial3D_jcxqu")
-mesh = SubResource("BoxMesh_htgcl")
-
-[node name="LegFootGold" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/RouletteTableCabinet"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.54, 0.085, -0.58)
-material_override = SubResource("StandardMaterial3D_k1udn")
-mesh = SubResource("BoxMesh_f3y11")
-
-[node name="@MeshInstance3D@23491" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/RouletteTableCabinet"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.54, 0.405, 0.58)
-material_override = SubResource("StandardMaterial3D_jcxqu")
-mesh = SubResource("BoxMesh_u81y6")
-
-[node name="@MeshInstance3D@23492" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/RouletteTableCabinet"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.54, 0.085, 0.58)
-material_override = SubResource("StandardMaterial3D_k1udn")
-mesh = SubResource("BoxMesh_rt5wr")
-
-[node name="@MeshInstance3D@23493" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/RouletteTableCabinet"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.54, 0.405, -0.58)
-material_override = SubResource("StandardMaterial3D_jcxqu")
-mesh = SubResource("BoxMesh_vjgyh")
-
-[node name="@MeshInstance3D@23494" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/RouletteTableCabinet"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.54, 0.085, -0.58)
-material_override = SubResource("StandardMaterial3D_k1udn")
-mesh = SubResource("BoxMesh_asu84")
-
-[node name="@MeshInstance3D@23495" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/RouletteTableCabinet"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.54, 0.405, 0.58)
-material_override = SubResource("StandardMaterial3D_jcxqu")
-mesh = SubResource("BoxMesh_qwt6e")
-
-[node name="@MeshInstance3D@23496" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/RouletteTableCabinet"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.54, 0.085, 0.58)
-material_override = SubResource("StandardMaterial3D_k1udn")
-mesh = SubResource("BoxMesh_tttfs")
-
-[node name="DealerRail" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/RouletteTableCabinet"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.77, -0.78)
-material_override = SubResource("StandardMaterial3D_jcxqu")
-mesh = SubResource("BoxMesh_g5xqc")
-
-[node name="GridVertical" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/RouletteTableCabinet"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.29, 0.999, 0)
-material_override = SubResource("StandardMaterial3D_7mmqq")
-mesh = SubResource("BoxMesh_3exxq")
-
-[node name="@MeshInstance3D@23497" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/RouletteTableCabinet"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.17, 0.999, 0)
-material_override = SubResource("StandardMaterial3D_7mmqq")
-mesh = SubResource("BoxMesh_bmvma")
-
-[node name="@MeshInstance3D@23498" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/RouletteTableCabinet"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.63, 0.999, 0)
-material_override = SubResource("StandardMaterial3D_7mmqq")
-mesh = SubResource("BoxMesh_shlp4")
-
-[node name="@MeshInstance3D@23499" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/RouletteTableCabinet"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.09, 0.999, 0)
-material_override = SubResource("StandardMaterial3D_7mmqq")
-mesh = SubResource("BoxMesh_86lig")
-
-[node name="@MeshInstance3D@23500" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/RouletteTableCabinet"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.55, 0.999, 0)
-material_override = SubResource("StandardMaterial3D_7mmqq")
-mesh = SubResource("BoxMesh_qe8ju")
-
-[node name="GridHorizontal" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/RouletteTableCabinet"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.64, 0.999, -0.57)
-material_override = SubResource("StandardMaterial3D_7mmqq")
-mesh = SubResource("BoxMesh_bnk2o")
-
-[node name="@MeshInstance3D@23501" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/RouletteTableCabinet"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.64, 0.999, -0.19)
-material_override = SubResource("StandardMaterial3D_7mmqq")
-mesh = SubResource("BoxMesh_nf4f2")
-
-[node name="@MeshInstance3D@23502" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/RouletteTableCabinet"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.64, 0.999, 0.19)
-material_override = SubResource("StandardMaterial3D_7mmqq")
-mesh = SubResource("BoxMesh_t5kpo")
-
-[node name="@MeshInstance3D@23503" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/RouletteTableCabinet"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.64, 0.999, 0.57)
-material_override = SubResource("StandardMaterial3D_7mmqq")
-mesh = SubResource("BoxMesh_37eu1")
-
-[node name="BettingTile" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/RouletteTableCabinet"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.05, 1.003, -0.18)
-material_override = SubResource("StandardMaterial3D_0wkqm")
-mesh = SubResource("BoxMesh_ve5sr")
-
-[node name="@MeshInstance3D@23504" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/RouletteTableCabinet"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.4, 1.003, -0.18)
-material_override = SubResource("StandardMaterial3D_5s44m")
-mesh = SubResource("BoxMesh_ibca3")
-
-[node name="@MeshInstance3D@23505" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/RouletteTableCabinet"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.85, 1.003, -0.18)
-material_override = SubResource("StandardMaterial3D_0wkqm")
-mesh = SubResource("BoxMesh_1slqb")
-
-[node name="@MeshInstance3D@23506" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/RouletteTableCabinet"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.3, 1.003, -0.18)
-material_override = SubResource("StandardMaterial3D_5s44m")
-mesh = SubResource("BoxMesh_y0aao")
 
 [node name="SketchfabBlackjack" type="Node3D" parent="SketchfabFurniture/EditableImportedModels"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20.3, 0, -10.15)
@@ -4217,7 +3743,7 @@ metadata/source_asset = "blackjack_table"
 transform = Transform3D(1.0012974, 0, 0, 0, 1.0012974, 0, 0, 0, 1.0012974, 0, 7.7021045e-16, -1.2521026)
 
 [node name="FurnitureCollider" type="StaticBody3D" parent="SketchfabFurniture/EditableImportedModels/SketchfabBlackjack"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45194566, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.829, 0)
 
 [node name="@CollisionShape3D@23507" type="CollisionShape3D" parent="SketchfabFurniture/EditableImportedModels/SketchfabBlackjack/FurnitureCollider"]
 shape = SubResource("BoxShape3D_wm5rm")
@@ -4237,145 +3763,9 @@ metadata/placement_type = "roulette_wheel"
 [node name="Sketchfab_Scene" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23508" instance=ExtResource("22_birbe")]
 transform = Transform3D(0.30185148, 0, 0, 0, 0.30185148, 0, 0, 0, 0.30185148, 5.03769e-07, -0.1340777, 1.43934e-07)
 
-[node name="@Node3D@23509" type="Node3D" parent="SketchfabFurniture/EditableImportedModels"]
+[node name="@Node3D@23509" parent="SketchfabFurniture/EditableImportedModels" instance=ExtResource("112_premium_roulette")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -27.2, 0, -10.1)
 metadata/furniture_kind = "roulette_table"
-
-[node name="SolidTableTop" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23509"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.865, 0)
-material_override = SubResource("StandardMaterial3D_fdpg8")
-mesh = SubResource("BoxMesh_rpys8")
-
-[node name="SolidTableTopCollider" type="StaticBody3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23509"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.865, 0)
-
-[node name="@CollisionShape3D@23510" type="CollisionShape3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23509/SolidTableTopCollider"]
-shape = SubResource("BoxShape3D_6gr3f")
-
-[node name="OuterBrassRim" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23509"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.957, 0)
-material_override = SubResource("StandardMaterial3D_6seew")
-mesh = SubResource("BoxMesh_3ox4t")
-
-[node name="WheelAreaInset" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23509"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.02, 0.984, 0)
-material_override = SubResource("StandardMaterial3D_fdpg8")
-mesh = SubResource("BoxMesh_4fmho")
-
-[node name="BettingFelt" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23509"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.64, 0.984, 0)
-material_override = SubResource("StandardMaterial3D_aivy6")
-mesh = SubResource("BoxMesh_bil4k")
-
-[node name="TableLeg" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23509"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.54, 0.405, -0.58)
-material_override = SubResource("StandardMaterial3D_fdpg8")
-mesh = SubResource("BoxMesh_hnquj")
-
-[node name="LegFootGold" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23509"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.54, 0.085, -0.58)
-material_override = SubResource("StandardMaterial3D_6seew")
-mesh = SubResource("BoxMesh_nycv6")
-
-[node name="@MeshInstance3D@23511" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23509"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.54, 0.405, 0.58)
-material_override = SubResource("StandardMaterial3D_fdpg8")
-mesh = SubResource("BoxMesh_arf1h")
-
-[node name="@MeshInstance3D@23512" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23509"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.54, 0.085, 0.58)
-material_override = SubResource("StandardMaterial3D_6seew")
-mesh = SubResource("BoxMesh_gkfde")
-
-[node name="@MeshInstance3D@23513" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23509"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.54, 0.405, -0.58)
-material_override = SubResource("StandardMaterial3D_fdpg8")
-mesh = SubResource("BoxMesh_4qxq8")
-
-[node name="@MeshInstance3D@23514" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23509"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.54, 0.085, -0.58)
-material_override = SubResource("StandardMaterial3D_6seew")
-mesh = SubResource("BoxMesh_oy6td")
-
-[node name="@MeshInstance3D@23515" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23509"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.54, 0.405, 0.58)
-material_override = SubResource("StandardMaterial3D_fdpg8")
-mesh = SubResource("BoxMesh_p5pln")
-
-[node name="@MeshInstance3D@23516" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23509"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.54, 0.085, 0.58)
-material_override = SubResource("StandardMaterial3D_6seew")
-mesh = SubResource("BoxMesh_mldrc")
-
-[node name="DealerRail" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23509"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.77, -0.78)
-material_override = SubResource("StandardMaterial3D_fdpg8")
-mesh = SubResource("BoxMesh_xxpw2")
-
-[node name="GridVertical" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23509"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.29, 0.999, 0)
-material_override = SubResource("StandardMaterial3D_wghq8")
-mesh = SubResource("BoxMesh_k08w7")
-
-[node name="@MeshInstance3D@23517" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23509"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.17, 0.999, 0)
-material_override = SubResource("StandardMaterial3D_wghq8")
-mesh = SubResource("BoxMesh_hp4ct")
-
-[node name="@MeshInstance3D@23518" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23509"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.63, 0.999, 0)
-material_override = SubResource("StandardMaterial3D_wghq8")
-mesh = SubResource("BoxMesh_lxb2r")
-
-[node name="@MeshInstance3D@23519" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23509"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.09, 0.999, 0)
-material_override = SubResource("StandardMaterial3D_wghq8")
-mesh = SubResource("BoxMesh_lv1ug")
-
-[node name="@MeshInstance3D@23520" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23509"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.55, 0.999, 0)
-material_override = SubResource("StandardMaterial3D_wghq8")
-mesh = SubResource("BoxMesh_6kttw")
-
-[node name="GridHorizontal" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23509"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.64, 0.999, -0.57)
-material_override = SubResource("StandardMaterial3D_wghq8")
-mesh = SubResource("BoxMesh_uor2d")
-
-[node name="@MeshInstance3D@23521" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23509"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.64, 0.999, -0.19)
-material_override = SubResource("StandardMaterial3D_wghq8")
-mesh = SubResource("BoxMesh_j6smb")
-
-[node name="@MeshInstance3D@23522" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23509"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.64, 0.999, 0.19)
-material_override = SubResource("StandardMaterial3D_wghq8")
-mesh = SubResource("BoxMesh_xp7cv")
-
-[node name="@MeshInstance3D@23523" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23509"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.64, 0.999, 0.57)
-material_override = SubResource("StandardMaterial3D_wghq8")
-mesh = SubResource("BoxMesh_ly5pk")
-
-[node name="BettingTile" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23509"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.05, 1.003, -0.18)
-material_override = SubResource("StandardMaterial3D_s0u5n")
-mesh = SubResource("BoxMesh_8lrju")
-
-[node name="@MeshInstance3D@23524" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23509"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.4, 1.003, -0.18)
-material_override = SubResource("StandardMaterial3D_5kegx")
-mesh = SubResource("BoxMesh_afgqn")
-
-[node name="@MeshInstance3D@23525" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23509"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.85, 1.003, -0.18)
-material_override = SubResource("StandardMaterial3D_s0u5n")
-mesh = SubResource("BoxMesh_jegnu")
-
-[node name="@MeshInstance3D@23526" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23509"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.3, 1.003, -0.18)
-material_override = SubResource("StandardMaterial3D_5kegx")
-mesh = SubResource("BoxMesh_31js7")
 
 [node name="@Node3D@23527" type="Node3D" parent="SketchfabFurniture/EditableImportedModels"]
 transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -42.12, 1.01, -10.05)
@@ -4385,145 +3775,9 @@ metadata/placement_type = "roulette_wheel"
 [node name="Sketchfab_Scene" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23527" instance=ExtResource("22_birbe")]
 transform = Transform3D(0.30185148, 0, 0, 0, 0.30185148, 0, 0, 0, 0.30185148, 5.03769e-07, -0.1340777, 1.43934e-07)
 
-[node name="@Node3D@23528" type="Node3D" parent="SketchfabFurniture/EditableImportedModels"]
+[node name="@Node3D@23528" parent="SketchfabFurniture/EditableImportedModels" instance=ExtResource("112_premium_roulette")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -41.1, 0, -10.05)
 metadata/furniture_kind = "roulette_table"
-
-[node name="SolidTableTop" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23528"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.865, 0)
-material_override = SubResource("StandardMaterial3D_i0xsp")
-mesh = SubResource("BoxMesh_kll2q")
-
-[node name="SolidTableTopCollider" type="StaticBody3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23528"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.865, 0)
-
-[node name="@CollisionShape3D@23529" type="CollisionShape3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23528/SolidTableTopCollider"]
-shape = SubResource("BoxShape3D_ft875")
-
-[node name="OuterBrassRim" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23528"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.957, 0)
-material_override = SubResource("StandardMaterial3D_rhlye")
-mesh = SubResource("BoxMesh_pqvsh")
-
-[node name="WheelAreaInset" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23528"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.02, 0.984, 0)
-material_override = SubResource("StandardMaterial3D_i0xsp")
-mesh = SubResource("BoxMesh_mo8hc")
-
-[node name="BettingFelt" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23528"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.64, 0.984, 0)
-material_override = SubResource("StandardMaterial3D_gbg58")
-mesh = SubResource("BoxMesh_le5wj")
-
-[node name="TableLeg" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23528"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.54, 0.405, -0.58)
-material_override = SubResource("StandardMaterial3D_i0xsp")
-mesh = SubResource("BoxMesh_2um21")
-
-[node name="LegFootGold" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23528"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.54, 0.085, -0.58)
-material_override = SubResource("StandardMaterial3D_rhlye")
-mesh = SubResource("BoxMesh_w7qqv")
-
-[node name="@MeshInstance3D@23530" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23528"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.54, 0.405, 0.58)
-material_override = SubResource("StandardMaterial3D_i0xsp")
-mesh = SubResource("BoxMesh_h0sjo")
-
-[node name="@MeshInstance3D@23531" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23528"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.54, 0.085, 0.58)
-material_override = SubResource("StandardMaterial3D_rhlye")
-mesh = SubResource("BoxMesh_gfi32")
-
-[node name="@MeshInstance3D@23532" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23528"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.54, 0.405, -0.58)
-material_override = SubResource("StandardMaterial3D_i0xsp")
-mesh = SubResource("BoxMesh_trkoe")
-
-[node name="@MeshInstance3D@23533" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23528"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.54, 0.085, -0.58)
-material_override = SubResource("StandardMaterial3D_rhlye")
-mesh = SubResource("BoxMesh_ycw8e")
-
-[node name="@MeshInstance3D@23534" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23528"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.54, 0.405, 0.58)
-material_override = SubResource("StandardMaterial3D_i0xsp")
-mesh = SubResource("BoxMesh_2gd4m")
-
-[node name="@MeshInstance3D@23535" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23528"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.54, 0.085, 0.58)
-material_override = SubResource("StandardMaterial3D_rhlye")
-mesh = SubResource("BoxMesh_lix4w")
-
-[node name="DealerRail" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23528"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.77, -0.78)
-material_override = SubResource("StandardMaterial3D_i0xsp")
-mesh = SubResource("BoxMesh_c6fgv")
-
-[node name="GridVertical" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23528"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.29, 0.999, 0)
-material_override = SubResource("StandardMaterial3D_fd6dt")
-mesh = SubResource("BoxMesh_gttkg")
-
-[node name="@MeshInstance3D@23536" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23528"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.17, 0.999, 0)
-material_override = SubResource("StandardMaterial3D_fd6dt")
-mesh = SubResource("BoxMesh_ed5de")
-
-[node name="@MeshInstance3D@23537" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23528"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.63, 0.999, 0)
-material_override = SubResource("StandardMaterial3D_fd6dt")
-mesh = SubResource("BoxMesh_mq14a")
-
-[node name="@MeshInstance3D@23538" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23528"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.09, 0.999, 0)
-material_override = SubResource("StandardMaterial3D_fd6dt")
-mesh = SubResource("BoxMesh_yf6j3")
-
-[node name="@MeshInstance3D@23539" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23528"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.55, 0.999, 0)
-material_override = SubResource("StandardMaterial3D_fd6dt")
-mesh = SubResource("BoxMesh_a1n43")
-
-[node name="GridHorizontal" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23528"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.64, 0.999, -0.57)
-material_override = SubResource("StandardMaterial3D_fd6dt")
-mesh = SubResource("BoxMesh_kcoi7")
-
-[node name="@MeshInstance3D@23540" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23528"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.64, 0.999, -0.19)
-material_override = SubResource("StandardMaterial3D_fd6dt")
-mesh = SubResource("BoxMesh_um25j")
-
-[node name="@MeshInstance3D@23541" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23528"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.64, 0.999, 0.19)
-material_override = SubResource("StandardMaterial3D_fd6dt")
-mesh = SubResource("BoxMesh_0abf2")
-
-[node name="@MeshInstance3D@23542" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23528"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.64, 0.999, 0.57)
-material_override = SubResource("StandardMaterial3D_fd6dt")
-mesh = SubResource("BoxMesh_8tqy7")
-
-[node name="BettingTile" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23528"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.05, 1.003, -0.18)
-material_override = SubResource("StandardMaterial3D_acld0")
-mesh = SubResource("BoxMesh_kc3cm")
-
-[node name="@MeshInstance3D@23543" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23528"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.4, 1.003, -0.18)
-material_override = SubResource("StandardMaterial3D_utcts")
-mesh = SubResource("BoxMesh_2pm5r")
-
-[node name="@MeshInstance3D@23544" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23528"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.85, 1.003, -0.18)
-material_override = SubResource("StandardMaterial3D_acld0")
-mesh = SubResource("BoxMesh_nkmqd")
-
-[node name="@MeshInstance3D@23545" type="MeshInstance3D" parent="SketchfabFurniture/EditableImportedModels/@Node3D@23528"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.3, 1.003, -0.18)
-material_override = SubResource("StandardMaterial3D_utcts")
-mesh = SubResource("BoxMesh_0li47")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_casino")
@@ -7086,3 +6340,42 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6221484, -9.980265)
 spot_range = 8.8
 spot_attenuation = 1.19
 spot_angle = 93.93
+
+[editable path="CornerBar/Signature_1_02_silver_lotus"]
+[editable path="CornerBar/Signature_1_03_rouge_clover"]
+[editable path="CornerBar/Signature_1_04_solara"]
+[editable path="CornerBar/Signature_1_05_montevale"]
+[editable path="CornerBar/Signature_1_06_nightfall"]
+[editable path="CornerBar/Signature_1_07_velvet_ace"]
+[editable path="CornerBar/Signature_1_08_silver_lotus"]
+[editable path="CornerBar/Signature_1_09_rouge_clover"]
+[editable path="CornerBar/Signature_1_10_solara"]
+[editable path="CornerBar/Signature_1_11_montevale"]
+[editable path="CornerBar/Signature_1_12_nightfall"]
+[editable path="CornerBar/Signature_1_13_velvet_ace"]
+[editable path="CornerBar/Signature_2_01_rouge_clover"]
+[editable path="CornerBar/Signature_2_02_solara"]
+[editable path="CornerBar/Signature_2_03_montevale"]
+[editable path="CornerBar/Signature_2_04_nightfall"]
+[editable path="CornerBar/Signature_2_05_velvet_ace"]
+[editable path="CornerBar/Signature_2_06_silver_lotus"]
+[editable path="CornerBar/Signature_2_07_rouge_clover"]
+[editable path="CornerBar/Signature_2_08_solara"]
+[editable path="CornerBar/Signature_2_09_montevale"]
+[editable path="CornerBar/Signature_2_10_nightfall"]
+[editable path="CornerBar/Signature_2_11_velvet_ace"]
+[editable path="CornerBar/Signature_2_12_silver_lotus"]
+[editable path="CornerBar/Signature_2_13_rouge_clover"]
+[editable path="CornerBar/Signature_3_01_montevale"]
+[editable path="CornerBar/Signature_3_02_nightfall"]
+[editable path="CornerBar/Signature_3_03_velvet_ace"]
+[editable path="CornerBar/Signature_3_04_silver_lotus"]
+[editable path="CornerBar/Signature_3_05_rouge_clover"]
+[editable path="CornerBar/Signature_3_06_solara"]
+[editable path="CornerBar/Signature_3_07_montevale"]
+[editable path="CornerBar/Signature_3_08_nightfall"]
+[editable path="CornerBar/Signature_3_09_velvet_ace"]
+[editable path="CornerBar/Signature_3_10_silver_lotus"]
+[editable path="CornerBar/Signature_3_11_rouge_clover"]
+[editable path="CornerBar/Signature_3_12_solara"]
+[editable path="CornerBar/Signature_3_13_montevale"]

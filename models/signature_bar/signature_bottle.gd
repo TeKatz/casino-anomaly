@@ -104,6 +104,12 @@ func _part(label: String, mesh: Mesh, mat: Material, pos := Vector3.ZERO) -> Mes
     part.material_override = mat
     part.position = pos
     add_child(part)
+    # Each bottle is an editable instance in main.tscn. Give its generated
+    # meshes a scene owner in the editor, otherwise the visual surface is
+    # ownerless and cannot be picked/adjusted from the editor scene tree.
+    # Runtime keeps the fast shared-geometry cache without extra ownership.
+    if Engine.is_editor_hint():
+        part.owner = self
     return part
 
 
@@ -356,6 +362,8 @@ func _build() -> void:
     knurled_cap.name = "MachinedCapFluting"
     knurled_cap.multimesh = knurling
     add_child(knurled_cap)
+    if Engine.is_editor_hint():
+        knurled_cap.owner = self
 
     # The physical bottle has a real UV-textured paper wrap that follows its
     # exact glass surface, including facets and shoulder taper.
@@ -388,6 +396,8 @@ func _build() -> void:
         stud_batch.name = "VermouthDiamondEmbossing"
         stud_batch.multimesh = emboss
         add_child(stud_batch)
+        if Engine.is_editor_hint():
+            stud_batch.owner = self
     if kind == 5:
         # Side-hanging stamped medallion and its metallic cord.
         var coin := CylinderMesh.new()

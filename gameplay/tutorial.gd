@@ -83,14 +83,22 @@ func _process(_delta: float) -> void:
 
 
 func _is_looking_at_door() -> bool:
-    var center := door.global_position + Vector3(0, 1.6, 0)
-    var towards: Vector3 = center - camera.global_position
-    var distance := towards.length()
-    if distance < 0.05 or distance > 3.0:
+    # Aim at the actual DOOR PANEL rather than a tiny point in its centre.
+    # The old .985 dot threshold demanded an almost exact viewing angle.
+    # Project the camera's sight line onto the door plane in door-local
+    # space. This tracks the designer's door transforms, including scale.
+    var eye := door.to_local(camera.global_position)
+    if eye.z < 0.15 or eye.z > 5.0:
         return false
-    if door.to_local(camera.global_position).z < 0.15:
+    var view_world := -camera.global_transform.basis.z
+    var forward := door.to_local(camera.global_position + view_world) - eye
+    if forward.z >= -0.15:
         return false
-    return (-camera.global_transform.basis.z).dot(towards / distance) >= 0.985
+    var hit := eye + forward * (eye.z / -forward.z)
+    # Authored door: 1.85m wide x 3.15m tall in local units. A small
+    # allowance around the frame makes the E prompt comfortable, without
+    # activating when looking sideways down the hallway.
+    return absf(hit.x) <= 1.18 and hit.y >= 0.05 and hit.y <= 3.30
 
 
 func _is_looking_at_croupier() -> bool:

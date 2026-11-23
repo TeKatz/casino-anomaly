@@ -1,0 +1,912 @@
+[gd_scene load_steps=41 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/wood_table_001/wood_table_001_diff_2k.jpg" id="1_wood"]
+[ext_resource type="Texture2D" path="res://assets/wood_table_001/wood_table_001_nor_gl_2k.jpg" id="2_normal"]
+[ext_resource type="Texture2D" path="res://assets/wood_table_001/wood_table_001_rough_2k.jpg" id="3_rough"]
+[ext_resource type="Texture2D" path="res://assets/quatrefoil_jacquard_fabric/quatrefoil_jacquard_fabric_diff_2k.jpg" id="4_felt"]
+[ext_resource type="Texture2D" path="res://assets/quatrefoil_jacquard_fabric/quatrefoil_jacquard_fabric_nor_gl_2k.jpg" id="5_felt_normal"]
+
+[sub_resource type="StandardMaterial3D" id="DarkWalnut"]
+albedo_texture = ExtResource("1_wood")
+albedo_color = Color(0.58, 0.43, 0.35, 1)
+normal_enabled = true
+normal_texture = ExtResource("2_normal")
+roughness_texture = ExtResource("3_rough")
+roughness = 0.44
+metallic = 0.1
+texture_filter = 5
+
+[sub_resource type="StandardMaterial3D" id="SatinBrass"]
+albedo_color = Color(0.77, 0.60, 0.35, 1)
+roughness = 0.31
+metallic = 0.83
+
+[sub_resource type="StandardMaterial3D" id="DarkBrass"]
+albedo_color = Color(0.40, 0.29, 0.18, 1)
+roughness = 0.42
+metallic = 0.69
+
+[sub_resource type="StandardMaterial3D" id="GreenFelt"]
+albedo_texture = ExtResource("4_felt")
+albedo_color = Color(0.16, 0.38, 0.27, 1)
+normal_enabled = true
+normal_texture = ExtResource("5_felt_normal")
+roughness = 0.96
+uv1_scale = Vector3(2.4, 2.4, 1)
+texture_filter = 5
+
+[sub_resource type="StandardMaterial3D" id="PaddedLeather"]
+albedo_color = Color(0.24, 0.12, 0.12, 1)
+roughness = 0.67
+metallic = 0.02
+
+[sub_resource type="StandardMaterial3D" id="TileRed"]
+albedo_color = Color(0.49, 0.095, 0.105, 1)
+roughness = 0.96
+
+[sub_resource type="StandardMaterial3D" id="TileBlack"]
+albedo_color = Color(0.075, 0.085, 0.088, 1)
+roughness = 0.97
+
+[sub_resource type="StandardMaterial3D" id="TileGreen"]
+albedo_color = Color(0.105, 0.275, 0.19, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="IvoryInlay"]
+albedo_color = Color(0.88, 0.79, 0.62, 1)
+roughness = 0.73
+
+[sub_resource type="BoxMesh" id="MainTopMesh"]
+size = Vector3(3.5, 0.18, 1.62)
+
+[sub_resource type="BoxMesh" id="ApronMesh"]
+size = Vector3(3.28, 0.16, 1.42)
+
+[sub_resource type="BoxMesh" id="BeadedRailLong"]
+size = Vector3(3.5, 0.065, 0.115)
+
+[sub_resource type="BoxMesh" id="BeadedRailShort"]
+size = Vector3(0.115, 0.065, 1.6)
+
+[sub_resource type="BoxMesh" id="RailGoldLong"]
+size = Vector3(3.5, 0.018, 0.017)
+
+[sub_resource type="BoxMesh" id="RailGoldShort"]
+size = Vector3(0.017, 0.018, 1.55)
+
+[sub_resource type="BoxMesh" id="WheelInset"]
+size = Vector3(1.46, 0.023, 1.43)
+
+[sub_resource type="BoxMesh" id="BettingFelt"]
+size = Vector3(1.93, 0.026, 1.33)
+
+[sub_resource type="BoxMesh" id="BettingOutline"]
+size = Vector3(1.98, 0.02, 1.38)
+
+[sub_resource type="BoxMesh" id="WheelCrossrail"]
+size = Vector3(0.046, 0.08, 1.4)
+
+[sub_resource type="BoxMesh" id="CellMesh"]
+size = Vector3(0.134, 0.006, 0.306)
+
+[sub_resource type="BoxMesh" id="ZeroMesh"]
+size = Vector3(0.116, 0.006, 0.945)
+
+[sub_resource type="BoxMesh" id="NumberBorder"]
+size = Vector3(1.79, 0.009, 0.97)
+
+[sub_resource type="BoxMesh" id="BettingBench"]
+size = Vector3(0.23, 0.078, 1.24)
+
+[sub_resource type="BoxMesh" id="DealerArmrest"]
+size = Vector3(2.98, 0.11, 0.105)
+
+[sub_resource type="BoxMesh" id="LegColumn"]
+size = Vector3(0.255, 0.72, 0.61)
+
+[sub_resource type="BoxMesh" id="LegMoulding"]
+size = Vector3(0.3, 0.06, 0.66)
+
+[sub_resource type="BoxMesh" id="LegFoot"]
+size = Vector3(0.345, 0.112, 0.72)
+
+[sub_resource type="BoxMesh" id="LegAccent"]
+size = Vector3(0.31, 0.015, 0.675)
+
+[sub_resource type="BoxMesh" id="CrossBracing"]
+size = Vector3(2.42, 0.145, 0.18)
+
+[sub_resource type="BoxMesh" id="CrossBracingGilt"]
+size = Vector3(2.37, 0.018, 0.18)
+
+[sub_resource type="BoxMesh" id="ChipRail"]
+size = Vector3(0.67, 0.06, 0.19)
+
+[sub_resource type="BoxMesh" id="ChipInset"]
+size = Vector3(0.62, 0.011, 0.105)
+
+[sub_resource type="CylinderMesh" id="RosetteMesh"]
+top_radius = 0.034
+bottom_radius = 0.034
+height = 0.011
+radial_segments = 32
+
+[sub_resource type="BoxShape3D" id="TableShape"]
+size = Vector3(3.5, 0.18, 1.62)
+
+[sub_resource type="BoxShape3D" id="PedestalShape"]
+size = Vector3(0.30, 0.73, 0.65)
+
+[node name="PremiumRouletteTable" type="Node3D"]
+metadata/furniture_kind = "roulette_table"
+
+[node name="SolidTableTop" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.865, 0)
+mesh = SubResource("MainTopMesh")
+material_override = SubResource("DarkWalnut")
+
+[node name="CarvedTableApron" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.731, 0)
+mesh = SubResource("ApronMesh")
+material_override = SubResource("DarkWalnut")
+
+[node name="GildedOutlineUnderFelt" type="MeshInstance3D" parent="."]
+position = Vector3(0.62, 0.97, 0)
+mesh = SubResource("BettingOutline")
+material_override = SubResource("SatinBrass")
+
+[node name="WheelAreaInset" type="MeshInstance3D" parent="."]
+position = Vector3(-1.02, 0.971, 0)
+mesh = SubResource("WheelInset")
+material_override = SubResource("DarkWalnut")
+
+[node name="BettingFelt" type="MeshInstance3D" parent="."]
+position = Vector3(0.62, 0.985, 0)
+mesh = SubResource("BettingFelt")
+material_override = SubResource("GreenFelt")
+
+[node name="PaddedRail_Back" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.019, -0.749)
+mesh = SubResource("BeadedRailLong")
+material_override = SubResource("PaddedLeather")
+
+[node name="BrassBead_Back" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.038, -0.821)
+mesh = SubResource("RailGoldLong")
+material_override = SubResource("SatinBrass")
+
+[node name="InnerGoldStrip_Back" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.996, -0.675)
+mesh = SubResource("RailGoldLong")
+material_override = SubResource("DarkBrass")
+
+[node name="EdgeRosette_Back" type="MeshInstance3D" parent="."]
+position = Vector3(-1.7, 1.054, -0.75)
+mesh = SubResource("RosetteMesh")
+material_override = SubResource("SatinBrass")
+rotation = Vector3(1.5708, 0, 0)
+
+[node name="PaddedRail_Front" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.019, 0.749)
+mesh = SubResource("BeadedRailLong")
+material_override = SubResource("PaddedLeather")
+
+[node name="BrassBead_Front" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.038, 0.821)
+mesh = SubResource("RailGoldLong")
+material_override = SubResource("SatinBrass")
+
+[node name="InnerGoldStrip_Front" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.996, 0.675)
+mesh = SubResource("RailGoldLong")
+material_override = SubResource("DarkBrass")
+
+[node name="EdgeRosette_Front" type="MeshInstance3D" parent="."]
+position = Vector3(-1.7, 1.054, 0.75)
+mesh = SubResource("RosetteMesh")
+material_override = SubResource("SatinBrass")
+rotation = Vector3(1.5708, 0, 0)
+
+[node name="PaddedRail_WheelSide" type="MeshInstance3D" parent="."]
+position = Vector3(-1.697, 1.019, 0)
+mesh = SubResource("BeadedRailShort")
+material_override = SubResource("PaddedLeather")
+
+[node name="BrassBead_WheelSide" type="MeshInstance3D" parent="."]
+position = Vector3(-1.763, 1.037, 0)
+mesh = SubResource("RailGoldShort")
+material_override = SubResource("SatinBrass")
+
+[node name="PaddedRail_FarSide" type="MeshInstance3D" parent="."]
+position = Vector3(1.697, 1.019, 0)
+mesh = SubResource("BeadedRailShort")
+material_override = SubResource("PaddedLeather")
+
+[node name="BrassBead_FarSide" type="MeshInstance3D" parent="."]
+position = Vector3(1.763, 1.037, 0)
+mesh = SubResource("RailGoldShort")
+material_override = SubResource("SatinBrass")
+
+[node name="WheelPartition" type="MeshInstance3D" parent="."]
+position = Vector3(-0.3, 1.025, 0)
+mesh = SubResource("WheelCrossrail")
+material_override = SubResource("SatinBrass")
+
+[node name="DealerArmrest" type="MeshInstance3D" parent="."]
+position = Vector3(0.31, 0.98, -0.635)
+mesh = SubResource("DealerArmrest")
+material_override = SubResource("DarkWalnut")
+
+[node name="CarvedPedestal_L" type="MeshInstance3D" parent="."]
+position = Vector3(-1.21, 0.399, 0)
+mesh = SubResource("LegColumn")
+material_override = SubResource("DarkWalnut")
+
+[node name="LegCrown_L" type="MeshInstance3D" parent="."]
+position = Vector3(-1.21, 0.752, 0)
+mesh = SubResource("LegMoulding")
+material_override = SubResource("SatinBrass")
+
+[node name="LegFoot_L" type="MeshInstance3D" parent="."]
+position = Vector3(-1.21, 0.091, 0)
+mesh = SubResource("LegFoot")
+material_override = SubResource("DarkWalnut")
+
+[node name="FootGilt_L" type="MeshInstance3D" parent="."]
+position = Vector3(-1.21, 0.148, 0)
+mesh = SubResource("LegAccent")
+material_override = SubResource("SatinBrass")
+
+[node name="PedestalCollider_L" type="StaticBody3D" parent="."]
+position = Vector3(-1.21, 0.394, 0)
+
+[node name="PedestalShape_L" type="CollisionShape3D" parent="PedestalCollider_L"]
+shape = SubResource("PedestalShape")
+
+[node name="CarvedPedestal_R" type="MeshInstance3D" parent="."]
+position = Vector3(1.21, 0.399, 0)
+mesh = SubResource("LegColumn")
+material_override = SubResource("DarkWalnut")
+
+[node name="LegCrown_R" type="MeshInstance3D" parent="."]
+position = Vector3(1.21, 0.752, 0)
+mesh = SubResource("LegMoulding")
+material_override = SubResource("SatinBrass")
+
+[node name="LegFoot_R" type="MeshInstance3D" parent="."]
+position = Vector3(1.21, 0.091, 0)
+mesh = SubResource("LegFoot")
+material_override = SubResource("DarkWalnut")
+
+[node name="FootGilt_R" type="MeshInstance3D" parent="."]
+position = Vector3(1.21, 0.148, 0)
+mesh = SubResource("LegAccent")
+material_override = SubResource("SatinBrass")
+
+[node name="PedestalCollider_R" type="StaticBody3D" parent="."]
+position = Vector3(1.21, 0.394, 0)
+
+[node name="PedestalShape_R" type="CollisionShape3D" parent="PedestalCollider_R"]
+shape = SubResource("PedestalShape")
+
+[node name="JoinedLowerBeam" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.321, 0)
+mesh = SubResource("CrossBracing")
+material_override = SubResource("DarkWalnut")
+
+[node name="LowerBeamInlay" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.375, 0.086)
+mesh = SubResource("CrossBracingGilt")
+material_override = SubResource("DarkBrass")
+
+[node name="NumberWell_03" type="MeshInstance3D" parent="."]
+position = Vector3(-0.192, 1.003, -0.341)
+mesh = SubResource("CellMesh")
+material_override = SubResource("TileRed")
+
+[node name="BettingNumber_03" type="Label3D" parent="."]
+position = Vector3(-0.192, 1.012, -0.341)
+rotation = Vector3(-1.5708, 0, 0)
+text = "3"
+font_size = 24
+pixel_size = 0.0025
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.96, 0.89, 0.75, 1)
+double_sided = true
+
+[node name="NumberWell_02" type="MeshInstance3D" parent="."]
+position = Vector3(-0.192, 1.003, 0)
+mesh = SubResource("CellMesh")
+material_override = SubResource("TileBlack")
+
+[node name="BettingNumber_02" type="Label3D" parent="."]
+position = Vector3(-0.192, 1.012, 0)
+rotation = Vector3(-1.5708, 0, 0)
+text = "2"
+font_size = 24
+pixel_size = 0.0025
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.96, 0.89, 0.75, 1)
+double_sided = true
+
+[node name="NumberWell_01" type="MeshInstance3D" parent="."]
+position = Vector3(-0.192, 1.003, 0.341)
+mesh = SubResource("CellMesh")
+material_override = SubResource("TileRed")
+
+[node name="BettingNumber_01" type="Label3D" parent="."]
+position = Vector3(-0.192, 1.012, 0.341)
+rotation = Vector3(-1.5708, 0, 0)
+text = "1"
+font_size = 24
+pixel_size = 0.0025
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.96, 0.89, 0.75, 1)
+double_sided = true
+
+[node name="NumberWell_06" type="MeshInstance3D" parent="."]
+position = Vector3(-0.05, 1.003, -0.341)
+mesh = SubResource("CellMesh")
+material_override = SubResource("TileBlack")
+
+[node name="BettingNumber_06" type="Label3D" parent="."]
+position = Vector3(-0.05, 1.012, -0.341)
+rotation = Vector3(-1.5708, 0, 0)
+text = "6"
+font_size = 24
+pixel_size = 0.0025
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.96, 0.89, 0.75, 1)
+double_sided = true
+
+[node name="NumberWell_05" type="MeshInstance3D" parent="."]
+position = Vector3(-0.05, 1.003, 0)
+mesh = SubResource("CellMesh")
+material_override = SubResource("TileRed")
+
+[node name="BettingNumber_05" type="Label3D" parent="."]
+position = Vector3(-0.05, 1.012, 0)
+rotation = Vector3(-1.5708, 0, 0)
+text = "5"
+font_size = 24
+pixel_size = 0.0025
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.96, 0.89, 0.75, 1)
+double_sided = true
+
+[node name="NumberWell_04" type="MeshInstance3D" parent="."]
+position = Vector3(-0.05, 1.003, 0.341)
+mesh = SubResource("CellMesh")
+material_override = SubResource("TileBlack")
+
+[node name="BettingNumber_04" type="Label3D" parent="."]
+position = Vector3(-0.05, 1.012, 0.341)
+rotation = Vector3(-1.5708, 0, 0)
+text = "4"
+font_size = 24
+pixel_size = 0.0025
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.96, 0.89, 0.75, 1)
+double_sided = true
+
+[node name="NumberWell_09" type="MeshInstance3D" parent="."]
+position = Vector3(0.092, 1.003, -0.341)
+mesh = SubResource("CellMesh")
+material_override = SubResource("TileRed")
+
+[node name="BettingNumber_09" type="Label3D" parent="."]
+position = Vector3(0.092, 1.012, -0.341)
+rotation = Vector3(-1.5708, 0, 0)
+text = "9"
+font_size = 24
+pixel_size = 0.0025
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.96, 0.89, 0.75, 1)
+double_sided = true
+
+[node name="NumberWell_08" type="MeshInstance3D" parent="."]
+position = Vector3(0.092, 1.003, 0)
+mesh = SubResource("CellMesh")
+material_override = SubResource("TileBlack")
+
+[node name="BettingNumber_08" type="Label3D" parent="."]
+position = Vector3(0.092, 1.012, 0)
+rotation = Vector3(-1.5708, 0, 0)
+text = "8"
+font_size = 24
+pixel_size = 0.0025
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.96, 0.89, 0.75, 1)
+double_sided = true
+
+[node name="NumberWell_07" type="MeshInstance3D" parent="."]
+position = Vector3(0.092, 1.003, 0.341)
+mesh = SubResource("CellMesh")
+material_override = SubResource("TileRed")
+
+[node name="BettingNumber_07" type="Label3D" parent="."]
+position = Vector3(0.092, 1.012, 0.341)
+rotation = Vector3(-1.5708, 0, 0)
+text = "7"
+font_size = 24
+pixel_size = 0.0025
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.96, 0.89, 0.75, 1)
+double_sided = true
+
+[node name="NumberWell_12" type="MeshInstance3D" parent="."]
+position = Vector3(0.234, 1.003, -0.341)
+mesh = SubResource("CellMesh")
+material_override = SubResource("TileRed")
+
+[node name="BettingNumber_12" type="Label3D" parent="."]
+position = Vector3(0.234, 1.012, -0.341)
+rotation = Vector3(-1.5708, 0, 0)
+text = "12"
+font_size = 24
+pixel_size = 0.0025
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.96, 0.89, 0.75, 1)
+double_sided = true
+
+[node name="NumberWell_11" type="MeshInstance3D" parent="."]
+position = Vector3(0.234, 1.003, 0)
+mesh = SubResource("CellMesh")
+material_override = SubResource("TileBlack")
+
+[node name="BettingNumber_11" type="Label3D" parent="."]
+position = Vector3(0.234, 1.012, 0)
+rotation = Vector3(-1.5708, 0, 0)
+text = "11"
+font_size = 24
+pixel_size = 0.0025
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.96, 0.89, 0.75, 1)
+double_sided = true
+
+[node name="NumberWell_10" type="MeshInstance3D" parent="."]
+position = Vector3(0.234, 1.003, 0.341)
+mesh = SubResource("CellMesh")
+material_override = SubResource("TileBlack")
+
+[node name="BettingNumber_10" type="Label3D" parent="."]
+position = Vector3(0.234, 1.012, 0.341)
+rotation = Vector3(-1.5708, 0, 0)
+text = "10"
+font_size = 24
+pixel_size = 0.0025
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.96, 0.89, 0.75, 1)
+double_sided = true
+
+[node name="NumberWell_15" type="MeshInstance3D" parent="."]
+position = Vector3(0.376, 1.003, -0.341)
+mesh = SubResource("CellMesh")
+material_override = SubResource("TileBlack")
+
+[node name="BettingNumber_15" type="Label3D" parent="."]
+position = Vector3(0.376, 1.012, -0.341)
+rotation = Vector3(-1.5708, 0, 0)
+text = "15"
+font_size = 24
+pixel_size = 0.0025
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.96, 0.89, 0.75, 1)
+double_sided = true
+
+[node name="NumberWell_14" type="MeshInstance3D" parent="."]
+position = Vector3(0.376, 1.003, 0)
+mesh = SubResource("CellMesh")
+material_override = SubResource("TileRed")
+
+[node name="BettingNumber_14" type="Label3D" parent="."]
+position = Vector3(0.376, 1.012, 0)
+rotation = Vector3(-1.5708, 0, 0)
+text = "14"
+font_size = 24
+pixel_size = 0.0025
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.96, 0.89, 0.75, 1)
+double_sided = true
+
+[node name="NumberWell_13" type="MeshInstance3D" parent="."]
+position = Vector3(0.376, 1.003, 0.341)
+mesh = SubResource("CellMesh")
+material_override = SubResource("TileBlack")
+
+[node name="BettingNumber_13" type="Label3D" parent="."]
+position = Vector3(0.376, 1.012, 0.341)
+rotation = Vector3(-1.5708, 0, 0)
+text = "13"
+font_size = 24
+pixel_size = 0.0025
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.96, 0.89, 0.75, 1)
+double_sided = true
+
+[node name="NumberWell_18" type="MeshInstance3D" parent="."]
+position = Vector3(0.518, 1.003, -0.341)
+mesh = SubResource("CellMesh")
+material_override = SubResource("TileRed")
+
+[node name="BettingNumber_18" type="Label3D" parent="."]
+position = Vector3(0.518, 1.012, -0.341)
+rotation = Vector3(-1.5708, 0, 0)
+text = "18"
+font_size = 24
+pixel_size = 0.0025
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.96, 0.89, 0.75, 1)
+double_sided = true
+
+[node name="NumberWell_17" type="MeshInstance3D" parent="."]
+position = Vector3(0.518, 1.003, 0)
+mesh = SubResource("CellMesh")
+material_override = SubResource("TileBlack")
+
+[node name="BettingNumber_17" type="Label3D" parent="."]
+position = Vector3(0.518, 1.012, 0)
+rotation = Vector3(-1.5708, 0, 0)
+text = "17"
+font_size = 24
+pixel_size = 0.0025
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.96, 0.89, 0.75, 1)
+double_sided = true
+
+[node name="NumberWell_16" type="MeshInstance3D" parent="."]
+position = Vector3(0.518, 1.003, 0.341)
+mesh = SubResource("CellMesh")
+material_override = SubResource("TileRed")
+
+[node name="BettingNumber_16" type="Label3D" parent="."]
+position = Vector3(0.518, 1.012, 0.341)
+rotation = Vector3(-1.5708, 0, 0)
+text = "16"
+font_size = 24
+pixel_size = 0.0025
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.96, 0.89, 0.75, 1)
+double_sided = true
+
+[node name="NumberWell_21" type="MeshInstance3D" parent="."]
+position = Vector3(0.66, 1.003, -0.341)
+mesh = SubResource("CellMesh")
+material_override = SubResource("TileRed")
+
+[node name="BettingNumber_21" type="Label3D" parent="."]
+position = Vector3(0.66, 1.012, -0.341)
+rotation = Vector3(-1.5708, 0, 0)
+text = "21"
+font_size = 24
+pixel_size = 0.0025
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.96, 0.89, 0.75, 1)
+double_sided = true
+
+[node name="NumberWell_20" type="MeshInstance3D" parent="."]
+position = Vector3(0.66, 1.003, 0)
+mesh = SubResource("CellMesh")
+material_override = SubResource("TileBlack")
+
+[node name="BettingNumber_20" type="Label3D" parent="."]
+position = Vector3(0.66, 1.012, 0)
+rotation = Vector3(-1.5708, 0, 0)
+text = "20"
+font_size = 24
+pixel_size = 0.0025
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.96, 0.89, 0.75, 1)
+double_sided = true
+
+[node name="NumberWell_19" type="MeshInstance3D" parent="."]
+position = Vector3(0.66, 1.003, 0.341)
+mesh = SubResource("CellMesh")
+material_override = SubResource("TileRed")
+
+[node name="BettingNumber_19" type="Label3D" parent="."]
+position = Vector3(0.66, 1.012, 0.341)
+rotation = Vector3(-1.5708, 0, 0)
+text = "19"
+font_size = 24
+pixel_size = 0.0025
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.96, 0.89, 0.75, 1)
+double_sided = true
+
+[node name="NumberWell_24" type="MeshInstance3D" parent="."]
+position = Vector3(0.802, 1.003, -0.341)
+mesh = SubResource("CellMesh")
+material_override = SubResource("TileBlack")
+
+[node name="BettingNumber_24" type="Label3D" parent="."]
+position = Vector3(0.802, 1.012, -0.341)
+rotation = Vector3(-1.5708, 0, 0)
+text = "24"
+font_size = 24
+pixel_size = 0.0025
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.96, 0.89, 0.75, 1)
+double_sided = true
+
+[node name="NumberWell_23" type="MeshInstance3D" parent="."]
+position = Vector3(0.802, 1.003, 0)
+mesh = SubResource("CellMesh")
+material_override = SubResource("TileRed")
+
+[node name="BettingNumber_23" type="Label3D" parent="."]
+position = Vector3(0.802, 1.012, 0)
+rotation = Vector3(-1.5708, 0, 0)
+text = "23"
+font_size = 24
+pixel_size = 0.0025
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.96, 0.89, 0.75, 1)
+double_sided = true
+
+[node name="NumberWell_22" type="MeshInstance3D" parent="."]
+position = Vector3(0.802, 1.003, 0.341)
+mesh = SubResource("CellMesh")
+material_override = SubResource("TileBlack")
+
+[node name="BettingNumber_22" type="Label3D" parent="."]
+position = Vector3(0.802, 1.012, 0.341)
+rotation = Vector3(-1.5708, 0, 0)
+text = "22"
+font_size = 24
+pixel_size = 0.0025
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.96, 0.89, 0.75, 1)
+double_sided = true
+
+[node name="NumberWell_27" type="MeshInstance3D" parent="."]
+position = Vector3(0.944, 1.003, -0.341)
+mesh = SubResource("CellMesh")
+material_override = SubResource("TileRed")
+
+[node name="BettingNumber_27" type="Label3D" parent="."]
+position = Vector3(0.944, 1.012, -0.341)
+rotation = Vector3(-1.5708, 0, 0)
+text = "27"
+font_size = 24
+pixel_size = 0.0025
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.96, 0.89, 0.75, 1)
+double_sided = true
+
+[node name="NumberWell_26" type="MeshInstance3D" parent="."]
+position = Vector3(0.944, 1.003, 0)
+mesh = SubResource("CellMesh")
+material_override = SubResource("TileBlack")
+
+[node name="BettingNumber_26" type="Label3D" parent="."]
+position = Vector3(0.944, 1.012, 0)
+rotation = Vector3(-1.5708, 0, 0)
+text = "26"
+font_size = 24
+pixel_size = 0.0025
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.96, 0.89, 0.75, 1)
+double_sided = true
+
+[node name="NumberWell_25" type="MeshInstance3D" parent="."]
+position = Vector3(0.944, 1.003, 0.341)
+mesh = SubResource("CellMesh")
+material_override = SubResource("TileRed")
+
+[node name="BettingNumber_25" type="Label3D" parent="."]
+position = Vector3(0.944, 1.012, 0.341)
+rotation = Vector3(-1.5708, 0, 0)
+text = "25"
+font_size = 24
+pixel_size = 0.0025
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.96, 0.89, 0.75, 1)
+double_sided = true
+
+[node name="NumberWell_30" type="MeshInstance3D" parent="."]
+position = Vector3(1.086, 1.003, -0.341)
+mesh = SubResource("CellMesh")
+material_override = SubResource("TileRed")
+
+[node name="BettingNumber_30" type="Label3D" parent="."]
+position = Vector3(1.086, 1.012, -0.341)
+rotation = Vector3(-1.5708, 0, 0)
+text = "30"
+font_size = 24
+pixel_size = 0.0025
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.96, 0.89, 0.75, 1)
+double_sided = true
+
+[node name="NumberWell_29" type="MeshInstance3D" parent="."]
+position = Vector3(1.086, 1.003, 0)
+mesh = SubResource("CellMesh")
+material_override = SubResource("TileBlack")
+
+[node name="BettingNumber_29" type="Label3D" parent="."]
+position = Vector3(1.086, 1.012, 0)
+rotation = Vector3(-1.5708, 0, 0)
+text = "29"
+font_size = 24
+pixel_size = 0.0025
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.96, 0.89, 0.75, 1)
+double_sided = true
+
+[node name="NumberWell_28" type="MeshInstance3D" parent="."]
+position = Vector3(1.086, 1.003, 0.341)
+mesh = SubResource("CellMesh")
+material_override = SubResource("TileBlack")
+
+[node name="BettingNumber_28" type="Label3D" parent="."]
+position = Vector3(1.086, 1.012, 0.341)
+rotation = Vector3(-1.5708, 0, 0)
+text = "28"
+font_size = 24
+pixel_size = 0.0025
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.96, 0.89, 0.75, 1)
+double_sided = true
+
+[node name="NumberWell_33" type="MeshInstance3D" parent="."]
+position = Vector3(1.228, 1.003, -0.341)
+mesh = SubResource("CellMesh")
+material_override = SubResource("TileBlack")
+
+[node name="BettingNumber_33" type="Label3D" parent="."]
+position = Vector3(1.228, 1.012, -0.341)
+rotation = Vector3(-1.5708, 0, 0)
+text = "33"
+font_size = 24
+pixel_size = 0.0025
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.96, 0.89, 0.75, 1)
+double_sided = true
+
+[node name="NumberWell_32" type="MeshInstance3D" parent="."]
+position = Vector3(1.228, 1.003, 0)
+mesh = SubResource("CellMesh")
+material_override = SubResource("TileRed")
+
+[node name="BettingNumber_32" type="Label3D" parent="."]
+position = Vector3(1.228, 1.012, 0)
+rotation = Vector3(-1.5708, 0, 0)
+text = "32"
+font_size = 24
+pixel_size = 0.0025
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.96, 0.89, 0.75, 1)
+double_sided = true
+
+[node name="NumberWell_31" type="MeshInstance3D" parent="."]
+position = Vector3(1.228, 1.003, 0.341)
+mesh = SubResource("CellMesh")
+material_override = SubResource("TileBlack")
+
+[node name="BettingNumber_31" type="Label3D" parent="."]
+position = Vector3(1.228, 1.012, 0.341)
+rotation = Vector3(-1.5708, 0, 0)
+text = "31"
+font_size = 24
+pixel_size = 0.0025
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.96, 0.89, 0.75, 1)
+double_sided = true
+
+[node name="NumberWell_36" type="MeshInstance3D" parent="."]
+position = Vector3(1.37, 1.003, -0.341)
+mesh = SubResource("CellMesh")
+material_override = SubResource("TileRed")
+
+[node name="BettingNumber_36" type="Label3D" parent="."]
+position = Vector3(1.37, 1.012, -0.341)
+rotation = Vector3(-1.5708, 0, 0)
+text = "36"
+font_size = 24
+pixel_size = 0.0025
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.96, 0.89, 0.75, 1)
+double_sided = true
+
+[node name="NumberWell_35" type="MeshInstance3D" parent="."]
+position = Vector3(1.37, 1.003, 0)
+mesh = SubResource("CellMesh")
+material_override = SubResource("TileBlack")
+
+[node name="BettingNumber_35" type="Label3D" parent="."]
+position = Vector3(1.37, 1.012, 0)
+rotation = Vector3(-1.5708, 0, 0)
+text = "35"
+font_size = 24
+pixel_size = 0.0025
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.96, 0.89, 0.75, 1)
+double_sided = true
+
+[node name="NumberWell_34" type="MeshInstance3D" parent="."]
+position = Vector3(1.37, 1.003, 0.341)
+mesh = SubResource("CellMesh")
+material_override = SubResource("TileRed")
+
+[node name="BettingNumber_34" type="Label3D" parent="."]
+position = Vector3(1.37, 1.012, 0.341)
+rotation = Vector3(-1.5708, 0, 0)
+text = "34"
+font_size = 24
+pixel_size = 0.0025
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.96, 0.89, 0.75, 1)
+double_sided = true
+
+[node name="ZeroWell" type="MeshInstance3D" parent="."]
+position = Vector3(-0.285, 1.003, 0)
+mesh = SubResource("ZeroMesh")
+material_override = SubResource("TileGreen")
+
+[node name="BettingZero" type="Label3D" parent="."]
+position = Vector3(-0.285, 1.012, 0)
+rotation = Vector3(-1.5708, 0, 0)
+text = "0"
+font_size = 28
+pixel_size = 0.0025
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.95, 0.88, 0.69, 1)
+
+[node name="DealerChipRack" type="MeshInstance3D" parent="."]
+position = Vector3(1.185, 1.035, -0.568)
+mesh = SubResource("ChipRail")
+material_override = SubResource("DarkWalnut")
+
+[node name="DealerRackInlay" type="MeshInstance3D" parent="."]
+position = Vector3(1.185, 1.071, -0.565)
+mesh = SubResource("ChipInset")
+material_override = SubResource("DarkBrass")
+
+[node name="DealerRackGoldEdge" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.955, -0.705)
+mesh = SubResource("RailGoldLong")
+material_override = SubResource("SatinBrass")
+
+[node name="SolidTableTopCollider" type="StaticBody3D" parent="."]
+position = Vector3(0, 0.865, 0)
+
+[node name="TableTopShape" type="CollisionShape3D" parent="SolidTableTopCollider"]
+shape = SubResource("TableShape")

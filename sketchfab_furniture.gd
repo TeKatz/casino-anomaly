@@ -5,7 +5,7 @@ extends Node3D
 # complete glTF scene has been loaded and placed successfully.
 
 const FOLDER := "res://models/sketchfab/"
-const ROULETTE_PBR: StandardMaterial3D = preload("res://roulette_wood_material.tres")
+const PREMIUM_ROULETTE = preload("res://models/casino_furniture/premium_roulette_table.tscn")
 signal furniture_finalized
 var assets: Dictionary = {}
 var replaced_slots := 0
@@ -225,14 +225,21 @@ func _spawn(slug: String, label: String, spot: Vector3, max_width: float,
     if add_collision and (_editor_preview_root == null or _baking_editor_models):
         var body := StaticBody3D.new()
         body.name = "FurnitureCollider"
-        body.position.y = size.size.y * factor * 0.5
+        body.position.y = 0.829 if slug == "blackjack_table" else size.size.y * factor * 0.5
         var shape := CollisionShape3D.new()
         var box := BoxShape3D.new()
-        box.size = Vector3(
-            maxf(size.size.x * factor, 0.25),
-            maxf(size.size.y * factor, 0.25),
-            maxf(size.size.z * factor, 0.25)
-        )
+        if slug == "blackjack_table":
+            # The old all-height bounding cube had a massive 0.326m margin,
+            # obstructing empty air around the curved felt table. Only the
+            # actual tabletop needs a broad collision plate.
+            box.size = Vector3(2.48, 0.14, 1.48)
+            box.margin = 0.012
+        else:
+            box.size = Vector3(
+                maxf(size.size.x * factor, 0.25),
+                maxf(size.size.y * factor, 0.25),
+                maxf(size.size.z * factor, 0.25)
+            )
         shape.shape = box
         body.add_child(shape)
         wrapper.add_child(body)
@@ -286,52 +293,20 @@ func _retro_plinth(spot: Vector3) -> Node3D:
     return stand
 
 func _roulette_table(spot: Vector3) -> Node3D:
-    # The donated Sketchfab "roulette_table" geometry is a WHEEL only.
-    # Make a readable casino table with a real betting layout beneath it.
-    var table := Node3D.new()
+    # Match the authored premium cabinet, even when older scenes need
+    # the legacy Sketchfab editor preview / authoring conversion.
+    # The wheel itself remains the separately imported Sketchfab model.
+    var table := PREMIUM_ROULETTE.instantiate() as Node3D
     table.name = "RouletteTableCabinet"
     table.set_meta("furniture_kind", "roulette_table")
     table.position = spot
     _replacement_parent().add_child(table)
-    var timber := ROULETTE_PBR.duplicate() as StandardMaterial3D
-    timber.uv1_scale = Vector3(2.15, 1.0, 1.35)
-    var brass := _finish(Color("#c4a05c"), 0.34, 0.62)
-    var felt := _finish(Color("#175444"), 0.96)
-    var white := _finish(Color("#e5d3ae"), 0.8)
-    var red := _finish(Color("#9c2e30"), 0.9)
-    var black := _finish(Color("#242629"), 0.89)
-
-    # Top reduced by 15 cm to match the imported blackjack table.
-    # Wheel inset is wide enough for a 1.28 m wheel, not a toy roulette dish.
-    _block(table, "SolidTableTop", Vector3(0, 0.865, 0),
-        Vector3(3.50, 0.18, 1.62), timber, true)
-    _block(table, "OuterBrassRim", Vector3(0, 0.957, 0),
-        Vector3(3.54, 0.042, 1.66), brass)
-    _block(table, "WheelAreaInset", Vector3(-1.02, 0.984, 0),
-        Vector3(1.47, 0.015, 1.43), timber)
-    _block(table, "BettingFelt", Vector3(0.64, 0.984, 0),
-        Vector3(1.94, 0.017, 1.37), felt)
-    for x in [-1.54, 1.54]:
-        for z in [-0.58, 0.58]:
-            _block(table, "TableLeg", Vector3(x, 0.405, z),
-                Vector3(0.17, 0.79, 0.17), timber)
-            _block(table, "LegFootGold", Vector3(x, 0.085, z),
-                Vector3(0.22, 0.12, 0.22), brass)
-    _block(table, "DealerRail", Vector3(0, 0.77, -0.78),
-        Vector3(3.36, 0.095, 0.09), timber)
-    # Thin, level betting-number grid, not emissive graphics or hovering
-    # objects. Cards/chips can replace this simple first-pass layout later.
-    for i in range(5):
-        var x := -0.29 + float(i) * 0.46
-        _block(table, "GridVertical", Vector3(x, 0.999, 0),
-            Vector3(0.012, 0.007, 1.15), white)
-    for i in range(4):
-        var z := -0.57 + float(i) * 0.38
-        _block(table, "GridHorizontal", Vector3(0.64, 0.999, z),
-            Vector3(1.87, 0.007, 0.012), white)
-    for i in range(4):
-        _block(table, "BettingTile", Vector3(-0.05 + float(i)*0.45, 1.003, -0.18),
-            Vector3(0.27, 0.007, 0.22), red if i % 2 == 0 else black)
+    if _editor_preview_root != null and not _baking_editor_models:
+        # Preview is intentionally unsaved and must not bring physics into
+        # the editor's preview scene. Authored and runtime models keep it.
+        for collision in table.find_children("*", "CollisionObject3D", true, false):
+            collision.get_parent().remove_child(collision)
+            collision.free()
     return table
 
 func _populate() -> void:
