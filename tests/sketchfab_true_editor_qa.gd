@@ -43,7 +43,9 @@ func _run() -> void:
                 roles[source] = int(roles[source]) + 1
             if str(item.get_meta("furniture_kind", "")) == "roulette_table":
                 cabinets += 1
-        if roles["retro_slot_machine"] != 1 or roles["roulette_table"] != 3 \
+        # The permanent authored scene can intentionally omit the retro
+        # hero; transient previews of older procedural rooms still need it.
+        if int(roles["retro_slot_machine"]) > 1 or roles["roulette_table"] != 3 \
                 or roles["blackjack_table"] != 1 or roles["poker_set"] != 1 \
                 or cabinets != 3:
             _fail("Authored imported furniture missing in the editor: " + str(roles))

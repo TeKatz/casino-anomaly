@@ -93,8 +93,20 @@ func _run() -> void:
     # than assuming the artist kept all ten original slot placements.
     var authored_slots := world.get_node("SlotMachines") as Node3D
     var imported_furniture := world.get_node("SketchfabFurniture") as Node3D
-    if imported_furniture == null or int(imported_furniture.get("replaced_slots")) != 1             or authored_slots.has_node("Slot_01"):
-        _fail("Runtime Sketchfab hero replacement failed")
+    if imported_furniture == null:
+        _fail("Runtime Sketchfab furniture layer missing")
+        return
+    var saved_models := imported_furniture.get_node_or_null("EditableImportedModels") as Node3D
+    var saved_hero_count := 0
+    if saved_models != null:
+        for item in saved_models.get_children():
+            if str(item.get_meta("source_asset", "")) == "retro_slot_machine":
+                saved_hero_count += 1
+    # The invisible source Slot_01 MUST be removed at runtime even when
+    # the designer deleted the imported hero and its original plinth.
+    if int(imported_furniture.get("replaced_slots")) != saved_hero_count \
+            or authored_slots.has_node("Slot_01"):
+        _fail("An authored retro hero or its hidden source was not synchronized")
         return
     for cabinet in authored_slots.get_children():
         if cabinet.name.begins_with("Slot_") and not cabinet.has_node("Body"):

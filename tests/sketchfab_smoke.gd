@@ -14,11 +14,8 @@ func _test() -> void:
     await process_frame
     await process_frame
     var layer: Node3D = world.get_node_or_null("SketchfabFurniture") as Node3D
-    if layer == null or layer.get("replaced_slots") != 1 \
-            or layer.get("replaced_roulette") < 3 \
-            or layer.get("replaced_blackjack") < 1 \
-            or layer.get("poker_props_placed") != 1:
-        push_error("Sketchfab model replacements are incomplete")
+    if layer == null:
+        push_error("Sketchfab furniture layer is missing")
         quit(1)
         return
     # Generated instances and permanently authored editor instances share
@@ -26,7 +23,22 @@ func _test() -> void:
     var placed_models := layer.get_node_or_null("EditableImportedModels") as Node3D
     if placed_models == null:
         placed_models = layer
+    # Unlike the three gameplay roulette wheels, the retro hero is optional:
+    # the level designer can remove that imported model in main.tscn.
+    var authored_retro := 0
+    for item in placed_models.get_children():
+        if str(item.get_meta("source_asset", "")) == "retro_slot_machine":
+            authored_retro += 1
+    if authored_retro > 1 or int(layer.get("replaced_slots")) != authored_retro \
+            or int(layer.get("replaced_roulette")) < 3 \
+            or int(layer.get("replaced_blackjack")) < 1 \
+            or int(layer.get("poker_props_placed")) != 1:
+        push_error("Sketchfab model counters disagree with saved furniture")
+        quit(1)
+        return
     for asset in ["retro_slot_machine", "roulette_table", "blackjack_table", "poker_set"]:
+        if asset == "retro_slot_machine" and authored_retro == 0:
+            continue
         var match_found := false
         for node in placed_models.get_children():
             if node.get_meta("source_asset", "") == asset:
@@ -65,7 +77,7 @@ func _test() -> void:
                 push_error("Raised slot platform is missing its collision")
                 quit(1)
                 return
-    if roulette_tables != 3 or raised_retro != 1:
+    if roulette_tables != 3 or raised_retro != authored_retro:
         push_error("Missing roulette tables or retro slot platform: tables=%d platform=%d" % [roulette_tables, raised_retro])
         quit(1)
         return

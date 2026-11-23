@@ -336,6 +336,13 @@ func _populate() -> void:
                 "poker_set":
                     poker_props_placed += 1
         if not Engine.is_editor_hint():
+            # The artist may delete the imported retro hero from the saved
+            # scene. In that case its original Slot_01 placeholder remains
+            # hidden in the authoring file: free it at runtime so its
+            # invisible StaticBody3D never blocks the entrance.
+            var hidden_source := hall.get_node_or_null("SlotMachines/Slot_01") as Node3D
+            if hidden_source != null and not hidden_source.visible:
+                hidden_source.queue_free()
             furniture_finalized.emit()
         return
     var slots: Node3D = hall.get_node_or_null("SlotMachines") as Node3D

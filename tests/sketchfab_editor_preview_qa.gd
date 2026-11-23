@@ -34,8 +34,11 @@ func _run() -> void:
     # permanent children and the unchanged runtime replacement contract.
     var authored := imported.get_node_or_null("EditableImportedModels") as Node3D
     if authored != null:
+        # A saved scene is authoritative. The old imported retro hero may
+        # have been deliberately removed, while the three roulette wheels,
+        # blackjack table and poker props remain required.
         var expected := {
-            "retro_slot_machine": 1,
+            "retro_slot_machine": 0,
             "roulette_table": 3,
             "blackjack_table": 1,
             "poker_set": 1
@@ -62,7 +65,9 @@ func _run() -> void:
                 if item.get_node_or_null("PedestalBodyCollider") == null:
                     _fail("Authored retro pedestal lacks collision")
                     return
-        if found != expected or cabinets != 3 or plinths != 1:
+        var saved_retro := int(found["retro_slot_machine"])
+        expected["retro_slot_machine"] = saved_retro
+        if saved_retro > 1 or found != expected or cabinets != 3 or plinths != saved_retro:
             _fail("Authored furniture count is incorrect: %s, cabinets=%d, plinths=%d" % [str(found), cabinets, plinths])
             return
         if retro.visible or tables.get_node("Roulette2").visible:
@@ -77,7 +82,7 @@ func _run() -> void:
                 or imported.get_child_count() != 1:
             _fail("Runtime unexpectedly recreated the saved imported models")
             return
-        if int(imported.get("replaced_slots")) != 1 \
+        if int(imported.get("replaced_slots")) != saved_retro \
                 or int(imported.get("replaced_roulette")) != 3 \
                 or int(imported.get("replaced_blackjack")) != 1 \
                 or int(imported.get("poker_props_placed")) != 1:
