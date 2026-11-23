@@ -62,7 +62,12 @@ func _run() -> void:
     await process_frame
     var cards := world.get_node_or_null("PlayingCardDecor") as Node3D
     if cards == null:
-        _fail("Missing PlayingCardDecor container")
+        var root_names: Array[String] = []
+        for item in world.get_children():
+            root_names.append(str(item.name))
+        var authored_text := FileAccess.get_file_as_string("res://main.tscn")
+        _fail("Missing PlayingCardDecor container; scene=%s, source has node=%s, root children=%s" \
+            % [world.scene_file_path, str(authored_text.contains("[node name=\\\"PlayingCardDecor\\\"")), str(root_names)])
         return
     var authored_count := 0
     var child_names: Array[String] = []
