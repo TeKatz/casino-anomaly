@@ -6,6 +6,16 @@ Model source set: Chandelier_02, Chandelier_01, brass_candleholders, marble_bust
 
 The installer does not request assets from Poly Haven at runtime; model imports are downloaded and verified during development. The in-game Credits panel links back to these sources.
 
+## Monstera Deliciosa Potted Mid-Century plant — Giora (CC BY 4.0)
+
+Source: https://sketchfab.com/3d-models/monstera-deliciosa-potted-mid-century-plant-1ab9bf841df04c07b1819be596327629
+Author: https://sketchfab.com/ChubbyPanda
+License: https://creativecommons.org/licenses/by/4.0/
+
+The uploaded source package includes the explicit license text. Optimized
+textures retain the original UVs, foliage alpha, pot and stand and their
+material associations. This model must be distributed with attribution.
+
 ## Sketchfab CC BY 4.0 — user-provided models
 
 - **Playing Cards (52 individual cards)** — [jdastine](https://sketchfab.com/jdastine), [source](https://sketchfab.com/3d-models/playing-cards-2dd7c45bf68a4ce3bf63c995b1bf12bf). The uploaded set was split into 52 separately editable 3D glTF assets, with a shared optimized source-texture atlas, and selected examples placed on Blackjack and lounge tables. A [published third-party credits sheet](https://margaridabelo.myblog.arts.ac.uk/files/2023/05/credits.pdf) identifies the model as CC BY 4.0; its supplied `license.txt` does **not** expressly state a Creative Commons license and the glTF identifies jdastine as copyright holder. Preserve credit and verify permission with the author if distribution terms are uncertain. Source/license details and original material mapping are in `models/playing_cards/`.

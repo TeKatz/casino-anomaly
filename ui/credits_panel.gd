@@ -99,6 +99,7 @@ Roulette Table — [url=https://sketchfab.com/3d-models/roulette-table-18a27b0e3
 Retro Slot Machine — [url=https://sketchfab.com/3d-models/retro-slot-machine-46f0ae338d984364ac1249451067c1a3]ARTEL_3D[/url]
 Poker set — [url=https://sketchfab.com/3d-models/poker-set-841e271f392b4b3187b19fbdbb81ef62]Matth_mat[/url]
 Playing Cards (52 separated meshes) — [url=https://sketchfab.com/3d-models/playing-cards-2dd7c45bf68a4ce3bf63c995b1bf12bf]jdastine[/url]
+Monstera Deliciosa Potted Mid-Century plant — [url=https://sketchfab.com/3d-models/monstera-deliciosa-potted-mid-century-plant-1ab9bf841df04c07b1819be596327629]Giora[/url]
 Blackjack Table — [url=https://sketchfab.com/3d-models/blackjack-table-baf7e3cbd14140ca81ea1a79d28fb635]Ravi Jangid[/url]
 Business Man (Croupier) — [url=https://sketchfab.com/3d-models/business-man-low-polygon-game-character-b6f6740f883b4749abac47af0045a9dd]manoeldarochadeoliveira[/url]
 Assets have been adapted for this game. License: [url=https://creativecommons.org/licenses/by/4.0/]Creative Commons Attribution 4.0[/url].
