@@ -1,0 +1,328 @@
+{
+  "schema": 1,
+  "source": "https://sketchfab.com/3d-models/playing-cards-2dd7c45bf68a4ce3bf63c995b1bf12bf",
+  "artist": "jdastine",
+  "original_license_claim": "CC BY 4.0 reported by third-party attribution page; downloaded ZIP generic copyright notice does not explicitly restate that license",
+  "modifications": [
+    "Separated each of 52 cards into a standalone glTF 2.0 scene",
+    "Preserved original 3D vertex/index/UV geometry",
+    "Packed and re-UVed original faces to a shared 8-by-7 game atlas",
+    "Scaled source face/back image textures for game use"
+  ],
+  "geometry_sha256": "5c3828ce63bcdc2cfab4ecbd06dd4691b0f30dd626cab7cd81ee4e12174f6375",
+  "atlas_sha256": "dec7e0aa25ac1f86c962fc289c4063b03dd354453d25555beed3f944f37cc584",
+  "faces": [
+    {
+      "id": 0,
+      "source_material": "material",
+      "scene": "individual/card_00.gltf",
+      "original_group": "pCube23"
+    },
+    {
+      "id": 1,
+      "source_material": "DQueen",
+      "scene": "individual/card_01.gltf",
+      "original_group": "pCube24"
+    },
+    {
+      "id": 2,
+      "source_material": "DJack",
+      "scene": "individual/card_02.gltf",
+      "original_group": "pCube25"
+    },
+    {
+      "id": 3,
+      "source_material": "material_5",
+      "scene": "individual/card_03.gltf",
+      "original_group": "pCube26"
+    },
+    {
+      "id": 4,
+      "source_material": "material_6",
+      "scene": "individual/card_04.gltf",
+      "original_group": "pCube27"
+    },
+    {
+      "id": 5,
+      "source_material": "material_7",
+      "scene": "individual/card_05.gltf",
+      "original_group": "pCube28"
+    },
+    {
+      "id": 6,
+      "source_material": "material_8",
+      "scene": "individual/card_06.gltf",
+      "original_group": "pCube29"
+    },
+    {
+      "id": 7,
+      "source_material": "material_9",
+      "scene": "individual/card_07.gltf",
+      "original_group": "pCube30"
+    },
+    {
+      "id": 8,
+      "source_material": "material_10",
+      "scene": "individual/card_08.gltf",
+      "original_group": "pCube31"
+    },
+    {
+      "id": 9,
+      "source_material": "material_11",
+      "scene": "individual/card_09.gltf",
+      "original_group": "pCube32"
+    },
+    {
+      "id": 10,
+      "source_material": "material_12",
+      "scene": "individual/card_10.gltf",
+      "original_group": "pCube33"
+    },
+    {
+      "id": 11,
+      "source_material": "material_13",
+      "scene": "individual/card_11.gltf",
+      "original_group": "pCube34"
+    },
+    {
+      "id": 12,
+      "source_material": "DAce",
+      "scene": "individual/card_12.gltf",
+      "original_group": "pCube35"
+    },
+    {
+      "id": 13,
+      "source_material": "HKing",
+      "scene": "individual/card_13.gltf",
+      "original_group": "pCube36"
+    },
+    {
+      "id": 14,
+      "source_material": "SKing",
+      "scene": "individual/card_14.gltf",
+      "original_group": "pCube37"
+    },
+    {
+      "id": 15,
+      "source_material": "CKing",
+      "scene": "individual/card_15.gltf",
+      "original_group": "pCube38"
+    },
+    {
+      "id": 16,
+      "source_material": "HQueen",
+      "scene": "individual/card_16.gltf",
+      "original_group": "pCube39"
+    },
+    {
+      "id": 17,
+      "source_material": "SQueen",
+      "scene": "individual/card_17.gltf",
+      "original_group": "pCube40"
+    },
+    {
+      "id": 18,
+      "source_material": "CQueen",
+      "scene": "individual/card_18.gltf",
+      "original_group": "pCube41"
+    },
+    {
+      "id": 19,
+      "source_material": "HJack",
+      "scene": "individual/card_19.gltf",
+      "original_group": "pCube42"
+    },
+    {
+      "id": 20,
+      "source_material": "SJack",
+      "scene": "individual/card_20.gltf",
+      "original_group": "pCube43"
+    },
+    {
+      "id": 21,
+      "source_material": "CJack",
+      "scene": "individual/card_21.gltf",
+      "original_group": "pCube44"
+    },
+    {
+      "id": 22,
+      "source_material": "material_24",
+      "scene": "individual/card_22.gltf",
+      "original_group": "pCube45"
+    },
+    {
+      "id": 23,
+      "source_material": "material_25",
+      "scene": "individual/card_23.gltf",
+      "original_group": "pCube46"
+    },
+    {
+      "id": 24,
+      "source_material": "DKing",
+      "scene": "individual/card_24.gltf",
+      "original_group": "pCube47"
+    },
+    {
+      "id": 25,
+      "source_material": "material_27",
+      "scene": "individual/card_25.gltf",
+      "original_group": "pCube48"
+    },
+    {
+      "id": 26,
+      "source_material": "material_28",
+      "scene": "individual/card_26.gltf",
+      "original_group": "pCube49"
+    },
+    {
+      "id": 27,
+      "source_material": "material_29",
+      "scene": "individual/card_27.gltf",
+      "original_group": "pCube50"
+    },
+    {
+      "id": 28,
+      "source_material": "material_30",
+      "scene": "individual/card_28.gltf",
+      "original_group": "pCube51"
+    },
+    {
+      "id": 29,
+      "source_material": "material_31",
+      "scene": "individual/card_29.gltf",
+      "original_group": "pCube52"
+    },
+    {
+      "id": 30,
+      "source_material": "material_32",
+      "scene": "individual/card_30.gltf",
+      "original_group": "pCube53"
+    },
+    {
+      "id": 31,
+      "source_material": "material_33",
+      "scene": "individual/card_31.gltf",
+      "original_group": "pCube54"
+    },
+    {
+      "id": 32,
+      "source_material": "material_34",
+      "scene": "individual/card_32.gltf",
+      "original_group": "pCube55"
+    },
+    {
+      "id": 33,
+      "source_material": "SAce",
+      "scene": "individual/card_33.gltf",
+      "original_group": "pCube56"
+    },
+    {
+      "id": 34,
+      "source_material": "material_36",
+      "scene": "individual/card_34.gltf",
+      "original_group": "pCube57"
+    },
+    {
+      "id": 35,
+      "source_material": "material_37",
+      "scene": "individual/card_35.gltf",
+      "original_group": "pCube58"
+    },
+    {
+      "id": 36,
+      "source_material": "material_38",
+      "scene": "individual/card_36.gltf",
+      "original_group": "pCube59"
+    },
+    {
+      "id": 37,
+      "source_material": "HAce",
+      "scene": "individual/card_37.gltf",
+      "original_group": "pCube60"
+    },
+    {
+      "id": 38,
+      "source_material": "material_40",
+      "scene": "individual/card_38.gltf",
+      "original_group": "pCube61"
+    },
+    {
+      "id": 39,
+      "source_material": "material_41",
+      "scene": "individual/card_39.gltf",
+      "original_group": "pCube62"
+    },
+    {
+      "id": 40,
+      "source_material": "material_42",
+      "scene": "individual/card_40.gltf",
+      "original_group": "pCube63"
+    },
+    {
+      "id": 41,
+      "source_material": "material_43",
+      "scene": "individual/card_41.gltf",
+      "original_group": "pCube64"
+    },
+    {
+      "id": 42,
+      "source_material": "CAce",
+      "scene": "individual/card_42.gltf",
+      "original_group": "pCube65"
+    },
+    {
+      "id": 43,
+      "source_material": "material_45",
+      "scene": "individual/card_43.gltf",
+      "original_group": "pCube66"
+    },
+    {
+      "id": 44,
+      "source_material": "material_46",
+      "scene": "individual/card_44.gltf",
+      "original_group": "pCube67"
+    },
+    {
+      "id": 45,
+      "source_material": "material_47",
+      "scene": "individual/card_45.gltf",
+      "original_group": "pCube68"
+    },
+    {
+      "id": 46,
+      "source_material": "material_48",
+      "scene": "individual/card_46.gltf",
+      "original_group": "pCube69"
+    },
+    {
+      "id": 47,
+      "source_material": "material_49",
+      "scene": "individual/card_47.gltf",
+      "original_group": "pCube70"
+    },
+    {
+      "id": 48,
+      "source_material": "material_50",
+      "scene": "individual/card_48.gltf",
+      "original_group": "pCube71"
+    },
+    {
+      "id": 49,
+      "source_material": "material_51",
+      "scene": "individual/card_49.gltf",
+      "original_group": "pCube72"
+    },
+    {
+      "id": 50,
+      "source_material": "material_52",
+      "scene": "individual/card_50.gltf",
+      "original_group": "pCube73"
+    },
+    {
+      "id": 51,
+      "source_material": "material_53",
+      "scene": "individual/card_51.gltf",
+      "original_group": "pCube74"
+    }
+  ]
+}
