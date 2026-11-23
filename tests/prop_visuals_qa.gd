@@ -51,15 +51,31 @@ func _run() -> void:
         var medallion := child.get_node_or_null("EightPointReserveMedallion")
         var crown := child.get_node_or_null("OrnateCrownStopper")
         var wood := child.get_node_or_null("NaturalWoodenStopper")
-        var label := child.get_node_or_null("DieCutPaperLabel") as MeshInstance3D
-        var lettering := child.get_node_or_null("RaisedSignatureLettering") as Label3D
-        if shell == null or liquid == null or label == null or lettering == null:
-            _fail("One of the volumetric signature bottles is missing body, liquid or detail")
+        var label := child.get_node_or_null("ConformalPaperLabel") as MeshInstance3D
+        if shell == null or liquid == null or label == null:
+            _fail("A signature bottle is missing its shell, liquid or surface-wrap label")
             return
         if not (shell.mesh is ArrayMesh) or not (liquid.mesh is ArrayMesh) \
-                or label.mesh == null or shell.get_aabb().size.z < 0.10:
-            _fail("Bottle is a flat graphic rather than full 3D geometry")
+                or not (label.mesh is ArrayMesh) or shell.get_aabb().size.z < 0.10:
+            _fail("Bottle or its curved paper label is not real 3D geometry")
             return
+        var label_mat := label.material_override as StandardMaterial3D
+        if label_mat == null or label_mat.albedo_texture == null:
+            _fail("Conformal bottle label has no printed texture")
+            return
+        var uv: PackedVector2Array = label.mesh.surface_get_arrays(0)[Mesh.ARRAY_TEX_UV]
+        if uv.size() < 400:
+            _fail("Bottle label is not a densely UV-unwrapped curved surface")
+            return
+        if label.get_aabb().end.z > shell.get_aabb().end.z + 0.006:
+            _fail("Bottle label floats in front of the glass instead of touching it")
+            return
+        for obsolete in ["EmbossedMetalLabelFrame", "DieCutPaperLabel",
+                "RaisedSignatureLettering", "SpiritType", "InnerGoldRule",
+                "LowerGoldRule"]:
+            if child.get_node_or_null(obsolete) != null:
+                _fail("Detached 3D plaque survived on bottle: " + obsolete)
+                return
         if cap == null and medallion == null and crown == null and wood == null:
             _fail("Bottle has no sculpted stopper or closure")
             return
