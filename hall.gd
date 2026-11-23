@@ -3,6 +3,8 @@ extends Node3D
 
 # First room-design pass. Everything is intentionally modular so assets may replace
 # the whitebox furniture later without rebuilding the room or its collision layout.
+const GAME_TABLE_STOOL = preload("res://models/casino_furniture/gaming_stool.tscn")
+const GAME_TABLE_SURFACE = preload("res://models/casino_furniture/detailed_table_surface.tscn")
 const OAK: StandardMaterial3D = preload("res://floor_material.tres")
 const VoxelRig = preload("res://lighting/voxel_gi_rig.gd")
 const RoomSoundscape = preload("res://gameplay/room_soundscape.gd")
@@ -842,14 +844,26 @@ func _game_table(pos: Vector3, label: String, index: int) -> void:
     var base := _cylinder(group, "TableSupport", Vector3(0, 0.49, 0),
         0.18, 0.94, dark_wood)
     base.rotation.y = float(index) * 0.2
-    _cylinder(group, "GoldTableRim", Vector3(0, 0.96, 0), 1.25, 0.14, gold, true, 24)
-    _cylinder(group, "FeltSurface", Vector3(0, 1.045, 0), 1.14, 0.035, green_felt, false, 24)
+    # Keep the original tabletop collider, and preserve the old surface
+    # nodes for tools that resolve their dimensions, but do not render the
+    # placeholder cylinders underneath the detailed PBR construction.
+    var old_rim := _cylinder(group, "GoldTableRim", Vector3(0, 0.96, 0), 1.25, 0.14, gold, true, 24)
+    var old_felt := _cylinder(group, "FeltSurface", Vector3(0, 1.045, 0), 1.14, 0.035, green_felt, false, 24)
+    old_rim.visible = false
+    old_felt.visible = false
+    var top := GAME_TABLE_SURFACE.instantiate() as Node3D
+    top.name = "DetailedTableSurface"
+    group.add_child(top)
+    # Existing horizontal coordinates and scene-relative floor anchor remain
+    # unchanged, so authored layouts and anomaly targets are unaffected.
     for n in range(5):
         var angle := float(n) * TAU / 5.0 + 0.18
         var cx := sin(angle) * 1.78
         var cz := cos(angle) * 1.78
-        _cylinder(group, "ChairSeat", Vector3(cx, 0.51, cz), 0.34, 0.20, velvet)
-        _cylinder(group, "ChairLeg", Vector3(cx, 0.23, cz), 0.08, 0.41, dark_wood)
+        var stool := GAME_TABLE_STOOL.instantiate() as Node3D
+        stool.name = "GamingStool_%02d" % (n + 1)
+        stool.position = Vector3(cx, 0.0, cz)
+        group.add_child(stool)
     if index % 2 == 0:
         _cylinder(group, "RouletteCenter", Vector3(0, 1.105, 0), 0.49, 0.085, brass, false, 24)
         _cylinder(group, "RouletteInner", Vector3(0, 1.17, 0), 0.35, 0.045, screen_black, false, 24)

@@ -1,4 +1,4 @@
-[gd_scene load_steps=1432 format=4 uid="uid://3qbt7lcevocj"]
+[gd_scene load_steps=1434 format=4 uid="uid://3qbt7lcevocj"]
 
 [ext_resource type="Script" uid="uid://bfylaxqpynwux" path="res://hall.gd" id="1_hall"]
 [ext_resource type="Script" uid="uid://ddd0bf0443g2o" path="res://player.gd" id="2_player"]
@@ -65,6 +65,10 @@
 [ext_resource type="Texture2D" uid="uid://bnyjbufx6ul5q" path="res://assets/wood_table_worn/wood_table_worn_rough_2k.jpg" id="39_0dhbp"]
 [ext_resource type="Material" path="res://bar_top_material.tres" id="41_d2t1y"]
 [ext_resource type="Material" path="res://bi_stretch_material.tres" id="42_gngh3"]
+
+[ext_resource type="PackedScene" path="res://models/casino_furniture/gaming_stool.tscn" id="110_stool"]
+
+[ext_resource type="PackedScene" path="res://models/casino_furniture/detailed_table_surface.tscn" id="111_table"]
 
 [ext_resource type="PackedScene" path="res://models/signature_bar/velvet_ace.tscn" id="90_velvet_ace"]
 
@@ -11699,6 +11703,7 @@ mesh = SubResource("CylinderMesh_q0woa")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.96, 0)
 material_override = SubResource("StandardMaterial3D_swcop")
 mesh = SubResource("CylinderMesh_s4qw7")
+visible = false
 
 [node name="GoldTableRim_Collision" type="StaticBody3D" parent="GamingTables/Cards5"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.96, 0)
@@ -11710,56 +11715,24 @@ shape = SubResource("CylinderShape3D_bhe3f")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.045, 0)
 material_override = SubResource("StandardMaterial3D_ymbnq")
 mesh = SubResource("CylinderMesh_87l2x")
+visible = false
 
-[node name="ChairSeat" type="MeshInstance3D" parent="GamingTables/Cards5"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.31867263, 0.51, 1.7512418)
-material_override = SubResource("StandardMaterial3D_mlki8")
-mesh = SubResource("CylinderMesh_edsws")
+[node name="DetailedTableSurface" parent="GamingTables/Cards5" instance=ExtResource("111_table")]
 
-[node name="ChairLeg" type="MeshInstance3D" parent="GamingTables/Cards5"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.31867263, 0.23, 1.7512418)
-material_override = SubResource("StandardMaterial3D_dij0e")
-mesh = SubResource("CylinderMesh_j0dfg")
+[node name="GamingStool_01" parent="GamingTables/Cards5" instance=ExtResource("110_stool")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.31867263, 0, 1.7512418)
 
-[node name="@MeshInstance3D@285" type="MeshInstance3D" parent="GamingTables/Cards5"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7640052, 0.51, 0.23808777)
-material_override = SubResource("StandardMaterial3D_mlki8")
-mesh = SubResource("CylinderMesh_a65hj")
+[node name="GamingStool_02" parent="GamingTables/Cards5" instance=ExtResource("110_stool")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7640052, 0, 0.23808777)
 
-[node name="@MeshInstance3D@286" type="MeshInstance3D" parent="GamingTables/Cards5"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7640052, 0.23, 0.23808777)
-material_override = SubResource("StandardMaterial3D_dij0e")
-mesh = SubResource("CylinderMesh_c3wcc")
+[node name="GamingStool_03" parent="GamingTables/Cards5" instance=ExtResource("110_stool")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7715425, 0, -1.6040955)
 
-[node name="@MeshInstance3D@287" type="MeshInstance3D" parent="GamingTables/Cards5"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7715425, 0.51, -1.6040955)
-material_override = SubResource("StandardMaterial3D_mlki8")
-mesh = SubResource("CylinderMesh_4qqwq")
+[node name="GamingStool_04" parent="GamingTables/Cards5" instance=ExtResource("110_stool")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2871656, 0, -1.2294732)
 
-[node name="@MeshInstance3D@288" type="MeshInstance3D" parent="GamingTables/Cards5"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7715425, 0.23, -1.6040955)
-material_override = SubResource("StandardMaterial3D_dij0e")
-mesh = SubResource("CylinderMesh_u0i8n")
-
-[node name="@MeshInstance3D@289" type="MeshInstance3D" parent="GamingTables/Cards5"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2871656, 0.51, -1.2294732)
-material_override = SubResource("StandardMaterial3D_mlki8")
-mesh = SubResource("CylinderMesh_t8vpl")
-
-[node name="@MeshInstance3D@290" type="MeshInstance3D" parent="GamingTables/Cards5"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2871656, 0.23, -1.2294732)
-material_override = SubResource("StandardMaterial3D_dij0e")
-mesh = SubResource("CylinderMesh_t0lub")
-
-[node name="@MeshInstance3D@291" type="MeshInstance3D" parent="GamingTables/Cards5"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5670546, 0.51, 0.8442392)
-material_override = SubResource("StandardMaterial3D_mlki8")
-mesh = SubResource("CylinderMesh_6ewuf")
-
-[node name="@MeshInstance3D@292" type="MeshInstance3D" parent="GamingTables/Cards5"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5670546, 0.23, 0.8442392)
-material_override = SubResource("StandardMaterial3D_dij0e")
-mesh = SubResource("CylinderMesh_7f0ru")
+[node name="GamingStool_05" parent="GamingTables/Cards5" instance=ExtResource("110_stool")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5670546, 0, 0.8442392)
 
 [node name="Dealer_AceDiamond" type="Node3D" parent="GamingTables/Cards5"]
 position = Vector3(-0.22, 1.067, -0.42)
@@ -11946,6 +11919,7 @@ mesh = SubResource("CylinderMesh_2ch0x")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.96, 0)
 material_override = SubResource("StandardMaterial3D_swcop")
 mesh = SubResource("CylinderMesh_5u1sv")
+visible = false
 
 [node name="GoldTableRim_Collision" type="StaticBody3D" parent="GamingTables/Cards7"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.96, 0)
@@ -11957,56 +11931,24 @@ shape = SubResource("CylinderShape3D_vnihe")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.045, 0)
 material_override = SubResource("StandardMaterial3D_ymbnq")
 mesh = SubResource("CylinderMesh_shp24")
+visible = false
 
-[node name="ChairSeat" type="MeshInstance3D" parent="GamingTables/Cards7"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.31867263, 0.51, 1.7512418)
-material_override = SubResource("StandardMaterial3D_mlki8")
-mesh = SubResource("CylinderMesh_3rep0")
+[node name="DetailedTableSurface" parent="GamingTables/Cards7" instance=ExtResource("111_table")]
 
-[node name="ChairLeg" type="MeshInstance3D" parent="GamingTables/Cards7"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.31867263, 0.23, 1.7512418)
-material_override = SubResource("StandardMaterial3D_dij0e")
-mesh = SubResource("CylinderMesh_7v30y")
+[node name="GamingStool_01" parent="GamingTables/Cards7" instance=ExtResource("110_stool")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.31867263, 0, 1.7512418)
 
-[node name="@MeshInstance3D@307" type="MeshInstance3D" parent="GamingTables/Cards7"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7640052, 0.51, 0.23808777)
-material_override = SubResource("StandardMaterial3D_mlki8")
-mesh = SubResource("CylinderMesh_mlr1b")
+[node name="GamingStool_02" parent="GamingTables/Cards7" instance=ExtResource("110_stool")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7640052, 0, 0.23808777)
 
-[node name="@MeshInstance3D@308" type="MeshInstance3D" parent="GamingTables/Cards7"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7640052, 0.23, 0.23808777)
-material_override = SubResource("StandardMaterial3D_dij0e")
-mesh = SubResource("CylinderMesh_hq74r")
+[node name="GamingStool_03" parent="GamingTables/Cards7" instance=ExtResource("110_stool")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7715425, 0, -1.6040955)
 
-[node name="@MeshInstance3D@309" type="MeshInstance3D" parent="GamingTables/Cards7"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7715425, 0.51, -1.6040955)
-material_override = SubResource("StandardMaterial3D_mlki8")
-mesh = SubResource("CylinderMesh_r4jle")
+[node name="GamingStool_04" parent="GamingTables/Cards7" instance=ExtResource("110_stool")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2871656, 0, -1.2294732)
 
-[node name="@MeshInstance3D@310" type="MeshInstance3D" parent="GamingTables/Cards7"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7715425, 0.23, -1.6040955)
-material_override = SubResource("StandardMaterial3D_dij0e")
-mesh = SubResource("CylinderMesh_ir7nn")
-
-[node name="@MeshInstance3D@311" type="MeshInstance3D" parent="GamingTables/Cards7"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2871656, 0.51, -1.2294732)
-material_override = SubResource("StandardMaterial3D_mlki8")
-mesh = SubResource("CylinderMesh_0ephg")
-
-[node name="@MeshInstance3D@312" type="MeshInstance3D" parent="GamingTables/Cards7"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2871656, 0.23, -1.2294732)
-material_override = SubResource("StandardMaterial3D_dij0e")
-mesh = SubResource("CylinderMesh_p2k2b")
-
-[node name="@MeshInstance3D@313" type="MeshInstance3D" parent="GamingTables/Cards7"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5670546, 0.51, 0.8442392)
-material_override = SubResource("StandardMaterial3D_mlki8")
-mesh = SubResource("CylinderMesh_ot77d")
-
-[node name="@MeshInstance3D@314" type="MeshInstance3D" parent="GamingTables/Cards7"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5670546, 0.23, 0.8442392)
-material_override = SubResource("StandardMaterial3D_dij0e")
-mesh = SubResource("CylinderMesh_jt18l")
+[node name="GamingStool_05" parent="GamingTables/Cards7" instance=ExtResource("110_stool")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5670546, 0, 0.8442392)
 
 [node name="Side_2Diamond" type="Node3D" parent="GamingTables/Cards7"]
 position = Vector3(-0.45, 1.067, -0.17)
