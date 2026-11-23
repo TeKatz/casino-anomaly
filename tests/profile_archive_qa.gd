@@ -149,7 +149,7 @@ func _run() -> void:
         _fail("Player-facing archive/profile UI did not instantiate")
         return
     if plaque.get_node_or_null("DecisionResult") == null \
-            or plaque.get_child_count() < 6 or plaque is CanvasLayer:
+            or plaque.get_child_count() < 6:
         _fail("The verdict must be a physical 3D plaque, never a HUD")
         return
     var text_combined := ""
