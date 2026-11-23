@@ -1,11 +1,13 @@
 extends Button
-## Soft sculpted-glass buttons; no icons, corner strokes or orange trim.
+## Soft sculpted-glass buttons with a unified, cached line-icon system.
 ## The default mouse-click focus outline is suppressed. Keyboard/gamepad
 ## navigation gets a quiet *internal* focus edge instead.
 @export var featured := false
-@export_enum("gold", "green", "red") var accent := "gold"
+@export_enum("gold", "green", "red", "amber") var accent := "gold"
+@export var symbol := ""
 
 const MenuStyle = preload("res://ui/menu_style.gd")
+const MenuIcons = preload("res://ui/menu_icons.gd")
 var _motion: Tween
 var _keyboard_navigation := false
 
@@ -13,6 +15,10 @@ var _keyboard_navigation := false
 func _ready() -> void:
     MenuStyle.apply_button(self, featured, accent)
     alignment = HORIZONTAL_ALIGNMENT_CENTER
+    icon_alignment = HORIZONTAL_ALIGNMENT_LEFT
+    expand_icon = false
+    add_theme_constant_override("h_separation", 12)
+    set_symbol(symbol)
     add_theme_font_size_override("font_size", 19 if featured else 16)
     mouse_entered.connect(_hover_changed.bind(true))
     mouse_exited.connect(_hover_changed.bind(false))
@@ -22,6 +28,18 @@ func _ready() -> void:
     focus_exited.connect(_refresh_focus)
     resized.connect(_center_pivot)
     _center_pivot()
+
+
+func set_symbol(value: String) -> void:
+    symbol = value
+    icon = MenuIcons.texture(value)
+
+
+func set_accent(value: String, promoted: bool = false) -> void:
+    accent = value
+    featured = promoted
+    if is_node_ready():
+        MenuStyle.apply_button(self, featured, accent)
 
 
 func _center_pivot() -> void:

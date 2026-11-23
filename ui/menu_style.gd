@@ -5,6 +5,7 @@ extends RefCounted
 const GOLD := Color("#dabd84")
 const GREEN := Color("#75c899")
 const RED := Color("#df8490")
+const AMBER := Color("#f2ae70")
 const PALE := Color("#f5e9dc")
 const SKIN_WIDTH := 256
 const SKIN_HEIGHT := 48
@@ -19,6 +20,8 @@ static func accent_color(accent: String) -> Color:
             return GREEN
         "red":
             return RED
+        "amber":
+            return AMBER
         _:
             return GOLD
 
@@ -41,8 +44,11 @@ static func button_skin(state: String, featured: bool = false, accent: String = 
             top = Color("#1b2938")
             bottom = Color("#101b2a")
     if featured and state == "normal":
-        top = Color("#415b72")
-        bottom = Color("#21334a")
+        top = Color("#465e72")
+        bottom = Color("#21374b")
+    if featured and state == "hover":
+        top = Color("#5a7085")
+        bottom = Color("#294256")
     var rim := accent_color(accent)
     if state == "disabled":
         rim = Color("#62717b")
@@ -100,8 +106,8 @@ static func button_skin(state: String, featured: bool = false, accent: String = 
     style.texture_margin_right = 22.0
     style.texture_margin_top = 15.0
     style.texture_margin_bottom = 15.0
-    style.content_margin_left = 20.0
-    style.content_margin_right = 20.0
+    style.content_margin_left = 23.0
+    style.content_margin_right = 23.0
     style.content_margin_top = 8.0
     style.content_margin_bottom = 8.0
     _skin_cache[key] = style
@@ -135,6 +141,10 @@ static func apply_button(button: Button, active: bool = false, accent: String = 
     button.add_theme_color_override("font_hover_color", Color.WHITE)
     button.add_theme_color_override("font_pressed_color", Color("#e4f3f6"))
     button.add_theme_color_override("font_disabled_color", Color("#74818f"))
+    button.add_theme_color_override("icon_normal_color", accent_color(accent))
+    button.add_theme_color_override("icon_hover_color", Color("#f6f6f2"))
+    button.add_theme_color_override("icon_pressed_color", accent_color(accent).lightened(0.18))
+    button.add_theme_color_override("icon_disabled_color", Color("#79848c"))
     if not button.has_meta("_ui_click_attached"):
         button.set_meta("_ui_click_attached", true)
         button.pressed.connect(func() -> void:
@@ -165,10 +175,12 @@ static func apply_dropdown(button: OptionButton) -> void:
 
 static func panel() -> StyleBoxFlat:
     var box := StyleBoxFlat.new()
-    box.bg_color = Color("#101c2b")
-    box.border_color = Color("#647487")
-    box.set_border_width_all(1)
-    box.set_corner_radius_all(15)
-    box.shadow_color = Color(0, 0, 0, 0.65)
-    box.shadow_size = 24
+    box.bg_color = Color("#0d1928")
+    box.border_color = Color("#9d886d", 0.92)
+    box.set_border_width_all(2)
+    box.set_corner_radius_all(18)
+    box.corner_detail = 12
+    box.shadow_color = Color(0, 0, 0, 0.78)
+    box.shadow_size = 32
+    box.shadow_offset = Vector2(0, 9)
     return box
