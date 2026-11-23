@@ -100,3 +100,21 @@ surfaces; the originals and license statements remain available.
 - **Vintage Gramophone** — Maxim Mavrichev, [Sketchfab original](https://sketchfab.com/3d-models/vintage-gramophone-a7508a4233a344008029d21a2f0024bd), CC BY 4.0.
 - **Books with magnifier** — **shuvalov.di**, [Sketchfab original](https://sketchfab.com/3d-models/books-with-magnifier-cc153ce6258b4e538d9fc7da5b5d0fe4), **[Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)](https://creativecommons.org/licenses/by-sa/4.0/)** (license confirmed by the project owner). Imported from the original Sketchfab ZIP; model is uniformly scaled and positioned in the reception scene. Geometry and original PBR textures are otherwise retained. If the original asset is further adapted and redistributed, its adapted material must remain under CC BY-SA 4.0 or a permitted compatible license. This game is a collection of separately credited assets and does not assert ownership of the model.
 - **Desk Bell** — ClintonAbbott.Art, [Sketchfab original](https://sketchfab.com/3d-models/desk-bell-cc21b304c4bb4750bdde7a8fb538b116), CC BY 4.0.
+
+
+## Oxygen — Backrooms environment and prop packs (CC0-1.0)
+
+- **Backrooms Vol. 1** (modular corridors, walls, floors, ceilings, light fixtures):
+  https://oxygen3d.itch.io/game-ready-backrooms-asset-pack-vol-1
+- **Backrooms Vol. 2 (1k)** (interior props, office furniture and other details):
+  https://oxygen3d.itch.io/game-ready-backrooms-asset-pack-vol-2
+- Author: **Oxygen** (itch.io)
+- License: **Creative Commons Zero v1.0 Universal (CC0-1.0)**;
+  https://creativecommons.org/publicdomain/zero/1.0/
+
+The original downloaded archives are retained in
+`models/backrooms/oxygen/sources/`; the Godot-ready FBX/texture and GLB files
+are in `models/backrooms/oxygen/vol1/` and `vol2/`. Exact source checksums,
+import instructions and editor usage are recorded in
+`models/backrooms/oxygen/README.md`. The CC0 license does not require credits,
+but this attribution is retained for asset provenance.
