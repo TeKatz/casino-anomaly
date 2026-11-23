@@ -1,0 +1,52 @@
+name: Import Oxygen Backrooms assets
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - .github/workflows/import-oxygen-backrooms.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  import-verified-assets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dev
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated download tool
+        shell: bash
+        run: |
+          npm install --prefix "$RUNNER_TEMP/itch-downloader" --no-save --ignore-scripts --no-audit --no-fund itchio-downloader
+      - name: Download and authenticate Oxygen archives
+        shell: bash
+        env:
+          ITCH_DOWNLOADER_PATH: ${{ runner.temp }}/itch-downloader/node_modules/itchio-downloader
+        run: |
+          node tools/download_oxygen_backrooms.cjs "$RUNNER_TEMP/oxygen-archives"
+      - name: Install original source ZIPs and Godot assets
+        shell: bash
+        run: |
+          python3 tools/import_oxygen_backrooms.py \
+            --vol1 "$RUNNER_TEMP/oxygen-archives/backrooms.zip" \
+            --vol2 "$RUNNER_TEMP/oxygen-archives/Backrooms_Vol2_1k.zip"
+      - name: Commit verified assets to dev
+        shell: bash
+        run: |
+          git add models/backrooms/oxygen
+          if git diff --cached --quiet; then
+            echo "No asset changes required"
+            exit 0
+          fi
+          git -c user.name="Casino Anomaly asset importer" \
+              -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+              commit -m "assets: add verified Oxygen Backrooms Vol. 1 and Vol. 2"
+          git push origin HEAD:dev
