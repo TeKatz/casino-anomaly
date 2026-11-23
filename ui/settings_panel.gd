@@ -15,6 +15,7 @@ var tab_row: HBoxContainer
 var options_box: VBoxContainer
 var tabs: Array[Button] = []
 var selected_tab := 0
+var options_tween: Tween
 var settings_node: Variant = null
 var title_label: Label
 var footer_note: Label
@@ -191,6 +192,13 @@ func _switch_tab(index: int) -> void:
             _select(Loc.t("settings.language", self), "language", [
                 ["English", "en"], ["Deutsch", "de"]
             ])
+
+    if options_tween != null and options_tween.is_running():
+        options_tween.kill()
+    options_box.modulate.a = 0.0
+    options_tween = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+    options_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+    options_tween.tween_property(options_box, "modulate:a", 1.0, 0.19)
 
 
 func _section(text: String) -> void:

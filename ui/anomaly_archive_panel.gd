@@ -12,6 +12,7 @@ var heading: Label
 var tabs: HBoxContainer
 var body: VBoxContainer
 var back_button: Button
+var body_tween: Tween
 
 
 func _ready() -> void:
@@ -82,8 +83,15 @@ func _label(parent: Node, value: String, size: int = 16,
 
 func show_mode(next_mode: String = "archive") -> void:
     mode = next_mode
-    if is_node_ready():
-        refresh_language()
+    if not is_node_ready():
+        return
+    refresh_language()
+    if body_tween != null and body_tween.is_running():
+        body_tween.kill()
+    body.modulate.a = 0.0
+    body_tween = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+    body_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+    body_tween.tween_property(body, "modulate:a", 1.0, 0.19)
 
 
 func refresh_language() -> void:

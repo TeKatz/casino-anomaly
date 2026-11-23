@@ -265,19 +265,16 @@ func _on_scene_load_failed(_path: String) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-    if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
-        if credits_overlay != null and credits_overlay.visible:
-            _hide_overlay(credits_overlay)
-            get_viewport().set_input_as_handled()
-        elif settings_overlay != null and settings_overlay.visible:
-            _hide_overlay(settings_overlay)
-            get_viewport().set_input_as_handled()
-        elif archive_overlay != null and archive_overlay.visible:
+    if event is InputEventKey and event.pressed and not event.echo \
+            and event.keycode == KEY_ESCAPE and active_overlay != null:
+        # During cross-fades the outgoing screen may still be visible;
+        # Escape always belongs to the CURRENT menu, never the outgoing one.
+        if active_overlay == archive_overlay:
             _back_from_profile_archive()
-            get_viewport().set_input_as_handled()
-        elif profile_overlay != null and profile_overlay.visible:
-            _hide_overlay(profile_overlay)
-            get_viewport().set_input_as_handled()
+        else:
+            _hide_overlay(active_overlay)
+        get_viewport().set_input_as_handled()
+
 
 func _on_quit() -> void:
     if changing_scene:
