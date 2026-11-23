@@ -532,26 +532,20 @@ func _slots() -> void:
         i += 1
 
 func _plants() -> void:
-    # Almost imperceptible indoor-air motion, independent of their solid pots.
-    # Never move collision bodies or the stable anomaly landmarks.
-    var decoration: Node3D = get_parent().get_node_or_null("Decor") as Node3D
+    # Animate only the real imported leaves, not the standing pot or collision.
+    var decoration := get_parent().get_node_or_null("Decor") as Node3D
     if decoration == null:
         return
+    plant_crowns.clear()
     for plant in decoration.get_children():
         if not (plant is Node3D) or not plant.name.begins_with("Plant_"):
             continue
-        # If the genuine source glTF is available, sway its *leaf mesh*
-        # rather than the entire pot and wooden stand.
-        if plant.has_method("get_foliage_animation_target"):
-            var original_leaves := plant.call("get_foliage_animation_target") as Node3D
-            if original_leaves != null:
-                plant_crowns.append(original_leaves)
-                continue
-        # Existing decorations remain functional before source installation.
-        for crown in plant.get_children():
-            if crown is Node3D and crown.name.begins_with("PlantFoliage_"):
-                plant_crowns.append(crown as Node3D)
-
+        var model := plant.get_node_or_null("GioraMonsteraOriginal") as Node3D
+        if model == null:
+            continue
+        var candidates := model.find_children("Leaves", "Node3D", true, false)
+        if not candidates.is_empty():
+            plant_crowns.append(candidates[0] as Node3D)
 
 func _dust() -> void:
     # Fine atmospheric dust is distributed throughout both wings rather

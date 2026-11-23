@@ -155,52 +155,32 @@ func _run() -> void:
         _fail("Unexpected number of remaining procedural slot cabinets: %d" % rebuilt_slots)
         return
 
-    var model_asset_available := ResourceLoader.exists(
-        "res://models/sketchfab_monstera/scene.gltf", "PackedScene")
-    var pots := 0
-    var foliage := 0
+    var source_models := 0
     for plant in decor.get_children():
-        if not plant is Node3D or not plant.name.begins_with("Plant_"):
+        if not (plant is Node3D) or not plant.name.begins_with("Plant_"):
             continue
-        var pot := plant.get_node_or_null("PlantPot_%s" % plant.name.trim_prefix("Plant_")) as MeshInstance3D
-        var crown := plant.get_node_or_null("PlantFoliage_%s" % plant.name.trim_prefix("Plant_")) as Node3D
-        if not plant.has_method("get_foliage_animation_target"):
-            _fail("Plant root lost the source-authentic Monstera importer")
+        var original := plant.get_node_or_null("GioraMonsteraOriginal") as Node3D
+        if original == null or not original.is_visible_in_tree():
+            _fail("Original Giora Monstera not visible on " + str(plant.name))
             return
-        if model_asset_available:
-            var original := plant.get_node_or_null("GioraMonsteraOriginal") as Node3D
-            if original == null or not original.is_visible_in_tree():
-                _fail("Uploaded Giora Monstera source model was not instantiated")
-                return
-            var original_meshes := original.find_children("*", "MeshInstance3D", true, false)
-            if original_meshes.size() < 4:
-                _fail("Source Monstera lost its original four component meshes")
-                return
-            if (pot != null and pot.visible) or (crown != null and crown.visible):
-                _fail("Legacy plant placeholders are still visible over real Monstera")
-                return
-            if plant.call("get_foliage_animation_target") == null:
-                _fail("Source Monstera leaf node is not available for ambient motion")
-                return
-        if pot != null and pot.get_meta("decor_type", "") == "plant":
-            pots += 1
-            if not (pot.mesh is CylinderMesh):
-                _fail("Decorative plant has no tapered ceramic pot")
-                return
-            var mesh: CylinderMesh = pot.mesh as CylinderMesh
-            if mesh.bottom_radius >= mesh.top_radius:
-                _fail("Ceramic pot must taper toward its base")
-                return
-            if plant.get_node_or_null(pot.name + "_Collision") == null:
-                _fail("Plant pot collision is not grouped with the movable plant")
-                return
-        if crown != null:
-            foliage += 1
-            if crown.find_children("Leaf_*", "MeshInstance3D", false, false).size() < 18:
-                _fail("Plant %s has not been replaced by detailed leaves" % plant.name)
-                return
-    if pots != 6 or foliage != 6:
-        _fail("Expected six potted plants and six detailed foliage crowns")
+        var meshes := original.find_children("*", "MeshInstance3D", true, false)
+        if meshes.size() < 4:
+            _fail("Imported Monstera must include original leaves, stalks, pot and stand")
+            return
+        if original.find_children("Leaves", "Node3D", true, false).is_empty():
+            _fail("Imported Monstera lacks foliage node for ambient movement")
+            return
+        var suffix := str(plant.name).trim_prefix("Plant_")
+        if plant.get_node_or_null("PlantPot_" + suffix) != null \
+                or plant.get_node_or_null("PlantFoliage_" + suffix) != null:
+            _fail("Old plant placeholder geometry still exists")
+            return
+        if plant.get_node_or_null("PlantPot_" + suffix + "_Collision") == null:
+            _fail("Plant collision must remain under the movable anomaly root")
+            return
+        source_models += 1
+    if source_models != 6:
+        _fail("Expected all six fully modeled Monstera scene instances")
         return
     var animated: Array = atmosphere.get("plant_crowns")
     if animated.size() != 6:
