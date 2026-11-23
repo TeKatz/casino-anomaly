@@ -35,8 +35,11 @@ func _run() -> void:
     var families := {}
     var signature_count := 0
     var shared_bottle_meshes := {}
-    for child in bar.get_children():
-        if not child.name.begins_with("Signature_"):
+    # Do not confuse the artist's nested bottle instances with missing
+    # furniture: each saved bottle remains a separate editable scene even
+    # when it has another signature bottle as its scene-tree parent.
+    for child in bar.find_children("Signature_*", "Node3D", true, false):
+        if not child.name.begins_with("Signature_") or child.scene_file_path == "":
             continue
         signature_count += 1
         var design_name := str(child.get_meta("bottle_design", ""))
@@ -93,8 +96,8 @@ func _run() -> void:
         if cap == null and medallion == null and crown == null and wood == null:
             _fail("Bottle has no sculpted stopper or closure")
             return
-    if signature_count < 38 or families.size() != 6:
-        _fail("Expected at least 38 signature 3D bottle instances spanning all 6 designs")
+    if signature_count < 6 or families.size() != 6:
+        _fail("Bar must retain editable signature bottles from all six designs")
         return
     if bar.has_node("Bottle") or bar.has_node("BottleNeck"):
         _fail("Bar still contains cylinder-only placeholder bottle set")

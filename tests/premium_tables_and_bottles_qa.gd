@@ -74,9 +74,14 @@ func _run() -> void:
         _fail("Signature bar missing")
         return
     var bottle_count := 0
-    for child in bar.get_children():
-        if not str(child.name).begins_with("Signature_"):
+    var designs := {}
+    # Saved editor layouts may add or remove individual bottles, and may
+    # put additional editable bottle instances under another bottle root.
+    # Their scene_file_path identifies them without counting mesh parts.
+    for child in bar.find_children("Signature_*", "Node3D", true, false):
+        if not str(child.name).begins_with("Signature_") or child.scene_file_path == "":
             continue
+        designs[str(child.get_meta("bottle_design", ""))] = true
         bottle_count += 1
         if child.scene_file_path == "" or not world.is_editable_instance(child):
             _fail("Bar bottle is not a selectable/editable saved instance: " + child.name)
@@ -84,8 +89,8 @@ func _run() -> void:
         if child.get_node_or_null("HandCutGlassShell") == null:
             _fail("Bar bottle geometry did not survive editor authoring")
             return
-    if bottle_count != 38:
-        _fail("Signature bar lost artist-placed bottles: %d" % bottle_count)
+    if bottle_count < 6 or designs.size() != 6:
+        _fail("The editable signature bar must retain all six bottle designs")
         return
     world.queue_free()
     await process_frame

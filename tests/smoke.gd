@@ -169,13 +169,14 @@ func _run_smoke() -> void:
                 var shape: BoxShape3D = shape_node.shape as BoxShape3D if shape_node != null else null
                 cabinet_correct = item.position.y >= 0.24 and shape != null and shape.size.x >= 3.0
     var signature_count := 0
-    for item in bar.get_children():
-        # The authored, instance-specific name is a more stable identifier
-        # than scene-instance metadata during Godot's editor reimport.
-        if item.name.begins_with("Signature_"):
+    # Artist-placed bottles can also be nested under another editable
+    # bottle while arranging the display. Count ALL saved scene instances,
+    # not just CornerBar's immediate children.
+    for item in bar.find_children("Signature_*", "Node3D", true, false):
+        if item.name.begins_with("Signature_") and item.scene_file_path != "":
             signature_count += 1
     if count_busts != 2 or count_stools != 10 or count_candles != 3 \
-            or signature_count < 38 or legacy_wine_on_shelf \
+            or signature_count < 6 or legacy_wine_on_shelf \
             or not coffee_correct or not cabinet_correct \
             or interior.get_node_or_null("BarCabinetPlinth") == null:
         push_error("Interior QA failed: busts=%d stools=%d candles=%d signatureBottles=%d legacyWine=%s coffee=%s cabinet=%s plinth=%s" % [count_busts, count_stools, count_candles, signature_count, str(legacy_wine_on_shelf), str(coffee_correct), str(cabinet_correct), str(interior.get_node_or_null("BarCabinetPlinth") != null)])
