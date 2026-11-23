@@ -6701,9 +6701,12 @@ roughness = 0.7
 [node name="CasinoAnomalyHall" type="Node3D"]
 script = ExtResource("1_hall")
 
-# Original author-supplied card model geometry. Each plain Node3D is an
-# editable local wrapper, and its imported glTF is a child with NO transform
-# override. This avoids Godot applying glTF scene root transform to main room.
+# Preserve the original local decor anchor for compatible scene hierarchy.
+# Actual source-derived card instances are placed on VISIBLE gaming tables.
+[node name="PlayingCardDecor" type="Node3D" parent="."]
+metadata/source_asset = "jdastine_playing_cards"
+metadata/decorative_only = true
+
 [node name="Player" type="CharacterBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.02, 11.1)
 script = ExtResource("2_player")
