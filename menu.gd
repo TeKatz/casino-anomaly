@@ -3,6 +3,7 @@ extends Control
 const SettingsPanel = preload("res://ui/settings_panel.gd")
 const CreditsPanel = preload("res://ui/credits_panel.gd")
 const ProfilePanel = preload("res://ui/profile_panel.gd")
+const ProfileSideCards = preload("res://ui/profile_side_cards.gd")
 const ArchivePanel = preload("res://ui/anomaly_archive_panel.gd")
 const Loc = preload("res://gameplay/localization.gd")
 var settings_overlay: Control
@@ -10,6 +11,7 @@ var credits_overlay: Control
 var credits_panel: PanelContainer
 var profile_panel: PanelContainer
 var profile_overlay: Control
+var profile_side_cards: Control
 var archive_panel: PanelContainer
 var archive_overlay: Control
 var overlay_tween: Tween
@@ -109,6 +111,9 @@ func _localize_ui() -> void:
 func _on_play() -> void:
     profile_panel.call("refresh")
     _show_overlay(profile_overlay)
+    var slot := int(profile_panel.get("selected_slot"))
+    var occupied := bool(profile_panel.call("is_selected_occupied"))
+    profile_side_cards.call("sync_selection", slot, occupied, true)
 
 
 func _on_continue() -> void:
@@ -118,9 +123,15 @@ func _on_continue() -> void:
 func _create_profile_overlay() -> void:
     profile_panel = ProfilePanel.new()
     profile_overlay = _build_overlay(profile_panel)
+    profile_side_cards = ProfileSideCards.new()
+    profile_side_cards.name = "ProfileSideCards"
+    profile_overlay.add_child(profile_side_cards)
+    profile_side_cards.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+    profile_side_cards.call("bind_panel", profile_panel)
+    profile_side_cards.connect("open_requested", Callable(self, "_open_profile_archive"))
+    profile_panel.connect("selection_changed", Callable(profile_side_cards, "sync_selection"))
     profile_panel.back_pressed.connect(func() -> void: _hide_overlay(profile_overlay))
     profile_panel.launch_requested.connect(_fade_to_scene)
-    profile_panel.archive_requested.connect(_open_profile_archive)
 
 
 func _create_archive_overlay() -> void:
@@ -219,14 +230,32 @@ func _open_credits() -> void:
 
 
 func _update_layout() -> void:
-    var compact := get_viewport_rect().size.x < 980.0
+    var view_size := get_viewport_rect().size
+    var compact := view_size.x < 980.0
     $Brand.visible = not compact
+    var panel := $CenterPanel as PanelContainer
     if compact:
-        $CenterPanel.anchor_left = 0.14
-        $CenterPanel.anchor_right = 0.86
+        panel.anchor_left = 0.14
+        panel.anchor_right = 0.86
     else:
-        $CenterPanel.anchor_left = 0.56
-        $CenterPanel.anchor_right = 0.95
+        panel.anchor_left = 0.56
+        panel.anchor_right = 0.95
+
+    # The old anchored +/-293px panel could exceed 720p after font/icon
+    # minimums grew, clipping its top edge. Give the entire glass frame
+    # guaranteed margins in logical viewport coordinates, even at 720p.
+    var natural_height := maxf(586.0, panel.get_combined_minimum_size().y)
+    var available_height := maxf(200.0, view_size.y - 56.0)
+    var fit_scale := minf(1.0, available_height / natural_height)
+    panel.pivot_offset = Vector2.ZERO
+    panel.scale = Vector2(fit_scale, fit_scale)
+    panel.anchor_top = 0.0
+    panel.anchor_bottom = 0.0
+    var top := maxf(28.0, (view_size.y - natural_height * fit_scale) * 0.5)
+    panel.offset_top = top
+    panel.offset_bottom = top + natural_height
+    if profile_side_cards != null:
+        profile_side_cards.call_deferred("_layout_cards")
 
 
 func _animate_intro() -> void:
