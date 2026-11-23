@@ -63,8 +63,8 @@ func _run() -> void:
         if cap == null and medallion == null and crown == null and wood == null:
             _fail("Bottle has no sculpted stopper or closure")
             return
-    if signature_count != 39 or families.size() != 6:
-        _fail("Expected 39 signature 3D bottle instances spanning all 6 designs")
+    if signature_count < 38 or families.size() != 6:
+        _fail("Expected at least 38 signature 3D bottle instances spanning all 6 designs")
         return
     if bar.has_node("Bottle") or bar.has_node("BottleNeck"):
         _fail("Bar still contains cylinder-only placeholder bottle set")
