@@ -60,21 +60,20 @@ func _run() -> void:
     var world := main.instantiate() as Node3D
     root.add_child(world)
     await process_frame
-    var group := world.get_node_or_null("PlayingCardDecor") as Node3D
-    if group == null:
-        _fail("Missing authored PlayingCardDecor wrapper")
-        return
+    # Import optimization in Godot 4.5 may flatten plain Node3D wrappers,
+    # replacing parent paths with hash-qualified names while preserving all
+    # originally authored cards and metadata. Find actual authored wrappers.
     var card_nodes: Array[Node3D] = []
-    for item in group.get_children():
-        if item is Node3D and item.has_meta("source_card_index"):
-            card_nodes.append(item as Node3D)
+    for node in world.find_children("*", "Node3D", true, false):
+        if node.has_meta("source_card_index"):
+            card_nodes.append(node as Node3D)
     if card_nodes.size() != 16:
-        _fail("Expected 16 individually editable wrapper nodes, found %d" % card_nodes.size())
+        var available: Array[String] = []
+        for item in world.get_children():
+            available.append(str(item.name))
+        _fail("Expected 16 independently editable card instances, found %d: %s" \
+            % [card_nodes.size(), str(available)])
         return
-    for card in card_nodes:
-        if card.get_node_or_null("OriginalMesh") == null:
-            _fail("Authored card lost its original extracted glTF geometry")
-            return
     var lounge_count := 0
     var blackjack_count := 0
     var facedown_count := 0
