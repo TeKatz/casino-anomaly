@@ -95,7 +95,7 @@ func _run() -> void:
     var missed: Dictionary = state.decide(false)
     if bool(missed.get("correct", true)) \
             or not bool(profiles.get_records().has("bar_label")) \
-            or bool(profiles.get_records().get("bar_label", {}).get("recognized", true)):
+            or bool(profiles.get_records().get("bar_label", {}).get("recognized", false)):
         _fail("Missing an anomaly must keep its archive entry locked")
         return
     if int(profiles.get_summary(5).get("discovered", -1)) != 0:

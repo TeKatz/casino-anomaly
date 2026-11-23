@@ -238,6 +238,9 @@ func record_decision(verdict: Dictionary) -> void:
             record["recognized"] = true
             record["correct"] = int(record.get("correct", 0)) + 1
         else:
+            # An encountered-but-missed effect remains explicitly locked.
+            # Never revoke an unlock earned during an earlier run.
+            record["recognized"] = bool(record.get("recognized", false))
             record["missed"] = int(record.get("missed", 0)) + 1
         records[id] = record
     history.append(verdict.duplicate(true))
