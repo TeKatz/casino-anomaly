@@ -23,6 +23,13 @@ func _run() -> void:
     await process_frame
     var background := menu.get_node_or_null("Background") as ColorRect
     var menu_buttons := menu.get_node_or_null("CenterPanel/Content/Stack")
+    var main_panel := menu.get_node_or_null("CenterPanel") as Control
+    var screen := menu.get_viewport_rect().size
+    var bounds := main_panel.get_global_rect() if main_panel != null else Rect2()
+    if main_panel == null or bounds.position.y < 10.0 \
+            or bounds.end.y > screen.y - 10.0:
+        _fail("Main menu glass panel is clipped by the top/bottom viewport edge")
+        return
     if background == null or not (background.material is ShaderMaterial) or menu_buttons == null:
         _fail("Abstract shader or menu stack missing")
         return
@@ -116,6 +123,15 @@ func _run() -> void:
         if not (slot_button is Button) or (slot_button as Button).icon == null:
             _fail("Profile slots must have a themed icon and custom button skin")
             return
+    var side_cards := menu.get("profile_side_cards") as Control
+    if side_cards == null or side_cards.get_node_or_null("StatisticsCard") == null \
+            or side_cards.get_node_or_null("ArchiveCard") == null:
+        _fail("Flanking statistics and anomaly archive panels are missing")
+        return
+    var buttons: Array = profile_picker.get("slot_delete_buttons")
+    if buttons.size() != 5:
+        _fail("Every profile row needs an independent delete icon")
+        return
     menu.queue_free()
     await process_frame
 
