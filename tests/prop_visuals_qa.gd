@@ -34,6 +34,7 @@ func _run() -> void:
         return
     var families := {}
     var signature_count := 0
+    var shared_bottle_meshes := {}
     for child in bar.get_children():
         if not child.name.begins_with("Signature_"):
             continue
@@ -63,6 +64,19 @@ func _run() -> void:
         if label_mat == null or label_mat.albedo_texture == null:
             _fail("Conformal bottle label has no printed texture")
             return
+        # Repeated designs must share expensive generated GPU geometry,
+        # without sharing the actual scene nodes or transforms.
+        if shared_bottle_meshes.has(design_name):
+            var cached: Dictionary = shared_bottle_meshes[design_name]
+            if shell.mesh != cached["shell"] or label.mesh != cached["label"] \
+                    or label_mat != cached["label_material"]:
+                _fail("Repeated bottle design rebuilt unique geometry instead of using the runtime cache")
+                return
+        else:
+            shared_bottle_meshes[design_name] = {
+                "shell": shell.mesh, "label": label.mesh,
+                "label_material": label_mat
+            }
         var uv: PackedVector2Array = label.mesh.surface_get_arrays(0)[Mesh.ARRAY_TEX_UV]
         if uv.size() < 400:
             _fail("Bottle label is not a densely UV-unwrapped curved surface")

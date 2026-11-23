@@ -11,6 +11,12 @@ extends Node3D
         if is_inside_tree():
             _rebuild()
 
+static var _runtime_design_templates: Dictionary = {}
+# The first instance of each design owns a detached set of immutable render
+# templates. Every subsequent bottle (including streamed halls) reuses its
+# generated Mesh, Material and MultiMesh resources without recomputing UVs or
+# rebuilding SurfaceTool meshes. Never mutate these shared resources per bottle.
+
 const PROFILES := [
     [Vector2(0.0, 0.88), Vector2(0.03, 1.02), Vector2(0.14, 1.0),
         Vector2(0.63, 1.0), Vector2(0.69, 0.94), Vector2(0.78, 0.47),
@@ -60,12 +66,24 @@ func _ready() -> void:
 
 
 func _rebuild() -> void:
-    # The model is generated in the editor as editable 3D geometry and
-    # regenerated on loading in packaged builds. No bitmap silhouettes.
+    # Keep the editor fully procedural and editable. In the running game,
+    # constructing the 39 labels and lathed surfaces on every room swap
+    # would synchronously block the main thread.
     for child in get_children():
         remove_child(child)
         child.free()
+    if not Engine.is_editor_hint() and _runtime_design_templates.has(design):
+        for prototype in _runtime_design_templates[design]:
+            # DUPLICATE_SCRIPTS is deliberately disabled: these parts are
+            # plain MeshInstance3D/MultiMeshInstance3D with shared resources.
+            add_child((prototype as Node).duplicate(0))
+        return
     _build()
+    if not Engine.is_editor_hint():
+        var prototypes: Array[Node] = []
+        for part in get_children():
+            prototypes.append((part as Node).duplicate(0))
+        _runtime_design_templates[design] = prototypes
 
 
 func _material(hex: Color, metal: float, rough: float, alpha := 1.0) -> StandardMaterial3D:

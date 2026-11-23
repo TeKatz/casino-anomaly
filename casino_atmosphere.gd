@@ -34,6 +34,7 @@ func _ready() -> void:
 func _build() -> void:
     if not active:
         return
+    var build_start_us := Time.get_ticks_usec()
     set_meta("ambient_fx_only", true)
     _ensure_reflection_probes()
     _ensure_bar_fill_lights()
@@ -57,6 +58,9 @@ func _build() -> void:
     _slots()
     _plants()
     _dust()
+    var elapsed_ms := float(Time.get_ticks_usec() - build_start_us) / 1000.0
+    if elapsed_ms >= 20.0 and get_parent().has_meta("_streaming_standby"):
+        print("Casino deferred atmosphere setup: %.1f ms" % elapsed_ms)
 
 
 func _on_furniture_finalized() -> void:

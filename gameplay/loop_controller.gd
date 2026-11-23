@@ -38,6 +38,7 @@ var choice_taken := false
 var transitioning := false
 var finishing := false
 var won := false
+var _stage_spike_frames := 0
 
 
 func _ready() -> void:
@@ -196,7 +197,15 @@ func _lane_z(lane: String) -> float:
     return EXIT_Z_LEFT if lane == "left" else EXIT_Z_RIGHT
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+    # The node creation and deferred setup phases land on separate frames.
+    # Report any frame-time spike around staging so a remaining stall can
+    # be attributed to the exact phase instead of guessing.
+    if _stage_spike_frames > 0:
+        if delta > 0.08:
+            print("Casino streaming frame spike: %.1f ms (%d frames after staging)" %
+                [delta * 1000.0, 13 - _stage_spike_frames])
+        _stage_spike_frames -= 1
     if transitioning or won or room == null or player == null:
         return
     var local := room.to_local(player.global_position)
@@ -242,9 +251,11 @@ func _stage_next(lane: String) -> void:
             staged_lane = lane
         return
 
-    # Prewarm well ahead of the exits. Godot caches the PackedScene and all
-    # shared textures; only the scene nodes/physics are instantiated twice.
+    # Time every expensive step independently. The packed scene is already
+    # loaded, but instantiate() and adding it to SceneTree are synchronous.
+    var stage_start_us := Time.get_ticks_usec()
     var next := ROOM.instantiate() as Node3D
+    var instance_ms := float(Time.get_ticks_usec() - stage_start_us) / 1000.0
     if next == null:
         push_error("Cannot preload next casino hall")
         return
@@ -252,9 +263,11 @@ func _stage_next(lane: String) -> void:
     var duplicate_player := next.get_node_or_null("Player")
     if duplicate_player != null:
         duplicate_player.free()
+    var portal_start_us := Time.get_ticks_usec()
     if not portals.prepare_room(next):
         next.free()
         return
+    var portals_ms := float(Time.get_ticks_usec() - portal_start_us) / 1000.0
     # UPDATE_ONCE probes would otherwise capture the next casino's six views
     # while the previous hall is still visible, causing a loading hitch.
     _set_reflections_visible(next, false)
@@ -263,7 +276,14 @@ func _stage_next(lane: String) -> void:
     if environment_node != null:
         environment_node.environment = null
     next.transform = _stage_transform(lane)
+    var attach_start_us := Time.get_ticks_usec()
     get_tree().root.add_child(next)
+    var attach_ms := float(Time.get_ticks_usec() - attach_start_us) / 1000.0
+    var total_ms := float(Time.get_ticks_usec() - stage_start_us) / 1000.0
+    _stage_spike_frames = 12
+    if total_ms >= 20.0:
+        print("Casino staging: instantiate=%.1f ms, portals=%.1f ms, attach/ready=%.1f ms, total=%.1f ms" %
+            [instance_ms, portals_ms, attach_ms, total_ms])
     var state = get_node_or_null("/root/LoopState")
     if state != null:
         _update_level_sign(next, int(state.correct_streak), false)
