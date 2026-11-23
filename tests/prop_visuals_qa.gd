@@ -26,6 +26,47 @@ func _run() -> void:
         _fail("Required visual prop section is missing")
         return
 
+    # The bar must use THREE rows of actual textured/material 3D bottle
+    # meshes, not the earlier 118 cylinder-only placeholders or flat images.
+    var bar := world.get_node_or_null("CornerBar") as Node3D
+    if bar == null:
+        _fail("Bar prop container missing")
+        return
+    var families := {}
+    var signature_count := 0
+    for child in bar.get_children():
+        if str(child.get_meta("prop_family", "")) != "signature_bar_bottle":
+            continue
+        signature_count += 1
+        families[str(child.get_meta("bottle_design", ""))] = true
+        if not (child is Node3D):
+            _fail("Signature bottle is not a 3D scene")
+            return
+        var shell := child.get_node_or_null("HandCutGlassShell") as MeshInstance3D
+        var liquid := child.get_node_or_null("InnerLiquidVolume") as MeshInstance3D
+        var cap := child.get_node_or_null("MetallicEngravedCap")
+        var medallion := child.get_node_or_null("EightPointReserveMedallion")
+        var crown := child.get_node_or_null("OrnateCrownStopper")
+        var wood := child.get_node_or_null("NaturalWoodenStopper")
+        var label := child.get_node_or_null("DieCutPaperLabel") as MeshInstance3D
+        var lettering := child.get_node_or_null("RaisedSignatureLettering") as Label3D
+        if shell == null or liquid == null or label == null or lettering == null:
+            _fail("One of the volumetric signature bottles is missing body, liquid or detail")
+            return
+        if not (shell.mesh is ArrayMesh) or not (liquid.mesh is ArrayMesh) \
+                or label.mesh == null or shell.get_aabb().size.z < 0.10:
+            _fail("Bottle is a flat graphic rather than full 3D geometry")
+            return
+        if cap == null and medallion == null and crown == null and wood == null:
+            _fail("Bottle has no sculpted stopper or closure")
+            return
+    if signature_count != 39 or families.size() != 6:
+        _fail("Expected 39 signature 3D bottle instances spanning all 6 designs")
+        return
+    if bar.has_node("Bottle") or bar.has_node("BottleNeck"):
+        _fail("Bar still contains cylinder-only placeholder bottle set")
+        return
+
     var sofa_count := 0
     var west_camera_count := 0
     for item in models.get_children():
