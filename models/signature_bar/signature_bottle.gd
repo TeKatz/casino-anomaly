@@ -31,6 +31,14 @@ const PROFILES := [
         Vector2(0.65, 0.98), Vector2(0.72, 0.90), Vector2(0.83, 0.44),
         Vector2(0.95, 0.40), Vector2(1.0, 0.40)]
 ]
+const LABEL_TEXTURES := [
+    preload("res://models/signature_bar/labels/velvet_ace.svg"),
+    preload("res://models/signature_bar/labels/silver_lotus.svg"),
+    preload("res://models/signature_bar/labels/rouge_clover.svg"),
+    preload("res://models/signature_bar/labels/solara.svg"),
+    preload("res://models/signature_bar/labels/montevale.svg"),
+    preload("res://models/signature_bar/labels/nightfall.svg")
+]
 const TITLES := ["VELVET\nACE", "SILVER\nLOTUS", "ROUGE\nCLOVER",
     "SOLARA", "MONTEVALE", "NIGHTFALL"]
 const TYPES := ["RESERVE WHISKEY", "BOTANICAL GIN", "CRIMSON LIQUEUR",
@@ -152,21 +160,96 @@ func _torus(label: String, center_y: float, outer: float,
     _part(label, torus, mat, Vector3(0.0, center_y, 0.0))
 
 
-func _label_text(content: String, y: float, z: float, text_size: int,
-        ink: Color, label_name: String) -> void:
-    var letter := Label3D.new()
-    letter.name = label_name
-    letter.position = Vector3(0.0, y, z)
-    letter.font_size = text_size
-    letter.pixel_size = 0.0013
-    letter.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-    letter.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-    letter.modulate = ink
-    letter.outline_size = 1
-    letter.outline_modulate = Color("#111113")
-    letter.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-    letter.text = content
-    add_child(letter)
+func _profile_width_at(outline: Array, relative_y: float) -> float:
+    # Match the existing lathed glass silhouette, including bottle shoulders.
+    for row in range(outline.size() - 1):
+        var lower: Vector2 = outline[row]
+        var upper: Vector2 = outline[row + 1]
+        if relative_y <= upper.x:
+            var fraction := clampf((relative_y - lower.x) /
+                maxf(0.000001, upper.x - lower.x), 0.0, 1.0)
+            return lerpf(lower.y, upper.y, fraction)
+    var last: Vector2 = outline[outline.size() - 1]
+    return last.y
+
+
+func _glass_surface_point(theta: float, relative_y: float, outline: Array,
+        radius: float, height: float, facets: float) -> Vector3:
+    var pitch := TAU / 32.0
+    var wrapped := fposmod(theta, TAU)
+    var sector := floori(wrapped / pitch)
+    var fraction := (wrapped - float(sector) * pitch) / pitch
+    var base_radius := _profile_width_at(outline, relative_y)
+    # The original shell is a 32-sided polygon, NOT a mathematically smooth
+    # circle. Interpolating its actual vertices prevents even tiny gaps
+    # between the paper and the faceted glass on corners.
+    var first := _radius(design, float(sector) * pitch, radius, facets) * base_radius
+    var second := _radius(design, float(sector + 1) * pitch, radius, facets) * base_radius
+    var point := first.lerp(second, fraction)
+    # 1.3 mm surface offset prevents z-fighting; there is NO suspended box.
+    var normal := point.normalized()
+    point += normal * 0.0013
+    return Vector3(point.x, relative_y * height, point.y)
+
+
+func _paper_vertex(tool: SurfaceTool, point: Vector3, uv: Vector2) -> void:
+    tool.set_uv(uv)
+    tool.add_vertex(point)
+
+
+func _paper_triangle(tool: SurfaceTool, a: Vector3, uv_a: Vector2,
+        b: Vector3, uv_b: Vector2, c: Vector3, uv_c: Vector2) -> void:
+    _paper_vertex(tool, a, uv_a)
+    _paper_vertex(tool, b, uv_b)
+    _paper_vertex(tool, c, uv_c)
+
+
+func _conformal_label(outline: Array, radius: float, height: float,
+        facets: float, kind: int) -> void:
+    # Ink and gold detailing are part of the label TEXTURE, not thick,
+    # rectangular 3D slabs. These UV-mapped triangles wrap the bottle
+    # front with exactly the same lathed cross section as the glass.
+    var paper := StandardMaterial3D.new()
+    paper.albedo_texture = LABEL_TEXTURES[kind]
+    paper.albedo_color = Color.WHITE
+    paper.roughness = 0.78
+    paper.metallic = 0.0
+    paper.cull_mode = BaseMaterial3D.CULL_DISABLED
+    paper.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
+    var tool := SurfaceTool.new()
+    tool.begin(Mesh.PRIMITIVE_TRIANGLES)
+    var y_center := 0.39
+    var y_span := 0.350 if kind != 3 else 0.375
+    # A little less than half the circumference follows the square-like and
+    # rounded designs without running into a corner or overlapping the sides.
+    var angle_span := 0.67 if kind in [1, 2, 3, 4] else 0.60
+    var cols := 32
+    var rows := 18
+    for column in range(cols):
+        for row in range(rows):
+            var left_u := float(column) / float(cols)
+            var right_u := float(column + 1) / float(cols)
+            var top_v := float(row) / float(rows)
+            var bottom_v := float(row + 1) / float(rows)
+            var left_angle := PI * 0.5 + angle_span * (1.0 - 2.0 * left_u)
+            var right_angle := PI * 0.5 + angle_span * (1.0 - 2.0 * right_u)
+            var top_y := y_center + (0.5 - top_v) * y_span
+            var bottom_y := y_center + (0.5 - bottom_v) * y_span
+            var a := _glass_surface_point(left_angle, top_y, outline,
+                radius, height, facets)
+            var b := _glass_surface_point(right_angle, top_y, outline,
+                radius, height, facets)
+            var c := _glass_surface_point(left_angle, bottom_y, outline,
+                radius, height, facets)
+            var d := _glass_surface_point(right_angle, bottom_y, outline,
+                radius, height, facets)
+            _paper_triangle(tool, a, Vector2(left_u, top_v),
+                c, Vector2(left_u, bottom_v), b, Vector2(right_u, top_v))
+            _paper_triangle(tool, b, Vector2(right_u, top_v),
+                c, Vector2(left_u, bottom_v), d, Vector2(right_u, bottom_v))
+    tool.generate_normals()
+    var mesh: ArrayMesh = tool.commit()
+    _part("ConformalPaperLabel", mesh, paper)
 
 
 func _build() -> void:
@@ -256,31 +339,9 @@ func _build() -> void:
     knurled_cap.multimesh = knurling
     add_child(knurled_cap)
 
-    # A multi-layered physically raised paper-and-metal label on the FRONT.
-    # The label itself is an accessory attached to a 3D bottle, never a
-    # replacement bottle sprite or a billboard facing the camera.
-    var label_width := wide * 1.74
-    var label_height := 0.228 if kind != 3 else 0.250
-    var label_y := height * 0.39
-    var label_depth := wide * 1.008 + 0.020
-    _cube("EmbossedMetalLabelFrame",
-        Vector3(label_width + 0.021, label_height + 0.018, 0.014),
-        Vector3(0, label_y, label_depth), brass)
-    _cube("DieCutPaperLabel",
-        Vector3(label_width, label_height, 0.015),
-        Vector3(0, label_y, label_depth + 0.009), seal)
-    _cube("InnerGoldRule",
-        Vector3(label_width * 0.88, 0.004, 0.002),
-        Vector3(0, label_y + label_height * 0.36,
-            label_depth + 0.020), metal)
-    _cube("LowerGoldRule",
-        Vector3(label_width * 0.88, 0.004, 0.002),
-        Vector3(0, label_y - label_height * 0.32,
-            label_depth + 0.020), metal)
-    _label_text(TITLES[kind], label_y + 0.018, label_depth + 0.023,
-        25 if kind != 4 else 23, text_col, "RaisedSignatureLettering")
-    _label_text(TYPES[kind], label_y - 0.073, label_depth + 0.024,
-        11, text_col, "SpiritType")
+    # The physical bottle has a real UV-textured paper wrap that follows its
+    # exact glass surface, including facets and shoulder taper.
+    _conformal_label(body_outline, wide, height, facet, kind)
     # Additional sculpted details distinguish the silhouettes at a distance.
     if kind == 1:
         # Gin: silvery etched botanical stems on both edges.
