@@ -86,8 +86,9 @@ func _run() -> void:
         if child.scene_file_path == "" or not world.is_editable_instance(child):
             _fail("Bar bottle is not a selectable/editable saved instance: " + child.name)
             return
-        if child.get_node_or_null("HandCutGlassShell") == null:
-            _fail("Bar bottle geometry did not survive editor authoring")
+        var shell := child.get_node_or_null("HandCutGlassShell") as MeshInstance3D
+        if shell == null or shell.mesh == null or shell.owner != world:
+            _fail("Bar bottle glass must be an owned, saved and editable scene mesh: " + child.name)
             return
     if bottle_count < 6 or designs.size() != 6:
         _fail("The editable signature bar must retain all six bottle designs")

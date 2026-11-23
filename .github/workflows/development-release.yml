@@ -57,6 +57,23 @@ jobs:
           }
           "PUBLISHED_COMMIT=$((git rev-parse HEAD).Trim())" >> $env:GITHUB_ENV
 
+      - name: Repair persisted signature bottle mesh nodes
+        shell: pwsh
+        run: |
+          python tools/repair_signature_bottles.py --apply
+          if ($LASTEXITCODE -ne 0) { throw 'Signature bar scene migration failed' }
+          python tools/repair_signature_bottles.py --check
+          if ($LASTEXITCODE -ne 0) { throw 'Signature bar serialization check failed' }
+          git add -- main.tscn
+          git diff --cached --quiet
+          if ($LASTEXITCODE -eq 1) {
+            git commit -m 'fix(scene): preserve artist-editable signature bar meshes'
+            if ($LASTEXITCODE -ne 0) { throw 'Signature bar scene commit failed' }
+            git push origin HEAD:refs/heads/dev
+            if ($LASTEXITCODE -ne 0) { throw 'Signature bar scene push failed' }
+          }
+          "PUBLISHED_COMMIT=$((git rev-parse HEAD).Trim())" >> $env:GITHUB_ENV
+
       - name: Embed version
         shell: pwsh
         run: |

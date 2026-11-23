@@ -62,16 +62,19 @@ const INK := ["#ead2a4", "#292a34", "#efcba3", "#403026",
 
 
 func _ready() -> void:
-    _rebuild()
+    # main.tscn stores artist-editable meshes as real scene children. Do not
+    # destroy or replace them when an authored bottle instance loads.
+    if get_node_or_null("HandCutGlassShell") == null:
+        _rebuild()
 
 
 func _rebuild() -> void:
-    # Keep the editor fully procedural and editable. In the running game,
-    # constructing the 39 labels and lathed surfaces on every room swap
-    # would synchronously block the main thread.
+    # An artist may parent another bottle under this one. Keep authored
+    # children, replacing only the procedural mesh pieces for this design.
     for child in get_children():
-        remove_child(child)
-        child.free()
+        if child is MeshInstance3D or child is MultiMeshInstance3D:
+            remove_child(child)
+            child.free()
     if not Engine.is_editor_hint() and _runtime_design_templates.has(design):
         for prototype in _runtime_design_templates[design]:
             # DUPLICATE_SCRIPTS is deliberately disabled: these parts are
@@ -79,11 +82,29 @@ func _rebuild() -> void:
             add_child((prototype as Node).duplicate(0))
         return
     _build()
-    if not Engine.is_editor_hint():
+    if Engine.is_editor_hint():
+        _own_generated_parts()
+        call_deferred("_own_generated_parts")
+    else:
         var prototypes: Array[Node] = []
         for part in get_children():
-            prototypes.append((part as Node).duplicate(0))
+            if part is MeshInstance3D or part is MultiMeshInstance3D:
+                prototypes.append((part as Node).duplicate(0))
         _runtime_design_templates[design] = prototypes
+
+
+# New procedural pieces belong to the currently edited scene (main.tscn),
+# never to the instanced template: Godot otherwise saves invalid overrides
+# of meshes that do not exist in the source bottle .tscn.
+func _own_generated_parts() -> void:
+    if not Engine.is_editor_hint() or not is_inside_tree():
+        return
+    var edited_root := get_tree().edited_scene_root
+    if edited_root == null or (edited_root != self and not edited_root.is_ancestor_of(self)):
+        return
+    for child in get_children():
+        if child is MeshInstance3D or child is MultiMeshInstance3D:
+            child.owner = edited_root
 
 
 func _material(hex: Color, metal: float, rough: float, alpha := 1.0) -> StandardMaterial3D:
@@ -104,12 +125,7 @@ func _part(label: String, mesh: Mesh, mat: Material, pos := Vector3.ZERO) -> Mes
     part.material_override = mat
     part.position = pos
     add_child(part)
-    # Each bottle is an editable instance in main.tscn. Give its generated
-    # meshes a scene owner in the editor, otherwise the visual surface is
-    # ownerless and cannot be picked/adjusted from the editor scene tree.
-    # Runtime keeps the fast shared-geometry cache without extra ownership.
-    if Engine.is_editor_hint():
-        part.owner = self
+    # _own_generated_parts() assigns the edited-scene owner after building.
     return part
 
 
@@ -362,8 +378,7 @@ func _build() -> void:
     knurled_cap.name = "MachinedCapFluting"
     knurled_cap.multimesh = knurling
     add_child(knurled_cap)
-    if Engine.is_editor_hint():
-        knurled_cap.owner = self
+    # The edited scene root owns this instance after building.
 
     # The physical bottle has a real UV-textured paper wrap that follows its
     # exact glass surface, including facets and shoulder taper.
@@ -396,8 +411,7 @@ func _build() -> void:
         stud_batch.name = "VermouthDiamondEmbossing"
         stud_batch.multimesh = emboss
         add_child(stud_batch)
-        if Engine.is_editor_hint():
-            stud_batch.owner = self
+        # The edited scene root owns this instance after building.
     if kind == 5:
         # Side-hanging stamped medallion and its metallic cord.
         var coin := CylinderMesh.new()
