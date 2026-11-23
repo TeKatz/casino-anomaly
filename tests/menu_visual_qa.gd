@@ -49,6 +49,19 @@ func _run() -> void:
         return
     var quit_button := menu_buttons.get_node_or_null("QuitButton") as Button
     var settings_button := menu_buttons.get_node_or_null("SettingsButton") as Button
+    var menu_icons = preload("res://ui/menu_icons.gd")
+    for name in ["play", "resume", "settings", "archive", "stats", "credits",
+            "new", "load", "home", "quit", "update", "install",
+            "profile", "add_profile", "edit", "delete", "back", "history"]:
+        var texture: Texture2D = menu_icons.texture(name)
+        if texture == null or texture.get_size().x < 18.0:
+            _fail("Shared vector menu icon missing: " + name)
+            return
+    for id in ["PlayButton", "SettingsButton", "CreditsButton", "QuitButton", "UpdateButton"]:
+        var icon_button := menu_buttons.get_node(id) as Button
+        if icon_button.icon == null or str(icon_button.get("symbol")).is_empty():
+            _fail("Main menu button has no icon: " + id)
+            return
     if str(play_button.get("accent")) != "green" or str(quit_button.get("accent")) != "red" \
             or str(settings_button.get("accent")) != "gold":
         _fail("Main-menu semantic green, red and gold borders were not applied")
@@ -92,6 +105,17 @@ func _run() -> void:
     if credits == null or not credits.has_method("refresh_language"):
         _fail("Credits panel missing")
         return
+    menu.call("_on_play")
+    var profile_overlay := menu.get("profile_overlay") as Control
+    var profile_picker := menu.get("profile_panel") as Control
+    if profile_overlay == null or not profile_overlay.visible \
+            or profile_picker == null or (profile_picker.get("slot_buttons") as Array).size() != 5:
+        _fail("Profile selection lost its five-slot menu transition")
+        return
+    for slot_button in profile_picker.get("slot_buttons"):
+        if not (slot_button is Button) or (slot_button as Button).icon == null:
+            _fail("Profile slots must have a themed icon and custom button skin")
+            return
     menu.queue_free()
     await process_frame
 
@@ -101,6 +125,29 @@ func _run() -> void:
     if pause_ui.get("credits_panel") == null:
         _fail("Pause menu has no credits entry")
         return
+    var pause_buttons: Array = pause_ui.get("localized_buttons")
+    var section_labels: Array = pause_ui.get("section_labels")
+    if pause_buttons.size() != 9 or section_labels.size() != 3:
+        _fail("Pause menu action groups lost their hierarchy")
+        return
+    for button in pause_buttons:
+        var control := button as Button
+        if control == null or control.icon == null or not control.has_meta("translation_key"):
+            _fail("Every pause action must have an icon and localization key")
+            return
+        match str(control.get_meta("translation_key")):
+            "pause.resume":
+                if str(control.get("accent")) != "green":
+                    _fail("Resume action must be primary")
+                    return
+            "pause.new_game":
+                if str(control.get("accent")) != "amber":
+                    _fail("New game needs its distinct warm accent")
+                    return
+            "pause.quit":
+                if str(control.get("accent")) != "red":
+                    _fail("Quit must remain visually destructive")
+                    return
     pause_ui.call("_open_credits")
     if not (pause_ui.get("credits_panel") as Control).visible:
         _fail("Pause credits cannot open")
