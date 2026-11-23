@@ -187,7 +187,7 @@ func _build() -> void:
     var metal: StandardMaterial3D = silver if kind == 1 else gold
     var seal := _material(Color(DARK_LABEL[kind]), 0.17, 0.65)
     var text_col := Color(INK[kind])
-    var neck_radius := wide * [0.43, 0.44, 0.43, 0.39, 0.43, 0.41][kind]
+    var neck_radius: float = wide * [0.43, 0.44, 0.43, 0.39, 0.43, 0.41][kind]
     var body_outline: Array = PROFILES[kind]
     _lathe("HandCutGlassShell", body_outline, wide, height, outside, facet)
     # Inner liquid has its own closed silhouette and visible meniscus,
@@ -238,7 +238,7 @@ func _build() -> void:
     # True embossed cap knurling: individual raised metal teeth.
     for tooth in range(12):
         var theta := TAU * float(tooth) / 12.0
-        var ring_radius := neck_radius * 1.245
+        var ring_radius: float = neck_radius * 1.245
         var nick := BoxMesh.new()
         nick.size = Vector3(0.004, 0.030, 0.006)
         var part := _part("CapFluting_%02d" % tooth, nick, brass,
