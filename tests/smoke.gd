@@ -170,7 +170,9 @@ func _run_smoke() -> void:
                 cabinet_correct = item.position.y >= 0.24 and shape != null and shape.size.x >= 3.0
     var signature_count := 0
     for item in bar.get_children():
-        if str(item.get_meta("prop_family", "")) == "signature_bar_bottle":
+        # The authored, instance-specific name is a more stable identifier
+        # than scene-instance metadata during Godot's editor reimport.
+        if item.name.begins_with("Signature_"):
             signature_count += 1
     if count_busts != 2 or count_stools != 10 or count_candles != 3 \
             or signature_count != 39 or legacy_wine_on_shelf \

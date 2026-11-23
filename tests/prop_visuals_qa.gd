@@ -35,10 +35,13 @@ func _run() -> void:
     var families := {}
     var signature_count := 0
     for child in bar.get_children():
-        if str(child.get_meta("prop_family", "")) != "signature_bar_bottle":
+        if not child.name.begins_with("Signature_"):
             continue
         signature_count += 1
-        families[str(child.get_meta("bottle_design", ""))] = true
+        var design_name := str(child.get_meta("bottle_design", ""))
+        if design_name.is_empty():
+            design_name = str(child.name).get_slice("_", 3)
+        families[design_name] = true
         if not (child is Node3D):
             _fail("Signature bottle is not a 3D scene")
             return
