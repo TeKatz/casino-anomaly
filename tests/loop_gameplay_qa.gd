@@ -136,7 +136,7 @@ func _run() -> void:
     if absf(progress.position.x + 45.94) > 0.01 \
             or absf(progress.position.z + 6.68) > 0.01 \
             or neon_number.global_transform.basis.z.dot(scene.global_transform.basis.x) < 0.95:
-        _fail("Neon number must face into the room between the two exit doors")
+        _fail("Neon number must face into the room between the two exit doors: pos=%s number_basis_z=%s room_basis_x=%s dot=%.4f" % [str(progress.position), str(neon_number.global_transform.basis.z), str(scene.global_transform.basis.x), neon_number.global_transform.basis.z.dot(scene.global_transform.basis.x)])
         return
     if scene.get_node_or_null("StreamingPortals/InitialEntryCap/SolidDoor_Collision") == null:
         _fail("First hall entrance is open to the void")
