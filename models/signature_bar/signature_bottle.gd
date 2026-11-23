@@ -99,10 +99,10 @@ func _cylinder(label: String, r1: float, r2: float, height: float,
 
 
 func _radius(shape: int, theta: float, relative: float, cut: float) -> Vector2:
-    var power := [0.56, 1.0, 0.91, 0.78, 0.79, 0.54][shape]
+    var power: float = [0.56, 1.0, 0.91, 0.78, 0.79, 0.54][shape]
     var x := signf(cos(theta)) * pow(absf(cos(theta)), power)
     var z := signf(sin(theta)) * pow(absf(sin(theta)), power)
-    var facets := [8, 24, 16, 12, 12, 8][shape]
+    var facets: int = [8, 24, 16, 12, 12, 8][shape]
     var bevel := (1.0 + cut * cos(theta * float(facets)))
     return Vector2(x * relative * bevel, z * relative * bevel)
 
