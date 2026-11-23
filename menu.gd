@@ -148,6 +148,11 @@ func _open_profile_archive(next_mode: String) -> void:
 func _back_from_profile_archive() -> void:
     profile_panel.call("refresh")
     _show_overlay(profile_overlay)
+    # Coming back from the archive must restore the preview cards' exact
+    # geometry and current data, rather than keeping an old slide state.
+    profile_side_cards.call("sync_selection",
+        int(profile_panel.get("selected_slot")),
+        bool(profile_panel.call("is_selected_occupied")), false)
 
 
 func _create_settings_overlay() -> void:

@@ -44,7 +44,9 @@ func bind_panel(panel: Control) -> void:
 func _build_card(mode: String, symbol: String) -> PanelContainer:
     var panel := PanelContainer.new()
     panel.name = "StatisticsCard" if mode == "stats" else "ArchiveCard"
-    panel.custom_minimum_size = Vector2(160, 342)
+    # The preview card has a bounded viewport-controlled height. Its text
+    # may grow, but must never raise the PanelContainer minimum height.
+    panel.custom_minimum_size = Vector2(160, 0)
     panel.add_theme_stylebox_override("panel", MenuStyle.panel())
     panel.mouse_filter = Control.MOUSE_FILTER_PASS
     add_child(panel)
@@ -64,13 +66,24 @@ func _build_card(mode: String, symbol: String) -> PanelContainer:
     heading.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
     var rule := HSeparator.new()
     stack.add_child(rule)
+    # Unbounded dynamic labels used to enlarge the entire side panel after
+    # a repeated profile selection. A scrolling *content viewport* keeps the
+    # card geometry stable and the bottom action reachable at every size.
+    var preview_scroll := ScrollContainer.new()
+    preview_scroll.name = "PreviewScroll"
+    preview_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    preview_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+    preview_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+    preview_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+    stack.add_child(preview_scroll)
     var content := VBoxContainer.new()
     content.name = "PreviewContent"
-    content.size_flags_vertical = Control.SIZE_EXPAND_FILL
+    content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     content.add_theme_constant_override("separation", 9)
-    stack.add_child(content)
+    preview_scroll.add_child(content)
     var button := LuminousButton.new()
     button.symbol = symbol
+    button.clip_text = true
     button.custom_minimum_size.y = 44
     button.add_theme_font_size_override("font_size", 13)
     button.pressed.connect(func() -> void: open_requested.emit(mode))
@@ -209,9 +222,11 @@ func _fill(slot: int) -> void:
 
 
 func sync_selection(slot: int, occupied: bool, animated: bool = true) -> void:
-    _layout_cards()
+    # Cancel any unfinished slide/fade BEFORE computing placement. Repeated
+    # clicks or quick navigation must not leave a card at a tween midpoint.
     if motion != null and motion.is_running():
         motion.kill()
+    _layout_cards()
     if not occupied or slot <= 0:
         displayed_slot = 0
         if not shown:
@@ -249,6 +264,8 @@ func sync_selection(slot: int, occupied: bool, animated: bool = true) -> void:
     if switching:
         # Keep the cards anchored. Fade old data out, swap both previews
         # atomically, then fade the new profile's numbers back in.
+        statistics_card.position = target_left
+        archive_card.position = target_right
         motion = create_tween().set_trans(Tween.TRANS_CUBIC)
         motion.tween_property(statistics_card, "modulate:a", 0.0, 0.12)
         motion.parallel().tween_property(archive_card, "modulate:a", 0.0, 0.12)
@@ -268,7 +285,10 @@ func sync_selection(slot: int, occupied: bool, animated: bool = true) -> void:
         motion.parallel().tween_property(statistics_card, "modulate:a", 1.0, 0.30)
         motion.parallel().tween_property(archive_card, "modulate:a", 1.0, 0.30)
     else:
+        # Repeated click on the same profile is a data refresh, not a new
+        # entrance animation. Restore its exact normal geometry and alpha.
         _fill(slot)
+        _layout_cards()
         statistics_card.position = target_left
         archive_card.position = target_right
         statistics_card.modulate.a = 1.0

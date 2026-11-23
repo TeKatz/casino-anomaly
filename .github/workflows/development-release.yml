@@ -157,6 +157,7 @@ jobs:
             @('tests/streaming_qa.gd', 'Casino Anomaly seamless two-room streaming QA PASS'),
             @('tests/settings_pause_qa.gd', 'Casino Anomaly pause, persistent settings and world-camera input QA PASS'),
             @('tests/menu_visual_qa.gd', 'Casino Anomaly abstract UI and credits QA PASS'),
+            @('tests/profile_side_cards_qa.gd', 'Casino Anomaly profile side-card layout QA PASS'),
             @('tests/loading_transition_qa.gd', 'Casino Anomaly threaded scene loading QA PASS'),
             @('tests/audio_loop_qa.gd', 'Casino Anomaly persistent audio and menu-only loop QA PASS'),
             @('tests/localization_intro_qa.gd', 'Casino Anomaly bilingual intro and door interaction QA PASS'),
