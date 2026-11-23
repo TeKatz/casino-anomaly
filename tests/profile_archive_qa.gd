@@ -4,7 +4,7 @@ extends SceneTree
 const Catalog = preload("res://gameplay/anomaly_catalog.gd")
 const ProfilePanel = preload("res://ui/profile_panel.gd")
 const ArchivePanel = preload("res://ui/anomaly_archive_panel.gd")
-const Feedback = preload("res://ui/decision_feedback.gd")
+const WorldVerdictDisplay = preload("res://gameplay/world_verdict_display.gd")
 
 
 func _initialize() -> void:
@@ -88,22 +88,35 @@ func _run() -> void:
 
     var picker := ProfilePanel.new()
     var archive := ArchivePanel.new()
-    var feedback := Feedback.new()
+    var plaque := WorldVerdictDisplay.new()
     root.add_child(picker)
     root.add_child(archive)
-    root.add_child(feedback)
+    root.add_child(plaque)
+    plaque.place_for_lane("left", -52.0, -3.7, 1.22)
+    plaque.set_result({"valid": true, "correct": false, "anomaly_id": "bar_label",
+        "visited": 3, "previous_streak": 2, "streak": 0})
     await process_frame
     archive.show_mode("archive")
     archive.show_mode("stats")
     archive.show_mode("last")
-    feedback.show_verdict({"valid": true, "correct": false, "anomaly_id": "bar_label",
-        "visited": 3, "previous_streak": 2})
     if picker.get_node_or_null(".") == null or archive.get_child_count() == 0:
         _fail("Player-facing archive/profile UI did not instantiate")
         return
+    if plaque.get_node_or_null("DecisionResult") == null \
+            or plaque.get_child_count() < 6 or plaque is CanvasLayer:
+        _fail("The verdict must be a physical 3D plaque, never a HUD")
+        return
+    var text_combined := ""
+    for item in plaque.get_children():
+        if item is Label3D:
+            text_combined += (item as Label3D).text + " "
+    if text_combined.contains("bar_label") or text_combined.contains("Bar sign") \
+            or text_combined.contains("Barschild"):
+        _fail("The corridor leaked an anomaly identity")
+        return
     picker.queue_free()
     archive.queue_free()
-    feedback.queue_free()
+    plaque.queue_free()
     if not profiles.delete_profile(4) or not profiles.delete_profile(5):
         _fail("Could not safely delete test profiles")
         return

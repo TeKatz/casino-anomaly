@@ -1,5 +1,6 @@
 extends RefCounted
 const Loc = preload("res://gameplay/localization.gd")
+const WorldVerdictDisplay = preload("res://gameplay/world_verdict_display.gd")
 ## Runtime geometry for two physically separated L-shaped exit passages.
 ## The next hall remains out of sight behind a solid corner. All geometry,
 ## including one-way locking gates, exists only in the running game.
@@ -224,6 +225,22 @@ func _build_bent_connector(parent: Node3D, lane: String,
     second_light.omni_range = 4.4
     second_light.light_volumetric_fog_energy = 0.10
     corridor.add_child(second_light)
+
+
+func mount_verdict(room: Node3D, lane: String, verdict: Dictionary) -> bool:
+    # Add only after committing the choice. The plaque is a genuine
+    # physical object on the chosen connector, retained across handoff.
+    var corridor := get_connector(room, lane)
+    if corridor == null or not bool(verdict.get("valid", false)):
+        return false
+    var display := corridor.get_node_or_null("VerdictPlaque") as Node3D
+    if display == null:
+        display = WorldVerdictDisplay.new() as Node3D
+        display.name = "VerdictPlaque"
+        display.call("place_for_lane", lane, BEND_X, lane_z(lane), HALF_WIDTH)
+        corridor.add_child(display)
+    display.call("set_result", verdict)
+    return true
 
 
 func _build_wood_exit_frame(parent: Node3D, label: String,

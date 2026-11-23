@@ -127,27 +127,42 @@ func _render_archive(profiles: Node) -> void:
         return category_a < category_b
     )
     var current_category := ""
+    var encountered := 0
+    var unseen := 0
     for entry in entries:
         if not bool(entry.get("discoverable", true)):
+            continue
+        var record: Dictionary = saved.get(str(entry["id"]), {})
+        # A miss does not count as identification. Even the category
+        # remains hidden until this anomaly is correctly recognized.
+        if not bool(record.get("recognized", false)):
+            if record.is_empty():
+                unseen += 1
+            else:
+                encountered += 1
             continue
         var category := _field(entry, "category")
         if category != current_category:
             current_category = category
             _label(body, "— " + category + " —", 17, GOLD)
-        var record: Dictionary = saved.get(str(entry["id"]), {})
-        if record.is_empty():
-            _label(body, _word("??? · Unbekannte Anomalie", "??? · Unknown anomaly"), 15, MUTED)
-            continue
-        var recognized := bool(record.get("recognized", false))
-        var status := _word("ERKANNT", "RECOGNIZED") if recognized \
-            else _word("BEGEGNET", "ENCOUNTERED")
-        _label(body, "%s · %s" % [status, _field(entry, "title")], 16,
-            GOLD if recognized else Color("#d0d6dc"))
+        _label(body, _field(entry, "title"), 16, GOLD)
         _label(body, _field(entry, "description"), 14, MUTED)
         _label(body, _word("Richtig: %d · Übersehen: %d" % [
             int(record.get("correct", 0)), int(record.get("missed", 0))],
             "Correct: %d · Missed: %d" % [
             int(record.get("correct", 0)), int(record.get("missed", 0))]), 13, MUTED)
+    # Aggregate still-locked entries so the category and precise anomaly
+    # remain impossible to infer, even in future catalogs with 500+ effects.
+    if encountered > 0 or unseen > 0:
+        _label(body, _word("— NOCH NICHT IDENTIFIZIERT —",
+            "— NOT YET IDENTIFIED —"), 17, GOLD)
+        _label(body, _word("Unbestätigte Beobachtungen: %d", "Unconfirmed encounters: %d") \
+            % encountered, 15, MUTED)
+        _label(body, _word("Unbekannte Anomalien: %d", "Unknown anomalies: %d") \
+            % unseen, 15, MUTED)
+        _label(body, _word("Namen und Beschreibungen werden erst nach einer richtigen Erkennung sichtbar.",
+            "Names and descriptions unlock only after correctly identifying an anomaly."),
+            14, MUTED)
 
 
 func _render_stats(profiles: Node) -> void:
@@ -177,23 +192,22 @@ func _render_last(profiles: Node) -> void:
             "No recorded decisions yet."), 16, MUTED)
         return
     var correct := bool(verdict.get("correct", false))
-    var id := str(verdict.get("anomaly_id", ""))
+    var anomaly_present := bool(verdict.get("expected_anomaly",
+        not str(verdict.get("anomaly_id", "")).is_empty()))
     var chose := bool(verdict.get("choice_anomaly", false))
-    _label(body, _word("RICHTIG", "CORRECT") if correct \
-        else _word("FALSCHE ENTSCHEIDUNG", "WRONG DECISION"), 20,
+    _label(body, _word("BESTÄTIGT", "ACCEPTED") if correct \
+        else _word("NICHT BESTÄTIGT", "REJECTED"), 20,
         Color("#8cd4ac") if correct else Color("#f2a3a3"))
-    _label(body, _word("Raum %d · Deine Wahl: %s" % [
+    _label(body, _word("Prüfung %d · Deine Wahl: %s" % [
         int(verdict.get("visited", 0)), "ANOMALIE" if chose else "NORMAL"],
-        "Room %d · Your choice: %s" % [
+        "Review %d · Your choice: %s" % [
         int(verdict.get("visited", 0)), "ANOMALY" if chose else "NORMAL"]), 16)
-    if id.is_empty():
-        _label(body, _word("Dieser Raum war normal. Es gab keine Veränderung.",
-            "This room was normal. Nothing had changed."), 16)
-    else:
-        var entry := Catalog.get_entry(id)
-        _label(body, _field(entry, "title") if not entry.is_empty() else id, 18, GOLD)
-        if not entry.is_empty():
-            _label(body, _field(entry, "description"), 16, MUTED)
+    _label(body, _word("Befund: Abweichung" if anomaly_present \
+        else "Befund: Unauffällig",
+        "Finding: Irregular" if anomaly_present else "Finding: Clear"), 16, MUTED)
     if not correct:
         _label(body, _word("Serie: %d → 0" % int(verdict.get("previous_streak", 0)),
             "Streak: %d → 0" % int(verdict.get("previous_streak", 0))), 16, MUTED)
+    _label(body, _word("Einzelheiten findest du ausschließlich bei korrekt identifizierten Anomalien im Archiv.",
+        "Detailed descriptions are available only for correctly identified anomalies in the archive."),
+        14, MUTED)

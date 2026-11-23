@@ -29,8 +29,11 @@ registration or hard-coded anomaly counts need to be updated.
 categories, tuning or handlers, but do not rename an existing ID without
 an explicit migration. Disabled/deleted entries remain in player saves
 but are not counted against the current active catalog denominator.
-The archive deliberately hides names and descriptions until the player
-encounters the effect; successful identification marks it recognized.
+The archive deliberately hides **names, descriptions and categories** until
+the player correctly identifies the effect. A wrong choice records a
+non-identifying encounter only; correct identification unlocks the full
+entry. The most recent review and the physical corridor plaque display
+only a neutral result (irregular/clear), never the effect ID or details.
 
 ## Profile and run persistence
 

@@ -191,6 +191,14 @@ func _run() -> void:
     if not bool(controller.get("choice_taken")):
         _fail("The left choice was not permanently committed")
         return
+    var plaque := shape.get_connector(first, "left").get_node_or_null("VerdictPlaque")
+    if plaque == null or not (plaque is Node3D) \
+            or plaque.get_node_or_null("NeutralFinding") == null:
+        _fail("The chosen connector is missing its physical, neutral verdict plaque")
+        return
+    if shape.get_connector(first, "right").has_node("VerdictPlaque"):
+        _fail("Unchosen corridor unexpectedly contains a verdict plaque")
+        return
     var old_rig := first.get_node("VoxelGIRig") as Node3D
     if bool(old_rig.get("streaming_active")) or not bool(staged_gi.get("streaming_active")):
         _fail("Committed departure must transfer the GI budget to the next room")
@@ -256,6 +264,9 @@ func _run() -> void:
         return
     if second.get_node_or_null("ArrivalConnector/OneWayGate_Collision") == null:
         _fail("The passage behind the player vanished and exposed the void")
+        return
+    if second.get_node_or_null("ArrivalConnector/VerdictPlaque") == null:
+        _fail("The corridor result was lost during the seamless handoff")
         return
     if second.get_node("WorldEnvironment").environment == null:
         _fail("The new room did not activate its original lighting")
