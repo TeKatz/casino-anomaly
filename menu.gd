@@ -13,6 +13,7 @@ var profile_overlay: Control
 var archive_panel: PanelContainer
 var archive_overlay: Control
 var overlay_tween: Tween
+var active_overlay: Control
 var changing_scene := false
 
 const UPDATE_MANIFEST_URL := "https://github.com/TeKatz/casino-anomaly/releases/download/development/update-manifest.json"
@@ -130,12 +131,10 @@ func _create_archive_overlay() -> void:
 
 func _open_profile_archive(next_mode: String) -> void:
     archive_panel.call("show_mode", next_mode)
-    profile_overlay.visible = false
     _show_overlay(archive_overlay)
 
 
 func _back_from_profile_archive() -> void:
-    archive_overlay.visible = false
     profile_panel.call("refresh")
     _show_overlay(profile_overlay)
 
@@ -172,18 +171,43 @@ func _build_overlay(content: Control) -> Control:
 func _show_overlay(overlay: Control) -> void:
     if overlay_tween != null and overlay_tween.is_running():
         overlay_tween.kill()
+    var previous := active_overlay
+    for candidate in [profile_overlay, archive_overlay, credits_overlay, settings_overlay]:
+        if candidate != null and candidate != overlay and candidate != previous:
+            candidate.visible = false
+    active_overlay = overlay
     overlay.visible = true
+    overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+    overlay.move_to_front()
     overlay.modulate.a = 0.0
-    overlay_tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+    overlay.position.x = 18.0
+    overlay_tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
     overlay_tween.tween_property(overlay, "modulate:a", 1.0, 0.25)
+    overlay_tween.tween_property(overlay, "position:x", 0.0, 0.25)
+    if previous != null and previous != overlay and is_instance_valid(previous):
+        previous.visible = true
+        previous.mouse_filter = Control.MOUSE_FILTER_IGNORE
+        overlay_tween.tween_property(previous, "modulate:a", 0.0, 0.15)
+        overlay_tween.chain().tween_callback(func() -> void:
+            if is_instance_valid(previous) and previous != active_overlay:
+                previous.visible = false
+        )
 
 
 func _hide_overlay(overlay: Control) -> void:
     if overlay_tween != null and overlay_tween.is_running():
         overlay_tween.kill()
-    overlay_tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+    if active_overlay == overlay:
+        active_overlay = null
+    overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+    overlay_tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
     overlay_tween.tween_property(overlay, "modulate:a", 0.0, 0.18)
-    overlay_tween.tween_callback(func() -> void: overlay.visible = false)
+    overlay_tween.tween_property(overlay, "position:x", 12.0, 0.18)
+    overlay_tween.chain().tween_callback(func() -> void:
+        if is_instance_valid(overlay) and overlay != active_overlay:
+            overlay.visible = false
+            overlay.position.x = 0.0
+    )
 
 
 func _open_settings() -> void:

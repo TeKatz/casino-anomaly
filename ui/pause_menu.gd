@@ -16,6 +16,8 @@ var settings_panel: PanelContainer
 var credits_panel: PanelContainer
 var archive_panel: PanelContainer
 var intro_tween: Tween
+var panel_tween: Tween
+var section_labels: Array[Label] = []
 var confirmation: ConfirmationDialog
 var open := false
 var subtitle_label: Label
@@ -41,7 +43,7 @@ func _ready() -> void:
     center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     panel_root.add_child(center)
     pause_panel = PanelContainer.new()
-    pause_panel.custom_minimum_size = Vector2(475, 625)
+    pause_panel.custom_minimum_size = Vector2(500, 680)
     pause_panel.add_theme_stylebox_override("panel", MenuStyle.panel())
     center.add_child(pause_panel)
 
@@ -52,13 +54,13 @@ func _ready() -> void:
     margin.add_theme_constant_override("margin_bottom", 27)
     pause_panel.add_child(margin)
     var stack := VBoxContainer.new()
-    stack.add_theme_constant_override("separation", 9)
+    stack.add_theme_constant_override("separation", 7)
     margin.add_child(stack)
     var title := Label.new()
     title.text = "CASINO ANOMALY"
     title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     title.add_theme_color_override("font_color", GOLD)
-    title.add_theme_font_size_override("font_size", 29)
+    title.add_theme_font_size_override("font_size", 28)
     stack.add_child(title)
     subtitle_label = Label.new()
     var subtitle := subtitle_label
@@ -67,11 +69,14 @@ func _ready() -> void:
     subtitle.add_theme_color_override("font_color", Color("#a5aeb7"))
     stack.add_child(subtitle)
 
+    _add_section(stack, "pause.group_current")
     _add_button(stack, "pause.resume", _resume)
     _add_button(stack, "pause.settings", _open_settings)
+    _add_section(stack, "pause.group_discoveries")
     _add_button(stack, "pause.archive", func() -> void: _open_archive("archive"))
     _add_button(stack, "pause.stats", func() -> void: _open_archive("stats"))
     _add_button(stack, "pause.credits", _open_credits)
+    _add_section(stack, "pause.group_session")
     _add_button(stack, "pause.new_game", func() -> void: _confirm_action("new"))
     _add_button(stack, "pause.load", func() -> void: _confirm_action("load"))
     _add_button(stack, "pause.menu", _go_to_main_menu)
@@ -108,15 +113,46 @@ func _ready() -> void:
     _refresh_localization()
 
 
+func _add_section(parent: VBoxContainer, key: String) -> void:
+    var row := HBoxContainer.new()
+    row.custom_minimum_size.y = 21
+    row.add_theme_constant_override("separation", 13)
+    parent.add_child(row)
+    var label := Label.new()
+    label.text = Loc.t(key, self)
+    label.set_meta("translation_key", key)
+    label.add_theme_font_size_override("font_size", 11)
+    label.add_theme_color_override("font_color", Color("#bba58a"))
+    row.add_child(label)
+    section_labels.append(label)
+    var rule := HSeparator.new()
+    rule.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    row.add_child(rule)
+
+
 func _add_button(parent: VBoxContainer, key: String, action: Callable) -> void:
     var button := LuminousButton.new()
     button.text = Loc.t(key, self)
     button.set_meta("translation_key", key)
-    button.custom_minimum_size = Vector2(0, 43)
-    if key == "pause.new_game":
-        button.accent = "green"
-    elif key == "pause.quit":
-        button.accent = "red"
+    button.custom_minimum_size = Vector2(0, 41)
+    match key:
+        "pause.resume":
+            button.symbol = "resume"
+            button.accent = "green"
+            button.featured = true
+        "pause.settings": button.symbol = "settings"
+        "pause.archive": button.symbol = "archive"
+        "pause.stats": button.symbol = "stats"
+        "pause.credits": button.symbol = "credits"
+        "pause.new_game":
+            button.symbol = "new"
+            button.accent = "amber"
+            button.featured = true
+        "pause.load": button.symbol = "load"
+        "pause.menu": button.symbol = "home"
+        "pause.quit":
+            button.symbol = "quit"
+            button.accent = "red"
     button.pressed.connect(action)
     parent.add_child(button)
     localized_buttons.append(button)
@@ -130,6 +166,8 @@ func _on_setting_changed(key: String) -> void:
 func _refresh_localization() -> void:
     for button in localized_buttons:
         button.text = Loc.t(str(button.get_meta("translation_key")), self)
+    for section in section_labels:
+        section.text = Loc.t(str(section.get_meta("translation_key")), self)
     confirmation.title = Loc.t("pause.save_title", self)
     credits_panel.call("refresh_language")
     archive_panel.call("refresh_language")
@@ -184,11 +222,14 @@ func _pause() -> void:
     intro_tween = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
     intro_tween.tween_property(panel_root, "modulate:a", 1.0, 0.23).set_trans(Tween.TRANS_CUBIC)
     get_tree().paused = true
+    _fade_panel(pause_panel)
     Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 
 func _resume() -> void:
     open = false
+    if panel_tween != null and panel_tween.is_running():
+        panel_tween.kill()
     visible = false
     settings_panel.visible = false
     credits_panel.visible = false
@@ -239,9 +280,15 @@ func _close_archive() -> void:
 
 
 func _fade_panel(panel: Control) -> void:
+    if panel_tween != null and panel_tween.is_running():
+        panel_tween.kill()
+    panel.pivot_offset = panel.size * 0.5
+    panel.scale = Vector2(0.984, 0.984)
     panel.modulate.a = 0.0
-    var tween := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
-    tween.tween_property(panel, "modulate:a", 1.0, 0.22).set_trans(Tween.TRANS_CUBIC)
+    panel_tween = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+    panel_tween.set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+    panel_tween.tween_property(panel, "modulate:a", 1.0, 0.24)
+    panel_tween.tween_property(panel, "scale", Vector2.ONE, 0.24)
 
 
 func _confirm_action(action: String) -> void:

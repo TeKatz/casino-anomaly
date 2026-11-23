@@ -5,6 +5,7 @@ signal launch_requested(scene_path: String)
 signal archive_requested(mode: String)
 
 const MenuStyle = preload("res://ui/menu_style.gd")
+const LuminousButton = preload("res://ui/luminous_button.gd")
 const GOLD := Color("#dcb477")
 const MUTED := Color("#a5b0bb")
 const SLOT_COUNT := 5
@@ -42,7 +43,8 @@ func _ready() -> void:
     title_label.add_theme_color_override("font_color", GOLD)
     stack.add_child(title_label)
     for slot in range(1, SLOT_COUNT + 1):
-        var button := Button.new()
+        var button := LuminousButton.new()
+        button.symbol = "profile"
         button.custom_minimum_size.y = 52
         button.alignment = HORIZONTAL_ALIGNMENT_LEFT
         button.add_theme_font_size_override("font_size", 15)
@@ -57,24 +59,24 @@ func _ready() -> void:
     name_edit.max_length = 32
     name_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     name_line.add_child(name_edit)
-    rename_button = _button(name_line, _rename)
+    rename_button = _button(name_line, _rename, "edit")
     var actions := HBoxContainer.new()
     actions.add_theme_constant_override("separation", 7)
     stack.add_child(actions)
-    continue_button = _button(actions, _continue)
-    new_button = _button(actions, _request_new_run)
+    continue_button = _button(actions, _continue, "resume", "green")
+    new_button = _button(actions, _request_new_run, "new", "amber")
     var collection_actions := HBoxContainer.new()
     collection_actions.add_theme_constant_override("separation", 7)
     stack.add_child(collection_actions)
     archive_button = _button(collection_actions,
-        func() -> void: archive_requested.emit("archive"))
+        func() -> void: archive_requested.emit("archive"), "archive")
     stats_button = _button(collection_actions,
-        func() -> void: archive_requested.emit("stats"))
+        func() -> void: archive_requested.emit("stats"), "stats")
     var last_actions := HBoxContainer.new()
     last_actions.add_theme_constant_override("separation", 7)
     stack.add_child(last_actions)
-    delete_button = _button(last_actions, _request_delete)
-    back_button = _button(last_actions, func() -> void: back_pressed.emit())
+    delete_button = _button(last_actions, _request_delete, "delete", "red")
+    back_button = _button(last_actions, func() -> void: back_pressed.emit(), "back")
     status = Label.new()
     status.add_theme_font_size_override("font_size", 13)
     status.add_theme_color_override("font_color", MUTED)
@@ -93,9 +95,13 @@ func _ready() -> void:
     refresh()
 
 
-func _button(parent: HBoxContainer, action: Callable) -> Button:
-    var button := Button.new()
-    button.custom_minimum_size.y = 38
+func _button(parent: HBoxContainer, action: Callable, symbol: String,
+        accent: String = "gold") -> Button:
+    var button := LuminousButton.new()
+    button.symbol = symbol
+    button.accent = accent
+    button.featured = accent != "gold"
+    button.custom_minimum_size.y = 40
     button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     parent.add_child(button)
     button.pressed.connect(action)
@@ -133,6 +139,8 @@ func refresh() -> void:
         else:
             button.text = _word("SLOT %d · + Neues Profil erstellen",
                 "SLOT %d · + Create new profile") % slot
+        (button as LuminousButton).set_symbol("profile" if bool(summary.get("exists", false)) else "add_profile")
+        button.alignment = HORIZONTAL_ALIGNMENT_LEFT
         button.clip_text = true
         button.tooltip_text = button.text
         button.modulate = Color("#f5dfb5") if slot == selected_slot else Color.WHITE

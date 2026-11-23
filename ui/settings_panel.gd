@@ -52,12 +52,13 @@ func _ready() -> void:
     tab_row.add_theme_constant_override("separation", 10)
     layout.add_child(tab_row)
     for i in range(CATEGORIES.size()):
-        var tab := Button.new()
+        var tab := LuminousButton.new()
+        tab.symbol = ["settings", "info", "profile", "stats"][i]
         MenuStyle.apply_button(tab)
         tab.text = Loc.t(CATEGORIES[i], self)
         tab.custom_minimum_size = Vector2(126, 39)
         tab.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-        tab.focus_mode = Control.FOCUS_NONE
+        tab.focus_mode = Control.FOCUS_ALL
         tab_row.add_child(tab)
         tabs.append(tab)
         tab.pressed.connect(_switch_tab.bind(i))
@@ -83,6 +84,7 @@ func _ready() -> void:
     note.add_theme_color_override("font_color", Color("#96a2ab"))
     footer.add_child(note)
     back_button = LuminousButton.new()
+    (back_button as LuminousButton).symbol = "back"
     var back := back_button
     back.text = Loc.t("settings.back", self)
     back.custom_minimum_size = Vector2(142, 44)

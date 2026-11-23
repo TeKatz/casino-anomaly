@@ -4,6 +4,7 @@ signal back_pressed
 
 const Catalog = preload("res://gameplay/anomaly_catalog.gd")
 const MenuStyle = preload("res://ui/menu_style.gd")
+const LuminousButton = preload("res://ui/luminous_button.gd")
 const GOLD := Color("#dcb477")
 const MUTED := Color("#a5b0bb")
 var mode := "archive"
@@ -30,8 +31,9 @@ func _ready() -> void:
     tabs = HBoxContainer.new()
     stack.add_child(tabs)
     for tab in ["archive", "stats", "last"]:
-        var button := Button.new()
-        button.custom_minimum_size.y = 35
+        var button := LuminousButton.new()
+        button.symbol = "archive" if tab == "archive" else ("stats" if tab == "stats" else "history")
+        button.custom_minimum_size.y = 39
         button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
         button.pressed.connect(show_mode.bind(tab))
         button.set_meta("mode", tab)
@@ -45,8 +47,9 @@ func _ready() -> void:
     body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     body.add_theme_constant_override("separation", 10)
     scroll.add_child(body)
-    back_button = Button.new()
-    back_button.custom_minimum_size.y = 39
+    back_button = LuminousButton.new()
+    (back_button as LuminousButton).symbol = "back"
+    back_button.custom_minimum_size.y = 41
     back_button.pressed.connect(func() -> void: back_pressed.emit())
     stack.add_child(back_button)
     refresh_language()
@@ -95,7 +98,8 @@ func refresh_language() -> void:
             button.text = _word("STATISTIKEN", "STATISTICS")
         else:
             button.text = _word("LETZTE AUSWERTUNG", "LAST VERDICT")
-        button.disabled = key == mode
+        button.disabled = false
+        MenuStyle.apply_button(button, key == mode, "amber" if key == mode else "gold")
     back_button.text = _word("ZURÜCK", "BACK")
     for child in body.get_children():
         body.remove_child(child)

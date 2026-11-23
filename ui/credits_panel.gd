@@ -65,6 +65,7 @@ func _ready() -> void:
     bottom.add_child(note)
 
     back_button = LuminousButton.new()
+    (back_button as LuminousButton).symbol = "back"
     back_button.custom_minimum_size = Vector2(156, 46)
     back_button.pressed.connect(func() -> void: back_pressed.emit())
     bottom.add_child(back_button)

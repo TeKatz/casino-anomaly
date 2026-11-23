@@ -8,18 +8,18 @@
 shader = ExtResource("3")
 
 [sub_resource type="StyleBoxFlat" id="GlassPanel"]
-bg_color = Color(0.052, 0.085, 0.13, 0.89)
+bg_color = Color(0.041, 0.069, 0.112, 0.94)
 border_width_left = 2
-border_width_top = 1
-border_width_right = 1
+border_width_top = 2
+border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.53, 0.48, 0.5, 0.55)
-corner_radius_top_left = 4
-corner_radius_top_right = 20
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 20
+border_color = Color(0.75, 0.60, 0.41, 0.82)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
 shadow_color = Color(0, 0, 0, 0.65)
-shadow_size = 24
+shadow_size = 32
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -48,7 +48,7 @@ anchor_right = 1.0
 offset_bottom = 2.0
 grow_horizontal = 2
 mouse_filter = 2
-color = Color(0.79, 0.47, 0.47, 0.75)
+color = Color(0.85, 0.66, 0.45, 0.69)
 
 [node name="Brand" type="Control" parent="."]
 layout_mode = 1
@@ -116,9 +116,9 @@ theme_override_styles/panel = SubResource("GlassPanel")
 
 [node name="Content" type="MarginContainer" parent="CenterPanel"]
 layout_mode = 2
-theme_override_constants/margin_left = 24
+theme_override_constants/margin_left = 28
 theme_override_constants/margin_top = 22
-theme_override_constants/margin_right = 24
+theme_override_constants/margin_right = 28
 theme_override_constants/margin_bottom = 20
 
 [node name="Stack" type="VBoxContainer" parent="CenterPanel/Content"]
@@ -134,7 +134,7 @@ text = "CASINO ANOMALY  /  INTERFACE"
 [node name="Title" type="Label" parent="CenterPanel/Content/Stack"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.96, 0.84, 0.71, 1)
-theme_override_font_sizes/font_size = 23
+theme_override_font_sizes/font_size = 26
 text = "CHOOSE YOUR PATH"
 
 [node name="Subtitle" type="Label" parent="CenterPanel/Content/Stack"]
@@ -153,6 +153,7 @@ custom_minimum_size = Vector2(0, 53)
 layout_mode = 2
 text = "NEW GAME"
 script = ExtResource("2")
+symbol = "play"
 accent = "green"
 featured = true
 
@@ -161,6 +162,7 @@ custom_minimum_size = Vector2(0, 46)
 layout_mode = 2
 text = "CONTINUE"
 script = ExtResource("2")
+symbol = "resume"
 disabled = true
 
 [node name="SettingsButton" type="Button" parent="CenterPanel/Content/Stack"]
@@ -168,18 +170,21 @@ custom_minimum_size = Vector2(0, 46)
 layout_mode = 2
 text = "SETTINGS"
 script = ExtResource("2")
+symbol = "settings"
 
 [node name="CreditsButton" type="Button" parent="CenterPanel/Content/Stack"]
 custom_minimum_size = Vector2(0, 46)
 layout_mode = 2
 text = "CREDITS"
 script = ExtResource("2")
+symbol = "credits"
 
 [node name="QuitButton" type="Button" parent="CenterPanel/Content/Stack"]
 custom_minimum_size = Vector2(0, 46)
 layout_mode = 2
 text = "QUIT"
 script = ExtResource("2")
+symbol = "quit"
 accent = "red"
 
 [node name="Separator" type="HSeparator" parent="CenterPanel/Content/Stack"]
@@ -190,6 +195,7 @@ custom_minimum_size = Vector2(0, 38)
 layout_mode = 2
 text = "Check for updates"
 script = ExtResource("2")
+symbol = "update"
 
 [node name="InstallButton" type="Button" parent="CenterPanel/Content/Stack"]
 visible = false
@@ -198,6 +204,7 @@ layout_mode = 2
 disabled = true
 text = "Install update"
 script = ExtResource("2")
+symbol = "install"
 
 [node name="StatusLabel" type="Label" parent="CenterPanel/Content/Stack"]
 layout_mode = 2
