@@ -235,16 +235,26 @@ func _build() -> void:
             _torus("CapMachinedGroove_%d" % ring,
                 closure_y + float(ring) * cap_height / 4.0,
                 neck_radius * 1.27, 0.0035, brass)
-    # True embossed cap knurling: individual raised metal teeth.
+    # All twelve machined cap teeth share ONE draw call, not twelve
+    # separate MeshInstance3D render submissions per bottle.
+    var cap_tooth := BoxMesh.new()
+    cap_tooth.size = Vector3(0.004, 0.030, 0.006)
+    cap_tooth.material = brass
+    var knurling := MultiMesh.new()
+    knurling.transform_format = MultiMesh.TRANSFORM_3D
+    knurling.mesh = cap_tooth
+    knurling.instance_count = 12
     for tooth in range(12):
         var theta := TAU * float(tooth) / 12.0
         var ring_radius: float = neck_radius * 1.245
-        var nick := BoxMesh.new()
-        nick.size = Vector3(0.004, 0.030, 0.006)
-        var part := _part("CapFluting_%02d" % tooth, nick, brass,
+        var basis := Basis(Vector3.UP, -theta)
+        knurling.set_instance_transform(tooth, Transform3D(basis,
             Vector3(cos(theta) * ring_radius,
-                closure_y + 0.038, sin(theta) * ring_radius))
-        part.rotation.y = -theta
+                closure_y + 0.038, sin(theta) * ring_radius)))
+    var knurled_cap := MultiMeshInstance3D.new()
+    knurled_cap.name = "MachinedCapFluting"
+    knurled_cap.multimesh = knurling
+    add_child(knurled_cap)
 
     # A multi-layered physically raised paper-and-metal label on the FRONT.
     # The label itself is an accessory attached to a 3D bottle, never a
@@ -281,14 +291,24 @@ func _build() -> void:
                 Vector3(x_side * wide * 0.79, height * 0.35, wide * 0.60))
             part.rotation.z = x_side * 0.24
     if kind == 4:
+        var stud := SphereMesh.new()
+        stud.radius = 0.006
+        stud.height = 0.012
+        stud.material = brass
+        var emboss := MultiMesh.new()
+        emboss.transform_format = MultiMesh.TRANSFORM_3D
+        emboss.mesh = stud
+        emboss.instance_count = 12
         for theta_idx in range(12):
-            var theta := TAU * theta_idx / 12.0
-            var stud := SphereMesh.new()
-            stud.radius = 0.006
-            stud.height = 0.012
-            _part("VermouthDiamondStud", stud, brass,
+            var theta := TAU * float(theta_idx) / 12.0
+            emboss.set_instance_transform(theta_idx, Transform3D(
+                Basis.IDENTITY,
                 Vector3(cos(theta) * wide * 0.89, height * 0.59,
-                sin(theta) * wide * 0.89))
+                    sin(theta) * wide * 0.89)))
+        var stud_batch := MultiMeshInstance3D.new()
+        stud_batch.name = "VermouthDiamondEmbossing"
+        stud_batch.multimesh = emboss
+        add_child(stud_batch)
     if kind == 5:
         # Side-hanging stamped medallion and its metallic cord.
         var coin := CylinderMesh.new()
