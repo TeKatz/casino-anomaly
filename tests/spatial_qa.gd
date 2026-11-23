@@ -143,21 +143,25 @@ func _run() -> void:
         _fail("Unexpected lounge seating layout")
         return
 
-    # Plant pots/leaves must not share the same footprint as sofa seats.
-    var pot_count := 0
+    # Genuine Monstera stands must not overlap lounge sofa seats.
+    # Check the imported model's actual offset, not the legacy pot mesh.
+    var monstera_count := 0
     for plant in decor.get_children():
-        if not plant is Node3D or not plant.name.begins_with("Plant_"):
+        if not (plant is Node3D) or not plant.name.begins_with("Plant_"):
             continue
-        var pot := plant.get_node_or_null("PlantPot_%s" % plant.name.trim_prefix("Plant_")) as MeshInstance3D
-        if pot == null or pot.get_meta("decor_type", "") != "plant":
-            continue
-        pot_count += 1
+        var imported := plant.get_node_or_null("GioraMonsteraOriginal") as Node3D
+        if imported == null:
+            _fail("Original source plant is missing from " + str(plant.name))
+            return
+        monstera_count += 1
+        var placement := imported.global_position
         for sofa_pos in sofa_positions:
-            if absf(plant.position.x - sofa_pos.x) < 1.70 and absf(plant.position.z - sofa_pos.z) < 1.20:
-                _fail("Decorative topiary intersects lounge sofa at " + str(sofa_pos))
+            if absf(placement.x - sofa_pos.x) < 1.70 \
+                    and absf(placement.z - sofa_pos.z) < 1.20:
+                _fail("Real Monstera overlaps lounge sofa at " + str(sofa_pos))
                 return
-    if pot_count != 6:
-        _fail("Decorative topiary count changed unexpectedly")
+    if monstera_count != 6:
+        _fail("Expected six real Monstera plants, not old topiary placeholders")
         return
 
     world.queue_free()
