@@ -80,10 +80,9 @@ func _populate() -> void:
             if stool != null:
                 _stool_cushion(stool)
 
-    # Remove label-flickering wine-bottle groups from the COUNTER. One small
-    # set sits on a cleared display shelf, away from the patron's viewpoint
-    # and from the original block-shaped bottle placeholders.
-    _place("wine_bottles_01", "ShelfWine", Vector3(-5.85 + BAR_SHIFT_X, 1.96, -12.38), 0.45)
+    # The bar's three shelves now use dedicated editor-selectable, fully
+    # volumetric signature bottle scenes (see main.tscn). Do not layer the
+    # previous wine cluster on top of these newly authored bottle assets.
 
     # This Poly Haven glTF contains THREE physically separate candleholders.
     # Select only the tall third variant; never put a complete trio on a

@@ -1,4 +1,4 @@
-[gd_scene load_steps=1410 format=4 uid="uid://3qbt7lcevocj"]
+[gd_scene load_steps=1416 format=4 uid="uid://3qbt7lcevocj"]
 
 [ext_resource type="Script" uid="uid://bfylaxqpynwux" path="res://hall.gd" id="1_hall"]
 [ext_resource type="Script" uid="uid://ddd0bf0443g2o" path="res://player.gd" id="2_player"]
@@ -64,6 +64,18 @@
 [ext_resource type="Texture2D" uid="uid://bnyjbufx6ul5q" path="res://assets/wood_table_worn/wood_table_worn_rough_2k.jpg" id="39_0dhbp"]
 [ext_resource type="Material" path="res://bar_top_material.tres" id="41_d2t1y"]
 [ext_resource type="Material" path="res://bi_stretch_material.tres" id="42_gngh3"]
+
+[ext_resource type="PackedScene" path="res://models/signature_bar/velvet_ace.tscn" id="90_velvet_ace"]
+
+[ext_resource type="PackedScene" path="res://models/signature_bar/silver_lotus.tscn" id="90_silver_lotus"]
+
+[ext_resource type="PackedScene" path="res://models/signature_bar/rouge_clover.tscn" id="90_rouge_clover"]
+
+[ext_resource type="PackedScene" path="res://models/signature_bar/solara.tscn" id="90_solara"]
+
+[ext_resource type="PackedScene" path="res://models/signature_bar/montevale.tscn" id="90_montevale"]
+
+[ext_resource type="PackedScene" path="res://models/signature_bar/nightfall.tscn" id="90_nightfall"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape_player"]
 radius = 0.34
@@ -6836,17 +6848,6 @@ metadata/placement_group = "SideStool"
 [node name="EditableImportedModel" parent="ModelInteriors/SideStool_03" instance=ExtResource("7_uatky")]
 transform = Transform3D(1.3723297, 0, 0, 0, 1.3723297, 0, 0, 0, 1.3723297, -0.017624786, -3.9616803e-05, 0.0019333797)
 
-[node name="ShelfWine_01" type="Node3D" parent="ModelInteriors"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.8, 1.96, -12.38)
-script = ExtResource("6_editor_anchor")
-asset_id = "wine_bottles_01"
-target_height = 0.45
-metadata/asset_id = "wine_bottles_01"
-metadata/placement_group = "ShelfWine"
-
-[node name="EditableImportedModel" parent="ModelInteriors/ShelfWine_01" instance=ExtResource("8_rqtf5")]
-transform = Transform3D(1.35801, 0, 0, 0, 1.35801, 0, 0, 0, 1.35801, -0.41029578, 7.904659e-10, -1.5090943e-05)
-
 [node name="SingleBrassCandleholder_01" type="Node3D" parent="ModelInteriors"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.4, 0.56, -2.75)
 script = ExtResource("6_editor_anchor")
@@ -12083,595 +12084,241 @@ metadata/collision_for = "BottleShelf"
 [node name="@CollisionShape3D@135" type="CollisionShape3D" parent="CornerBar/@StaticBody3D@136"]
 shape = SubResource("BoxShape3D_lb2e8")
 
-[node name="Bottle" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.44, 2.13, -12.48)
-material_override = SubResource("StandardMaterial3D_4hsu2")
-mesh = SubResource("CylinderMesh_6dwpw")
-
-[node name="BottleNeck" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.44, 2.38, -12.48)
-material_override = SubResource("StandardMaterial3D_4hsu2")
-mesh = SubResource("CylinderMesh_33agu")
-
-[node name="@MeshInstance3D@137" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.94, 2.13, -12.48)
-material_override = SubResource("StandardMaterial3D_0kc6e")
-mesh = SubResource("CylinderMesh_4ad0h")
-
-[node name="@MeshInstance3D@138" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.94, 2.38, -12.48)
-material_override = SubResource("StandardMaterial3D_0kc6e")
-mesh = SubResource("CylinderMesh_nax1i")
-
-[node name="@MeshInstance3D@139" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.44, 2.13, -12.48)
-material_override = SubResource("StandardMaterial3D_mo4vk")
-mesh = SubResource("CylinderMesh_1n1t6")
-
-[node name="@MeshInstance3D@140" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.44, 2.38, -12.48)
-material_override = SubResource("StandardMaterial3D_mo4vk")
-mesh = SubResource("CylinderMesh_vxm87")
-
-[node name="@MeshInstance3D@141" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.94, 2.13, -12.48)
-material_override = SubResource("StandardMaterial3D_ca1r3")
-mesh = SubResource("CylinderMesh_6e2hy")
-
-[node name="@MeshInstance3D@142" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.94, 2.38, -12.48)
-material_override = SubResource("StandardMaterial3D_ca1r3")
-mesh = SubResource("CylinderMesh_icsds")
-
-[node name="@MeshInstance3D@143" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.44, 2.13, -12.48)
-material_override = SubResource("StandardMaterial3D_5ci08")
-mesh = SubResource("CylinderMesh_chvga")
-
-[node name="@MeshInstance3D@144" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.44, 2.38, -12.48)
-material_override = SubResource("StandardMaterial3D_5ci08")
-mesh = SubResource("CylinderMesh_60r1o")
-
-[node name="@MeshInstance3D@145" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.94, 2.13, -12.48)
-material_override = SubResource("StandardMaterial3D_8e50f")
-mesh = SubResource("CylinderMesh_4mm0r")
-
-[node name="@MeshInstance3D@146" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.94, 2.38, -12.48)
-material_override = SubResource("StandardMaterial3D_8e50f")
-mesh = SubResource("CylinderMesh_hfeai")
-
-[node name="@MeshInstance3D@147" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.44, 2.13, -12.48)
-material_override = SubResource("StandardMaterial3D_imbwt")
-mesh = SubResource("CylinderMesh_j35t8")
-
-[node name="@MeshInstance3D@148" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.44, 2.38, -12.48)
-material_override = SubResource("StandardMaterial3D_imbwt")
-mesh = SubResource("CylinderMesh_drm30")
-
-[node name="@MeshInstance3D@149" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.94, 2.13, -12.48)
-material_override = SubResource("StandardMaterial3D_3trhp")
-mesh = SubResource("CylinderMesh_3peqy")
-
-[node name="@MeshInstance3D@150" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.94, 2.38, -12.48)
-material_override = SubResource("StandardMaterial3D_3trhp")
-mesh = SubResource("CylinderMesh_68l03")
-
-[node name="@MeshInstance3D@151" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.44, 2.13, -12.48)
-material_override = SubResource("StandardMaterial3D_lwbc4")
-mesh = SubResource("CylinderMesh_avr7p")
-
-[node name="@MeshInstance3D@152" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.44, 2.38, -12.48)
-material_override = SubResource("StandardMaterial3D_lwbc4")
-mesh = SubResource("CylinderMesh_7xfho")
-
-[node name="@MeshInstance3D@153" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.06, 2.13, -12.48)
-material_override = SubResource("StandardMaterial3D_7ansv")
-mesh = SubResource("CylinderMesh_4bf3h")
-
-[node name="@MeshInstance3D@154" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.06, 2.38, -12.48)
-material_override = SubResource("StandardMaterial3D_7ansv")
-mesh = SubResource("CylinderMesh_0b281")
-
-[node name="@MeshInstance3D@155" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.56, 2.13, -12.48)
-material_override = SubResource("StandardMaterial3D_wy1tv")
-mesh = SubResource("CylinderMesh_ca5uj")
-
-[node name="@MeshInstance3D@156" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.56, 2.38, -12.48)
-material_override = SubResource("StandardMaterial3D_wy1tv")
-mesh = SubResource("CylinderMesh_ka7qf")
-
-[node name="@MeshInstance3D@157" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.06, 2.13, -12.48)
-material_override = SubResource("StandardMaterial3D_dfgps")
-mesh = SubResource("CylinderMesh_3wep2")
-
-[node name="@MeshInstance3D@158" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.06, 2.38, -12.48)
-material_override = SubResource("StandardMaterial3D_dfgps")
-mesh = SubResource("CylinderMesh_qvwcl")
-
-[node name="@MeshInstance3D@159" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.56, 2.13, -12.48)
-material_override = SubResource("StandardMaterial3D_1o3tb")
-mesh = SubResource("CylinderMesh_ep11k")
-
-[node name="@MeshInstance3D@160" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.56, 2.38, -12.48)
-material_override = SubResource("StandardMaterial3D_1o3tb")
-mesh = SubResource("CylinderMesh_myk44")
-
-[node name="@MeshInstance3D@161" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.06, 2.13, -12.48)
-material_override = SubResource("StandardMaterial3D_yuwq1")
-mesh = SubResource("CylinderMesh_a0tts")
-
-[node name="@MeshInstance3D@162" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.06, 2.38, -12.48)
-material_override = SubResource("StandardMaterial3D_yuwq1")
-mesh = SubResource("CylinderMesh_p43yu")
-
-[node name="@MeshInstance3D@163" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.56, 2.13, -12.48)
-material_override = SubResource("StandardMaterial3D_54khs")
-mesh = SubResource("CylinderMesh_lgeoj")
-
-[node name="@MeshInstance3D@164" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.56, 2.38, -12.48)
-material_override = SubResource("StandardMaterial3D_54khs")
-mesh = SubResource("CylinderMesh_ltn5m")
-
-[node name="@MeshInstance3D@165" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.06, 2.13, -12.48)
-material_override = SubResource("StandardMaterial3D_xnc7l")
-mesh = SubResource("CylinderMesh_wlatr")
-
-[node name="@MeshInstance3D@166" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.06, 2.38, -12.48)
-material_override = SubResource("StandardMaterial3D_xnc7l")
-mesh = SubResource("CylinderMesh_4o17a")
-
-[node name="@MeshInstance3D@167" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.56, 2.13, -12.48)
-material_override = SubResource("StandardMaterial3D_wi44c")
-mesh = SubResource("CylinderMesh_jg5uc")
-
-[node name="@MeshInstance3D@168" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.56, 2.38, -12.48)
-material_override = SubResource("StandardMaterial3D_wi44c")
-mesh = SubResource("CylinderMesh_5a0qf")
-
-[node name="@MeshInstance3D@169" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.44, 2.98, -12.48)
-material_override = SubResource("StandardMaterial3D_pf84s")
-mesh = SubResource("CylinderMesh_sueu6")
-
-[node name="@MeshInstance3D@170" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.44, 3.23, -12.48)
-material_override = SubResource("StandardMaterial3D_pf84s")
-mesh = SubResource("CylinderMesh_de25k")
-
-[node name="@MeshInstance3D@171" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.94, 2.98, -12.48)
-material_override = SubResource("StandardMaterial3D_btjt8")
-mesh = SubResource("CylinderMesh_gtrb2")
-
-[node name="@MeshInstance3D@172" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.94, 3.23, -12.48)
-material_override = SubResource("StandardMaterial3D_btjt8")
-mesh = SubResource("CylinderMesh_ei4hh")
-
-[node name="@MeshInstance3D@173" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.44, 2.98, -12.48)
-material_override = SubResource("StandardMaterial3D_xxg1c")
-mesh = SubResource("CylinderMesh_7fuib")
-
-[node name="@MeshInstance3D@174" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.44, 3.23, -12.48)
-material_override = SubResource("StandardMaterial3D_xxg1c")
-mesh = SubResource("CylinderMesh_48w8q")
-
-[node name="@MeshInstance3D@175" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.94, 2.98, -12.48)
-material_override = SubResource("StandardMaterial3D_13tlt")
-mesh = SubResource("CylinderMesh_qrcjq")
-
-[node name="@MeshInstance3D@176" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.94, 3.23, -12.48)
-material_override = SubResource("StandardMaterial3D_13tlt")
-mesh = SubResource("CylinderMesh_jg51j")
-
-[node name="@MeshInstance3D@177" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.44, 2.98, -12.48)
-material_override = SubResource("StandardMaterial3D_yg37t")
-mesh = SubResource("CylinderMesh_gctxx")
-
-[node name="@MeshInstance3D@178" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.44, 3.23, -12.48)
-material_override = SubResource("StandardMaterial3D_yg37t")
-mesh = SubResource("CylinderMesh_x80jr")
-
-[node name="@MeshInstance3D@179" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.94, 2.98, -12.48)
-material_override = SubResource("StandardMaterial3D_gcscj")
-mesh = SubResource("CylinderMesh_p3mcb")
-
-[node name="@MeshInstance3D@180" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.94, 3.23, -12.48)
-material_override = SubResource("StandardMaterial3D_gcscj")
-mesh = SubResource("CylinderMesh_lcxkp")
-
-[node name="@MeshInstance3D@181" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.44, 2.98, -12.48)
-material_override = SubResource("StandardMaterial3D_5g5tx")
-mesh = SubResource("CylinderMesh_bwrlo")
-
-[node name="@MeshInstance3D@182" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.44, 3.23, -12.48)
-material_override = SubResource("StandardMaterial3D_5g5tx")
-mesh = SubResource("CylinderMesh_dnmkq")
-
-[node name="@MeshInstance3D@183" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.94, 2.98, -12.48)
-material_override = SubResource("StandardMaterial3D_blj3h")
-mesh = SubResource("CylinderMesh_u7r7b")
-
-[node name="@MeshInstance3D@184" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.94, 3.23, -12.48)
-material_override = SubResource("StandardMaterial3D_blj3h")
-mesh = SubResource("CylinderMesh_f06rb")
-
-[node name="@MeshInstance3D@185" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.44, 2.98, -12.48)
-material_override = SubResource("StandardMaterial3D_8pdsi")
-mesh = SubResource("CylinderMesh_ankdd")
-
-[node name="@MeshInstance3D@186" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.44, 3.23, -12.48)
-material_override = SubResource("StandardMaterial3D_8pdsi")
-mesh = SubResource("CylinderMesh_tke7g")
-
-[node name="@MeshInstance3D@187" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.94, 2.98, -12.48)
-material_override = SubResource("StandardMaterial3D_860p3")
-mesh = SubResource("CylinderMesh_p0yi6")
-
-[node name="@MeshInstance3D@188" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.94, 3.23, -12.48)
-material_override = SubResource("StandardMaterial3D_860p3")
-mesh = SubResource("CylinderMesh_8811p")
-
-[node name="@MeshInstance3D@189" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.44, 2.98, -12.48)
-material_override = SubResource("StandardMaterial3D_o85wm")
-mesh = SubResource("CylinderMesh_8rubf")
-
-[node name="@MeshInstance3D@190" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.44, 3.23, -12.48)
-material_override = SubResource("StandardMaterial3D_o85wm")
-mesh = SubResource("CylinderMesh_awghy")
-
-[node name="@MeshInstance3D@191" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.94, 2.98, -12.48)
-material_override = SubResource("StandardMaterial3D_3tcxx")
-mesh = SubResource("CylinderMesh_ainxy")
-
-[node name="@MeshInstance3D@192" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.94, 3.23, -12.48)
-material_override = SubResource("StandardMaterial3D_3tcxx")
-mesh = SubResource("CylinderMesh_reowk")
-
-[node name="@MeshInstance3D@193" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.44, 2.98, -12.48)
-material_override = SubResource("StandardMaterial3D_rvaeh")
-mesh = SubResource("CylinderMesh_x2pi7")
-
-[node name="@MeshInstance3D@194" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.44, 3.23, -12.48)
-material_override = SubResource("StandardMaterial3D_rvaeh")
-mesh = SubResource("CylinderMesh_b8kl4")
-
-[node name="@MeshInstance3D@195" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.06, 2.98, -12.48)
-material_override = SubResource("StandardMaterial3D_iv57u")
-mesh = SubResource("CylinderMesh_6fgme")
-
-[node name="@MeshInstance3D@196" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.06, 3.23, -12.48)
-material_override = SubResource("StandardMaterial3D_iv57u")
-mesh = SubResource("CylinderMesh_raidj")
-
-[node name="@MeshInstance3D@197" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.56, 2.98, -12.48)
-material_override = SubResource("StandardMaterial3D_m3w4l")
-mesh = SubResource("CylinderMesh_ibbua")
-
-[node name="@MeshInstance3D@198" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.56, 3.23, -12.48)
-material_override = SubResource("StandardMaterial3D_m3w4l")
-mesh = SubResource("CylinderMesh_1ahfi")
-
-[node name="@MeshInstance3D@199" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.06, 2.98, -12.48)
-material_override = SubResource("StandardMaterial3D_svylg")
-mesh = SubResource("CylinderMesh_xkrlv")
-
-[node name="@MeshInstance3D@200" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.06, 3.23, -12.48)
-material_override = SubResource("StandardMaterial3D_svylg")
-mesh = SubResource("CylinderMesh_mcqbc")
-
-[node name="@MeshInstance3D@201" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.56, 2.98, -12.48)
-material_override = SubResource("StandardMaterial3D_gc21d")
-mesh = SubResource("CylinderMesh_vfmo7")
-
-[node name="@MeshInstance3D@202" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.56, 3.23, -12.48)
-material_override = SubResource("StandardMaterial3D_gc21d")
-mesh = SubResource("CylinderMesh_lbudm")
-
-[node name="@MeshInstance3D@203" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.06, 2.98, -12.48)
-material_override = SubResource("StandardMaterial3D_8rno8")
-mesh = SubResource("CylinderMesh_csv6v")
-
-[node name="@MeshInstance3D@204" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.06, 3.23, -12.48)
-material_override = SubResource("StandardMaterial3D_8rno8")
-mesh = SubResource("CylinderMesh_gr7c1")
-
-[node name="@MeshInstance3D@205" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.56, 2.98, -12.48)
-material_override = SubResource("StandardMaterial3D_gmxml")
-mesh = SubResource("CylinderMesh_uhqoc")
-
-[node name="@MeshInstance3D@206" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.56, 3.23, -12.48)
-material_override = SubResource("StandardMaterial3D_gmxml")
-mesh = SubResource("CylinderMesh_7x5q2")
-
-[node name="@MeshInstance3D@207" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.06, 2.98, -12.48)
-material_override = SubResource("StandardMaterial3D_ccmkb")
-mesh = SubResource("CylinderMesh_0qj1d")
-
-[node name="@MeshInstance3D@208" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.06, 3.23, -12.48)
-material_override = SubResource("StandardMaterial3D_ccmkb")
-mesh = SubResource("CylinderMesh_m8146")
-
-[node name="@MeshInstance3D@209" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.56, 2.98, -12.48)
-material_override = SubResource("StandardMaterial3D_i3yoe")
-mesh = SubResource("CylinderMesh_eme68")
-
-[node name="@MeshInstance3D@210" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.56, 3.23, -12.48)
-material_override = SubResource("StandardMaterial3D_i3yoe")
-mesh = SubResource("CylinderMesh_ppsi6")
-
-[node name="@MeshInstance3D@211" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.44, 3.83, -12.48)
-material_override = SubResource("StandardMaterial3D_fo7at")
-mesh = SubResource("CylinderMesh_bs14h")
-
-[node name="@MeshInstance3D@212" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.44, 4.08, -12.48)
-material_override = SubResource("StandardMaterial3D_fo7at")
-mesh = SubResource("CylinderMesh_bc6ph")
-
-[node name="@MeshInstance3D@213" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.94, 3.83, -12.48)
-material_override = SubResource("StandardMaterial3D_ddsg1")
-mesh = SubResource("CylinderMesh_w5fc4")
-
-[node name="@MeshInstance3D@214" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.94, 4.08, -12.48)
-material_override = SubResource("StandardMaterial3D_ddsg1")
-mesh = SubResource("CylinderMesh_0biuq")
-
-[node name="@MeshInstance3D@215" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.44, 3.83, -12.48)
-material_override = SubResource("StandardMaterial3D_a2hc4")
-mesh = SubResource("CylinderMesh_y5141")
-
-[node name="@MeshInstance3D@216" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.44, 4.08, -12.48)
-material_override = SubResource("StandardMaterial3D_a2hc4")
-mesh = SubResource("CylinderMesh_l03u7")
-
-[node name="@MeshInstance3D@217" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.94, 3.83, -12.48)
-material_override = SubResource("StandardMaterial3D_qagc6")
-mesh = SubResource("CylinderMesh_ixb84")
-
-[node name="@MeshInstance3D@218" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.94, 4.08, -12.48)
-material_override = SubResource("StandardMaterial3D_qagc6")
-mesh = SubResource("CylinderMesh_wco65")
-
-[node name="@MeshInstance3D@219" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.44, 3.83, -12.48)
-material_override = SubResource("StandardMaterial3D_w6dx4")
-mesh = SubResource("CylinderMesh_lm5so")
-
-[node name="@MeshInstance3D@220" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.44, 4.08, -12.48)
-material_override = SubResource("StandardMaterial3D_w6dx4")
-mesh = SubResource("CylinderMesh_jnmkq")
-
-[node name="@MeshInstance3D@221" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.94, 3.83, -12.48)
-material_override = SubResource("StandardMaterial3D_wsjip")
-mesh = SubResource("CylinderMesh_2xxhp")
-
-[node name="@MeshInstance3D@222" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.94, 4.08, -12.48)
-material_override = SubResource("StandardMaterial3D_wsjip")
-mesh = SubResource("CylinderMesh_1n34m")
-
-[node name="@MeshInstance3D@223" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.44, 3.83, -12.48)
-material_override = SubResource("StandardMaterial3D_w17xv")
-mesh = SubResource("CylinderMesh_v1137")
-
-[node name="@MeshInstance3D@224" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.44, 4.08, -12.48)
-material_override = SubResource("StandardMaterial3D_w17xv")
-mesh = SubResource("CylinderMesh_blr0m")
-
-[node name="@MeshInstance3D@225" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.94, 3.83, -12.48)
-material_override = SubResource("StandardMaterial3D_x1l0f")
-mesh = SubResource("CylinderMesh_bburt")
-
-[node name="@MeshInstance3D@226" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.94, 4.08, -12.48)
-material_override = SubResource("StandardMaterial3D_x1l0f")
-mesh = SubResource("CylinderMesh_jjl6d")
-
-[node name="@MeshInstance3D@227" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.44, 3.83, -12.48)
-material_override = SubResource("StandardMaterial3D_1pg4t")
-mesh = SubResource("CylinderMesh_nton8")
-
-[node name="@MeshInstance3D@228" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.44, 4.08, -12.48)
-material_override = SubResource("StandardMaterial3D_1pg4t")
-mesh = SubResource("CylinderMesh_cg70t")
-
-[node name="@MeshInstance3D@229" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.94, 3.83, -12.48)
-material_override = SubResource("StandardMaterial3D_vmlbg")
-mesh = SubResource("CylinderMesh_y2tgo")
-
-[node name="@MeshInstance3D@230" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.94, 4.08, -12.48)
-material_override = SubResource("StandardMaterial3D_vmlbg")
-mesh = SubResource("CylinderMesh_qtt2s")
-
-[node name="@MeshInstance3D@231" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.44, 3.83, -12.48)
-material_override = SubResource("StandardMaterial3D_kgqkr")
-mesh = SubResource("CylinderMesh_v1ks5")
-
-[node name="@MeshInstance3D@232" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.44, 4.08, -12.48)
-material_override = SubResource("StandardMaterial3D_kgqkr")
-mesh = SubResource("CylinderMesh_uat35")
-
-[node name="@MeshInstance3D@233" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.94, 3.83, -12.48)
-material_override = SubResource("StandardMaterial3D_001sc")
-mesh = SubResource("CylinderMesh_e3lh2")
-
-[node name="@MeshInstance3D@234" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.94, 4.08, -12.48)
-material_override = SubResource("StandardMaterial3D_001sc")
-mesh = SubResource("CylinderMesh_fbtyl")
-
-[node name="@MeshInstance3D@235" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.44, 3.83, -12.48)
-material_override = SubResource("StandardMaterial3D_jmxm2")
-mesh = SubResource("CylinderMesh_0hfrq")
-
-[node name="@MeshInstance3D@236" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.44, 4.08, -12.48)
-material_override = SubResource("StandardMaterial3D_jmxm2")
-mesh = SubResource("CylinderMesh_i035a")
-
-[node name="@MeshInstance3D@237" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.06, 3.83, -12.48)
-material_override = SubResource("StandardMaterial3D_a6a2d")
-mesh = SubResource("CylinderMesh_yuna4")
-
-[node name="@MeshInstance3D@238" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.06, 4.08, -12.48)
-material_override = SubResource("StandardMaterial3D_a6a2d")
-mesh = SubResource("CylinderMesh_5mmsu")
-
-[node name="@MeshInstance3D@239" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.56, 3.83, -12.48)
-material_override = SubResource("StandardMaterial3D_fmxvb")
-mesh = SubResource("CylinderMesh_kibbf")
-
-[node name="@MeshInstance3D@240" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.56, 4.08, -12.48)
-material_override = SubResource("StandardMaterial3D_fmxvb")
-mesh = SubResource("CylinderMesh_kn8wq")
-
-[node name="@MeshInstance3D@241" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.06, 3.83, -12.48)
-material_override = SubResource("StandardMaterial3D_f766x")
-mesh = SubResource("CylinderMesh_r0doa")
-
-[node name="@MeshInstance3D@242" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.06, 4.08, -12.48)
-material_override = SubResource("StandardMaterial3D_f766x")
-mesh = SubResource("CylinderMesh_6oxyu")
-
-[node name="@MeshInstance3D@243" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.56, 3.83, -12.48)
-material_override = SubResource("StandardMaterial3D_m2yaq")
-mesh = SubResource("CylinderMesh_tynwl")
-
-[node name="@MeshInstance3D@244" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.56, 4.08, -12.48)
-material_override = SubResource("StandardMaterial3D_m2yaq")
-mesh = SubResource("CylinderMesh_3sd3m")
-
-[node name="@MeshInstance3D@245" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.06, 3.83, -12.48)
-material_override = SubResource("StandardMaterial3D_8omki")
-mesh = SubResource("CylinderMesh_qi72e")
-
-[node name="@MeshInstance3D@246" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.06, 4.08, -12.48)
-material_override = SubResource("StandardMaterial3D_8omki")
-mesh = SubResource("CylinderMesh_5wjgg")
-
-[node name="@MeshInstance3D@247" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.56, 3.83, -12.48)
-material_override = SubResource("StandardMaterial3D_2grn4")
-mesh = SubResource("CylinderMesh_q7ecb")
-
-[node name="@MeshInstance3D@248" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.56, 4.08, -12.48)
-material_override = SubResource("StandardMaterial3D_2grn4")
-mesh = SubResource("CylinderMesh_0w380")
-
-[node name="@MeshInstance3D@249" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.06, 3.83, -12.48)
-material_override = SubResource("StandardMaterial3D_r320m")
-mesh = SubResource("CylinderMesh_biqeu")
-
-[node name="@MeshInstance3D@250" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.06, 4.08, -12.48)
-material_override = SubResource("StandardMaterial3D_r320m")
-mesh = SubResource("CylinderMesh_7svt4")
-
-[node name="@MeshInstance3D@251" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.56, 3.83, -12.48)
-material_override = SubResource("StandardMaterial3D_ivdk3")
-mesh = SubResource("CylinderMesh_qu5ba")
-
-[node name="@MeshInstance3D@252" type="MeshInstance3D" parent="CornerBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.56, 4.08, -12.48)
-material_override = SubResource("StandardMaterial3D_ivdk3")
-mesh = SubResource("CylinderMesh_6i5fn")
+# Each bottle below is an independent, reusable, genuine 3D model scene.
+# Its exported design and transform can be changed in Godot's inspector.
+[node name="Signature_1_01_velvet_ace" parent="CornerBar" instance=ExtResource("90_velvet_ace")]
+position = Vector3(-6.1200, 1.9670, -12.5175)
+rotation = Vector3(0, -0.0760, 0)
+metadata/prop_family = "signature_bar_bottle"
+metadata/bottle_design = "velvet_ace"
+
+[node name="Signature_1_02_silver_lotus" parent="CornerBar" instance=ExtResource("90_silver_lotus")]
+position = Vector3(-5.3480, 1.9670, -12.3225)
+rotation = Vector3(0, 0.0570, 0)
+metadata/prop_family = "signature_bar_bottle"
+metadata/bottle_design = "silver_lotus"
+
+[node name="Signature_1_03_rouge_clover" parent="CornerBar" instance=ExtResource("90_rouge_clover")]
+position = Vector3(-4.5760, 1.9670, -12.3875)
+rotation = Vector3(0, 0.0190, 0)
+metadata/prop_family = "signature_bar_bottle"
+metadata/bottle_design = "rouge_clover"
+
+[node name="Signature_1_04_solara" parent="CornerBar" instance=ExtResource("90_solara")]
+position = Vector3(-3.8040, 1.9670, -12.4525)
+rotation = Vector3(0, -0.0190, 0)
+metadata/prop_family = "signature_bar_bottle"
+metadata/bottle_design = "solara"
+
+[node name="Signature_1_05_montevale" parent="CornerBar" instance=ExtResource("90_montevale")]
+position = Vector3(-3.0320, 1.9670, -12.5175)
+rotation = Vector3(0, -0.0570, 0)
+metadata/prop_family = "signature_bar_bottle"
+metadata/bottle_design = "montevale"
+
+[node name="Signature_1_06_nightfall" parent="CornerBar" instance=ExtResource("90_nightfall")]
+position = Vector3(-2.2600, 1.9670, -12.3225)
+rotation = Vector3(0, 0.0760, 0)
+metadata/prop_family = "signature_bar_bottle"
+metadata/bottle_design = "nightfall"
+
+[node name="Signature_1_07_velvet_ace" parent="CornerBar" instance=ExtResource("90_velvet_ace")]
+position = Vector3(-1.4880, 1.9670, -12.3875)
+rotation = Vector3(0, 0.0380, 0)
+metadata/prop_family = "signature_bar_bottle"
+metadata/bottle_design = "velvet_ace"
+
+[node name="Signature_1_08_silver_lotus" parent="CornerBar" instance=ExtResource("90_silver_lotus")]
+position = Vector3(-0.7160, 1.9670, -12.4525)
+rotation = Vector3(0, 0.0000, 0)
+metadata/prop_family = "signature_bar_bottle"
+metadata/bottle_design = "silver_lotus"
+
+[node name="Signature_1_09_rouge_clover" parent="CornerBar" instance=ExtResource("90_rouge_clover")]
+position = Vector3(0.0560, 1.9670, -12.5175)
+rotation = Vector3(0, -0.0380, 0)
+metadata/prop_family = "signature_bar_bottle"
+metadata/bottle_design = "rouge_clover"
+
+[node name="Signature_1_10_solara" parent="CornerBar" instance=ExtResource("90_solara")]
+position = Vector3(0.8280, 1.9670, -12.3225)
+rotation = Vector3(0, -0.0760, 0)
+metadata/prop_family = "signature_bar_bottle"
+metadata/bottle_design = "solara"
+
+[node name="Signature_1_11_montevale" parent="CornerBar" instance=ExtResource("90_montevale")]
+position = Vector3(1.6000, 1.9670, -12.3875)
+rotation = Vector3(0, 0.0570, 0)
+metadata/prop_family = "signature_bar_bottle"
+metadata/bottle_design = "montevale"
+
+[node name="Signature_1_12_nightfall" parent="CornerBar" instance=ExtResource("90_nightfall")]
+position = Vector3(2.3720, 1.9670, -12.4525)
+rotation = Vector3(0, 0.0190, 0)
+metadata/prop_family = "signature_bar_bottle"
+metadata/bottle_design = "nightfall"
+
+[node name="Signature_1_13_velvet_ace" parent="CornerBar" instance=ExtResource("90_velvet_ace")]
+position = Vector3(3.1440, 1.9670, -12.5175)
+rotation = Vector3(0, -0.0190, 0)
+metadata/prop_family = "signature_bar_bottle"
+metadata/bottle_design = "velvet_ace"
+
+[node name="Signature_2_01_rouge_clover" parent="CornerBar" instance=ExtResource("90_rouge_clover")]
+position = Vector3(-6.0200, 2.8170, -12.4525)
+rotation = Vector3(0, -0.0380, 0)
+metadata/prop_family = "signature_bar_bottle"
+metadata/bottle_design = "rouge_clover"
+
+[node name="Signature_2_02_solara" parent="CornerBar" instance=ExtResource("90_solara")]
+position = Vector3(-5.2480, 2.8170, -12.5175)
+rotation = Vector3(0, -0.0760, 0)
+metadata/prop_family = "signature_bar_bottle"
+metadata/bottle_design = "solara"
+
+[node name="Signature_2_03_montevale" parent="CornerBar" instance=ExtResource("90_montevale")]
+position = Vector3(-4.4760, 2.8170, -12.3225)
+rotation = Vector3(0, 0.0570, 0)
+metadata/prop_family = "signature_bar_bottle"
+metadata/bottle_design = "montevale"
+
+[node name="Signature_2_04_nightfall" parent="CornerBar" instance=ExtResource("90_nightfall")]
+position = Vector3(-3.7040, 2.8170, -12.3875)
+rotation = Vector3(0, 0.0190, 0)
+metadata/prop_family = "signature_bar_bottle"
+metadata/bottle_design = "nightfall"
+
+[node name="Signature_2_05_velvet_ace" parent="CornerBar" instance=ExtResource("90_velvet_ace")]
+position = Vector3(-2.9320, 2.8170, -12.4525)
+rotation = Vector3(0, -0.0190, 0)
+metadata/prop_family = "signature_bar_bottle"
+metadata/bottle_design = "velvet_ace"
+
+[node name="Signature_2_06_silver_lotus" parent="CornerBar" instance=ExtResource("90_silver_lotus")]
+position = Vector3(-2.1600, 2.8170, -12.5175)
+rotation = Vector3(0, -0.0570, 0)
+metadata/prop_family = "signature_bar_bottle"
+metadata/bottle_design = "silver_lotus"
+
+[node name="Signature_2_07_rouge_clover" parent="CornerBar" instance=ExtResource("90_rouge_clover")]
+position = Vector3(-1.3880, 2.8170, -12.3225)
+rotation = Vector3(0, 0.0760, 0)
+metadata/prop_family = "signature_bar_bottle"
+metadata/bottle_design = "rouge_clover"
+
+[node name="Signature_2_08_solara" parent="CornerBar" instance=ExtResource("90_solara")]
+position = Vector3(-0.6160, 2.8170, -12.3875)
+rotation = Vector3(0, 0.0380, 0)
+metadata/prop_family = "signature_bar_bottle"
+metadata/bottle_design = "solara"
+
+[node name="Signature_2_09_montevale" parent="CornerBar" instance=ExtResource("90_montevale")]
+position = Vector3(0.1560, 2.8170, -12.4525)
+rotation = Vector3(0, 0.0000, 0)
+metadata/prop_family = "signature_bar_bottle"
+metadata/bottle_design = "montevale"
+
+[node name="Signature_2_10_nightfall" parent="CornerBar" instance=ExtResource("90_nightfall")]
+position = Vector3(0.9280, 2.8170, -12.5175)
+rotation = Vector3(0, -0.0380, 0)
+metadata/prop_family = "signature_bar_bottle"
+metadata/bottle_design = "nightfall"
+
+[node name="Signature_2_11_velvet_ace" parent="CornerBar" instance=ExtResource("90_velvet_ace")]
+position = Vector3(1.7000, 2.8170, -12.3225)
+rotation = Vector3(0, -0.0760, 0)
+metadata/prop_family = "signature_bar_bottle"
+metadata/bottle_design = "velvet_ace"
+
+[node name="Signature_2_12_silver_lotus" parent="CornerBar" instance=ExtResource("90_silver_lotus")]
+position = Vector3(2.4720, 2.8170, -12.3875)
+rotation = Vector3(0, 0.0570, 0)
+metadata/prop_family = "signature_bar_bottle"
+metadata/bottle_design = "silver_lotus"
+
+[node name="Signature_2_13_rouge_clover" parent="CornerBar" instance=ExtResource("90_rouge_clover")]
+position = Vector3(3.2440, 2.8170, -12.4525)
+rotation = Vector3(0, 0.0190, 0)
+metadata/prop_family = "signature_bar_bottle"
+metadata/bottle_design = "rouge_clover"
+
+[node name="Signature_3_01_montevale" parent="CornerBar" instance=ExtResource("90_montevale")]
+position = Vector3(-6.1200, 3.6670, -12.3875)
+rotation = Vector3(0, 0.0000, 0)
+metadata/prop_family = "signature_bar_bottle"
+metadata/bottle_design = "montevale"
+
+[node name="Signature_3_02_nightfall" parent="CornerBar" instance=ExtResource("90_nightfall")]
+position = Vector3(-5.3480, 3.6670, -12.4525)
+rotation = Vector3(0, -0.0380, 0)
+metadata/prop_family = "signature_bar_bottle"
+metadata/bottle_design = "nightfall"
+
+[node name="Signature_3_03_velvet_ace" parent="CornerBar" instance=ExtResource("90_velvet_ace")]
+position = Vector3(-4.5760, 3.6670, -12.5175)
+rotation = Vector3(0, -0.0760, 0)
+metadata/prop_family = "signature_bar_bottle"
+metadata/bottle_design = "velvet_ace"
+
+[node name="Signature_3_04_silver_lotus" parent="CornerBar" instance=ExtResource("90_silver_lotus")]
+position = Vector3(-3.8040, 3.6670, -12.3225)
+rotation = Vector3(0, 0.0570, 0)
+metadata/prop_family = "signature_bar_bottle"
+metadata/bottle_design = "silver_lotus"
+
+[node name="Signature_3_05_rouge_clover" parent="CornerBar" instance=ExtResource("90_rouge_clover")]
+position = Vector3(-3.0320, 3.6670, -12.3875)
+rotation = Vector3(0, 0.0190, 0)
+metadata/prop_family = "signature_bar_bottle"
+metadata/bottle_design = "rouge_clover"
+
+[node name="Signature_3_06_solara" parent="CornerBar" instance=ExtResource("90_solara")]
+position = Vector3(-2.2600, 3.6670, -12.4525)
+rotation = Vector3(0, -0.0190, 0)
+metadata/prop_family = "signature_bar_bottle"
+metadata/bottle_design = "solara"
+
+[node name="Signature_3_07_montevale" parent="CornerBar" instance=ExtResource("90_montevale")]
+position = Vector3(-1.4880, 3.6670, -12.5175)
+rotation = Vector3(0, -0.0570, 0)
+metadata/prop_family = "signature_bar_bottle"
+metadata/bottle_design = "montevale"
+
+[node name="Signature_3_08_nightfall" parent="CornerBar" instance=ExtResource("90_nightfall")]
+position = Vector3(-0.7160, 3.6670, -12.3225)
+rotation = Vector3(0, 0.0760, 0)
+metadata/prop_family = "signature_bar_bottle"
+metadata/bottle_design = "nightfall"
+
+[node name="Signature_3_09_velvet_ace" parent="CornerBar" instance=ExtResource("90_velvet_ace")]
+position = Vector3(0.0560, 3.6670, -12.3875)
+rotation = Vector3(0, 0.0380, 0)
+metadata/prop_family = "signature_bar_bottle"
+metadata/bottle_design = "velvet_ace"
+
+[node name="Signature_3_10_silver_lotus" parent="CornerBar" instance=ExtResource("90_silver_lotus")]
+position = Vector3(0.8280, 3.6670, -12.4525)
+rotation = Vector3(0, 0.0000, 0)
+metadata/prop_family = "signature_bar_bottle"
+metadata/bottle_design = "silver_lotus"
+
+[node name="Signature_3_11_rouge_clover" parent="CornerBar" instance=ExtResource("90_rouge_clover")]
+position = Vector3(1.6000, 3.6670, -12.5175)
+rotation = Vector3(0, -0.0380, 0)
+metadata/prop_family = "signature_bar_bottle"
+metadata/bottle_design = "rouge_clover"
+
+[node name="Signature_3_12_solara" parent="CornerBar" instance=ExtResource("90_solara")]
+position = Vector3(2.3720, 3.6670, -12.3225)
+rotation = Vector3(0, -0.0760, 0)
+metadata/prop_family = "signature_bar_bottle"
+metadata/bottle_design = "solara"
+
+[node name="Signature_3_13_montevale" parent="CornerBar" instance=ExtResource("90_montevale")]
+position = Vector3(3.1440, 3.6670, -12.3875)
+rotation = Vector3(0, 0.0570, 0)
+metadata/prop_family = "signature_bar_bottle"
+metadata/bottle_design = "montevale"
 
 [node name="BarSignPanel" type="MeshInstance3D" parent="CornerBar"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.3699014, 4.999528, -12.925201)
