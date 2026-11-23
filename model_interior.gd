@@ -315,10 +315,6 @@ func _place(identifier: String, label: String, anchor: Vector3,
         target_height: float, yaw: float = 0.0, add_collision: bool = false,
         wall_mount: bool = false, mesh_variant: String = "",
         max_footprint: float = 0.0) -> Node3D:
-    var packed := _resource(identifier)
-    if packed == null:
-        return null
-
     # The numbered nodes in main.tscn are the designer's source of truth.
     # Keep their saved transform (including scale); only the model geometry,
     # collision and decorative details are constructed during play.
@@ -341,6 +337,11 @@ func _place(identifier: String, label: String, anchor: Vector3,
     var imported := wrapper.get_node_or_null("EditableImportedModel") as Node3D
     var has_authored_model := imported != null
     if not has_authored_model:
+        var packed := _resource(identifier)
+        if packed == null:
+            if generated:
+                wrapper.queue_free()
+            return null
         imported = packed.instantiate() as Node3D
         if imported == null:
             if generated:
@@ -368,6 +369,12 @@ func _place(identifier: String, label: String, anchor: Vector3,
                 wrapper.queue_free()
             push_error("Requested candleholder variant is missing: " + mesh_variant)
             return null
+
+    # An authored model without runtime collision already has its final
+    # transform. Computing its mesh bounds would not change a single node,
+    # yet repeated that full hierarchy walk for every streamed casino hall.
+    if has_authored_model and not add_collision:
+        return wrapper
 
     var bounds := _bounds_for(imported)
     if bounds.size.y <= 0.0001:

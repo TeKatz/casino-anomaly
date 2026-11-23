@@ -39,6 +39,15 @@ var transitioning := false
 var finishing := false
 var won := false
 var _stage_spike_frames := 0
+# Normal gameplay distributes scene assembly, portal geometry and SceneTree
+# activation across consecutive frames instead of forcing all three at the
+# invisible threshold. _stage_next() remains the immediate safety fallback.
+var _pending_stage: Node3D
+var _pending_lane := ""
+var _pending_stage_phase := 0
+var _pending_stage_start_us := 0
+var _pending_instance_ms := 0.0
+var _pending_portal_ms := 0.0
 
 
 func _ready() -> void:
@@ -121,8 +130,11 @@ func debug_restore_random() -> bool:
 
 
 func _exit_tree() -> void:
-    # Prevent a preloaded second hall from remaining in SceneTree if ESC
-    # switches to the menu before a player enters a portal.
+    # Both attached standby rooms and not-yet-attached partial instances
+    # belong to this controller; leaving for the menu must release both.
+    if _pending_stage != null and is_instance_valid(_pending_stage):
+        _pending_stage.free()
+        _pending_stage = null
     if staged != null and is_instance_valid(staged):
         staged.queue_free()
         staged = null
@@ -210,7 +222,7 @@ func _process(delta: float) -> void:
         return
     var local := room.to_local(player.global_position)
     if local.x < PRELOAD_AT_X and not choice_taken:
-        _stage_next(_candidate_lane(local.z))
+        _schedule_stage_next(_candidate_lane(local.z))
     # The second room is still completely out of view here. Enabling its
     # already-loaded VoxelGI data now avoids the obvious post-entry pop.
     if local.x < GI_PREWARM_AT_X and not choice_taken:
@@ -243,6 +255,8 @@ func _stage_transform(lane: String) -> Transform3D:
 
 
 func _stage_next(lane: String) -> void:
+    # Immediate path for developer/integration calls and for a player who
+    # somehow reaches the choice gate before three staging frames have run.
     if choice_taken:
         return
     if staged != null and is_instance_valid(staged):
@@ -250,46 +264,80 @@ func _stage_next(lane: String) -> void:
             staged.global_transform = _stage_transform(lane)
             staged_lane = lane
         return
+    for ignored in range(3):
+        if staged != null or _pending_stage == null and _pending_stage_phase == 0 and ignored > 0:
+            break
+        _advance_pending_stage(lane)
 
-    # Time every expensive step independently. The packed scene is already
-    # loaded, but instantiate() and adding it to SceneTree are synchronous.
-    var stage_start_us := Time.get_ticks_usec()
-    var next := ROOM.instantiate() as Node3D
-    var instance_ms := float(Time.get_ticks_usec() - stage_start_us) / 1000.0
-    if next == null:
-        push_error("Cannot preload next casino hall")
+
+func _schedule_stage_next(lane: String) -> void:
+    # One bounded stage per _process frame. The threshold is far ahead of
+    # the exit gate, so ordinary walking leaves plenty of preparation time.
+    if staged != null and is_instance_valid(staged):
+        if staged_lane != lane:
+            staged.global_transform = _stage_transform(lane)
+            staged_lane = lane
         return
-    next.set_meta("_streaming_standby", true)
-    var duplicate_player := next.get_node_or_null("Player")
-    if duplicate_player != null:
-        duplicate_player.free()
-    var portal_start_us := Time.get_ticks_usec()
-    if not portals.prepare_room(next):
-        next.free()
+    _advance_pending_stage(lane)
+
+
+func _advance_pending_stage(lane: String) -> void:
+    if _pending_stage == null:
+        _pending_stage_start_us = Time.get_ticks_usec()
+        var next := ROOM.instantiate() as Node3D
+        _pending_instance_ms = float(Time.get_ticks_usec() - _pending_stage_start_us) / 1000.0
+        if next == null:
+            push_error("Cannot preload next casino hall")
+            return
+        next.set_meta("_streaming_standby", true)
+        var duplicate_player := next.get_node_or_null("Player")
+        if duplicate_player != null:
+            duplicate_player.free()
+        _pending_stage = next
+        _pending_lane = lane
+        _pending_stage_phase = 1
+        _stage_spike_frames = 12
         return
-    var portals_ms := float(Time.get_ticks_usec() - portal_start_us) / 1000.0
-    # UPDATE_ONCE probes would otherwise capture the next casino's six views
-    # while the previous hall is still visible, causing a loading hitch.
-    _set_reflections_visible(next, false)
-    var environment_node := next.get_node_or_null("WorldEnvironment") as WorldEnvironment
-    staged_environment = environment_node.environment if environment_node != null else null
-    if environment_node != null:
-        environment_node.environment = null
-    next.transform = _stage_transform(lane)
-    var attach_start_us := Time.get_ticks_usec()
-    get_tree().root.add_child(next)
-    var attach_ms := float(Time.get_ticks_usec() - attach_start_us) / 1000.0
-    var total_ms := float(Time.get_ticks_usec() - stage_start_us) / 1000.0
-    _stage_spike_frames = 12
-    if total_ms >= 20.0:
-        print("Casino staging: instantiate=%.1f ms, portals=%.1f ms, attach/ready=%.1f ms, total=%.1f ms" %
-            [instance_ms, portals_ms, attach_ms, total_ms])
-    var state = get_node_or_null("/root/LoopState")
-    if state != null:
-        _update_level_sign(next, int(state.correct_streak), false)
-    staged = next
-    staged_lane = lane
-    staged_gi_warmed = false
+
+    _pending_lane = lane
+    if _pending_stage_phase == 1:
+        var portal_start_us := Time.get_ticks_usec()
+        if not portals.prepare_room(_pending_stage):
+            _pending_stage.free()
+            _pending_stage = null
+            _pending_stage_phase = 0
+            staged_environment = null
+            return
+        _pending_portal_ms = float(Time.get_ticks_usec() - portal_start_us) / 1000.0
+        # Prevent expensive one-shot captures and duplicate WorldEnvironment
+        # while the room remains invisible beyond the opaque bend.
+        _set_reflections_visible(_pending_stage, false)
+        var environment_node := _pending_stage.get_node_or_null("WorldEnvironment") as WorldEnvironment
+        staged_environment = environment_node.environment if environment_node != null else null
+        if environment_node != null:
+            environment_node.environment = null
+        _pending_stage_phase = 2
+        return
+
+    if _pending_stage_phase == 2:
+        var next := _pending_stage
+        next.transform = _stage_transform(lane)
+        var attach_start_us := Time.get_ticks_usec()
+        get_tree().root.add_child(next)
+        var attach_ms := float(Time.get_ticks_usec() - attach_start_us) / 1000.0
+        if _pending_instance_ms >= 16.7 or _pending_portal_ms >= 16.7 or attach_ms >= 16.7:
+            print("Casino staging: instantiate=%.1f ms, portals=%.1f ms, attach/ready=%.1f ms (spread across frames)" %
+                [_pending_instance_ms, _pending_portal_ms, attach_ms])
+        var state = get_node_or_null("/root/LoopState")
+        if state != null:
+            _update_level_sign(next, int(state.correct_streak), false)
+        staged = next
+        staged_lane = lane
+        staged_gi_warmed = false
+        _pending_stage = null
+        _pending_lane = ""
+        _pending_stage_phase = 0
+        _stage_spike_frames = 12
 
 
 func _prewarm_next_gi() -> void:

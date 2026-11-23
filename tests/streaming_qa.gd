@@ -308,10 +308,20 @@ func _run() -> void:
 
     # The new room may have rotated 180 degrees relative to the last one.
     # Test the opposite turn from that new local coordinate system.
-    controller.call("_stage_next", "right")
+    controller.call("_schedule_stage_next", "right")
+    if controller.get("staged") != null or controller.get("_pending_stage") == null             or int(controller.get("_pending_stage_phase")) != 1:
+        _fail("Incremental staging did not defer portal and SceneTree work")
+        return
+    await process_frame
+    controller.call("_schedule_stage_next", "right")
+    if int(controller.get("_pending_stage_phase")) != 2             or controller.get("staged") != null:
+        _fail("Incremental staging did not isolate portal preparation")
+        return
+    await process_frame
+    controller.call("_schedule_stage_next", "right")
     var third := controller.get("staged") as Node3D
-    if third == null:
-        _fail("Could not prepare a third continuous loop")
+    if third == null or controller.get("_pending_stage") != null:
+        _fail("Incremental staging did not attach the third continuous loop")
         return
     var third_entry := second.to_global(
         Vector3(shape.BEND_X, 0, shape.end_z("right"))
