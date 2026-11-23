@@ -37,14 +37,15 @@ func _build() -> void:
     var build_start_us := Time.get_ticks_usec()
     set_meta("ambient_fx_only", true)
     _ensure_reflection_probes()
-    # Keep reflection probes available immediately for the hidden-corridor
-    # prewarm; the remaining decorative work can safely wait one frame.
+    _ensure_bar_fill_lights()
+    _ensure_practical_lights()
+    # Reflection probes and practical light arrays must exist before the
+    # early GI-prewarm path and its regression checks. Only the optional
+    # atmospheric ornaments/particles are delayed to another frame.
     if get_parent().has_meta("_streaming_standby"):
         await get_tree().process_frame
         if not is_inside_tree():
             return
-    _ensure_bar_fill_lights()
-    _ensure_practical_lights()
     if not has_node("EntrySignTop"):
         _architecture()
         _spot("CatHighlight", Vector3(-8.45, 4.7, -3.25),
