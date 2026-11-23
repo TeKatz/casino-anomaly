@@ -1,8 +1,7 @@
-[gd_scene load_steps=696 format=4 uid="uid://3qbt7lcevocj"]
+[gd_scene load_steps=695 format=4 uid="uid://3qbt7lcevocj"]
 
 [ext_resource type="Script" uid="uid://bfylaxqpynwux" path="res://hall.gd" id="1_hall"]
 [ext_resource type="Script" uid="uid://ddd0bf0443g2o" path="res://player.gd" id="2_player"]
-[ext_resource type="PackedScene" path="res://models/sketchfab_monstera/scene.gltf" id="101_monstera"]
 [ext_resource type="Script" uid="uid://dvnb7t6pscmxq" path="res://model_interior.gd" id="3_models"]
 [ext_resource type="Script" uid="uid://ch0ewcjnanyr5" path="res://sketchfab_furniture.gd" id="4_sketchfab"]
 [ext_resource type="Script" uid="uid://c1ricgmawlcb" path="res://casino_atmosphere.gd" id="5_atmosphere"]
@@ -12,7 +11,6 @@
 [ext_resource type="Texture2D" uid="uid://b6igd7kkrs3ke" path="res://assets/oak_wood_planks/oak_wood_planks_diff_2k.jpg" id="7_come4"]
 [ext_resource type="PackedScene" uid="uid://b10ctf6trdmqy" path="res://models/bar_chair_round_01/bar_chair_round_01_1k.gltf" id="7_uatky"]
 [ext_resource type="Texture2D" uid="uid://km7gbh2we8vr" path="res://assets/oak_wood_planks/oak_wood_planks_nor_gl_2k.png" id="8_h8e4i"]
-[ext_resource type="PackedScene" uid="uid://5iimfqrvajr3" path="res://models/wine_bottles_01/wine_bottles_01_1k.gltf" id="8_rqtf5"]
 [ext_resource type="PackedScene" uid="uid://vs3fdrgq0h8v" path="res://models/brass_candleholders/brass_candleholders_1k.gltf" id="9_1vm84"]
 [ext_resource type="Texture2D" uid="uid://1wgorijf8myn" path="res://assets/oak_wood_planks/oak_wood_planks_rough_2k.jpg" id="9_4lmeg"]
 [ext_resource type="Texture2D" uid="uid://dbiujeel3dd2m" path="res://assets/fabric037/Fabric037_2K-JPG_Color.jpg" id="10_0cp0l"]
@@ -65,60 +63,32 @@
 [ext_resource type="Texture2D" uid="uid://bnyjbufx6ul5q" path="res://assets/wood_table_worn/wood_table_worn_rough_2k.jpg" id="39_0dhbp"]
 [ext_resource type="Material" path="res://bar_top_material.tres" id="41_d2t1y"]
 [ext_resource type="Material" path="res://bi_stretch_material.tres" id="42_gngh3"]
-
-[ext_resource type="PackedScene" path="res://models/casino_furniture/heritage_slot_cabinet.tscn" id="110_heritage_slot"]
-
-[ext_resource type="PackedScene" path="res://models/casino_furniture/gaming_stool.tscn" id="110_stool"]
-
-[ext_resource type="PackedScene" path="res://models/casino_furniture/detailed_table_surface.tscn" id="111_table"]
-
-[ext_resource type="PackedScene" path="res://models/signature_bar/velvet_ace.tscn" id="90_velvet_ace"]
-
-[ext_resource type="PackedScene" path="res://models/signature_bar/silver_lotus.tscn" id="90_silver_lotus"]
-
-[ext_resource type="PackedScene" path="res://models/signature_bar/rouge_clover.tscn" id="90_rouge_clover"]
-
-[ext_resource type="PackedScene" path="res://models/signature_bar/solara.tscn" id="90_solara"]
-
 [ext_resource type="PackedScene" path="res://models/signature_bar/montevale.tscn" id="90_montevale"]
-
 [ext_resource type="PackedScene" path="res://models/signature_bar/nightfall.tscn" id="90_nightfall"]
-
-[ext_resource type="PackedScene" path="res://models/playing_cards/individual/card_00.gltf" id="92_pc0"]
-
-[ext_resource type="PackedScene" path="res://models/playing_cards/individual/card_01.gltf" id="92_pc1"]
-
-[ext_resource type="PackedScene" path="res://models/playing_cards/individual/card_02.gltf" id="92_pc2"]
-
-[ext_resource type="PackedScene" path="res://models/playing_cards/individual/card_12.gltf" id="92_pc12"]
-
-[ext_resource type="PackedScene" path="res://models/playing_cards/individual/card_13.gltf" id="92_pc13"]
-
-[ext_resource type="PackedScene" path="res://models/playing_cards/individual/card_16.gltf" id="92_pc16"]
-
-[ext_resource type="PackedScene" path="res://models/playing_cards/individual/card_18.gltf" id="92_pc18"]
-
-[ext_resource type="PackedScene" path="res://models/playing_cards/individual/card_19.gltf" id="92_pc19"]
-
-[ext_resource type="PackedScene" path="res://models/playing_cards/individual/card_22.gltf" id="92_pc22"]
-
-[ext_resource type="PackedScene" path="res://models/playing_cards/individual/card_24.gltf" id="92_pc24"]
-
-[ext_resource type="PackedScene" path="res://models/playing_cards/individual/card_31.gltf" id="92_pc31"]
-
-[ext_resource type="PackedScene" path="res://models/playing_cards/individual/card_33.gltf" id="92_pc33"]
-
-[ext_resource type="PackedScene" path="res://models/playing_cards/individual/card_37.gltf" id="92_pc37"]
-
-[ext_resource type="PackedScene" path="res://models/playing_cards/individual/card_42.gltf" id="92_pc42"]
-
-[ext_resource type="PackedScene" path="res://models/playing_cards/individual/card_49.gltf" id="92_pc49"]
-
-[ext_resource type="PackedScene" path="res://models/playing_cards/individual/card_51.gltf" id="92_pc51"]
-
-[sub_resource type="CylinderShape3D" id="CylinderShape3D_monstera"]
-radius = 0.18
-height = 0.62
+[ext_resource type="PackedScene" path="res://models/signature_bar/rouge_clover.tscn" id="90_rouge_clover"]
+[ext_resource type="PackedScene" path="res://models/signature_bar/silver_lotus.tscn" id="90_silver_lotus"]
+[ext_resource type="PackedScene" path="res://models/signature_bar/solara.tscn" id="90_solara"]
+[ext_resource type="PackedScene" path="res://models/signature_bar/velvet_ace.tscn" id="90_velvet_ace"]
+[ext_resource type="PackedScene" uid="uid://ceu35epw3fpgy" path="res://models/playing_cards/individual/card_00.gltf" id="92_pc0"]
+[ext_resource type="PackedScene" uid="uid://crde01aysg7ly" path="res://models/playing_cards/individual/card_01.gltf" id="92_pc1"]
+[ext_resource type="PackedScene" uid="uid://bixvav46dwxak" path="res://models/playing_cards/individual/card_02.gltf" id="92_pc2"]
+[ext_resource type="PackedScene" uid="uid://rmdyk0jvfa0b" path="res://models/playing_cards/individual/card_12.gltf" id="92_pc12"]
+[ext_resource type="PackedScene" uid="uid://b1wcjfhjniolg" path="res://models/playing_cards/individual/card_13.gltf" id="92_pc13"]
+[ext_resource type="PackedScene" uid="uid://u31f6tvemhxb" path="res://models/playing_cards/individual/card_16.gltf" id="92_pc16"]
+[ext_resource type="PackedScene" uid="uid://uiddvlcbxtgn" path="res://models/playing_cards/individual/card_18.gltf" id="92_pc18"]
+[ext_resource type="PackedScene" uid="uid://duq5wjo2ayx26" path="res://models/playing_cards/individual/card_19.gltf" id="92_pc19"]
+[ext_resource type="PackedScene" uid="uid://bcal1h7g2l5sp" path="res://models/playing_cards/individual/card_22.gltf" id="92_pc22"]
+[ext_resource type="PackedScene" uid="uid://b818sxvy3tnf3" path="res://models/playing_cards/individual/card_24.gltf" id="92_pc24"]
+[ext_resource type="PackedScene" uid="uid://u3rqen41aam7" path="res://models/playing_cards/individual/card_31.gltf" id="92_pc31"]
+[ext_resource type="PackedScene" uid="uid://bcf8jdcip2whs" path="res://models/playing_cards/individual/card_33.gltf" id="92_pc33"]
+[ext_resource type="PackedScene" uid="uid://b6rr1450x8av1" path="res://models/playing_cards/individual/card_37.gltf" id="92_pc37"]
+[ext_resource type="PackedScene" uid="uid://lit0asjk0bco" path="res://models/playing_cards/individual/card_42.gltf" id="92_pc42"]
+[ext_resource type="PackedScene" uid="uid://bml51phw77vhx" path="res://models/playing_cards/individual/card_49.gltf" id="92_pc49"]
+[ext_resource type="PackedScene" uid="uid://1bdikfualwci" path="res://models/playing_cards/individual/card_51.gltf" id="92_pc51"]
+[ext_resource type="PackedScene" uid="uid://dqegnqhrl275p" path="res://models/sketchfab_monstera/scene.gltf" id="101_monstera"]
+[ext_resource type="PackedScene" path="res://models/casino_furniture/heritage_slot_cabinet.tscn" id="110_heritage_slot"]
+[ext_resource type="PackedScene" path="res://models/casino_furniture/gaming_stool.tscn" id="110_stool"]
+[ext_resource type="PackedScene" path="res://models/casino_furniture/detailed_table_surface.tscn" id="111_table"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape_player"]
 radius = 0.34
@@ -306,6 +276,7 @@ size = Vector3(0.27, 0.007, 0.22)
 size = Vector3(0.27, 0.007, 0.22)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_wm5rm"]
+margin = 0.326
 size = Vector3(2.6, 0.9038913, 1.6544404)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fdpg8"]
@@ -3474,13 +3445,12 @@ size = Vector3(10.85, 0.09, 0.36)
 [sub_resource type="BoxMesh" id="BoxMesh_0nuox"]
 size = Vector3(4.2, 0.9, 0.14)
 
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_monstera"]
+height = 0.62
+radius = 0.18
+
 [node name="CasinoAnomalyHall" type="Node3D"]
 script = ExtResource("1_hall")
-
-# Preserve the original local decor anchor for compatible scene hierarchy.
-# Actual source-derived card instances are placed on VISIBLE gaming tables.
-[node name="PlayingCardDecor" type="Node3D" parent="."]
-metadata/source_asset = "jdastine_playing_cards"
 metadata/decorative_only = true
 
 [node name="Player" type="CharacterBody3D" parent="."]
@@ -5933,54 +5903,57 @@ transform = Transform3D(3.1391647e-07, 0, -1, 0, 1, 0, 1, 0, 3.1391647e-07, 4.85
 accent_variant = 2
 cabinet_title = "LUCKY 7"
 reel_seed = 2
+metadata/slot_cabinet_revision = 2
 
 [node name="Slot_03" parent="SlotMachines" instance=ExtResource("110_heritage_slot")]
 transform = Transform3D(3.1391647e-07, 0, -1, 0, 1, 0, 1, 0, 3.1391647e-07, 4.85, 0, 5.8)
 accent_variant = 3
 cabinet_title = "NOVA"
 reel_seed = 3
+metadata/slot_cabinet_revision = 2
 
 [node name="Slot_04" parent="SlotMachines" instance=ExtResource("110_heritage_slot")]
 transform = Transform3D(3.1391647e-07, 0, -1, 0, 1, 0, 1, 0, 3.1391647e-07, 4.85, 0, 3)
-accent_variant = 0
 cabinet_title = "ROYAL"
 reel_seed = 4
+metadata/slot_cabinet_revision = 2
 
 [node name="Slot_05" parent="SlotMachines" instance=ExtResource("110_heritage_slot")]
 transform = Transform3D(3.1391647e-07, 0, -1, 0, 1, 0, 1, 0, 3.1391647e-07, 4.85, 0, 0.2)
 accent_variant = 1
-cabinet_title = "MIDNIGHT"
-reel_seed = 0
+metadata/slot_cabinet_revision = 2
 
 [node name="Slot_06" parent="SlotMachines" instance=ExtResource("110_heritage_slot")]
 transform = Transform3D(3.1391647e-07, 0, 1, 0, 1, 0, -1, 0, 3.1391647e-07, -4.82, 0, 10.1)
 accent_variant = 2
 cabinet_title = "GOLD RUSH"
 reel_seed = 1
+metadata/slot_cabinet_revision = 2
 
 [node name="Slot_07" parent="SlotMachines" instance=ExtResource("110_heritage_slot")]
 transform = Transform3D(3.1391647e-07, 0, 1, 0, 1, 0, -1, 0, 3.1391647e-07, -4.82, 0, 7.6)
 accent_variant = 3
 cabinet_title = "LUCKY 7"
 reel_seed = 2
+metadata/slot_cabinet_revision = 2
 
 [node name="Slot_08" parent="SlotMachines" instance=ExtResource("110_heritage_slot")]
 transform = Transform3D(3.1391647e-07, 0, 1, 0, 1, 0, -1, 0, 3.1391647e-07, -4.82, 0, 4.6)
-accent_variant = 0
 cabinet_title = "NOVA"
 reel_seed = 3
+metadata/slot_cabinet_revision = 2
 
 [node name="Slot_09" parent="SlotMachines" instance=ExtResource("110_heritage_slot")]
 transform = Transform3D(3.1391647e-07, 0, 1, 0, 1, 0, -1, 0, 3.1391647e-07, -4.82, 0, 1.9)
 accent_variant = 1
 cabinet_title = "ROYAL"
 reel_seed = 4
+metadata/slot_cabinet_revision = 2
 
 [node name="Slot_10" parent="SlotMachines" instance=ExtResource("110_heritage_slot")]
 transform = Transform3D(3.1391647e-07, 0, -1, 0, 1, 0, 1, 0, 3.1391647e-07, 4.65, 0, 11.85)
 accent_variant = 2
-cabinet_title = "MIDNIGHT"
-reel_seed = 0
+metadata/slot_cabinet_revision = 2
 
 [node name="GamingTables" type="Node3D" parent="."]
 
@@ -6239,9 +6212,9 @@ mesh = SubResource("CylinderMesh_q0woa")
 
 [node name="GoldTableRim" type="MeshInstance3D" parent="GamingTables/Cards5"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.96, 0)
+visible = false
 material_override = SubResource("StandardMaterial3D_swcop")
 mesh = SubResource("CylinderMesh_s4qw7")
-visible = false
 
 [node name="GoldTableRim_Collision" type="StaticBody3D" parent="GamingTables/Cards5"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.96, 0)
@@ -6251,9 +6224,9 @@ shape = SubResource("CylinderShape3D_bhe3f")
 
 [node name="FeltSurface" type="MeshInstance3D" parent="GamingTables/Cards5"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.045, 0)
+visible = false
 material_override = SubResource("StandardMaterial3D_ymbnq")
 mesh = SubResource("CylinderMesh_87l2x")
-visible = false
 
 [node name="DetailedTableSurface" parent="GamingTables/Cards5" instance=ExtResource("111_table")]
 
@@ -6273,92 +6246,84 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2871656, 0, -1.2294732)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5670546, 0, 0.8442392)
 
 [node name="Dealer_AceDiamond" type="Node3D" parent="GamingTables/Cards5"]
-position = Vector3(-0.22, 1.067, -0.42)
-rotation = Vector3(0.000000, 0.14, 0)
-scale = Vector3(0.15, 0.15, 0.15)
+transform = Transform3D(0.1485324, 0, 0.020931467, 0, 0.15, 0, -0.020931467, 0, 0.1485324, -0.22, 1.067, -0.42)
 metadata/source_card_index = 12
 metadata/face_down = false
 metadata/asset_source = "jdastine"
 metadata/decorative_only = true
 
 [node name="OriginalMesh" parent="GamingTables/Cards5/Dealer_AceDiamond" instance=ExtResource("92_pc12")]
+transform = Transform3D(1.5962622, 0, 1.2049677, 0, 1.9999989, 0, -1.2049677, 0, 1.5962622, -1.7805786, 0, -0.8911667)
 
 [node name="Dealer_AceSpade" type="Node3D" parent="GamingTables/Cards5"]
-position = Vector3(-0.12, 1.069, -0.405)
-rotation = Vector3(0.000000, 0.27, 0)
-scale = Vector3(0.15, 0.15, 0.15)
+transform = Transform3D(0.14456564, 0, 0.04000972, 0, 0.15, 0, -0.04000972, 0, 0.14456564, -0.12, 1.069, -0.405)
 metadata/source_card_index = 33
 metadata/face_down = false
 metadata/asset_source = "jdastine"
 metadata/decorative_only = true
 
 [node name="OriginalMesh" parent="GamingTables/Cards5/Dealer_AceSpade" instance=ExtResource("92_pc33")]
+transform = Transform3D(1.993157, 0, 0.16530341, 0, 1.9999995, 0, -0.16530341, 0, 1.993157, -2.6819, 0, -1.1897583)
 
 [node name="Player_DiamondQueen" type="Node3D" parent="GamingTables/Cards5"]
-position = Vector3(-0.55, 1.067, 0.1)
-rotation = Vector3(0.000000, 0.21, 0)
-scale = Vector3(0.15, 0.15, 0.15)
+transform = Transform3D(0.14670464, 0, 0.031268988, 0, 0.15, 0, -0.031268988, 0, 0.14670464, -0.55, 1.067, 0.1)
 metadata/source_card_index = 1
 metadata/face_down = false
 metadata/asset_source = "jdastine"
 metadata/decorative_only = true
 
 [node name="OriginalMesh" parent="GamingTables/Cards5/Player_DiamondQueen" instance=ExtResource("92_pc1")]
+transform = Transform3D(-0.2586987, 0, -1.9831982, 0, 1.9999995, 0, 1.9831982, 0, -0.2586987, -0.7484131, 0, 1.9522095)
 
 [node name="Player_HeartKing" type="Node3D" parent="GamingTables/Cards5"]
-position = Vector3(-0.45, 1.069, 0.12)
-rotation = Vector3(0.000000, 0.32, 0)
-scale = Vector3(0.15, 0.15, 0.15)
+transform = Transform3D(0.14238532, 0, 0.047184985, 0, 0.15, 0, -0.047184985, 0, 0.14238532, -0.45, 1.069, 0.12)
 metadata/source_card_index = 13
 metadata/face_down = false
 metadata/asset_source = "jdastine"
 metadata/decorative_only = true
 
 [node name="OriginalMesh" parent="GamingTables/Cards5/Player_HeartKing" instance=ExtResource("92_pc13")]
+transform = Transform3D(0.30314296, 0, -1.9768919, 0, 1.9999995, 0, 1.9768919, 0, 0.30314296, -1.5359497, 0, 1.0179138)
 
 [node name="Player_DiamondJack" type="Node3D" parent="GamingTables/Cards5"]
-position = Vector3(-0.04, 1.067, 0.29)
-rotation = Vector3(0.000000, -0.12, 0)
-scale = Vector3(0.15, 0.15, 0.15)
+transform = Transform3D(0.1489213, 0, -0.01795683, 0, 0.15, 0, 0.01795683, 0, 0.1489213, -0.04, 1.067, 0.29)
 metadata/source_card_index = 2
 metadata/face_down = false
 metadata/asset_source = "jdastine"
 metadata/decorative_only = true
 
 [node name="OriginalMesh" parent="GamingTables/Cards5/Player_DiamondJack" instance=ExtResource("92_pc2")]
+transform = Transform3D(2, 0, -4.4703484e-08, 0, 2.0000005, 0, 4.4703484e-08, 0, 2, 1.0717773, 0, 2.1740036)
 
 [node name="Player_HeartQueen" type="Node3D" parent="GamingTables/Cards5"]
-position = Vector3(0.06, 1.069, 0.31)
-rotation = Vector3(0.000000, 0.06, 0)
-scale = Vector3(0.15, 0.15, 0.15)
+transform = Transform3D(0.14973009, 0, 0.008994601, 0, 0.15, 0, -0.008994601, 0, 0.14973009, 0.06, 1.069, 0.31)
 metadata/source_card_index = 16
 metadata/face_down = false
 metadata/asset_source = "jdastine"
 metadata/decorative_only = true
 
 [node name="OriginalMesh" parent="GamingTables/Cards5/Player_HeartQueen" instance=ExtResource("92_pc16")]
+transform = Transform3D(2, 0, 0, 0, 1.9999996, 0, 0, 0, 2, 0.47979736, 0, 2.2030563)
 
 [node name="Player_ClubAce" type="Node3D" parent="GamingTables/Cards5"]
-position = Vector3(0.43, 1.067, 0)
-rotation = Vector3(0.000000, -0.31, 0)
-scale = Vector3(0.15, 0.15, 0.15)
+transform = Transform3D(0.14285004, 0, -0.045758795, 0, 0.15, 0, 0.045758795, 0, 0.14285004, 0.43, 1.067, 0)
 metadata/source_card_index = 42
 metadata/face_down = false
 metadata/asset_source = "jdastine"
 metadata/decorative_only = true
 
 [node name="OriginalMesh" parent="GamingTables/Cards5/Player_ClubAce" instance=ExtResource("92_pc42")]
+transform = Transform3D(-0.3352927, 0, -1.9716942, 0, 1.9999996, 0, 1.9716942, 0, -0.3352927, 1.640091, 0, -0.52536774)
 
 [node name="Player_DiamondKing" type="Node3D" parent="GamingTables/Cards5"]
-position = Vector3(0.53, 1.069, 0.025)
-rotation = Vector3(0.000000, -0.23, 0)
-scale = Vector3(0.15, 0.15, 0.15)
+transform = Transform3D(0.14604996, 0, -0.03419663, 0, 0.15, 0, 0.03419663, 0, 0.14604996, 0.53, 1.069, 0.025)
 metadata/source_card_index = 24
 metadata/face_down = false
 metadata/asset_source = "jdastine"
 metadata/decorative_only = true
 
 [node name="OriginalMesh" parent="GamingTables/Cards5/Player_DiamondKing" instance=ExtResource("92_pc24")]
+transform = Transform3D(0.08385584, 0, -1.9982415, 0, 2.0000005, 0, 1.9982415, 0, 0.08385584, 0.9635315, 0, 0.08885956)
 
 [node name="Roulette6" type="Node3D" parent="GamingTables"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -41.1, 0, -10.05)
@@ -6455,9 +6420,9 @@ mesh = SubResource("CylinderMesh_2ch0x")
 
 [node name="GoldTableRim" type="MeshInstance3D" parent="GamingTables/Cards7"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.96, 0)
+visible = false
 material_override = SubResource("StandardMaterial3D_swcop")
 mesh = SubResource("CylinderMesh_5u1sv")
-visible = false
 
 [node name="GoldTableRim_Collision" type="StaticBody3D" parent="GamingTables/Cards7"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.96, 0)
@@ -6467,9 +6432,9 @@ shape = SubResource("CylinderShape3D_vnihe")
 
 [node name="FeltSurface" type="MeshInstance3D" parent="GamingTables/Cards7"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.045, 0)
+visible = false
 material_override = SubResource("StandardMaterial3D_ymbnq")
 mesh = SubResource("CylinderMesh_shp24")
-visible = false
 
 [node name="DetailedTableSurface" parent="GamingTables/Cards7" instance=ExtResource("111_table")]
 
@@ -6489,92 +6454,84 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2871656, 0, -1.2294732)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5670546, 0, 0.8442392)
 
 [node name="Side_2Diamond" type="Node3D" parent="GamingTables/Cards7"]
-position = Vector3(-0.45, 1.067, -0.17)
-rotation = Vector3(0.000000, 0.55, 0)
-scale = Vector3(0.22, 0.22, 0.22)
+transform = Transform3D(0.18755539, 0, 0.114991195, 0, 0.22, 0, -0.114991195, 0, 0.18755539, -0.45, 1.067, -0.17)
 metadata/source_card_index = 0
 metadata/face_down = false
 metadata/asset_source = "jdastine"
 metadata/decorative_only = true
 
 [node name="OriginalMesh" parent="GamingTables/Cards7/Side_2Diamond" instance=ExtResource("92_pc0")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
 
 [node name="Side_AceHeart" type="Node3D" parent="GamingTables/Cards7"]
-position = Vector3(-0.36, 1.069, -0.12)
-rotation = Vector3(0.000000, 0.42, 0)
-scale = Vector3(0.22, 0.22, 0.22)
+transform = Transform3D(0.20087956, 0, 0.0897073, 0, 0.22, 0, -0.0897073, 0, 0.20087956, -0.36, 1.069, -0.12)
 metadata/source_card_index = 37
 metadata/face_down = false
 metadata/asset_source = "jdastine"
 metadata/decorative_only = true
 
 [node name="OriginalMesh" parent="GamingTables/Cards7/Side_AceHeart" instance=ExtResource("92_pc37")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
 
 [node name="Discard_JackHeart" type="Node3D" parent="GamingTables/Cards7"]
-position = Vector3(-0.15, 1.067, 0.29)
-rotation = Vector3(0.000000, 1.2, 0)
-scale = Vector3(0.22, 0.22, 0.22)
+transform = Transform3D(0.079718694, 0, 0.20504859, 0, 0.22, 0, -0.20504859, 0, 0.079718694, -0.15, 1.067, 0.29)
 metadata/source_card_index = 19
 metadata/face_down = false
 metadata/asset_source = "jdastine"
 metadata/decorative_only = true
 
 [node name="OriginalMesh" parent="GamingTables/Cards7/Discard_JackHeart" instance=ExtResource("92_pc19")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
 
 [node name="FaceDown_01" type="Node3D" parent="GamingTables/Cards7"]
-position = Vector3(-0.01, 1.069, 0.28)
-rotation = Vector3(3.141593, 2.1, 0)
-scale = Vector3(0.22, 0.22, 0.22)
+transform = Transform3D(-0.111066125, -6.1879255e-08, -0.18990608, 0, -0.22, 7.16851e-08, -0.18990608, 3.6189938e-08, 0.111066125, -0.01, 1.069, 0.28)
 metadata/source_card_index = 49
 metadata/face_down = true
 metadata/asset_source = "jdastine"
 metadata/decorative_only = true
 
 [node name="OriginalMesh" parent="GamingTables/Cards7/FaceDown_01" instance=ExtResource("92_pc49")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
 
 [node name="Lounge_03" type="Node3D" parent="GamingTables/Cards7"]
-position = Vector3(0.12, 1.067, -0.4)
-rotation = Vector3(0.000000, 0.28, 0)
-scale = Vector3(0.22, 0.22, 0.22)
+transform = Transform3D(0.2114322, 0, 0.060798243, 0, 0.22, 0, -0.060798243, 0, 0.2114322, 0.12, 1.067, -0.4)
 metadata/source_card_index = 31
 metadata/face_down = false
 metadata/asset_source = "jdastine"
 metadata/decorative_only = true
 
 [node name="OriginalMesh" parent="GamingTables/Cards7/Lounge_03" instance=ExtResource("92_pc31")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
 
 [node name="Lounge_02" type="Node3D" parent="GamingTables/Cards7"]
-position = Vector3(0.23, 1.069, -0.385)
-rotation = Vector3(0.000000, -0.11, 0)
-scale = Vector3(0.22, 0.22, 0.22)
+transform = Transform3D(0.21867034, 0, -0.024151227, 0, 0.22, 0, 0.024151227, 0, 0.21867034, 0.23, 1.069, -0.385)
 metadata/source_card_index = 22
 metadata/face_down = false
 metadata/asset_source = "jdastine"
 metadata/decorative_only = true
 
 [node name="OriginalMesh" parent="GamingTables/Cards7/Lounge_02" instance=ExtResource("92_pc22")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
 
 [node name="Lounge_QueenClubs" type="Node3D" parent="GamingTables/Cards7"]
-position = Vector3(0.48, 1.067, 0.1)
-rotation = Vector3(0.000000, 0.37, 0)
-scale = Vector3(0.22, 0.22, 0.22)
+transform = Transform3D(0.20511201, 0, 0.0795554, 0, 0.22, 0, -0.0795554, 0, 0.20511201, 0.48, 1.067, 0.1)
 metadata/source_card_index = 18
 metadata/face_down = false
 metadata/asset_source = "jdastine"
 metadata/decorative_only = true
 
 [node name="OriginalMesh" parent="GamingTables/Cards7/Lounge_QueenClubs" instance=ExtResource("92_pc18")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
 
 [node name="Lounge_FaceDown" type="Node3D" parent="GamingTables/Cards7"]
-position = Vector3(0.55, 1.069, 0.135)
-rotation = Vector3(3.141593, 0.71, 0)
-scale = Vector3(0.22, 0.22, 0.22)
+transform = Transform3D(0.16683961, -4.6726772e-08, -0.14340343, 0, -0.22, 7.16851e-08, -0.14340343, -5.4363248e-08, -0.16683961, 0.55, 1.069, 0.135)
 metadata/source_card_index = 51
 metadata/face_down = true
 metadata/asset_source = "jdastine"
 metadata/decorative_only = true
 
 [node name="OriginalMesh" parent="GamingTables/Cards7/Lounge_FaceDown" instance=ExtResource("92_pc51")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
 
 [node name="CornerBar" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.95, 0, 0)
@@ -6706,241 +6663,198 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.38, 3.6, -12.52)
 metadata/collision_for = "BottleShelf"
 
 [node name="@CollisionShape3D@135" type="CollisionShape3D" parent="CornerBar/@StaticBody3D@136"]
+transform = Transform3D(0.9971134, 0, -0.075926855, 0, 1, 0, 0.075926855, 0, 0.9971134, 0, 0, 0)
 shape = SubResource("BoxShape3D_lb2e8")
-
-# Each bottle below is an independent, reusable, genuine 3D model scene.
-# Its exported design and transform can be changed in Godot's inspector.
-[node name="Signature_1_01_velvet_ace" parent="CornerBar" instance=ExtResource("90_velvet_ace")]
-position = Vector3(-6.1200, 1.9670, -12.5175)
-rotation = Vector3(0, -0.0760, 0)
 metadata/prop_family = "signature_bar_bottle"
 metadata/bottle_design = "velvet_ace"
 
 [node name="Signature_1_02_silver_lotus" parent="CornerBar" instance=ExtResource("90_silver_lotus")]
-position = Vector3(-5.3480, 1.9670, -12.3225)
-rotation = Vector3(0, 0.0570, 0)
+transform = Transform3D(0.99837595, 0, 0.05696914, 0, 1, 0, -0.05696914, 0, 0.99837595, -5.348, 1.967, -12.3225)
 metadata/prop_family = "signature_bar_bottle"
 metadata/bottle_design = "silver_lotus"
 
 [node name="Signature_1_03_rouge_clover" parent="CornerBar" instance=ExtResource("90_rouge_clover")]
-position = Vector3(-4.5760, 1.9670, -12.3875)
-rotation = Vector3(0, 0.0190, 0)
+transform = Transform3D(0.9998195, 0, 0.018998856, 0, 1, 0, -0.018998856, 0, 0.9998195, -4.576, 1.967, -12.3875)
 metadata/prop_family = "signature_bar_bottle"
 metadata/bottle_design = "rouge_clover"
 
 [node name="Signature_1_04_solara" parent="CornerBar" instance=ExtResource("90_solara")]
-position = Vector3(-3.8040, 1.9670, -12.4525)
-rotation = Vector3(0, -0.0190, 0)
+transform = Transform3D(0.9998195, 0, -0.018998856, 0, 1, 0, 0.018998856, 0, 0.9998195, -3.804, 1.967, -12.4525)
 metadata/prop_family = "signature_bar_bottle"
 metadata/bottle_design = "solara"
 
 [node name="Signature_1_05_montevale" parent="CornerBar" instance=ExtResource("90_montevale")]
-position = Vector3(-3.0320, 1.9670, -12.5175)
-rotation = Vector3(0, -0.0570, 0)
+transform = Transform3D(0.99837595, 0, -0.05696914, 0, 1, 0, 0.05696914, 0, 0.99837595, -3.032, 1.967, -12.5175)
 metadata/prop_family = "signature_bar_bottle"
 metadata/bottle_design = "montevale"
 
 [node name="Signature_1_06_nightfall" parent="CornerBar" instance=ExtResource("90_nightfall")]
-position = Vector3(-2.2600, 1.9670, -12.3225)
-rotation = Vector3(0, 0.0760, 0)
+transform = Transform3D(0.9971134, 0, 0.075926855, 0, 1, 0, -0.075926855, 0, 0.9971134, -2.26, 1.967, -12.3225)
 metadata/prop_family = "signature_bar_bottle"
 metadata/bottle_design = "nightfall"
 
 [node name="Signature_1_07_velvet_ace" parent="CornerBar" instance=ExtResource("90_velvet_ace")]
-position = Vector3(-1.4880, 1.9670, -12.3875)
-rotation = Vector3(0, 0.0380, 0)
+transform = Transform3D(0.99927807, 0, 0.037990853, 0, 1, 0, -0.037990853, 0, 0.99927807, -1.488, 1.967, -12.3875)
 metadata/prop_family = "signature_bar_bottle"
 metadata/bottle_design = "velvet_ace"
 
 [node name="Signature_1_08_silver_lotus" parent="CornerBar" instance=ExtResource("90_silver_lotus")]
-position = Vector3(-0.7160, 1.9670, -12.4525)
-rotation = Vector3(0, 0.0000, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.716, 1.967, -12.4525)
 metadata/prop_family = "signature_bar_bottle"
 metadata/bottle_design = "silver_lotus"
 
 [node name="Signature_1_09_rouge_clover" parent="CornerBar" instance=ExtResource("90_rouge_clover")]
-position = Vector3(0.0560, 1.9670, -12.5175)
-rotation = Vector3(0, -0.0380, 0)
+transform = Transform3D(0.99927807, 0, -0.037990853, 0, 1, 0, 0.037990853, 0, 0.99927807, 0.056, 1.967, -12.5175)
 metadata/prop_family = "signature_bar_bottle"
 metadata/bottle_design = "rouge_clover"
 
 [node name="Signature_1_10_solara" parent="CornerBar" instance=ExtResource("90_solara")]
-position = Vector3(0.8280, 1.9670, -12.3225)
-rotation = Vector3(0, -0.0760, 0)
+transform = Transform3D(0.9971134, 0, -0.075926855, 0, 1, 0, 0.075926855, 0, 0.9971134, 0.828, 1.967, -12.3225)
 metadata/prop_family = "signature_bar_bottle"
 metadata/bottle_design = "solara"
 
 [node name="Signature_1_11_montevale" parent="CornerBar" instance=ExtResource("90_montevale")]
-position = Vector3(1.6000, 1.9670, -12.3875)
-rotation = Vector3(0, 0.0570, 0)
+transform = Transform3D(0.99837595, 0, 0.05696914, 0, 1, 0, -0.05696914, 0, 0.99837595, 1.6, 1.967, -12.3875)
 metadata/prop_family = "signature_bar_bottle"
 metadata/bottle_design = "montevale"
 
 [node name="Signature_1_12_nightfall" parent="CornerBar" instance=ExtResource("90_nightfall")]
-position = Vector3(2.3720, 1.9670, -12.4525)
-rotation = Vector3(0, 0.0190, 0)
+transform = Transform3D(0.9998195, 0, 0.018998856, 0, 1, 0, -0.018998856, 0, 0.9998195, 2.372, 1.967, -12.4525)
 metadata/prop_family = "signature_bar_bottle"
 metadata/bottle_design = "nightfall"
 
 [node name="Signature_1_13_velvet_ace" parent="CornerBar" instance=ExtResource("90_velvet_ace")]
-position = Vector3(3.1440, 1.9670, -12.5175)
-rotation = Vector3(0, -0.0190, 0)
+transform = Transform3D(0.9998195, 0, -0.018998856, 0, 1, 0, 0.018998856, 0, 0.9998195, 3.144, 1.967, -12.5175)
 metadata/prop_family = "signature_bar_bottle"
 metadata/bottle_design = "velvet_ace"
 
 [node name="Signature_2_01_rouge_clover" parent="CornerBar" instance=ExtResource("90_rouge_clover")]
-position = Vector3(-6.0200, 2.8170, -12.4525)
-rotation = Vector3(0, -0.0380, 0)
+transform = Transform3D(0.99927807, 0, -0.037990853, 0, 1, 0, 0.037990853, 0, 0.99927807, -6.02, 2.817, -12.4525)
 metadata/prop_family = "signature_bar_bottle"
 metadata/bottle_design = "rouge_clover"
 
 [node name="Signature_2_02_solara" parent="CornerBar" instance=ExtResource("90_solara")]
-position = Vector3(-5.2480, 2.8170, -12.5175)
-rotation = Vector3(0, -0.0760, 0)
+transform = Transform3D(0.9971134, 0, -0.075926855, 0, 1, 0, 0.075926855, 0, 0.9971134, -5.248, 2.817, -12.5175)
 metadata/prop_family = "signature_bar_bottle"
 metadata/bottle_design = "solara"
 
 [node name="Signature_2_03_montevale" parent="CornerBar" instance=ExtResource("90_montevale")]
-position = Vector3(-4.4760, 2.8170, -12.3225)
-rotation = Vector3(0, 0.0570, 0)
+transform = Transform3D(0.99837595, 0, 0.05696914, 0, 1, 0, -0.05696914, 0, 0.99837595, -4.476, 2.817, -12.3225)
 metadata/prop_family = "signature_bar_bottle"
 metadata/bottle_design = "montevale"
 
 [node name="Signature_2_04_nightfall" parent="CornerBar" instance=ExtResource("90_nightfall")]
-position = Vector3(-3.7040, 2.8170, -12.3875)
-rotation = Vector3(0, 0.0190, 0)
+transform = Transform3D(0.9998195, 0, 0.018998856, 0, 1, 0, -0.018998856, 0, 0.9998195, -3.704, 2.817, -12.3875)
 metadata/prop_family = "signature_bar_bottle"
 metadata/bottle_design = "nightfall"
 
 [node name="Signature_2_05_velvet_ace" parent="CornerBar" instance=ExtResource("90_velvet_ace")]
-position = Vector3(-2.9320, 2.8170, -12.4525)
-rotation = Vector3(0, -0.0190, 0)
+transform = Transform3D(0.9998195, 0, -0.018998856, 0, 1, 0, 0.018998856, 0, 0.9998195, -2.932, 2.817, -12.4525)
 metadata/prop_family = "signature_bar_bottle"
 metadata/bottle_design = "velvet_ace"
 
 [node name="Signature_2_06_silver_lotus" parent="CornerBar" instance=ExtResource("90_silver_lotus")]
-position = Vector3(-2.1600, 2.8170, -12.5175)
-rotation = Vector3(0, -0.0570, 0)
+transform = Transform3D(0.99837595, 0, -0.05696914, 0, 1, 0, 0.05696914, 0, 0.99837595, -2.16, 2.817, -12.5175)
 metadata/prop_family = "signature_bar_bottle"
 metadata/bottle_design = "silver_lotus"
 
 [node name="Signature_2_07_rouge_clover" parent="CornerBar" instance=ExtResource("90_rouge_clover")]
-position = Vector3(-1.3880, 2.8170, -12.3225)
-rotation = Vector3(0, 0.0760, 0)
+transform = Transform3D(0.9971134, 0, 0.075926855, 0, 1, 0, -0.075926855, 0, 0.9971134, -1.388, 2.817, -12.3225)
 metadata/prop_family = "signature_bar_bottle"
 metadata/bottle_design = "rouge_clover"
 
 [node name="Signature_2_08_solara" parent="CornerBar" instance=ExtResource("90_solara")]
-position = Vector3(-0.6160, 2.8170, -12.3875)
-rotation = Vector3(0, 0.0380, 0)
+transform = Transform3D(0.99927807, 0, 0.037990853, 0, 1, 0, -0.037990853, 0, 0.99927807, -0.616, 2.817, -12.3875)
 metadata/prop_family = "signature_bar_bottle"
 metadata/bottle_design = "solara"
 
 [node name="Signature_2_09_montevale" parent="CornerBar" instance=ExtResource("90_montevale")]
-position = Vector3(0.1560, 2.8170, -12.4525)
-rotation = Vector3(0, 0.0000, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.156, 2.817, -12.4525)
 metadata/prop_family = "signature_bar_bottle"
 metadata/bottle_design = "montevale"
 
 [node name="Signature_2_10_nightfall" parent="CornerBar" instance=ExtResource("90_nightfall")]
-position = Vector3(0.9280, 2.8170, -12.5175)
-rotation = Vector3(0, -0.0380, 0)
+transform = Transform3D(0.99927807, 0, -0.037990853, 0, 1, 0, 0.037990853, 0, 0.99927807, 0.928, 2.817, -12.5175)
 metadata/prop_family = "signature_bar_bottle"
 metadata/bottle_design = "nightfall"
 
 [node name="Signature_2_11_velvet_ace" parent="CornerBar" instance=ExtResource("90_velvet_ace")]
-position = Vector3(1.7000, 2.8170, -12.3225)
-rotation = Vector3(0, -0.0760, 0)
+transform = Transform3D(0.9971134, 0, -0.075926855, 0, 1, 0, 0.075926855, 0, 0.9971134, 1.7, 2.817, -12.3225)
 metadata/prop_family = "signature_bar_bottle"
 metadata/bottle_design = "velvet_ace"
 
 [node name="Signature_2_12_silver_lotus" parent="CornerBar" instance=ExtResource("90_silver_lotus")]
-position = Vector3(2.4720, 2.8170, -12.3875)
-rotation = Vector3(0, 0.0570, 0)
+transform = Transform3D(0.99837595, 0, 0.05696914, 0, 1, 0, -0.05696914, 0, 0.99837595, 2.472, 2.817, -12.3875)
 metadata/prop_family = "signature_bar_bottle"
 metadata/bottle_design = "silver_lotus"
 
 [node name="Signature_2_13_rouge_clover" parent="CornerBar" instance=ExtResource("90_rouge_clover")]
-position = Vector3(3.2440, 2.8170, -12.4525)
-rotation = Vector3(0, 0.0190, 0)
+transform = Transform3D(0.9998195, 0, 0.018998856, 0, 1, 0, -0.018998856, 0, 0.9998195, 3.244, 2.817, -12.4525)
 metadata/prop_family = "signature_bar_bottle"
 metadata/bottle_design = "rouge_clover"
 
 [node name="Signature_3_01_montevale" parent="CornerBar" instance=ExtResource("90_montevale")]
-position = Vector3(-6.1200, 3.6670, -12.3875)
-rotation = Vector3(0, 0.0000, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.12, 3.667, -12.3875)
 metadata/prop_family = "signature_bar_bottle"
 metadata/bottle_design = "montevale"
 
 [node name="Signature_3_02_nightfall" parent="CornerBar" instance=ExtResource("90_nightfall")]
-position = Vector3(-5.3480, 3.6670, -12.4525)
-rotation = Vector3(0, -0.0380, 0)
+transform = Transform3D(0.99927807, 0, -0.037990853, 0, 1, 0, 0.037990853, 0, 0.99927807, -5.348, 3.667, -12.4525)
 metadata/prop_family = "signature_bar_bottle"
 metadata/bottle_design = "nightfall"
 
 [node name="Signature_3_03_velvet_ace" parent="CornerBar" instance=ExtResource("90_velvet_ace")]
-position = Vector3(-4.5760, 3.6670, -12.5175)
-rotation = Vector3(0, -0.0760, 0)
+transform = Transform3D(0.9971134, 0, -0.075926855, 0, 1, 0, 0.075926855, 0, 0.9971134, -4.576, 3.667, -12.5175)
 metadata/prop_family = "signature_bar_bottle"
 metadata/bottle_design = "velvet_ace"
 
 [node name="Signature_3_04_silver_lotus" parent="CornerBar" instance=ExtResource("90_silver_lotus")]
-position = Vector3(-3.8040, 3.6670, -12.3225)
-rotation = Vector3(0, 0.0570, 0)
+transform = Transform3D(0.99837595, 0, 0.05696914, 0, 1, 0, -0.05696914, 0, 0.99837595, -3.804, 3.667, -12.3225)
 metadata/prop_family = "signature_bar_bottle"
 metadata/bottle_design = "silver_lotus"
 
 [node name="Signature_3_05_rouge_clover" parent="CornerBar" instance=ExtResource("90_rouge_clover")]
-position = Vector3(-3.0320, 3.6670, -12.3875)
-rotation = Vector3(0, 0.0190, 0)
+transform = Transform3D(0.9998195, 0, 0.018998856, 0, 1, 0, -0.018998856, 0, 0.9998195, -3.032, 3.667, -12.3875)
 metadata/prop_family = "signature_bar_bottle"
 metadata/bottle_design = "rouge_clover"
 
 [node name="Signature_3_06_solara" parent="CornerBar" instance=ExtResource("90_solara")]
-position = Vector3(-2.2600, 3.6670, -12.4525)
-rotation = Vector3(0, -0.0190, 0)
+transform = Transform3D(0.9998195, 0, -0.018998856, 0, 1, 0, 0.018998856, 0, 0.9998195, -2.26, 3.667, -12.4525)
 metadata/prop_family = "signature_bar_bottle"
 metadata/bottle_design = "solara"
 
 [node name="Signature_3_07_montevale" parent="CornerBar" instance=ExtResource("90_montevale")]
-position = Vector3(-1.4880, 3.6670, -12.5175)
-rotation = Vector3(0, -0.0570, 0)
+transform = Transform3D(0.99837595, 0, -0.05696914, 0, 1, 0, 0.05696914, 0, 0.99837595, -1.488, 3.667, -12.5175)
 metadata/prop_family = "signature_bar_bottle"
 metadata/bottle_design = "montevale"
 
 [node name="Signature_3_08_nightfall" parent="CornerBar" instance=ExtResource("90_nightfall")]
-position = Vector3(-0.7160, 3.6670, -12.3225)
-rotation = Vector3(0, 0.0760, 0)
+transform = Transform3D(0.9971134, 0, 0.075926855, 0, 1, 0, -0.075926855, 0, 0.9971134, -0.716, 3.667, -12.3225)
 metadata/prop_family = "signature_bar_bottle"
 metadata/bottle_design = "nightfall"
 
 [node name="Signature_3_09_velvet_ace" parent="CornerBar" instance=ExtResource("90_velvet_ace")]
-position = Vector3(0.0560, 3.6670, -12.3875)
-rotation = Vector3(0, 0.0380, 0)
+transform = Transform3D(0.99927807, 0, 0.037990853, 0, 1, 0, -0.037990853, 0, 0.99927807, 0.056, 3.667, -12.3875)
 metadata/prop_family = "signature_bar_bottle"
 metadata/bottle_design = "velvet_ace"
 
 [node name="Signature_3_10_silver_lotus" parent="CornerBar" instance=ExtResource("90_silver_lotus")]
-position = Vector3(0.8280, 3.6670, -12.4525)
-rotation = Vector3(0, 0.0000, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.828, 3.667, -12.4525)
 metadata/prop_family = "signature_bar_bottle"
 metadata/bottle_design = "silver_lotus"
 
 [node name="Signature_3_11_rouge_clover" parent="CornerBar" instance=ExtResource("90_rouge_clover")]
-position = Vector3(1.6000, 3.6670, -12.5175)
-rotation = Vector3(0, -0.0380, 0)
+transform = Transform3D(0.99927807, 0, -0.037990853, 0, 1, 0, 0.037990853, 0, 0.99927807, 1.6, 3.667, -12.5175)
 metadata/prop_family = "signature_bar_bottle"
 metadata/bottle_design = "rouge_clover"
 
 [node name="Signature_3_12_solara" parent="CornerBar" instance=ExtResource("90_solara")]
-position = Vector3(2.3720, 3.6670, -12.3225)
-rotation = Vector3(0, -0.0760, 0)
+transform = Transform3D(0.9971134, 0, -0.075926855, 0, 1, 0, 0.075926855, 0, 0.9971134, 2.372, 3.667, -12.3225)
 metadata/prop_family = "signature_bar_bottle"
 metadata/bottle_design = "solara"
 
 [node name="Signature_3_13_montevale" parent="CornerBar" instance=ExtResource("90_montevale")]
-position = Vector3(3.1440, 3.6670, -12.3875)
-rotation = Vector3(0, 0.0570, 0)
+transform = Transform3D(0.99837595, 0, 0.05696914, 0, 1, 0, -0.05696914, 0, 0.99837595, 3.144, 3.667, -12.3875)
 metadata/prop_family = "signature_bar_bottle"
 metadata/bottle_design = "montevale"
 
@@ -6973,14 +6887,12 @@ font_size = 57
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.9, 0, 12.2)
 
 [node name="GioraMonsteraOriginal" parent="Decor/Plant_00" instance=ExtResource("101_monstera")]
-position = Vector3(0, 0.594834, 0)
-rotation = Vector3(0, 0.000000, 0)
-scale = Vector3(1.14, 1.14, 1.14)
+transform = Transform3D(1.14, 0, 0, 0, 1.14, 0, 0, 0, 1.14, 0, 0.594834, 0)
 metadata/source_asset = "giora_monstera_deliciosa"
 metadata/license = "CC BY 4.0"
 
 [node name="PlantPot_00_Collision" type="StaticBody3D" parent="Decor/Plant_00"]
-position = Vector3(0, 0.31, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.31, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Decor/Plant_00/PlantPot_00_Collision"]
 shape = SubResource("CylinderShape3D_monstera")
@@ -6989,14 +6901,12 @@ shape = SubResource("CylinderShape3D_monstera")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.65, 0, 12)
 
 [node name="GioraMonsteraOriginal" parent="Decor/Plant_01" instance=ExtResource("101_monstera")]
-position = Vector3(0, 0.594834, 0)
-rotation = Vector3(0, 1.012291, 0)
-scale = Vector3(1.14, 1.14, 1.14)
+transform = Transform3D(0.604108, 0, 0.9667748, 0, 1.14, 0, -0.9667748, 0, 0.604108, 0, 0.594834, 0)
 metadata/source_asset = "giora_monstera_deliciosa"
 metadata/license = "CC BY 4.0"
 
 [node name="PlantPot_01_Collision" type="StaticBody3D" parent="Decor/Plant_01"]
-position = Vector3(0, 0.31, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.31, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Decor/Plant_01/PlantPot_01_Collision"]
 shape = SubResource("CylinderShape3D_monstera")
@@ -7005,14 +6915,12 @@ shape = SubResource("CylinderShape3D_monstera")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20.95, 0, -0.78)
 
 [node name="GioraMonsteraOriginal" parent="Decor/Plant_02" instance=ExtResource("101_monstera")]
-position = Vector3(0, 0.594834, 0)
-rotation = Vector3(0, 2.059489, 0)
-scale = Vector3(1.14, 1.14, 1.14)
+transform = Transform3D(-0.5351981, 0, 1.00656, 0, 1.14, 0, -1.00656, 0, -0.5351981, 0, 0.594834, 0)
 metadata/source_asset = "giora_monstera_deliciosa"
 metadata/license = "CC BY 4.0"
 
 [node name="PlantPot_02_Collision" type="StaticBody3D" parent="Decor/Plant_02"]
-position = Vector3(0, 0.31, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.31, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Decor/Plant_02/PlantPot_02_Collision"]
 shape = SubResource("CylinderShape3D_monstera")
@@ -7021,14 +6929,12 @@ shape = SubResource("CylinderShape3D_monstera")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.2, 0, -1.25)
 
 [node name="GioraMonsteraOriginal" parent="Decor/Plant_03" instance=ExtResource("101_monstera")]
-position = Vector3(0, 0.594834, 0)
-rotation = Vector3(0, 3.036873, 0)
-scale = Vector3(1.14, 1.14, 1.14)
+transform = Transform3D(-1.133755, 0, 0.11916222, 0, 1.14, 0, -0.11916222, 0, -1.133755, 0, 0.594834, 0)
 metadata/source_asset = "giora_monstera_deliciosa"
 metadata/license = "CC BY 4.0"
 
 [node name="PlantPot_03_Collision" type="StaticBody3D" parent="Decor/Plant_03"]
-position = Vector3(0, 0.31, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.31, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Decor/Plant_03/PlantPot_03_Collision"]
 shape = SubResource("CylinderShape3D_monstera")
@@ -7037,14 +6943,12 @@ shape = SubResource("CylinderShape3D_monstera")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.15, 0, -0.78)
 
 [node name="GioraMonsteraOriginal" parent="Decor/Plant_04" instance=ExtResource("101_monstera")]
-position = Vector3(0, 0.594834, 0)
-rotation = Vector3(0, 4.171337, 0)
-scale = Vector3(1.14, 1.14, 1.14)
+transform = Transform3D(-0.5871432, 0, -0.9771708, 0, 1.14, 0, 0.9771708, 0, -0.5871432, 0, 0.594834, 0)
 metadata/source_asset = "giora_monstera_deliciosa"
 metadata/license = "CC BY 4.0"
 
 [node name="PlantPot_04_Collision" type="StaticBody3D" parent="Decor/Plant_04"]
-position = Vector3(0, 0.31, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.31, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Decor/Plant_04/PlantPot_04_Collision"]
 shape = SubResource("CylinderShape3D_monstera")
@@ -7053,14 +6957,12 @@ shape = SubResource("CylinderShape3D_monstera")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -41.4, 0, -0.78)
 
 [node name="GioraMonsteraOriginal" parent="Decor/Plant_05" instance=ExtResource("101_monstera")]
-position = Vector3(-1.0252457, 0.594834, 0)
-rotation = Vector3(0, 5.305801, 0)
-scale = Vector3(1.14, 1.14, 1.14)
+transform = Transform3D(0.6374799, 0, -0.9451029, 0, 1.14, 0, 0.9451029, 0, 0.6374799, -1.0252457, 0.594834, 0)
 metadata/source_asset = "giora_monstera_deliciosa"
 metadata/license = "CC BY 4.0"
 
 [node name="PlantPot_05_Collision" type="StaticBody3D" parent="Decor/Plant_05"]
-position = Vector3(-1.0252457, 0.31, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.0252457, 0.31, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Decor/Plant_05/PlantPot_05_Collision"]
 shape = SubResource("CylinderShape3D_monstera")
