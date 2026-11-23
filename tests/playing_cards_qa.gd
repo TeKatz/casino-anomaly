@@ -60,33 +60,28 @@ func _run() -> void:
     var world := main.instantiate() as Node3D
     root.add_child(world)
     await process_frame
-    var cards := world.get_node_or_null("PlayingCardDecor") as Node3D
-    if cards == null:
-        var root_names: Array[String] = []
+    # All cards are intentionally root-level scene instances. Godot may
+    # flatten nested ImportedScene paths using '#' when a parent wrapper is
+    # auto-optimized; root-level instances are predictable in editor/game.
+    var card_nodes: Array[Node3D] = []
+    for item in world.get_children():
+        if item.name.begins_with("TableCard_"):
+            card_nodes.append(item as Node3D)
+    if card_nodes.size() != 16:
+        var names: Array[String] = []
         for item in world.get_children():
-            root_names.append(str(item.name))
-        var authored_text := FileAccess.get_file_as_string("res://main.tscn")
-        _fail("Missing PlayingCardDecor container; scene=%s, source has node=%s, root children=%s" \
-            % [world.scene_file_path, str(authored_text.contains("[node name=\\\"PlayingCardDecor\\\"")), str(root_names)])
-        return
-    var authored_count := 0
-    var child_names: Array[String] = []
-    for item in cards.get_children():
-        child_names.append(str(item.name))
-        if item.has_meta("source_card_index"):
-            authored_count += 1
-    if authored_count != 16:
-        _fail("Expected 16 independently movable card instances, found %d (total %d): %s" \
-            % [authored_count, cards.get_child_count(), str(child_names)])
+            names.append(str(item.name))
+        _fail("Expected 16 original card scene instances; found %d, children=%s" \
+            % [card_nodes.size(), str(names)])
         return
     var lounge_count := 0
     var blackjack_count := 0
     var facedown_count := 0
-    for card in cards.get_children():
-        if not (card is Node3D) or not card.has_meta("source_card_index"):
-            _fail("A table card is not an independent named Node3D")
+    for card in card_nodes:
+        if not card.has_meta("source_card_index"):
+            _fail("A 3D table card is missing its authored material index")
             return
-        if (card as Node3D).scale.x < 0.09:
+        if card.scale.x < 0.09:
             _fail("An extracted card was incorrectly scaled")
             return
         if card.position.z > -5.0:
