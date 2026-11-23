@@ -51,12 +51,14 @@ func _build_card(mode: String, symbol: String) -> PanelContainer:
     panel.mouse_filter = Control.MOUSE_FILTER_PASS
     add_child(panel)
     var pad := MarginContainer.new()
+    pad.name = "MarginContainer"
     pad.add_theme_constant_override("margin_left", 16)
     pad.add_theme_constant_override("margin_right", 16)
     pad.add_theme_constant_override("margin_top", 19)
     pad.add_theme_constant_override("margin_bottom", 18)
     panel.add_child(pad)
     var stack := VBoxContainer.new()
+    stack.name = "VBoxContainer"
     stack.add_theme_constant_override("separation", 10)
     pad.add_child(stack)
     var kicker := _label(stack, "", 11, MUTED)
