@@ -538,10 +538,19 @@ func _plants() -> void:
     if decoration == null:
         return
     for plant in decoration.get_children():
-        if plant is Node3D and plant.name.begins_with("Plant_"):
-            for crown in plant.get_children():
-                if crown is Node3D and crown.name.begins_with("PlantFoliage_"):
-                    plant_crowns.append(crown as Node3D)
+        if not (plant is Node3D) or not plant.name.begins_with("Plant_"):
+            continue
+        # If the genuine source glTF is available, sway its *leaf mesh*
+        # rather than the entire pot and wooden stand.
+        if plant.has_method("get_foliage_animation_target"):
+            var original_leaves := plant.call("get_foliage_animation_target") as Node3D
+            if original_leaves != null:
+                plant_crowns.append(original_leaves)
+                continue
+        # Existing decorations remain functional before source installation.
+        for crown in plant.get_children():
+            if crown is Node3D and crown.name.begins_with("PlantFoliage_"):
+                plant_crowns.append(crown as Node3D)
 
 
 func _dust() -> void:
