@@ -374,6 +374,10 @@ func _place(identifier: String, label: String, anchor: Vector3,
     # transform. Computing its mesh bounds would not change a single node,
     # yet repeated that full hierarchy walk for every streamed casino hall.
     if has_authored_model and not add_collision:
+        # Preserve the exact same accounting as the full placement path:
+        # gameplay diagnostics and the headless scene smoke test rely on it.
+        placed_model_count += 1
+        successful_model_ids[identifier] = true
         return wrapper
 
     var bounds := _bounds_for(imported)
