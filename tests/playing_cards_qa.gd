@@ -60,20 +60,21 @@ func _run() -> void:
     var world := main.instantiate() as Node3D
     root.add_child(world)
     await process_frame
-    # All cards are intentionally root-level scene instances. Godot may
-    # flatten nested ImportedScene paths using '#' when a parent wrapper is
-    # auto-optimized; root-level instances are predictable in editor/game.
+    var group := world.get_node_or_null("PlayingCardDecor") as Node3D
+    if group == null:
+        _fail("Missing authored PlayingCardDecor wrapper")
+        return
     var card_nodes: Array[Node3D] = []
-    for item in world.get_children():
-        if item.name.begins_with("TableCard_"):
+    for item in group.get_children():
+        if item is Node3D and item.has_meta("source_card_index"):
             card_nodes.append(item as Node3D)
     if card_nodes.size() != 16:
-        var names: Array[String] = []
-        for item in world.get_children():
-            names.append(str(item.name))
-        _fail("Expected 16 original card scene instances; found %d, children=%s" \
-            % [card_nodes.size(), str(names)])
+        _fail("Expected 16 individually editable wrapper nodes, found %d" % card_nodes.size())
         return
+    for card in card_nodes:
+        if card.get_node_or_null("OriginalMesh") == null:
+            _fail("Authored card lost its original extracted glTF geometry")
+            return
     var lounge_count := 0
     var blackjack_count := 0
     var facedown_count := 0

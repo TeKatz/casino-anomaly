@@ -6701,10 +6701,14 @@ roughness = 0.7
 [node name="CasinoAnomalyHall" type="Node3D"]
 script = ExtResource("1_hall")
 
-# Individually editor-selectable original jdastine playing cards, isolated from
-# the supplied 52-card Sketchfab set. Cards are STATIC decorations; their
-# transforms are authored in the scene and do not create random anomalies.
-[node name="TableCard_Dealer_AceDiamond" parent="." instance=ExtResource("92_pc12")]
+# Original author-supplied card model geometry. Each plain Node3D is an
+# editable local wrapper, and its imported glTF is a child with NO transform
+# override. This avoids Godot applying glTF scene root transform to main room.
+[node name="PlayingCardDecor" type="Node3D" parent="."]
+metadata/source_asset = "jdastine_playing_cards"
+metadata/decorative_only = true
+
+[node name="Dealer_AceDiamond" type="Node3D" parent="PlayingCardDecor"]
 position = Vector3(-20.64, 0.953, -11.46)
 rotation = Vector3(0.000000, 0.14, 0)
 scale = Vector3(0.12, 0.12, 0.12)
@@ -6712,7 +6716,9 @@ metadata/source_card_index = 12
 metadata/face_down = false
 metadata/asset_source = "jdastine"
 
-[node name="TableCard_Dealer_AceSpade" parent="." instance=ExtResource("92_pc33")]
+[node name="OriginalMesh" parent="PlayingCardDecor/Dealer_AceDiamond" instance=ExtResource("92_pc12")]
+
+[node name="Dealer_AceSpade" type="Node3D" parent="PlayingCardDecor"]
 position = Vector3(-20.54, 0.954, -11.445)
 rotation = Vector3(0.000000, 0.27, 0)
 scale = Vector3(0.12, 0.12, 0.12)
@@ -6720,7 +6726,9 @@ metadata/source_card_index = 33
 metadata/face_down = false
 metadata/asset_source = "jdastine"
 
-[node name="TableCard_Player_DiamondQueen" parent="." instance=ExtResource("92_pc1")]
+[node name="OriginalMesh" parent="PlayingCardDecor/Dealer_AceSpade" instance=ExtResource("92_pc33")]
+
+[node name="Player_DiamondQueen" type="Node3D" parent="PlayingCardDecor"]
 position = Vector3(-21.15, 0.953, -10.94)
 rotation = Vector3(0.000000, 0.21, 0)
 scale = Vector3(0.12, 0.12, 0.12)
@@ -6728,7 +6736,9 @@ metadata/source_card_index = 1
 metadata/face_down = false
 metadata/asset_source = "jdastine"
 
-[node name="TableCard_Player_HeartKing" parent="." instance=ExtResource("92_pc13")]
+[node name="OriginalMesh" parent="PlayingCardDecor/Player_DiamondQueen" instance=ExtResource("92_pc1")]
+
+[node name="Player_HeartKing" type="Node3D" parent="PlayingCardDecor"]
 position = Vector3(-21.09, 0.954, -10.955)
 rotation = Vector3(0.000000, 0.32, 0)
 scale = Vector3(0.12, 0.12, 0.12)
@@ -6736,7 +6746,9 @@ metadata/source_card_index = 13
 metadata/face_down = false
 metadata/asset_source = "jdastine"
 
-[node name="TableCard_Player_DiamondJack" parent="." instance=ExtResource("92_pc2")]
+[node name="OriginalMesh" parent="PlayingCardDecor/Player_HeartKing" instance=ExtResource("92_pc13")]
+
+[node name="Player_DiamondJack" type="Node3D" parent="PlayingCardDecor"]
 position = Vector3(-20.45, 0.953, -10.78)
 rotation = Vector3(0.000000, -0.12, 0)
 scale = Vector3(0.12, 0.12, 0.12)
@@ -6744,7 +6756,9 @@ metadata/source_card_index = 2
 metadata/face_down = false
 metadata/asset_source = "jdastine"
 
-[node name="TableCard_Player_HeartQueen" parent="." instance=ExtResource("92_pc16")]
+[node name="OriginalMesh" parent="PlayingCardDecor/Player_DiamondJack" instance=ExtResource("92_pc2")]
+
+[node name="Player_HeartQueen" type="Node3D" parent="PlayingCardDecor"]
 position = Vector3(-20.36, 0.954, -10.8)
 rotation = Vector3(0.000000, 0.06, 0)
 scale = Vector3(0.12, 0.12, 0.12)
@@ -6752,7 +6766,9 @@ metadata/source_card_index = 16
 metadata/face_down = false
 metadata/asset_source = "jdastine"
 
-[node name="TableCard_Player_ClubAce" parent="." instance=ExtResource("92_pc42")]
+[node name="OriginalMesh" parent="PlayingCardDecor/Player_HeartQueen" instance=ExtResource("92_pc16")]
+
+[node name="Player_ClubAce" type="Node3D" parent="PlayingCardDecor"]
 position = Vector3(-19.83, 0.953, -11.03)
 rotation = Vector3(0.000000, -0.31, 0)
 scale = Vector3(0.12, 0.12, 0.12)
@@ -6760,7 +6776,9 @@ metadata/source_card_index = 42
 metadata/face_down = false
 metadata/asset_source = "jdastine"
 
-[node name="TableCard_Player_DiamondKing" parent="." instance=ExtResource("92_pc24")]
+[node name="OriginalMesh" parent="PlayingCardDecor/Player_ClubAce" instance=ExtResource("92_pc42")]
+
+[node name="Player_DiamondKing" type="Node3D" parent="PlayingCardDecor"]
 position = Vector3(-19.74, 0.954, -11.01)
 rotation = Vector3(0.000000, -0.23, 0)
 scale = Vector3(0.12, 0.12, 0.12)
@@ -6768,7 +6786,9 @@ metadata/source_card_index = 24
 metadata/face_down = false
 metadata/asset_source = "jdastine"
 
-[node name="TableCard_Side_2Diamond" parent="." instance=ExtResource("92_pc0")]
+[node name="OriginalMesh" parent="PlayingCardDecor/Player_DiamondKing" instance=ExtResource("92_pc24")]
+
+[node name="Side_2Diamond" type="Node3D" parent="PlayingCardDecor"]
 position = Vector3(-20.9, 0.953, -11.71)
 rotation = Vector3(0.000000, 0.55, 0)
 scale = Vector3(0.12, 0.12, 0.12)
@@ -6776,7 +6796,9 @@ metadata/source_card_index = 0
 metadata/face_down = false
 metadata/asset_source = "jdastine"
 
-[node name="TableCard_Side_AceHeart" parent="." instance=ExtResource("92_pc37")]
+[node name="OriginalMesh" parent="PlayingCardDecor/Side_2Diamond" instance=ExtResource("92_pc0")]
+
+[node name="Side_AceHeart" type="Node3D" parent="PlayingCardDecor"]
 position = Vector3(-19.52, 0.953, -11.5)
 rotation = Vector3(0.000000, -0.64, 0)
 scale = Vector3(0.12, 0.12, 0.12)
@@ -6784,7 +6806,9 @@ metadata/source_card_index = 37
 metadata/face_down = false
 metadata/asset_source = "jdastine"
 
-[node name="TableCard_Discard_JackHeart" parent="." instance=ExtResource("92_pc19")]
+[node name="OriginalMesh" parent="PlayingCardDecor/Side_AceHeart" instance=ExtResource("92_pc37")]
+
+[node name="Discard_JackHeart" type="Node3D" parent="PlayingCardDecor"]
 position = Vector3(-21.3, 0.953, -11.38)
 rotation = Vector3(0.000000, 1.2, 0)
 scale = Vector3(0.12, 0.12, 0.12)
@@ -6792,7 +6816,9 @@ metadata/source_card_index = 19
 metadata/face_down = false
 metadata/asset_source = "jdastine"
 
-[node name="TableCard_FaceDown_01" parent="." instance=ExtResource("92_pc49")]
+[node name="OriginalMesh" parent="PlayingCardDecor/Discard_JackHeart" instance=ExtResource("92_pc19")]
+
+[node name="FaceDown_01" type="Node3D" parent="PlayingCardDecor"]
 position = Vector3(-20.12, 0.953, -11.63)
 rotation = Vector3(3.141593, 2.1, 0)
 scale = Vector3(0.12, 0.12, 0.12)
@@ -6800,7 +6826,9 @@ metadata/source_card_index = 49
 metadata/face_down = true
 metadata/asset_source = "jdastine"
 
-[node name="TableCard_Lounge_03" parent="." instance=ExtResource("92_pc31")]
+[node name="OriginalMesh" parent="PlayingCardDecor/FaceDown_01" instance=ExtResource("92_pc49")]
+
+[node name="Lounge_03" type="Node3D" parent="PlayingCardDecor"]
 position = Vector3(-23.57, 0.57, -2.69)
 rotation = Vector3(0.000000, 0.28, 0)
 scale = Vector3(0.12, 0.12, 0.12)
@@ -6808,7 +6836,9 @@ metadata/source_card_index = 31
 metadata/face_down = false
 metadata/asset_source = "jdastine"
 
-[node name="TableCard_Lounge_02" parent="." instance=ExtResource("92_pc22")]
+[node name="OriginalMesh" parent="PlayingCardDecor/Lounge_03" instance=ExtResource("92_pc31")]
+
+[node name="Lounge_02" type="Node3D" parent="PlayingCardDecor"]
 position = Vector3(-23.47, 0.571, -2.72)
 rotation = Vector3(0.000000, -0.11, 0)
 scale = Vector3(0.12, 0.12, 0.12)
@@ -6816,7 +6846,9 @@ metadata/source_card_index = 22
 metadata/face_down = false
 metadata/asset_source = "jdastine"
 
-[node name="TableCard_Lounge_QueenClubs" parent="." instance=ExtResource("92_pc18")]
+[node name="OriginalMesh" parent="PlayingCardDecor/Lounge_02" instance=ExtResource("92_pc22")]
+
+[node name="Lounge_QueenClubs" type="Node3D" parent="PlayingCardDecor"]
 position = Vector3(-33.66, 0.57, -2.77)
 rotation = Vector3(0.000000, 0.37, 0)
 scale = Vector3(0.12, 0.12, 0.12)
@@ -6824,13 +6856,17 @@ metadata/source_card_index = 18
 metadata/face_down = false
 metadata/asset_source = "jdastine"
 
-[node name="TableCard_Lounge_FaceDown" parent="." instance=ExtResource("92_pc51")]
+[node name="OriginalMesh" parent="PlayingCardDecor/Lounge_QueenClubs" instance=ExtResource("92_pc18")]
+
+[node name="Lounge_FaceDown" type="Node3D" parent="PlayingCardDecor"]
 position = Vector3(-33.71, 0.572, -2.74)
 rotation = Vector3(3.141593, 0.71, 0)
 scale = Vector3(0.12, 0.12, 0.12)
 metadata/source_card_index = 51
 metadata/face_down = true
 metadata/asset_source = "jdastine"
+
+[node name="OriginalMesh" parent="PlayingCardDecor/Lounge_FaceDown" instance=ExtResource("92_pc51")]
 
 [node name="Player" type="CharacterBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.02, 11.1)
