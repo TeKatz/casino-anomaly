@@ -8,6 +8,9 @@ The installer does not request assets from Poly Haven at runtime; model imports 
 
 ## Sketchfab CC BY 4.0 — user-provided models
 
+- **Playing Cards (52 individual cards)** — [jdastine](https://sketchfab.com/jdastine), [source](https://sketchfab.com/3d-models/playing-cards-2dd7c45bf68a4ce3bf63c995b1bf12bf). The uploaded set was split into 52 separately editable 3D glTF assets, with a shared optimized source-texture atlas, and selected examples placed on Blackjack and lounge tables. A [published third-party credits sheet](https://margaridabelo.myblog.arts.ac.uk/files/2023/05/credits.pdf) identifies the model as CC BY 4.0; its supplied `license.txt` does **not** expressly state a Creative Commons license and the glTF identifies jdastine as copyright holder. Preserve credit and verify permission with the author if distribution terms are uncertain. Source/license details and original material mapping are in `models/playing_cards/`.
+
+
 The four original casino prop models and the separately selected Business Man NPC use **Creative Commons Attribution 4.0**, not CC0.
 The official license text is preserved in each extracted `models/sketchfab/*/license.txt`.
 This game includes modified assets: PBR textures were downscaled for performance;
