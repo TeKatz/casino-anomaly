@@ -34,7 +34,7 @@ func _run() -> void:
         return
     var families := {}
     var signature_count := 0
-    var shared_bottle_meshes := {}
+
     # Do not confuse the artist's nested bottle instances with missing
     # furniture: each saved bottle remains a separate editable scene even
     # when it has another signature bottle as its scene-tree parent.
@@ -67,19 +67,12 @@ func _run() -> void:
         if label_mat == null or label_mat.albedo_texture == null:
             _fail("Conformal bottle label has no printed texture")
             return
-        # Repeated designs must share expensive generated GPU geometry,
-        # without sharing the actual scene nodes or transforms.
-        if shared_bottle_meshes.has(design_name):
-            var cached: Dictionary = shared_bottle_meshes[design_name]
-            if shell.mesh != cached["shell"] or label.mesh != cached["label"] \
-                    or label_mat != cached["label_material"]:
-                _fail("Repeated bottle design rebuilt unique geometry instead of using the runtime cache")
-                return
-        else:
-            shared_bottle_meshes[design_name] = {
-                "shell": shell.mesh, "label": label.mesh,
-                "label_material": label_mat
-            }
+        # Author-edited bottles use pre-saved mesh resources instead of
+        # regenerating shared templates during every room load. Every piece
+        # must survive as a genuine child owned by the authored main scene.
+        if shell.owner != world or liquid.owner != world or label.owner != world:
+            _fail("Saved signature bottle geometry lost its editable scene ownership")
+            return
         var uv: PackedVector2Array = label.mesh.surface_get_arrays(0)[Mesh.ARRAY_TEX_UV]
         if uv.size() < 400:
             _fail("Bottle label is not a densely UV-unwrapped curved surface")
@@ -96,6 +89,31 @@ func _run() -> void:
         if cap == null and medallion == null and crown == null and wood == null:
             _fail("Bottle has no sculpted stopper or closure")
             return
+    # The procedural fallback is still cached for any *new*, non-authored
+    # bottles spawned at runtime. Check the cache separately from saved meshes,
+    # whose individual artist overrides must remain independent.
+    var template := load("res://models/signature_bar/montevale.tscn") as PackedScene
+    if template == null:
+        _fail("Runtime bottle design template missing")
+        return
+    var generated_a := template.instantiate() as Node3D
+    var generated_b := template.instantiate() as Node3D
+    root.add_child(generated_a)
+    root.add_child(generated_b)
+    var generated_shell_a := generated_a.get_node_or_null("HandCutGlassShell") as MeshInstance3D
+    var generated_shell_b := generated_b.get_node_or_null("HandCutGlassShell") as MeshInstance3D
+    var generated_label_a := generated_a.get_node_or_null("ConformalPaperLabel") as MeshInstance3D
+    var generated_label_b := generated_b.get_node_or_null("ConformalPaperLabel") as MeshInstance3D
+    if generated_shell_a == null or generated_shell_b == null \
+            or generated_label_a == null or generated_label_b == null \
+            or generated_shell_a.mesh != generated_shell_b.mesh \
+            or generated_label_a.mesh != generated_label_b.mesh \
+            or generated_label_a.material_override != generated_label_b.material_override:
+        _fail("Newly generated runtime bottle instances no longer reuse cached geometry")
+        return
+    generated_a.queue_free()
+    generated_b.queue_free()
+
     if signature_count < 6 or families.size() != 6:
         _fail("Bar must retain editable signature bottles from all six designs")
         return
