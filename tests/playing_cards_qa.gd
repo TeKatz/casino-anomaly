@@ -61,8 +61,18 @@ func _run() -> void:
     root.add_child(world)
     await process_frame
     var cards := world.get_node_or_null("PlayingCardDecor") as Node3D
-    if cards == null or cards.get_child_count() != 16:
-        _fail("Expected 16 individually movable table-card scene instances")
+    if cards == null:
+        _fail("Missing PlayingCardDecor container")
+        return
+    var authored_count := 0
+    var child_names: Array[String] = []
+    for item in cards.get_children():
+        child_names.append(str(item.name))
+        if item.has_meta("source_card_index"):
+            authored_count += 1
+    if authored_count != 16:
+        _fail("Expected 16 independently movable card instances, found %d (total %d): %s" \
+            % [authored_count, cards.get_child_count(), str(child_names)])
         return
     var lounge_count := 0
     var blackjack_count := 0
