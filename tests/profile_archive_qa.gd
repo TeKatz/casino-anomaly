@@ -15,6 +15,14 @@ func _fail(reason: String) -> void:
     push_error("Casino Anomaly profile/archive QA: " + reason)
     quit(1)
 
+func _all_label_text(parent: Node) -> String:
+    var combined := ""
+    for child in parent.find_children("*", "Label", true, false):
+        combined += (child as Label).text + "\n"
+    return combined
+
+
+
 
 func _run() -> void:
     var profiles := root.get_node_or_null("ProfileManager")
@@ -78,6 +86,21 @@ func _run() -> void:
             or int(profiles.get_summary(5).get("discovered", -1)) != 0:
         _fail("Developer selection incorrectly counted as discovery")
         return
+    # Missing a real anomaly records an encounter but must never reveal
+    # the name, category or description in the archive or last verdict.
+    state.prepare_round(ids)
+    state.anomaly_id = "bar_label"
+    state.round_ready = true
+    state.round_debugged = false
+    var missed: Dictionary = state.decide(false)
+    if bool(missed.get("correct", true)) \
+            or not bool(profiles.get_records().has("bar_label")) \
+            or bool(profiles.get_records().get("bar_label", {}).get("recognized", true)):
+        _fail("Missing an anomaly must keep its archive entry locked")
+        return
+    if int(profiles.get_summary(5).get("discovered", -1)) != 0:
+        _fail("Encountering an anomaly incorrectly unlocked its description")
+        return
     if not profiles.rename_profile(5, "QA Renamed") \
             or str(profiles.get_summary(5).get("name", "")) != "QA Renamed":
         _fail("Profile rename not saved")
@@ -96,7 +119,30 @@ func _run() -> void:
     plaque.set_result({"valid": true, "correct": false, "anomaly_id": "bar_label",
         "visited": 3, "previous_streak": 2, "streak": 0})
     await process_frame
+    if not profiles.select_profile(5):
+        _fail("Could not select unidentified-anomaly profile for UI check")
+        return
     archive.show_mode("archive")
+    var catalog_entry := Catalog.get_entry("bar_label")
+    for field in ["title_de", "title_en", "description_de", "description_en", "category_de", "category_en"]:
+        var private_value := str(catalog_entry.get(field, ""))
+        if not private_value.is_empty() and _all_label_text(archive).contains(private_value):
+            _fail("Archive exposed locked anomaly detail: " + field)
+            return
+    archive.show_mode("last")
+    for field in ["title_de", "title_en", "description_de", "description_en"]:
+        var private_value := str(catalog_entry.get(field, ""))
+        if not private_value.is_empty() and _all_label_text(archive).contains(private_value):
+            _fail("Last review exposed locked anomaly detail: " + field)
+            return
+    if not profiles.select_profile(4):
+        _fail("Could not switch back to identified-anomaly profile")
+        return
+    archive.show_mode("archive")
+    if not _all_label_text(archive).contains(str(catalog_entry.get("title_en", ""))) \
+            and not _all_label_text(archive).contains(str(catalog_entry.get("title_de", ""))):
+        _fail("Correct identification did not unlock the archive entry")
+        return
     archive.show_mode("stats")
     archive.show_mode("last")
     if picker.get_node_or_null(".") == null or archive.get_child_count() == 0:
