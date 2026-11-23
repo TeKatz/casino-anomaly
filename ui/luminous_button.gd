@@ -5,6 +5,7 @@ extends Button
 @export var featured := false
 @export_enum("gold", "green", "red", "amber") var accent := "gold"
 @export var symbol := ""
+@export var compact_icon := false
 
 const MenuStyle = preload("res://ui/menu_style.gd")
 const MenuIcons = preload("res://ui/menu_icons.gd")
@@ -15,10 +16,25 @@ var _keyboard_navigation := false
 func _ready() -> void:
     MenuStyle.apply_button(self, featured, accent)
     alignment = HORIZONTAL_ALIGNMENT_CENTER
-    icon_alignment = HORIZONTAL_ALIGNMENT_LEFT
+    icon_alignment = HORIZONTAL_ALIGNMENT_CENTER if compact_icon else HORIZONTAL_ALIGNMENT_LEFT
     expand_icon = false
     add_theme_constant_override("h_separation", 12)
     set_symbol(symbol)
+    if compact_icon:
+        # The shared 23px side padding is correct for wide text buttons,
+        # but makes a 46px icon-only delete action overflow. Use private
+        # style copies; never mutate the cached nine-slice skins.
+        for state in ["normal", "hover", "pressed", "disabled"]:
+            var base := get_theme_stylebox(state) as StyleBoxTexture
+            if base == null:
+                continue
+            var compact := base.duplicate() as StyleBoxTexture
+            compact.content_margin_left = 7.0
+            compact.content_margin_right = 7.0
+            compact.content_margin_top = 5.0
+            compact.content_margin_bottom = 5.0
+            add_theme_stylebox_override(state, compact)
+        add_theme_constant_override("h_separation", 0)
     add_theme_font_size_override("font_size", 19 if featured else 16)
     mouse_entered.connect(_hover_changed.bind(true))
     mouse_exited.connect(_hover_changed.bind(false))

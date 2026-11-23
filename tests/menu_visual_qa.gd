@@ -132,6 +132,11 @@ func _run() -> void:
     if buttons.size() != 5:
         _fail("Every profile row needs an independent delete icon")
         return
+    for delete_icon in buttons:
+        if not (delete_icon as Button).get("compact_icon") \
+                or (delete_icon as Button).icon == null:
+            _fail("Small per-slot delete button has no compact icon skin")
+            return
     menu.queue_free()
     await process_frame
 

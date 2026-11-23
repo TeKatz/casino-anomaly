@@ -66,8 +66,9 @@ func _ready() -> void:
         var delete_icon := LuminousButton.new()
         delete_icon.name = "DeleteSlot%d" % slot
         delete_icon.symbol = "delete"
+        delete_icon.compact_icon = true
         delete_icon.accent = "red"
-        delete_icon.custom_minimum_size = Vector2(44, 47)
+        delete_icon.custom_minimum_size = Vector2(46, 47)
         delete_icon.alignment = HORIZONTAL_ALIGNMENT_CENTER
         delete_icon.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
         delete_icon.pressed.connect(_request_delete_slot.bind(slot))
