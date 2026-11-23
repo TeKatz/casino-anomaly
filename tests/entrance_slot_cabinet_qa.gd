@@ -1,7 +1,7 @@
 extends SceneTree
 ## A single editable cabinet prefab replaces all nine entrance placeholders.
-## The Sketchfab hero remains untouched; positions, colliders and individually
-## animated TopGlow resources remain part of the public scene contract.
+## The optional imported retro hero can be removed by the artist.
+## Positions, collisions and independent TopGlow materials must remain stable.
 
 const POSITIONS := {
     "Slot_02": Vector2(4.85, 8.2),
@@ -39,9 +39,11 @@ func _run() -> void:
     if group == null:
         _fail("No authored slot machines")
         return
-    var hero := group.get_node_or_null("Slot_01") as Node3D
-    if hero == null or hero.visible:
-        _fail("The original imported Sketchfab hero must remain visible in its own layer")
+    # The old Slot_01 is a hidden procedural placeholder. Its StaticBody3D
+    # must NOT survive runtime loading, irrespective of whether the artist
+    # kept or removed the separately imported retro hero.
+    if group.get_node_or_null("Slot_01") != null:
+        _fail("The hidden legacy slot source still blocks the entrance")
         return
 
     var glow_ids := {}
