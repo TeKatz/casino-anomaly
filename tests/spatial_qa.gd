@@ -116,11 +116,17 @@ func _run() -> void:
         return
     var checked_seats := 0
     for seat in side_cards.get_children():
-        if not (seat is MeshInstance3D) or not (seat.mesh is CylinderMesh):
+        if not (seat is Node3D) or not str(seat.name).begins_with("GamingStool_"):
             continue
-        if absf(seat.position.y - 0.51) > 0.001:
-            continue
-        var seat_radius: float = (seat.mesh as CylinderMesh).top_radius * side_cards.scale.z
+        # The placeholder seat cylinders were replaced by editable stool
+        # instances. Validate their ACTUAL collidable footprint, not the
+        # deleted primitive mesh, against the original walkway limits.
+        var body := seat.get_node_or_null("StoolBody") as StaticBody3D
+        var collision := body.get_node_or_null("StoolCollision") as CollisionShape3D if body != null else null
+        if collision == null or collision.disabled or not (collision.shape is CylinderShape3D):
+            _fail("A north-side stool has no active collision")
+            return
+        var seat_radius: float = (collision.shape as CylinderShape3D).radius * side_cards.scale.z
         var absolute_z: float = side_cards.position.z + seat.position.z * side_cards.scale.z
         if absolute_z - seat_radius <= -3.48 or absolute_z + seat_radius >= -0.12:
             _fail("A north-side chair clips into the carpet or back wall")
