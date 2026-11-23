@@ -49,17 +49,28 @@ func _run() -> void:
             _bad("A white placeholder globe or rod remains above the bar")
             return
 
-    # The wooden bar backdrop is now fully solid, including all shelves.
+    # A designer may edit or remove individual shelf boards. Every visible
+    # authored shelf must have precisely one matching collision at its
+    # current position, and no collision from a deleted shelf may remain.
     var rear: StaticBody3D = bar.get_node_or_null("BarBackboard_Collision") as StaticBody3D
     if rear == null or rear.get_child_count() == 0:
         _bad("Rear bar wood wall does not block players")
         return
-    var shelf_colliders := 0
+    var shelves := 0
+    var colliders := 0
     for child in bar.get_children():
-        if child is StaticBody3D and child.get_meta("collision_for", "") == "BottleShelf":
-            shelf_colliders += 1
-    if shelf_colliders != 3:
-        _bad("Bar wood shelves must have three collision bodies")
+        if child is MeshInstance3D and child.name.begins_with("BottleShelf"):
+            shelves += 1
+            var matching := bar.get_node_or_null(str(child.name) + "_Collision") as StaticBody3D
+            var shape_node := matching.get_node_or_null("ShelfShape") as CollisionShape3D if matching != null else null
+            if shape_node == null or not (shape_node.shape is BoxShape3D) \
+                    or matching.position.distance_to(child.position) > 0.01:
+                _bad("An edited bar shelf has missing or misaligned gameplay collision")
+                return
+        elif child is StaticBody3D and child.get_meta("collision_for", "") == "BottleShelf":
+            colliders += 1
+    if shelves == 0 or colliders != shelves:
+        _bad("Bar shelf collision count no longer matches the saved shelf layout")
         return
 
     var sign_panel: MeshInstance3D = bar.get_node_or_null("BarSignPanel") as MeshInstance3D

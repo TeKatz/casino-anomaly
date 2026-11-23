@@ -102,6 +102,11 @@ func _ready() -> void:
     _make_slots()
     if bar_area.get_child_count() == 0:
         _make_bar()
+    # The authored bar shelves may have been moved or deleted in Godot.
+    # Rebuild only their cheap physics boxes from the visible saved meshes
+    # so removed shelves never leave invisible obstacles in the room.
+    if not Engine.is_editor_hint():
+        _align_bar_shelf_collisions()
     _make_tables()
     _make_lounge()
     if decor.get_child_count() == 0:
@@ -621,6 +626,41 @@ func _make_slots() -> void:
     # The visual rhythm stays asymmetrical in the entry wing.
     n += 1
     _slot_machine(Vector3(4.65, 0, 11.85), -PI / 2.0, colors[2], n)
+
+func _align_bar_shelf_collisions() -> void:
+    var shelves: Array[MeshInstance3D] = []
+    var obsolete_bodies: Array[StaticBody3D] = []
+    for child in bar_area.get_children():
+        if child is MeshInstance3D and child.name.begins_with("BottleShelf"):
+            shelves.append(child as MeshInstance3D)
+        elif child is StaticBody3D and str(child.get_meta("collision_for", "")) == "BottleShelf":
+            obsolete_bodies.append(child as StaticBody3D)
+    # A designer might remove one or every shelf; never preserve colliders
+    # from the old procedural three-row arrangement.
+    for body in obsolete_bodies:
+        bar_area.remove_child(body)
+        body.queue_free()
+    for shelf in shelves:
+        var box_mesh := shelf.mesh as BoxMesh
+        if box_mesh == null:
+            push_warning("Bar shelf needs a BoxMesh for automatic collision: " + shelf.name)
+            continue
+        var body := StaticBody3D.new()
+        body.name = str(shelf.name) + "_Collision"
+        body.position = shelf.position
+        body.rotation = shelf.rotation
+        body.set_meta("collision_for", "BottleShelf")
+        var shape := BoxShape3D.new()
+        # Do not carry the visual scale onto the physics node. The scaled
+        # authored mesh extent becomes the collision shape's real extent.
+        shape.size = box_mesh.size * shelf.scale.abs()
+        shape.margin = 0.005
+        var collider := CollisionShape3D.new()
+        collider.name = "ShelfShape"
+        collider.shape = shape
+        body.add_child(collider)
+        bar_area.add_child(body)
+
 
 func _make_bar() -> void:
     # The bar remains on the outside/right of the left turn as shown in the
