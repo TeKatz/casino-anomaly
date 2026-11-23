@@ -60,39 +60,73 @@ func _run() -> void:
     var world := main.instantiate() as Node3D
     root.add_child(world)
     await process_frame
-    # Import optimization in Godot 4.5 may flatten plain Node3D wrappers,
-    # replacing parent paths with hash-qualified names while preserving all
-    # originally authored cards and metadata. Find actual authored wrappers.
+    # These cards used to pass a geometry-only test while buried under the
+    # felt of an INVISIBLE blackjack table. Verify actual visible tables
+    # and world-space heights, and reject the five white placeholder boxes.
     var card_nodes: Array[Node3D] = []
     for node in world.find_children("*", "Node3D", true, false):
         if node.has_meta("source_card_index"):
             card_nodes.append(node as Node3D)
     if card_nodes.size() != 16:
-        var available: Array[String] = []
-        for item in world.get_children():
-            available.append(str(item.name))
-        _fail("Expected 16 independently editable card instances, found %d: %s" \
-            % [card_nodes.size(), str(available)])
+        _fail("Expected 16 individually editable original card instances, found %d" % card_nodes.size())
         return
-    var lounge_count := 0
-    var blackjack_count := 0
+    var counts := {"Cards5": 0, "Cards7": 0}
     var facedown_count := 0
     for card in card_nodes:
-        if not card.has_meta("source_card_index"):
-            _fail("A 3D table card is missing its authored material index")
+        var table := card.get_parent() as Node3D
+        if table == null or not counts.has(str(table.name)) or not table.is_visible_in_tree():
+            _fail("Playing card has no visible parent table: " + str(card.get_path()))
             return
-        if card.scale.x < 0.09:
-            _fail("An extracted card was incorrectly scaled")
+        counts[str(table.name)] += 1
+        var felt := table.get_node_or_null("FeltSurface") as MeshInstance3D
+        if felt == null or not (felt.mesh is CylinderMesh):
+            _fail("Playing card parent has no physical table surface")
             return
-        if card.position.z > -5.0:
-            lounge_count += 1
-        else:
-            blackjack_count += 1
+        var cylinder := felt.mesh as CylinderMesh
+        var tabletop_y := felt.global_position.y + cylinder.height * 0.5
+        if card.global_position.y < tabletop_y + 0.001 \
+                or card.global_position.y > tabletop_y + 0.025:
+            _fail("Card is inside, underneath or floating over the felt: %s (%.4f vs %.4f)" \
+                % [card.name, card.global_position.y, tabletop_y])
+            return
+        if card.scale.x < 0.14:
+            _fail("An original card is too small to read on its table")
+            return
+        if not card.is_visible_in_tree():
+            _fail("A card is hidden by its ancestor or visibility setting")
+            return
+        var visible_meshes := card.find_children("*", "MeshInstance3D", true, false)
+        if visible_meshes.size() != 3:
+            _fail("Visible table card lost its 3D front, back or edge")
+            return
+        var textured_faces := 0
+        for piece in visible_meshes:
+            var render_mesh := (piece as MeshInstance3D).mesh
+            if render_mesh == null:
+                continue
+            for surface_id in range(render_mesh.get_surface_count()):
+                var mat := render_mesh.surface_get_material(surface_id) as BaseMaterial3D
+                if mat != null and mat.albedo_texture != null:
+                    textured_faces += 1
+        if textured_faces < 2:
+            _fail("Visible playing card has no textured front and back")
+            return
         if bool(card.get_meta("face_down", false)):
             facedown_count += 1
-    if lounge_count != 4 or blackjack_count != 12 or facedown_count != 2:
-        _fail("Card distribution across the blackjack and lounge tables changed")
+    if counts["Cards5"] != 8 or counts["Cards7"] != 8 or facedown_count != 2:
+        _fail("Original cards not distributed across two visible gaming tables")
         return
+    for table_name in ["Blackjack3", "Cards5", "Cards7"]:
+        var table := world.get_node("GamingTables/" + table_name) as Node3D
+        if table.get_node_or_null("CardBack") != null:
+            _fail("Original white card placeholder was not deleted")
+            return
+        for child in table.get_children():
+            if not (child is MeshInstance3D) or not ((child as MeshInstance3D).mesh is BoxMesh):
+                continue
+            if absf((child as MeshInstance3D).position.y - 1.082) < 0.001:
+                _fail("A flat white placeholder card remains on " + table_name)
+                return
     world.queue_free()
     await process_frame
     print("Casino Anomaly extracted playing cards QA PASS")
