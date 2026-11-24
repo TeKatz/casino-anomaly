@@ -169,16 +169,16 @@ func _create_credits_overlay() -> void:
 
 func _build_overlay(content: Control) -> Control:
     var overlay := Control.new()
-    overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     overlay.mouse_filter = Control.MOUSE_FILTER_STOP
     add_child(overlay)
+    overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     var shade := ColorRect.new()
     shade.color = Color(0.015, 0.024, 0.04, 0.94)
-    shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     overlay.add_child(shade)
+    shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     var center := CenterContainer.new()
-    center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     overlay.add_child(center)
+    center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     center.add_child(content)
     overlay.visible = false
     return overlay

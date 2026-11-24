@@ -43,8 +43,19 @@ func _check_cards(side: Control, label: String) -> bool:
         if not card.has_node("MarginContainer/VBoxContainer/PreviewScroll"):
             push_error(label + ": preview body needs bounded scrollable content")
             return false
-    if left.get_global_rect().end.x > right.get_global_rect().position.x:
-        push_error(label + ": two preview panels overlap")
+    var picker := side.get("main_panel") as Control
+    var central := picker.get_global_rect()
+    var bounds := side.get_global_rect()
+    var left_rect := left.get_global_rect()
+    var right_rect := right.get_global_rect()
+    if left_rect.end.x > central.position.x or right_rect.position.x < central.end.x:
+        push_error(label + ": preview overlaps central profile panel")
+        return false
+    if not bounds.grow(1.0).encloses(left_rect) or not bounds.grow(1.0).encloses(right_rect):
+        push_error(label + ": preview extends outside overlay")
+        return false
+    if absf(left_rect.get_center().y - central.get_center().y) > 2.0 or absf(right_rect.get_center().y - central.get_center().y) > 2.0:
+        push_error(label + ": preview not vertically aligned with profile panel")
         return false
     return true
 
@@ -111,8 +122,34 @@ func _run() -> void:
         _fail("Profile preview panels overflow after viewport resizing")
         return
 
+    # Recreate the main menu as after quitting an in-game run, and open
+    # Play immediately, before CenterContainer has settled its first sort.
     menu.queue_free()
     await process_frame
+    for cycle in range(3):
+        menu = MENU.instantiate() as Control
+        root.add_child(menu)
+        menu.call("_on_play")
+        picker = menu.get("profile_panel") as Control
+        side = menu.get("profile_side_cards") as Control
+        picker.call("_select_slot", selected)
+        # Resize mid-animation, including an aspect-ratio change. The
+        # previous absolute-position tween kept obsolete destinations.
+        root.size = Vector2i(1650, 930) if cycle % 2 == 0 else Vector2i(1280, 720)
+        await process_frame
+        root.size = Vector2i(1440, 900) if cycle % 2 == 0 else Vector2i(1600, 900)
+        await create_timer(0.42).timeout
+        if not _check_cards(side, "Fresh menu / resize during slide %d" % cycle):
+            _fail("Side previews kept stale animation targets")
+            return
+        menu.call("_hide_overlay", menu.get("profile_overlay"))
+        menu.call("_on_play")
+        await create_timer(0.42).timeout
+        if not _check_cards(side, "Interrupted close / reopen %d" % cycle):
+            _fail("Side previews did not reset after rapid reopening")
+            return
+        menu.queue_free()
+        await process_frame
     _restore_profile()
     print("Casino Anomaly profile side-card layout QA PASS")
     quit(0)
