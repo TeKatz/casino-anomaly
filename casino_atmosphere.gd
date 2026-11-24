@@ -580,6 +580,7 @@ func _dust() -> void:
     # Broad, overlapping volumes cover the walkable hall at several heights.
     # Keep boxes below the ceiling and outside the floor.
     var dust_index := 0
+    var gpu_experiment := DisplayServer.get_name() != "headless" and OS.get_cmdline_user_args().has("--gpu-dust")
     for pos in [
         Vector3(-1.9, 2.9, 10.5),
         Vector3(2.1, 2.7, 6.5),
@@ -594,6 +595,10 @@ func _dust() -> void:
         Vector3(-37.8, 2.7, -4.6),
         Vector3(-43.0, 2.8, -7.2)
     ]:
+        if gpu_experiment:
+            _gpu_dust_zone(pos, dust_index, mesh)
+            dust_index += 1
+            continue
         var particles := CPUParticles3D.new()
         particles.name = "AmbientDust_%02d" % dust_index
         dust_index += 1
@@ -610,6 +615,27 @@ func _dust() -> void:
         particles.mesh = mesh
         particles.emitting = true
         add_child(particles)
+
+# Experimental comparison only; the default CPU emitter is unchanged.
+func _gpu_dust_zone(pos: Vector3, index: int, mesh: Mesh) -> void:
+    var particles := GPUParticles3D.new()
+    particles.name = "AmbientDust_%02d" % index
+    particles.position = pos
+    particles.amount = 22
+    particles.lifetime = 11.0
+    particles.visibility_aabb = AABB(Vector3(-3.4, -2.15, -3.45), Vector3(6.8, 4.3, 6.9))
+    var material := ParticleProcessMaterial.new()
+    material.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
+    material.emission_box_extents = Vector3(3.1, 1.85, 3.15)
+    material.direction = Vector3.UP
+    material.spread = 180.0
+    material.gravity = Vector3.ZERO
+    material.initial_velocity_min = 0.006
+    material.initial_velocity_max = 0.020
+    particles.process_material = material
+    particles.draw_pass_1 = mesh
+    particles.emitting = true
+    add_child(particles)
 
 func _unhandled_key_input(event: InputEvent) -> void:
     # Development diagnostic only, invisible during normal play: F10 shows
