@@ -5,6 +5,9 @@ on:
     branches: [dev]
     paths:
       - 'backrooms/**'
+      - 'tools/bake_backrooms_voxel_gi.gd'
+      - 'addons/casino_model_preview/voxel_bake_targets.gd'
+      - 'addons/casino_model_preview/plugin.gd'
       - 'models/backrooms/oxygen/textures/**'
       - tests/backrooms_layout_qa.gd
       - .github/workflows/backrooms-layout-qa.yml
@@ -29,7 +32,9 @@ jobs:
         run: |
           set -euo pipefail
           WORK="$RUNNER_TEMP/backrooms-project"
-          mkdir -p "$WORK/models/backrooms/oxygen" "$WORK/tests"
+          mkdir -p "$WORK/models/backrooms/oxygen" "$WORK/tests" "$WORK/tools" "$WORK/addons/casino_model_preview"
+          cp tools/bake_backrooms_voxel_gi.gd "$WORK/tools/"
+          cp addons/casino_model_preview/voxel_bake_targets.gd "$WORK/addons/casino_model_preview/"
           cp -r backrooms "$WORK/"
           cp -r models/backrooms/oxygen/textures "$WORK/models/backrooms/oxygen/"
           cp tests/backrooms_layout_qa.gd "$WORK/tests/"

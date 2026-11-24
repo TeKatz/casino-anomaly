@@ -1,4 +1,6 @@
 extends SceneTree
+const Targets = preload("res://addons/casino_model_preview/voxel_bake_targets.gd")
+const Baker = preload("res://tools/bake_backrooms_voxel_gi.gd")
 ## Standalone geometry/asset QA. Run after Godot editor import.
 var failures: Array[String] = []
 
@@ -99,6 +101,23 @@ func _run() -> void:
 	check(active == 14, "Expected 14 dim active spots")
 	var probe := scene.get_node("Lighting/BackroomsVoxelGI") as VoxelGI
 	check(probe != null and probe.size.x >= 33.5 and probe.size.z >= 27.0, "Missing room-local VoxelGI probe")
+	# Both menu routes stay isolated; unknown scenes never launch a bake.
+	check(Targets.for_scene(Targets.CASINO_SCENE).get("script") == "res://tools/bake_voxel_gi.gd", "Casino bake route changed")
+	check(Targets.for_scene(Targets.BACKROOMS_SCENE).get("script") == "res://tools/bake_backrooms_voxel_gi.gd", "Backrooms bake route missing")
+	check(Targets.for_scene(Targets.BACKROOMS_SCENE).get("output") == "res://backrooms/backrooms_voxel_gi.res", "Backrooms bake output changed")
+	check(Targets.for_scene("res://menu.tscn").is_empty() and Targets.process_args("res://menu.tscn", ".").is_empty(), "Unsupported scene routes to baker")
+	var args := Targets.process_args(Targets.BACKROOMS_SCENE, ".")
+	check(args.has("forward_plus") and not args.has("--headless"), "Offline process must use Forward+ GPU")
+	check(probe.has_method("reload_baked_data"), "Backrooms probe cannot reload external bake")
+	if not FileAccess.file_exists(Targets.BACKROOMS_OUTPUT):
+		check(not bool(probe.call("reload_baked_data")) and probe.data == null, "Missing bake must safely use direct light")
+	Baker.prepare_lights(scene)
+	for fixture in fixtures.get_children():
+		var spot := fixture.get_node("Downlight") as SpotLight3D
+		if not spot.visible:
+			check(spot.light_bake_mode == Light3D.BAKE_DISABLED, "Hidden fixture participates in bake")
+		else:
+			check(spot.light_bake_mode == Light3D.BAKE_STATIC, "Active fixture's authored bake mode changed")
 	var first := walls.get_child(0) as StaticBody3D
 	var old: Vector3 = first.get("dimensions")
 	first.set("dimensions", old + Vector3(0.2, 0.0, 0.0))

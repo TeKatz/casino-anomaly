@@ -38,13 +38,18 @@ editor; the headless QA checks scene structure, not rendered exposure.
 
 A scene-owned 128-subdivision `Lighting/BackroomsVoxelGI` covers the entire
 layout. Its data has not been baked by headless CI. Direct lights work without
-GI. To enable GI, open the scene with Forward+, select BackroomsVoxelGI and
-click **Bake VoxelGI** in the 3D editor toolbar. Save the resulting VoxelGIData
-as `res://backrooms/backrooms_voxel_gi.res` if prompted, and save the scene.
-For a dim interior, adjust the baked data Energy downward as needed and
-enable Interior if appropriate. Re-bake after changing walls or lights.
-The existing casino-specific bake menu does not bake this separate probe.
-Commit only the scene and its baked data, not .godot cache files.
+GI. Open this scene with Forward+, then select **Project > Tools > Casino:
+VoxelGI neu backen...** and confirm. The editor detects the active scene,
+saves it and launches a separate GPU-backed process. It writes only
+`res://backrooms/backrooms_voxel_gi.res` and reloads the completed bake in the
+open scene. Subsequent editor/runtime opens load the same external resource
+when present; fresh checkouts without it keep direct lights. No geometry is
+generated or rewritten by the baker. Existing casino wing resources are untouched.
+Re-bake after changes to walls or light fixtures. The first bake uses a dim
+interior GI preset; subsequent bakes retain the previous data settings.
+Commit the baked .res alongside any intentional scene edits, not .godot caches.
+Console fallback (no --headless):
+`Godot_v4.5.1-stable_win64_console.exe --path . --rendering-method forward_plus --script res://tools/bake_backrooms_voxel_gi.gd`.
 
 No player, flashlight, sound, enemies, props, anomaly logic, or main-scene
 changes are included in this blockout.
