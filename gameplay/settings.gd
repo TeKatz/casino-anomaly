@@ -60,8 +60,8 @@ const PRESETS := {
         "upscaling": "fsr1",
         "aa_mode": "fxaa",
         "anisotropy": 2,
-        "texture_filter": "anisotropic",
-1679 false,
+        "texture_filter": "trilinear",
+        "voxel_gi": false,
         "shadow_quality": "low",
         "shadow_distance": "low",
         "fog_quality": "off",
@@ -76,8 +76,8 @@ const PRESETS := {
         "upscaling": "fsr2",
         "aa_mode": "taa",
         "anisotropy": 4,
-        "texture_filter": "anisotropic",
-2085 true,
+        "texture_filter": "trilinear",
+        "voxel_gi": true,
         "shadow_quality": "medium",
         "shadow_distance": "medium",
         "fog_quality": "low",
@@ -92,8 +92,8 @@ const PRESETS := {
         "upscaling": "bilinear",
         "aa_mode": "taa",
         "anisotropy": 8,
-        "texture_filter": "anisotropic",
-2494 true,
+        "texture_filter": "original",
+        "voxel_gi": true,
         "shadow_quality": "original",
         "shadow_distance": "original",
         "fog_quality": "original",
@@ -109,7 +109,7 @@ const PRESETS := {
         "aa_mode": "taa",
         "anisotropy": 16,
         "texture_filter": "anisotropic",
-2927 true,
+        "voxel_gi": true,
         "shadow_quality": "ultra",
         "shadow_distance": "high",
         "fog_quality": "high",
@@ -140,6 +140,7 @@ var dynamic_elapsed := 0.0
 var dynamic_frames := 0
 var dynamic_bad_windows := 0
 var dynamic_good_windows := 0
+var filtered_materials: Dictionary = {}
 var dirty := false
 var menu_context := false
 var overlay: CanvasLayer
@@ -433,6 +434,8 @@ func _apply_keys(keys: Array) -> void:
     for key in VOLUME_KEYS:
         if keys.has(key):
             _apply_volume(key)
+    if keys.has("texture_filter"):
+        _refresh_material_filters()
     if _intersects(keys, ENV_KEYS) or _intersects(keys, NODE_KEYS):
         _apply_scene(get_tree().root, keys)
     if keys.has("dynamic_resolution") or keys.has("dynamic_target_fps") or keys.has("render_scale"):
@@ -612,9 +615,24 @@ func _apply_material_filter(material: Material) -> void:
         return
     if not mat.has_meta("_original_sampler"):
         mat.set_meta("_original_sampler", mat.texture_filter)
+    filtered_materials[mat.get_instance_id()] = weakref(mat)
     var selected: int = {"bilinear": BaseMaterial3D.TEXTURE_FILTER_LINEAR, "trilinear": BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS, "anisotropic": BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC}[mode]
     if mat.texture_filter != selected:
         mat.texture_filter = selected
+
+func _refresh_material_filters() -> void:
+    # Packed scenes and imported material resources can be cached even when
+    # their nodes are gone. Restore all still-live modified resources, not
+    # just materials belonging to the currently visible scene.
+    for id in filtered_materials.keys():
+        var reference: WeakRef = filtered_materials[id]
+        var material = reference.get_ref()
+        if not is_instance_valid(material):
+            filtered_materials.erase(id)
+        else:
+            _apply_material_filter(material)
+    if options["texture_filter"] == "original":
+        filtered_materials.clear()
 
 func _reset_dynamic_resolution() -> void:
     dynamic_elapsed = 0.0
