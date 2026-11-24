@@ -164,6 +164,9 @@ func _run() -> void:
         _fail("The left bend does not meet the next room entrance")
         return
     var second_transform := second.global_transform
+    if not await _exercise_settings(controller, player, first, second, state, settings):
+        _fail("Settings sweep broke the live/staged room contract")
+        return
 
     # The next room remains beyond the L-shaped sightline, but its baked
     # GPU lighting must be prepared BEFORE the player can see its entrance.
@@ -324,6 +327,14 @@ func _run() -> void:
         return
     settings.set_option("door_symbols", true)
     for child in second.get_node("Architecture").get_children():
+        if child is Label3D and not Portals.exit_lane(child).is_empty():
+            child.text = "QA arbitrary presentation"
+    if not bool(controller.call("_place_markers")):
+        _fail("Arbitrary visual text invalidated markers")
+        return
+    settings.set_option("door_symbols", false)
+    settings.set_option("door_symbols", true)
+    for child in second.get_node("Architecture").get_children():
         if child is Label3D and Portals.exit_lane(child) == "left" and child.text != "! ANOMALIE":
             _fail("Localized door decoration was not applied")
             return
@@ -395,3 +406,153 @@ func _run() -> void:
     DirAccess.remove_absolute(ProjectSettings.globalize_path(state.save_path))
     print("Casino Anomaly seamless two-room streaming QA PASS")
     quit(0)
+
+func _exercise_settings(controller: Node, player: CharacterBody3D, first: Node3D, second: Node3D, state: Node, settings: Node) -> bool:
+    var baseline: Dictionary = settings.get("options").duplicate(true)
+    var samples: Dictionary = {
+        "language": "de",
+        "window_mode": "borderless",
+        "resolution": "1600x900",
+        "monitor": 0,
+        "vsync": false,
+        "vsync_mode": "off",
+        "fps_limit": 90,
+        "render_scale": 0.67,
+        "image_contrast": 0.75,
+        "taa": false,
+        "aa_mode": "msaa2",
+        "voxel_gi": false,
+        "graphics_preset": "low",
+        "upscaling": "fsr2",
+        "anisotropy": 2,
+        "texture_filter": "bilinear",
+        "dynamic_resolution": true,
+        "dynamic_target_fps": 90,
+        "shadow_quality": "off",
+        "shadow_distance": "low",
+        "fog_quality": "off",
+        "reflection_quality": "off",
+        "ssao_quality": "off",
+        "ssil": false,
+        "bloom": false,
+        "bloom_strength": 0.25,
+        "brightness": 0.7,
+        "saturation": 0.5,
+        "particle_quality": "off",
+        "fps_display": true,
+        "performance_overlay": true,
+        "menu_background": "abstract",
+        "menu_render_scale": 0.5,
+        "menu_fps_limit": 30,
+        "menu_camera_motion": false,
+        "menu_camera_speed": 0.25,
+        "menu_darkness": 1.5,
+        "master_volume": 0,
+        "music_volume": 0,
+        "sfx_volume": 0,
+        "ui_volume": 0,
+        "mouse_sensitivity": 0.25,
+        "invert_y": true,
+        "fov": 105,
+        "camera_motion": false,
+        "sprint_mode": "toggle",
+        "hud_visible": false,
+        "mouse_vertical_multiplier": 3,
+        "invert_x": true,
+        "mouse_smoothing": 1,
+        "controller_enabled": false,
+        "controller_sensitivity": 3,
+        "controller_deadzone": 0.45,
+        "controller_vibration": 1,
+        "ambience_volume": 0,
+        "footstep_volume": 0,
+        "cabinet_volume": 0,
+        "horror_volume": 0,
+        "pressure_volume": 0,
+        "reverb_mode": "off",
+        "audio_dynamic_range": "night",
+        "audio_device": "QA missing output",
+        "mute_unfocused": true,
+        "mono_audio": true,
+        "audio_balance": -1,
+        "head_bob": 0,
+        "breathing_motion": 0,
+        "camera_sway": 0,
+        "crosshair": "cross",
+        "crosshair_size": 2,
+        "crosshair_color": "cyan",
+        "interaction_hints": false,
+        "tutorial_hints": false,
+        "skip_tutorial": true,
+        "skip_creator_intro": true,
+        "pause_unfocused": true,
+        "confirm_quit": true,
+        "confirm_new_run": false,
+        "loading_motion": false,
+        "reduce_light_motion": true,
+        "soft_light_transitions": true,
+        "reduced_motion": true,
+        "reduced_menu_motion": true,
+        "ui_scale": 1.5,
+        "ui_text_size": "very_large",
+        "high_contrast_ui": true,
+        "sound_captions": true,
+        "caption_size": "very_large",
+        "caption_background": 0,
+        "color_assistance": "deutan",
+        "door_symbols": false,
+        "reduced_horror_audio": true,
+        "auto_updates": false
+    }
+    var rebound: Dictionary = baseline["key_bindings"].duplicate(true)
+    rebound["interact"] = [KEY_F, 0]
+    samples["key_bindings"] = rebound
+    var saved_run := FileAccess.get_file_as_string(str(state.get("save_path")))
+    var before := [state.get("correct_streak"), state.get("visited_loops"), state.get("mistakes"), state.get("anomaly_id"), state.get("round_ready"), state.get("tutorial_done"), state.get("active"), state.get("finished")]
+    var camera := player.get_node("Camera3D") as Camera3D
+    var speed: float = player.call("movement_speed", false)
+    var sprint: float = player.call("movement_speed", true)
+    var first_pose := first.global_transform
+    var second_pose := second.global_transform
+    var portals := Portals.new()
+    var base_count := baseline.size()
+    if samples.size() != base_count:
+        push_error("Settings sweep must cover every persisted key: %d/%d" % [samples.size(), base_count])
+        return false
+    for key in samples:
+        var value = samples[key]
+        if key == "door_symbols":
+            value = not bool(baseline[key])
+        if value == baseline[key]:
+            # Even when equal, exercise the dispatch and sanitization.
+            settings.call("_apply_keys", [key])
+        else:
+            settings.call("set_option", key, value)
+        # Deferred settings handlers are also part of the contract.
+        await process_frame
+        var after := [state.get("correct_streak"), state.get("visited_loops"), state.get("mistakes"), state.get("anomaly_id"), state.get("round_ready"), state.get("tutorial_done"), state.get("active"), state.get("finished")]
+        if before != after or FileAccess.get_file_as_string(str(state.get("save_path"))) != saved_run:
+            push_error("Option altered live progress/save: " + key)
+            return false
+        if not is_instance_valid(controller) or not is_instance_valid(player) or current_scene != first or controller.get("staged") != second or controller.get("room") != first or controller.get("choice_taken") or paused:
+            push_error("Option invalidated streaming or unexpectedly paused: " + key)
+            return false
+        if not first.global_transform.is_equal_approx(first_pose) or not second.global_transform.is_equal_approx(second_pose) or player.get_parent() != first or not camera.is_current():
+            push_error("Option altered room/player ownership or transform: " + key)
+            return false
+        if not is_equal_approx(float(player.call("movement_speed", false)), speed) or not is_equal_approx(float(player.call("movement_speed", true)), sprint):
+            push_error("Option changed walking/sprint speed: " + key)
+            return false
+        for hall in [first, second]:
+            for lane in ["left", "right"]:
+                var connector := portals.get_connector(hall, lane)
+                if connector == null or connector.has_node("OneWayGate") or not connector.has_node("StraightOuterWall_Collision"):
+                    push_error("Option invalidated physical route: " + key)
+                    return false
+        if not bool(controller.call("_place_markers")):
+            push_error("Option invalidated exit markers: " + key)
+            return false
+        settings.call("_change", baseline, true)
+        await process_frame
+    print("All %d persisted settings exercised with live and staged rooms" % base_count)
+    return true

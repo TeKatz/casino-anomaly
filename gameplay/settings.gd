@@ -524,6 +524,7 @@ func _apply_keys(keys: Array) -> void:
         _apply_volume("master_volume")
     if keys.has("reduced_horror_audio"):
         _apply_volume("horror_volume")
+        _apply_volume("pressure_volume")
     if keys.has("ui_scale"):
         get_tree().root.content_scale_factor = float(options["ui_scale"])
     if _intersects(keys, UI_KEYS):
@@ -799,7 +800,7 @@ func _apply_volume(key: String) -> void:
     var idx := AudioServer.get_bus_index(bus_name)
     if idx >= 0:
         var volume := float(options[key])
-        if key == "horror_volume" and bool(options["reduced_horror_audio"]):
+        if key in ["horror_volume", "pressure_volume"] and bool(options["reduced_horror_audio"]):
             volume *= 0.35
         AudioServer.set_bus_mute(idx, volume <= 0.0001 or (key == "master_volume" and audio_unfocused and bool(options["mute_unfocused"])))
         AudioServer.set_bus_volume_db(idx, linear_to_db(maxf(volume, 0.0001)))

@@ -46,3 +46,7 @@ Keyboard and mouse use two persisted physical bindings per gameplay action. Conf
 Audio controls route ambience, footsteps, cabinets, horror and pressure through independent buses with the master/SFX volume hierarchy. Night mode uses a compressor; output device, balance, mono and focus mute are independent. Sound captions are non-directional and never announce a hidden anomaly.
 
 Accessibility options include motion reductions, soft Backrooms entry lighting, decorative light steadiness, UI scale and text size, high-contrast panels, UI icon palettes, extra choice symbols, caption size/background and reduced horror audio. Actual anomaly colors, scoring, route conditions and authored geometry are unchanged. Tutorial skipping preserves the guaranteed normal first room. Controller, display and audio hardware need manual testing. Dialogue is currently text-only; no voice volume is exposed.
+
+### Settings regression contract
+
+Portal identity is determined by physical connectors, never translated/decorated text. Exit labels carry lane metadata for rendering only. The ordinary streaming QA starts with door symbols enabled, exercises every persisted setting on the active and staged hall, checks saved progress, portal collision, camera/player identity and speed, then crosses both successive halls. The Backrooms QA enables door symbols and soft entry lighting across both choices, including the final victory. Headless tests do not establish physical device or GPU behavior.

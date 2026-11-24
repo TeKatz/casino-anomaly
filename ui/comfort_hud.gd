@@ -84,7 +84,9 @@ func _sync() -> void:
     crosshair.visible = available and bool(Controls.pref(self, "hud_visible", true)) and Controls.pref(self, "crosshair", "off") != "off"
     var cue := current_cue if Time.get_ticks_msec() < until else ""
     if cue.is_empty() and is_instance_valid(player) and bool(player.get("backrooms_mode")):
-        cue = "hum"
+        var controller := player.get_parent().get_node_or_null("LoopController")
+        if controller != null and not bool(controller.get("backrooms_scored")):
+            cue = "hum"
     captions.visible = available and bool(Controls.pref(self, "sound_captions", false)) and not cue.is_empty()
     if captions.visible:
         var de: bool = Controls.pref(self, "language", "en") == "de"

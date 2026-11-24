@@ -192,7 +192,7 @@ func _prepare_immersion() -> void:
         AudioServer.set_bus_send(horror, "SFX")
     var pressure := AudioServer.get_bus_index("PRESSURE")
     if pressure >= 0:
-        AudioServer.set_bus_send(pressure, "HORROR")
+        AudioServer.set_bus_send(pressure, "SFX")
     if AudioServer.get_bus_effect_count(index) == 0:
         world_reverb = AudioEffectReverb.new()
         world_reverb.room_size = 0.53
