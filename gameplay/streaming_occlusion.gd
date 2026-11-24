@@ -1,4 +1,5 @@
 extends RefCounted
+const RuntimeCache = preload("res://gameplay/runtime_asset_cache.gd")
 ## Only actual opaque structural boxes are eligible. Never approximate a
 ## door opening, transparent surface, furniture, or the full room AABB.
 static func add_box(mesh: MeshInstance3D) -> void:
@@ -8,8 +9,7 @@ static func add_box(mesh: MeshInstance3D) -> void:
     # Inset all faces to avoid falsely hiding geometry at seams.
     if minf(size.x, minf(size.y, size.z)) <= 0.04:
         return
-    var shape := BoxOccluder3D.new()
-    shape.size = size - Vector3(0.04, 0.04, 0.04)
+    var shape := RuntimeCache.box_occluder(size - Vector3(0.04, 0.04, 0.04))
     var node := OccluderInstance3D.new()
     node.name = "StreamingOccluder"
     node.occluder = shape

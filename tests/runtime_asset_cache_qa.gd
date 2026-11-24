@@ -58,15 +58,23 @@ func _run() -> void:
     if dust != Cache.dust_mesh() or not is_equal_approx(dust.radius, 0.007):
         _fail("Fixed dust resources were not reused")
         return
+    var occluder := Cache.box_occluder(size)
+    if occluder != Cache.box_occluder(size) or occluder.size != size:
+        _fail("Structural occluder resource was not reused exactly")
+        return
+    if Cache.stool_cushion_mesh() != Cache.stool_cushion_mesh() or Cache.stool_cushion_material() != Cache.stool_cushion_material():
+        _fail("Fixed upholstery resources were not reused")
+        return
     for i in range(Cache.GEOMETRY_LIMIT * 3):
         var dimensions := Vector3(float(i + 1), 2.0, 3.0)
         Cache.portal_mesh(dimensions)
         Cache.portal_shape(dimensions)
-    if Cache.counts()["meshes"] > Cache.GEOMETRY_LIMIT or Cache.counts()["shapes"] > Cache.GEOMETRY_LIMIT:
+        Cache.box_occluder(dimensions)
+    if Cache.counts()["meshes"] > Cache.GEOMETRY_LIMIT or Cache.counts()["shapes"] > Cache.GEOMETRY_LIMIT or Cache.counts()["occluders"] > Cache.GEOMETRY_LIMIT:
         _fail("Cache grew beyond its limit")
         return
     Cache.clear()
-    if Cache.counts()["meshes"] != 0 or Cache.counts()["shapes"] != 0 or Cache.counts()["bounds"] != 0:
+    if Cache.counts()["meshes"] != 0 or Cache.counts()["shapes"] != 0 or Cache.counts()["bounds"] != 0 or Cache.counts()["occluders"] != 0:
         _fail("Cache did not release retained references")
         return
     if mesh.size != size or shape.size != size:

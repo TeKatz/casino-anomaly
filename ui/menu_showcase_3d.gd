@@ -54,9 +54,12 @@ func _resize_render_target() -> void:
     var pixels := get_window().size
     if pixels.x < 2 or pixels.y < 2:
         return
-    viewport.size = pixels
-    viewport.scaling_3d_scale = menu_scale
-    if ready_for_display and not suspended and not motion_enabled and background_mode != "abstract":
+    var changed := viewport.size != pixels or not is_equal_approx(viewport.scaling_3d_scale, menu_scale)
+    if viewport.size != pixels:
+        viewport.size = pixels
+    if not is_equal_approx(viewport.scaling_3d_scale, menu_scale):
+        viewport.scaling_3d_scale = menu_scale
+    if changed and ready_for_display and not suspended and not motion_enabled and background_mode != "abstract":
         viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 
 
@@ -171,6 +174,9 @@ func install_room(packed: PackedScene) -> bool:
         probe.free()
     for other_camera in visual.find_children("*", "Camera3D", true, false):
         other_camera.free()
+    # Keep mesh-bearing bodies, but deactivate authored collision layers
+    # before entering the separate visual-only world.
+    _disable_showcase_collisions(visual)
     room = visual
     stage.add_child(room)
     camera.make_current()
@@ -178,15 +184,22 @@ func install_room(packed: PackedScene) -> bool:
     call_deferred("_finish_room")
     return true
 
+func _disable_showcase_collisions(visual: Node3D) -> void:
+    for item in visual.find_children("*", "CollisionObject3D", true, false):
+        var body := item as CollisionObject3D
+        if body.collision_layer != 0:
+            body.collision_layer = 0
+        if body.collision_mask != 0:
+            body.collision_mask = 0
+
 func _finish_room() -> void:
     await get_tree().process_frame
     await get_tree().process_frame
     if not is_inside_tree() or not is_instance_valid(room):
         return
     Occlusion.casino_walls(room)
-    for item in room.find_children("*", "CollisionObject3D", true, false):
-        (item as CollisionObject3D).collision_layer = 0
-        (item as CollisionObject3D).collision_mask = 0
+    # Cover legacy procedural bodies created in ready callbacks too.
+    _disable_showcase_collisions(room)
     for particle in room.find_children("*", "CPUParticles3D", true, false):
         (particle as CPUParticles3D).emitting = false
     for particle in room.find_children("*", "GPUParticles3D", true, false):

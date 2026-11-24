@@ -195,6 +195,10 @@ var dynamic_bad_windows := 0
 var dynamic_good_windows := 0
 var filtered_materials: Dictionary = {}
 var _material_registrations := 0
+# IDs do not retain retired rooms. Track only graphics-relevant nodes.
+var _quality_nodes: Dictionary = {"environment": {}, "light": {}, "particle": {}, "reflection": {}, "mesh": {}}
+var _pending_meshes: Dictionary = {}
+var _mesh_flush_queued := false
 var dirty := false
 var audio_unfocused := false
 var master_effects: Dictionary = {}
@@ -216,8 +220,10 @@ func _ready() -> void:
     add_child(preview_timer)
     preview_timer.timeout.connect(cancel_display_preview)
     load_options()
-    apply_options()
+    _index_quality_tree(get_tree().root)
     get_tree().node_added.connect(_on_node_added)
+    get_tree().node_removed.connect(_on_node_removed)
+    apply_options()
     set_process(false)
     _update_overlay()
 
@@ -540,7 +546,7 @@ func _apply_keys(keys: Array) -> void:
     if keys.has("texture_filter"):
         _refresh_material_filters()
     if _intersects(keys, ENV_KEYS) or _intersects(keys, NODE_KEYS):
-        _apply_scene(get_tree().root, keys)
+        _apply_registered_quality(keys)
     if keys.has("dynamic_resolution") or keys.has("dynamic_target_fps") or keys.has("render_scale"):
         _reset_dynamic_resolution()
     if keys.has("fps_display") or keys.has("performance_overlay") or keys.has("dynamic_resolution"):
@@ -643,7 +649,7 @@ func _apply_reflection(probe: ReflectionProbe) -> void:
     if quality == "low" and probe.name == "WestWingReflection":
         probe.visible = false
 
-func _apply_node(node: Node, keys: Array) -> void:
+func _apply_node(node: Node, keys: Array, seen_materials: Dictionary = {}) -> void:
     if node is WorldEnvironment and _intersects(keys, ENV_KEYS):
         if not node.has_meta("_return_blend"):
             apply_environment(node.environment, keys)
@@ -670,47 +676,136 @@ func _apply_node(node: Node, keys: Array) -> void:
             node.set_meta("_particle_base", [node.amount, node.emitting])
         var original: Array = node.get_meta("_particle_base")
         var level := str(options["particle_quality"])
-        node.amount = maxi(1, roundi(float(original[0]) * (0.25 if level == "low" else (0.5 if level == "medium" else 1.0))))
-        node.emitting = bool(original[1]) and level != "off"
+        var amount := maxi(1, roundi(float(original[0]) * (0.25 if level == "low" else (0.5 if level == "medium" else 1.0))))
+        var emitting := bool(original[1]) and level != "off"
+        # Avoid resetting a live emitter when its budget is unchanged.
+        if node.amount != amount:
+            node.amount = amount
+        if node.emitting != emitting:
+            node.emitting = emitting
     elif node is ReflectionProbe and keys.has("reflection_quality") and node.has_meta("_reflection_requested"):
         _apply_reflection(node)
     elif node is MeshInstance3D and keys.has("texture_filter"):
-        _apply_mesh_filter(node as MeshInstance3D)
+        _apply_mesh_filter(node as MeshInstance3D, seen_materials)
 
 func _apply_scene(node: Node, keys: Array) -> void:
     if node == self or node.has_meta("_baking_room"):
         return
-    _apply_node(node, keys)
+    _apply_node(node, keys, {})
     for child in node.get_children():
         _apply_scene(child, keys)
 
+func _quality_kind(node: Node) -> String:
+    if node is WorldEnvironment:
+        return "environment"
+    if node is Light3D:
+        return "light"
+    if node is CPUParticles3D or node is GPUParticles3D:
+        return "particle"
+    if node is ReflectionProbe:
+        return "reflection"
+    if node is MeshInstance3D:
+        return "mesh"
+    return ""
+
+func _register_quality_node(node: Node) -> String:
+    var kind := _quality_kind(node)
+    if not kind.is_empty():
+        var bucket: Dictionary = _quality_nodes[kind]
+        bucket[node.get_instance_id()] = true
+    return kind
+
+func _index_quality_tree(node: Node) -> void:
+    _register_quality_node(node)
+    for child in node.get_children():
+        _index_quality_tree(child)
+
+func _quality_eligible(node: Node) -> bool:
+    if not is_instance_valid(node) or not node.is_inside_tree():
+        return false
+    var ancestor := node
+    while ancestor != null:
+        if ancestor == self or ancestor.has_meta("_baking_room"):
+            return false
+        ancestor = ancestor.get_parent()
+    return true
+
+func _apply_registered_quality(keys: Array) -> void:
+    var kinds: Array[String] = []
+    if _intersects(keys, ENV_KEYS):
+        kinds.append("environment")
+    if keys.has("shadow_quality") or keys.has("shadow_distance"):
+        kinds.append("light")
+    if keys.has("particle_quality"):
+        kinds.append("particle")
+    if keys.has("reflection_quality"):
+        kinds.append("reflection")
+    if keys.has("texture_filter"):
+        kinds.append("mesh")
+    var seen: Dictionary = {}
+    for kind in kinds:
+        var bucket: Dictionary = _quality_nodes[kind]
+        for id in bucket.keys():
+            var node := instance_from_id(int(id)) as Node
+            if not is_instance_valid(node):
+                bucket.erase(id)
+            elif _quality_eligible(node):
+                _apply_node(node, keys, seen)
+
 func _on_node_added(node: Node) -> void:
+    var kind := _register_quality_node(node)
+    # Keep UI, lighting and environment initialization ordering unchanged.
     if node is Control and (options["ui_text_size"] != "normal" or options["high_contrast_ui"] or options["color_assistance"] != "off"):
         call_deferred("_apply_new_ui", weakref(node))
-    if node is WorldEnvironment or node is Light3D or node is CPUParticles3D or node is GPUParticles3D or (node is MeshInstance3D and options["texture_filter"] != "original"):
-        # Newly staged nodes can still be configured in their parent's ready.
+    if kind in ["environment", "light", "particle"]:
         call_deferred("_apply_new_node", weakref(node))
+    elif kind == "mesh" and options["texture_filter"] != "original":
+        _pending_meshes[node.get_instance_id()] = true
+        if not _mesh_flush_queued:
+            _mesh_flush_queued = true
+            call_deferred("_flush_pending_meshes")
+
+func _on_node_removed(node: Node) -> void:
+    var kind := _quality_kind(node)
+    if not kind.is_empty():
+        var bucket: Dictionary = _quality_nodes[kind]
+        bucket.erase(node.get_instance_id())
+    _pending_meshes.erase(node.get_instance_id())
+
+func _flush_pending_meshes() -> void:
+    _mesh_flush_queued = false
+    var pending := _pending_meshes
+    _pending_meshes = {}
+    var seen: Dictionary = {}
+    for id in pending:
+        var mesh := instance_from_id(int(id)) as MeshInstance3D
+        if _quality_eligible(mesh):
+            _apply_mesh_filter(mesh, seen)
 
 func _apply_new_node(reference: WeakRef) -> void:
-    var node = reference.get_ref()
-    if is_instance_valid(node) and node.is_inside_tree():
-        var ancestor: Node = node
-        while ancestor != null:
-            if ancestor.has_meta("_baking_room"):
-                return
-            ancestor = ancestor.get_parent()
-        _apply_node(node, ENV_KEYS + NODE_KEYS)
+    var node := reference.get_ref() as Node
+    if _quality_eligible(node):
+        _apply_node(node, ENV_KEYS + NODE_KEYS, {})
 
-func _apply_mesh_filter(mesh: MeshInstance3D) -> void:
+func _apply_mesh_filter(mesh: MeshInstance3D, seen: Dictionary = {}) -> void:
     # Apply real Godot sampler modes to standard 3D materials. Shader
     # materials keep their authored sampler settings; no texture is reimported.
     if mesh.material_override != null:
-        _apply_material_filter(mesh.material_override)
+        _filter_once(mesh.material_override, seen)
     elif mesh.mesh != null:
         for index in range(mesh.mesh.get_surface_count()):
-            _apply_material_filter(mesh.get_active_material(index))
+            _filter_once(mesh.get_active_material(index), seen)
     if mesh.material_overlay != null:
-        _apply_material_filter(mesh.material_overlay)
+        _filter_once(mesh.material_overlay, seen)
+
+func _filter_once(material: Material, seen: Dictionary) -> void:
+    if material == null:
+        return
+    var id := material.get_instance_id()
+    if seen.has(id):
+        return
+    seen[id] = true
+    _apply_material_filter(material)
 
 func _apply_material_filter(material: Material) -> void:
     if not material is BaseMaterial3D:

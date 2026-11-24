@@ -13,6 +13,9 @@ static var _boxes: Dictionary = {}
 static var _shapes: Dictionary = {}
 static var _validated_gi: Dictionary = {}
 static var _dust: SphereMesh
+static var _occluders: Dictionary = {}
+static var _stool_mesh: CylinderMesh
+static var _stool_material: StandardMaterial3D
 static var bounds_computations := 0
 static var gi_validations := 0
 
@@ -96,9 +99,40 @@ static func dust_mesh() -> SphereMesh:
         _dust = mesh
     return mesh
 
+static func box_occluder(dimensions: Vector3) -> BoxOccluder3D:
+    if not Engine.is_editor_hint() and _occluders.has(dimensions):
+        return _occluders[dimensions] as BoxOccluder3D
+    var shape := BoxOccluder3D.new()
+    shape.size = dimensions
+    if not Engine.is_editor_hint():
+        _remember(_occluders, dimensions, shape, GEOMETRY_LIMIT)
+    return shape
+
+static func stool_cushion_mesh() -> CylinderMesh:
+    if not Engine.is_editor_hint() and _stool_mesh != null:
+        return _stool_mesh
+    var pad := CylinderMesh.new()
+    pad.top_radius = 0.32
+    pad.bottom_radius = 0.32
+    pad.height = 0.095
+    pad.radial_segments = 24
+    if not Engine.is_editor_hint():
+        _stool_mesh = pad
+    return pad
+
+static func stool_cushion_material() -> StandardMaterial3D:
+    if not Engine.is_editor_hint() and _stool_material != null:
+        return _stool_material
+    var material := StandardMaterial3D.new()
+    material.albedo_color = Color("#793c49")
+    material.roughness = 0.91
+    if not Engine.is_editor_hint():
+        _stool_material = material
+    return material
+
 static func counts() -> Dictionary:
     return {"scenes": _scenes.size(), "bounds": _bounds.size(), "meshes": _boxes.size(),
-        "shapes": _shapes.size(), "gi": _validated_gi.size(),
+        "shapes": _shapes.size(), "gi": _validated_gi.size(), "occluders": _occluders.size(),
         "bounds_computations": bounds_computations, "gi_validations": gi_validations}
 
 static func clear() -> void:
@@ -108,5 +142,8 @@ static func clear() -> void:
     _shapes.clear()
     _validated_gi.clear()
     _dust = null
+    _occluders.clear()
+    _stool_mesh = null
+    _stool_material = null
     bounds_computations = 0
     gi_validations = 0

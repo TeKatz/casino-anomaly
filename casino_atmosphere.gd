@@ -326,6 +326,7 @@ func prewarm_streaming_lights() -> void:
     if room == null or not room.has_meta("_streaming_standby"):
         return
     room.set_meta("_streaming_lighting_prepared", true)
+    _animate_plants()
     # _build() runs deferred. If it has not populated its arrays yet,
     # _ensure_practical_lights() will synchronize after construction.
     if not strip_fills.is_empty() and not furniture_fills.is_empty():
@@ -659,8 +660,18 @@ func _process(delta: float) -> void:
         var energy := base if steady else base + 0.08 * sin(elapsed * 0.58 + float(i))
         if not steady or not is_equal_approx(signs[i].emission_energy_multiplier, energy):
             signs[i].emission_energy_multiplier = energy
+    # Room-local foliage keeps its clock but skips transform updates
+    # behind the blind connector until prewarm.
+    if not get_parent().has_meta("_streaming_standby") or get_parent().has_meta("_streaming_lighting_prepared"):
+        _animate_plants()
+
+func _animate_plants() -> void:
     for i in range(plant_crowns.size()):
-        # Slow <1-degree sway, deliberately subtle for an indoor casino.
-        plant_crowns[i].rotation.z = 0.009 * sin(elapsed * 0.47 + float(i) * 1.7)
-        plant_crowns[i].rotation.x = 0.007 * sin(elapsed * 0.39 + float(i) * 2.1)
+        if not is_instance_valid(plant_crowns[i]):
+            continue
+        var plant := plant_crowns[i]
+        var rotation_value := plant.rotation
+        rotation_value.z = 0.009 * sin(elapsed * 0.47 + float(i) * 1.7)
+        rotation_value.x = 0.007 * sin(elapsed * 0.39 + float(i) * 2.1)
+        plant.rotation = rotation_value
 

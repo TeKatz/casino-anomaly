@@ -91,6 +91,10 @@ func _run() -> void:
     if not visual.find_children("*", "ReflectionProbe", true, false).is_empty() or visual.process_mode != Node.PROCESS_MODE_DISABLED:
         _fail("Menu scene has live reflection capture or gameplay processing")
         return
+    for body in visual.find_children("*", "CollisionObject3D", true, false):
+        if body.collision_layer != 0 or body.collision_mask != 0:
+            _fail("Physics layers remain active in the visual-only menu")
+            return
     var rig := panorama.get_node("RenderSurface/World/Showcase/CameraRig") as Node3D
     var camera := rig.get_node("PanoramaCamera") as Camera3D
     if view.get_camera_3d() != camera or root.get_camera_3d() == camera:

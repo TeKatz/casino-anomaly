@@ -261,7 +261,9 @@ func _refresh_exit_signs(target_room: Node3D) -> void:
 			var lane := StreamPortals.exit_lane(node as Label3D)
 			if not lane.is_empty():
 				node.set_meta("_exit_lane", lane)
-				node.text = StreamPortals.choice_label(self, lane == "left")
+				var caption := StreamPortals.choice_label(self, lane == "left")
+				if node.text != caption:
+					node.text = caption
 
 
 func _candidate_lane(local_z: float) -> String:

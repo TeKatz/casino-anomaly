@@ -194,17 +194,11 @@ func _stool_cushion(stool: Node3D) -> void:
     # on EVERY stool, including the two end stools.
     var cushion := MeshInstance3D.new()
     cushion.name = "VelvetSeatCushion"
-    var pad := CylinderMesh.new()
-    pad.top_radius = 0.32
-    pad.bottom_radius = 0.32
-    pad.height = 0.095
-    pad.radial_segments = 24
-    cushion.mesh = pad
+    # Shared render resources permit Forward+ automatic instancing;
+    # individual stools and their anomaly transforms remain independent.
+    cushion.mesh = RuntimeCache.stool_cushion_mesh()
     cushion.position = Vector3(0, 1.045, 0)
-    var material := StandardMaterial3D.new()
-    material.albedo_color = Color("#793c49")
-    material.roughness = 0.91
-    cushion.material_override = material
+    cushion.material_override = RuntimeCache.stool_cushion_material()
     stool.add_child(cushion)
 
 
@@ -320,6 +314,8 @@ func _place(identifier: String, label: String, anchor: Vector3,
     # The numbered nodes in main.tscn are the designer's source of truth.
     # Keep their saved transform (including scale); only the model geometry,
     # collision and decorative details are constructed during play.
+    # The visual-only menu does not need runtime model colliders.
+    var needs_collision := add_collision and not get_parent().has_meta("_menu_showcase")
     var index: int = int(_placement_indices.get(label, 0)) + 1
     _placement_indices[label] = index
     var saved_name := "%s_%02d" % [label, index]
@@ -375,7 +371,7 @@ func _place(identifier: String, label: String, anchor: Vector3,
     # An authored model without runtime collision already has its final
     # transform. Computing its mesh bounds would not change a single node,
     # yet repeated that full hierarchy walk for every streamed casino hall.
-    if has_authored_model and not add_collision:
+    if has_authored_model and not needs_collision:
         # Preserve the exact same accounting as the full placement path:
         # gameplay diagnostics and the headless scene smoke test rely on it.
         placed_model_count += 1
@@ -406,7 +402,7 @@ func _place(identifier: String, label: String, anchor: Vector3,
             # Wall art should be centered around its mounting point, not its foot.
             imported.position.y -= target_height * 0.5
 
-    if add_collision:
+    if needs_collision:
         # Use actual imported geometry extents, rather than a tiny cylinder
         # which allowed the player to walk through most of the sideboard.
         var body := StaticBody3D.new()

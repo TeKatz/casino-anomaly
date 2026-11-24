@@ -71,6 +71,32 @@ func _run() -> void:
     if material.texture_filter != BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS:
         _fail("Authored texture sampler not restored")
         return
+    # Newly added meshes receive the current filter in one deferred batch.
+    settings.set_option("texture_filter", "bilinear")
+    var sibling := MeshInstance3D.new()
+    sibling.mesh = BoxMesh.new()
+    sibling.material_override = material
+    root.add_child(sibling)
+    var late := MeshInstance3D.new()
+    late.mesh = BoxMesh.new()
+    var late_material := StandardMaterial3D.new()
+    late_material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+    late.material_override = late_material
+    root.add_child(late)
+    var removed_id := sibling.get_instance_id()
+    sibling.free()
+    await process_frame
+    if late_material.texture_filter != BaseMaterial3D.TEXTURE_FILTER_LINEAR:
+        _fail("Deferred sampler batch missed a newly added mesh")
+        return
+    if settings._quality_nodes["mesh"].has(removed_id):
+        _fail("Removed mesh still retained in graphics index")
+        return
+    settings.set_option("texture_filter", "original")
+    if late_material.texture_filter != BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS:
+        _fail("Deferred mesh sampler did not restore its authored value")
+        return
+    late.free()
     textured.free()
     var world := WorldEnvironment.new()
     var env := Environment.new()

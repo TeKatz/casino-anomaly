@@ -224,7 +224,7 @@ func _spawn(slug: String, label: String, spot: Vector3, max_width: float,
         -size.position.y * factor,
         -(size.position.z + size.size.z * 0.5) * factor
     )
-    if add_collision and (_editor_preview_root == null or _baking_editor_models):
+    if add_collision and not get_parent().has_meta("_menu_showcase") and (_editor_preview_root == null or _baking_editor_models):
         var body := StaticBody3D.new()
         body.name = "FurnitureCollider"
         body.position.y = 0.829 if slug == "blackjack_table" else size.size.y * factor * 0.5
@@ -422,10 +422,11 @@ func _populate() -> void:
             var hidden_source := hall.get_node_or_null("SlotMachines/Slot_01") as Node3D
             if hidden_source != null and not hidden_source.visible:
                 hidden_source.queue_free()
-            _disable_hidden_table_collisions(hall)
-            for child in saved.get_children():
-                if str(child.get_meta("source_asset", "")) == "blackjack_table":
-                    _fit_blackjack_collision(child as Node3D)
+            if not hall.has_meta("_menu_showcase"):
+                _disable_hidden_table_collisions(hall)
+                for child in saved.get_children():
+                    if str(child.get_meta("source_asset", "")) == "blackjack_table":
+                        _fit_blackjack_collision(child as Node3D)
             furniture_finalized.emit()
         return
     var slots: Node3D = hall.get_node_or_null("SlotMachines") as Node3D
