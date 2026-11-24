@@ -36,7 +36,9 @@ func _build() -> void:
         return
     var build_start_us := Time.get_ticks_usec()
     set_meta("ambient_fx_only", true)
-    _ensure_reflection_probes()
+    var showcase := get_parent().has_meta("_menu_showcase")
+    if not showcase:
+        _ensure_reflection_probes()
     _ensure_bar_fill_lights()
     _ensure_practical_lights()
     # Reflection probes and practical light arrays must exist before the
@@ -63,6 +65,10 @@ func _build() -> void:
             if neon != null and neon.material_override is StandardMaterial3D:
                 signs.append(neon.material_override as StandardMaterial3D)
     _slots()
+    if showcase:
+        set_process(false)
+        set_process_unhandled_key_input(false)
+        return
     _plants()
     _dust()
     var elapsed_ms := float(Time.get_ticks_usec() - build_start_us) / 1000.0
@@ -623,7 +629,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 
 
 func _process(delta: float) -> void:
-    if not active:
+    if not active or get_parent().has_meta("_menu_showcase"):
         return
     elapsed += delta
     hybrid_sync_elapsed += delta

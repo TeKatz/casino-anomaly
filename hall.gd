@@ -52,9 +52,10 @@ var decor: Node3D
 var lights: Node3D
 
 func _ready() -> void:
+    var showcase := has_meta("_menu_showcase")
     # The headless editor does not expose all GPU-only anti-aliasing settings.
     # Ensure the actual Forward+ game viewport uses TAA during play.
-    if not Engine.is_editor_hint() and DisplayServer.get_name() != "headless" and not has_meta("_streaming_standby"):
+    if not Engine.is_editor_hint() and DisplayServer.get_name() != "headless" and not has_meta("_streaming_standby") and not showcase:
         var viewport := get_viewport()
         # Do not reconfigure the shared render target on each streamed hall.
         # Respect the current graphics option, including when TAA is disabled.
@@ -109,7 +110,7 @@ func _ready() -> void:
     # The authored bar shelves may have been moved or deleted in Godot.
     # Rebuild only their cheap physics boxes from the visible saved meshes
     # so removed shelves never leave invisible obstacles in the room.
-    if not Engine.is_editor_hint():
+    if not Engine.is_editor_hint() and not showcase:
         _align_bar_shelf_collisions()
     _make_tables()
     _make_lounge()
@@ -122,7 +123,7 @@ func _ready() -> void:
     # Also show it when artists preview/play main.tscn directly in Godot.
     # It remains a generated, ownerless node; the authored scene and the
     # carefully tuned baked lighting stay untouched.
-    if not has_node("NeonLevelSign") and not has_meta("_baking_room"):
+    if not has_node("NeonLevelSign") and not has_meta("_baking_room") and not showcase:
         var neon := NeonLevelSign.new() as Node3D
         neon.name = "NeonLevelSign"
         if Engine.is_editor_hint():
@@ -141,7 +142,7 @@ func _ready() -> void:
     # scene viewport. Editor previews are transient, internal, and ownerless:
     # no duplicate probe nodes are serialized into main.tscn. Gameplay still
     # receives one room-local rig per active/streamed room.
-    if not has_node("VoxelGIRig"):
+    if not has_node("VoxelGIRig") and not showcase:
         var gi_rig := VoxelRig.new() as Node3D
         gi_rig.name = "VoxelGIRig"
         if Engine.is_editor_hint():
@@ -150,7 +151,7 @@ func _ready() -> void:
             add_child(gi_rig)
 
     # Runtime-only positional sound, with no extra editor scene objects.
-    if not Engine.is_editor_hint() and not has_meta("_baking_room"):
+    if not Engine.is_editor_hint() and not has_meta("_baking_room") and not showcase:
         var soundscape := RoomSoundscape.new() as Node3D
         soundscape.name = "RoomSoundscape"
         add_child(soundscape)
@@ -158,7 +159,7 @@ func _ready() -> void:
     # Keep the designer-authored scene untouched. The game controller and
     # choice doors exist only in a started/continued run, not in editor mode.
     # The offline VoxelGI bake must never generate a live run controller.
-    if not Engine.is_editor_hint() and not has_meta("_baking_room"):
+    if not Engine.is_editor_hint() and not has_meta("_baking_room") and not showcase:
         var state = get_node_or_null("/root/LoopState")
         if state != null and state.active and state.tutorial_done and not state.finished \
                 and not has_meta("_streaming_standby"):

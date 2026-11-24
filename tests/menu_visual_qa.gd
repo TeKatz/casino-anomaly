@@ -33,6 +33,58 @@ func _run() -> void:
     if background == null or not (background.material is ShaderMaterial) or menu_buttons == null:
         _fail("Abstract shader or menu stack missing")
         return
+    var panorama := menu.get_node_or_null("CasinoPanorama") as Control
+    var view := panorama.get_node_or_null("RenderSurface/World") as SubViewport if panorama != null else null
+    if view == null or not view.own_world_3d or not view.gui_disable_input or (panorama.get_node("RenderSurface") as SubViewportContainer).stretch_shrink != 2:
+        _fail("Panorama viewport is not isolated or performance bounded")
+        return
+    if screen.x >= 980.0 and (main_panel.anchor_left < 0.599 or main_panel.anchor_right < 0.979 or (menu.get_node("Brand") as Control).anchor_top > 0.231):
+        _fail("Panorama menu positioning regressed")
+        return
+    var state := root.get_node_or_null("LoopState")
+    var previous_active = state.active
+    var previous_tutorial = state.tutorial_done
+    state.active = true
+    state.tutorial_done = true
+    var packed := load("res://main.tscn") as PackedScene
+    var installed := bool(panorama.call("install_room", packed))
+    state.active = previous_active
+    state.tutorial_done = previous_tutorial
+    if not installed:
+        _fail("Real casino panorama cannot be instantiated")
+        return
+    for frame in range(5):
+        await process_frame
+    var visual := panorama.get("room") as Node3D
+    if visual == null or not bool(panorama.get("ready_for_display")) or not visual.has_node("Architecture") or not visual.has_node("SlotMachines"):
+        _fail("Casino visual geometry missing")
+        return
+    for node_name in ["Player", "LoopController", "StreamingPortals", "RoomSoundscape", "VoxelGIRig"]:
+        if visual.has_node(node_name):
+            _fail("Gameplay node leaked into menu: " + node_name)
+            return
+    if not visual.find_children("*", "ReflectionProbe", true, false).is_empty() or visual.process_mode != Node.PROCESS_MODE_DISABLED:
+        _fail("Menu scene has live reflection capture or gameplay processing")
+        return
+    var rig := panorama.get_node("RenderSurface/World/Showcase/CameraRig") as Node3D
+    var camera := rig.get_node("PanoramaCamera") as Camera3D
+    if view.get_camera_3d() != camera or root.get_camera_3d() == camera:
+        _fail("Panorama camera leaked into the gameplay viewport")
+        return
+    panorama.call("update_pose", 0.0)
+    var start := rig.transform
+    panorama.call("update_pose", 10.5)
+    if rig.transform.is_equal_approx(start) or absf(rig.position.x) > 0.7:
+        _fail("Panorama is static or outside its safe camera path")
+        return
+    panorama.call("update_pose", 42.0)
+    if not rig.transform.is_equal_approx(start):
+        _fail("Panorama loop is not seamless")
+        return
+    panorama.call("set_suspended", true)
+    if view.render_target_update_mode != SubViewport.UPDATE_DISABLED:
+        _fail("Menu panorama still renders while loading a game")
+        return
     for id in ["PlayButton", "ContinueButton", "SettingsButton", "CreditsButton", "QuitButton"]:
         var button := menu_buttons.get_node_or_null(id) as Button
         if button == null or button.get_script() == null:

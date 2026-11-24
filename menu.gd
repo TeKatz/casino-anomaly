@@ -243,8 +243,8 @@ func _update_layout() -> void:
         panel.anchor_left = 0.14
         panel.anchor_right = 0.86
     else:
-        panel.anchor_left = 0.56
-        panel.anchor_right = 0.95
+        panel.anchor_left = 0.60
+        panel.anchor_right = 0.98
 
     # The old anchored +/-293px panel could exceed 720p after font/icon
     # minimums grew, clipping its top edge. Give the entire glass frame
@@ -266,11 +266,9 @@ func _update_layout() -> void:
 func _animate_intro() -> void:
     $Brand.modulate.a = 0.0
     $CenterPanel.modulate.a = 0.0
-    $CenterPanel.position.y += 12.0
     var tween := create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
     tween.tween_property($Brand, "modulate:a", 1.0, 0.72)
     tween.tween_property($CenterPanel, "modulate:a", 1.0, 0.48)
-    tween.tween_property($CenterPanel, "position:y", $CenterPanel.position.y - 12.0, 0.48)
 
 
 func _fade_to_scene(scene_path: String) -> void:
@@ -285,9 +283,11 @@ func _fade_to_scene(scene_path: String) -> void:
     tween.tween_property(screen, "modulate:a", 1.0, 0.38)
     tween.tween_callback(func() -> void:
         var loader = get_node_or_null("/root/SceneLoader")
+        $CasinoPanorama.set_suspended(true)
         screen.visible = false
         if loader == null or not loader.travel_to(scene_path):
             changing_scene = false
+            $CasinoPanorama.set_suspended(false)
             _set_status("menu.failed_state")
             return
         loader.transition_failed.connect(_on_scene_load_failed, CONNECT_ONE_SHOT)
@@ -296,6 +296,7 @@ func _fade_to_scene(scene_path: String) -> void:
 
 func _on_scene_load_failed(_path: String) -> void:
     changing_scene = false
+    $CasinoPanorama.set_suspended(false)
 
 
 func _unhandled_input(event: InputEvent) -> void:

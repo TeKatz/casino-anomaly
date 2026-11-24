@@ -1,14 +1,15 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://menu.gd" id="1"]
 [ext_resource type="Script" path="res://ui/luminous_button.gd" id="2"]
 [ext_resource type="Shader" path="res://ui/abstract_menu.gdshader" id="3"]
+[ext_resource type="PackedScene" path="res://ui/menu_showcase_3d.tscn" id="4_showcase"]
 
 [sub_resource type="ShaderMaterial" id="Atmosphere"]
 shader = ExtResource("3")
 
 [sub_resource type="StyleBoxFlat" id="GlassPanel"]
-bg_color = Color(0.041, 0.069, 0.112, 0.94)
+bg_color = Color(0.041, 0.069, 0.112, 0.90)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
@@ -41,6 +42,9 @@ mouse_filter = 2
 material = SubResource("Atmosphere")
 color = Color(1, 1, 1, 1)
 
+[node name="CasinoPanorama" parent="." instance=ExtResource("4_showcase")]
+layout_mode = 1
+
 [node name="TopRail" type="ColorRect" parent="."]
 layout_mode = 1
 anchors_preset = 10
@@ -53,9 +57,9 @@ color = Color(0.85, 0.66, 0.45, 0.69)
 [node name="Brand" type="Control" parent="."]
 layout_mode = 1
 anchor_left = 0.075
-anchor_top = 0.31
+anchor_top = 0.23
 anchor_right = 0.075
-anchor_bottom = 0.31
+anchor_bottom = 0.23
 offset_right = 550.0
 offset_bottom = 310.0
 mouse_filter = 2
@@ -104,9 +108,9 @@ text = "EVERY DETAIL IS A DECISION."
 
 [node name="CenterPanel" type="PanelContainer" parent="."]
 layout_mode = 1
-anchor_left = 0.56
+anchor_left = 0.60
 anchor_top = 0.5
-anchor_right = 0.95
+anchor_right = 0.98
 anchor_bottom = 0.5
 offset_top = -293.0
 offset_bottom = 293.0
