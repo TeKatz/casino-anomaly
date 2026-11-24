@@ -150,6 +150,7 @@ func _exit_tree() -> void:
 	if is_instance_valid(backrooms_maze) and backrooms_maze != room:
 		backrooms_maze.queue_free()
 	if backrooms_active:
+		_stop_backrooms_hum(room)
 		var sound := get_node_or_null("/root/AudioDirector")
 		if sound != null:
 			sound.call("set_backrooms_mode", false)
@@ -733,6 +734,15 @@ func _finish_backrooms() -> void:
 	_activate_reflections_sequentially(staged)
 
 
+func _stop_backrooms_hum(target: Node3D) -> void:
+	if not is_instance_valid(target):
+		return
+	var hum := target.get_node_or_null("BackroomsHum") as AudioStreamPlayer
+	if hum != null:
+		hum.stop()
+		hum.stream = null
+
+
 func _handoff_backrooms_return() -> void:
 	if not backrooms_active or not backrooms_scored or not is_instance_valid(staged):
 		return
@@ -742,6 +752,7 @@ func _handoff_backrooms_return() -> void:
 	backrooms_exit_connector.reparent(upcoming, true)
 	backrooms_exit_connector.name = "ArrivalConnector"
 	player.call("set_backrooms_mode", false)
+	_stop_backrooms_hum(previous)
 	var sound := get_node_or_null("/root/AudioDirector")
 	if sound != null:
 		sound.call("set_backrooms_mode", false)

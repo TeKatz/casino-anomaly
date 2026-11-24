@@ -25,6 +25,13 @@ func _run() -> void:
     if not await _exercise("left", 11, true):
         quit(1)
         return
+    # End the simulated play session as the menu would, releasing all
+    # audio players before the headless engine shuts down.
+    var sound := root.get_node_or_null("AudioDirector")
+    if sound != null:
+        sound.call("set_world_ambience_enabled", false)
+    for frame in range(5):
+        await process_frame
     print("Casino Anomaly Backrooms traversal QA PASS")
     quit(0)
 
@@ -151,6 +158,7 @@ func _exercise(lane: String, streak: int, rotated: bool) -> bool:
     if not require(not is_instance_valid(maze) and is_instance_valid(next), "Old maze leaked or return casino freed"):
         return false
     next.queue_free()
+    await process_frame
     await process_frame
     DirAccess.remove_absolute(ProjectSettings.globalize_path(state.save_path))
     return true

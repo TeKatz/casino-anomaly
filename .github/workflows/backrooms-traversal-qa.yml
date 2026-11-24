@@ -51,6 +51,6 @@ jobs:
           GODOT="$RUNNER_TEMP/godot/Godot_v4.5.1-stable_linux.x86_64"
           timeout --kill-after=10s 300s "$GODOT" --headless --path . --editor --import > "$RUNNER_TEMP/import.log" 2>&1 || { cat "$RUNNER_TEMP/import.log"; exit 1; }
           if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' "$RUNNER_TEMP/import.log"; then cat "$RUNNER_TEMP/import.log"; exit 1; fi
-          timeout --kill-after=10s 120s "$GODOT" --headless --path . --script res://tests/backrooms_traversal_qa.gd 2>&1 | tee "$RUNNER_TEMP/traversal.log"
+          timeout --kill-after=10s 120s "$GODOT" --headless --path . --verbose --script res://tests/backrooms_traversal_qa.gd 2>&1 | tee "$RUNNER_TEMP/traversal.log"
           grep -F 'Casino Anomaly Backrooms traversal QA PASS' "$RUNNER_TEMP/traversal.log"
           if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' "$RUNNER_TEMP/traversal.log"; then exit 1; fi
