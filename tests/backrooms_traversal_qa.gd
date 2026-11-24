@@ -96,8 +96,16 @@ func _exercise(lane: String, streak: int, rotated: bool) -> bool:
         return false
     player.global_position = casino.to_global(Vector3(portals.BEND_X, 1.02, portals.lane_z(lane) + portals.lane_sign(lane) * 2.5))
     var pose := player.global_transform
-    loop.call("_process", 0.016)
-    if not require(current_scene == maze and player.get_parent() == maze and loop.get_parent() == maze and player.global_transform.is_equal_approx(pose), "Reveal teleported or replaced player/controller"):
+    var camera := player.get_node("Camera3D") as Camera3D
+    # Real frame-driven reveal, not a direct _enter_backrooms call. The
+    # deferred environment swap must preserve the original active camera.
+    for frame in range(5):
+        await process_frame
+        if bool(loop.get("backrooms_active")):
+            break
+    if not require(current_scene == casino and maze.get_parent() == casino and player.get_parent() == casino and loop.get_parent() == casino and player.global_position.distance_to(pose.origin) < 0.15, "Reveal removed or moved live player/controller"):
+        return false
+    if not require(root.get_camera_3d() == camera and camera.is_current() and camera.is_inside_tree() and player.can_process() and player.is_physics_processing() and player.is_processing_unhandled_input() and not paused, "Camera or input disabled after reveal"):
         return false
     if not require(bool(player.get("backrooms_mode")) and maze.has_node("BackroomsArrivalConnector/BackroomsRevealGate_Collision") and maze.has_node("BackroomsArrivalConnector/OneWayGate_Collision"), "Dark traversal mode or blocking wall missing"):
         return false
@@ -111,7 +119,22 @@ func _exercise(lane: String, streak: int, rotated: bool) -> bool:
         return false
     await process_frame
     await physics_frame
-    if not require(is_instance_valid(maze) and not is_instance_valid(casino), "Maze freed during reparent or old casino leaked"):
+    if not require(is_instance_valid(maze) and is_instance_valid(casino) and casino.get_child_count() == 3 and not casino.has_node("Architecture"), "Old casino geometry or controller lifecycle leaked"):
+        return false
+    if not require(root.get_camera_3d() == camera and player.can_process() and not bool(player.get("interaction_locked")) and not paused, "Camera or input lost after old geometry teardown"):
+        return false
+    if not require(maze.has_node("FlashlightPickupLight"), "Unlit approach to flashlight"):
+        return false
+    # Verify the actual input routing and pause menu remain alive. Push
+    # events through the viewport, never directly invoke the menu handler.
+    var esc := InputEventKey.new()
+    esc.keycode = KEY_ESCAPE
+    esc.pressed = true
+    root.push_input(esc, true)
+    if not require(paused and bool(player.get_node("InGameMenu").get("open")), "Escape no longer opens pause menu"):
+        return false
+    root.push_input(esc, true)
+    if not require(not paused and not bool(player.get_node("InGameMenu").get("open")), "Escape no longer resumes the game"):
         return false
     var pickup := maze.get_node_or_null("FlashlightPickup")
     if not require(pickup != null and maze.has_node("BackroomsHum") and player.get_node_or_null("Camera3D/BackroomsFlashlight") == null, "Initial flashlight or ambience state wrong"):
@@ -121,10 +144,10 @@ func _exercise(lane: String, streak: int, rotated: bool) -> bool:
     var key := InputEventKey.new()
     key.keycode = KEY_E
     key.pressed = true
-    loop.call("_unhandled_input", key)
+    root.push_input(key, true)
     if not require(bool(pickup.get("taken")) and not pickup.visible and player.has_node("Camera3D/BackroomsFlashlight"), "E did not collect the nearby torch"):
         return false
-    loop.call("_unhandled_input", key)
+    root.push_input(key, true)
     if not require(player.get_node("Camera3D").find_children("BackroomsFlashlight", "SpotLight3D", false, false).size() == 1, "Repeated E duplicated flashlight"):
         return false
     # Stand inside before the exit: next hall is available but unscored.
@@ -155,7 +178,9 @@ func _exercise(lane: String, streak: int, rotated: bool) -> bool:
         return false
     await process_frame
     await process_frame
-    if not require(not is_instance_valid(maze) and is_instance_valid(next), "Old maze leaked or return casino freed"):
+    if not require(not is_instance_valid(maze) and not is_instance_valid(casino) and is_instance_valid(next), "Old maze/host leaked or return casino freed"):
+        return false
+    if not require(root.get_camera_3d() == camera and camera.is_current() and player.can_process() and not paused, "Camera or input lost during return handoff"):
         return false
     next.queue_free()
     await process_frame

@@ -59,6 +59,20 @@ static func build_entrance(maze: Node3D) -> void:
     box(collar, "Soffit", Vector3(ENTRY_X - 0.68, 3.25, ENTRY_Z), Vector3(1.22, 0.5, 2.62), CEILING)
     box(collar, "Threshold", Vector3(ENTRY_X - 0.5, -0.13, ENTRY_Z), Vector3(1.24, 0.24, 2.44), FLOOR)
 
+static func add_pickup_light(maze: Node3D, at: Vector3) -> void:
+    # A weak local pool, not a player light. The first few steps must stay
+    # navigable even on a fresh checkout without baked VoxelGI data.
+    var light := OmniLight3D.new()
+    light.name = "FlashlightPickupLight"
+    light.position = Vector3(at.x, 2.45, at.z + 0.40)
+    light.light_color = Color(0.87, 0.84, 0.68)
+    light.light_energy = 0.36
+    light.omni_range = 5.0
+    light.omni_attenuation = 1.2
+    light.shadow_enabled = true
+    light.light_bake_mode = Light3D.BAKE_DISABLED
+    maze.add_child(light)
+
 static func build_exit(maze: Node3D) -> Node3D:
     var corridor := Node3D.new()
     corridor.name = "BackroomsExitConnector"

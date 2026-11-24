@@ -52,6 +52,10 @@ var _pending_stage_phase := 0
 var _pending_stage_start_us := 0
 var _pending_instance_ms := 0.0
 var backrooms_active := false
+# Keep the active scene root and player/camera in the tree during reveal.
+# Only its environment children are retired; the root is freed on return.
+var backrooms_host: Node3D
+var _backrooms_entry_pending := false
 var backrooms_maze: Node3D
 var backrooms_lane := ""
 var backrooms_environment: Environment
@@ -506,8 +510,10 @@ func _handoff() -> void:
 
 	# Preserve the single CharacterBody3D and its live controller.
 	# No camera cut, teleport, or orientation change occurs at handoff.
+	player.call("begin_streaming_handoff")
 	player.reparent(upcoming, true)
 	reparent(upcoming, true)
+	player.call("end_streaming_handoff")
 	room = upcoming
 	var environment_node := upcoming.get_node_or_null("WorldEnvironment") as WorldEnvironment
 	if environment_node != null:
@@ -532,7 +538,7 @@ func _handoff() -> void:
 		portals.lock_departure(upcoming, "left")
 		won = true
 		finishing = false
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	player.call("restore_streaming_view")
 	transitioning = false
 
 
@@ -549,8 +555,10 @@ func _process_backrooms_approach(local: Vector3) -> void:
 	if not is_instance_valid(backrooms_maze):
 		return
 	var distance: float = (local.z - _lane_z(lane)) * portals.lane_sign(lane)
-	if absf(local.x - portals.BEND_X) <= 1.15 and distance >= BACKROOMS_REVEAL_DISTANCE:
-		_enter_backrooms(lane)
+	if absf(local.x - portals.BEND_X) <= 1.15 and distance >= BACKROOMS_REVEAL_DISTANCE and not _backrooms_entry_pending:
+		_backrooms_entry_pending = true
+		# The real frame callback must finish before retiring scene children.
+		call_deferred("_enter_backrooms", lane)
 
 
 func _stage_backrooms(lane: String) -> void:
@@ -592,6 +600,7 @@ func _stage_backrooms(lane: String) -> void:
 
 
 func _enter_backrooms(lane: String) -> void:
+	_backrooms_entry_pending = false
 	if backrooms_active or not is_instance_valid(backrooms_maze) or backrooms_lane != lane:
 		return
 	var previous := room
@@ -605,8 +614,11 @@ func _enter_backrooms(lane: String) -> void:
 	Backrooms.box(connector, "BackroomsRevealGate", Vector3(portals.BEND_X, 1.76, _lane_z(lane) + direction * 0.25),
 		Vector3(2.62, 3.52, 0.20), gate_mat)
 	for child in connector.get_children():
-		if child is Light3D:
-			(child as Light3D).hide()
+		if child is OmniLight3D:
+			var passage_light := child as OmniLight3D
+			passage_light.light_energy *= 0.18
+			passage_light.light_color = Color(0.84, 0.81, 0.64)
+			passage_light.light_volumetric_fog_energy = 0.0
 	connector.reparent(backrooms_maze, true)
 	connector.name = "BackroomsArrivalConnector"
 	var old_env := previous.get_node_or_null("WorldEnvironment") as WorldEnvironment
@@ -619,10 +631,12 @@ func _enter_backrooms(lane: String) -> void:
 	backrooms_active = true
 	choice_taken = true
 	backrooms_scored = false
-	player.reparent(backrooms_maze, true)
-	reparent(backrooms_maze, true)
+	# Do not reparent the live player, Camera3D, pause CanvasLayer or
+	# controller here. The active SceneTree root remains the casino shell.
+	# The maze joins that shell at its existing world-space transform.
+	backrooms_host = previous
+	backrooms_maze.reparent(backrooms_host, true)
 	room = backrooms_maze
-	get_tree().current_scene = room
 	var env := room.get_node("Lighting/Environment") as WorldEnvironment
 	env.environment = backrooms_environment
 	(room.get_node("Lighting") as Node3D).show()
@@ -650,10 +664,17 @@ func _enter_backrooms(lane: String) -> void:
 	backrooms_pickup.name = "FlashlightPickup"
 	backrooms_pickup.position = Vector3(-14.5, 0.84, -0.52)
 	room.add_child(backrooms_pickup)
-	previous.hide()
-	previous.queue_free()
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	Backrooms.add_pickup_light(room, backrooms_pickup.position)
+	# Retire only the old world, never the live root or any player child.
+	# Remove nodes from the tree now so old geometry/lights cannot overlap.
+	for child in previous.get_children():
+		if child == player or child == self or child == room:
+			continue
+		previous.remove_child(child)
+		child.queue_free()
+	player.call("restore_streaming_view")
 	transitioning = false
+	print("Backrooms reveal: active camera=", get_viewport().get_camera_3d() == player.get_node("Camera3D"), ", host=", previous.name)
 
 
 func _physics_process(_delta: float) -> void:
@@ -662,7 +683,7 @@ func _physics_process(_delta: float) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not backrooms_active or not is_instance_valid(backrooms_pickup):
+	if not backrooms_active or not is_instance_valid(backrooms_pickup) or get_tree().paused or bool(player.get("interaction_locked")):
 		return
 	if event is InputEventKey and event.pressed and not event.echo and (event.keycode == KEY_E or event.physical_keycode == KEY_E):
 		if bool(backrooms_pickup.call("collect", player)):
@@ -744,10 +765,11 @@ func _stop_backrooms_hum(target: Node3D) -> void:
 
 
 func _handoff_backrooms_return() -> void:
-	if not backrooms_active or not backrooms_scored or not is_instance_valid(staged):
+	if not backrooms_active or not backrooms_scored or not is_instance_valid(staged) or not is_instance_valid(backrooms_host):
 		return
 	transitioning = true
 	var previous := room
+	var old_host := backrooms_host
 	var upcoming := staged
 	backrooms_exit_connector.reparent(upcoming, true)
 	backrooms_exit_connector.name = "ArrivalConnector"
@@ -761,8 +783,10 @@ func _handoff_backrooms_return() -> void:
 	var old_probe := previous.get_node_or_null("Lighting/BackroomsVoxelGI") as VoxelGI
 	if old_probe != null:
 		old_probe.hide()
+	player.call("begin_streaming_handoff")
 	player.reparent(upcoming, true)
 	reparent(upcoming, true)
+	player.call("end_streaming_handoff")
 	room = upcoming
 	var environment_node := upcoming.get_node_or_null("WorldEnvironment") as WorldEnvironment
 	if environment_node != null:
@@ -772,8 +796,8 @@ func _handoff_backrooms_return() -> void:
 	upcoming.remove_meta("_streaming_standby")
 	upcoming.remove_meta("_streaming_lighting_prepared")
 	get_tree().current_scene = upcoming
-	previous.hide()
-	previous.queue_free()
+	old_host.hide()
+	old_host.queue_free()
 	staged = null
 	staged_lane = ""
 	staged_gi_warmed = false
@@ -781,6 +805,7 @@ func _handoff_backrooms_return() -> void:
 	backrooms_active = false
 	backrooms_scored = false
 	backrooms_maze = null
+	backrooms_host = null
 	backrooms_lane = ""
 	backrooms_environment = null
 	backrooms_exit_connector = null
@@ -790,5 +815,5 @@ func _handoff_backrooms_return() -> void:
 		portals.lock_departure(upcoming, "left")
 		won = true
 		finishing = false
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	player.call("restore_streaming_view")
 	transitioning = false

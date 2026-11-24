@@ -24,6 +24,7 @@ func _ready() -> void:
     prompt.pixel_size = 0.004
     prompt.outline_size = 6
     prompt.modulate = Color(0.85, 0.85, 0.78)
+    prompt.shaded = false
     prompt.visible = false
     add_child(prompt)
 

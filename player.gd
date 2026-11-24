@@ -25,6 +25,7 @@ var _sprint_toggled := false
 var _footstep_distance := 0.80
 var interaction_locked := false
 var backrooms_mode := false
+var _streaming_handoff := false
 var backrooms_flashlight: SpotLight3D
 var collision_diagnostics := false
 var _reported_contacts: Dictionary = {}
@@ -65,6 +66,25 @@ func set_interaction_locked(locked: bool) -> void:
     if locked:
         velocity = Vector3.ZERO
         _footstep_distance = 0.80
+
+
+func begin_streaming_handoff() -> void:
+    _streaming_handoff = true
+
+
+func end_streaming_handoff() -> void:
+    _streaming_handoff = false
+    restore_streaming_view()
+
+
+func restore_streaming_view() -> void:
+    if not is_inside_tree() or not is_instance_valid(camera):
+        return
+    # Reparenting can change the viewport camera registration. Never rely
+    # on the implicit camera choice after a scene handoff.
+    camera.make_current()
+    if not get_tree().paused and not interaction_locked:
+        Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 
 func set_backrooms_mode(enabled: bool) -> void:
@@ -251,4 +271,5 @@ func _movement_direction(axis: Vector2) -> Vector3:
 
 
 func _exit_tree() -> void:
-    Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+    if not _streaming_handoff:
+        Input.mouse_mode = Input.MOUSE_MODE_VISIBLE

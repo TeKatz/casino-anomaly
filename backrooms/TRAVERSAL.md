@@ -5,9 +5,10 @@ developer picker (next round). It has no effect on the current casino's
 architecture, lighting or signs. The first reference room stays anomaly-free.
 
 Both doors take the player through their existing blind bend. At the reveal
-threshold, the original player/controller is reparented into the authored maze
-without a camera teleport, the departure path is physically sealed and the
-environment switches to the maze's lighting. The original scene is unloaded.
+threshold, the original scene root, player, camera and menus stay continuously in the
+SceneTree. The authored maze is attached at its existing world transform,
+the departure path is sealed and the retired casino geometry is unloaded.
+The empty scene shell is disposed on return to the next casino.
 The first passage has a physical flashlight and a nearby E interaction. Sprint
 is disabled throughout the traversal; the flashlight has no battery mechanic.
 A fluorescent hum replaces the regular casino room tone. No enemies or hazards.
