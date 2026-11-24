@@ -71,6 +71,10 @@ func set_world_ambience_enabled(enabled: bool) -> void:
     if _ambience_fade != null and _ambience_fade.is_running():
         _ambience_fade.kill()
     if enabled:
+        if room_player != null and room_player.stream == null:
+            room_player.stream = _load_loop(ROOM_PATH)
+        if pressure_player != null and pressure_player.stream == null:
+            pressure_player.stream = get_immersion_loop("pressure")
         if room_player != null and room_player.stream != null:
             if not room_player.playing:
                 room_player.volume_db = -45.0
@@ -89,10 +93,13 @@ func set_world_ambience_enabled(enabled: bool) -> void:
             world_reverb.wet = 0.045
         if room_player != null:
             room_player.stop()
+            room_player.stream = null
         if pressure_player != null:
             pressure_player.stop()
+            pressure_player.stream = null
         if footstep_player != null:
             footstep_player.stop()
+            footstep_player.stream = null
 
 
 func set_backrooms_mode(enabled: bool) -> void:

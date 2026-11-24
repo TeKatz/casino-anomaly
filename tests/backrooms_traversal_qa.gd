@@ -30,7 +30,17 @@ func _run() -> void:
     var sound := root.get_node_or_null("AudioDirector")
     if sound != null:
         sound.call("set_world_ambience_enabled", false)
-    for frame in range(5):
+    if sound != null:
+        for name in ["ContinuousRoomTone", "PressureBed", "FootstepCue"]:
+            var emitter := sound.get_node(name) as AudioStreamPlayer
+            if not require(not emitter.playing and emitter.stream == null, "Stopped audio retains stream: " + name):
+                quit(1)
+                return
+    # Headless frames are not audio mix ticks. Keep the tree alive for
+    # real elapsed time after stop/stream release so the AudioServer can
+    # drain its asynchronous decoder/playback removal queue before quit.
+    var drain_until := Time.get_ticks_msec() + 350
+    while Time.get_ticks_msec() < drain_until:
         await process_frame
     print("Casino Anomaly Backrooms traversal QA PASS")
     quit(0)

@@ -81,3 +81,7 @@ func _exit_tree() -> void:
     for source in _sources:
         if is_instance_valid(source):
             source.stop()
+            source.stream = null
+    _fade = null
+    _sources.clear()
+    _target_db.clear()
