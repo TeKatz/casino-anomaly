@@ -1024,13 +1024,21 @@ func _process_backrooms() -> void:
 	var local := room.to_local(player.global_position)
 	if not is_instance_valid(staged) and (is_instance_valid(_pending_stage) or local.distance_to(Vector3(Backrooms.EXIT_X, local.y, Backrooms.EXIT_Z)) < BACKROOMS_RETURN_PRELOAD_RADIUS):
 		_advance_pending_stage("", true)
-	if local.x > Backrooms.EXIT_X + 1.3 and absf(local.z - Backrooms.EXIT_Z) < 1.1 and not backrooms_scored:
-		_finish_backrooms()
+	# Evaluate the actual staged casino transform on every frame. The
+	# return corridor and casino have different local coordinate systems.
+	var arrived := is_instance_valid(staged) and Backrooms.crossed_return_entrance(
+		staged.to_local(player.global_position), portals.ENTRY_Z)
+	if not backrooms_scored:
+		var passed_exit := local.x > Backrooms.EXIT_X + 1.3 and absf(local.z - Backrooms.EXIT_Z) < 1.1
+		# If a large movement step missed the narrow scoring band, the
+		# physical return route is also proof of traversal. Do not score
+		# from inside the maze: its X extent ends before the return bend.
+		var passed_return := arrived and local.x > Backrooms.RETURN_BEND_X - Backrooms.HALF_WIDTH - 0.35
+		if passed_exit or passed_return:
+			_finish_backrooms()
 	if backrooms_scored:
 		_update_backrooms_return_lighting(local.x)
-		# The player can turn sideways as soon as the wide hall opens.
-		# Finalize at the actual entry plane, not 4.2 m down a narrow lane.
-		if Backrooms.crossed_return_entrance(local):
+		if arrived:
 			_handoff_backrooms_return()
 
 
@@ -1146,15 +1154,20 @@ func _handoff_backrooms_return() -> void:
 	# Safety fallback for unusually large frame steps; ordinary walking
 	# completes this well before the player sees the casino.
 	_update_backrooms_return_lighting(Backrooms.LIGHT_BLEND_END)
+	# A visual preparation flag must never strand the gameplay state.
+	# If a destination environment was unavailable, preserve the actual
+	# staged environment when possible and still complete the valid return.
 	if not backrooms_return_lighting_ready:
-		return
+		var destination := staged.get_node_or_null("WorldEnvironment") as WorldEnvironment
+		if destination != null and staged_environment != null:
+			destination.environment = staged_environment
+		push_warning("Backrooms return lighting was not ready; completing the physical handoff")
 	transitioning = true
 	var previous := room
 	var old_host := backrooms_host
 	var upcoming := staged
 	backrooms_exit_connector.reparent(upcoming, true)
 	backrooms_exit_connector.name = "ArrivalConnector"
-	player.call("set_backrooms_mode", false)
 	_stop_backrooms_hum(previous)
 	var sound := get_node_or_null("/root/AudioDirector")
 	if sound != null:
@@ -1168,10 +1181,9 @@ func _handoff_backrooms_return() -> void:
 	player.reparent(upcoming, true)
 	reparent(upcoming, true)
 	player.call("end_streaming_handoff")
-	# Explicitly restore normal movement after reparent as well, so the
-	# camera/input lifecycle cannot leave the traversal state enabled.
-	if bool(player.get("backrooms_mode")):
-		player.call("set_backrooms_mode", false)
+	# The live player has arrived in the casino. Reset movement and
+	# traversal-only equipment unconditionally after reparenting, once.
+	player.call("set_backrooms_mode", false)
 	room = upcoming
 	# Do not reassign or reconfigure the active environment here. It has
 	# been rendering the casino since before the turn in the connector.

@@ -283,10 +283,15 @@ func _exercise(lane: String, streak: int, rotated: bool) -> bool:
     loop.call("_process", 0.016)
     if not require(bool(player.get("backrooms_mode")) and bool(loop.get("backrooms_active")), "Return finalized before crossing the casino entrance"):
         return false
-    # Reproduce the in-game bug: the player turns off the centerline
-    # immediately in the hall instead of walking 4.2 m straight ahead.
+    # Regression: cross only a few centimeters beyond the actual entry
+    # plane, then move sideways. The old +0.75 m guard stranded the player.
+    # Use the destination's own coordinates, including a rotated hall.
     var side_offset := 2.1 if rotated else -2.1
-    player.global_position = maze.to_global(Vector3(Backrooms.RETURN_BEND_X + side_offset, 1.02, Backrooms.RETURN_SEAM_Z + 1.4))
+    player.global_position = next.to_global(Vector3(0.0, 1.02, portals.ENTRY_Z + 0.05))
+    loop.call("_process", 0.016)
+    if not require(bool(player.get("backrooms_mode")), "Sprint enabled before crossing the entry plane"):
+        return false
+    player.global_position = next.to_global(Vector3(side_offset, 1.02, portals.ENTRY_Z - 0.05))
     pose = player.global_transform
     loop.call("_process", 0.016)
     if not require(current_scene == next and player.get_parent() == next and loop.get_parent() == next and player.global_transform.is_equal_approx(pose), "Return teleported or replaced player/controller"):
@@ -320,6 +325,11 @@ func _exercise(lane: String, streak: int, rotated: bool) -> bool:
     if not require(not is_instance_valid(maze) and not is_instance_valid(casino) and is_instance_valid(next), "Old maze/host leaked or return casino freed"):
         return false
     if not require(root.get_camera_3d() == camera and camera.is_current() and player.can_process() and not paused, "Camera or input lost during return handoff"):
+        return false
+    # Confirm normal movement survives the old host's deferred destruction,
+    # not only the synchronous handoff callback.
+    await physics_frame
+    if not require(not bool(player.get("backrooms_mode")) and not bool(loop.get("backrooms_active")) and is_equal_approx(float(player.call("movement_speed", false)), 4.0) and is_equal_approx(float(player.call("movement_speed", true)), 6.3), "Retired Backrooms restored the traversal speed restriction"):
         return false
     next.queue_free()
     await process_frame

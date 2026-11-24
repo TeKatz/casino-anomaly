@@ -14,8 +14,6 @@ const EXIT_LENGTH := 7.0
 const RETURN_TURN_LENGTH := 7.0
 const RETURN_BEND_X := EXIT_X + EXIT_LENGTH
 const RETURN_SEAM_Z := EXIT_Z + RETURN_TURN_LENGTH
-# The player capsule has cleared the entrance sleeve at this depth.
-const RETURN_ENTRY_CLEARANCE := 0.75
 # Finish the environment blend before the inner edge of the blind corner.
 const LIGHT_BLEND_START := EXIT_X + 1.3
 const LIGHT_BLEND_END := RETURN_BEND_X - 2.2
@@ -214,11 +212,11 @@ static func _add_exit_direction_sign(corridor: Node3D, wall_x: float) -> void:
     sign.text = "EXIT  →"
     corridor.add_child(sign)
 
-static func crossed_return_entrance(local: Vector3) -> bool:
-    # Once past the sleeve, the entire casino is valid, not just the
-    # narrow centerline of the corridor. The maze is on the other side
-    # of EXIT_X, and the one-way exit gate has already sealed it.
-    return local.x > EXIT_X and local.z >= RETURN_SEAM_Z + RETURN_ENTRY_CLEARANCE
+static func crossed_return_entrance(destination_local: Vector3, entry_z: float) -> bool:
+    # Caller must have a scored, sealed traversal and the real destination.
+    # Use its entrance plane, not a maze-space X bound or an extra walking
+    # distance: the player can already turn sideways at the actual seam.
+    return destination_local.z <= entry_z
 
 static func return_light_weight(local_x: float) -> float:
     return smoothstep(LIGHT_BLEND_START, LIGHT_BLEND_END, local_x)

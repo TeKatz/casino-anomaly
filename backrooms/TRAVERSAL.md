@@ -38,9 +38,10 @@ right at its end wall. The next casino is prewarmed
 behind its blind bend. Ambient light, fog and post-processing blend by walking
 distance on a temporary Environment copy, and the flashlight fades out. The
 exact destination Environment is active before the bend, with no environment
-reassignment at visible handoff. The handoff takes place 0.75 m beyond the
-actual casino entrance plane, with no narrow centerline restriction once in
-the hall. The player is preserved and ordinary 4.0 m/s walking, 6.3 m/s
+reassignment at visible handoff. The handoff takes place at the actual
+destination-local casino entrance plane, with no additional clearance or
+centerline restriction. The lighting readiness flag cannot block restoration
+of normal movement after a valid traversal. The player is preserved and ordinary 4.0 m/s walking, 6.3 m/s
 sprint and audio are restored on return. The authored main and Backrooms scene files are not modified at runtime.
 
 Test: `Godot --headless --path . --script res://tests/backrooms_traversal_qa.gd`
