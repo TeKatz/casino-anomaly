@@ -230,16 +230,16 @@ func _fill(slot: int) -> void:
     archive_button.text = _word("ARCHIV ÖFFNEN", "VIEW ARCHIVE")
     _clear_body(stats_body)
     _clear_body(archive_body)
-    _label(stats_body, _word("RICHTIGE ENTSCHEIDUNGEN", "CORRECT DECISIONS"), 11, MUTED)
-    _label(stats_body, str(stats.get("correct", 0)), 34, GOLD)
-    _label(stats_body, _word("Untersuchte Räume: %d", "Rooms inspected: %d") \
-        % int(stats.get("rooms", 0)), 14)
+    _label(stats_body, _word("PERMANENTES LEVEL", "PERMANENT LEVEL"), 11, MUTED)
+    _label(stats_body, str(summary.get("player_level", 1)), 34, GOLD)
+    _label(stats_body, _word("Erfahrung: %d XP", "Experience: %d XP") \
+        % int(summary.get("xp", 0)), 14)
     _label(stats_body, _word("Beste Serie: %d / 12", "Best streak: %d / 12") \
         % int(stats.get("best_streak", 0)), 14)
     _label(stats_body, _word("Abschlüsse: %d", "Completions: %d") \
         % int(summary.get("completions", 0)), 14)
-    _label(stats_body, _word("Fehlentscheidungen: %d", "Wrong decisions: %d") \
-        % int(stats.get("mistakes", 0)), 13, MUTED)
+    _label(stats_body, _word("Erfolge: %d", "Achievements: %d") \
+        % int(summary.get("achievements", 0)), 13, MUTED)
 
     _label(archive_body, _word("ENTDECKTE ANOMALIEN", "DISCOVERED ANOMALIES"), 11, MUTED)
     _label(archive_body, "%d / %d" % [int(summary.get("discovered", 0)),

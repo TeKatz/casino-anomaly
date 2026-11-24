@@ -87,8 +87,9 @@ static func award(stats: Dictionary, records: Dictionary, verdict: Dictionary, f
         if id.is_empty():
             xp += 25
             stats["normal_correct"] = int(stats.get("normal_correct", 0)) + 1
-            stats["normal_chain"] = int(stats.get("normal_chain", 0)) + 1
-            stats["best_normal_chain"] = maxi(int(stats.get("best_normal_chain", 0)), int(stats["normal_chain"]))
+            stats["normal_chain"] = int(verdict.get("normal_chain", 0))
+            if not bool(verdict.get("assisted", false)):
+                stats["best_normal_chain"] = maxi(int(stats.get("best_normal_chain", 0)), int(stats["normal_chain"]))
         else:
             xp += 200 if id == "backrooms" else 50
             stats["anomaly_correct"] = int(stats.get("anomaly_correct", 0)) + 1

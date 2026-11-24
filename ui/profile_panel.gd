@@ -6,6 +6,8 @@ signal launch_requested(scene_path: String)
 signal selection_changed(slot: int, occupied: bool)
 
 const Controls = preload("res://gameplay/input_bindings.gd")
+const Modes = preload("res://gameplay/run_modes.gd")
+const Progress = preload("res://gameplay/progression.gd")
 const MenuStyle = preload("res://ui/menu_style.gd")
 const LuminousButton = preload("res://ui/luminous_button.gd")
 const GOLD := Color("#dcb477")
@@ -25,6 +27,9 @@ var back_button: Button
 var title_label: Label
 var delete_dialog: ConfirmationDialog
 var new_run_dialog: ConfirmationDialog
+var mode_picker: OptionButton
+var mode_description: Label
+var selected_mode := "classic"
 
 
 func _ready() -> void:
@@ -88,6 +93,20 @@ func _ready() -> void:
     name_line.add_child(name_edit)
     rename_button = _button(name_line, _rename, "edit")
 
+    mode_picker = OptionButton.new()
+    mode_picker.name = "RunModePicker"
+    mode_picker.custom_minimum_size.y = 40
+    mode_picker.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    mode_picker.add_theme_color_override("font_color", GOLD)
+    mode_picker.item_selected.connect(_select_mode)
+    stack.add_child(mode_picker)
+    mode_description = Label.new()
+    mode_description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+    mode_description.add_theme_font_size_override("font_size", 13)
+    mode_description.add_theme_color_override("font_color", MUTED)
+    mode_description.custom_minimum_size.y = 38
+    stack.add_child(mode_description)
+
     var actions := HBoxContainer.new()
     actions.add_theme_constant_override("separation", 9)
     stack.add_child(actions)
@@ -117,6 +136,7 @@ func _ready() -> void:
     var profiles := get_node_or_null("/root/ProfileManager")
     if profiles != null and profiles.profile_exists(profiles.active_slot):
         selected_slot = profiles.active_slot
+        selected_mode = str(profiles.active_mode)
         name_edit.text = str(profiles.get_summary(selected_slot).get("name", ""))
     refresh()
 
@@ -162,11 +182,11 @@ func refresh() -> void:
         var button := slot_buttons[i] as LuminousButton
         var delete_icon := slot_delete_buttons[i] as LuminousButton
         if occupied:
-            button.text = "%s · %d / %d (%.0f %%)" % [
+            button.text = "%s · LV %d · %d / %d" % [
                 str(summary.get("name", "Profil %d" % slot)),
+                int(summary.get("player_level", 1)),
                 int(summary.get("discovered", 0)),
-                int(summary.get("total", 0)),
-                float(summary.get("percent", 0.0))]
+                int(summary.get("total", 0))]
         else:
             button.text = _word("SLOT %d · + Neues Profil erstellen",
                 "SLOT %d · + Create new profile") % slot
@@ -188,15 +208,32 @@ func refresh() -> void:
     back_button.text = _word("ZURÜCK", "BACK")
 
     var active := is_selected_occupied()
-    var summary: Dictionary = profiles.get_summary(selected_slot)
+    var summary: Dictionary = profiles.get_summary(selected_slot, selected_mode)
+    mode_picker.clear()
+    var stats: Dictionary = profiles.get_stats() if active else {}
+    var records: Dictionary = profiles.get_records() if active else {}
+    for id in Modes.IDS:
+        var unlocked := Modes.unlock(id, stats, records)
+        var text := Modes.title(id, _de())
+        if not unlocked:
+            text += " · " + _word("GESPERRT", "LOCKED")
+        mode_picker.add_item(text)
+        var index := mode_picker.item_count - 1
+        mode_picker.set_item_disabled(index, not unlocked)
+        mode_picker.set_item_metadata(index, id)
+        mode_picker.get_popup().set_item_tooltip(index, Modes.description(id, _de()) if unlocked else Modes.unlock_hint(id, _de()))
+    mode_picker.select(Modes.IDS.find(selected_mode))
+    mode_picker.disabled = selected_slot == 0
+    mode_description.text = Modes.description(selected_mode, _de()) if selected_slot > 0 else ""
     continue_button.disabled = not active or not bool(summary.get("can_continue", false))
     new_button.disabled = selected_slot == 0
     rename_button.disabled = not active
     name_edit.editable = selected_slot > 0
     if active:
-        status.text = _word("Abgeschlossene Durchläufe: %d · Entdeckungen bleiben erhalten.",
-            "Completed runs: %d · Discoveries are preserved.") \
-            % int(summary.get("completions", 0))
+        status.text = "%s · %s %d · %s XP · %d %s" % [
+            Progress.rank(int(summary.get("player_level", 1)), _de()), _word("Level", "Level"),
+            int(summary.get("player_level", 1)), int(summary.get("xp", 0)),
+            int(summary.get("achievements", 0)), _word("Erfolge", "achievements")]
     elif selected_slot > 0:
         status.text = _word("Leerer Platz · Profil erstellen, um einen Durchlauf zu beginnen.",
             "Empty slot · Create a profile to begin a run.")
@@ -216,9 +253,21 @@ func _select_slot(slot: int) -> void:
     # Selecting an EMPTY slot is NOT creation. This is essential for the
     # side panels to fade away without producing a phantom saved profile.
     selected_slot = slot
+    selected_mode = str(profiles.active_mode) if occupied else "classic"
     name_edit.text = str(profiles.get_summary(slot).get("name", "")) if occupied else ""
     refresh()
     selection_changed.emit(slot, occupied)
+
+
+func _select_mode(index: int) -> void:
+    if index < 0 or index >= mode_picker.item_count or mode_picker.is_item_disabled(index):
+        return
+    selected_mode = str(mode_picker.get_item_metadata(index))
+    var profiles := get_node_or_null("/root/ProfileManager")
+    if profiles != null and is_selected_occupied():
+        profiles.select_mode(selected_mode)
+        selected_mode = str(profiles.active_mode)
+    refresh()
 
 
 func _rename() -> void:
@@ -238,8 +287,8 @@ func _request_new_run() -> void:
     if state != null and state.has_continue() and bool(Controls.pref(self, "confirm_new_run", true)):
         new_run_dialog.title = _word("Neuer Durchlauf", "New run")
         new_run_dialog.dialog_text = _word(
-            "Aktuellen Durchlauf überschreiben? Das Anomalie-Archiv bleibt erhalten.",
-            "Overwrite the current run? Your anomaly archive will be preserved.")
+            "Durchlauf dieses Modus überschreiben? Andere Modi und Profilfortschritt bleiben erhalten.",
+            "Overwrite this mode's run? Other modes and profile progression are preserved.")
         new_run_dialog.popup_centered()
     else:
         _new_run()
@@ -256,8 +305,10 @@ func _new_run() -> void:
             return
     elif profiles.active_slot != selected_slot and not profiles.select_profile(selected_slot):
         return
-    state.start_new_run()
-    if bool(Controls.pref(self, "skip_tutorial", false)):
+    profiles.select_mode(selected_mode)
+    selected_mode = str(profiles.active_mode)
+    state.start_new_run(selected_mode)
+    if selected_mode != "classic" or bool(Controls.pref(self, "skip_tutorial", false)):
         state.complete_tutorial()
         launch_requested.emit("res://main.tscn")
     else:
@@ -297,6 +348,7 @@ func _delete_target() -> void:
         return
     if selected_slot == slot:
         selected_slot = 0
+        selected_mode = "classic"
         name_edit.text = ""
         selection_changed.emit(0, false)
     refresh()

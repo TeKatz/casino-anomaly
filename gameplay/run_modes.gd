@@ -39,5 +39,5 @@ static func unlock_hint(id: String, de: bool) -> String:
     if id == "nightmare":
         return "Schließe Klassisch ab." if de else "Complete Classic."
     if id == "expedition":
-        return "Entdecke die Backrooms." if de else "Discover the Backrooms."
+        return "Identifiziere eine Singularität." if de else "Identify a singularity."
     return ""

@@ -13,6 +13,7 @@ var save_path: String = DEFAULT_SAVE_PATH
 var mode := "classic"
 var elapsed_seconds := 0.0
 var run_assisted := false
+var normal_chain := 0
 var active := false
 var tutorial_done := false
 var finished := false
@@ -39,6 +40,7 @@ func reset_runtime() -> void:
     mode = "classic"
     elapsed_seconds = 0.0
     run_assisted = false
+    normal_chain = 0
     active = false
     tutorial_done = false
     finished = false
@@ -61,6 +63,7 @@ func start_new_run(next_mode: String = "classic") -> void:
     mode = Modes.normalize(next_mode)
     elapsed_seconds = 0.0
     run_assisted = false
+    normal_chain = 0
     active = true
     tutorial_done = false
     finished = false
@@ -158,6 +161,8 @@ func tick_play_time(delta: float) -> void:
 func progress_number() -> int:
     if mode in ["time_trial", "research", "expedition"]:
         return visited_loops
+    if finished and mode in ["endless", "nightmare"] and bool(last_verdict.get("failed", false)):
+        return int(last_verdict.get("previous_streak", 0))
     return correct_streak
 
 
@@ -228,6 +233,7 @@ func _resolve_decision(choose_anomaly: bool, correct: bool) -> Dictionary:
         mistakes += 1
         if mode not in ["research", "time_trial", "expedition"]:
             correct_streak = 0
+    normal_chain = normal_chain + 1 if correct and actual_id.is_empty() and not round_debugged else 0
     run_assisted = run_assisted or round_debugged
     var failed := false
     match mode:
@@ -253,7 +259,7 @@ func _resolve_decision(choose_anomaly: bool, correct: bool) -> Dictionary:
         "expected_anomaly": not actual_id.is_empty(),
         "debugged": round_debugged,
         "traversal": actual_id == BACKROOMS_ID,
-        "mode": mode, "failed": failed, "assisted": run_assisted,
+        "mode": mode, "failed": failed, "assisted": run_assisted, "normal_chain": normal_chain,
         "progress": progress_number(), "goal": Modes.target(mode),
         "elapsed_seconds": elapsed_seconds,
         "score_seconds": elapsed_seconds + mistakes * Modes.PENALTY_SECONDS
@@ -279,6 +285,7 @@ func save_run() -> void:
     config.set_value("run", "mode", mode)
     config.set_value("run", "elapsed_seconds", elapsed_seconds)
     config.set_value("run", "assisted", run_assisted)
+    config.set_value("run", "normal_chain", normal_chain)
     config.set_value("run", "active", active)
     config.set_value("run", "tutorial_done", tutorial_done)
     config.set_value("run", "finished", finished)
@@ -304,6 +311,7 @@ func load_run() -> bool:
     mode = Modes.normalize(str(config.get_value("run", "mode", "classic")))
     elapsed_seconds = maxf(0.0, float(config.get_value("run", "elapsed_seconds", 0.0)))
     run_assisted = bool(config.get_value("run", "assisted", false))
+    normal_chain = maxi(0, int(config.get_value("run", "normal_chain", 0)))
     active = bool(config.get_value("run", "active", false))
     tutorial_done = bool(config.get_value("run", "tutorial_done", false))
     finished = bool(config.get_value("run", "finished", false))
