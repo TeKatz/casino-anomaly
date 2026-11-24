@@ -97,8 +97,14 @@ static func apply_button(button: Button, active: bool = false, accent: String = 
     button.add_theme_stylebox_override("hover", button_skin("hover", active, accent))
     button.add_theme_stylebox_override("pressed", button_skin("pressed", active, accent))
     button.add_theme_stylebox_override("disabled", button_skin("disabled", active, accent))
-    # Mouse focus is empty; keyboard/gamepad focus is set by LuminousButton.
-    button.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+    # LuminousButton distinguishes mouse and navigation focus. Plain controls
+    # must still expose a focus ring for keyboard and controller users.
+    if button.has_method("_refresh_focus"):
+        button.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+        if button.is_node_ready():
+            button.call_deferred("_refresh_focus")
+    else:
+        button.add_theme_stylebox_override("focus", keyboard_focus_skin())
     button.add_theme_color_override("font_color", PALE)
     button.add_theme_color_override("font_hover_color", Color.WHITE)
     button.add_theme_color_override("font_pressed_color", Color("#f0d9a0"))
@@ -192,11 +198,17 @@ static func apply_progress(bar: ProgressBar, target: float) -> void:
     bar.add_theme_stylebox_override("fill", flat_surface(Color("#c9a45c"), Color("#e0c38a"), 4, 0))
     bar.value = target
     # Presentation only. The profile continues to be the source of truth.
-    if not bar.is_inside_tree():
+    if not bar.is_inside_tree() or not bar.is_visible_in_tree():
         return
     var settings := bar.get_node_or_null("/root/GameSettings")
     if settings != null and bool(settings.call("get_option", "reduced_menu_motion")):
         return
     bar.value = bar.min_value
     var motion := bar.create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
-    motion.tween_property(bar, "value", target, 0.32).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+    motion.tween_method(func(value: float) -> void:
+        if is_instance_valid(settings) and bool(settings.call("get_option", "reduced_menu_motion")):
+            bar.value = target
+            motion.kill()
+        else:
+            bar.value = value
+    , bar.min_value, target, 0.32).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)

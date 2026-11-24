@@ -7,3 +7,5 @@
 - Imported resources are limited to the selected SVGs; no wholesale asset pack import.
 - Manual QA: main menu, profile slot actions, pause while in game, all six settings tabs, dropdown sizing at 36px, keyboard/controller navigation, reduced menu motion, UI volume, archive progress and profile switches. Check at 1280×720 and 1920×1080.
 - Pending: external sound pack integration, dedicated achievement notifications, reactive card effects, runtime/visual verification.
+
+Targeted regression script: `godot --headless --path . --script res://tests/ui_design_qa.gd` (run after editor import, preferably with an isolated user-data directory). Existing menu, profile and settings regressions should also be run.
