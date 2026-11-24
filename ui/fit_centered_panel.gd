@@ -25,4 +25,12 @@ func _layout() -> void:
         panel.size = natural
         panel.pivot_offset = Vector2.ZERO
         panel.scale = Vector2.ONE * factor
-        panel.position = (size - natural * factor) * 0.5
+        # Align the static panel origin to the output pixel grid instead
+        # of introducing a half-pixel offset while centering it.
+        var centered := (size - natural * factor) * 0.5
+        var transform := get_global_transform_with_canvas()
+        var output := get_viewport().get_final_transform()
+        var to_pixels := output * transform
+        if absf(to_pixels.determinant()) > 0.00001:
+            centered = to_pixels.affine_inverse() * (to_pixels * centered).round()
+        panel.position = centered

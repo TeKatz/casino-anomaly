@@ -31,6 +31,12 @@ window/size/viewport_height=720
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 
+[gui]
+
+common/snap_controls_to_pixels=true
+fonts/dynamic_fonts/use_oversampling=true
+theme/default_font_multichannel_signed_distance_field=true
+
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/casino_model_preview/plugin.cfg")

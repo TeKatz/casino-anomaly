@@ -51,6 +51,9 @@ func _ready() -> void:
     if settings != null:
         settings.connect("options_changed", _on_motion_option)
     _center_pivot()
+    # Linear sampling retains antialiased vector edges; nearest filtering
+    # would make the interface jagged at fractional scales.
+    texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 
 
 func set_symbol(value: String) -> void:

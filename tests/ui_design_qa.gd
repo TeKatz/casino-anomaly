@@ -3,6 +3,7 @@ extends SceneTree
 const Style = preload("res://ui/menu_style.gd")
 const Luminous = preload("res://ui/luminous_button.gd")
 const Kenney = preload("res://ui/kenney_icons.gd")
+const MenuIcons = preload("res://ui/menu_icons.gd")
 
 
 func _initialize() -> void:
@@ -15,6 +16,9 @@ func _fail(message: String) -> void:
 
 
 func _run() -> void:
+    if not bool(ProjectSettings.get_setting("gui/theme/default_font_multichannel_signed_distance_field")):
+        _fail("Default UI font is not using MSDF")
+        return
     for accent in ["gold", "green", "red", "amber"]:
         var normal := Style.button_skin("normal", false, accent)
         var hover := Style.button_skin("hover", false, accent)
@@ -25,7 +29,10 @@ func _run() -> void:
             _fail("Missing texture or oversized vertical caps")
             return
         var pixels := normal.texture.get_image()
-        if pixels == null or pixels.get_pixel(96, 3).is_equal_approx(pixels.get_pixel(96, 32)):
+        if pixels == null or pixels.get_size() != Vector2i(768, 256) or normal.texture.get_size() != Vector2(192, 64):
+            _fail("Nine-slice raster density or logical size regressed")
+            return
+        if pixels.get_pixel(384, 12).is_equal_approx(pixels.get_pixel(384, 128)):
             _fail("Vector skin failed to render a distinct rim")
             return
     for name in Kenney.DRAWINGS:
@@ -33,6 +40,18 @@ func _run() -> void:
         if icon == null or icon.get_width() <= 0 or icon != Kenney.texture(name):
             _fail("Embedded icon failed or was not cached: " + str(name))
             return
+        var expected := Vector2i(26, 26)
+        if name == "arrow":
+            expected = Vector2i(16, 16)
+        elif str(name).begins_with("slider"):
+            expected = Vector2i(18, 24)
+        if icon.get_size() != Vector2(expected) or icon.get_image().get_size() != expected * 4:
+            _fail("Kenney icon density or logical size regressed: " + str(name))
+            return
+    var menu_icon := MenuIcons.texture("settings")
+    if menu_icon == null or menu_icon.get_size() != Vector2(30, 30) or menu_icon.get_image().get_size() != Vector2i(120, 120):
+        _fail("Menu icon density or logical size regressed")
+        return
     var sounds := root.get_node_or_null("UISfx")
     if sounds == null:
         _fail("Missing UI sound singleton")

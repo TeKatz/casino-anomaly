@@ -15,6 +15,9 @@ func _fail(message: String) -> void:
 
 
 func _run() -> void:
+    if not bool(ProjectSettings.get_setting("gui/theme/default_font_multichannel_signed_distance_field")):
+        _fail("MSDF default font rendering must be enabled")
+        return
     var menu := MENU.instantiate() as Control
     if menu == null:
         _fail("Menu could not be instantiated")
@@ -195,7 +198,7 @@ func _run() -> void:
             "profile", "add_profile", "edit", "delete", "back", "history",
             "graphics", "audio", "controls", "gameplay", "general", "accessibility", "achievements", "modes"]:
         var texture: Texture2D = menu_icons.texture(name)
-        if texture == null or texture.get_size().x < 18.0:
+        if texture == null or texture.get_size() != Vector2(30, 30) or texture.get_image().get_size() != Vector2i(120, 120):
             _fail("Shared vector menu icon missing: " + name)
             return
     for id in ["PlayButton", "SettingsButton", "CreditsButton", "QuitButton", "UpdateButton"]:
@@ -219,6 +222,9 @@ func _run() -> void:
             var shared_skin := palette.button_skin(state, false, type) as StyleBoxTexture
             var caps := shared_skin.texture_margin_top + shared_skin.texture_margin_bottom
             var source_height := shared_skin.texture.get_height()
+            if shared_skin.texture.get_size() != Vector2(192, 64) or shared_skin.texture.get_image().get_size() != Vector2i(768, 256):
+                _fail("Nine-slice skin backing image or logical size regressed")
+                return
             if caps > 36.0 or caps > float(source_height):
                 _fail("Nine-slice caps clip 36px dropdowns: %s/%s: %.0fpx" % [type, state, caps])
                 return
@@ -230,6 +236,14 @@ func _run() -> void:
         var icon: Texture2D = kenney.texture(name)
         if icon == null or icon.get_width() <= 0 or icon != kenney.texture(name):
             _fail("Embedded Kenney icon missing or uncached: " + str(name))
+            return
+        var expected := Vector2i(26, 26)
+        if name == "arrow":
+            expected = Vector2i(16, 16)
+        elif str(name).begins_with("slider"):
+            expected = Vector2i(18, 24)
+        if icon.get_size() != Vector2(expected) or icon.get_image().get_size() != expected * 4:
+            _fail("Kenney icon backing image or logical size regressed: " + str(name))
             return
     var credits_source := preload("res://ui/credits_panel.gd").new()
     if not str(credits_source.call("_credit_text")).contains("freesound.org/people/leonelmail/sounds/329533/") \

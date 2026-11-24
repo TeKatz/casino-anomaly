@@ -9,6 +9,7 @@ const AMBER := Color("#f2ae70")
 const PALE := Color("#f5e9dc")
 const KENNEY_FACE := """<svg xmlns="http://www.w3.org/2000/svg" width="192" height="64" viewBox="0 0 192 64"><defs><linearGradient id="surface" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0" stop-color="#TOP"/><stop offset="1" stop-color="#BOTTOM"/></linearGradient></defs><rect x="0" y="0" width="192" height="64" rx="6" fill="#EDGE"/><rect x="2" y="2" width="188" height="60" rx="4" fill="#RIM"/><rect x="4" y="4" width="184" height="56" rx="2" fill="url(#surface)"/></svg>"""
 const KenneyIcons = preload("res://ui/kenney_icons.gd")
+const HiDPI = preload("res://ui/hidpi_texture.gd")
 static var _skin_cache: Dictionary = {}
 
 
@@ -54,13 +55,16 @@ static func button_skin(state: String, featured: bool = false, accent: String = 
     # Geometry adapted from Kenney UI Pack 2.0 (CC0). Rasterize each palette
     # variant once; keep the existing symmetric nine-slice and compact sizing.
     var svg := KENNEY_FACE.replace("RIM", rim.to_html(false)).replace("TOP", top.to_html(false)).replace("BOTTOM", bottom.to_html(false)).replace("EDGE", rim.darkened(0.40).to_html(false))
-    var image := Image.new()
-    var result := image.load_svg_from_buffer(svg.to_utf8_buffer())
-    if result != OK:
-        image = Image.create_empty(192, 64, false, Image.FORMAT_RGBA8)
+    var logical_size := Vector2i(192, 64)
+    var texture := HiDPI.from_svg(svg, logical_size)
+    if texture == null:
+        var image := Image.create_empty(logical_size.x * HiDPI.DENSITY, logical_size.y * HiDPI.DENSITY, false, Image.FORMAT_RGBA8)
         image.fill(top)
+        texture = HiDPI.from_image(image, logical_size)
     var style := StyleBoxTexture.new()
-    style.texture = ImageTexture.create_from_image(image)
+    style.texture = texture
+    # Texture size override keeps the nine-slice source coordinates and
+    # layout margins in logical pixels, even though the backing image is 4x.
     # Both vertical caps must fit inside the smallest 36px settings dropdown.
     # The previous 26+26px caps could not fit in 36–43px controls and
     # Godot visibly sliced off their lower halves. Equal caps also avoid

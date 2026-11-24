@@ -2,6 +2,7 @@ extends RefCounted
 ## Kenney UI Pack 2.0 (CC0), recolored for Casino Anomaly.
 ## Embedded vector sources: safe during first editor import and in exports.
 ## The editable SVG originals remain in ui/kenney/.
+const HiDPI = preload("res://ui/hidpi_texture.gd")
 static var _cache: Dictionary = {}
 
 const DRAWINGS := {
@@ -21,12 +22,15 @@ static func texture(name: String) -> Texture2D:
         return _cache[name] as Texture2D
     if not DRAWINGS.has(name):
         return null
-    var image := Image.new()
     var svg: String = DRAWINGS[name]
-    var err := image.load_svg_from_buffer(svg.to_utf8_buffer())
-    if err != OK:
+    var logical_size := Vector2i(26, 26)
+    if name == "arrow":
+        logical_size = Vector2i(16, 16)
+    elif name.begins_with("slider"):
+        logical_size = Vector2i(18, 24)
+    var result := HiDPI.from_svg(svg, logical_size)
+    if result == null:
         push_warning("Cannot render Kenney UI icon: " + name)
         return null
-    var result := ImageTexture.create_from_image(image)
     _cache[name] = result
     return result

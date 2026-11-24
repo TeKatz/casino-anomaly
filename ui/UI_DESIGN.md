@@ -12,3 +12,11 @@ Targeted regression script: `godot --headless --path . --script res://tests/ui_d
 
 
 Menu icon library: Nieobie Game Icon Pack v1.4, CC0, embedded SVG paths; selected from the matching source version. UI sound routing: navigation = bong_001, back = original synthesized click, Continue and New Run OK = confirmation_002, dropdown popup opening = glass_006. All voices share the existing UI audio bus. Settings dropdowns keep a fixed minimum width, ellipsize long names, and expose full labels via tooltips.
+
+
+## High-DPI rendering
+
+- UI source vectors are rasterized at 4× logical density via `hidpi_texture.gd` and cached. ImageTexture.size_override retains the previous intrinsic dimensions and nine-slice margins. Button skins: 768×256 backing / 192×64 logical. Menu icons: 120×120 / 30×30. Kenney controls: 4× backing density, original logical sizes.
+- Project default font uses MSDF. Existing font sizes, accessibility options, canvas_items stretch and automatic font oversampling remain intact. Custom fonts, if added later, need their own import settings. MSDF appearance at small sizes needs visual verification.
+- Centered overlay origins snap in output-pixel coordinates; no global 2D vertex snapping or nearest-neighbor filtering. 3D render scale, AA and upscaling remain unchanged.
+- Regression checks assert both physical backing image dimensions and logical sizes. Manual screenshot comparisons recommended at 720p, 1080p, 1440p, 4K and with fractional UI scale, including dropdowns and hover effects.
