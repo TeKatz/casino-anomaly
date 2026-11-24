@@ -82,6 +82,7 @@ var backrooms_exit_connector: Node3D
 var backrooms_pickup: Node3D
 var backrooms_scored := false
 var backrooms_entry_blend: Environment
+var _entry_lights: Array[Dictionary] = []
 var backrooms_entry_tween: Tween
 var backrooms_return_environment: Environment
 var backrooms_return_lighting_ready := false
@@ -798,7 +799,9 @@ func _schedule_backrooms(lane: String) -> void:
 			graphics.call("apply_environment", backrooms_environment)
 		env.environment = null
 		(_pending_maze.get_node("Lighting") as Node3D).hide()
-		Backrooms.build_entrance(_pending_maze)
+		var passage := portals.get_connector(room, lane) as Node3D
+		var roof := passage.get_node_or_null("TurnCeiling") as MeshInstance3D if passage != null else null
+		Backrooms.build_entrance(_pending_maze, roof.material_override if roof != null else null)
 		backrooms_exit_connector = Backrooms.build_exit(_pending_maze)
 		Backrooms.Occlusion.maze_walls(_pending_maze)
 		_pending_maze_phase = 2
@@ -827,12 +830,14 @@ func _enter_backrooms(lane: String) -> void:
 	# The original lock_departure gate already seals the route. Do not add
 	# another wall at the bend. Butt the oak floor against the carpet edge.
 	Backrooms.fit_entrance_floor(connector, backrooms_maze, portals.lane_sign(lane))
+	# Keep the actual corridor light at its current energy on the reveal
+	# frame. Fade the direct light alongside the environment, not just fog.
+	_entry_lights.clear()
 	for child in connector.get_children():
 		if child is OmniLight3D:
 			var passage_light := child as OmniLight3D
-			passage_light.light_energy *= 0.10
-			passage_light.light_color = Color(0.84, 0.81, 0.64)
-			passage_light.light_volumetric_fog_energy = 0.0
+			_entry_lights.append({"light": passage_light, "energy": passage_light.light_energy,
+				"color": passage_light.light_color, "fog": passage_light.light_volumetric_fog_energy})
 	connector.reparent(backrooms_maze, true)
 	connector.name = "BackroomsArrivalConnector"
 	var old_env := previous.get_node_or_null("WorldEnvironment") as WorldEnvironment
@@ -856,17 +861,21 @@ func _enter_backrooms(lane: String) -> void:
 	backrooms_maze.reparent(backrooms_host, true)
 	room = backrooms_maze
 	var env := room.get_node("Lighting/Environment") as WorldEnvironment
-	env.environment = backrooms_environment
 	(room.get_node("Lighting") as Node3D).show()
 	var settings := get_node_or_null("/root/GameSettings")
-	if settings != null and bool(settings.call("get_option", "soft_light_transitions")) and arrival_source != null and backrooms_environment != null:
+	# This transition belongs to the scene, irrespective of accessibility.
+	# Soft light transitions simply lengthens it further.
+	var soft := settings != null and bool(settings.call("get_option", "soft_light_transitions"))
+	if arrival_source != null and backrooms_environment != null:
 		backrooms_entry_blend = backrooms_environment.duplicate() as Environment
 		env.set_meta("_return_blend", true)
 		Backrooms.blend_return_environment(arrival_source, backrooms_environment, backrooms_entry_blend, 0.0)
 		env.environment = backrooms_entry_blend
-		backrooms_entry_tween = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-		backrooms_entry_tween.tween_method(_blend_entry.bind(arrival_source, env), 0.0, 1.0, 0.8)
-		backrooms_entry_tween.tween_callback(_finish_entry_blend.bind(env))
+	else:
+		env.environment = backrooms_environment
+	backrooms_entry_tween = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	backrooms_entry_tween.tween_method(_blend_entry.bind(arrival_source, env), 0.0, 1.0, 2.0 if soft else 1.35)
+	backrooms_entry_tween.tween_callback(_finish_entry_blend.bind(env))
 	var probe := room.get_node_or_null("Lighting/BackroomsVoxelGI") as VoxelGI
 	if probe != null:
 		# Old local bakes can still be present after pulling this update.
@@ -883,10 +892,11 @@ func _enter_backrooms(lane: String) -> void:
 		hum.name = "BackroomsHum"
 		hum.stream = sound.call("get_immersion_loop", "backrooms_hum") as AudioStream
 		hum.bus = "HORROR"
-		hum.volume_db = -15.0
+		hum.volume_db = -60.0
 		room.add_child(hum)
 		if hum.stream != null:
 			hum.play()
+			hum.create_tween().tween_property(hum, "volume_db", -15.0, 0.55)
 	# A small wall-side stand leaves the first passage unobstructed.
 	var stand_mat := StandardMaterial3D.new()
 	stand_mat.albedo_color = Color(0.27, 0.24, 0.19)
@@ -909,12 +919,26 @@ func _enter_backrooms(lane: String) -> void:
 
 
 func _blend_entry(weight: float, source: Environment, env: WorldEnvironment) -> void:
-	if is_instance_valid(env) and backrooms_entry_blend != null:
+	if is_instance_valid(env) and source != null and backrooms_entry_blend != null:
 		Backrooms.blend_return_environment(source, backrooms_environment, backrooms_entry_blend, weight)
+	_set_entry_lights(weight)
+
+
+func _set_entry_lights(weight: float) -> void:
+	for item in _entry_lights:
+		var light := item["light"] as OmniLight3D
+		if not is_instance_valid(light):
+			continue
+		var original_color: Color = item["color"]
+		light.light_energy = float(item["energy"]) * lerpf(1.0, 0.10, weight)
+		light.light_color = original_color.lerp(Color(0.84, 0.81, 0.64), weight)
+		light.light_volumetric_fog_energy = float(item["fog"]) * (1.0 - weight)
 
 
 func _finish_entry_blend(env: WorldEnvironment) -> void:
-	if is_instance_valid(env) and env.environment == backrooms_entry_blend:
+	_set_entry_lights(1.0)
+	_entry_lights.clear()
+	if is_instance_valid(env) and backrooms_entry_blend != null and env.environment == backrooms_entry_blend:
 		env.environment = backrooms_environment
 		env.remove_meta("_return_blend")
 	backrooms_entry_blend = null
@@ -1031,7 +1055,7 @@ func _finish_backrooms() -> void:
 	var verdict: Dictionary = state.complete_backrooms(backrooms_lane == "left")
 	if not bool(verdict.get("valid", false)):
 		return
-	if backrooms_entry_tween != null and backrooms_entry_tween.is_running():
+	if backrooms_entry_tween != null:
 		backrooms_entry_tween.kill()
 		_finish_entry_blend(room.get_node("Lighting/Environment") as WorldEnvironment)
 	backrooms_scored = true
@@ -1080,7 +1104,7 @@ func _update_backrooms_return_lighting(local_x: float) -> void:
 	var old_env := room.get_node("Lighting/Environment") as WorldEnvironment
 	var torch := player.get_node_or_null("Camera3D/BackroomsFlashlight") as SpotLight3D
 	if torch != null:
-		torch.light_energy = 0.95 * (1.0 - weight)
+		torch.light_energy = float(torch.get_meta("_return_base_energy", 0.95)) * (1.0 - weight)
 	if weight >= 1.0:
 		# Activate the EXACT destination resource before the blind turn,
 		# not when the player has already walked into the visible hall.

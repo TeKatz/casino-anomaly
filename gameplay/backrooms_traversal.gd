@@ -57,7 +57,7 @@ static func box(parent: Node3D, label: String, at: Vector3, size: Vector3, mat: 
         body.add_child(collision)
         parent.add_child(body)
 
-static func build_entrance(maze: Node3D) -> void:
+static func build_entrance(maze: Node3D, connector_ceiling: Material = null) -> void:
     var collar := Node3D.new()
     collar.name = "EntranceJoin"
     maze.add_child(collar)
@@ -67,9 +67,30 @@ static func build_entrance(maze: Node3D) -> void:
         var suffix := "N" if side < 0 else "S"
         box(collar, "Return_" + suffix, Vector3(ENTRY_X - 0.68, 1.76, ENTRY_Z + side * 1.31),
             Vector3(1.0, 3.52, 0.18), WALL)
-        box(collar, "Jamb_" + suffix, Vector3(ENTRY_X - 0.25, 1.5, ENTRY_Z + side * (HALF_WIDTH + OPENING_HALF) * 0.5),
-            Vector3(0.20, 3.0, HALF_WIDTH - OPENING_HALF), WALL)
-    box(collar, "Soffit", Vector3(ENTRY_X - 0.68, 3.25, ENTRY_Z), Vector3(1.22, 0.5, 2.62), CEILING)
+        box(collar, "Jamb_" + suffix, Vector3(ENTRY_X - 0.25, 1.76, ENTRY_Z + side * (HALF_WIDTH + OPENING_HALF) * 0.5),
+            Vector3(0.20, 3.52, HALF_WIDTH - OPENING_HALF), WALL)
+    # The casino roof ends 1.10 m before the maze entrance, at 3.51 m.
+    # Meet the actual authored ceiling edge at 3.00 m with a sloped soffit,
+    # not a hanging tiled box with a coplanar underside and exposed fascia.
+    var roof := maze.get_node_or_null("Architecture/Ceiling/Mesh") as MeshInstance3D
+    var end_x := ENTRY_X - 0.20
+    var end_y := 3.0
+    if roof != null:
+        var bounds := roof.get_aabb()
+        var edge := (roof.get_parent() as Node3D).transform * roof.transform * bounds.position
+        end_x = edge.x
+        end_y = edge.y
+    var start := Vector2(ENTRY_X - 1.10, 3.51)
+    var finish := Vector2(end_x, end_y)
+    var span := finish - start
+    var normal := Vector2(-span.y, span.x).normalized()
+    var thickness := 0.18
+    var center := (start + finish) * 0.5 + normal * thickness * 0.5
+    box(collar, "Soffit", Vector3(center.x, center.y, ENTRY_Z),
+        Vector3(span.length(), thickness, 2.62), connector_ceiling if connector_ceiling != null else CEILING)
+    var pitch := atan2(span.y, span.x)
+    (collar.get_node("Soffit") as Node3D).rotation.z = pitch
+    (collar.get_node("Soffit_Collision") as Node3D).rotation.z = pitch
     # The existing TurnFloor bridges the entrance. No extra coplanar
     # carpet threshold is needed; its end is fitted at reveal.
 

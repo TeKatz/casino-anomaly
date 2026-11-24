@@ -22,10 +22,11 @@ func _run() -> void:
     var settings = root.get_node("GameSettings")
     var saved_settings: Dictionary = settings.options.duplicate(true)
     settings.set_option("door_symbols", true)
-    settings.set_option("soft_light_transitions", true)
+    settings.set_option("soft_light_transitions", false)
     if not await _exercise("right", 1, false):
         quit(1)
         return
+    settings.set_option("soft_light_transitions", true)
     if not await _exercise("left", 11, true):
         quit(1)
         return
@@ -162,12 +163,19 @@ func _exercise(lane: String, streak: int, rotated: bool) -> bool:
     var dark_target := loop.get("backrooms_environment") as Environment
     if not require(dark_target != null and dark_target.ambient_light_energy <= 0.0351, "Backrooms final ambient light too bright"):
         return false
-    if not require(env.environment == dark_target or env.environment == loop.get("backrooms_entry_blend"), "Soft entry transition used an unexpected environment"):
+    if not require(env.environment == loop.get("backrooms_entry_blend") and env.environment != dark_target, "Entry must blend even with soft light transitions disabled"):
+        return false
+    var soffit := maze.get_node("EntranceJoin/Soffit") as MeshInstance3D
+    var soffit_shape := maze.get_node("EntranceJoin/Soffit_Collision") as StaticBody3D
+    if not require(soffit.rotation.z < -0.1 and soffit.transform.is_equal_approx(soffit_shape.transform), "Entrance roof is not a fitted slope with matching collider"):
+        return false
+    var passage_light := connector.get_node("PassageLight") as OmniLight3D
+    if not require(passage_light.light_energy > 0.25, "Passage light dropped instantly on reveal"):
         return false
     if not rotated:
         # Normal traversal must settle into the original authored darkness.
-        await create_timer(0.95).timeout
-        if not require(env.environment == dark_target and env.environment.ambient_light_energy <= 0.0351, "Soft entry did not settle into the dark Backrooms"):
+        await create_timer(1.55).timeout
+        if not require(env.environment == dark_target and env.environment.ambient_light_energy <= 0.0351 and is_equal_approx(passage_light.light_energy, 0.052), "Entry did not settle into the authored darkness"):
             return false
     # The rotated/final-room scenario intentionally proceeds without this
     # wait to exercise cancellation of a still-running entry tween.
@@ -185,6 +193,13 @@ func _exercise(lane: String, streak: int, rotated: bool) -> bool:
     if not require(is_equal_approx(float(player.call("movement_speed", false)), 2.1) and is_equal_approx(float(player.call("movement_speed", true)), 2.1), "Backrooms speed/sprint restriction not active"):
         return false
     var pickup := maze.get_node_or_null("FlashlightPickup")
+    var hum_player := maze.get_node_or_null("BackroomsHum") as AudioStreamPlayer
+    var hum := hum_player.stream as AudioStreamWAV if hum_player != null else null
+    if not require(hum != null and hum.loop_mode == AudioStreamWAV.LOOP_FORWARD and hum.loop_end == hum.mix_rate * 8 and hum.data.size() == (hum.loop_end + 4) * 2, "Hum loop is not guarded native-rate PCM"):
+        return false
+    var pcm := hum.data
+    if not require(pcm.decode_s16(0) == 0 and pcm.decode_s16((hum.loop_end - 1) * 2) == 0 and pcm.slice(hum.loop_end * 2) == pcm.slice(0, 8), "Hum seam or interpolation guard is discontinuous"):
+        return false
     if not require(pickup != null and maze.has_node("BackroomsHum") and player.get_node_or_null("Camera3D/BackroomsFlashlight") == null, "Initial flashlight or ambience state wrong"):
         return false
     player.global_position = maze.to_global(Vector3(-14.5, 1.02, 0.5))
@@ -206,7 +221,7 @@ func _exercise(lane: String, streak: int, rotated: bool) -> bool:
     if not require(bool(pickup.get("taken")) and not pickup.visible and player.has_node("Camera3D/BackroomsFlashlight"), "E did not collect the nearby torch"):
         return false
     var torch := player.get_node("Camera3D/BackroomsFlashlight") as SpotLight3D
-    if not require(not hint.visible and torch.light_energy <= 0.95 and torch.spot_range <= 9.0, "Pickup hint or beam tuning incorrect"):
+    if not require(not hint.visible and torch.light_energy <= 0.95 and is_equal_approx(torch.spot_range, 11.0) and torch.spot_angle > 30.0 and torch.light_projector != null, "Pickup hint or optical beam tuning incorrect"):
         return false
     root.push_input(key, true)
     if not require(player.get_node("Camera3D").find_children("BackroomsFlashlight", "SpotLight3D", false, false).size() == 1, "Repeated E duplicated flashlight"):

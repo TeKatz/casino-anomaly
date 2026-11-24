@@ -11,13 +11,21 @@ the departure path is sealed and the retired casino geometry is unloaded.
 The empty scene shell is disposed on return to the next casino.
 The first passage has a physical flashlight and a nearby E interaction. Sprint
 is disabled throughout the traversal, with a 2.1 m/s walking cap from reveal.
-The flashlight uses a 0.95 energy, 9 m spot and no battery mechanic. The
+The flashlight uses one 0.95 energy, 11 m shadowed spot with a 34-degree
+cone and a radial optical projector (bright core, subtle reflector ring and
+soft spill). Shadow-off settings retain the ordinary spot as a fallback.
+No extra shadow lights, forced fog, flicker or battery mechanic. The
 pickup hint is a screen-space label, independent of view direction but blocked
 by real intervening walls. The original OneWayGate alone seals the entry.
 The oak floor and carpet meet at a fitted edge, with matching collider.
-Ambient and ceiling illumination are reduced; rebake Backrooms VoxelGI after
-this lighting pass (older data is capped at runtime).
-A fluorescent hum replaces the regular casino room tone. No enemies or hazards.
+A sloped casino-material soffit joins the existing corridor roof to the
+authored maze ceiling with a matching collision shape, eliminating the
+overhanging tiled fascia. The entry environment and existing passage lights
+fade together over 1.35 seconds (2 seconds with soft light transitions).
+The authored dark environment and GI data are retained; no new bake required.
+A native mixer-rate eight-second fluorescent PCM loop with a smooth seam
+and interpolation guard replaces the regular casino room tone; it fades in
+on entry. No enemies or hazards.
 
 Only crossing the far exit gives a successful verdict, adds one to the streak
 and visited count, and records the discovery (unless developer-forced). The

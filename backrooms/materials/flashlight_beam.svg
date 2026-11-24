@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <radialGradient id="optics" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.11" stop-color="#f9f9f9"/>
+      <stop offset="0.25" stop-color="#e7e7e7"/>
+      <stop offset="0.39" stop-color="#b5b5b5"/>
+      <stop offset="0.50" stop-color="#747474"/>
+      <stop offset="0.59" stop-color="#606060"/>
+      <stop offset="0.65" stop-color="#686868"/>
+      <stop offset="0.73" stop-color="#424242"/>
+      <stop offset="0.86" stop-color="#252525"/>
+      <stop offset="0.96" stop-color="#090909"/>
+      <stop offset="1" stop-color="#000000"/>
+    </radialGradient>
+  </defs>
+  <rect width="256" height="256" fill="url(#optics)"/>
+</svg>
