@@ -178,6 +178,10 @@ func _prepare_immersion() -> void:
         index = AudioServer.get_bus_count()
         AudioServer.add_bus(index)
         AudioServer.set_bus_name(index, "WORLD")
+    var first_child := AudioServer.get_bus_index("FOOTSTEP")
+    if first_child >= 0 and index > first_child:
+        AudioServer.move_bus(index, first_child)
+        index = AudioServer.get_bus_index("WORLD")
     AudioServer.set_bus_send(index, "SFX")
     for name in ["FOOTSTEP", "CABINET"]:
         var child_index := AudioServer.get_bus_index(name)
@@ -185,7 +189,7 @@ func _prepare_immersion() -> void:
             AudioServer.set_bus_send(child_index, "WORLD")
     var horror := AudioServer.get_bus_index("HORROR")
     if horror >= 0:
-        AudioServer.set_bus_send(horror, "WORLD")
+        AudioServer.set_bus_send(horror, "SFX")
     var pressure := AudioServer.get_bus_index("PRESSURE")
     if pressure >= 0:
         AudioServer.set_bus_send(pressure, "HORROR")

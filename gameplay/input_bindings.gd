@@ -54,7 +54,7 @@ static func label(code: int) -> String:
         return "—"
     if code < 0:
         return "Mouse %d" % -code
-    var local := DisplayServer.keyboard_get_keycode_from_physical(code)
+    var local := code if DisplayServer.get_name() == "headless" else DisplayServer.keyboard_get_keycode_from_physical(code)
     return OS.get_keycode_string(local if local != 0 else code)
 
 static func apply(bindings: Dictionary, controller: bool, deadzone: float) -> void:
