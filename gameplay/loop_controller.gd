@@ -206,6 +206,12 @@ func _place_markers() -> bool:
 
 
 func _on_language_changed(key: String) -> void:
+	var graphics := get_node_or_null("/root/GameSettings")
+	if graphics != null and key in ["image_contrast", "brightness", "saturation", "fog_quality", "ssao_quality", "ssil", "bloom", "bloom_strength"]:
+		graphics.call("apply_environment", staged_environment, [key])
+		graphics.call("apply_environment", backrooms_environment, [key])
+		if backrooms_active and backrooms_return_environment != null and staged_environment != null:
+			Backrooms.blend_return_environment(backrooms_environment, staged_environment, backrooms_return_environment, backrooms_return_light_weight)
 	if backrooms_active:
 		if key == "image_contrast" and staged_environment != null:
 			var contrast_settings := get_node_or_null("/root/GameSettings")
@@ -411,6 +417,9 @@ func _advance_pending_stage(lane: String, returning: bool = false) -> void:
 		_set_reflections_visible(_pending_stage, false)
 		var environment_node := _pending_stage.get_node_or_null("WorldEnvironment") as WorldEnvironment
 		staged_environment = environment_node.environment if environment_node != null else null
+		var graphics := get_node_or_null("/root/GameSettings")
+		if graphics != null:
+			graphics.call("apply_environment", staged_environment)
 		if environment_node != null:
 			environment_node.environment = null
 		_pending_stage_phase = 2
@@ -466,7 +475,11 @@ func _set_reflections_visible(target_room: Node3D, enabled: bool) -> void:
 		return
 	for child in atmosphere.get_children():
 		if child is ReflectionProbe:
-			(child as ReflectionProbe).visible = enabled
+			var settings := get_node_or_null("/root/GameSettings")
+			if settings != null:
+				settings.call("reflection_requested", child, enabled)
+			else:
+				(child as ReflectionProbe).visible = enabled
 
 
 func _activate_reflections_sequentially(target_room: Node3D) -> void:
@@ -482,7 +495,13 @@ func _activate_reflections_sequentially(target_room: Node3D) -> void:
 		await get_tree().process_frame
 		if not is_instance_valid(target_room) or not target_room.is_inside_tree():
 			return
-		(child as ReflectionProbe).visible = true
+		if not is_instance_valid(child):
+			continue
+		var settings := get_node_or_null("/root/GameSettings")
+		if settings != null:
+			settings.call("reflection_requested", child, true)
+		else:
+			(child as ReflectionProbe).visible = true
 
 
 func _commit_choice(lane: String) -> void:
@@ -675,6 +694,9 @@ func _schedule_backrooms(lane: String) -> void:
 			preview.free()
 		var env := _pending_maze.get_node("Lighting/Environment") as WorldEnvironment
 		backrooms_environment = env.environment
+		var graphics := get_node_or_null("/root/GameSettings")
+		if graphics != null:
+			graphics.call("apply_environment", backrooms_environment)
 		env.environment = null
 		(_pending_maze.get_node("Lighting") as Node3D).hide()
 		Backrooms.build_entrance(_pending_maze)
@@ -887,6 +909,7 @@ func _update_backrooms_return_lighting(local_x: float) -> void:
 		if next_env == null:
 			return
 		old_env.environment = null
+		old_env.remove_meta("_return_blend")
 		next_env.environment = staged_environment
 		if staged.has_method("apply_image_contrast"):
 			staged.call("apply_image_contrast")
@@ -901,6 +924,7 @@ func _update_backrooms_return_lighting(local_x: float) -> void:
 		backrooms_return_environment = staged_environment.duplicate() as Environment
 	Backrooms.blend_return_environment(backrooms_environment, staged_environment, backrooms_return_environment, weight)
 	if old_env.environment != backrooms_return_environment:
+		old_env.set_meta("_return_blend", true)
 		old_env.environment = backrooms_return_environment
 
 

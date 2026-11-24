@@ -32,6 +32,9 @@ var status_key := "menu.offline"
 var status_value := ""
 
 func _ready() -> void:
+    var preferences := get_node_or_null("/root/GameSettings")
+    if preferences != null:
+        preferences.call("set_menu_context", true)
     Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
     var sound := get_node_or_null("/root/AudioDirector")
     if sound != null:
@@ -74,6 +77,9 @@ func _ready() -> void:
     call_deferred("_check_update")
 
 func _exit_tree() -> void:
+    var preferences := get_node_or_null("/root/GameSettings")
+    if preferences != null:
+        preferences.call("set_menu_context", false)
     var sound := get_node_or_null("/root/AudioDirector")
     if sound != null:
         sound.set_menu_music_enabled(false)
@@ -281,6 +287,7 @@ func _on_panorama_ready() -> void:
 
 
 func _on_panorama_failed() -> void:
+    $Background.show()
     # A broken/missing asset must not strand the user at startup.
     $StartupIntro.complete()
 

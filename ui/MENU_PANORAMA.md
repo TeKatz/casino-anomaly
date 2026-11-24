@@ -19,3 +19,7 @@ The foreground is sized to its visible controls, right-aligned on wide
 screens and centered on compact screens. The brand is raised and reduced.
 The intro is editable in ui/menu_startup_intro.tscn. Actual GPU appearance,
 frame pacing and startup duration should be checked in Forward+.
+
+## Player-configurable menu quality
+
+Graphics now includes a separate panorama mode (live / still / abstract), native-window scale, frame cap, motion toggle, speed and dimming. The frame cap applies to the menu only; gameplay restores its own cap. The previous camera-motion preference is migrated once and then independent.

@@ -17,6 +17,9 @@ var loading := false
 var suspended := false
 var elapsed := 0.0
 var motion_enabled := true
+var background_mode := "live"
+var camera_speed := 1.0
+var menu_scale := 1.0
 var ready_for_display := false
 var base_position := Vector3.ZERO
 var first_frame_ready := false
@@ -33,8 +36,7 @@ func _ready() -> void:
     var settings := get_node_or_null("/root/GameSettings")
     if settings != null:
         settings.options_changed.connect(_on_setting)
-        _on_setting("camera_motion")
-        _on_setting("taa")
+        _on_setting("")
     set_process(false)
     if DisplayServer.get_name() != "headless":
         call_deferred("_begin_after_cover")
@@ -52,22 +54,43 @@ func _resize_render_target() -> void:
     var pixels := get_window().size
     if pixels.x < 2 or pixels.y < 2:
         return
-    viewport.size = pixels
+    viewport.size = Vector2i(maxi(2, roundi(pixels.x * menu_scale)), maxi(2, roundi(pixels.y * menu_scale)))
     if ready_for_display and not suspended and not motion_enabled:
         viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 
 
 func _on_setting(key: String) -> void:
-    if key == "camera_motion":
-        var settings := get_node_or_null("/root/GameSettings")
-        motion_enabled = settings == null or bool(settings.get_option("camera_motion"))
-    if key == "taa":
-        var settings := get_node_or_null("/root/GameSettings")
-        viewport.use_taa = settings == null or bool(settings.get_option("taa"))
+    var settings := get_node_or_null("/root/GameSettings")
+    if settings == null:
+        return
+    if key == "" or key == "menu_camera_motion" or key == "menu_background":
+        background_mode = str(settings.call("get_option", "menu_background"))
+        motion_enabled = background_mode == "live" and bool(settings.call("get_option", "menu_camera_motion"))
+        if key == "menu_background":
+            if background_mode == "abstract":
+                hide()
+                panorama_failed.emit()
+            elif first_frame_ready:
+                show()
+                panorama_ready.emit()
+            elif DisplayServer.get_name() != "headless":
+                _request_room()
+    if key == "" or key == "menu_camera_speed":
+        camera_speed = float(settings.call("get_option", "menu_camera_speed"))
+    if key == "" or key == "menu_render_scale":
+        menu_scale = float(settings.call("get_option", "menu_render_scale"))
+        _resize_render_target()
+    if key == "" or key == "menu_darkness":
+        ($ReadabilityGrade.material as ShaderMaterial).set_shader_parameter("dimming", float(settings.call("get_option", "menu_darkness")))
+    if key in ["", "aa_mode", "taa", "upscaling", "anisotropy", "shadow_quality"]:
+        settings.call("apply_viewport", viewport, true)
     if ready_for_display:
         _sync_rendering()
 
 func _request_room() -> void:
+    if background_mode == "abstract":
+        panorama_failed.emit()
+        return
     if loading or is_instance_valid(room) or suspended:
         return
     if loaded_scene != null:
@@ -97,7 +120,7 @@ func _process(delta: float) -> void:
             loaded_scene = ResourceLoader.load_threaded_get(CASINO_PATH) as PackedScene
             if load_deadline == 0:
                 loaded_scene = null
-            elif not suspended:
+            elif not suspended and background_mode != "abstract":
                 if not install_room(loaded_scene):
                     panorama_failed.emit()
                 loaded_scene = null
@@ -109,7 +132,7 @@ func _process(delta: float) -> void:
             panorama_failed.emit()
         return
     if first_frame_ready and not suspended and motion_enabled:
-        elapsed = fmod(elapsed + delta, PERIOD)
+        elapsed = fmod(elapsed + delta * camera_speed, PERIOD)
         update_pose(elapsed)
 
 func install_room(packed: PackedScene) -> bool:
@@ -180,7 +203,12 @@ func _finish_room() -> void:
     first_frame_ready = true
     modulate.a = 1.0
     _sync_rendering()
-    panorama_ready.emit()
+    if background_mode == "abstract":
+        hide()
+        panorama_failed.emit()
+    else:
+        show()
+        panorama_ready.emit()
 
 func update_pose(seconds: float) -> void:
     var angle := TAU * seconds / PERIOD
@@ -195,7 +223,7 @@ func set_suspended(value: bool) -> void:
 
 
 func _sync_rendering() -> void:
-    if not ready_for_display or suspended:
+    if not ready_for_display or suspended or background_mode == "abstract":
         viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
     elif warming or motion_enabled:
         viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS

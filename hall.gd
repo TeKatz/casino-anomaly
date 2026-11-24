@@ -53,17 +53,6 @@ var lights: Node3D
 
 func _ready() -> void:
     var showcase := has_meta("_menu_showcase")
-    # The headless editor does not expose all GPU-only anti-aliasing settings.
-    # Ensure the actual Forward+ game viewport uses TAA during play.
-    if not Engine.is_editor_hint() and DisplayServer.get_name() != "headless" and not has_meta("_streaming_standby") and not showcase:
-        var viewport := get_viewport()
-        # Do not reconfigure the shared render target on each streamed hall.
-        # Respect the current graphics option, including when TAA is disabled.
-        var settings := get_node_or_null("/root/GameSettings")
-        if settings != null:
-            viewport.use_taa = bool(settings.get_option("taa"))
-        viewport.anisotropic_filtering_level = Viewport.ANISOTROPY_8X
-        viewport.texture_mipmap_bias = 0.25
     wood = OAK.duplicate() as StandardMaterial3D
     wood.uv1_scale = Vector3.ONE
     wood.cull_mode = BaseMaterial3D.CULL_DISABLED
@@ -182,9 +171,7 @@ func apply_image_contrast() -> void:
     # During streaming the WorldEnvironment is intentionally detached;
     # the handoff reapplies the current setting once it is restored.
     if world != null and world.environment != null and game_settings != null:
-        world.environment.adjustment_enabled = true
-        world.environment.adjustment_contrast = float(
-            game_settings.get_option("image_contrast"))
+        game_settings.apply_environment(world.environment)
 
 
 func _section(label: String) -> Node3D:

@@ -33,6 +33,7 @@ func _run() -> void:
     settings.set_option("mouse_sensitivity", 1.35)
     settings.set_option("fov", 86.0)
     settings.set_option("fps_limit", 60)
+    await create_timer(0.5).timeout
     if absf(float(settings.get_option("mouse_sensitivity")) - 1.35) > 0.001             or absf(float(settings.get_option("fov")) - 86.0) > 0.01             or Engine.max_fps != 60 or not FileAccess.file_exists("user://casino_settings.cfg"):
         _fail("Changing settings failed to apply and persist")
         return
@@ -93,8 +94,8 @@ func _run() -> void:
         _fail("Pause settings submenu not available")
         return
     var tabs: Array = subpanel.get("tabs")
-    if tabs.size() != 4:
-        _fail("Expected four tab BUTTONS: graphics, audio, controls, gameplay")
+    if tabs.size() != 5:
+        _fail("Expected five category buttons including General")
         return
     subpanel.call("_switch_tab", 2)
     if int(subpanel.get("selected_tab")) != 2:
@@ -180,6 +181,7 @@ func _run() -> void:
     settings.set_option("fps_limit", saved_fps)
     settings.set_option("voxel_gi", saved_gi)
     settings.set_option("image_contrast", saved_contrast)
+    settings.save_options()
     room.queue_free()
     await process_frame
     DirAccess.remove_absolute(ProjectSettings.globalize_path(state.save_path))

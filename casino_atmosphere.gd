@@ -413,7 +413,11 @@ func _ensure_probe(label: String, center: Vector3, extents: Vector3,
         probe.enable_shadows = false
         probe.update_mode = ReflectionProbe.UPDATE_ONCE
         add_child(probe)
-    probe.visible = enabled
+    var settings := get_node_or_null("/root/GameSettings")
+    if settings != null:
+        settings.call("reflection_requested", probe, enabled)
+    else:
+        probe.visible = enabled
 
 
 func _ensure_bar_fill_lights() -> void:
