@@ -20,6 +20,7 @@ var corridor_target := false
 var _created_world_bus := false
 var menu_enabled := false
 var world_ambience_enabled := false
+var backrooms_mode := false
 var _fade: Tween
 var _ambience_fade: Tween
 
@@ -83,6 +84,7 @@ func set_world_ambience_enabled(enabled: bool) -> void:
     else:
         # The main menu must be music-only, including procedural sounds.
         corridor_target = false
+        backrooms_mode = false
         if world_reverb != null:
             world_reverb.wet = 0.045
         if room_player != null:
@@ -91,6 +93,19 @@ func set_world_ambience_enabled(enabled: bool) -> void:
             pressure_player.stop()
         if footstep_player != null:
             footstep_player.stop()
+
+
+func set_backrooms_mode(enabled: bool) -> void:
+    if backrooms_mode == enabled:
+        return
+    backrooms_mode = enabled
+    if not world_ambience_enabled or room_player == null:
+        return
+    if _ambience_fade != null and _ambience_fade.is_running():
+        _ambience_fade.kill()
+    _ambience_fade = create_tween()
+    _ambience_fade.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+    _ambience_fade.tween_property(room_player, "volume_db", -60.0 if enabled else ROOM_DB, 0.25)
 
 
 func set_menu_music_enabled(enabled: bool) -> void:
@@ -169,7 +184,7 @@ func _prepare_immersion() -> void:
     for surface in ["wood", "carpet", "corridor"]:
         for variant in range(2):
             step_sounds[surface + str(variant)] = ImmersionSynth.footstep(surface, variant)
-    for kind in ["cabinet", "bar", "vent", "pressure"]:
+    for kind in ["cabinet", "bar", "vent", "pressure", "backrooms_hum"]:
         procedural_loops[kind] = ImmersionSynth.ambience(kind)
     footstep_player = AudioStreamPlayer.new()
     footstep_player.name = "FootstepCue"
@@ -220,10 +235,10 @@ func _process(delta: float) -> void:
     if not world_ambience_enabled:
         return
     if world_reverb != null:
-        var wet := 0.26 if corridor_target else 0.045
+        var wet := 0.20 if backrooms_mode else (0.26 if corridor_target else 0.045)
         world_reverb.wet = lerpf(world_reverb.wet, wet, 1.0 - exp(-4.0 * delta))
     if pressure_player != null and pressure_player.playing:
         var state := get_node_or_null("/root/LoopState")
         var visits := int(state.visited_loops) if state != null else 0
         pressure_player.volume_db = lerpf(pressure_player.volume_db,
-                pressure_db_for_visits(visits), 1.0 - exp(-0.50 * delta))
+                -60.0 if backrooms_mode else pressure_db_for_visits(visits), 1.0 - exp(-0.50 * delta))

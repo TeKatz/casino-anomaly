@@ -198,7 +198,7 @@ func _open_menu() -> void:
     if open or get_tree().paused:
         return
     var loop := _loop()
-    if loop == null or bool(loop.get("won")) or bool(loop.get("finishing")):
+    if loop == null or bool(loop.get("won")) or bool(loop.get("finishing")) or bool(loop.get("backrooms_active")):
         return
     open = true
     search.text = ""

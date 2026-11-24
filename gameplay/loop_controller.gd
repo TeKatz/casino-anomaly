@@ -13,6 +13,9 @@ const AnomalyDevMenu = preload("res://ui/anomaly_dev_menu.gd")
 const StreamPortals = preload("res://gameplay/stream_portals.gd")
 const Loc = preload("res://gameplay/localization.gd")
 const ROOM = preload("res://main.tscn")
+const Backrooms = preload("res://gameplay/backrooms_traversal.gd")
+const FlashlightPickup = preload("res://gameplay/backrooms_flashlight_pickup.gd")
+const BACKROOMS_ID := "backrooms"
 
 const PRELOAD_AT_X := -31.0
 # Prepare GPU-backed baked GI while the next casino is still hidden by the
@@ -47,6 +50,13 @@ var _pending_lane := ""
 var _pending_stage_phase := 0
 var _pending_stage_start_us := 0
 var _pending_instance_ms := 0.0
+var backrooms_active := false
+var backrooms_maze: Node3D
+var backrooms_lane := ""
+var backrooms_environment: Environment
+var backrooms_exit_connector: Node3D
+var backrooms_pickup: Node3D
+var backrooms_scored := false
 var _pending_portal_ms := 0.0
 
 
@@ -95,12 +105,14 @@ func _ready() -> void:
 
 
 func debug_available_ids() -> Array[String]:
+	if backrooms_active:
+		return []
 	var target_room := staged if staged != null and is_instance_valid(staged) else room
 	return demo.available_ids(target_room)
 
 
 func debug_select_next_anomaly(id: String) -> bool:
-	if won or finishing or transitioning:
+	if won or finishing or transitioning or backrooms_active:
 		return false
 	var state = get_node_or_null("/root/LoopState")
 	if state == null:
@@ -116,7 +128,7 @@ func debug_select_next_anomaly(id: String) -> bool:
 
 
 func debug_restore_random() -> bool:
-	if won or finishing or transitioning:
+	if won or finishing or transitioning or backrooms_active:
 		return false
 	var state = get_node_or_null("/root/LoopState")
 	if state == null:
@@ -130,6 +142,12 @@ func debug_restore_random() -> bool:
 
 
 func _exit_tree() -> void:
+	if is_instance_valid(backrooms_maze) and backrooms_maze != room:
+		backrooms_maze.queue_free()
+	if backrooms_active:
+		var sound := get_node_or_null("/root/AudioDirector")
+		if sound != null:
+			sound.call("set_backrooms_mode", false)
 	# Both attached standby rooms and not-yet-attached partial instances
 	# belong to this controller; leaving for the menu must release both.
 	if _pending_stage != null and is_instance_valid(_pending_stage):
@@ -165,7 +183,7 @@ func _place_markers() -> bool:
 
 
 func _on_language_changed(key: String) -> void:
-	if key != "language":
+	if key != "language" or backrooms_active:
 		return
 	_refresh_exit_signs(room)
 	if staged != null and is_instance_valid(staged):
@@ -220,7 +238,13 @@ func _process(delta: float) -> void:
 		_stage_spike_frames -= 1
 	if transitioning or won or room == null or player == null:
 		return
+	if backrooms_active:
+		_process_backrooms()
+		return
 	var local := room.to_local(player.global_position)
+	if _backrooms_selected():
+		_process_backrooms_approach(local)
+		return
 	if local.x < PRELOAD_AT_X and not choice_taken:
 		_schedule_stage_next(_candidate_lane(local.z))
 	# The second room is still completely out of view here. Enabling its
@@ -255,6 +279,9 @@ func _stage_transform(lane: String) -> Transform3D:
 
 
 func _stage_next(lane: String) -> void:
+	if _backrooms_selected() and not backrooms_active:
+		_stage_backrooms(lane)
+		return
 	# Immediate path for developer/integration calls and for a player who
 	# somehow reaches the choice gate before three staging frames have run.
 	if choice_taken:
@@ -271,6 +298,9 @@ func _stage_next(lane: String) -> void:
 
 
 func _schedule_stage_next(lane: String) -> void:
+	if _backrooms_selected() and not backrooms_active:
+		_stage_backrooms(lane)
+		return
 	# One bounded stage per _process frame. The threshold is far ahead of
 	# the exit gate, so ordinary walking leaves plenty of preparation time.
 	if staged != null and is_instance_valid(staged):
@@ -382,6 +412,11 @@ func _activate_reflections_sequentially(target_room: Node3D) -> void:
 
 
 func _commit_choice(lane: String) -> void:
+	if _backrooms_selected():
+		# The binary choice is not committed at the ordinary threshold.
+		# Only the actual blind-corner crossing enters this special round.
+		_stage_backrooms(lane)
+		return
 	_stage_next(lane)
 	if staged == null or not is_instance_valid(staged):
 		return # Keep the current loop safe if staging fails.
@@ -433,6 +468,8 @@ func _commit_choice(lane: String) -> void:
 
 
 func _handoff() -> void:
+	if backrooms_active:
+		return
 	if staged == null or not is_instance_valid(staged):
 		return
 	transitioning = true
@@ -475,6 +512,250 @@ func _handoff() -> void:
 	if finishing:
 		# Both dead-end connectors are physically closed in the final room.
 		# The player is free to look around and see the neon 12.
+		portals.lock_departure(upcoming, "left")
+		won = true
+		finishing = false
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	transitioning = false
+
+
+func _backrooms_selected() -> bool:
+	var state = get_node_or_null("/root/LoopState")
+	return state != null and state.round_ready and str(state.anomaly_id) == BACKROOMS_ID
+
+
+func _process_backrooms_approach(local: Vector3) -> void:
+	if local.x >= PRELOAD_AT_X:
+		return
+	var lane := _candidate_lane(local.z)
+	_stage_backrooms(lane)
+	if not is_instance_valid(backrooms_maze):
+		return
+	var distance: float = (local.z - _lane_z(lane)) * portals.lane_sign(lane)
+	if absf(local.x - portals.BEND_X) <= 1.15 and distance >= 2.1:
+		_enter_backrooms(lane)
+
+
+func _stage_backrooms(lane: String) -> void:
+	if backrooms_active:
+		return
+	if is_instance_valid(backrooms_maze):
+		if backrooms_lane != lane:
+			backrooms_maze.global_transform = Backrooms.entrance_transform(room, portals, lane)
+			backrooms_lane = lane
+		return
+	# A stale normal standby is never allowed to coexist with the maze.
+	if is_instance_valid(_pending_stage):
+		_pending_stage.free()
+		_pending_stage = null
+		_pending_stage_phase = 0
+	if is_instance_valid(staged):
+		staged.free()
+		staged = null
+		staged_lane = ""
+		staged_gi_warmed = false
+	var maze := Backrooms.MAZE.instantiate() as Node3D
+	if maze == null:
+		push_error("Backrooms scene cannot be staged")
+		return
+	var preview := maze.get_node_or_null("PreviewCamera")
+	if preview != null:
+		preview.free()
+	var env := maze.get_node("Lighting/Environment") as WorldEnvironment
+	backrooms_environment = env.environment
+	env.environment = null
+	var lighting := maze.get_node("Lighting") as Node3D
+	lighting.hide()
+	maze.transform = Backrooms.entrance_transform(room, portals, lane)
+	Backrooms.build_entrance(maze)
+	backrooms_exit_connector = Backrooms.build_exit(maze)
+	get_tree().root.add_child(maze)
+	backrooms_maze = maze
+	backrooms_lane = lane
+
+
+func _enter_backrooms(lane: String) -> void:
+	if backrooms_active or not is_instance_valid(backrooms_maze) or backrooms_lane != lane:
+		return
+	var previous := room
+	var connector := portals.get_connector(previous, lane) as Node3D
+	if connector == null or not portals.lock_departure(previous, lane):
+		return
+	# Seal immediately behind the corner, not inside the player capsule.
+	var direction: float = portals.lane_sign(lane)
+	var gate_mat: Material = (connector.get_node("TurnOuterWall") as MeshInstance3D).material_override
+	Backrooms.box(connector, "BackroomsRevealGate", Vector3(portals.BEND_X, 1.76, _lane_z(lane) + direction * 0.55),
+		Vector3(2.62, 3.52, 0.20), gate_mat)
+	for child in connector.get_children():
+		if child is Light3D:
+			(child as Light3D).hide()
+	connector.reparent(backrooms_maze, true)
+	connector.name = "BackroomsArrivalConnector"
+	var old_env := previous.get_node_or_null("WorldEnvironment") as WorldEnvironment
+	if old_env != null:
+		old_env.environment = null
+	var old_rig := previous.get_node_or_null("VoxelGIRig")
+	if old_rig != null:
+		old_rig.call("set_streaming_active", false)
+	demo.clear()
+	backrooms_active = true
+	choice_taken = true
+	backrooms_scored = false
+	player.reparent(backrooms_maze, true)
+	reparent(backrooms_maze, true)
+	room = backrooms_maze
+	get_tree().current_scene = room
+	var env := room.get_node("Lighting/Environment") as WorldEnvironment
+	env.environment = backrooms_environment
+	(room.get_node("Lighting") as Node3D).show()
+	var settings := get_node_or_null("/root/GameSettings")
+	var probe := room.get_node_or_null("Lighting/BackroomsVoxelGI") as VoxelGI
+	if probe != null and settings != null and not bool(settings.get_option("voxel_gi")):
+		probe.hide()
+	player.call("set_backrooms_mode", true)
+	var sound := get_node_or_null("/root/AudioDirector")
+	if sound != null:
+		sound.call("set_backrooms_mode", true)
+		var hum := AudioStreamPlayer.new()
+		hum.name = "BackroomsHum"
+		hum.stream = sound.call("get_immersion_loop", "backrooms_hum") as AudioStream
+		hum.bus = "WORLD"
+		hum.volume_db = -15.0
+		room.add_child(hum)
+		if hum.stream != null:
+			hum.play()
+	# A small wall-side stand leaves the first passage unobstructed.
+	var stand_mat := StandardMaterial3D.new()
+	stand_mat.albedo_color = Color(0.27, 0.24, 0.19)
+	Backrooms.box(room, "FlashlightStand", Vector3(-14.5, 0.38, -0.52), Vector3(0.42, 0.76, 0.40), stand_mat)
+	backrooms_pickup = FlashlightPickup.new() as Node3D
+	backrooms_pickup.name = "FlashlightPickup"
+	backrooms_pickup.position = Vector3(-14.5, 0.84, -0.52)
+	room.add_child(backrooms_pickup)
+	previous.hide()
+	previous.queue_free()
+
+
+func _physics_process(_delta: float) -> void:
+	if backrooms_active and is_instance_valid(backrooms_pickup):
+		backrooms_pickup.call("update_prompt", player)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if not backrooms_active or not is_instance_valid(backrooms_pickup):
+		return
+	if event is InputEventKey and event.pressed and not event.echo and (event.keycode == KEY_E or event.physical_keycode == KEY_E):
+		if bool(backrooms_pickup.call("collect", player)):
+			get_viewport().set_input_as_handled()
+
+
+func _process_backrooms() -> void:
+	var local := room.to_local(player.global_position)
+	if local.distance_to(Vector3(Backrooms.EXIT_X, local.y, Backrooms.EXIT_Z)) < 10.0:
+		_stage_backrooms_return()
+	if local.x > Backrooms.EXIT_X + 1.3 and absf(local.z - Backrooms.EXIT_Z) < 1.1 and not backrooms_scored:
+		_finish_backrooms()
+	if backrooms_scored and local.x > Backrooms.EXIT_X + Backrooms.EXIT_LENGTH + HANDOFF_AFTER_TURN and absf(local.z - Backrooms.EXIT_Z) < 1.6:
+		_handoff_backrooms_return()
+
+
+func _stage_backrooms_return() -> void:
+	if is_instance_valid(staged):
+		return
+	var next := ROOM.instantiate() as Node3D
+	if next == null:
+		return
+	next.set_meta("_streaming_standby", true)
+	var duplicate_player := next.get_node_or_null("Player")
+	if duplicate_player != null:
+		duplicate_player.free()
+	if not portals.prepare_room(next):
+		next.free()
+		return
+	_set_reflections_visible(next, false)
+	var environment_node := next.get_node_or_null("WorldEnvironment") as WorldEnvironment
+	staged_environment = environment_node.environment if environment_node != null else null
+	if environment_node != null:
+		environment_node.environment = null
+	next.transform = Backrooms.return_transform(room, portals.ENTRY_Z)
+	get_tree().root.add_child(next)
+	staged = next
+	staged_gi_warmed = false
+	var state = get_node_or_null("/root/LoopState")
+	if state != null:
+		_update_level_sign(next, int(state.correct_streak), false)
+	_prewarm_next_gi()
+
+
+func _finish_backrooms() -> void:
+	if not backrooms_active or backrooms_scored:
+		return
+	_stage_backrooms_return()
+	if not is_instance_valid(staged):
+		return
+	var state = get_node_or_null("/root/LoopState")
+	if state == null:
+		return
+	var verdict: Dictionary = state.complete_backrooms(backrooms_lane == "left")
+	if not bool(verdict.get("valid", false)):
+		return
+	backrooms_scored = true
+	Backrooms.seal_exit(backrooms_exit_connector)
+	finishing = bool(verdict.get("finished", false))
+	_update_level_sign(staged, int(verdict["streak"]), finishing)
+	if not finishing:
+		var candidates: Array[String] = demo.available_ids(staged)
+		state.prepare_round(candidates)
+		demo.apply(staged, str(state.anomaly_id))
+	var soundscape := staged.get_node_or_null("RoomSoundscape")
+	if soundscape != null:
+		soundscape.call("activate")
+	_activate_reflections_sequentially(staged)
+
+
+func _handoff_backrooms_return() -> void:
+	if not backrooms_active or not backrooms_scored or not is_instance_valid(staged):
+		return
+	transitioning = true
+	var previous := room
+	var upcoming := staged
+	backrooms_exit_connector.reparent(upcoming, true)
+	backrooms_exit_connector.name = "ArrivalConnector"
+	player.call("set_backrooms_mode", false)
+	var sound := get_node_or_null("/root/AudioDirector")
+	if sound != null:
+		sound.call("set_backrooms_mode", false)
+	var old_env := previous.get_node("Lighting/Environment") as WorldEnvironment
+	old_env.environment = null
+	var old_probe := previous.get_node_or_null("Lighting/BackroomsVoxelGI") as VoxelGI
+	if old_probe != null:
+		old_probe.hide()
+	player.reparent(upcoming, true)
+	reparent(upcoming, true)
+	room = upcoming
+	var environment_node := upcoming.get_node_or_null("WorldEnvironment") as WorldEnvironment
+	if environment_node != null:
+		environment_node.environment = staged_environment
+	if upcoming.has_method("apply_image_contrast"):
+		upcoming.call("apply_image_contrast")
+	upcoming.remove_meta("_streaming_standby")
+	upcoming.remove_meta("_streaming_lighting_prepared")
+	get_tree().current_scene = upcoming
+	previous.hide()
+	previous.queue_free()
+	staged = null
+	staged_lane = ""
+	staged_gi_warmed = false
+	choice_taken = false
+	backrooms_active = false
+	backrooms_scored = false
+	backrooms_maze = null
+	backrooms_lane = ""
+	backrooms_environment = null
+	backrooms_exit_connector = null
+	backrooms_pickup = null
+	_place_markers()
+	if finishing:
 		portals.lock_departure(upcoming, "left")
 		won = true
 		finishing = false

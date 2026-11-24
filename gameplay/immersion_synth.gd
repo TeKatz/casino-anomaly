@@ -64,6 +64,9 @@ static func ambience(kind: String) -> AudioStreamWAV:
             "vent":
                 value = 0.27 * sin(TAU * 39.0 * t) + 0.10 * sin(TAU * 84.0 * t)
                 value += 0.09 * sin(TAU * 391.0 * t) * sin(TAU * 77.0 * t)
+            "backrooms_hum":
+                value = 0.24 * sin(TAU * 50.0 * t) + 0.17 * sin(TAU * 100.0 * t)
+                value += 0.07 * sin(TAU * 150.0 * t) + 0.025 * sin(TAU * 197.0 * t)
             "pressure":
                 value = 0.26 * sin(TAU * 41.0 * t) + 0.17 * sin(TAU * 47.0 * t)
                 value += 0.07 * sin(TAU * 83.0 * t)

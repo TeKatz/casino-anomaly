@@ -3,6 +3,7 @@ extends Node
 ## Never writes into res:// or the designer-authored casino scene.
 
 const REQUIRED_CORRECT := 12
+const BACKROOMS_ID := "backrooms"
 const SAVE_VERSION := 1
 const DEFAULT_SAVE_PATH := "user://anomaly_run.cfg"
 
@@ -152,9 +153,22 @@ func decide(choose_anomaly: bool) -> Dictionary:
         return {"valid": false, "correct": false, "finished": false}
     if visited_loops == 0:
         anomaly_id = ""
+    # Backrooms is a traversal, never a binary door verdict.
+    if anomaly_id == BACKROOMS_ID:
+        return {"valid": false, "correct": false, "finished": false}
+    return _resolve_decision(choose_anomaly, choose_anomaly == not anomaly_id.is_empty())
+
+
+func complete_backrooms(choose_anomaly: bool) -> Dictionary:
+    if not active or not tutorial_done or not round_ready or finished \
+            or visited_loops == 0 or anomaly_id != BACKROOMS_ID:
+        return {"valid": false, "correct": false, "finished": false}
+    return _resolve_decision(choose_anomaly, true)
+
+
+func _resolve_decision(choose_anomaly: bool, correct: bool) -> Dictionary:
     var actual_id := anomaly_id
     var previous_streak := correct_streak
-    var correct := choose_anomaly == not actual_id.is_empty()
     visited_loops += 1
     if correct:
         correct_streak += 1
@@ -170,7 +184,8 @@ func decide(choose_anomaly: bool) -> Dictionary:
         "visited": visited_loops, "mistakes": mistakes,
         "anomaly_id": actual_id, "choice_anomaly": choose_anomaly,
         "expected_anomaly": not actual_id.is_empty(),
-        "debugged": round_debugged
+        "debugged": round_debugged,
+        "traversal": actual_id == BACKROOMS_ID
     }
     round_ready = false
     anomaly_id = ""

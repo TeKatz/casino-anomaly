@@ -306,6 +306,9 @@ func _run() -> void:
         _fail("The preselected anomaly was lost during room handoff")
         return
 
+    # Keep this ordinary-hall regression deterministic even when the new
+    # traversal anomaly is present in the random catalog.
+    state.anomaly_id = ""
     # The new room may have rotated 180 degrees relative to the last one.
     # Test the opposite turn from that new local coordinate system.
     controller.call("_schedule_stage_next", "right")

@@ -24,6 +24,8 @@ var _walk_blend: float = 0.0
 var _sprint_toggled := false
 var _footstep_distance := 0.80
 var interaction_locked := false
+var backrooms_mode := false
+var backrooms_flashlight: SpotLight3D
 var collision_diagnostics := false
 var _reported_contacts: Dictionary = {}
 var _options: Variant = null
@@ -65,6 +67,32 @@ func set_interaction_locked(locked: bool) -> void:
         _footstep_distance = 0.80
 
 
+func set_backrooms_mode(enabled: bool) -> void:
+    backrooms_mode = enabled
+    _sprint_toggled = false
+    _footstep_distance = 0.0
+    if not enabled and is_instance_valid(backrooms_flashlight):
+        backrooms_flashlight.free()
+        backrooms_flashlight = null
+
+
+func equip_backrooms_flashlight() -> bool:
+    if not backrooms_mode or is_instance_valid(backrooms_flashlight):
+        return false
+    backrooms_flashlight = SpotLight3D.new()
+    backrooms_flashlight.name = "BackroomsFlashlight"
+    backrooms_flashlight.position = Vector3(0.18, -0.12, -0.12)
+    backrooms_flashlight.light_color = Color(0.94, 0.96, 1.0)
+    backrooms_flashlight.light_energy = 2.2
+    backrooms_flashlight.spot_range = 15.0
+    backrooms_flashlight.spot_angle = 28.0
+    backrooms_flashlight.spot_angle_attenuation = 1.5
+    backrooms_flashlight.shadow_enabled = true
+    backrooms_flashlight.light_bake_mode = Light3D.BAKE_DISABLED
+    camera.add_child(backrooms_flashlight)
+    return true
+
+
 func _unhandled_input(event: InputEvent) -> void:
     if interaction_locked:
         return
@@ -75,7 +103,7 @@ func _unhandled_input(event: InputEvent) -> void:
         camera.rotate_x(-event.relative.y * sensitivity * invert)
         camera.rotation.x = clamp(camera.rotation.x, -1.25, 1.25)
     elif event is InputEventKey and event.pressed and not event.echo \
-            and event.keycode == KEY_SHIFT and str(_setting("sprint_mode", "hold")) == "toggle":
+            and not backrooms_mode and event.keycode == KEY_SHIFT and str(_setting("sprint_mode", "hold")) == "toggle":
         _sprint_toggled = not _sprint_toggled
     elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
         Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -131,7 +159,8 @@ func _physics_process(delta: float) -> void:
     var direction := _movement_direction(axis)
     var sprint := _sprint_toggled if str(_setting("sprint_mode", "hold")) == "toggle" \
         else Input.is_physical_key_pressed(KEY_SHIFT)
-    var speed := SPRINT_SPEED if sprint else WALK_SPEED
+    sprint = sprint and not backrooms_mode
+    var speed := SPRINT_SPEED if sprint else (3.1 if backrooms_mode else WALK_SPEED)
     var target := direction * speed
     var acceleration := WALK_ACCELERATION if axis.length_squared() > 0.0 else WALK_DECELERATION
     velocity.x = move_toward(velocity.x, target.x, acceleration * delta)
@@ -187,6 +216,8 @@ func classify_casino_surface(local: Vector3) -> String:
 
 
 func _surface_underfoot() -> String:
+    if backrooms_mode:
+        return "carpet"
     var room := get_parent() as Node3D
     if room == null or not room.has_node("RedCarpet"):
         return "wood" # Tutorial has no carpet.
