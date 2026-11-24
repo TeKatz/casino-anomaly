@@ -50,9 +50,9 @@ func _bake() -> void:
         _fail("Cannot instantiate Backrooms")
         return
     var probe := scene.get_node_or_null(PROBE_PATH) as VoxelGI
-    if probe == null:
+    if probe == null or not probe.has_method("reload_baked_data"):
         scene.free()
-        _fail("Missing " + PROBE_PATH)
+        _fail("Missing " + PROBE_PATH + " or its external bake reload script")
         return
     root.add_child(scene)
     await process_frame

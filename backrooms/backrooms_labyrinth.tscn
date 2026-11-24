@@ -1,9 +1,10 @@
-[gd_scene load_steps=101 format=3 uid="uid://4ssdxevgilx5"]
+[gd_scene load_steps=102 format=3 uid="uid://4ssdxevgilx5"]
 
 [ext_resource type="Material" path="res://backrooms/materials/wall.tres" id="1_wall"]
 [ext_resource type="Material" path="res://backrooms/materials/floor.tres" id="2_floor"]
 [ext_resource type="Material" path="res://backrooms/materials/ceiling.tres" id="3_ceiling"]
 [ext_resource type="Script" uid="uid://dbfuddbolkg27" path="res://backrooms/editable_box.gd" id="4_box"]
+[ext_resource type="Script" path="res://backrooms/voxel_gi.gd" id="5_voxel"]
 
 [sub_resource type="BoxMesh" id="Mesh_Outer_N"]
 resource_local_to_scene = true
@@ -994,6 +995,7 @@ environment = SubResource("Environment_Backrooms")
 [node name="BackroomsVoxelGI" type="VoxelGI" parent="Lighting"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
 size = Vector3(35.5, 5, 29)
+script = ExtResource("5_voxel")
 
 [node name="CeilingFixtures" type="Node3D" parent="Lighting"]
 

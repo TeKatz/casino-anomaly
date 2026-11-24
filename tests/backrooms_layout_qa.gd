@@ -99,8 +99,15 @@ func _run() -> void:
 		if spot != null and spot.visible:
 			active += 1
 	check(active == 14, "Expected 14 dim active spots")
-	var probe := scene.get_node("Lighting/BackroomsVoxelGI") as VoxelGI
-	check(probe != null and probe.size.x >= 33.5 and probe.size.z >= 27.0, "Missing room-local VoxelGI probe")
+	var probe := scene.get_node_or_null("Lighting/BackroomsVoxelGI") as VoxelGI
+	if probe == null or not probe.has_method("reload_baked_data"):
+		push_error("Backrooms VoxelGI probe or its reload script is missing from the saved scene")
+		scene.free()
+		quit(1)
+		return
+	check(probe.size.x >= 33.5 and probe.size.z >= 27.0, "Missing room-local VoxelGI probe")
+	check(probe.subdiv == VoxelGI.SUBDIV_128, "Unexpected VoxelGI resolution")
+	check(probe.get_script().resource_path == "res://backrooms/voxel_gi.gd", "Wrong VoxelGI reload script")
 	# Both menu routes stay isolated; unknown scenes never launch a bake.
 	check(Targets.for_scene(Targets.CASINO_SCENE).get("script") == "res://tools/bake_voxel_gi.gd", "Casino bake route changed")
 	check(Targets.for_scene(Targets.BACKROOMS_SCENE).get("script") == "res://tools/bake_backrooms_voxel_gi.gd", "Backrooms bake route missing")
@@ -108,7 +115,6 @@ func _run() -> void:
 	check(Targets.for_scene("res://menu.tscn").is_empty() and Targets.process_args("res://menu.tscn", ".").is_empty(), "Unsupported scene routes to baker")
 	var args := Targets.process_args(Targets.BACKROOMS_SCENE, ".")
 	check(args.has("forward_plus") and not args.has("--headless"), "Offline process must use Forward+ GPU")
-	check(probe.has_method("reload_baked_data"), "Backrooms probe cannot reload external bake")
 	if not FileAccess.file_exists(Targets.BACKROOMS_OUTPUT):
 		check(not bool(probe.call("reload_baked_data")) and probe.data == null, "Missing bake must safely use direct light")
 	Baker.prepare_lights(scene)

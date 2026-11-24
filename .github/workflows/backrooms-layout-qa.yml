@@ -40,8 +40,8 @@ jobs:
           cp tests/backrooms_layout_qa.gd "$WORK/tests/"
           printf 'config_version=5\n[application]\nconfig/name="Backrooms layout QA"\n[rendering]\nrenderer/rendering_method="forward_plus"\n' > "$WORK/project.godot"
           GODOT="$RUNNER_TEMP/godot/Godot_v4.5.1-stable_linux.x86_64"
-          "$GODOT" --headless --path "$WORK" --editor --import 2>&1 | tee "$RUNNER_TEMP/backrooms-import.log"
+          timeout --kill-after=10s 180s "$GODOT" --headless --path "$WORK" --editor --import 2>&1 | tee "$RUNNER_TEMP/backrooms-import.log"
           if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' "$RUNNER_TEMP/backrooms-import.log"; then exit 1; fi
-          "$GODOT" --headless --path "$WORK" --script res://tests/backrooms_layout_qa.gd 2>&1 | tee "$RUNNER_TEMP/backrooms-qa.log"
+          timeout --kill-after=10s 90s "$GODOT" --headless --path "$WORK" --script res://tests/backrooms_layout_qa.gd 2>&1 | tee "$RUNNER_TEMP/backrooms-qa.log"
           grep -F 'Backrooms sketch 02 native layout QA PASS' "$RUNNER_TEMP/backrooms-qa.log"
           if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' "$RUNNER_TEMP/backrooms-qa.log"; then exit 1; fi
