@@ -44,6 +44,9 @@ var transitioning := false
 var finishing := false
 var won := false
 var _stage_spike_frames := 0
+var _perf_trace := false
+var _perf_elapsed := 0.0
+var _perf_worst_ms := 0.0
 # Normal gameplay distributes scene assembly, portal geometry and SceneTree
 # activation across consecutive frames instead of forcing all three at the
 # invisible threshold. _stage_next() remains the immediate safety fallback.
@@ -262,6 +265,8 @@ func _lane_z(lane: String) -> float:
 
 
 func _process(delta: float) -> void:
+	if _perf_trace:
+		_sample_streaming_performance(delta)
 	# The node creation and deferred setup phases land on separate frames.
 	# Report any frame-time spike around staging so a remaining stall can
 	# be attributed to the exact phase instead of guessing.
@@ -301,6 +306,29 @@ func _process(delta: float) -> void:
 			var arrival := staged.to_local(player.global_position)
 			if arrival.z <= portals.ENTRY_Z - 0.75:
 				_handoff()
+
+
+func _sample_streaming_performance(delta: float) -> void:
+	_perf_elapsed += delta
+	_perf_worst_ms = maxf(_perf_worst_ms, delta * 1000.0)
+	if _perf_elapsed < 1.0:
+		return
+	var phase := "casino"
+	if backrooms_active:
+		phase = "backrooms_return" if backrooms_scored else "backrooms"
+	elif choice_taken:
+		phase = "casino_connector"
+	var local := room.to_local(player.global_position) if is_instance_valid(room) and is_instance_valid(player) else Vector3.ZERO
+	print("[StreamingPerf] %s fps=%d worst_frame=%.1fms process=%.1fms physics=%.1fms draws=%d objects=%d primitives=%d staged=%s pending=%d maze_pending=%d position=%s" % [
+		phase, Engine.get_frames_per_second(), _perf_worst_ms,
+		Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
+		Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0,
+		int(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)),
+		int(Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME)),
+		int(Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME)),
+		str(is_instance_valid(staged)), _pending_stage_phase, _pending_maze_phase, str(local)])
+	_perf_elapsed = 0.0
+	_perf_worst_ms = 0.0
 
 
 func _stage_transform(lane: String) -> Transform3D:
@@ -756,6 +784,13 @@ func _physics_process(_delta: float) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo and event.ctrl_pressed and event.keycode == KEY_F9:
+		_perf_trace = not _perf_trace
+		_perf_elapsed = 0.0
+		_perf_worst_ms = 0.0
+		print("[StreamingPerf] ", "ON" if _perf_trace else "OFF")
+		get_viewport().set_input_as_handled()
+		return
 	if not backrooms_active or not is_instance_valid(backrooms_pickup) or get_tree().paused or bool(player.get("interaction_locked")):
 		return
 	if event is InputEventKey and event.pressed and not event.echo and (event.keycode == KEY_E or event.physical_keycode == KEY_E):

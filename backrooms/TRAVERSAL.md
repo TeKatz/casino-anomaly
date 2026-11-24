@@ -48,3 +48,9 @@ active environment. Structural opaque boxes carry inset occluders; no door
 opening, collision or authored material is changed. The normal casino
 handoff also uses the entrance plane rather than a narrow centerline.
 Actual frame-time and GPU improvement must be measured in Forward+.
+
+In a running game, Ctrl+F9 toggles a console performance sample once per
+second (phase, FPS, maximum observed frame interval, process/physics times,
+render draw calls/objects/primitives, staging phases and local position).
+It is disabled by default. These are engine counters, not GPU timings.
+Compare looking into the casino and back into the sealed return corridor.

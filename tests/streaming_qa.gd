@@ -351,11 +351,13 @@ func _run() -> void:
             _fail("Second loop did not close both reverse paths")
             return
 
+    # A player can move sideways immediately after the entrance sleeve.
+    # Exercise the actual frame-driven handoff rather than forcing it.
     player.global_position = second.to_global(
-        Vector3(shape.BEND_X, 1.02, shape.end_z("right") - 4.4)
+        Vector3(shape.BEND_X + 2.1, 1.02, shape.end_z("right") - 1.4)
     )
     var another_pose := player.global_transform
-    controller.call("_handoff")
+    controller.call("_process", 0.016)
     if current_scene != third or player.global_position.distance_to(another_pose.origin) > 0.001:
         _fail("Second handoff moved the player")
         return
