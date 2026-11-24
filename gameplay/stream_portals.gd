@@ -1,4 +1,5 @@
 extends RefCounted
+const RuntimeCache = preload("res://gameplay/runtime_asset_cache.gd")
 const Loc = preload("res://gameplay/localization.gd")
 const Occlusion = preload("res://gameplay/streaming_occlusion.gd")
 const WorldVerdictDisplay = preload("res://gameplay/world_verdict_display.gd")
@@ -425,9 +426,7 @@ func _box(parent: Node3D, label: String, center: Vector3,
     var mesh := MeshInstance3D.new()
     mesh.name = label
     mesh.position = center
-    var shape_mesh := BoxMesh.new()
-    shape_mesh.size = dimensions
-    mesh.mesh = shape_mesh
+    mesh.mesh = RuntimeCache.portal_mesh(dimensions)
     if material != null:
         mesh.material_override = material
     parent.add_child(mesh)
@@ -440,8 +439,6 @@ func _box(parent: Node3D, label: String, center: Vector3,
     body.position = center
     var collision := CollisionShape3D.new()
     collision.name = "Shape"
-    var shape := BoxShape3D.new()
-    shape.size = dimensions
-    collision.shape = shape
+    collision.shape = RuntimeCache.portal_shape(dimensions)
     body.add_child(collision)
     parent.add_child(body)

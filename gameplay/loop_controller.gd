@@ -7,6 +7,7 @@ extends Node3D
 ## connector stays with the new room after the old hall has been freed.
 ## No camera teleports, fades or extra button presses.
 
+const RuntimeCache = preload("res://gameplay/runtime_asset_cache.gd")
 const Controls = preload("res://gameplay/input_bindings.gd")
 const DemoAnomalies = preload("res://gameplay/demo_anomalies.gd")
 const NeonLevelSign = preload("res://gameplay/neon_level_sign.gd")
@@ -48,6 +49,8 @@ var _stage_spike_frames := 0
 var _perf_trace := false
 var _perf_elapsed := 0.0
 var _perf_worst_ms := 0.0
+var _perf_samples: Array[float] = []
+const PERF_SAMPLE_LIMIT := 2048
 # Normal gameplay distributes scene assembly, portal geometry and SceneTree
 # activation across consecutive frames instead of forcing all three at the
 # invisible threshold. _stage_next() remains the immediate safety fallback.
@@ -316,6 +319,8 @@ func _process(delta: float) -> void:
 func _sample_streaming_performance(delta: float) -> void:
 	_perf_elapsed += delta
 	_perf_worst_ms = maxf(_perf_worst_ms, delta * 1000.0)
+	if _perf_samples.size() < PERF_SAMPLE_LIMIT:
+		_perf_samples.append(delta * 1000.0)
 	if _perf_elapsed < 1.0:
 		return
 	var phase := "casino"
@@ -332,6 +337,14 @@ func _sample_streaming_performance(delta: float) -> void:
 		int(Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME)),
 		int(Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME)),
 		str(is_instance_valid(staged)), _pending_stage_phase, _pending_maze_phase, str(local)])
+	_perf_samples.sort()
+	var p99 := _perf_samples[clampi(ceili(_perf_samples.size() * 0.99) - 1, 0, _perf_samples.size() - 1)] if not _perf_samples.is_empty() else 0.0
+	print("[StreamingPerfResources] phase=%s p99=%.2fms static_mb=%.1f video_mb=%.1f nodes=%d resources=%d orphans=%d cache=%s" % [
+		phase, p99, Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0,
+		Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0,
+		int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT)), int(Performance.get_monitor(Performance.OBJECT_RESOURCE_COUNT)),
+		int(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT)), str(RuntimeCache.counts())])
+	_perf_samples.clear()
 	_perf_elapsed = 0.0
 	_perf_worst_ms = 0.0
 
@@ -832,6 +845,7 @@ func _physics_process(_delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.ctrl_pressed and event.keycode == KEY_F9:
 		_perf_trace = not _perf_trace
+		_perf_samples.clear()
 		_perf_elapsed = 0.0
 		_perf_worst_ms = 0.0
 		print("[StreamingPerf] ", "ON" if _perf_trace else "OFF")

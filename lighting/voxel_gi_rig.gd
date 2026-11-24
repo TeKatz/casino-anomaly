@@ -3,6 +3,7 @@ extends Node3D
 ## Pre-baked VoxelGI volumes for a rotated/streamed Casino Anomaly hall.
 ## No bake is performed at runtime. Exported builds only enable validated
 ## external VoxelGIData resources, never a blank or partially baked rig.
+const RuntimeCache = preload("res://gameplay/runtime_asset_cache.gd")
 const BAKES := {
     "MainWingGI": "res://lighting/main_wing.res",
     "WestWingGI": "res://lighting/west_wing.res"
@@ -60,8 +61,7 @@ func _load_baked_data() -> void:
             probe.data = null
             continue
         var baked := load(path) as VoxelGIData
-        if baked == null or baked.get_octree_cells().is_empty() \
-                or baked.get_data_cells().is_empty():
+        if not RuntimeCache.valid_gi(baked):
             probe.data = null
             continue
         probe.data = baked

@@ -1,5 +1,6 @@
 extends Control
 
+const RuntimeCache = preload("res://gameplay/runtime_asset_cache.gd")
 const Controls = preload("res://gameplay/input_bindings.gd")
 const FitCenter = preload("res://ui/fit_centered_panel.gd")
 const SettingsPanel = preload("res://ui/settings_panel.gd")
@@ -34,6 +35,9 @@ var status_key := "menu.offline"
 var status_value := ""
 
 func _ready() -> void:
+    # Release cache-only references from the previous run. Live scene nodes
+    # retain their resources until Godot finishes the normal scene handoff.
+    RuntimeCache.clear()
     var preferences := get_node_or_null("/root/GameSettings")
     if preferences != null:
         preferences.call("set_menu_context", true)

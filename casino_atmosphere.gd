@@ -4,6 +4,7 @@ extends Node3D
 # Uses Godot 4.5.1 Forward+ for volumetric lighting and screen-space occlusion.
 @export var active: bool = true
 
+const RuntimeCache = preload("res://gameplay/runtime_asset_cache.gd")
 const GOLD = Color("#e8b76f")
 const CYAN = Color("#75d5dd")
 const WARM = Color("#ffdfb6")
@@ -20,6 +21,7 @@ var hybrid_sync_elapsed := 0.0
 var last_gi_lighting := false
 var last_standby := false
 var hybrid_mode_initialized := false
+var _settings: Node
 
 func _ready() -> void:
     # The one-time scene baker captures static neon frames and spotlights.
@@ -29,6 +31,7 @@ func _ready() -> void:
     var imported := get_parent().get_node_or_null("SketchfabFurniture")
     if imported != null and imported.has_signal("furniture_finalized"):
         imported.connect("furniture_finalized", _on_furniture_finalized)
+    _settings = get_node_or_null("/root/GameSettings")
     call_deferred("_build")
 
 func _build() -> void:
@@ -572,16 +575,7 @@ func _dust() -> void:
     # Fine atmospheric dust is distributed throughout both wings rather
     # than clustering under the five chandelier positions. Deliberately
     # non-emissive, tiny and slow: it must never resemble falling snow.
-    var mesh := SphereMesh.new()
-    mesh.radius = 0.007
-    mesh.height = 0.014
-    mesh.radial_segments = 6
-    mesh.rings = 4
-    var mat := StandardMaterial3D.new()
-    mat.albedo_color = Color(0.96, 0.86, 0.74, 0.22)
-    mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-    mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-    mesh.material = mat
+    var mesh := RuntimeCache.dust_mesh()
     # Broad, overlapping volumes cover the walkable hall at several heights.
     # Keep boxes below the ceiling and outside the floor.
     var dust_index := 0
@@ -643,20 +637,28 @@ func _process(delta: float) -> void:
         hybrid_sync_elapsed = 0.0
         _sync_hybrid_lights()
     # Accessibility affects only decorative animation, never anomaly lights.
-    var settings := get_node_or_null("/root/GameSettings")
-    var steady := settings != null and bool(settings.call("get_option", "reduce_light_motion"))
-    var wave := 0.0 if steady else 1.0
-    # Slow ambient breathing, never an anomaly-like sudden flicker.
+    var steady := is_instance_valid(_settings) and bool(_settings.call("get_option", "reduce_light_motion"))
+    # Keep full-rate motion and identical phases. In steady mode avoid sin()
+    # and redundant RenderingServer writes, even with two live rooms.
     for i in range(slot_glows.size()):
-        slot_glows[i].emission_energy_multiplier = 1.85 + (
-            wave * 0.20 * sin(elapsed * 1.1 + slot_phases[i]))
+        if not is_instance_valid(slot_glows[i]):
+            continue
+        var energy := 1.85 if steady else 1.85 + 0.20 * sin(elapsed * 1.1 + slot_phases[i])
+        if not steady or not is_equal_approx(slot_glows[i].emission_energy_multiplier, energy):
+            slot_glows[i].emission_energy_multiplier = energy
     for i in range(slot_spills.size()):
-        slot_spills[i].light_energy = 0.29 + (
-            wave * 0.04 * sin(elapsed * 1.1 + float(i) * 1.44))
+        if not is_instance_valid(slot_spills[i]):
+            continue
+        var energy := 0.29 if steady else 0.29 + 0.04 * sin(elapsed * 1.1 + float(i) * 1.44)
+        if not steady or not is_equal_approx(slot_spills[i].light_energy, energy):
+            slot_spills[i].light_energy = energy
     for i in range(signs.size()):
-        signs[i].emission_energy_multiplier = (
-            (1.6 if i == 0 else 1.32) +
-            wave * 0.08 * sin(elapsed * 0.58 + float(i)))
+        if not is_instance_valid(signs[i]):
+            continue
+        var base := 1.6 if i == 0 else 1.32
+        var energy := base if steady else base + 0.08 * sin(elapsed * 0.58 + float(i))
+        if not steady or not is_equal_approx(signs[i].emission_energy_multiplier, energy):
+            signs[i].emission_energy_multiplier = energy
     for i in range(plant_crowns.size()):
         # Slow <1-degree sway, deliberately subtle for an indoor casino.
         plant_crowns[i].rotation.z = 0.009 * sin(elapsed * 0.47 + float(i) * 1.7)

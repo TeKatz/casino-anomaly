@@ -194,6 +194,7 @@ var dynamic_frames := 0
 var dynamic_bad_windows := 0
 var dynamic_good_windows := 0
 var filtered_materials: Dictionary = {}
+var _material_registrations := 0
 var dirty := false
 var audio_unfocused := false
 var master_effects: Dictionary = {}
@@ -717,15 +718,29 @@ func _apply_material_filter(material: Material) -> void:
     var mat := material as BaseMaterial3D
     var mode := str(options["texture_filter"])
     if mode == "original":
-        if mat.has_meta("_original_sampler"):
+        if mat.has_meta("_original_sampler") and mat.texture_filter != int(mat.get_meta("_original_sampler")):
             mat.texture_filter = int(mat.get_meta("_original_sampler"))
         return
     if not mat.has_meta("_original_sampler"):
         mat.set_meta("_original_sampler", mat.texture_filter)
-    filtered_materials[mat.get_instance_id()] = weakref(mat)
+    var id := mat.get_instance_id()
+    if not filtered_materials.has(id) or (filtered_materials[id] as WeakRef).get_ref() != mat:
+        filtered_materials[id] = weakref(mat)
+        _material_registrations += 1
+        # Streamed rooms may contain unique material instances. WeakRef does
+        # not retain them, but dead dictionary entries must also be pruned.
+        if _material_registrations >= 256:
+            _material_registrations = 0
+            _prune_filtered_materials()
     var selected: int = {"bilinear": BaseMaterial3D.TEXTURE_FILTER_LINEAR, "trilinear": BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS, "anisotropic": BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC}[mode]
     if mat.texture_filter != selected:
         mat.texture_filter = selected
+
+func _prune_filtered_materials() -> void:
+    for id in filtered_materials.keys():
+        var reference: WeakRef = filtered_materials[id]
+        if not is_instance_valid(reference.get_ref()):
+            filtered_materials.erase(id)
 
 func _refresh_material_filters() -> void:
     # Packed scenes and imported material resources can be cached even when
@@ -960,6 +975,7 @@ func _process(delta: float) -> void:
         var message := "%d FPS" % Engine.get_frames_per_second()
         if options["performance_overlay"]:
             message += " | max %.1f ms | Draws %d | Objects %d | 3D %.0f%%" % [perf_worst, int(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)), int(Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME)), 100.0 * float(options["menu_render_scale"] if menu_context else get_tree().root.scaling_3d_scale)]
-        perf_label.text = message
+        if perf_label.text != message:
+            perf_label.text = message
     perf_elapsed = 0.0
     perf_worst = 0.0

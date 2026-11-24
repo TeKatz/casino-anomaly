@@ -4,6 +4,7 @@ extends Node3D
 # Low-poly original placeholders only disappear after the corresponding
 # complete glTF scene has been loaded and placed successfully.
 
+const RuntimeCache = preload("res://gameplay/runtime_asset_cache.gd")
 const FOLDER := "res://models/sketchfab/"
 const PREMIUM_ROULETTE = preload("res://models/casino_furniture/premium_roulette_table.tscn")
 signal furniture_finalized
@@ -168,11 +169,11 @@ func has_active_editor_preview() -> bool:
 
 func _load_scene(slug: String, filename: String = "scene.gltf") -> PackedScene:
     var path := FOLDER + slug + "/" + filename
-    if not ResourceLoader.exists(path):
-        return null
     if assets.has(path):
         return assets[path]
-    var scene: PackedScene = load(path) as PackedScene
+    if not ResourceLoader.exists(path):
+        return null
+    var scene: PackedScene = RuntimeCache.packed_scene(path)
     if scene != null:
         assets[path] = scene
     else:
@@ -182,11 +183,12 @@ func _load_scene(slug: String, filename: String = "scene.gltf") -> PackedScene:
 func _mesh_bounds(scene_root: Node3D) -> AABB:
     var result := AABB()
     var found := false
+    var inverse := scene_root.global_transform.affine_inverse()
     for candidate in scene_root.find_children("*", "MeshInstance3D", true, false):
         var part: MeshInstance3D = candidate as MeshInstance3D
         if part.mesh == null:
             continue
-        var xform: Transform3D = scene_root.global_transform.affine_inverse() * part.global_transform
+        var xform: Transform3D = inverse * part.global_transform
         var box: AABB = xform * part.get_aabb()
         result = result.merge(box) if found else box
         found = true
@@ -210,7 +212,7 @@ func _spawn(slug: String, label: String, spot: Vector3, max_width: float,
         push_error("Sketchfab model does not instantiate as a 3D node: " + slug)
         return null
     wrapper.add_child(model)
-    var size: AABB = _mesh_bounds(model)
+    var size: AABB = RuntimeCache.imported_bounds(FOLDER + slug + "/" + filename, model, _mesh_bounds)
     if size.size.y < 0.001 or maxf(size.size.x, size.size.z) < 0.001:
         wrapper.queue_free()
         push_warning("Empty or unorientable imported Sketchfab mesh: " + slug)

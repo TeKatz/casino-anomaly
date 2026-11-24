@@ -172,6 +172,7 @@ jobs:
             @('tests/premium_tables_and_bottles_qa.gd', 'Casino Anomaly premium tables and editable bottles QA PASS'),
             @('tests/dev_anomaly_tool_qa.gd', 'Casino Anomaly developer anomaly picker QA PASS'),
             @('tests/anomaly_variations_qa.gd', 'Casino Anomaly ten subtle anomalies QA PASS'),
+            @('tests/runtime_asset_cache_qa.gd', 'Casino Anomaly runtime asset cache QA PASS'),
             @('tests/streaming_qa.gd', 'Casino Anomaly seamless two-room streaming QA PASS'),
             @('tests/backrooms_traversal_qa.gd', 'Casino Anomaly Backrooms traversal QA PASS'),
             @('tests/settings_pause_qa.gd', 'Casino Anomaly pause, persistent settings and world-camera input QA PASS'),

@@ -6,6 +6,7 @@ extends Node3D
 # Geometry is normalized by its imported AABB to protect against differences
 # in asset pivots and original Blender measurement units.
 
+const RuntimeCache = preload("res://gameplay/runtime_asset_cache.gd")
 const RESOLUTION := "1k"
 const BAR_SHIFT_X := -0.95
 
@@ -286,7 +287,7 @@ func _asset_available(identifier: String) -> bool:
 func _resource(identifier: String) -> PackedScene:
     if _scene_cache.has(identifier):
         return _scene_cache[identifier]
-    var imported: PackedScene = load(_asset_path(identifier)) as PackedScene
+    var imported: PackedScene = RuntimeCache.packed_scene(_asset_path(identifier))
     if imported == null:
         push_error("Missing or invalid Poly Haven model: " + identifier)
         return null
@@ -296,11 +297,12 @@ func _resource(identifier: String) -> PackedScene:
 func _bounds_for(model: Node3D) -> AABB:
     var found := false
     var result := AABB()
+    var inverse := model.global_transform.affine_inverse()
     for candidate in model.find_children("*", "MeshInstance3D", true, false):
         var mesh_node: MeshInstance3D = candidate as MeshInstance3D
         if mesh_node == null or mesh_node.mesh == null:
             continue
-        var relative: Transform3D = model.global_transform.affine_inverse() * mesh_node.global_transform
+        var relative: Transform3D = inverse * mesh_node.global_transform
         var transformed: AABB = relative * mesh_node.get_aabb()
         if not found:
             result = transformed
@@ -380,7 +382,7 @@ func _place(identifier: String, label: String, anchor: Vector3,
         successful_model_ids[identifier] = true
         return wrapper
 
-    var bounds := _bounds_for(imported)
+    var bounds := _bounds_for(imported) if has_authored_model else RuntimeCache.imported_bounds(_asset_path(identifier) + "|" + mesh_variant, imported, _bounds_for)
     if bounds.size.y <= 0.0001:
         if generated:
             wrapper.queue_free()

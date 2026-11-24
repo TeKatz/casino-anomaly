@@ -23,10 +23,15 @@ var world_ambience_enabled := false
 var backrooms_mode := false
 var _fade: Tween
 var _ambience_fade: Tween
+var _settings: Node
+var _loop_state: Node
 
 
 func _ready() -> void:
     process_mode = Node.PROCESS_MODE_ALWAYS
+    _settings = get_node_or_null("/root/GameSettings")
+    _loop_state = get_node_or_null("/root/LoopState")
+    set_process(world_ambience_enabled)
     menu_player = AudioStreamPlayer.new()
     menu_player.name = "MenuMusic"
     menu_player.bus = "MUSIC"
@@ -68,6 +73,7 @@ func set_world_ambience_enabled(enabled: bool) -> void:
     if world_ambience_enabled == enabled:
         return
     world_ambience_enabled = enabled
+    set_process(enabled)
     if _ambience_fade != null and _ambience_fade.is_running():
         _ambience_fade.kill()
     if enabled:
@@ -257,12 +263,18 @@ func _process(delta: float) -> void:
         return
     if world_reverb != null:
         var wet := 0.20 if backrooms_mode else (0.26 if corridor_target else 0.045)
-        var settings := get_node_or_null("/root/GameSettings")
-        var mode := str(settings.call("get_option", "reverb_mode")) if settings != null else "normal"
+        if not is_instance_valid(_settings):
+            _settings = get_node_or_null("/root/GameSettings")
+        var mode := str(_settings.call("get_option", "reverb_mode")) if is_instance_valid(_settings) else "normal"
         wet *= 0.0 if mode == "off" else (0.35 if mode == "reduced" else 1.0)
-        world_reverb.wet = lerpf(world_reverb.wet, wet, 1.0 - exp(-4.0 * delta))
+        var next_wet := lerpf(world_reverb.wet, wet, 1.0 - exp(-4.0 * delta))
+        if world_reverb.wet != next_wet:
+            world_reverb.wet = next_wet
     if pressure_player != null and pressure_player.playing:
-        var state := get_node_or_null("/root/LoopState")
-        var visits := int(state.visited_loops) if state != null else 0
-        pressure_player.volume_db = lerpf(pressure_player.volume_db,
-                -60.0 if backrooms_mode else pressure_db_for_visits(visits), 1.0 - exp(-0.50 * delta))
+        if not is_instance_valid(_loop_state):
+            _loop_state = get_node_or_null("/root/LoopState")
+        var visits := int(_loop_state.get("visited_loops")) if is_instance_valid(_loop_state) else 0
+        var target := -60.0 if backrooms_mode else pressure_db_for_visits(visits)
+        var next_db := lerpf(pressure_player.volume_db, target, 1.0 - exp(-0.50 * delta))
+        if pressure_player.volume_db != next_db:
+            pressure_player.volume_db = next_db

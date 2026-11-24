@@ -15,6 +15,8 @@ const CATEGORIES := ["settings.graphics", "settings.audio", "settings.controls",
 var tab_row: VBoxContainer
 var scroll: ScrollContainer
 var preview_dialog: ConfirmationDialog
+var _preview_last_seconds := -1
+var _preview_last_language := ""
 var reset_dialog: ConfirmationDialog
 var preset_select: OptionButton
 var reset_button: Button
@@ -402,6 +404,7 @@ func _preview_changed(active: bool) -> void:
         preview_dialog.title = _tr("Keep display settings?", "Anzeigeeinstellungen behalten?")
         preview_dialog.get_ok_button().text = _tr("Keep", "Behalten")
         preview_dialog.get_cancel_button().text = _tr("Revert", "Zurücksetzen")
+        _preview_last_seconds = -1
         set_process(true)
         _process(0.0)
         preview_dialog.popup_centered()
@@ -412,7 +415,12 @@ func _preview_changed(active: bool) -> void:
 
 func _process(_delta: float) -> void:
     if preview_dialog != null:
-        preview_dialog.dialog_text = _tr("Reverting in %d seconds.", "Zurücksetzen in %d Sekunden.") % settings_node.display_preview_seconds()
+        var seconds: int = settings_node.display_preview_seconds()
+        var language := str(settings_node.get_option("language"))
+        if seconds != _preview_last_seconds or language != _preview_last_language:
+            _preview_last_seconds = seconds
+            _preview_last_language = language
+            preview_dialog.dialog_text = _tr("Reverting in %d seconds.", "Zurücksetzen in %d Sekunden.") % seconds
 
 func _quality_choices(allow_off: bool = true, ultra: bool = false) -> Array:
     var choices := [[_tr("Original", "Original"), "original"]]

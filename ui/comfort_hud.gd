@@ -6,6 +6,9 @@ var caption: Label
 var until := 0
 var current_cue := ""
 var player: CharacterBody3D
+var _crosshair_enabled := false
+var _captions_enabled := false
+var _german := false
 
 func _ready() -> void:
     layer = 44
@@ -55,8 +58,14 @@ func _on_option(key: String) -> void:
     caption.add_theme_color_override("font_color", Color.WHITE)
     caption.add_theme_constant_override("outline_size", 4)
     caption.add_theme_color_override("font_outline_color", Color.BLACK)
+    _crosshair_enabled = bool(Controls.pref(self, "hud_visible", true)) and Controls.pref(self, "crosshair", "off") != "off"
+    _captions_enabled = bool(Controls.pref(self, "sound_captions", false))
+    _german = Controls.pref(self, "language", "en") == "de"
     crosshair.queue_redraw()
     _sync()
+    # Player/loop state can change directly during a handoff. Keep immediate
+    # state tracking only while at least one accessibility feature is active.
+    set_process(_crosshair_enabled or _captions_enabled)
 
 func _draw_crosshair() -> void:
     var style := str(Controls.pref(self, "crosshair", "off"))
@@ -81,13 +90,22 @@ func _process(_delta: float) -> void:
 
 func _sync() -> void:
     var available := is_instance_valid(player) and not bool(player.get("interaction_locked")) and not get_tree().paused
-    crosshair.visible = available and bool(Controls.pref(self, "hud_visible", true)) and Controls.pref(self, "crosshair", "off") != "off"
+    var show_crosshair := available and _crosshair_enabled
+    if crosshair.visible != show_crosshair:
+        crosshair.visible = show_crosshair
+    if not available or not _captions_enabled:
+        if captions.visible:
+            captions.hide()
+        return
     var cue := current_cue if Time.get_ticks_msec() < until else ""
     if cue.is_empty() and is_instance_valid(player) and bool(player.get("backrooms_mode")):
         var controller := player.get_parent().get_node_or_null("LoopController")
         if controller != null and not bool(controller.get("backrooms_scored")):
             cue = "hum"
-    captions.visible = available and bool(Controls.pref(self, "sound_captions", false)) and not cue.is_empty()
-    if captions.visible:
-        var de: bool = Controls.pref(self, "language", "en") == "de"
-        caption.text = ("[Schritte]" if de else "[Footsteps]") if cue == "steps" else ("[Elektrisches Brummen]" if de else "[Electrical hum]")
+    var show_caption := not cue.is_empty()
+    if captions.visible != show_caption:
+        captions.visible = show_caption
+    if show_caption:
+        var message := ("[Schritte]" if _german else "[Footsteps]") if cue == "steps" else ("[Elektrisches Brummen]" if _german else "[Electrical hum]")
+        if caption.text != message:
+            caption.text = message
