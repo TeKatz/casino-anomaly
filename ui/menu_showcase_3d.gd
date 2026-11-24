@@ -61,14 +61,14 @@ func _resize_render_target() -> void:
 
 
 func _on_setting(key: String) -> void:
-    if key not in ["", "menu_camera_motion", "menu_background", "menu_camera_speed", "menu_render_scale", "menu_darkness", "aa_mode", "taa", "upscaling", "anisotropy", "shadow_quality", "shadow_distance", "image_contrast", "brightness", "saturation", "fog_quality", "ssao_quality", "ssil", "bloom", "bloom_strength", "texture_filter"]:
+    if key not in ["", "reduced_motion", "reduced_menu_motion", "menu_camera_motion", "menu_background", "menu_camera_speed", "menu_render_scale", "menu_darkness", "aa_mode", "taa", "upscaling", "anisotropy", "shadow_quality", "shadow_distance", "image_contrast", "brightness", "saturation", "fog_quality", "ssao_quality", "ssil", "bloom", "bloom_strength", "texture_filter"]:
         return
     var settings := get_node_or_null("/root/GameSettings")
     if settings == null:
         return
-    if key == "" or key == "menu_camera_motion" or key == "menu_background":
+    if key in ["", "menu_camera_motion", "menu_background", "reduced_motion", "reduced_menu_motion"]:
         background_mode = str(settings.call("get_option", "menu_background"))
-        motion_enabled = background_mode == "live" and bool(settings.call("get_option", "menu_camera_motion"))
+        motion_enabled = background_mode == "live" and bool(settings.call("get_option", "menu_camera_motion")) and not bool(settings.call("get_option", "reduced_motion")) and not bool(settings.call("get_option", "reduced_menu_motion"))
         if key == "menu_background":
             if background_mode == "abstract":
                 hide()

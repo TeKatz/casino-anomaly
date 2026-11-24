@@ -18,6 +18,13 @@ const GATE_X := -47.7
 const GATE_HEIGHT := 3.54
 
 
+static func choice_label(context: Node, is_anomaly: bool) -> String:
+    # Staged rooms are not necessarily in the tree yet.
+    var settings := context.get_node_or_null("/root/GameSettings") if context.is_inside_tree() else null
+    var symbols := settings != null and bool(settings.call("get_option", "door_symbols"))
+    var caption := Loc.t("world.anomaly", context) if is_anomaly else Loc.t("world.normal", context)
+    return ("! " if is_anomaly else "= ") + caption if symbols else caption
+
 func lane_z(lane: String) -> float:
     return EXIT_Z_LEFT if lane == "left" else EXIT_Z_RIGHT
 
@@ -79,7 +86,9 @@ func prepare_room(room: Node3D) -> bool:
             var sign := node as Label3D
             if sign.text == "EXIT":
                 # Left = Anomalie (+Z), right = Normal (-Z).
-                sign.text = Loc.t("world.anomaly", room) if absf(sign.position.z - EXIT_Z_LEFT) < 0.6 else Loc.t("world.normal", room)
+                var is_anomaly := absf(sign.position.z - EXIT_Z_LEFT) < 0.6
+                sign.set_meta("_choice_sign", true)
+                sign.text = choice_label(room, is_anomaly)
             continue
         if not node is MeshInstance3D:
             continue

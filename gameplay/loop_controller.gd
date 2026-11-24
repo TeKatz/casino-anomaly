@@ -70,6 +70,8 @@ var backrooms_environment: Environment
 var backrooms_exit_connector: Node3D
 var backrooms_pickup: Node3D
 var backrooms_scored := false
+var backrooms_entry_blend: Environment
+var backrooms_entry_tween: Tween
 var backrooms_return_environment: Environment
 var backrooms_return_lighting_ready := false
 var backrooms_return_light_weight := 0.0
@@ -224,10 +226,10 @@ func _on_language_changed(key: String) -> void:
 			var probe := room.get_node_or_null("Lighting/BackroomsVoxelGI") as VoxelGI
 			if probe != null and settings != null:
 				probe.visible = bool(settings.get_option("voxel_gi"))
-		if key == "language" and is_instance_valid(staged):
+		if key in ["language", "door_symbols"] and is_instance_valid(staged):
 			_refresh_exit_signs(staged)
 		return
-	if key != "language":
+	if key not in ["language", "door_symbols"]:
 		return
 	_refresh_exit_signs(room)
 	if staged != null and is_instance_valid(staged):
@@ -258,9 +260,9 @@ func _refresh_exit_signs(target_room: Node3D) -> void:
 	if architecture == null:
 		return
 	for node in architecture.get_children():
-		if node is Label3D and (node.text in ["ANOMALIE", "ANOMALY", "NORMAL"]):
+		if node is Label3D and (node.has_meta("_choice_sign") or node.text in ["ANOMALIE", "ANOMALY", "NORMAL"]):
 			var left_side: bool = absf(node.position.z - EXIT_Z_LEFT) < 0.6
-			node.text = Loc.t("world.anomaly", self) if left_side else Loc.t("world.normal", self)
+			node.text = StreamPortals.choice_label(self, left_side)
 
 
 func _candidate_lane(local_z: float) -> String:
@@ -740,6 +742,7 @@ func _enter_backrooms(lane: String) -> void:
 	connector.reparent(backrooms_maze, true)
 	connector.name = "BackroomsArrivalConnector"
 	var old_env := previous.get_node_or_null("WorldEnvironment") as WorldEnvironment
+	var arrival_source: Environment = old_env.environment if old_env != null else null
 	if old_env != null:
 		old_env.environment = null
 	var old_rig := previous.get_node_or_null("VoxelGIRig")
@@ -762,6 +765,14 @@ func _enter_backrooms(lane: String) -> void:
 	env.environment = backrooms_environment
 	(room.get_node("Lighting") as Node3D).show()
 	var settings := get_node_or_null("/root/GameSettings")
+	if settings != null and bool(settings.call("get_option", "soft_light_transitions")) and arrival_source != null and backrooms_environment != null:
+		backrooms_entry_blend = backrooms_environment.duplicate() as Environment
+		env.set_meta("_return_blend", true)
+		Backrooms.blend_return_environment(arrival_source, backrooms_environment, backrooms_entry_blend, 0.0)
+		env.environment = backrooms_entry_blend
+		backrooms_entry_tween = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		backrooms_entry_tween.tween_method(_blend_entry.bind(arrival_source, env), 0.0, 1.0, 0.8)
+		backrooms_entry_tween.tween_callback(_finish_entry_blend.bind(env))
 	var probe := room.get_node_or_null("Lighting/BackroomsVoxelGI") as VoxelGI
 	if probe != null:
 		# Old local bakes can still be present after pulling this update.
@@ -801,6 +812,18 @@ func _enter_backrooms(lane: String) -> void:
 	player.call("restore_streaming_view")
 	transitioning = false
 	print("Backrooms reveal: active camera=", get_viewport().get_camera_3d() == player.get_node("Camera3D"), ", host=", previous.name)
+
+
+func _blend_entry(weight: float, source: Environment, env: WorldEnvironment) -> void:
+	if is_instance_valid(env) and backrooms_entry_blend != null:
+		Backrooms.blend_return_environment(source, backrooms_environment, backrooms_entry_blend, weight)
+
+
+func _finish_entry_blend(env: WorldEnvironment) -> void:
+	if is_instance_valid(env):
+		env.environment = backrooms_environment
+		env.remove_meta("_return_blend")
+	backrooms_entry_blend = null
 
 
 func _physics_process(_delta: float) -> void:

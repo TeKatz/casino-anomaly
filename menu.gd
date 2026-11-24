@@ -1,5 +1,7 @@
 extends Control
 
+const Controls = preload("res://gameplay/input_bindings.gd")
+const FitCenter = preload("res://ui/fit_centered_panel.gd")
 const SettingsPanel = preload("res://ui/settings_panel.gd")
 const CreditsPanel = preload("res://ui/credits_panel.gd")
 const ProfilePanel = preload("res://ui/profile_panel.gd")
@@ -72,9 +74,10 @@ func _ready() -> void:
     $CasinoPanorama.panorama_failed.connect(_on_panorama_failed)
     if DisplayServer.get_name() != "headless":
         var first_launch := not get_tree().root.has_meta("_casino_intro_seen")
-        $StartupIntro.begin(first_launch)
+        $StartupIntro.begin(first_launch and not bool(Controls.pref(self, "skip_creator_intro", false)))
         $StartupIntro.finished.connect(_on_startup_finished)
-    call_deferred("_check_update")
+    if bool(Controls.pref(self, "auto_updates", true)):
+        call_deferred("_check_update")
 
 func _exit_tree() -> void:
     var preferences := get_node_or_null("/root/GameSettings")
@@ -189,7 +192,7 @@ func _build_overlay(content: Control) -> Control:
     shade.color = Color(0.015, 0.024, 0.04, 0.94)
     overlay.add_child(shade)
     shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-    var center := CenterContainer.new()
+    var center := FitCenter.new()
     overlay.add_child(center)
     center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     center.add_child(content)
@@ -208,6 +211,12 @@ func _show_overlay(overlay: Control) -> void:
     overlay.visible = true
     overlay.mouse_filter = Control.MOUSE_FILTER_STOP
     overlay.move_to_front()
+    if bool(Controls.pref(self, "reduced_menu_motion", false)):
+        overlay.modulate.a = 1.0
+        overlay.position.x = 0.0
+        if previous != null and previous != overlay:
+            previous.hide()
+        return
     overlay.modulate.a = 0.0
     overlay.position.x = 18.0
     overlay_tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
@@ -229,6 +238,10 @@ func _hide_overlay(overlay: Control) -> void:
     if active_overlay == overlay:
         active_overlay = null
     overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+    if bool(Controls.pref(self, "reduced_menu_motion", false)):
+        overlay.hide()
+        overlay.position.x = 0.0
+        return
     overlay_tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
     overlay_tween.tween_property(overlay, "modulate:a", 0.0, 0.18)
     overlay_tween.tween_property(overlay, "position:x", 12.0, 0.18)
@@ -297,6 +310,8 @@ func _on_startup_finished() -> void:
 
 
 func _animate_intro() -> void:
+    if bool(Controls.pref(self, "reduced_menu_motion", false)):
+        return
     $Brand.modulate.a = 0.0
     $CenterPanel.modulate.a = 0.0
     var tween := create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
@@ -333,8 +348,7 @@ func _on_scene_load_failed(_path: String) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-    if event is InputEventKey and event.pressed and not event.echo \
-            and event.keycode == KEY_ESCAPE and active_overlay != null:
+    if active_overlay != null and (Controls.pressed(event, "pause") or event.is_action_pressed("ui_cancel")):
         # During cross-fades the outgoing screen may still be visible;
         # Escape always belongs to the CURRENT menu, never the outgoing one.
         if active_overlay == archive_overlay:
@@ -345,6 +359,20 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _on_quit() -> void:
+    if changing_scene:
+        return
+    if bool(Controls.pref(self, "confirm_quit", false)):
+        var dialog := ConfirmationDialog.new()
+        dialog.title = "Casino Anomaly"
+        dialog.dialog_text = "Spiel beenden?" if Controls.pref(self, "language", "en") == "de" else "Quit the game?"
+        add_child(dialog)
+        dialog.confirmed.connect(_quit_confirmed)
+        dialog.canceled.connect(dialog.queue_free)
+        dialog.popup_centered()
+        return
+    _quit_confirmed()
+
+func _quit_confirmed() -> void:
     if changing_scene:
         return
     changing_scene = true

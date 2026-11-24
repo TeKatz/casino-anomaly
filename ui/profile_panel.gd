@@ -5,6 +5,7 @@ signal back_pressed
 signal launch_requested(scene_path: String)
 signal selection_changed(slot: int, occupied: bool)
 
+const Controls = preload("res://gameplay/input_bindings.gd")
 const MenuStyle = preload("res://ui/menu_style.gd")
 const LuminousButton = preload("res://ui/luminous_button.gd")
 const GOLD := Color("#dcb477")
@@ -234,7 +235,7 @@ func _request_new_run() -> void:
         _new_run()
         return
     var state := get_node_or_null("/root/LoopState")
-    if state != null and state.has_continue():
+    if state != null and state.has_continue() and bool(Controls.pref(self, "confirm_new_run", true)):
         new_run_dialog.title = _word("Neuer Durchlauf", "New run")
         new_run_dialog.dialog_text = _word(
             "Aktuellen Durchlauf überschreiben? Das Anomalie-Archiv bleibt erhalten.",
@@ -256,7 +257,11 @@ func _new_run() -> void:
     elif profiles.active_slot != selected_slot and not profiles.select_profile(selected_slot):
         return
     state.start_new_run()
-    launch_requested.emit("res://gameplay/tutorial.tscn")
+    if bool(Controls.pref(self, "skip_tutorial", false)):
+        state.complete_tutorial()
+        launch_requested.emit("res://main.tscn")
+    else:
+        launch_requested.emit("res://gameplay/tutorial.tscn")
 
 
 func _continue() -> void:

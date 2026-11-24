@@ -7,6 +7,7 @@ extends Button
 @export var symbol := ""
 @export var compact_icon := false
 
+const Controls = preload("res://gameplay/input_bindings.gd")
 const MenuStyle = preload("res://ui/menu_style.gd")
 const MenuIcons = preload("res://ui/menu_icons.gd")
 var _motion: Tween
@@ -100,6 +101,10 @@ func _press_changed(pressed: bool) -> void:
 func _animate_size(target: Vector2, duration: float) -> void:
     if _motion != null and _motion.is_running():
         _motion.kill()
+    if bool(Controls.pref(self, "reduced_menu_motion", false)):
+        scale = Vector2.ONE
+        self_modulate = Color.WHITE
+        return
     _motion = create_tween().set_parallel(true)
     _motion.tween_property(self, "scale", target, duration).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
     var tint := Color(1.06, 1.07, 1.09, 1.0) if target.x > 1.0 else Color.WHITE

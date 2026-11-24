@@ -5,6 +5,8 @@ extends CanvasLayer
 ## rather than making Windows appear to have frozen.
 signal transition_failed(target_path: String)
 
+const Controls = preload("res://gameplay/input_bindings.gd")
+const FitCenter = preload("res://ui/fit_centered_panel.gd")
 const Loc = preload("res://gameplay/localization.gd")
 const ButtonSkin = preload("res://ui/luminous_button.gd")
 const SCENES := ["res://gameplay/tutorial.tscn", "res://main.tscn"]
@@ -62,7 +64,7 @@ func _build_screen() -> void:
     wash.mouse_filter = Control.MOUSE_FILTER_IGNORE
     overlay.add_child(wash)
 
-    var center := CenterContainer.new()
+    var center := FitCenter.new()
     center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     center.mouse_filter = Control.MOUSE_FILTER_IGNORE
     overlay.add_child(center)
@@ -207,7 +209,7 @@ func _process(delta: float) -> void:
         return
     elapsed += delta
     if not failed:
-        mark.modulate.a = 0.84 + 0.16 * sin(elapsed * 2.5)
+        mark.modulate.a = 0.84 + 0.16 * sin(elapsed * 2.5) if bool(Controls.pref(self, "loading_motion", true)) and not bool(Controls.pref(self, "reduced_menu_motion", false)) else 1.0
     if not requested or failed or committing:
         return
     var progress: Array = []

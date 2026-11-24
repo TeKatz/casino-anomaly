@@ -642,17 +642,21 @@ func _process(delta: float) -> void:
     if hybrid_sync_elapsed >= 0.50:
         hybrid_sync_elapsed = 0.0
         _sync_hybrid_lights()
+    # Accessibility affects only decorative animation, never anomaly lights.
+    var settings := get_node_or_null("/root/GameSettings")
+    var steady := settings != null and bool(settings.call("get_option", "reduce_light_motion"))
+    var wave := 0.0 if steady else 1.0
     # Slow ambient breathing, never an anomaly-like sudden flicker.
     for i in range(slot_glows.size()):
         slot_glows[i].emission_energy_multiplier = 1.85 + (
-            0.20 * sin(elapsed * 1.1 + slot_phases[i]))
+            wave * 0.20 * sin(elapsed * 1.1 + slot_phases[i]))
     for i in range(slot_spills.size()):
         slot_spills[i].light_energy = 0.29 + (
-            0.04 * sin(elapsed * 1.1 + float(i) * 1.44))
+            wave * 0.04 * sin(elapsed * 1.1 + float(i) * 1.44))
     for i in range(signs.size()):
         signs[i].emission_energy_multiplier = (
             (1.6 if i == 0 else 1.32) +
-            0.08 * sin(elapsed * 0.58 + float(i)))
+            wave * 0.08 * sin(elapsed * 0.58 + float(i)))
     for i in range(plant_crowns.size()):
         # Slow <1-degree sway, deliberately subtle for an indoor casino.
         plant_crowns[i].rotation.z = 0.009 * sin(elapsed * 0.47 + float(i) * 1.7)

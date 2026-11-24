@@ -3,6 +3,7 @@ extends Control
 ## ProfilePanel and never alter its position. Only known anomaly counts/names
 ## of correctly unlocked entries are displayed; unknowns stay unnamed.
 signal open_requested(mode: String)
+const Controls = preload("res://gameplay/input_bindings.gd")
 const MenuStyle = preload("res://ui/menu_style.gd")
 const LuminousButton = preload("res://ui/luminous_button.gd")
 const Catalog = preload("res://gameplay/anomaly_catalog.gd")
@@ -282,6 +283,7 @@ func _fill(slot: int) -> void:
 
 func sync_selection(slot: int, occupied: bool, animated: bool = true) -> void:
     _stop_motion()
+    animated = animated and not bool(Controls.pref(self, "reduced_menu_motion", false))
     if not occupied or slot <= 0:
         displayed_slot = 0
         shown = false

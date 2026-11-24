@@ -3,6 +3,7 @@ extends CanvasLayer
 ## while the SceneTree is paused and follows the same player across handoffs.
 
 const Controls = preload("res://gameplay/input_bindings.gd")
+const FitCenter = preload("res://ui/fit_centered_panel.gd")
 const SettingsPanel = preload("res://ui/settings_panel.gd")
 const CreditsPanel = preload("res://ui/credits_panel.gd")
 const ArchivePanel = preload("res://ui/anomaly_archive_panel.gd")
@@ -40,7 +41,7 @@ func _ready() -> void:
     dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     panel_root.add_child(dim)
 
-    var center := CenterContainer.new()
+    var center := FitCenter.new()
     center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     panel_root.add_child(center)
     pause_panel = PanelContainer.new()
@@ -81,7 +82,7 @@ func _ready() -> void:
     _add_button(stack, "pause.new_game", func() -> void: _confirm_action("new"))
     _add_button(stack, "pause.load", func() -> void: _confirm_action("load"))
     _add_button(stack, "pause.menu", _go_to_main_menu)
-    _add_button(stack, "pause.quit", get_tree().quit)
+    _add_button(stack, "pause.quit", _request_quit)
 
     settings_panel = SettingsPanel.new()
     settings_panel.visible = false
@@ -220,11 +221,11 @@ func _pause() -> void:
     settings_panel.visible = false
     credits_panel.visible = false
     archive_panel.visible = false
-    panel_root.modulate.a = 0.0
+    panel_root.modulate.a = 0.0 if not bool(Controls.pref(self, "reduced_menu_motion", false)) else 1.0
     if intro_tween != null and intro_tween.is_running():
         intro_tween.kill()
     intro_tween = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
-    intro_tween.tween_property(panel_root, "modulate:a", 1.0, 0.23).set_trans(Tween.TRANS_CUBIC)
+    intro_tween.tween_property(panel_root, "modulate:a", 1.0, 0.0 if bool(Controls.pref(self, "reduced_menu_motion", false)) else 0.23).set_trans(Tween.TRANS_CUBIC)
     get_tree().paused = true
     _fade_panel(pause_panel)
     Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -286,18 +287,21 @@ func _close_archive() -> void:
 func _fade_panel(panel: Control) -> void:
     if panel_tween != null and panel_tween.is_running():
         panel_tween.kill()
-    panel.pivot_offset = panel.size * 0.5
-    panel.scale = Vector2(0.984, 0.984)
+    if bool(Controls.pref(self, "reduced_menu_motion", false)):
+        panel.modulate.a = 1.0
+        return
     panel.modulate.a = 0.0
     panel_tween = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
     panel_tween.set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
     panel_tween.tween_property(panel, "modulate:a", 1.0, 0.24)
-    panel_tween.tween_property(panel, "scale", Vector2.ONE, 0.24)
 
 
 func _confirm_action(action: String) -> void:
     var state := get_node_or_null("/root/LoopState")
     if action == "load" and (state == null or not state.has_continue()):
+        return
+    if action == "new" and not bool(Controls.pref(self, "confirm_new_run", true)):
+        _run_action(action)
         return
     confirmation_action = action
     _refresh_localization()
@@ -315,13 +319,28 @@ func _run_action(action: String) -> void:
     Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
     if action == "new":
         state.start_new_run()
-        get_tree().change_scene_to_file("res://gameplay/tutorial.tscn")
+        if bool(Controls.pref(self, "skip_tutorial", false)):
+            state.complete_tutorial()
+            get_tree().change_scene_to_file("res://main.tscn")
+        else:
+            get_tree().change_scene_to_file("res://gameplay/tutorial.tscn")
     else:
         state.load_run()
         get_tree().change_scene_to_file(
             "res://main.tscn" if state.tutorial_done else "res://gameplay/tutorial.tscn"
         )
 
+
+func _request_quit() -> void:
+    if not bool(Controls.pref(self, "confirm_quit", false)):
+        get_tree().quit()
+        return
+    confirmation_action = "quit"
+    confirmation.dialog_text = "Spiel beenden?" if Controls.pref(self, "language", "en") == "de" else "Quit the game?"
+    for connection in confirmation.confirmed.get_connections():
+        confirmation.confirmed.disconnect(connection["callable"])
+    confirmation.confirmed.connect(get_tree().quit, CONNECT_ONE_SHOT)
+    confirmation.popup_centered()
 
 func _go_to_main_menu() -> void:
     get_tree().paused = false
