@@ -21,6 +21,9 @@ const DEFAULTS := {
     "graphics_preset": "custom",
     "upscaling": "bilinear",
     "anisotropy": 8,
+    "texture_filter": "original",
+    "dynamic_resolution": false,
+    "dynamic_target_fps": 60,
     "shadow_quality": "original",
     "shadow_distance": "original",
     "fog_quality": "original",
@@ -57,7 +60,8 @@ const PRESETS := {
         "upscaling": "fsr1",
         "aa_mode": "fxaa",
         "anisotropy": 2,
-        "voxel_gi": false,
+        "texture_filter": "anisotropic",
+1679 false,
         "shadow_quality": "low",
         "shadow_distance": "low",
         "fog_quality": "off",
@@ -72,7 +76,8 @@ const PRESETS := {
         "upscaling": "fsr2",
         "aa_mode": "taa",
         "anisotropy": 4,
-        "voxel_gi": true,
+        "texture_filter": "anisotropic",
+2085 true,
         "shadow_quality": "medium",
         "shadow_distance": "medium",
         "fog_quality": "low",
@@ -87,7 +92,8 @@ const PRESETS := {
         "upscaling": "bilinear",
         "aa_mode": "taa",
         "anisotropy": 8,
-        "voxel_gi": true,
+        "texture_filter": "anisotropic",
+2494 true,
         "shadow_quality": "original",
         "shadow_distance": "original",
         "fog_quality": "original",
@@ -102,7 +108,8 @@ const PRESETS := {
         "upscaling": "bilinear",
         "aa_mode": "taa",
         "anisotropy": 16,
-        "voxel_gi": true,
+        "texture_filter": "anisotropic",
+2927 true,
         "shadow_quality": "ultra",
         "shadow_distance": "high",
         "fog_quality": "high",
@@ -113,11 +120,11 @@ const PRESETS := {
         "particle_quality": "high"
     }
 }
-const GRAPHICS_KEYS := ["window_mode","resolution","monitor","vsync","vsync_mode","fps_limit","render_scale","image_contrast","taa","aa_mode","voxel_gi","graphics_preset","upscaling","anisotropy","shadow_quality","shadow_distance","fog_quality","reflection_quality","ssao_quality","ssil","bloom","bloom_strength","brightness","saturation","particle_quality","fps_display","performance_overlay","menu_background","menu_render_scale","menu_fps_limit","menu_camera_motion","menu_camera_speed","menu_darkness"]
+const GRAPHICS_KEYS := ["window_mode","resolution","monitor","vsync","vsync_mode","fps_limit","render_scale","image_contrast","taa","aa_mode","voxel_gi","graphics_preset","upscaling","anisotropy","texture_filter","dynamic_resolution","dynamic_target_fps","shadow_quality","shadow_distance","fog_quality","reflection_quality","ssao_quality","ssil","bloom","bloom_strength","brightness","saturation","particle_quality","fps_display","performance_overlay","menu_background","menu_render_scale","menu_fps_limit","menu_camera_motion","menu_camera_speed","menu_darkness"]
 const DISPLAY_KEYS := ["window_mode", "resolution", "monitor"]
 const VOLUME_KEYS := ["master_volume", "music_volume", "sfx_volume", "ui_volume"]
 const ENV_KEYS := ["image_contrast", "brightness", "saturation", "fog_quality", "ssao_quality", "ssil", "bloom", "bloom_strength"]
-const NODE_KEYS := ["shadow_quality", "shadow_distance", "particle_quality", "reflection_quality"]
+const NODE_KEYS := ["shadow_quality", "shadow_distance", "particle_quality", "reflection_quality", "texture_filter"]
 const VIEW_KEYS := ["render_scale", "aa_mode", "taa", "upscaling", "anisotropy", "shadow_quality"]
 const QUALITY_KEYS := ["fog_quality", "ssao_quality", "reflection_quality"]
 const PREVIEW_SECONDS := 15.0
@@ -126,6 +133,13 @@ var options: Dictionary = DEFAULTS.duplicate(true)
 var save_timer: Timer
 var preview_timer: Timer
 var preview_before: Dictionary = {}
+var preview_screen := -1
+var preview_window_size := Vector2i.ZERO
+var preview_window_position := Vector2i.ZERO
+var dynamic_elapsed := 0.0
+var dynamic_frames := 0
+var dynamic_bad_windows := 0
+var dynamic_good_windows := 0
 var dirty := false
 var menu_context := false
 var overlay: CanvasLayer
@@ -210,16 +224,27 @@ func reset_category(index: int) -> void:
     var patch := {}
     for key in groups[index]:
         patch[key] = DEFAULTS[key]
-    if index == 0:
+    if index == 0 and _display_differs(patch):
         _begin_display_preview()
     _change(patch, true)
 
 func reset_all() -> void:
-    _begin_display_preview()
+    if _display_differs(DEFAULTS):
+        _begin_display_preview()
     _change(DEFAULTS, true)
+
+func _display_differs(patch: Dictionary) -> bool:
+    for key in DISPLAY_KEYS:
+        if patch.has(key) and options[key] != patch[key]:
+            return true
+    return false
 
 func _begin_display_preview() -> void:
     if preview_before.is_empty():
+        if DisplayServer.get_name() != "headless":
+            preview_screen = DisplayServer.window_get_current_screen()
+            preview_window_size = DisplayServer.window_get_size()
+            preview_window_position = DisplayServer.window_get_position()
         for key in DISPLAY_KEYS:
             preview_before[key] = options[key]
     preview_timer.start(PREVIEW_SECONDS)
@@ -246,6 +271,16 @@ func cancel_display_preview() -> void:
     preview_before.clear()
     preview_timer.stop()
     _change(before, true)
+    if DisplayServer.get_name() != "headless" and preview_screen >= 0 and preview_screen < DisplayServer.get_screen_count():
+        # The automatic monitor preference (-1) is not a concrete screen.
+        # Restore the actual pre-preview monitor and window geometry too.
+        DisplayServer.window_set_current_screen(preview_screen)
+        if options["window_mode"] == "windowed":
+            DisplayServer.window_set_size(preview_window_size)
+            DisplayServer.window_set_position(preview_window_position)
+        elif options["window_mode"] == "borderless":
+            DisplayServer.window_set_size(DisplayServer.screen_get_size(preview_screen))
+            DisplayServer.window_set_position(DisplayServer.screen_get_position(preview_screen))
     save_options()
     display_preview_changed.emit(false)
 
@@ -305,6 +340,10 @@ func _sanitize(key: String, value: Variant) -> Variant:
             return str(value) if str(value) in ["custom", "low", "medium", "high", "ultra"] else "custom"
         "anisotropy":
             return int(value) if int(value) in [0, 2, 4, 8, 16] else 8
+        "texture_filter":
+            return str(value) if str(value) in ["original", "bilinear", "trilinear", "anisotropic"] else "original"
+        "dynamic_target_fps":
+            return int(value) if int(value) in [30, 60, 90, 120, 144] else 60
         "shadow_quality", "shadow_distance", "fog_quality", "reflection_quality", "ssao_quality", "particle_quality":
             return str(value) if str(value) in ["original", "off", "low", "medium", "high", "ultra"] else "original"
         "menu_background":
@@ -373,6 +412,8 @@ func apply_options() -> void:
 func set_menu_context(enabled: bool) -> void:
     menu_context = enabled
     _apply_fps()
+    _reset_dynamic_resolution()
+    _update_overlay()
 
 func _apply_fps() -> void:
     var cap := int(options["menu_fps_limit"])
@@ -394,7 +435,9 @@ func _apply_keys(keys: Array) -> void:
             _apply_volume(key)
     if _intersects(keys, ENV_KEYS) or _intersects(keys, NODE_KEYS):
         _apply_scene(get_tree().root, keys)
-    if keys.has("fps_display") or keys.has("performance_overlay"):
+    if keys.has("dynamic_resolution") or keys.has("dynamic_target_fps") or keys.has("render_scale"):
+        _reset_dynamic_resolution()
+    if keys.has("fps_display") or keys.has("performance_overlay") or keys.has("dynamic_resolution"):
         _update_overlay()
 
 func _intersects(a: Array, b: Array) -> bool:
@@ -426,7 +469,7 @@ func _apply_display() -> void:
 func apply_viewport(view: Viewport, is_menu: bool = false, keys: Array = VIEW_KEYS) -> void:
     if view == null:
         return
-    if keys.has("render_scale") or keys.has("upscaling") or keys.has("aa_mode") or keys.has("taa"):
+    if keys.has("render_scale") or keys.has("menu_render_scale") or keys.has("upscaling") or keys.has("aa_mode") or keys.has("taa"):
         var mode := str(options["upscaling"])
         var aa := str(options["aa_mode"])
         # FSR2 already supplies temporal AA; don't stack another AA pass.
@@ -434,7 +477,7 @@ func apply_viewport(view: Viewport, is_menu: bool = false, keys: Array = VIEW_KE
         view.msaa_3d = {"msaa2": 1, "msaa4": 2, "msaa8": 3}.get(aa, 0) if mode != "fsr2" else 0
         view.screen_space_aa = Viewport.SCREEN_SPACE_AA_FXAA if aa == "fxaa" and mode != "fsr2" else Viewport.SCREEN_SPACE_AA_DISABLED
         view.scaling_3d_mode = {"bilinear": 0, "fsr1": 1, "fsr2": 2}[mode]
-        view.scaling_3d_scale = 1.0 if is_menu else float(options["render_scale"])
+        view.scaling_3d_scale = float(options["menu_render_scale"] if is_menu else options["render_scale"])
     if keys.has("anisotropy"):
         view.anisotropic_filtering_level = [0, 2, 4, 8, 16].find(int(options["anisotropy"]))
     if keys.has("shadow_quality"):
@@ -450,8 +493,9 @@ func _apply_render_quality(keys: Array) -> void:
         RenderingServer.environment_set_volumetric_fog_volume_size(size, depth)
     if keys.has("ssao_quality"):
         var quality := str(options["ssao_quality"])
-        var level: int = {"off": 0, "low": 1, "medium": 2, "high": 3, "ultra": 4, "original": 2}[quality]
-        RenderingServer.environment_set_ssao_quality(level, level <= 1, 0.5, 2, 50.0, 300.0)
+        var level: int = {"off": 0, "low": 1, "medium": 2, "high": 3, "ultra": 4, "original": int(ProjectSettings.get_setting("rendering/environment/ssao/quality", 2))}[quality]
+        var half_size := bool(ProjectSettings.get_setting("rendering/environment/ssao/half_size", false)) if quality == "original" else level <= 1
+        RenderingServer.environment_set_ssao_quality(level, half_size, float(ProjectSettings.get_setting("rendering/environment/ssao/adaptive_target", 0.5)), int(ProjectSettings.get_setting("rendering/environment/ssao/blur_passes", 2)), float(ProjectSettings.get_setting("rendering/environment/ssao/fadeout_from", 50.0)), float(ProjectSettings.get_setting("rendering/environment/ssao/fadeout_to", 300.0)))
 
 func apply_environment(env: Environment, keys: Array = ENV_KEYS) -> void:
     if env == null:
@@ -459,7 +503,7 @@ func apply_environment(env: Environment, keys: Array = ENV_KEYS) -> void:
     # Remember the authored toggles once; disabled effects stay absent in
     # rooms such as the Backrooms, even on the Ultra preset.
     if not env.has_meta("_quality_base"):
-        env.set_meta("_quality_base", {"fog": env.volumetric_fog_enabled, "ssao": env.ssao_enabled, "ssil": env.ssil_enabled, "glow": env.glow_enabled, "glow_strength": env.glow_intensity})
+        env.set_meta("_quality_base", {"fog": env.volumetric_fog_enabled, "ssao": env.ssao_enabled, "ssil": env.ssil_enabled, "glow": env.glow_enabled, "glow_strength": env.glow_intensity, "contrast": env.adjustment_contrast, "brightness": env.adjustment_brightness, "saturation": env.adjustment_saturation, "adjustment": env.adjustment_enabled})
     var base: Dictionary = env.get_meta("_quality_base")
     if keys.has("fog_quality"):
         env.volumetric_fog_enabled = bool(base["fog"]) and options["fog_quality"] != "off"
@@ -472,10 +516,11 @@ func apply_environment(env: Environment, keys: Array = ENV_KEYS) -> void:
     if keys.has("bloom_strength"):
         env.glow_intensity = float(base["glow_strength"]) * float(options["bloom_strength"])
     if keys.has("image_contrast") or keys.has("brightness") or keys.has("saturation"):
-        env.adjustment_enabled = true
-        env.adjustment_contrast = float(options["image_contrast"])
-        env.adjustment_brightness = float(options["brightness"])
-        env.adjustment_saturation = float(options["saturation"])
+        var casino := bool(env.get_meta("_casino_contrast", false))
+        env.adjustment_enabled = casino or bool(base["adjustment"]) or not is_equal_approx(float(options["image_contrast"]), 0.85) or not is_equal_approx(float(options["brightness"]), 1.0) or not is_equal_approx(float(options["saturation"]), 1.0)
+        env.adjustment_contrast = float(options["image_contrast"]) if casino else float(base["contrast"]) * float(options["image_contrast"]) / 0.85
+        env.adjustment_brightness = float(base["brightness"]) * float(options["brightness"])
+        env.adjustment_saturation = float(base["saturation"]) * float(options["saturation"])
 
 func reflection_requested(probe: ReflectionProbe, enabled: bool) -> void:
     probe.set_meta("_reflection_requested", enabled)
@@ -502,7 +547,7 @@ func _apply_node(node: Node, keys: Array) -> void:
             light.set_meta("_shadow_base", [light.shadow_enabled, light.distance_fade_enabled, light.distance_fade_shadow, light.distance_fade_begin, light.distance_fade_length])
         var original: Array = light.get_meta("_shadow_base")
         if keys.has("shadow_quality"):
-            light.shadow_enabled = bool(original[0]) and options["shadow_quality"] != "off"
+            light.shadow_enabled = bool(original[0]) and options["shadow_quality"] != "off" and not light.has_meta("_showcase_no_shadow")
         if keys.has("shadow_distance"):
             var distance := str(options["shadow_distance"])
             light.distance_fade_enabled = bool(original[1]) or distance != "original"
@@ -520,23 +565,101 @@ func _apply_node(node: Node, keys: Array) -> void:
         node.emitting = bool(original[1]) and level != "off"
     elif node is ReflectionProbe and keys.has("reflection_quality") and node.has_meta("_reflection_requested"):
         _apply_reflection(node)
+    elif node is MeshInstance3D and keys.has("texture_filter"):
+        _apply_mesh_filter(node as MeshInstance3D)
 
 func _apply_scene(node: Node, keys: Array) -> void:
-    if node == self:
+    if node == self or node.has_meta("_baking_room"):
         return
     _apply_node(node, keys)
     for child in node.get_children():
         _apply_scene(child, keys)
 
 func _on_node_added(node: Node) -> void:
-    if node is WorldEnvironment or node is Light3D or node is CPUParticles3D or node is GPUParticles3D:
+    if node is WorldEnvironment or node is Light3D or node is CPUParticles3D or node is GPUParticles3D or (node is MeshInstance3D and options["texture_filter"] != "original"):
         # Newly staged nodes can still be configured in their parent's ready.
         call_deferred("_apply_new_node", weakref(node))
 
 func _apply_new_node(reference: WeakRef) -> void:
     var node = reference.get_ref()
     if is_instance_valid(node) and node.is_inside_tree():
+        var ancestor: Node = node
+        while ancestor != null:
+            if ancestor.has_meta("_baking_room"):
+                return
+            ancestor = ancestor.get_parent()
         _apply_node(node, ENV_KEYS + NODE_KEYS)
+
+func _apply_mesh_filter(mesh: MeshInstance3D) -> void:
+    # Apply real Godot sampler modes to standard 3D materials. Shader
+    # materials keep their authored sampler settings; no texture is reimported.
+    if mesh.material_override != null:
+        _apply_material_filter(mesh.material_override)
+    elif mesh.mesh != null:
+        for index in range(mesh.mesh.get_surface_count()):
+            _apply_material_filter(mesh.get_active_material(index))
+    if mesh.material_overlay != null:
+        _apply_material_filter(mesh.material_overlay)
+
+func _apply_material_filter(material: Material) -> void:
+    if not material is BaseMaterial3D:
+        return
+    var mat := material as BaseMaterial3D
+    var mode := str(options["texture_filter"])
+    if mode == "original":
+        if mat.has_meta("_original_sampler"):
+            mat.texture_filter = int(mat.get_meta("_original_sampler"))
+        return
+    if not mat.has_meta("_original_sampler"):
+        mat.set_meta("_original_sampler", mat.texture_filter)
+    var selected: int = {"bilinear": BaseMaterial3D.TEXTURE_FILTER_LINEAR, "trilinear": BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS, "anisotropic": BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC}[mode]
+    if mat.texture_filter != selected:
+        mat.texture_filter = selected
+
+func _reset_dynamic_resolution() -> void:
+    dynamic_elapsed = 0.0
+    dynamic_frames = 0
+    dynamic_bad_windows = 0
+    dynamic_good_windows = 0
+    get_tree().root.scaling_3d_scale = float(options["render_scale"])
+
+func _dynamic_step(current: float, measured_fps: float, target: float) -> float:
+    # Multiple consecutive two-second measurements avoid adapting to
+    # single streaming spikes. Frame-rate feedback is not GPU timing.
+    dynamic_bad_windows = dynamic_bad_windows + 1 if measured_fps < target * 0.90 else 0
+    dynamic_good_windows = dynamic_good_windows + 1 if measured_fps >= target * 0.98 else 0
+    if dynamic_bad_windows >= 2:
+        dynamic_bad_windows = 0
+        return maxf(0.5, current - 0.05)
+    if dynamic_good_windows >= 3:
+        dynamic_good_windows = 0
+        return minf(float(options["render_scale"]), current + 0.05)
+    return current
+
+func _sample_dynamic_resolution(delta: float) -> void:
+    if menu_context or get_tree().paused or get_tree().root.get_camera_3d() == null or DisplayServer.get_name() == "headless":
+        dynamic_elapsed = 0.0
+        dynamic_frames = 0
+        dynamic_bad_windows = 0
+        dynamic_good_windows = 0
+        return
+    dynamic_elapsed += delta
+    dynamic_frames += 1
+    if dynamic_elapsed < 2.0:
+        return
+    var target := float(options["dynamic_target_fps"])
+    if Engine.max_fps > 0:
+        target = minf(target, float(Engine.max_fps))
+    if options["vsync_mode"] != "off":
+        var refresh := DisplayServer.screen_get_refresh_rate(_screen_index())
+        if refresh > 0:
+            target = minf(target, refresh)
+    var view := get_tree().root
+    var scale := _dynamic_step(view.scaling_3d_scale, float(dynamic_frames) / dynamic_elapsed, target)
+    if not is_equal_approx(scale, view.scaling_3d_scale):
+        view.scaling_3d_scale = scale
+    dynamic_elapsed = 0.0
+    dynamic_frames = 0
 
 func _ensure_audio_buses() -> void:
     for bus_name in ["MUSIC", "SFX", "UI"]:
@@ -568,9 +691,13 @@ func _update_overlay() -> void:
         overlay.add_child(perf_label)
     if is_instance_valid(overlay):
         overlay.visible = enabled
-    set_process(enabled)
+    set_process(enabled or bool(options["dynamic_resolution"]))
 
 func _process(delta: float) -> void:
+    if options["dynamic_resolution"]:
+        _sample_dynamic_resolution(delta)
+    if not bool(options["fps_display"]) and not bool(options["performance_overlay"]):
+        return
     perf_elapsed += delta
     perf_worst = maxf(perf_worst, delta * 1000.0)
     if perf_elapsed < 0.5:
@@ -578,7 +705,7 @@ func _process(delta: float) -> void:
     if is_instance_valid(perf_label):
         var message := "%d FPS" % Engine.get_frames_per_second()
         if options["performance_overlay"]:
-            message += " | max %.1f ms | Draws %d | Objects %d" % [perf_worst, int(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)), int(Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME))]
+            message += " | max %.1f ms | Draws %d | Objects %d | 3D %.0f%%" % [perf_worst, int(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)), int(Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME)), 100.0 * float(options["menu_render_scale"] if menu_context else get_tree().root.scaling_3d_scale)]
         perf_label.text = message
     perf_elapsed = 0.0
     perf_worst = 0.0

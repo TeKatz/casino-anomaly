@@ -106,6 +106,24 @@ func _run() -> void:
     if not rig.transform.is_equal_approx(start):
         _fail("Panorama loop is not seamless")
         return
+    var preferences = root.get_node("GameSettings")
+    var saved_menu_scale = preferences.get_option("menu_render_scale")
+    var saved_menu_mode = preferences.get_option("menu_background")
+    preferences.set_option("menu_render_scale", 0.75)
+    if view.size != root.size or not is_equal_approx(view.scaling_3d_scale, 0.75):
+        _fail("Menu render scale does not use native output with scaled 3D")
+        return
+    preferences.set_option("menu_background", "abstract")
+    if panorama.visible or not background.visible or view.render_target_update_mode != SubViewport.UPDATE_DISABLED:
+        _fail("Abstract menu does not suspend panorama")
+        return
+    preferences.set_option("menu_background", "still")
+    if not panorama.visible or background.visible or view.render_target_update_mode != SubViewport.UPDATE_ONCE:
+        _fail("Still menu does not request a single render")
+        return
+    preferences.set_option("menu_background", saved_menu_mode)
+    preferences.set_option("menu_render_scale", saved_menu_scale)
+    preferences.save_options()
     panorama.call("set_suspended", true)
     if view.render_target_update_mode != SubViewport.UPDATE_DISABLED:
         _fail("Menu panorama still renders while loading a game")

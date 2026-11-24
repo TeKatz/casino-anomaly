@@ -418,6 +418,8 @@ func _advance_pending_stage(lane: String, returning: bool = false) -> void:
 		var environment_node := _pending_stage.get_node_or_null("WorldEnvironment") as WorldEnvironment
 		staged_environment = environment_node.environment if environment_node != null else null
 		var graphics := get_node_or_null("/root/GameSettings")
+		if staged_environment != null:
+			staged_environment.set_meta("_casino_contrast", true)
 		if graphics != null:
 			graphics.call("apply_environment", staged_environment)
 		if environment_node != null:

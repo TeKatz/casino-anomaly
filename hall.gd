@@ -170,7 +170,8 @@ func apply_image_contrast() -> void:
     var game_settings = get_node_or_null("/root/GameSettings")
     # During streaming the WorldEnvironment is intentionally detached;
     # the handoff reapplies the current setting once it is restored.
-    if world != null and world.environment != null and game_settings != null:
+    if world != null and world.environment != null and game_settings != null and not has_meta("_baking_room"):
+        world.environment.set_meta("_casino_contrast", true)
         game_settings.apply_environment(world.environment)
 
 

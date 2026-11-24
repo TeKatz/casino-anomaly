@@ -54,12 +54,15 @@ func _resize_render_target() -> void:
     var pixels := get_window().size
     if pixels.x < 2 or pixels.y < 2:
         return
-    viewport.size = Vector2i(maxi(2, roundi(pixels.x * menu_scale)), maxi(2, roundi(pixels.y * menu_scale)))
-    if ready_for_display and not suspended and not motion_enabled:
+    viewport.size = pixels
+    viewport.scaling_3d_scale = menu_scale
+    if ready_for_display and not suspended and not motion_enabled and background_mode != "abstract":
         viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 
 
 func _on_setting(key: String) -> void:
+    if key not in ["", "menu_camera_motion", "menu_background", "menu_camera_speed", "menu_render_scale", "menu_darkness", "aa_mode", "taa", "upscaling", "anisotropy", "shadow_quality", "shadow_distance", "image_contrast", "brightness", "saturation", "fog_quality", "ssao_quality", "ssil", "bloom", "bloom_strength", "texture_filter"]:
+        return
     var settings := get_node_or_null("/root/GameSettings")
     if settings == null:
         return
@@ -83,7 +86,7 @@ func _on_setting(key: String) -> void:
     if key == "" or key == "menu_darkness":
         ($ReadabilityGrade.material as ShaderMaterial).set_shader_parameter("dimming", float(settings.call("get_option", "menu_darkness")))
     if key in ["", "aa_mode", "taa", "upscaling", "anisotropy", "shadow_quality"]:
-        settings.call("apply_viewport", viewport, true)
+        settings.call("apply_viewport", viewport, true, ["render_scale", "aa_mode", "taa", "upscaling", "anisotropy", "shadow_quality"] if key == "" else [key])
     if ready_for_display:
         _sync_rendering()
 
@@ -152,6 +155,11 @@ func install_room(packed: PackedScene) -> bool:
         visual.free()
         return false
     var environment := world.environment.duplicate() as Environment
+    if environment.has_meta("_quality_base"):
+        var original: Dictionary = environment.get_meta("_quality_base").duplicate()
+        original["fog"] = false
+        original["ssil"] = false
+        environment.set_meta("_quality_base", original)
     environment.volumetric_fog_enabled = false
     environment.ssil_enabled = false
     environment.sdfgi_enabled = false
@@ -186,6 +194,7 @@ func _finish_room() -> void:
     for item in room.find_children("*", "Light3D", true, false):
         var light := item as Light3D
         if light is OmniLight3D or room.to_local(light.global_position).x < -8.0:
+            light.set_meta("_showcase_no_shadow", true)
             light.shadow_enabled = false
     room.process_mode = Node.PROCESS_MODE_DISABLED
     camera.make_current()

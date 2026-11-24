@@ -28,6 +28,14 @@ func _run() -> void:
     if root.scaling_3d_mode != Viewport.SCALING_3D_MODE_FSR2 or root.msaa_3d != Viewport.MSAA_DISABLED:
         _fail("FSR2 did not replace conflicting anti-aliasing")
         return
+    settings.set_option("dynamic_resolution", true)
+    settings.set_option("render_scale", 1.0)
+    var first_sample: float = settings._dynamic_step(1.0, 40.0, 60.0)
+    var second_sample: float = settings._dynamic_step(first_sample, 40.0, 60.0)
+    if not is_equal_approx(first_sample, 1.0) or not is_equal_approx(second_sample, 0.95):
+        _fail("Dynamic resolution overreacts to spikes or fails to adapt")
+        return
+    settings.set_option("dynamic_resolution", false)
     settings.set_option("fps_limit", 120)
     settings.set_option("menu_fps_limit", 30)
     settings.set_menu_context(true)
@@ -49,6 +57,21 @@ func _run() -> void:
     if settings.get_option("resolution") != before:
         _fail("Display rollback missing")
         return
+    var textured := MeshInstance3D.new()
+    textured.mesh = BoxMesh.new()
+    var material := StandardMaterial3D.new()
+    material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+    textured.material_override = material
+    root.add_child(textured)
+    settings.set_option("texture_filter", "anisotropic")
+    if material.texture_filter != BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC:
+        _fail("Texture filter does not change material sampler")
+        return
+    settings.set_option("texture_filter", "original")
+    if material.texture_filter != BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS:
+        _fail("Authored texture sampler not restored")
+        return
+    textured.free()
     var world := WorldEnvironment.new()
     var env := Environment.new()
     env.volumetric_fog_enabled = true
