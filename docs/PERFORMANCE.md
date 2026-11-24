@@ -65,7 +65,10 @@ guaranteed identical to CPU simulation.
 
 Press Ctrl+F9 shortly before walking through the suspected preload threshold.
 Walk normally through the portal into the next hall (repeat once if possible),
-then press Ctrl+F9 again. The console prints the full path to
+then press Ctrl+F9 again. An on-screen recording badge remains visible
+throughout capture; a temporary success or error notice confirms saving.
+The shortcut is available in the active casino loop, not the menu/tutorial.
+The console prints the full path to
 `user://streaming_trace.json`. It is written after capture, not during it.
 A genuine scene teardown also saves an active capture. Captures are bounded.
 

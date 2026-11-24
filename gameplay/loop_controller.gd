@@ -48,6 +48,9 @@ var finishing := false
 var won := false
 var _stage_spike_frames := 0
 var _perf_trace := false
+var _trace_badge: PanelContainer
+var _trace_label: Label
+var _trace_hide_at := 0
 var _perf_elapsed := 0.0
 var _perf_worst_ms := 0.0
 var _perf_samples: Array[float] = []
@@ -278,6 +281,10 @@ func _lane_z(lane: String) -> float:
 
 
 func _process(delta: float) -> void:
+	if _trace_hide_at > 0 and Time.get_ticks_msec() >= _trace_hide_at:
+		_trace_hide_at = 0
+		if is_instance_valid(_trace_badge):
+			_trace_badge.hide()
 	if _perf_trace:
 		var trace_local := room.to_local(player.global_position) if is_instance_valid(room) and is_instance_valid(player) else Vector3.ZERO
 		var trace_phase := "backrooms_return" if backrooms_active and backrooms_scored else ("backrooms" if backrooms_active else ("connector" if choice_taken else "casino"))
@@ -872,19 +879,69 @@ func _physics_process(_delta: float) -> void:
 		backrooms_pickup.call("update_prompt", player)
 
 
-func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.echo and event.ctrl_pressed and event.keycode == KEY_F9:
-		_perf_trace = not _perf_trace
-		if _perf_trace:
-			StreamingTrace.start()
-		else:
-			StreamingTrace.stop()
-		_perf_samples.clear()
-		_perf_elapsed = 0.0
-		_perf_worst_ms = 0.0
-		print("[StreamingPerf] ", "ON" if _perf_trace else "OFF")
-		get_viewport().set_input_as_handled()
+# Diagnostic shortcut uses _input so a GUI control cannot consume it first.
+# The ordinary interaction path below remains in _unhandled_input.
+func _input(event: InputEvent) -> void:
+	if not (event is InputEventKey) or not event.pressed or event.echo or not event.ctrl_pressed:
 		return
+	if event.keycode != KEY_F9 and event.physical_keycode != KEY_F9:
+		return
+	_perf_trace = not _perf_trace
+	_perf_samples.clear()
+	_perf_elapsed = 0.0
+	_perf_worst_ms = 0.0
+	var german := str(Controls.pref(self, "language", "en")) == "de"
+	if _perf_trace:
+		_show_trace_status("●  STREAMING-AUFZEICHNUNG AKTIV   |   Strg+F9: speichern" if german else "●  STREAMING RECORDING ACTIVE   |   Ctrl+F9: save", Color("#ff8c82"), false)
+		StreamingTrace.start()
+	else:
+		var saved := StreamingTrace.stop()
+		if saved:
+			_show_trace_status("✓  Messung gespeichert: streaming_trace.json" if german else "✓  Recording saved: streaming_trace.json", Color("#a4e4b3"), true)
+		else:
+			_show_trace_status("!  Messdatei konnte nicht gespeichert werden" if german else "!  Could not save recording", Color("#ff8c82"), true)
+	print("[StreamingPerf] ", "ON" if _perf_trace else "OFF")
+	get_viewport().set_input_as_handled()
+
+func _show_trace_status(message: String, color: Color, temporary: bool) -> void:
+	if not is_instance_valid(_trace_badge):
+		var layer := CanvasLayer.new()
+		layer.name = "StreamingTraceStatus"
+		layer.layer = 99
+		add_child(layer)
+		var anchor := Control.new()
+		anchor.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		layer.add_child(anchor)
+		anchor.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		_trace_badge = PanelContainer.new()
+		_trace_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_trace_badge.set_meta("_independent_caption", true)
+		anchor.add_child(_trace_badge)
+		_trace_badge.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
+		_trace_badge.offset_left = -255
+		_trace_badge.offset_right = 255
+		_trace_badge.offset_top = 14
+		_trace_badge.offset_bottom = 48
+		var style := StyleBoxFlat.new()
+		style.bg_color = Color(0.04, 0.05, 0.07, 0.94)
+		style.set_corner_radius_all(6)
+		style.content_margin_left = 12
+		style.content_margin_right = 12
+		style.content_margin_top = 6
+		style.content_margin_bottom = 6
+		_trace_badge.add_theme_stylebox_override("panel", style)
+		_trace_label = Label.new()
+		_trace_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_trace_label.set_meta("_independent_caption", true)
+		_trace_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_trace_label.add_theme_font_size_override("font_size", 16)
+		_trace_badge.add_child(_trace_label)
+	_trace_label.text = message
+	_trace_label.add_theme_color_override("font_color", color)
+	_trace_badge.show()
+	_trace_hide_at = Time.get_ticks_msec() + 6000 if temporary else 0
+
+func _unhandled_input(event: InputEvent) -> void:
 	if not backrooms_active or not is_instance_valid(backrooms_pickup) or get_tree().paused or bool(player.get("interaction_locked")):
 		return
 	if Controls.pressed(event, "interact"):

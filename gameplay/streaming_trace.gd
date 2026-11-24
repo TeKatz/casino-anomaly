@@ -56,16 +56,21 @@ static func report() -> Dictionary:
         "dropped_frames": _dropped_frames, "dropped_spans": _dropped_spans,
         "notes": "Frame intervals are wall-clock time between process callbacks. Engine process/physics monitors are not GPU timestamps. Spans measure synchronous calls only; correlate their timestamps with following frame intervals."}
 
-static func stop(save: bool = true) -> void:
+static func stop(save: bool = true) -> bool:
     enabled = false
+    var saved := false
     if save:
         var file := FileAccess.open(PATH, FileAccess.WRITE)
         if file != null:
             file.store_string(JSON.stringify(report()))
+            file.flush()
+            saved = file.get_error() == OK
             file.close()
+        if saved:
             print("[StreamingTrace] Saved ", _frames.size(), " frames, ", _spans.size(),
                 " spans to ", ProjectSettings.globalize_path(PATH))
         else:
             push_warning("StreamingTrace could not write " + PATH)
     _frames.clear()
     _spans.clear()
+    return saved
