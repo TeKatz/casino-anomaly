@@ -16,3 +16,4 @@ description_de = "Eine Marmorbüste blickt in eine andere Richtung."
 target_path = "ModelInteriors/MarbleBust_02"
 has_rotation_degrees = true
 rotation_degrees = Vector3(0.0, 35.0, 0.0)
+rarity = "common"

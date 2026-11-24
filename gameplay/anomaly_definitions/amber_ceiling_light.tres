@@ -18,3 +18,4 @@ has_color = true
 color = Color(1.0000000000000000, 0.39215686274509803, 0.11764705882352941, 1)
 has_energy_scale = true
 energy_scale = 3.40
+rarity = "uncommon"

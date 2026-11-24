@@ -20,3 +20,4 @@ has_energy_scale = true
 energy_scale = 5.60
 has_visible = true
 visible = true
+rarity = "rare"

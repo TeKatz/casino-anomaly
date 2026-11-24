@@ -1,0 +1,23 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://gameplay/anomaly_definition.gd" id="1_definition"]
+[ext_resource type="Script" path="res://gameplay/anomalies/prop_transform.gd" id="2_handler"]
+
+[resource]
+script = ExtResource("1_definition")
+handler = ExtResource("2_handler")
+id = "bust_turned__subtle"
+category_en = "Objects"
+category_de = "Gegenstände"
+title_en = "Turned marble bust"
+title_de = "Verdrehte Marmorbüste"
+description_en = "The statue's head faces a different direction."
+description_de = "Eine Marmorbüste blickt in eine andere Richtung."
+target_path = "ModelInteriors/MarbleBust_02"
+has_rotation_degrees = true
+rotation_degrees = Vector3(0, 20, 0)
+rarity = "common"
+family_id = "bust_turned"
+variant_name_de = "Kleine Drehung"
+variant_name_en = "Subtle turn"
+difficulty = 5

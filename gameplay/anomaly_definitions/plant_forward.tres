@@ -16,3 +16,4 @@ description_de = "Eine Pflanze steht näher am Gang."
 target_path = "Decor/Plant_02"
 has_position_offset = true
 position_offset = Vector3(0.0, 0.0, -0.90)
+rarity = "common"

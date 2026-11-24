@@ -1,0 +1,27 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://gameplay/anomaly_definition.gd" id="1_definition"]
+[ext_resource type="Script" path="res://gameplay/anomalies/light_variation.gd" id="2_handler"]
+
+[resource]
+script = ExtResource("1_definition")
+handler = ExtResource("2_handler")
+id = "horse_spotlight_off__soft"
+category_en = "Lighting"
+category_de = "Beleuchtung"
+title_en = "Red horse spotlight"
+title_de = "Roter Pferde-Spot"
+description_en = "The horse statue is brightly lit by a red spotlight."
+description_de = "Die Pferdestatue wird von einem sehr hellen roten Spot angestrahlt."
+target_path = "CasinoAtmosphere/HorseHighlight"
+has_color = true
+color = Color(1, 0.62, 0.72, 1)
+has_energy_scale = true
+energy_scale = 2.2
+has_visible = true
+visible = true
+rarity = "rare"
+family_id = "horse_spotlight_off"
+variant_name_de = "Rosa Schein"
+variant_name_en = "Pink glow"
+difficulty = 4

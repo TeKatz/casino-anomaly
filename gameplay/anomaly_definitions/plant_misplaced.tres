@@ -16,3 +16,4 @@ description_de = "Ein anderer Pflanzkübel steht seitlich versetzt."
 target_path = "Decor/Plant_04"
 has_position_offset = true
 position_offset = Vector3(0.45, 0.0, -0.80)
+rarity = "uncommon"

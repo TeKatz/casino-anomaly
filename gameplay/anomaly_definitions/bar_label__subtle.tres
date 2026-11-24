@@ -1,0 +1,22 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://gameplay/anomaly_definition.gd" id="1_definition"]
+[ext_resource type="Script" path="res://gameplay/anomalies/label_swap.gd" id="2_handler"]
+
+[resource]
+script = ExtResource("1_definition")
+handler = ExtResource("2_handler")
+id = "bar_label__subtle"
+category_en = "Signs"
+category_de = "Beschriftungen"
+title_en = "Midnight Bar sign"
+title_de = "Midnight-Bar-Schild"
+description_en = "One letter of the bar name is replaced."
+description_de = "Ein Buchstabe im Barschild verändert sich."
+target_path = "CornerBar/Sign_MIDNIGHT_BAR"
+replacement_text = "MIDNIGHT BARR"
+rarity = "common"
+family_id = "bar_label"
+variant_name_de = "Doppelter Buchstabe"
+variant_name_en = "Repeated letter"
+difficulty = 3

@@ -18,3 +18,4 @@ has_position_offset = true
 position_offset = Vector3(0.0, 0.22, 0.0)
 has_rotation_degrees = true
 rotation_degrees = Vector3(0.0, 0.0, 7.0)
+rarity = "common"

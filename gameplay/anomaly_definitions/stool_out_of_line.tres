@@ -16,3 +16,4 @@ description_de = "Ein Barhocker steht etwas weiter im Raum."
 target_path = "ModelInteriors/CounterStool_04"
 has_position_offset = true
 position_offset = Vector3(0.25, 0.0, 0.78)
+rarity = "common"
