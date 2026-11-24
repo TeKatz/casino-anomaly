@@ -124,7 +124,7 @@ func _process(_delta: float) -> void:
 
 func _sync_prompt() -> void:
     if is_instance_valid(prompt):
-        prompt.visible = _near and not taken and not get_tree().paused
+        prompt.visible = _near and not taken and not get_tree().paused and bool(Controls.pref(self, "hud_visible", true)) and bool(Controls.pref(self, "interaction_hints", true))
 
 func collect(player: CharacterBody3D) -> bool:
     if not can_pick_up(player) or not bool(player.call("equip_backrooms_flashlight")):

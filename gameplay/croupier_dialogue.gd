@@ -83,6 +83,7 @@ func _ready() -> void:
     if settings != null:
         settings.options_changed.connect(_on_settings_changed)
     _refresh_language()
+    _apply_readability()
     visible = false
 
 
@@ -116,7 +117,14 @@ func _on_choice(topic: String) -> void:
 func _on_settings_changed(key: String) -> void:
     if key == "language":
         _refresh_language()
+    if key in ["caption_size", "caption_background"]:
+        _apply_readability()
 
+
+func _apply_readability() -> void:
+    response_label.set_meta("_independent_caption", true)
+    var scale: float = {"small": 0.85, "normal": 1.0, "large": 1.15, "very_large": 1.30}[Controls.pref(self, "caption_size", "normal")]
+    response_label.add_theme_font_size_override("font_size", roundi(18 * scale))
 
 func _refresh_language() -> void:
     title_label.text = Loc.t("croupier.name", self)

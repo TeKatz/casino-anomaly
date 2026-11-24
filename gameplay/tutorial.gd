@@ -78,7 +78,7 @@ func _on_settings_changed(key: String) -> void:
 
 
 func _process(_delta: float) -> void:
-    var can_interact := not changing and not is_dialogue_open() and not get_tree().paused
+    var can_interact := not changing and not is_dialogue_open() and not get_tree().paused and bool(Controls.pref(self, "hud_visible", true)) and bool(Controls.pref(self, "interaction_hints", true)) and bool(Controls.pref(self, "tutorial_hints", true))
     croupier.call("set_hint_visible", can_interact and _is_looking_at_croupier())
     door_prompt.call("set_prompt_visible", can_interact and _is_looking_at_door())
 

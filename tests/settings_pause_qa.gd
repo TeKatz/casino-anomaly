@@ -94,8 +94,8 @@ func _run() -> void:
         _fail("Pause settings submenu not available")
         return
     var tabs: Array = subpanel.get("tabs")
-    if tabs.size() != 5:
-        _fail("Expected five category buttons including General")
+    if tabs.size() != 6:
+        _fail("Expected six category buttons including Accessibility")
         return
     subpanel.call("_switch_tab", 2)
     if int(subpanel.get("selected_tab")) != 2:

@@ -75,7 +75,32 @@ const DEFAULTS := {
     "audio_balance": 0.0,
     "head_bob": 1.0,
     "breathing_motion": 1.0,
-    "camera_sway": 1.0
+    "camera_sway": 1.0,
+    "crosshair": "off",
+    "crosshair_size": 1.0,
+    "crosshair_color": "white",
+    "interaction_hints": true,
+    "tutorial_hints": true,
+    "skip_tutorial": false,
+    "skip_creator_intro": false,
+    "pause_unfocused": false,
+    "confirm_quit": false,
+    "confirm_new_run": true,
+    "loading_motion": true,
+    "reduce_light_motion": false,
+    "soft_light_transitions": false,
+    "reduced_motion": false,
+    "reduced_menu_motion": false,
+    "ui_scale": 1.0,
+    "ui_text_size": "normal",
+    "high_contrast_ui": false,
+    "sound_captions": false,
+    "caption_size": "normal",
+    "caption_background": 0.7,
+    "color_assistance": "off",
+    "door_symbols": false,
+    "reduced_horror_audio": false,
+    "auto_updates": true
 }
 const PRESETS := {
     "low": {
@@ -148,7 +173,9 @@ const DISPLAY_KEYS := ["window_mode", "resolution", "monitor"]
 const VOLUME_KEYS := ["master_volume", "music_volume", "sfx_volume", "ui_volume", "ambience_volume", "footstep_volume", "cabinet_volume", "horror_volume", "pressure_volume"]
 const AUDIO_KEYS := ["master_volume", "music_volume", "sfx_volume", "ui_volume", "ambience_volume", "footstep_volume", "cabinet_volume", "horror_volume", "pressure_volume", "reverb_mode", "audio_dynamic_range", "audio_device", "mute_unfocused", "mono_audio", "audio_balance"]
 const CONTROL_KEYS := ["mouse_sensitivity", "mouse_vertical_multiplier", "invert_y", "invert_x", "mouse_smoothing", "sprint_mode", "key_bindings", "controller_enabled", "controller_sensitivity", "controller_deadzone", "controller_vibration"]
-const GAMEPLAY_KEYS := ["fov", "camera_motion", "head_bob", "breathing_motion", "camera_sway", "hud_visible"]
+const GAMEPLAY_KEYS := ["fov", "camera_motion", "head_bob", "breathing_motion", "camera_sway", "hud_visible", "crosshair", "crosshair_size", "crosshair_color", "interaction_hints", "tutorial_hints", "skip_tutorial", "skip_creator_intro", "pause_unfocused", "confirm_quit", "confirm_new_run", "loading_motion"]
+const ACCESS_KEYS := ["reduce_light_motion", "soft_light_transitions", "reduced_motion", "reduced_menu_motion", "ui_scale", "ui_text_size", "high_contrast_ui", "sound_captions", "caption_size", "caption_background", "color_assistance", "door_symbols", "reduced_horror_audio"]
+const UI_KEYS := ["ui_text_size", "high_contrast_ui", "color_assistance"]
 const ENV_KEYS := ["image_contrast", "brightness", "saturation", "fog_quality", "ssao_quality", "ssil", "bloom", "bloom_strength"]
 const NODE_KEYS := ["shadow_quality", "shadow_distance", "particle_quality", "reflection_quality", "texture_filter"]
 const VIEW_KEYS := ["render_scale", "aa_mode", "taa", "upscaling", "anisotropy", "shadow_quality"]
@@ -247,7 +274,7 @@ func _change(patch: Dictionary, keep_preset: bool) -> void:
         options_changed.emit(key)
 
 func reset_category(index: int) -> void:
-    var groups := [GRAPHICS_KEYS, AUDIO_KEYS, CONTROL_KEYS, GAMEPLAY_KEYS, ["language"]]
+    var groups := [GRAPHICS_KEYS, AUDIO_KEYS, CONTROL_KEYS, GAMEPLAY_KEYS, ["language", "auto_updates"], ACCESS_KEYS]
     if index < 0 or index >= groups.size():
         return
     var patch := {}
@@ -389,6 +416,18 @@ func _sanitize(key: String, value: Variant) -> Variant:
             return clampf(float(value), 0.0, 1.5)
         "menu_camera_speed":
             return clampf(float(value), 0.25, 1.5)
+        "ui_scale":
+            return clampf(float(value), 0.75, 1.5)
+        "crosshair_size":
+            return clampf(float(value), 0.5, 2.0)
+        "crosshair":
+            return str(value) if str(value) in ["off", "dot", "cross"] else "off"
+        "crosshair_color":
+            return str(value) if str(value) in ["white", "yellow", "cyan", "green", "black"] else "white"
+        "ui_text_size", "caption_size":
+            return str(value) if str(value) in ["small", "normal", "large", "very_large"] else "normal"
+        "color_assistance":
+            return str(value) if str(value) in ["off", "protan", "deutan", "tritan"] else "off"
         "key_bindings":
             return Controls.sanitize(value)
         "mouse_vertical_multiplier", "controller_sensitivity":
@@ -403,7 +442,7 @@ func _sanitize(key: String, value: Variant) -> Variant:
             return str(value) if str(value) in ["night", "normal", "full"] else "normal"
         "audio_device":
             return str(value).left(256)
-        "master_volume", "music_volume", "sfx_volume", "ui_volume", "ambience_volume", "footstep_volume", "cabinet_volume", "horror_volume", "pressure_volume", "mouse_smoothing", "controller_vibration", "head_bob", "breathing_motion", "camera_sway":
+        "master_volume", "music_volume", "sfx_volume", "ui_volume", "ambience_volume", "footstep_volume", "cabinet_volume", "horror_volume", "pressure_volume", "mouse_smoothing", "controller_vibration", "head_bob", "breathing_motion", "camera_sway", "caption_background":
             return clampf(float(value), 0.0, 1.0)
         "mouse_sensitivity":
             return clampf(float(value), 0.25, 3.0)
@@ -483,6 +522,12 @@ func _apply_keys(keys: Array) -> void:
             _apply_volume(key)
     if keys.has("mute_unfocused"):
         _apply_volume("master_volume")
+    if keys.has("reduced_horror_audio"):
+        _apply_volume("horror_volume")
+    if keys.has("ui_scale"):
+        get_tree().root.content_scale_factor = float(options["ui_scale"])
+    if _intersects(keys, UI_KEYS):
+        _apply_ui_tree(get_tree().root)
     if keys.has("audio_device") and DisplayServer.get_name() != "headless":
         var device := str(options["audio_device"])
         AudioServer.output_device = device if device in AudioServer.get_output_device_list() else "Default"
@@ -635,6 +680,8 @@ func _apply_scene(node: Node, keys: Array) -> void:
         _apply_scene(child, keys)
 
 func _on_node_added(node: Node) -> void:
+    if node is Control and (options["ui_text_size"] != "normal" or options["high_contrast_ui"] or options["color_assistance"] != "off"):
+        call_deferred("_apply_new_ui", weakref(node))
     if node is WorldEnvironment or node is Light3D or node is CPUParticles3D or node is GPUParticles3D or (node is MeshInstance3D and options["texture_filter"] != "original"):
         # Newly staged nodes can still be configured in their parent's ready.
         call_deferred("_apply_new_node", weakref(node))
@@ -749,8 +796,74 @@ func _apply_volume(key: String) -> void:
     var idx := AudioServer.get_bus_index(bus_name)
     if idx >= 0:
         var volume := float(options[key])
+        if key == "horror_volume" and bool(options["reduced_horror_audio"]):
+            volume *= 0.35
         AudioServer.set_bus_mute(idx, volume <= 0.0001 or (key == "master_volume" and audio_unfocused and bool(options["mute_unfocused"])))
         AudioServer.set_bus_volume_db(idx, linear_to_db(maxf(volume, 0.0001)))
+
+func _apply_new_ui(reference: WeakRef) -> void:
+    var node = reference.get_ref()
+    if is_instance_valid(node) and node.is_inside_tree():
+        _apply_ui_node(node)
+
+func _apply_ui_tree(node: Node) -> void:
+    if node is SubViewport:
+        return
+    if node is Control:
+        _apply_ui_node(node)
+    for child in node.get_children():
+        _apply_ui_tree(child)
+
+func _apply_ui_node(node: Control) -> void:
+    if node.get_viewport() is SubViewport or node.has_meta("_independent_caption"):
+        return
+    if options["ui_text_size"] == "normal" and not options["high_contrast_ui"] and options["color_assistance"] == "off" and not node.has_meta("_accessible_font") and not node.has_meta("_accessible_panel") and not node.has_meta("_accessible_icon"):
+        return
+    if node is Label or node is Button or node is LineEdit or node is CheckButton:
+        if not node.has_meta("_accessible_font"):
+            node.set_meta("_accessible_font", [node.has_theme_font_size_override("font_size"), node.get_theme_font_size("font_size")])
+        var base: Array = node.get_meta("_accessible_font")
+        var multiplier: float = {"small": 0.90, "normal": 1.0, "large": 1.15, "very_large": 1.30}[options["ui_text_size"]]
+        if multiplier == 1.0 and not bool(base[0]):
+            node.remove_theme_font_size_override("font_size")
+        else:
+            node.add_theme_font_size_override("font_size", maxi(10, roundi(float(base[1]) * multiplier)))
+        for key in ["font_color", "font_hover_color", "font_pressed_color"]:
+            if not node.has_meta("_accessible_" + key):
+                node.set_meta("_accessible_" + key, [node.has_theme_color_override(key), node.get_theme_color(key)])
+            var original: Array = node.get_meta("_accessible_" + key)
+            if options["high_contrast_ui"]:
+                node.add_theme_color_override(key, Color.WHITE)
+            elif bool(original[0]):
+                node.add_theme_color_override(key, original[1])
+            else:
+                node.remove_theme_color_override(key)
+    if node is Button and node.has_meta("_premium_accent"):
+        var accent := str(node.get_meta("_premium_accent"))
+        if accent in ["red", "green"]:
+            if not node.has_meta("_accessible_icon"):
+                node.set_meta("_accessible_icon", node.get_theme_color("icon_normal_color"))
+            var palette := str(options["color_assistance"])
+            var color: Color = node.get_meta("_accessible_icon")
+            if palette in ["protan", "deutan"]:
+                color = Color("#7bbdfb") if accent == "green" else Color("#ffbd75")
+            elif palette == "tritan":
+                color = Color("#8be0b0") if accent == "green" else Color("#ff9fa6")
+            node.add_theme_color_override("icon_normal_color", color)
+    if node is PanelContainer:
+        if not node.has_meta("_accessible_panel"):
+            node.set_meta("_accessible_panel", [node.has_theme_stylebox_override("panel"), node.get_theme_stylebox("panel")])
+        var original: Array = node.get_meta("_accessible_panel")
+        if options["high_contrast_ui"] and original[1] is StyleBoxFlat:
+            var panel := (original[1] as StyleBoxFlat).duplicate() as StyleBoxFlat
+            panel.bg_color = Color("#06090f")
+            panel.border_color = Color("#e9dfc3")
+            panel.set_border_width_all(2)
+            node.add_theme_stylebox_override("panel", panel)
+        elif bool(original[0]):
+            node.add_theme_stylebox_override("panel", original[1])
+        else:
+            node.remove_theme_stylebox_override("panel")
 
 func _remove_master_effect(name: String) -> void:
     if not master_effects.has(name):

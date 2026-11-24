@@ -145,6 +145,10 @@ func set_prompt_visible(enabled: bool) -> void:
     _shown = enabled
     if _fade != null and _fade.is_running():
         _fade.kill()
+    if bool(Controls.pref(self, "reduced_menu_motion", false)):
+        visible = enabled
+        plaque.modulate.a = 1.0 if enabled else 0.0
+        return
     if enabled:
         visible = true
     _fade = create_tween()
@@ -160,7 +164,7 @@ func set_prompt_visible(enabled: bool) -> void:
 func _process(delta: float) -> void:
     if Engine.is_editor_hint():
         return
-    if not _shown:
+    if not _shown or bool(Controls.pref(self, "reduced_motion", false)) or bool(Controls.pref(self, "reduced_menu_motion", false)):
         position = _origin
         return
     _clock += delta

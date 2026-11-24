@@ -10,6 +10,7 @@ const GRAVITY := 18.0
 const WALK_ACCELERATION := 13.0
 const WALK_DECELERATION := 19.0
 const Controls = preload("res://gameplay/input_bindings.gd")
+const ComfortHUD = preload("res://ui/comfort_hud.gd")
 const PauseMenu = preload("res://ui/pause_menu.gd")
 
 # Camera motion is cosmetic and can be disabled for motion-sensitive players.
@@ -46,6 +47,9 @@ func _ready() -> void:
     var pause_menu := PauseMenu.new()
     pause_menu.name = "InGameMenu"
     add_child(pause_menu)
+    var comfort := ComfortHUD.new()
+    comfort.name = "ComfortHUD"
+    add_child(comfort)
     # A real first-person player is the beginning of the soundscape.
     # This works in tutorial, casino halls, preview and continued saves;
     # repeated Player instances during room streaming do not restart tone.
@@ -173,7 +177,7 @@ func _process(delta: float) -> void:
             camera.rotation.x = clampf(camera.rotation.x - turn.y * (-1.0 if bool(_setting("invert_y", false)) else 1.0), -1.25, 1.25)
     else:
         _mouse_pending = Vector2.ZERO
-    if not camera_motion_enabled:
+    if not camera_motion_enabled or bool(_setting("reduced_motion", false)):
         camera.position = _camera_home
         camera.rotation.z = _camera_roll_home
         return
@@ -298,6 +302,9 @@ func _update_footsteps(traveled: float, sprinting: bool) -> void:
     if sound != null:
         var surface := _surface_underfoot()
         sound.play_footstep(surface, sprinting)
+        var comfort := get_node_or_null("ComfortHUD")
+        if comfort != null:
+            comfort.call("announce", "steps")
         sound.set_corridor_acoustics(surface == "corridor")
 
 
@@ -311,6 +318,14 @@ func _movement_direction(axis: Vector2) -> Vector3:
     forward = forward.normalized()
     return (right * axis.x - forward * axis.y).normalized()
 
+
+func _notification(what: int) -> void:
+    if what == NOTIFICATION_APPLICATION_FOCUS_OUT and is_inside_tree() and bool(_setting("pause_unfocused", false)) and not interaction_locked and not _streaming_handoff and not get_tree().paused:
+        var loading := get_node_or_null("/root/SceneLoader")
+        var dev := get_node_or_null("AnomalyDevMenu")
+        var pause_menu := get_node_or_null("InGameMenu")
+        if pause_menu != null and not (loading != null and bool(loading.get("active"))) and not (dev != null and dev.visible):
+            pause_menu.call("_pause")
 
 func _exit_tree() -> void:
     if not _streaming_handoff:

@@ -107,6 +107,10 @@ func set_prompt_visible(show_prompt: bool) -> void:
     _shown = show_prompt
     if _fade != null and _fade.is_running():
         _fade.kill()
+    if bool(Controls.pref(self, "reduced_menu_motion", false)):
+        panel.visible = show_prompt
+        panel.modulate.a = 1.0 if show_prompt else 0.0
+        return
     if show_prompt:
         panel.visible = true
     _fade = create_tween()

@@ -10,7 +10,7 @@ signal back_pressed
 const GOLD := Color("#dbad6b")
 const PALE := Color("#f5e4ce")
 const BACKGROUND := Color("#111924")
-const CATEGORIES := ["settings.graphics", "settings.audio", "settings.controls", "settings.gameplay", "settings.general"]
+const CATEGORIES := ["settings.graphics", "settings.audio", "settings.controls", "settings.gameplay", "settings.general", "settings.accessibility"]
 
 var tab_row: VBoxContainer
 var scroll: ScrollContainer
@@ -70,7 +70,7 @@ func _ready() -> void:
     body.add_child(tab_row)
     for i in range(CATEGORIES.size()):
         var tab := LuminousButton.new()
-        tab.symbol = ["settings", "info", "profile", "stats", "settings"][i]
+        tab.symbol = ["settings", "info", "profile", "stats", "settings", "info"][i]
         MenuStyle.apply_button(tab)
         tab.text = _category(i)
         tab.custom_minimum_size = Vector2(126, 39)
@@ -239,14 +239,21 @@ func _switch_tab(index: int) -> void:
             _slider(_tr("Head bob", "Schrittbewegung"), "head_bob", 0.0, 1.0, 0.05, "%")
             _slider(_tr("Breathing motion", "Atembewegung"), "breathing_motion", 0.0, 1.0, 0.05, "%")
             _slider(_tr("Camera sway", "Seitliches Schwanken"), "camera_sway", 0.0, 1.0, 0.05, "%")
+            _gameplay_options()
         4:
             _section(Loc.t("settings.language", self))
             _select(Loc.t("settings.language", self), "language", [
                 ["English", "en"], ["Deutsch", "de"]
             ])
+            _toggle(_tr("Check for updates automatically", "Automatisch nach Updates suchen"), "auto_updates")
+        5:
+            _accessibility()
 
     if options_tween != null and options_tween.is_running():
         options_tween.kill()
+    if bool(settings_node.get_option("reduced_menu_motion")):
+        options_box.modulate.a = 1.0
+        return
     options_box.modulate.a = 0.0
     options_tween = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
     options_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
@@ -362,7 +369,11 @@ func _tr(en: String, de: String) -> String:
     return de if settings_node != null and str(settings_node.get_option("language")) == "de" else en
 
 func _category(index: int) -> String:
-    return _tr("General", "Allgemein") if index == 4 else Loc.t(CATEGORIES[index], self)
+    if index == 4:
+        return _tr("General", "Allgemein")
+    if index == 5:
+        return _tr("Accessibility", "Barrierefreiheit")
+    return Loc.t(CATEGORIES[index], self)
 
 func _request_reset(all_settings: bool) -> void:
     reset_everything = all_settings
@@ -499,6 +510,7 @@ func _audio_options() -> void:
     _toggle(_tr("Mute when unfocused", "Bei Fokusverlust stummschalten"), "mute_unfocused")
     _toggle(_tr("Mono audio", "Mono-Audio"), "mono_audio")
     _slider(_tr("Stereo balance", "Stereo-Balance"), "audio_balance", -1.0, 1.0, 0.05, "%")
+    _toggle(_tr("Sound captions", "Geräuschuntertitel"), "sound_captions")
 
 func _action_title(action: String) -> String:
     var en := ["Forward", "Backward", "Left", "Right", "Sprint", "Interact", "Pause"]
@@ -564,3 +576,42 @@ func _input(event: InputEvent) -> void:
 func _exit_tree() -> void:
     if not binding_action.is_empty() and is_instance_valid(settings_node):
         settings_node.set_meta("_binding_capture", false)
+
+
+func _gameplay_options() -> void:
+    _section(_tr("Interface", "Benutzeroberfläche"))
+    _toggle(_tr("HUD visible", "HUD anzeigen"), "hud_visible")
+    _select(_tr("Crosshair", "Fadenkreuz"), "crosshair", [[_tr("Off", "Aus"), "off"], [_tr("Dot", "Punkt"), "dot"], [_tr("Cross", "Kreuz"), "cross"]])
+    _slider(_tr("Crosshair size", "Fadenkreuzgröße"), "crosshair_size", 0.5, 2.0, 0.1, "%")
+    _select(_tr("Crosshair color", "Fadenkreuzfarbe"), "crosshair_color", [[_tr("White", "Weiß"), "white"], [_tr("Yellow", "Gelb"), "yellow"], ["Cyan", "cyan"], [_tr("Green", "Grün"), "green"], [_tr("Black", "Schwarz"), "black"]])
+    _toggle(_tr("Interaction hints", "Interaktionshinweise"), "interaction_hints")
+    _toggle(_tr("Tutorial hints", "Tutorial-Hinweise"), "tutorial_hints")
+    _section(_tr("Comfort", "Spielkomfort"))
+    _toggle(_tr("Skip tutorial on new runs", "Tutorial bei neuen Durchläufen überspringen"), "skip_tutorial", _tr("The first casino room remains anomaly-free.", "Der erste Casinoraum bleibt anomaliefrei."))
+    _toggle(_tr("Skip creator intro", "Creator-Intro überspringen"), "skip_creator_intro")
+    _toggle(_tr("Pause when unfocused", "Bei Fokusverlust pausieren"), "pause_unfocused")
+    _toggle(_tr("Confirm quitting", "Beenden bestätigen"), "confirm_quit")
+    _toggle(_tr("Confirm overwriting a run", "Überschreiben eines Durchlaufs bestätigen"), "confirm_new_run")
+    _toggle(_tr("Loading animation", "Ladeanimation"), "loading_motion")
+
+func _size_choices() -> Array:
+    return [[_tr("Small", "Klein"), "small"], [_tr("Normal", "Normal"), "normal"], [_tr("Large", "Groß"), "large"], [_tr("Very large", "Sehr groß"), "very_large"]]
+
+func _accessibility() -> void:
+    _section(_tr("Motion and lighting", "Bewegung und Licht"))
+    _toggle(_tr("Reduce camera motion", "Kamerabewegung reduzieren"), "reduced_motion", _tr("Disables cosmetic camera motion and panorama, without changing walking speed.", "Deaktiviert kosmetische Kamera- und Panoramabewegung, ohne das Gehtempo zu ändern."))
+    _toggle(_tr("Reduce menu animation", "Menüanimationen reduzieren"), "reduced_menu_motion")
+    _toggle(_tr("Steady decorative lighting", "Dekorative Lichtbewegung reduzieren"), "reduce_light_motion", _tr("Only decorative pulses; actual anomaly lights stay unchanged.", "Nur dekoratives Pulsieren; echte Lichtanomalien bleiben unverändert."))
+    _toggle(_tr("Soften lighting transitions", "Lichtübergänge abmildern"), "soft_light_transitions", _tr("Blends the Backrooms entry environment. Does not remove lighting anomalies.", "Überblendet die Umgebung am Backrooms-Eingang. Entfernt keine Lichtanomalien."))
+    _section(_tr("Readability", "Lesbarkeit"))
+    _slider(_tr("UI scale", "UI-Skalierung"), "ui_scale", 0.75, 1.5, 0.05, "%")
+    _select(_tr("Menu text size", "Menü-Schriftgröße"), "ui_text_size", _size_choices())
+    _toggle(_tr("High contrast UI", "Kontrastreiche UI"), "high_contrast_ui")
+    _select(_tr("Color assistance (UI icons)", "Farbhilfe (UI-Symbole)"), "color_assistance", [[_tr("Off", "Aus"), "off"], ["Protanopia", "protan"], ["Deuteranopia", "deutan"], ["Tritanopia", "tritan"]], _tr("Changes UI accent icons only; the casino colors are unmodified.", "Ändert nur UI-Akzentsymbole; Casinofarben bleiben unverändert."))
+    _toggle(_tr("Additional door symbols", "Zusätzliche Türsymbole"), "door_symbols", _tr("Marks the two choices, not the correct answer.", "Kennzeichnet die beiden Optionen, nicht die richtige Antwort."))
+    _section(_tr("Audio and captions", "Audio und Untertitel"))
+    _toggle(_tr("Sound captions", "Geräuschuntertitel"), "sound_captions")
+    _select(_tr("Caption size", "Untertitelgröße"), "caption_size", _size_choices())
+    _slider(_tr("Caption background", "Untertitelhintergrund"), "caption_background", 0.0, 1.0, 0.05, "%")
+    _toggle(_tr("Reduce horror audio", "Horror-Audio reduzieren"), "reduced_horror_audio")
+    _note(_tr("Captions describe footsteps and electrical hum, not hidden anomalies or the correct route.", "Untertitel beschreiben Schritte und elektrisches Brummen, keine verborgenen Anomalien oder den richtigen Weg."))
