@@ -1,5 +1,5 @@
 extends Node
-## Original short, tactile UI click generated at startup (no asset licensing).
+## Kenney Interface Sounds (CC0); original synthesized click retained for Back.
 ## Audio bus UI is managed by GameSettings and its independent volume slider.
 
 const SAMPLE_RATE := 44100
@@ -7,6 +7,14 @@ const CLICK_DURATION := 0.095
 
 var player: AudioStreamPlayer
 var play_count := 0
+var last_event := ""
+var event_counts: Dictionary = {}
+var event_players: Dictionary = {}
+const EVENT_FILES := {
+    "navigation": "res://ui/audio/bong_001.ogg",
+    "confirmation": "res://ui/audio/confirmation_002.ogg",
+    "dropdown": "res://ui/audio/glass_006.ogg"
+}
 
 
 func _ready() -> void:
@@ -19,13 +27,36 @@ func _ready() -> void:
     player.process_mode = Node.PROCESS_MODE_ALWAYS
     add_child(player)
     player.stream = _make_click()
+    event_players["back"] = player
+    for event in EVENT_FILES:
+        var voice := AudioStreamPlayer.new()
+        voice.name = str(event).capitalize()
+        voice.bus = "UI"
+        voice.volume_db = -8.0
+        voice.max_polyphony = 4
+        voice.process_mode = Node.PROCESS_MODE_ALWAYS
+        add_child(voice)
+        var path: String = EVENT_FILES[event]
+        # Runtime load after editor import; no compile-time audio preload.
+        if ResourceLoader.exists(path):
+            voice.stream = load(path) as AudioStream
+        event_players[event] = voice
 
 
 func play_click() -> void:
-    if player == null or player.stream == null:
+    play_event("navigation")
+
+
+func play_event(event: String) -> void:
+    var voice := event_players.get(event) as AudioStreamPlayer
+    if voice == null or voice.stream == null:
+        voice = player
+    if voice == null or voice.stream == null:
         return
+    last_event = event
+    event_counts[event] = int(event_counts.get(event, 0)) + 1
     play_count += 1
-    player.play()
+    voice.play()
 
 
 func _make_click() -> AudioStreamWAV:

@@ -1,4 +1,5 @@
 extends Control
+const MenuStyle = preload("res://ui/menu_style.gd")
 
 const RuntimeCache = preload("res://gameplay/runtime_asset_cache.gd")
 const Controls = preload("res://gameplay/input_bindings.gd")
@@ -55,6 +56,7 @@ func _ready() -> void:
     # Loading a run is a contextual action inside the selected profile.
     $CenterPanel/Content/Stack/ContinueButton.visible = false
     $CenterPanel/Content/Stack/PlayButton.pressed.connect(_on_play)
+    MenuStyle.attach_sound($CenterPanel/Content/Stack/ContinueButton, "confirmation")
     $CenterPanel/Content/Stack/ContinueButton.pressed.connect(_on_continue)
     $CenterPanel/Content/Stack/SettingsButton.pressed.connect(_open_settings)
     $CenterPanel/Content/Stack/CreditsButton.pressed.connect(_open_credits)
@@ -355,6 +357,7 @@ func _unhandled_input(event: InputEvent) -> void:
     if active_overlay != null and (Controls.pressed(event, "pause") or event.is_action_pressed("ui_cancel")):
         # During cross-fades the outgoing screen may still be visible;
         # Escape always belongs to the CURRENT menu, never the outgoing one.
+        MenuStyle.play_sound("back")
         if active_overlay == archive_overlay:
             _back_from_profile_archive()
         else:
@@ -370,6 +373,8 @@ func _on_quit() -> void:
         dialog.title = "Casino Anomaly"
         dialog.dialog_text = "Spiel beenden?" if Controls.pref(self, "language", "en") == "de" else "Quit the game?"
         add_child(dialog)
+        MenuStyle.attach_sound(dialog.get_ok_button(), "navigation")
+        MenuStyle.attach_sound(dialog.get_cancel_button(), "back")
         dialog.confirmed.connect(_quit_confirmed)
         dialog.canceled.connect(dialog.queue_free)
         dialog.popup_centered()

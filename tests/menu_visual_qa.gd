@@ -146,6 +146,11 @@ func _run() -> void:
             or sound_player.bus != "UI":
         _fail("Original menu click sound or independent UI bus is missing")
         return
+    for event in ["Navigation", "Confirmation", "Dropdown"]:
+        var voice := sound.get_node_or_null(event) as AudioStreamPlayer
+        if voice == null or not (voice.stream is AudioStreamOggVorbis) or voice.bus != "UI":
+            _fail("Missing Kenney menu voice: " + event)
+            return
     var play_button := menu_buttons.get_node_or_null("PlayButton") as Button
     var focus_surface := play_button.get_theme_stylebox("focus")
     var normal_surface := play_button.get_theme_stylebox("normal")
@@ -158,7 +163,8 @@ func _run() -> void:
     var menu_icons = preload("res://ui/menu_icons.gd")
     for name in ["play", "resume", "settings", "archive", "stats", "credits",
             "new", "load", "home", "quit", "update", "install",
-            "profile", "add_profile", "edit", "delete", "back", "history"]:
+            "profile", "add_profile", "edit", "delete", "back", "history",
+            "graphics", "audio", "controls", "gameplay", "general", "accessibility", "achievements", "modes"]:
         var texture: Texture2D = menu_icons.texture(name)
         if texture == null or texture.get_size().x < 18.0:
             _fail("Shared vector menu icon missing: " + name)

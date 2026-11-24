@@ -97,6 +97,9 @@ func _ready() -> void:
     mode_picker.name = "RunModePicker"
     mode_picker.custom_minimum_size.y = 40
     mode_picker.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    MenuStyle.apply_dropdown(mode_picker)
+    mode_picker.fit_to_longest_item = false
+    mode_picker.clip_text = true
     mode_picker.add_theme_color_override("font_color", GOLD)
     mode_picker.item_selected.connect(_select_mode)
     stack.add_child(mode_picker)
@@ -111,6 +114,7 @@ func _ready() -> void:
     actions.add_theme_constant_override("separation", 9)
     stack.add_child(actions)
     continue_button = _button(actions, _continue, "resume", "green")
+    MenuStyle.attach_sound(continue_button, "confirmation")
     new_button = _button(actions, _request_new_run, "new", "amber")
 
     back_button = LuminousButton.new()
@@ -129,9 +133,13 @@ func _ready() -> void:
     delete_dialog = ConfirmationDialog.new()
     delete_dialog.confirmed.connect(_delete_target)
     add_child(delete_dialog)
+    MenuStyle.attach_sound(delete_dialog.get_ok_button(), "navigation")
+    MenuStyle.attach_sound(delete_dialog.get_cancel_button(), "back")
     new_run_dialog = ConfirmationDialog.new()
     new_run_dialog.confirmed.connect(_new_run)
     add_child(new_run_dialog)
+    MenuStyle.attach_sound(new_run_dialog.get_ok_button(), "confirmation")
+    MenuStyle.attach_sound(new_run_dialog.get_cancel_button(), "back")
 
     var profiles := get_node_or_null("/root/ProfileManager")
     if profiles != null and profiles.profile_exists(profiles.active_slot):

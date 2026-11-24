@@ -118,3 +118,9 @@ are in `models/backrooms/oxygen/vol1/` and `vol2/`. Exact source checksums,
 import instructions and editor usage are recorded in
 `models/backrooms/oxygen/README.md`. The CC0 license does not require credits,
 but this attribution is retained for asset provenance.
+
+
+## Menu interface icons and sounds (CC0 1.0)
+
+- Nieobie, [Game Icon Pack v1.4](https://nieobie.itch.io/free-icons) ([SVG source v1.4](https://github.com/Nieobie/game-icon-pack/tree/v1.4/svg)), CC0. Selected SVG icons rendered white and tinted in the existing button theme.
+- Kenney, [Interface Sounds](https://kenney.nl/assets/interface-sounds), CC0. `bong_001.ogg`, `confirmation_002.ogg`, `glass_006.ogg` copied byte-for-byte (matching user-provided Git blob hashes).

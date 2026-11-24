@@ -117,6 +117,8 @@ Original model and textures retained; scaled and placed in the game.
 
 [color=#e6bb81][b]UI ASSETS — CC0[/b][/color]
 Kenney UI Pack 2.0 — [url=https://kenney.nl/assets/ui-pack]Kenney[/url], CC0 1.0. Adapted vector shapes and colors.
+Game Icon Pack v1.4 — [url=https://nieobie.itch.io/free-icons]Nieobie[/url], CC0 1.0. Rounded menu symbols.
+Interface Sounds — [url=https://kenney.nl/assets/interface-sounds]Kenney[/url], CC0 1.0. bong_001, confirmation_002, glass_006.
 
 [color=#e6bb81][b]MODELS & TEXTURES — CC0[/b][/color]
 [url=https://polyhaven.com/]Poly Haven[/url] — architecture materials, chandeliers, furniture, props and decor.

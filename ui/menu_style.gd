@@ -114,17 +114,35 @@ static func apply_button(button: Button, active: bool = false, accent: String = 
     button.add_theme_color_override("icon_hover_color", Color("#f6f6f2"))
     button.add_theme_color_override("icon_pressed_color", accent_color(accent).lightened(0.18))
     button.add_theme_color_override("icon_disabled_color", Color("#79848c"))
-    if not button.has_meta("_ui_click_attached"):
-        button.set_meta("_ui_click_attached", true)
-        button.pressed.connect(func() -> void:
-            var sound = button.get_node_or_null("/root/UISfx")
-            if sound != null:
-                sound.call("play_click")
-        )
+    attach_sound(button)
+
+
+static func play_sound(event: String) -> void:
+    var tree := Engine.get_main_loop() as SceneTree
+    if tree == null:
+        return
+    var sound := tree.root.get_node_or_null("UISfx")
+    if sound != null:
+        sound.call("play_event", event)
+
+
+static func attach_sound(button: BaseButton, event: String = "") -> void:
+    if not event.is_empty():
+        button.set_meta("_ui_sound", event)
+    if button.has_meta("_ui_click_attached"):
+        return
+    button.set_meta("_ui_click_attached", true)
+    button.pressed.connect(func() -> void:
+        var action := str(button.get_meta("_ui_sound", "navigation"))
+        if action != "silent":
+            play_sound(action)
+    )
 
 
 static func apply_dropdown(button: OptionButton) -> void:
     apply_button(button)
+    # Popup opening, not item selection or programmatic setup.
+    attach_sound(button, "silent")
     # Godot defaults to only 4px, putting the icon against the border.
     button.add_theme_constant_override("arrow_margin", 23)
     button.add_theme_icon_override("arrow", KenneyIcons.texture("arrow"))
@@ -133,6 +151,9 @@ static func apply_dropdown(button: OptionButton) -> void:
     button.add_theme_color_override("font_color", PALE)
     var popup := button.get_popup()
     if popup != null:
+        if not popup.has_meta("_ui_dropdown_sound"):
+            popup.set_meta("_ui_dropdown_sound", true)
+            popup.about_to_popup.connect(func() -> void: play_sound("dropdown"))
         popup.add_theme_stylebox_override("panel", panel())
         var selected := StyleBoxFlat.new()
         selected.bg_color = Color("#40372b")
@@ -173,11 +194,7 @@ static func apply_toggle(toggle: CheckButton) -> void:
     toggle.add_theme_icon_override("unchecked_disabled", KenneyIcons.texture("check_off_disabled"))
     toggle.add_theme_stylebox_override("focus", keyboard_focus_skin())
     toggle.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-    toggle.pressed.connect(func() -> void:
-        var sound := toggle.get_node_or_null("/root/UISfx")
-        if sound != null:
-            sound.call("play_click")
-    )
+    attach_sound(toggle)
 
 
 static func apply_slider(slider: HSlider) -> void:

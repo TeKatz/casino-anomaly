@@ -72,7 +72,7 @@ func _ready() -> void:
     body.add_child(tab_row)
     for i in range(CATEGORIES.size()):
         var tab := LuminousButton.new()
-        tab.symbol = ["settings", "info", "profile", "stats", "settings", "info"][i]
+        tab.symbol = ["graphics", "audio", "controls", "gameplay", "general", "accessibility"][i]
         MenuStyle.apply_button(tab)
         tab.text = _category(i)
         tab.custom_minimum_size = Vector2(126, 39)
@@ -135,11 +135,15 @@ func _ready() -> void:
     preview_dialog = ConfirmationDialog.new()
     preview_dialog.process_mode = Node.PROCESS_MODE_ALWAYS
     add_child(preview_dialog)
+    MenuStyle.attach_sound(preview_dialog.get_ok_button(), "navigation")
+    MenuStyle.attach_sound(preview_dialog.get_cancel_button(), "back")
     preview_dialog.confirmed.connect(func() -> void: settings_node.confirm_display_preview())
     preview_dialog.canceled.connect(func() -> void: settings_node.cancel_display_preview())
     reset_dialog = ConfirmationDialog.new()
     reset_dialog.process_mode = Node.PROCESS_MODE_ALWAYS
     add_child(reset_dialog)
+    MenuStyle.attach_sound(reset_dialog.get_ok_button(), "navigation")
+    MenuStyle.attach_sound(reset_dialog.get_cancel_button(), "back")
     reset_dialog.confirmed.connect(_confirm_reset)
     visibility_changed.connect(_on_visibility)
     set_process(false)
@@ -290,6 +294,10 @@ func _select(caption: String, key: String, choices: Array, description: String =
     var line := _line(caption)
     var dropdown := OptionButton.new()
     dropdown.custom_minimum_size = Vector2(215, 36)
+    # Long hardware names must not change the natural width of the panel.
+    dropdown.fit_to_longest_item = false
+    dropdown.clip_text = true
+    dropdown.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
     dropdown.tooltip_text = description
     line.get_child(0).tooltip_text = description
     if key == "graphics_preset":
@@ -298,9 +306,13 @@ func _select(caption: String, key: String, choices: Array, description: String =
     for i in range(choices.size()):
         dropdown.add_item(str(choices[i][0]))
         dropdown.set_item_metadata(i, choices[i][1])
+        dropdown.get_popup().set_item_tooltip(i, str(choices[i][0]))
         if choices[i][1] == settings_node.get_option(key):
             dropdown.select(i)
+    if dropdown.selected >= 0:
+        dropdown.tooltip_text = dropdown.get_item_text(dropdown.selected) + ("\n" + description if not description.is_empty() else "")
     dropdown.item_selected.connect(func(index: int) -> void:
+        dropdown.tooltip_text = dropdown.get_item_text(index) + ("\n" + description if not description.is_empty() else "")
         if key in ["window_mode", "resolution", "monitor"]:
             settings_node.preview_display(key, choices[index][1])
         else:

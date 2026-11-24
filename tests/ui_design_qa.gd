@@ -33,6 +33,15 @@ func _run() -> void:
         if icon == null or icon.get_width() <= 0 or icon != Kenney.texture(name):
             _fail("Embedded icon failed or was not cached: " + str(name))
             return
+    var sounds := root.get_node_or_null("UISfx")
+    if sounds == null:
+        _fail("Missing UI sound singleton")
+        return
+    for event in ["Navigation", "Confirmation", "Dropdown"]:
+        var voice := sounds.get_node_or_null(event) as AudioStreamPlayer
+        if voice == null or not (voice.stream is AudioStreamOggVorbis) or voice.bus != "UI":
+            _fail("Missing menu sound " + event)
+            return
     var panel := Control.new()
     root.add_child(panel)
     var slider := HSlider.new()
@@ -55,6 +64,24 @@ func _run() -> void:
         return
     var button := Luminous.new()
     panel.add_child(button)
+    button.pressed.emit()
+    if str(sounds.get("last_event")) != "navigation":
+        _fail("Navigation sound routing incorrect")
+        return
+    button.set_symbol("back")
+    button.pressed.emit()
+    if str(sounds.get("last_event")) != "back":
+        _fail("Back sound routing incorrect")
+        return
+    Style.attach_sound(button, "confirmation")
+    button.pressed.emit()
+    if str(sounds.get("last_event")) != "confirmation":
+        _fail("Continue sound routing incorrect")
+        return
+    dropdown.get_popup().about_to_popup.emit()
+    if str(sounds.get("last_event")) != "dropdown":
+        _fail("Dropdown sound routing incorrect")
+        return
     var settings := root.get_node_or_null("GameSettings")
     if settings == null:
         _fail("Missing settings singleton")

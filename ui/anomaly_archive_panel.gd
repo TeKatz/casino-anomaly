@@ -35,7 +35,7 @@ func _ready() -> void:
     stack.add_child(tabs)
     for tab in ["archive", "stats", "achievements", "modes", "last"]:
         var button := LuminousButton.new()
-        button.symbol = "archive" if tab == "archive" else ("stats" if tab in ["stats", "achievements", "modes"] else "history")
+        button.symbol = str({"archive": "archive", "stats": "stats", "achievements": "achievements", "modes": "modes"}.get(tab, "history"))
         button.add_theme_font_size_override("font_size", 12)
         button.custom_minimum_size.y = 39
         button.size_flags_horizontal = Control.SIZE_EXPAND_FILL

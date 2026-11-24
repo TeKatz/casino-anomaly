@@ -9,3 +9,6 @@
 - Pending: external sound pack integration, dedicated achievement notifications, reactive card effects, runtime/visual verification.
 
 Targeted regression script: `godot --headless --path . --script res://tests/ui_design_qa.gd` (run after editor import, preferably with an isolated user-data directory). Existing menu, profile and settings regressions should also be run.
+
+
+Menu icon library: Nieobie Game Icon Pack v1.4, CC0, embedded SVG paths; selected from the matching source version. UI sound routing: navigation = bong_001, back = original synthesized click, Continue and New Run OK = confirmation_002, dropdown popup opening = glass_006. All voices share the existing UI audio bus. Settings dropdowns keep a fixed minimum width, ellipsize long names, and expose full labels via tooltips.

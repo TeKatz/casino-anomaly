@@ -110,6 +110,32 @@ func _run() -> void:
         _fail("Selected settings tab does not have its own active surface")
         return
     subpanel.call("_switch_tab", 0)
+    await process_frame
+    await process_frame
+    var normal_width := subpanel.get_combined_minimum_size().x
+    subpanel.call("_switch_tab", 1)
+    await process_frame
+    await process_frame
+    var audio_options := subpanel.get("options_box") as VBoxContainer
+    var device_dropdown: OptionButton
+    for line in audio_options.get_children():
+        for item in line.get_children():
+            if item is OptionButton and item.get_item_count() > 0 and item.get_item_metadata(0) == "Default":
+                device_dropdown = item as OptionButton
+                break
+        if device_dropdown != null:
+            break
+    if device_dropdown == null:
+        _fail("Audio output device dropdown missing")
+        return
+    device_dropdown.add_item("QA audio device with a deliberately long hardware name ".repeat(12))
+    device_dropdown.select(device_dropdown.item_count - 1)
+    await process_frame
+    await process_frame
+    if not is_equal_approx(subpanel.get_combined_minimum_size().x, normal_width):
+        _fail("Audio output device name changes settings panel width")
+        return
+    subpanel.call("_switch_tab", 0)
     var options_box := subpanel.get("options_box") as VBoxContainer
     var dropdown: OptionButton
     for line in options_box.get_children():

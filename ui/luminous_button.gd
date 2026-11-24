@@ -56,6 +56,8 @@ func _ready() -> void:
 func set_symbol(value: String) -> void:
     symbol = value
     icon = MenuIcons.texture(value)
+    if value == "back":
+        set_meta("_ui_sound", "back")
 
 
 func set_accent(value: String, promoted: bool = false) -> void:

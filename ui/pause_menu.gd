@@ -108,6 +108,7 @@ func _ready() -> void:
     panel_root.add_child(confirmation)
     MenuStyle.apply_button(confirmation.get_ok_button(), true)
     MenuStyle.apply_button(confirmation.get_cancel_button())
+    MenuStyle.attach_sound(confirmation.get_cancel_button(), "back")
     visible = false
     var game_settings = get_node_or_null("/root/GameSettings")
     if game_settings != null:
@@ -140,6 +141,7 @@ func _add_button(parent: VBoxContainer, key: String, action: Callable) -> void:
     match key:
         "pause.resume":
             button.symbol = "resume"
+            button.set_meta("_ui_sound", "confirmation")
             button.accent = "green"
             button.featured = true
         "pause.settings": button.symbol = "settings"
@@ -201,13 +203,17 @@ func _input(event: InputEvent) -> void:
             var preview := settings_panel.get("preview_dialog") as ConfirmationDialog
             var reset := settings_panel.get("reset_dialog") as ConfirmationDialog
             if preview != null and preview.visible:
+                MenuStyle.play_sound("back")
                 settings.call("cancel_display_preview")
                 get_viewport().set_input_as_handled()
                 return
             if reset != null and reset.visible:
+                MenuStyle.play_sound("back")
                 reset.hide()
                 get_viewport().set_input_as_handled()
                 return
+        if open:
+            MenuStyle.play_sound("back")
         if confirmation.visible:
             confirmation.hide()
         elif open and archive_panel.visible:
@@ -315,6 +321,7 @@ func _confirm_action(action: String) -> void:
         _run_action(action)
         return
     confirmation_action = action
+    MenuStyle.attach_sound(confirmation.get_ok_button(), "confirmation" if action == "new" else "navigation")
     _refresh_localization()
     for connection in confirmation.confirmed.get_connections():
         confirmation.confirmed.disconnect(connection["callable"])
@@ -351,6 +358,7 @@ func _request_quit() -> void:
         get_tree().quit()
         return
     confirmation_action = "quit"
+    MenuStyle.attach_sound(confirmation.get_ok_button(), "navigation")
     confirmation.dialog_text = "Spiel beenden?" if Controls.pref(self, "language", "en") == "de" else "Quit the game?"
     for connection in confirmation.confirmed.get_connections():
         confirmation.confirmed.disconnect(connection["callable"])
