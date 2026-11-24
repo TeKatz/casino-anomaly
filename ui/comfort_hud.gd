@@ -87,5 +87,5 @@ func _sync() -> void:
         cue = "hum"
     captions.visible = available and bool(Controls.pref(self, "sound_captions", false)) and not cue.is_empty()
     if captions.visible:
-        var de := Controls.pref(self, "language", "en") == "de"
+        var de: bool = Controls.pref(self, "language", "en") == "de"
         caption.text = ("[Schritte]" if de else "[Footsteps]") if cue == "steps" else ("[Elektrisches Brummen]" if de else "[Electrical hum]")
