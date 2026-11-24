@@ -1,0 +1,44 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://bn7mhd31erhgy"
+path.s3tc="res://.godot/imported/Backrooms_Vol2_1k_backrooms_1k.png-ee248f6bca48cee66938af086e072279.s3tc.ctex"
+metadata={
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
+}
+generator_parameters={
+"md5": "1ecab3468fbde60e7f13d42715c2703a"
+}
+
+[deps]
+
+source_file="res://models/backrooms/oxygen/vol2/Backrooms_Vol2_1k_backrooms_1k.png"
+dest_files=["res://.godot/imported/Backrooms_Vol2_1k_backrooms_1k.png-ee248f6bca48cee66938af086e072279.s3tc.ctex"]
+
+[params]
+
+compress/mode=2
+compress/high_quality=false
+compress/lossy_quality=0.7
+compress/uastc_level=0
+compress/rdo_quality_loss=0.0
+compress/hdr_compression=1
+compress/normal_map=0
+compress/channel_pack=0
+mipmaps/generate=true
+mipmaps/limit=-1
+roughness/mode=0
+roughness/src_normal=""
+process/channel_remap/red=0
+process/channel_remap/green=1
+process/channel_remap/blue=2
+process/channel_remap/alpha=3
+process/fix_alpha_border=true
+process/premult_alpha=false
+process/normal_map_invert_y=false
+process/hdr_as_srgb=false
+process/hdr_clamp_exposure=false
+process/size_limit=0
+detect_3d/compress_to=0
