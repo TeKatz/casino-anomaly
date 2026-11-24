@@ -129,6 +129,12 @@ func _run() -> void:
     if second == null or second == first or second.get_parent() != root:
         _fail("The next independent hall was not preloaded")
         return
+    if second.get_node("Architecture/OakMainWing").owner != second:
+        _fail("Chunked attachment lost authored ownership")
+        return
+    if not bool(second.get_node("ModelInteriors").get("_population_done")):
+        _fail("Published standby hall before model population finished")
+        return
     if second.has_node("StreamingPortals/InitialEntryCap"):
         _fail("Staged rooms must NOT seal their arrival doors")
         return
@@ -353,11 +359,18 @@ func _run() -> void:
     if int(controller.get("_pending_stage_phase")) != 2             or controller.get("staged") != null:
         _fail("Incremental staging did not isolate portal preparation")
         return
+    var observed_partial := false
     for frame in range(240):
         if is_instance_valid(controller.get("staged")):
             break
         await process_frame
         controller.call("_schedule_stage_next", "right")
+        var pending := controller.get("_pending_stage") as Node3D
+        if is_instance_valid(pending) and pending.is_inside_tree():
+            observed_partial = true
+    if not observed_partial:
+        _fail("Normal streaming did not expose an incremental attachment phase")
+        return
     var third := controller.get("staged") as Node3D
     if third == null or controller.get("_pending_stage") != null:
         _fail("Incremental staging did not attach the third continuous loop")

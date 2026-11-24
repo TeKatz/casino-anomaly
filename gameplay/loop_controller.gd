@@ -387,7 +387,7 @@ func _stage_next(lane: String) -> void:
 		_stage_backrooms(lane)
 		return
 	# Immediate path for developer/integration calls and for a player who
-	# somehow reaches the choice gate before three staging frames have run.
+	# somehow reaches the choice gate before all budgeted staging steps finish.
 	if choice_taken:
 		return
 	if staged != null and is_instance_valid(staged):
@@ -420,10 +420,17 @@ func _cancel_pending_stage() -> void:
 		_assembly.cancel()
 		_assembly = null
 	if is_instance_valid(_pending_stage):
-		_pending_stage.free()
+		if _pending_stage.is_inside_tree():
+			_pending_stage.hide()
+			_pending_stage.process_mode = Node.PROCESS_MODE_DISABLED
+			_pending_stage.queue_free()
+		else:
+			_pending_stage.free()
 	_pending_stage = null
 	_pending_stage_phase = 0
 	_pending_return = false
+	_pending_lane = ""
+	staged_environment = null
 
 
 func _advance_pending_stage(lane: String, returning: bool = false, immediate: bool = false) -> void:
@@ -438,11 +445,6 @@ func _advance_pending_stage(lane: String, returning: bool = false, immediate: bo
 			push_error("Cannot preload next casino hall")
 			return
 		next.set_meta("_streaming_standby", true)
-		var trace_cleanup := StreamingTrace.begin()
-		var duplicate_player := next.get_node_or_null("Player")
-		if duplicate_player != null:
-			duplicate_player.free()
-		StreamingTrace.finish("casino.remove_duplicate_player", trace_cleanup)
 		_pending_stage = next
 		_pending_lane = lane
 		_pending_stage_phase = 1
@@ -451,6 +453,13 @@ func _advance_pending_stage(lane: String, returning: bool = false, immediate: bo
 
 	_pending_lane = lane
 	if _pending_stage_phase == 1:
+		# Do not create and destroy the duplicate player in the same frame
+		# as the large PackedScene instantiation. It never enters the tree.
+		var trace_cleanup := StreamingTrace.begin()
+		var duplicate_player := _pending_stage.get_node_or_null("Player")
+		if duplicate_player != null:
+			duplicate_player.free()
+		StreamingTrace.finish("casino.remove_duplicate_player", trace_cleanup)
 		var portal_start_us := Time.get_ticks_usec()
 		var trace_portal := StreamingTrace.begin()
 		if not portals.prepare_room(_pending_stage):
@@ -492,7 +501,9 @@ func _advance_pending_stage(lane: String, returning: bool = false, immediate: bo
 		# Room scripts must see the complete authored hierarchy, including
 		# restored owners, before they schedule their normal runtime setup.
 		for section in next.get_children():
-			if section.has_method("initialize_room_section"):
+			if section.has_method("advance_streaming_population"):
+				section.call("initialize_room_section", true)
+			elif section.has_method("initialize_room_section"):
 				section.call("initialize_room_section")
 		next.call("initialize_streamed_hall")
 		StreamingTrace.finish("casino.initialize_hall", trace_init)
@@ -507,7 +518,9 @@ func _advance_pending_stage(lane: String, returning: bool = false, immediate: bo
 			if not bool(models.call("advance_streaming_population", immediate)):
 				return
 		if not _pending_return:
-			next.global_transform = _stage_transform(lane)
+			var destination := _stage_transform(lane)
+			if next.global_transform != destination:
+				next.global_transform = destination
 		var trace_signs := StreamingTrace.begin()
 		_refresh_exit_signs(next)
 		var state = get_node_or_null("/root/LoopState")
@@ -999,7 +1012,7 @@ func _process_backrooms() -> void:
 
 func _stage_backrooms_return() -> void:
 	# Only used as a safety fallback if a player reaches the scoring plane
-	# before the three ordinary preparation frames have completed.
+	# before all ordinary preparation steps have completed.
 	for phase in range(6):
 		if is_instance_valid(staged):
 			return

@@ -34,8 +34,8 @@ func _ready() -> void:
         return
     initialize_room_section()
 
-func initialize_room_section() -> void:
-    if get_parent().has_meta("_streaming_standby"):
+func initialize_room_section(incremental: bool = false) -> void:
+    if incremental:
         begin_streaming_population()
     else:
         call_deferred("_populate")

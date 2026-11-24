@@ -101,3 +101,5 @@ Old sealed rooms are hidden, disabled and destroyed bottom-up after handoff
 Trace labels distinguish shell attachment, section splitting, chunk attachment,
 population and disposal. Budgets are soft CPU limits, not GPU frame guarantees:
 individual subtree operations and PackedScene.instantiate() are indivisible.
+
+Duplicate-player disposal is deferred until the portal-preparation step; no second player enters the SceneTree. Instantiation itself is still atomic and must be measured independently.

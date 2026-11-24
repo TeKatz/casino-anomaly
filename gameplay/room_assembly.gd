@@ -13,6 +13,9 @@ var _root: Node3D
 var _jobs: Array[Dictionary] = []
 var _cursor := 0
 var _section_cursor := 0
+var _split_parent: Node
+var _split_children: Array[Node] = []
+var _split_cursor := 0
 var _attached := false
 
 func begin(hall: Node3D) -> void:
@@ -25,30 +28,44 @@ func _collect_owners(node: Node, owners: Dictionary) -> void:
     for child in node.get_children(true):
         _collect_owners(child, owners)
 
-func _split_section(path: String) -> void:
-    var section := _root.get_node_or_null(path)
-    if section == null:
-        return
-    for child in section.get_children():
+# Split individual subtrees rather than detaching a complete large
+# section in one pass. Keep the authored sibling order in the job list.
+func _advance_split(immediate: bool) -> bool:
+    var started := Time.get_ticks_usec()
+    var count := 0
+    while _section_cursor < SECTIONS.size():
+        if _split_parent == null:
+            _split_parent = _root.get_node_or_null(SECTIONS[_section_cursor])
+            if _split_parent == null:
+                _section_cursor += 1
+                continue
+            _split_children = _split_parent.get_children()
+            _split_cursor = 0
+        if _split_cursor >= _split_children.size():
+            _split_children.clear()
+            _split_parent = null
+            _section_cursor += 1
+            continue
+        var child := _split_children[_split_cursor]
         var owners: Dictionary = {}
         _collect_owners(child, owners)
-        section.remove_child(child)
-        _jobs.append({"parent": section, "node": child, "owners": owners})
+        _split_parent.remove_child(child)
+        _jobs.append({"parent": _split_parent, "node": child, "owners": owners})
+        _split_cursor += 1
+        count += 1
+        if not immediate and (count >= MAX_ATTACH_JOBS or Time.get_ticks_usec() - started >= BUDGET_US):
+            return false
+    return true
 
-# Each section is detached off-tree in its own budgeted step. During
-# attachment, section roots already have their original names and paths.
 func advance(tree_root: Node, immediate: bool = false) -> bool:
     var started := Time.get_ticks_usec()
     var trace_start := Trace.begin()
     if _section_cursor < SECTIONS.size():
-        while _section_cursor < SECTIONS.size():
-            _split_section(SECTIONS[_section_cursor])
-            _section_cursor += 1
-            if not immediate and Time.get_ticks_usec() - started >= BUDGET_US:
-                break
+        var split_done := _advance_split(immediate)
         Trace.finish("casino.split_sections", trace_start)
-        if not immediate:
+        if not split_done or not immediate:
             return false
+        trace_start = Trace.begin()
     if not _attached:
         tree_root.add_child(_root)
         _attached = true
@@ -89,4 +106,6 @@ func cancel() -> void:
         if is_instance_valid(child) and child.get_parent() == null:
             child.free()
     _jobs.clear()
+    _split_children.clear()
+    _split_parent = null
     _root = null
