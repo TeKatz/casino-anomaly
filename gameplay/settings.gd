@@ -1,4 +1,5 @@
 extends Node
+const StreamingTrace = preload("res://gameplay/streaming_trace.gd")
 ## Persistent preferences; display previews are transactional and slider writes
 ## are debounced. Renderer quality never edits an authored scene on disk.
 signal options_changed(key: String)
@@ -773,6 +774,7 @@ func _on_node_removed(node: Node) -> void:
     _pending_meshes.erase(node.get_instance_id())
 
 func _flush_pending_meshes() -> void:
+    var trace_start := StreamingTrace.begin()
     _mesh_flush_queued = false
     var pending := _pending_meshes
     _pending_meshes = {}
@@ -781,6 +783,7 @@ func _flush_pending_meshes() -> void:
         var mesh := instance_from_id(int(id)) as MeshInstance3D
         if _quality_eligible(mesh):
             _apply_mesh_filter(mesh, seen)
+    StreamingTrace.finish("settings.mesh_batch", trace_start)
 
 func _apply_new_node(reference: WeakRef) -> void:
     var node := reference.get_ref() as Node

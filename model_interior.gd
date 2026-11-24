@@ -1,4 +1,5 @@
 extends Node3D
+const StreamingTrace = preload("res://gameplay/streaming_trace.gd")
 
 # Placement layer for the CC0 Poly Haven assets in models/catalog.json.
 # Each original glTF remains reusable; the existing walkable whitebox hall
@@ -33,6 +34,7 @@ func _ready() -> void:
 
 func _populate() -> void:
     var populate_start_us := Time.get_ticks_usec()
+    var trace_start := StreamingTrace.begin()
     var hall: Node3D = get_parent() as Node3D
     if hall == null:
         push_error("Poly Haven placement layer must be inside the casino hall")
@@ -156,6 +158,7 @@ func _populate() -> void:
     _place("modern_wooden_cabinet", "BarServiceCabinet",
         Vector3(-2.5 + BAR_SHIFT_X, 0.245, -12.03), 1.02, 0.0, true)
 
+    StreamingTrace.finish("models.populate", trace_start)
     var elapsed_ms := float(Time.get_ticks_usec() - populate_start_us) / 1000.0
     if elapsed_ms >= 20.0 and hall.has_meta("_streaming_standby"):
         print("Casino deferred model placement: %.1f ms" % elapsed_ms)

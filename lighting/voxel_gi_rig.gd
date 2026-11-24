@@ -1,5 +1,6 @@
 @tool
 extends Node3D
+const StreamingTrace = preload("res://gameplay/streaming_trace.gd")
 ## Pre-baked VoxelGI volumes for a rotated/streamed Casino Anomaly hall.
 ## No bake is performed at runtime. Exported builds only enable validated
 ## external VoxelGIData resources, never a blank or partially baked rig.
@@ -50,6 +51,7 @@ func _ensure_volume(label: String, center: Vector3, extents: Vector3) -> void:
 
 
 func _load_baked_data() -> void:
+    var trace_start := StreamingTrace.begin()
     var loaded := 0
     for name in BAKES:
         var probe := get_node_or_null(name) as VoxelGI
@@ -73,6 +75,7 @@ func _load_baked_data() -> void:
             if item is VoxelGI:
                 (item as VoxelGI).visible = false
     _apply_visibility()
+    StreamingTrace.finish("voxel_gi.load_assign", trace_start)
 
 
 func _on_setting_changed(key: String) -> void:

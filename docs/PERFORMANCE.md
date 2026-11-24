@@ -60,3 +60,24 @@ particle quality options apply to both backends. The default remains
 QA also uses CPU. Compare visually and measure on the target GPU before
 considering a default backend switch. GPU particle motion is not
 guaranteed identical to CPU simulation.
+
+## Diagnosing repeatable streaming hitches
+
+Press Ctrl+F9 shortly before walking through the suspected preload threshold.
+Walk normally through the portal into the next hall (repeat once if possible),
+then press Ctrl+F9 again. The console prints the full path to
+`user://streaming_trace.json`. It is written after capture, not during it.
+A genuine scene teardown also saves an active capture. Captures are bounded.
+
+The trace associates wall-clock frame intervals and local X/Z positions with
+synchronous spans for scene instantiation, duplicate-player disposal, portal
+construction, environment preparation, SceneTree attachment, signs, deferred
+models/furniture/lights/particles/GI/material batches/audio, GI prewarm,
+reflection activation, anomaly application, retirement and handoff. A large
+interval following a short synchronous span may be queued rendering/physics
+or destruction work, not evidence that the last GDScript call was slow.
+Do not interpret CPU monitors as GPU timings.
+
+No thresholds or staging sequence were changed by this diagnostic. Avoid
+moving an unverified hitch or enabling unsafe render-node worker threads
+until its actual phase is known.

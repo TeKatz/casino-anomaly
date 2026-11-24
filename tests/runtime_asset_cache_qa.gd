@@ -1,5 +1,6 @@
 extends SceneTree
 const Cache = preload("res://gameplay/runtime_asset_cache.gd")
+const Trace = preload("res://gameplay/streaming_trace.gd")
 
 func _initialize() -> void:
     call_deferred("_run")
@@ -79,6 +80,19 @@ func _run() -> void:
         return
     if mesh.size != size or shape.size != size:
         _fail("Clearing cache changed resources still in use")
+        return
+    Trace.start()
+    var started := Trace.begin()
+    Trace.finish("qa.span", started)
+    Trace.sample(0.01, "casino", Vector3.ZERO, 1, false)
+    var report := Trace.report()
+    if report["frames"].size() != 1 or report["spans"].size() != 1 or report["spans"][0]["label"] != "qa.span":
+        Trace.stop(false)
+        _fail("Streaming diagnostic did not capture a frame and span")
+        return
+    Trace.stop(false)
+    if Trace.enabled or Trace.begin() != -1 or not Trace.report()["frames"].is_empty():
+        _fail("Disabled streaming trace did not release its samples")
         return
     print("Casino Anomaly runtime asset cache QA PASS")
     quit(0)

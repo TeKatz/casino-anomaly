@@ -1,4 +1,5 @@
 extends Node3D
+const StreamingTrace = preload("res://gameplay/streaming_trace.gd")
 ## Seamless Exit-8-style spatial streaming.
 ## At most two authored casino rooms coexist briefly: active + next.
 ## All edits to walls/doors and all connector meshes are runtime-only.
@@ -167,6 +168,8 @@ func _exit_tree() -> void:
 	# Ownership only ends on actual scene teardown, not on a handoff.
 	if transitioning:
 		return
+	if StreamingTrace.enabled:
+		StreamingTrace.stop()
 	if is_instance_valid(backrooms_maze) and backrooms_maze != room:
 		backrooms_maze.queue_free()
 	if backrooms_active:
@@ -276,6 +279,9 @@ func _lane_z(lane: String) -> float:
 
 func _process(delta: float) -> void:
 	if _perf_trace:
+		var trace_local := room.to_local(player.global_position) if is_instance_valid(room) and is_instance_valid(player) else Vector3.ZERO
+		var trace_phase := "backrooms_return" if backrooms_active and backrooms_scored else ("backrooms" if backrooms_active else ("connector" if choice_taken else "casino"))
+		StreamingTrace.sample(delta, trace_phase, trace_local, _pending_stage_phase, is_instance_valid(staged))
 		_sample_streaming_performance(delta)
 	# The node creation and deferred setup phases land on separate frames.
 	# Report any frame-time spike around staging so a remaining stall can
@@ -401,15 +407,19 @@ func _advance_pending_stage(lane: String, returning: bool = false) -> void:
 	if _pending_stage == null:
 		_pending_return = returning
 		_pending_stage_start_us = Time.get_ticks_usec()
+		var trace_start := StreamingTrace.begin()
 		var next := ROOM.instantiate() as Node3D
+		StreamingTrace.finish("casino.instantiate", trace_start)
 		_pending_instance_ms = float(Time.get_ticks_usec() - _pending_stage_start_us) / 1000.0
 		if next == null:
 			push_error("Cannot preload next casino hall")
 			return
 		next.set_meta("_streaming_standby", true)
+		var trace_cleanup := StreamingTrace.begin()
 		var duplicate_player := next.get_node_or_null("Player")
 		if duplicate_player != null:
 			duplicate_player.free()
+		StreamingTrace.finish("casino.remove_duplicate_player", trace_cleanup)
 		_pending_stage = next
 		_pending_lane = lane
 		_pending_stage_phase = 1
@@ -419,13 +429,16 @@ func _advance_pending_stage(lane: String, returning: bool = false) -> void:
 	_pending_lane = lane
 	if _pending_stage_phase == 1:
 		var portal_start_us := Time.get_ticks_usec()
+		var trace_portal := StreamingTrace.begin()
 		if not portals.prepare_room(_pending_stage):
 			_pending_stage.free()
 			_pending_stage = null
 			_pending_stage_phase = 0
 			staged_environment = null
 			return
+		StreamingTrace.finish("casino.prepare_portals", trace_portal)
 		_pending_portal_ms = float(Time.get_ticks_usec() - portal_start_us) / 1000.0
+		var trace_environment := StreamingTrace.begin()
 		# Prevent expensive one-shot captures and duplicate WorldEnvironment
 		# while the room remains invisible beyond the opaque bend.
 		_set_reflections_visible(_pending_stage, false)
@@ -438,6 +451,7 @@ func _advance_pending_stage(lane: String, returning: bool = false) -> void:
 			graphics.call("apply_environment", staged_environment)
 		if environment_node != null:
 			environment_node.environment = null
+		StreamingTrace.finish("casino.prepare_environment", trace_environment)
 		_pending_stage_phase = 2
 		return
 
@@ -445,7 +459,10 @@ func _advance_pending_stage(lane: String, returning: bool = false) -> void:
 		var next := _pending_stage
 		next.transform = Backrooms.return_transform(room, portals.ENTRY_Z) if _pending_return else _stage_transform(lane)
 		var attach_start_us := Time.get_ticks_usec()
+		var trace_attach := StreamingTrace.begin()
 		get_tree().root.add_child(next)
+		StreamingTrace.finish("casino.attach_ready", trace_attach)
+		var trace_signs := StreamingTrace.begin()
 		_refresh_exit_signs(next)
 		var attach_ms := float(Time.get_ticks_usec() - attach_start_us) / 1000.0
 		if _pending_instance_ms >= 16.7 or _pending_portal_ms >= 16.7 or attach_ms >= 16.7:
@@ -454,6 +471,7 @@ func _advance_pending_stage(lane: String, returning: bool = false) -> void:
 		var state = get_node_or_null("/root/LoopState")
 		if state != null:
 			_update_level_sign(next, int(state.correct_streak), false)
+		StreamingTrace.finish("casino.exit_and_level_signs", trace_signs)
 		staged = next
 		staged_lane = "" if _pending_return else lane
 		staged_gi_warmed = false
@@ -479,11 +497,13 @@ func _prewarm_next_gi() -> void:
 	# The standby metadata intentionally stays set to suppress the second
 	# player, reflection captures and furniture fills. The GI streaming gate
 	# is independent: we can render cached probes before the room handoff.
+	var trace_gi := StreamingTrace.begin()
 	rig.call("set_streaming_active", true)
 	var atmosphere := staged.get_node_or_null("CasinoAtmosphere") as Node3D
 	if atmosphere != null and atmosphere.has_method("prewarm_streaming_lights"):
 		atmosphere.call("prewarm_streaming_lights")
 	staged_gi_warmed = true
+	StreamingTrace.finish("casino.prewarm_gi", trace_gi)
 
 
 func _set_reflections_visible(target_room: Node3D, enabled: bool) -> void:
@@ -514,11 +534,13 @@ func _activate_reflections_sequentially(target_room: Node3D) -> void:
 			return
 		if not is_instance_valid(child):
 			continue
+		var trace_reflection := StreamingTrace.begin()
 		var settings := get_node_or_null("/root/GameSettings")
 		if settings != null:
 			settings.call("reflection_requested", child, true)
 		else:
 			(child as ReflectionProbe).visible = true
+		StreamingTrace.finish("casino.reflection." + str(child.name), trace_reflection)
 
 
 func _commit_choice(lane: String) -> void:
@@ -560,7 +582,9 @@ func _commit_choice(lane: String) -> void:
 	if departing_rig != null:
 		departing_rig.call("set_streaming_active", false)
 	choice_taken = true
+	var trace_retire := StreamingTrace.begin()
 	_retire_departing_casino(room, lane)
+	StreamingTrace.finish("casino.retire_departing", trace_retire)
 	# Reflection probes used to turn on one/two frames AFTER the handoff;
 	# reflected ceiling/bar highlights visibly popped into view. Start
 	# their one-shot capture while hidden around the blind L-corner.
@@ -575,9 +599,11 @@ func _commit_choice(lane: String) -> void:
 
 	# Populate the NEXT room while the player is still in the connector.
 	# The previous room stays visible behind them until the exit handoff.
+	var trace_anomaly := StreamingTrace.begin()
 	var candidates: Array[String] = demo.available_ids(staged)
 	state.prepare_round(candidates)
 	demo.apply(staged, str(state.anomaly_id))
+	StreamingTrace.finish("casino.apply_anomaly", trace_anomaly)
 
 
 func _retire_departing_casino(target: Node3D, lane: String) -> void:
@@ -603,6 +629,7 @@ func _handoff() -> void:
 		return
 	if staged == null or not is_instance_valid(staged):
 		return
+	var trace_handoff := StreamingTrace.begin()
 	transitioning = true
 	var previous := room
 	var upcoming := staged
@@ -651,6 +678,7 @@ func _handoff() -> void:
 		finishing = false
 	player.call("restore_streaming_view")
 	transitioning = false
+	StreamingTrace.finish("casino.handoff_queue_free", trace_handoff)
 
 
 func _backrooms_selected() -> bool:
@@ -847,6 +875,10 @@ func _physics_process(_delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.ctrl_pressed and event.keycode == KEY_F9:
 		_perf_trace = not _perf_trace
+		if _perf_trace:
+			StreamingTrace.start()
+		else:
+			StreamingTrace.stop()
 		_perf_samples.clear()
 		_perf_elapsed = 0.0
 		_perf_worst_ms = 0.0

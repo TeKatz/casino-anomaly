@@ -1,4 +1,5 @@
 extends Node3D
+const StreamingTrace = preload("res://gameplay/streaming_trace.gd")
 
 # Non-colliding atmosphere, independent of gameplay/anomaly targets.
 # Uses Godot 4.5.1 Forward+ for volumetric lighting and screen-space occlusion.
@@ -38,12 +39,14 @@ func _build() -> void:
     if not active:
         return
     var build_start_us := Time.get_ticks_usec()
+    var trace_lights := StreamingTrace.begin()
     set_meta("ambient_fx_only", true)
     var showcase := get_parent().has_meta("_menu_showcase")
     if not showcase:
         _ensure_reflection_probes()
     _ensure_bar_fill_lights()
     _ensure_practical_lights()
+    StreamingTrace.finish("atmosphere.lights", trace_lights)
     # Reflection probes and practical light arrays must exist before the
     # early GI-prewarm path and its regression checks. Only the optional
     # atmospheric ornaments/particles are delayed to another frame.
@@ -51,6 +54,7 @@ func _build() -> void:
         await get_tree().process_frame
         if not is_inside_tree():
             return
+    var trace_ornaments := StreamingTrace.begin()
     if not has_node("EntrySignTop"):
         _architecture()
         _spot("CatHighlight", Vector3(-8.45, 4.7, -3.25),
@@ -68,12 +72,15 @@ func _build() -> void:
             if neon != null and neon.material_override is StandardMaterial3D:
                 signs.append(neon.material_override as StandardMaterial3D)
     _slots()
+    StreamingTrace.finish("atmosphere.ornaments_slots", trace_ornaments)
     if showcase:
         set_process(false)
         set_process_unhandled_key_input(false)
         return
+    var trace_dust := StreamingTrace.begin()
     _plants()
     _dust()
+    StreamingTrace.finish("atmosphere.plants_dust", trace_dust)
     var elapsed_ms := float(Time.get_ticks_usec() - build_start_us) / 1000.0
     if elapsed_ms >= 20.0 and get_parent().has_meta("_streaming_standby"):
         print("Casino deferred atmosphere setup: %.1f ms" % elapsed_ms)

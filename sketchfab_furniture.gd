@@ -1,5 +1,6 @@
 @tool
 extends Node3D
+const StreamingTrace = preload("res://gameplay/streaming_trace.gd")
 # Imported user-provided Sketchfab CC BY 4.0 models.
 # Low-poly original placeholders only disappear after the corresponding
 # complete glTF scene has been loaded and placed successfully.
@@ -389,6 +390,7 @@ func prepare_authored_furniture_for_editor(scene_root: Node3D) -> bool:
 
 
 func _populate() -> void:
+    var trace_start := StreamingTrace.begin()
     var hall: Node3D = get_parent() as Node3D
     if hall == null:
         return
@@ -428,6 +430,7 @@ func _populate() -> void:
                     if str(child.get_meta("source_asset", "")) == "blackjack_table":
                         _fit_blackjack_collision(child as Node3D)
             furniture_finalized.emit()
+        StreamingTrace.finish("furniture.authored", trace_start)
         return
     var slots: Node3D = hall.get_node_or_null("SlotMachines") as Node3D
     var tables: Node3D = hall.get_node_or_null("GamingTables") as Node3D
@@ -482,6 +485,7 @@ func _populate() -> void:
     if _editor_preview_root != null:
         return
     furniture_finalized.emit()
+    StreamingTrace.finish("furniture.generated", trace_start)
     print("Sketchfab furniture imported: slots=", replaced_slots,
         ", roulette=", replaced_roulette, ", blackjack=", replaced_blackjack,
         ", poker props=", poker_props_placed)

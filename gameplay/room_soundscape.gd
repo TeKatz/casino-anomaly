@@ -1,4 +1,5 @@
 extends Node3D
+const StreamingTrace = preload("res://gameplay/streaming_trace.gd")
 ## Runtime-only positional audio. Staged halls do not double-play sound.
 var _sources: Array[AudioStreamPlayer3D] = []
 var _target_db: Array[float] = []
@@ -15,6 +16,7 @@ func _build() -> void:
     if _built:
         return
     _built = true
+    var trace_start := StreamingTrace.begin()
     var room := get_parent() as Node3D
     var sound := get_node_or_null("/root/AudioDirector")
     if room == null or sound == null:
@@ -36,6 +38,7 @@ func _build() -> void:
         "vent", -22.0, 9.0)
     if not room.has_meta("_streaming_standby"):
         activate()
+    StreamingTrace.finish("audio.room_build", trace_start)
 
 
 func _source(label: String, at: Vector3, kind: String, level: float,
