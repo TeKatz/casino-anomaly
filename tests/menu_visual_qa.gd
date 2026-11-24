@@ -1,5 +1,5 @@
 extends SceneTree
-## Lightweight menu/credit regression without loading expensive casino meshes.
+## Menu/credit regression including the isolated casino panorama.
 const MENU = preload("res://menu.tscn")
 const PAUSE = preload("res://ui/pause_menu.gd")
 
@@ -41,15 +41,15 @@ func _run() -> void:
     if screen.x >= 980.0 and (main_panel.anchor_left < 0.599 or main_panel.anchor_right < 0.979 or (menu.get_node("Brand") as Control).anchor_top > 0.231):
         _fail("Panorama menu positioning regressed")
         return
-    var state := root.get_node_or_null("LoopState")
-    var previous_active = state.active
-    var previous_tutorial = state.tutorial_done
-    state.active = true
-    state.tutorial_done = true
+    var run_state := root.get_node_or_null("LoopState")
+    var previous_active = run_state.active
+    var previous_tutorial = run_state.tutorial_done
+    run_state.active = true
+    run_state.tutorial_done = true
     var packed := load("res://main.tscn") as PackedScene
     var installed := bool(panorama.call("install_room", packed))
-    state.active = previous_active
-    state.tutorial_done = previous_tutorial
+    run_state.active = previous_active
+    run_state.tutorial_done = previous_tutorial
     if not installed:
         _fail("Real casino panorama cannot be instantiated")
         return
