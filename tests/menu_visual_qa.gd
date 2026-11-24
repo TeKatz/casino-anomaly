@@ -35,11 +35,20 @@ func _run() -> void:
         return
     var panorama := menu.get_node_or_null("CasinoPanorama") as Control
     var view := panorama.get_node_or_null("RenderSurface/World") as SubViewport if panorama != null else null
-    if view == null or not view.own_world_3d or not view.gui_disable_input or (panorama.get_node("RenderSurface") as SubViewportContainer).stretch_shrink != 2:
-        _fail("Panorama viewport is not isolated or performance bounded")
+    if view == null or not view.own_world_3d or not view.gui_disable_input or not (panorama.get_node("RenderSurface") is TextureRect) or view.size != root.size:
+        _fail("Panorama viewport is not isolated or native resolution")
         return
-    if screen.x >= 980.0 and (main_panel.anchor_left < 0.599 or main_panel.anchor_right < 0.979 or (menu.get_node("Brand") as Control).anchor_top > 0.231):
+    if screen.x >= 980.0 and (bounds.position.x < screen.x * 0.57 or bounds.end.x > screen.x * 0.98 or bounds.size.y > screen.y * 0.85 or (menu.get_node("Brand") as Control).anchor_top > 0.161):
         _fail("Panorama menu positioning regressed")
+        return
+    var intro := menu.get_node("StartupIntro") as ColorRect
+    intro.call("begin", true)
+    if not intro.visible or intro.modulate.a != 1.0 or not bool(intro.get("active")) or intro.get_node("Center/Content/Logo").texture == null or not str(intro.get_node("Center/Content/Creator").text).contains("TeKatz"):
+        _fail("Opaque branded startup cover missing")
+        return
+    await process_frame
+    if not intro.visible or bool(intro.get("closing")):
+        _fail("Startup cover disappeared before panorama readiness")
         return
     var run_state := root.get_node_or_null("LoopState")
     var previous_active = run_state.active
@@ -55,6 +64,22 @@ func _run() -> void:
         return
     for frame in range(5):
         await process_frame
+    if not bool(panorama.get("first_frame_ready")) or not bool(intro.get("closing")) or background.visible:
+        _fail("Startup cover did not wait for the panorama-ready signal")
+        return
+    await create_timer(2.4).timeout
+    if intro.visible or bool(intro.get("active")):
+        _fail("Startup cover failed to release input after fade")
+        return
+    intro.call("begin", false)
+    if not intro.visible or intro.get_node("Center/Content").visible:
+        _fail("Menu return repeated the branded first-launch intro")
+        return
+    intro.call("complete")
+    await create_timer(0.95).timeout
+    if intro.visible:
+        _fail("Return cover failed to clear")
+        return
     var visual := panorama.get("room") as Node3D
     if visual == null or not bool(panorama.get("ready_for_display")) or not visual.has_node("Architecture") or not visual.has_node("SlotMachines"):
         _fail("Casino visual geometry missing")

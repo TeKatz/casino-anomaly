@@ -62,8 +62,15 @@ func _ready() -> void:
         game_settings.options_changed.connect(_on_setting_changed)
     _localize_ui()
     get_viewport().size_changed.connect(_update_layout)
+    ($CenterPanel as Control).minimum_size_changed.connect(_queue_menu_layout)
     _update_layout()
     _animate_intro()
+    $CasinoPanorama.panorama_ready.connect(_on_panorama_ready)
+    $CasinoPanorama.panorama_failed.connect(_on_panorama_failed)
+    if DisplayServer.get_name() != "headless":
+        var first_launch := not get_tree().root.has_meta("_casino_intro_seen")
+        $StartupIntro.begin(first_launch)
+        $StartupIntro.finished.connect(_on_startup_finished)
     call_deferred("_check_update")
 
 func _exit_tree() -> void:
@@ -239,28 +246,47 @@ func _update_layout() -> void:
     var compact := view_size.x < 980.0
     $Brand.visible = not compact
     var panel := $CenterPanel as PanelContainer
-    if compact:
-        panel.anchor_left = 0.14
-        panel.anchor_right = 0.86
-    else:
-        panel.anchor_left = 0.60
-        panel.anchor_right = 0.98
-
-    # The old anchored +/-293px panel could exceed 720p after font/icon
-    # minimums grew, clipping its top edge. Give the entire glass frame
-    # guaranteed margins in logical viewport coordinates, even at 720p.
-    var natural_height := maxf(586.0, panel.get_combined_minimum_size().y)
-    var available_height := maxf(200.0, view_size.y - 56.0)
-    var fit_scale := minf(1.0, available_height / natural_height)
+    # Size to the real visible controls, not a fixed full-height glass slab.
+    # Keep the right edge fixed even when translations or the update button
+    # change the natural minimum size.
+    var minimum := panel.get_combined_minimum_size()
+    var natural_width := maxf(360.0, minimum.x)
+    var natural_height := maxf(300.0, minimum.y)
+    var available_width := view_size.x * (0.76 if compact else 0.38)
+    var available_height := maxf(120.0, view_size.y - 56.0)
+    var fit_scale := minf(1.0, minf(available_width / natural_width, available_height / natural_height))
     panel.pivot_offset = Vector2.ZERO
-    panel.scale = Vector2(fit_scale, fit_scale)
+    panel.scale = Vector2.ONE * fit_scale
+    panel.anchor_left = 0.0
+    panel.anchor_right = 0.0
     panel.anchor_top = 0.0
     panel.anchor_bottom = 0.0
-    var top := maxf(28.0, (view_size.y - natural_height * fit_scale) * 0.5)
+    var left := (view_size.x - natural_width * fit_scale) * 0.5 if compact else view_size.x * 0.96 - natural_width * fit_scale
+    var top := (view_size.y - natural_height * fit_scale) * 0.5
+    panel.offset_left = left
+    panel.offset_right = left + natural_width
     panel.offset_top = top
     panel.offset_bottom = top + natural_height
     if profile_side_cards != null:
         profile_side_cards.call_deferred("_layout_cards")
+
+
+func _queue_menu_layout() -> void:
+    call_deferred("_update_layout")
+
+
+func _on_panorama_ready() -> void:
+    $Background.hide()
+    $StartupIntro.complete()
+
+
+func _on_panorama_failed() -> void:
+    # A broken/missing asset must not strand the user at startup.
+    $StartupIntro.complete()
+
+
+func _on_startup_finished() -> void:
+    get_tree().root.set_meta("_casino_intro_seen", true)
 
 
 func _animate_intro() -> void:

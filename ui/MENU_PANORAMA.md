@@ -1,7 +1,21 @@
-# Main menu casino panorama
+# Main menu casino panorama and startup
 
-The full-screen background renders the current main.tscn visual geometry in an independent World3D/SubViewport at half the menu resolution in each dimension (one quarter of the pixels). The camera sweeps gently over the main aisle every 42 seconds and observes the camera-motion preference. The old abstract shader stays visible until the 3D view renders, and on load failure.
+Godot's ordinary boot splash is unchanged. The menu opens with an opaque branded
+intro (existing portal logo, CASINO ANOMALY and A game by TeKatz). A first-launch
+cover fades in and holds for at least 1.6 seconds, but fades out only after the
+casino viewport has actually rendered six warmup frames. On menu return the
+same gate is a short dark cover without repeating the creator splash. Missing
+assets or a 30-second loading timeout permit the fallback menu to be used.
 
-The showcase removes the player and run-specific nodes before tree entry. The hall and atmosphere scripts have a visual-only mode; no run controller, room audio, GI rig, reflection captures or animated dust are started. Existing authored models and materials are reused, and the environment is duplicated before menu-only lighting adjustments. The panorama is suspended during loading a run. No baked resources or gameplay geometry change.
+The background renders current main.tscn visual geometry in an isolated
+World3D/SubViewport. A TextureRect displays its native window-pixel texture,
+independent of the 1280x720 logical UI canvas. TAA follows the existing setting;
+the texture uses linear sampling and the viewport uses 8x anisotropy. The
+camera sweeps over the main aisle on a 42-second cycle. Gameplay, live
+reflections, GI rig, particles and room audio remain disabled. The panorama is
+suspended during game loading. No baked resources or gameplay geometry change.
 
-Edit camera placement and FOV in ui/menu_showcase_3d.tscn; sweep, period and quality budget in ui/menu_showcase_3d.gd. The foreground remains ordinary sharp 2D controls. The GPU look should be checked in Forward+.
+The foreground is sized to its visible controls, right-aligned on wide
+screens and centered on compact screens. The brand is raised and reduced.
+The intro is editable in ui/menu_startup_intro.tscn. Actual GPU appearance,
+frame pacing and startup duration should be checked in Forward+.

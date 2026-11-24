@@ -1,5 +1,8 @@
 extends Control
 ## Visual-only view of the authored casino, with a separate 3D world.
+signal panorama_ready
+signal panorama_failed
+
 const CASINO_PATH := "res://main.tscn"
 const PERIOD := 42.0
 const SWEEP := 0.39
@@ -16,23 +19,51 @@ var elapsed := 0.0
 var motion_enabled := true
 var ready_for_display := false
 var base_position := Vector3.ZERO
-var reveal_tween: Tween
+var first_frame_ready := false
+var warming := false
+var load_deadline := 0
 var loaded_scene: PackedScene
 
 func _ready() -> void:
     base_position = rig.position
+    ($RenderSurface as TextureRect).texture = viewport.get_texture()
+    get_window().size_changed.connect(_resize_render_target)
+    resized.connect(_resize_render_target)
+    _resize_render_target()
     var settings := get_node_or_null("/root/GameSettings")
     if settings != null:
         settings.options_changed.connect(_on_setting)
         _on_setting("camera_motion")
+        _on_setting("taa")
     set_process(false)
     if DisplayServer.get_name() != "headless":
-        call_deferred("_request_room")
+        call_deferred("_begin_after_cover")
+
+func _begin_after_cover() -> void:
+    # Present the branded cover before loading or instantiating geometry.
+    await RenderingServer.frame_post_draw
+    if is_inside_tree():
+        _request_room()
+
+
+func _resize_render_target() -> void:
+    # Canvas-items stretch uses logical UI coordinates. The texture must
+    # match the window's actual pixels, not the logical 1280x720 canvas.
+    var pixels := get_window().size
+    if pixels.x < 2 or pixels.y < 2:
+        return
+    viewport.size = pixels
+    if ready_for_display and not suspended and not motion_enabled:
+        viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+
 
 func _on_setting(key: String) -> void:
     if key == "camera_motion":
         var settings := get_node_or_null("/root/GameSettings")
         motion_enabled = settings == null or bool(settings.get_option("camera_motion"))
+    if key == "taa":
+        var settings := get_node_or_null("/root/GameSettings")
+        viewport.use_taa = settings == null or bool(settings.get_option("taa"))
     if ready_for_display:
         _sync_rendering()
 
@@ -46,26 +77,38 @@ func _request_room() -> void:
     var err := ResourceLoader.load_threaded_request(CASINO_PATH, "PackedScene", false)
     if err != OK:
         push_warning("Menu panorama could not request casino scene: " + str(err))
+        panorama_failed.emit()
         return
     loading = true
+    load_deadline = Time.get_ticks_msec() + 30000
     set_process(true)
 
 func _process(delta: float) -> void:
     if loading:
+        if load_deadline > 0 and Time.get_ticks_msec() >= load_deadline:
+            # Allow the menu to be used if the background cannot load.
+            # Keep polling to consume the threaded request, but do not
+            # replace the fallback unexpectedly after the failure.
+            load_deadline = 0
+            panorama_failed.emit()
         var status := ResourceLoader.load_threaded_get_status(CASINO_PATH)
         if status == ResourceLoader.THREAD_LOAD_LOADED:
             loading = false
             loaded_scene = ResourceLoader.load_threaded_get(CASINO_PATH) as PackedScene
-            if not suspended:
-                install_room(loaded_scene)
+            if load_deadline == 0:
+                loaded_scene = null
+            elif not suspended:
+                if not install_room(loaded_scene):
+                    panorama_failed.emit()
                 loaded_scene = null
             _sync_rendering()
         elif status == ResourceLoader.THREAD_LOAD_FAILED or status == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
             loading = false
             set_process(false)
             push_warning("Menu panorama could not load casino scene")
+            panorama_failed.emit()
         return
-    if ready_for_display and not suspended and motion_enabled:
+    if first_frame_ready and not suspended and motion_enabled:
         elapsed = fmod(elapsed + delta, PERIOD)
         update_pose(elapsed)
 
@@ -124,22 +167,20 @@ func _finish_room() -> void:
     room.process_mode = Node.PROCESS_MODE_DISABLED
     camera.make_current()
     ready_for_display = true
+    warming = true
     _sync_rendering()
-    if DisplayServer.get_name() == "headless":
-        modulate.a = 1.0
-        return
-    if suspended:
-        return
-    await RenderingServer.frame_post_draw
-    if not is_inside_tree() or suspended:
-        return
-    _reveal()
-
-func _reveal() -> void:
-    if reveal_tween != null and reveal_tween.is_running():
-        reveal_tween.kill()
-    reveal_tween = create_tween()
-    reveal_tween.tween_property(self, "modulate:a", 1.0, 0.65)
+    if DisplayServer.get_name() != "headless":
+        # The cover remains opaque during the actual render warmup,
+        # including initial shader compilation and temporal AA history.
+        for frame in range(6):
+            await RenderingServer.frame_post_draw
+            if not is_inside_tree():
+                return
+    warming = false
+    first_frame_ready = true
+    modulate.a = 1.0
+    _sync_rendering()
+    panorama_ready.emit()
 
 func update_pose(seconds: float) -> void:
     var angle := TAU * seconds / PERIOD
@@ -151,14 +192,13 @@ func set_suspended(value: bool) -> void:
     _sync_rendering()
     if not value and not loading and not is_instance_valid(room) and DisplayServer.get_name() != "headless":
         _request_room()
-    elif not value and ready_for_display and modulate.a < 1.0:
-        _reveal()
+
 
 func _sync_rendering() -> void:
     if not ready_for_display or suspended:
         viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
-    elif motion_enabled:
+    elif warming or motion_enabled:
         viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
     else:
         viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
-    set_process(loading or (ready_for_display and not suspended and motion_enabled))
+    set_process(loading or (first_frame_ready and not suspended and motion_enabled))
