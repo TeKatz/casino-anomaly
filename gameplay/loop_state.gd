@@ -2,12 +2,17 @@ extends Node
 ## Active profile run state; a ProfileManager owns the five save-slot paths.
 ## Never writes into res:// or the designer-authored casino scene.
 
+const Modes = preload("res://gameplay/run_modes.gd")
+const Catalog = preload("res://gameplay/anomaly_catalog.gd")
 const REQUIRED_CORRECT := 12
 const BACKROOMS_ID := "backrooms"
 const SAVE_VERSION := 1
 const DEFAULT_SAVE_PATH := "user://anomaly_run.cfg"
 
 var save_path: String = DEFAULT_SAVE_PATH
+var mode := "classic"
+var elapsed_seconds := 0.0
+var run_assisted := false
 var active := false
 var tutorial_done := false
 var finished := false
@@ -31,6 +36,9 @@ func _ready() -> void:
 
 
 func reset_runtime() -> void:
+    mode = "classic"
+    elapsed_seconds = 0.0
+    run_assisted = false
     active = false
     tutorial_done = false
     finished = false
@@ -49,7 +57,10 @@ func has_continue() -> bool:
     return active and not finished and FileAccess.file_exists(save_path)
 
 
-func start_new_run() -> void:
+func start_new_run(next_mode: String = "classic") -> void:
+    mode = Modes.normalize(next_mode)
+    elapsed_seconds = 0.0
+    run_assisted = false
     active = true
     tutorial_done = false
     finished = false
@@ -101,12 +112,53 @@ func prepare_round(available_anomalies: Array[String]) -> void:
 
 
 func _roll_random_anomaly(available_anomalies: Array[String]) -> String:
-    if available_anomalies.is_empty() or rng.randf() >= 0.5:
+    if mode == "expedition":
+        return BACKROOMS_ID if available_anomalies.has(BACKROOMS_ID) else ""
+    if available_anomalies.is_empty() or rng.randf() >= (0.75 if mode == "research" else 0.5):
         return ""
-    var candidates := available_anomalies.duplicate()
-    if candidates.size() > 1:
-        candidates.erase(last_anomaly_id)
-    return candidates[rng.randi_range(0, candidates.size() - 1)]
+    var groups := {}
+    for id in available_anomalies:
+        var family := Catalog.family(id)
+        if not groups.has(family):
+            groups[family] = []
+        groups[family].append(id)
+    if groups.size() > 1:
+        groups.erase(Catalog.family(last_anomaly_id))
+    var records := {}
+    if is_inside_tree():
+        var profiles := get_node_or_null("/root/ProfileManager")
+        if profiles != null and profiles.active_slot > 0 and save_path == profiles.run_path(profiles.active_slot, mode):
+            records = profiles.get_records()
+    var weights := PackedFloat32Array()
+    var families := groups.keys()
+    for family in families:
+        var entry := Catalog.get_entry(str(family))
+        var weight := Catalog.rarity_weight(str(entry.get("rarity", "common")))
+        if not bool(records.get(family, {}).get("recognized", false)):
+            weight *= 8.0 if mode == "research" else 2.5
+        weights.append(weight)
+    var selected := str(families[rng.rand_weighted(weights)])
+    var candidates: Array = groups[selected]
+    var variant_weights := PackedFloat32Array()
+    for id in candidates:
+        var entry := Catalog.get_entry(str(id))
+        var difficulty := int(entry.get("difficulty", 2))
+        var weight := float(difficulty * difficulty) if mode == "nightmare" else 1.0
+        if mode == "research" and not bool(records.get(selected, {}).get("variants", {}).get(id, false)):
+            weight *= 3.0
+        variant_weights.append(weight)
+    return str(candidates[rng.rand_weighted(variant_weights)])
+
+
+func tick_play_time(delta: float) -> void:
+    if active and tutorial_done and mode == "time_trial":
+        elapsed_seconds += maxf(delta, 0.0)
+
+
+func progress_number() -> int:
+    if mode in ["time_trial", "research", "expedition"]:
+        return visited_loops
+    return correct_streak
 
 
 func _debug_allowed(id: String, available_anomalies: Array[String]) -> bool:
@@ -173,9 +225,24 @@ func _resolve_decision(choose_anomaly: bool, correct: bool) -> Dictionary:
     if correct:
         correct_streak += 1
     else:
-        correct_streak = 0
         mistakes += 1
-    finished = correct_streak >= REQUIRED_CORRECT
+        if mode not in ["research", "time_trial", "expedition"]:
+            correct_streak = 0
+    run_assisted = run_assisted or round_debugged
+    var failed := false
+    match mode:
+        "endless":
+            finished = not correct
+            failed = finished
+        "nightmare":
+            finished = not correct or correct_streak >= REQUIRED_CORRECT
+            failed = not correct
+        "research", "time_trial":
+            finished = visited_loops >= Modes.target(mode)
+        "expedition":
+            finished = actual_id == BACKROOMS_ID and correct
+        _:
+            finished = correct_streak >= REQUIRED_CORRECT
     if finished:
         active = false
     var verdict := {
@@ -185,7 +252,11 @@ func _resolve_decision(choose_anomaly: bool, correct: bool) -> Dictionary:
         "anomaly_id": actual_id, "choice_anomaly": choose_anomaly,
         "expected_anomaly": not actual_id.is_empty(),
         "debugged": round_debugged,
-        "traversal": actual_id == BACKROOMS_ID
+        "traversal": actual_id == BACKROOMS_ID,
+        "mode": mode, "failed": failed, "assisted": run_assisted,
+        "progress": progress_number(), "goal": Modes.target(mode),
+        "elapsed_seconds": elapsed_seconds,
+        "score_seconds": elapsed_seconds + mistakes * Modes.PENALTY_SECONDS
     }
     round_ready = false
     anomaly_id = ""
@@ -197,7 +268,7 @@ func _resolve_decision(choose_anomaly: bool, correct: bool) -> Dictionary:
     if self == get_node_or_null("/root/LoopState"):
         var profiles := get_node_or_null("/root/ProfileManager")
         if profiles != null and profiles.active_slot > 0 \
-                and save_path == profiles.run_path(profiles.active_slot):
+                and save_path == profiles.run_path(profiles.active_slot, mode):
             profiles.record_decision(verdict)
     return verdict
 
@@ -205,6 +276,9 @@ func _resolve_decision(choose_anomaly: bool, correct: bool) -> Dictionary:
 func save_run() -> void:
     var config := ConfigFile.new()
     config.set_value("run", "version", SAVE_VERSION)
+    config.set_value("run", "mode", mode)
+    config.set_value("run", "elapsed_seconds", elapsed_seconds)
+    config.set_value("run", "assisted", run_assisted)
     config.set_value("run", "active", active)
     config.set_value("run", "tutorial_done", tutorial_done)
     config.set_value("run", "finished", finished)
@@ -227,11 +301,16 @@ func load_run() -> bool:
         return false
     if int(config.get_value("run", "version", -1)) != SAVE_VERSION:
         return false
+    mode = Modes.normalize(str(config.get_value("run", "mode", "classic")))
+    elapsed_seconds = maxf(0.0, float(config.get_value("run", "elapsed_seconds", 0.0)))
+    run_assisted = bool(config.get_value("run", "assisted", false))
     active = bool(config.get_value("run", "active", false))
     tutorial_done = bool(config.get_value("run", "tutorial_done", false))
     finished = bool(config.get_value("run", "finished", false))
     round_ready = bool(config.get_value("run", "round_ready", false))
-    correct_streak = clampi(int(config.get_value("run", "correct_streak", 0)), 0, REQUIRED_CORRECT)
+    correct_streak = maxi(0, int(config.get_value("run", "correct_streak", 0)))
+    if mode in ["classic", "nightmare"]:
+        correct_streak = mini(correct_streak, REQUIRED_CORRECT)
     visited_loops = maxi(0, int(config.get_value("run", "visited_loops", 0)))
     mistakes = maxi(0, int(config.get_value("run", "mistakes", 0)))
     anomaly_id = str(config.get_value("run", "anomaly_id", ""))

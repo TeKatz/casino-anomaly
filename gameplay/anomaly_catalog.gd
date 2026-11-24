@@ -62,7 +62,7 @@ static func discoverable_ids() -> Array[String]:
     _ensure_loaded()
     var result: Array[String] = []
     for entry in _entries:
-        if bool(entry.get("discoverable", true)):
+        if bool(entry.get("discoverable", true)) and str(entry.get("family_id", entry["id"])) == str(entry["id"]):
             result.append(str(entry["id"]))
     return result
 
@@ -77,3 +77,24 @@ static func available_ids(room: Node3D) -> Array[String]:
         if bool(handler.call("can_apply", room, entry)):
             result.append(str(entry["id"]))
     return result
+
+static func family(id: String) -> String:
+    var entry := get_entry(id)
+    return str(entry.get("family_id", id))
+
+static func family_entries(id: String) -> Array[Dictionary]:
+    _ensure_loaded()
+    var result: Array[Dictionary] = []
+    for entry in _entries:
+        if str(entry.get("family_id", entry["id"])) == id and bool(entry.get("discoverable", true)):
+            result.append(entry.duplicate())
+    return result
+
+static func rarity_weight(rarity: String) -> float:
+    return float({"common": 50.0, "uncommon": 27.0, "rare": 15.0, "exceptional": 6.0, "singularity": 2.0}.get(rarity, 50.0))
+
+static func rarity_name(rarity: String, de: bool) -> String:
+    var names := {"common": ["Gewöhnlich", "Common"], "uncommon": ["Ungewöhnlich", "Uncommon"],
+        "rare": ["Selten", "Rare"], "exceptional": ["Außergewöhnlich", "Exceptional"],
+        "singularity": ["Singularität", "Singularity"]}
+    return str(names.get(rarity, names["common"])[0 if de else 1])

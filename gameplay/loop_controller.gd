@@ -11,6 +11,7 @@ const StreamingTrace = preload("res://gameplay/streaming_trace.gd")
 const RuntimeCache = preload("res://gameplay/runtime_asset_cache.gd")
 const RoomAssembly = preload("res://gameplay/room_assembly.gd")
 const RoomDisposal = preload("res://gameplay/room_disposal.gd")
+const Modes = preload("res://gameplay/run_modes.gd")
 const Controls = preload("res://gameplay/input_bindings.gd")
 const DemoAnomalies = preload("res://gameplay/demo_anomalies.gd")
 const NeonLevelSign = preload("res://gameplay/neon_level_sign.gd")
@@ -176,6 +177,9 @@ func _exit_tree() -> void:
 	# Ownership only ends on actual scene teardown, not on a handoff.
 	if transitioning:
 		return
+	var run_state := get_node_or_null("/root/LoopState")
+	if run_state != null and str(run_state.get("mode")) == "time_trial" and bool(run_state.get("active")):
+		run_state.call("save_run")
 	if StreamingTrace.enabled:
 		StreamingTrace.stop()
 	if is_instance_valid(backrooms_maze) and backrooms_maze != room:
@@ -256,8 +260,17 @@ func _update_level_sign(target_room: Node3D, level: int, complete: bool) -> void
 		sign = NeonLevelSign.new() as Node3D
 		sign.name = "NeonLevelSign"
 		target_room.add_child(sign)
-	sign.call("set_progress", level, complete,
-		Loc.t("world.victory", self) if complete else "")
+	var caption := Loc.t("world.victory", self) if complete else ""
+	var state := get_node_or_null("/root/LoopState")
+	if state != null:
+		var mode_id := str(state.get("mode"))
+		if mode_id != "classic":
+			level = int(state.call("progress_number"))
+			if complete:
+				var verdict: Dictionary = state.get("last_verdict")
+				var de := str(Controls.pref(self, "language", "en")) == "de"
+				caption = ("SERIE BEENDET" if de else "RUN ENDED") if bool(verdict.get("failed", false)) else ("ABGESCHLOSSEN" if de else "COMPLETED")
+	sign.call("set_progress", level, complete, caption)
 
 
 func _refresh_exit_signs(target_room: Node3D) -> void:
@@ -306,6 +319,9 @@ func _process(delta: float) -> void:
 		_disposal.advance()
 	if transitioning or won or room == null or player == null:
 		return
+	var run_state := get_node_or_null("/root/LoopState")
+	if run_state != null:
+		run_state.call("tick_play_time", delta)
 	if backrooms_active:
 		_process_backrooms()
 		return

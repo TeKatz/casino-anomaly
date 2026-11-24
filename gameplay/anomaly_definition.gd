@@ -13,6 +13,11 @@ extends Resource
 @export var replacement_text := ""
 @export var enabled := true
 @export var discoverable := true
+@export_enum("common", "uncommon", "rare", "exceptional", "singularity") var rarity := "common"
+@export_range(1, 5) var difficulty := 2
+@export var family_id := ""
+@export var variant_name_en := ""
+@export var variant_name_de := ""
 
 @export var has_position_offset := false
 @export var position_offset := Vector3.ZERO
@@ -33,7 +38,9 @@ func to_entry() -> Dictionary:
         "title_en": title_en, "title_de": title_de,
         "description_en": description_en, "description_de": description_de,
         "handler": handler, "target_path": target_path,
-        "discoverable": discoverable
+        "discoverable": discoverable, "rarity": rarity, "difficulty": difficulty,
+        "family_id": family_id if not family_id.is_empty() else id,
+        "variant_name_en": variant_name_en, "variant_name_de": variant_name_de
     }
     if not replacement_text.is_empty():
         entry["replacement_text"] = replacement_text

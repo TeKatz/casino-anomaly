@@ -99,6 +99,7 @@ func _box(part_name: String, local_position: Vector3, size: Vector3,
 
 func set_progress(level: int, completed: bool, victory_text: String = "") -> void:
     number_mesh.text = str(level)
+    number_mesh.font_size = 190 if level < 100 else (135 if level < 1000 else 100)
     caption_mesh.text = victory_text if completed else ""
     var color := FINISH_COLOR if completed else ACTIVE_COLOR
     tubes.albedo_color = color

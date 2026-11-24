@@ -124,8 +124,15 @@ func _render() -> void:
     finding.text = ("BEFUND: ABWEICHUNG" if anomaly_present \
         else "BEFUND: UNAUFFÄLLIG") if de \
         else ("FINDING: IRREGULAR" if anomaly_present else "FINDING: CLEAR")
-    series.text = ("SERIE %02d / 12" if de else "STREAK %02d / 12") \
-        % int(verdict.get("streak", 0))
+    var mode := str(verdict.get("mode", "classic"))
+    var goal := int(verdict.get("goal", 12))
+    var progress := int(verdict.get("progress", verdict.get("streak", 0)))
+    var prefix := "RÄUME" if de else "ROOMS"
+    if mode in ["classic", "endless", "nightmare"]:
+        prefix = "SERIE" if de else "STREAK"
+    if mode == "endless" and bool(verdict.get("failed", false)):
+        progress = int(verdict.get("previous_streak", 0))
+    series.text = "%s %02d / %d" % [prefix, progress, goal] if goal > 0 else "%s %02d" % [prefix, progress]
     var tone := OK_COLOR if correct else ERROR_COLOR
     result.modulate = tone
     indicator_material.albedo_color = tone
