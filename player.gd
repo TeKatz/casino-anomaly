@@ -164,6 +164,12 @@ func _process(delta: float) -> void:
             - 0.004 * clampf(lateral, -1.0, 1.0)
     camera.rotation.z = lerpf(camera.rotation.z, roll, smooth)
 
+func movement_speed(sprint_requested: bool) -> float:
+    if backrooms_mode:
+        return BACKROOMS_WALK_SPEED
+    return SPRINT_SPEED if sprint_requested else WALK_SPEED
+
+
 func _physics_process(delta: float) -> void:
     if interaction_locked:
         velocity = Vector3.ZERO
@@ -188,7 +194,7 @@ func _physics_process(delta: float) -> void:
     var sprint := _sprint_toggled if str(_setting("sprint_mode", "hold")) == "toggle" \
         else Input.is_physical_key_pressed(KEY_SHIFT)
     sprint = sprint and not backrooms_mode
-    var speed := SPRINT_SPEED if sprint else (BACKROOMS_WALK_SPEED if backrooms_mode else WALK_SPEED)
+    var speed := movement_speed(sprint)
     var target := direction * speed
     var acceleration := WALK_ACCELERATION if axis.length_squared() > 0.0 else WALK_DECELERATION
     velocity.x = move_toward(velocity.x, target.x, acceleration * delta)

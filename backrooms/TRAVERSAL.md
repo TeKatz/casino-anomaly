@@ -25,12 +25,15 @@ actual door is still recorded for history, but either one is valid. Binary
 decisions cannot consume this special round. At 12 the normal final hall is
 loaded; otherwise the usual next-round selection continues. Leaving before
 completion retains the saved pre-traversal casino round and streak. No checkpoint
-inside the maze is needed. The return uses a sealed L-shaped corridor. The next casino is prewarmed
+inside the maze is needed. The return uses a sealed L-shaped corridor with a fixed EXIT arrow pointing
+right at its end wall. The next casino is prewarmed
 behind its blind bend. Ambient light, fog and post-processing blend by walking
 distance on a temporary Environment copy, and the flashlight fades out. The
 exact destination Environment is active before the bend, with no environment
-reassignment at visible handoff. The player is preserved and ordinary movement
-and audio are restored on return. The authored main and Backrooms scene files are not modified at runtime.
+reassignment at visible handoff. The handoff takes place 0.75 m beyond the
+actual casino entrance plane, with no narrow centerline restriction once in
+the hall. The player is preserved and ordinary 4.0 m/s walking, 6.3 m/s
+sprint and audio are restored on return. The authored main and Backrooms scene files are not modified at runtime.
 
 Test: `Godot --headless --path . --script res://tests/backrooms_traversal_qa.gd`
 after editor import and the existing asset preparation. GPU lighting and

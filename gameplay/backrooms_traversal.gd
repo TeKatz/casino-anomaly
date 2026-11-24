@@ -13,6 +13,8 @@ const EXIT_LENGTH := 7.0
 const RETURN_TURN_LENGTH := 7.0
 const RETURN_BEND_X := EXIT_X + EXIT_LENGTH
 const RETURN_SEAM_Z := EXIT_Z + RETURN_TURN_LENGTH
+# The player capsule has cleared the entrance sleeve at this depth.
+const RETURN_ENTRY_CLEARANCE := 0.75
 # Finish the environment blend before the inner edge of the blind corner.
 const LIGHT_BLEND_START := EXIT_X + 1.3
 const LIGHT_BLEND_END := RETURN_BEND_X - 2.2
@@ -153,6 +155,7 @@ static func build_exit(maze: Node3D) -> Node3D:
     light.light_energy = 0.16
     light.omni_range = 3.0
     corridor.add_child(light)
+    _add_exit_direction_sign(corridor, outer_x)
     var turn_light := OmniLight3D.new()
     turn_light.name = "CasinoApproachLight"
     turn_light.position = Vector3(bend, 2.7, seam - 2.2)
@@ -163,6 +166,35 @@ static func build_exit(maze: Node3D) -> Node3D:
     # The cap is removed only when the real next entrance is attached.
     box(corridor, "ReturnStandbyCap", Vector3(bend, 1.76, seam - 0.85), Vector3(2.62, 3.52, 0.22), WALL)
     return corridor
+
+static func _add_exit_direction_sign(corridor: Node3D, wall_x: float) -> void:
+    # Fixed on the end wall facing the maze, with the arrow pointing
+    # along +Z (right when approaching the wall along +X).
+    # It is not a billboard, HUD marker or extra collision surface.
+    var board := StandardMaterial3D.new()
+    board.albedo_color = Color(0.09, 0.12, 0.075)
+    board.roughness = 0.9
+    box(corridor, "ExitDirectionBoard", Vector3(wall_x - 0.018, 1.90, EXIT_Z),
+        Vector3(0.028, 0.45, 1.55), board, false)
+    var sign := Label3D.new()
+    sign.name = "ExitDirectionSign"
+    sign.position = Vector3(wall_x - 0.038, 1.90, EXIT_Z)
+    sign.rotation.y = -PI * 0.5
+    sign.billboard = BaseMaterial3D.BILLBOARD_DISABLED
+    sign.no_depth_test = false
+    sign.shaded = false
+    sign.modulate = Color(0.72, 0.79, 0.55)
+    sign.font_size = 64
+    sign.pixel_size = 0.005
+    sign.outline_size = 0
+    sign.text = "EXIT  →"
+    corridor.add_child(sign)
+
+static func crossed_return_entrance(local: Vector3) -> bool:
+    # Once past the sleeve, the entire casino is valid, not just the
+    # narrow centerline of the corridor. The maze is on the other side
+    # of EXIT_X, and the one-way exit gate has already sealed it.
+    return local.x > EXIT_X and local.z >= RETURN_SEAM_Z + RETURN_ENTRY_CLEARANCE
 
 static func return_light_weight(local_x: float) -> float:
     return smoothstep(LIGHT_BLEND_START, LIGHT_BLEND_END, local_x)

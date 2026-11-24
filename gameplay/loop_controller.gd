@@ -712,7 +712,9 @@ func _process_backrooms() -> void:
 		_finish_backrooms()
 	if backrooms_scored:
 		_update_backrooms_return_lighting(local.x)
-		if local.z > Backrooms.RETURN_SEAM_Z + HANDOFF_AFTER_TURN and absf(local.x - Backrooms.RETURN_BEND_X) < 1.6:
+		# The player can turn sideways as soon as the wide hall opens.
+		# Finalize at the actual entry plane, not 4.2 m down a narrow lane.
+		if Backrooms.crossed_return_entrance(local):
 			_handoff_backrooms_return()
 
 
@@ -852,6 +854,10 @@ func _handoff_backrooms_return() -> void:
 	player.reparent(upcoming, true)
 	reparent(upcoming, true)
 	player.call("end_streaming_handoff")
+	# Explicitly restore normal movement after reparent as well, so the
+	# camera/input lifecycle cannot leave the traversal state enabled.
+	if bool(player.get("backrooms_mode")):
+		player.call("set_backrooms_mode", false)
 	room = upcoming
 	# Do not reassign or reconfigure the active environment here. It has
 	# been rendering the casino since before the turn in the connector.

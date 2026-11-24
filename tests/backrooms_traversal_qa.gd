@@ -149,6 +149,8 @@ func _exercise(lane: String, streak: int, rotated: bool) -> bool:
     root.push_input(esc, true)
     if not require(not paused and not bool(player.get_node("InGameMenu").get("open")), "Escape no longer resumes the game"):
         return false
+    if not require(is_equal_approx(float(player.call("movement_speed", false)), 2.1) and is_equal_approx(float(player.call("movement_speed", true)), 2.1), "Backrooms speed/sprint restriction not active"):
+        return false
     var pickup := maze.get_node_or_null("FlashlightPickup")
     if not require(pickup != null and maze.has_node("BackroomsHum") and player.get_node_or_null("Camera3D/BackroomsFlashlight") == null, "Initial flashlight or ambience state wrong"):
         return false
@@ -175,6 +177,9 @@ func _exercise(lane: String, streak: int, rotated: bool) -> bool:
         return false
     root.push_input(key, true)
     if not require(player.get_node("Camera3D").find_children("BackroomsFlashlight", "SpotLight3D", false, false).size() == 1, "Repeated E duplicated flashlight"):
+        return false
+    var exit_sign := maze.get_node_or_null("BackroomsExitConnector/ExitDirectionSign") as Label3D
+    if not require(exit_sign != null and exit_sign.text == "EXIT  →" and exit_sign.basis.z.dot(Vector3.LEFT) > 0.99 and exit_sign.basis.x.dot(Vector3.BACK) > 0.99 and exit_sign.billboard == BaseMaterial3D.BILLBOARD_DISABLED and not exit_sign.no_depth_test and not maze.has_node("BackroomsExitConnector/ExitDirectionBoard_Collision"), "Exit arrow missing, misoriented or obstructing traversal"):
         return false
     # Stand inside before the exit: next hall is available but unscored.
     player.global_position = maze.to_global(Vector3(Backrooms.EXIT_X - 0.8, 1.02, Backrooms.EXIT_Z))
@@ -211,13 +216,38 @@ func _exercise(lane: String, streak: int, rotated: bool) -> bool:
         return false
     await process_frame
     await process_frame
-    player.global_position = maze.to_global(Vector3(Backrooms.RETURN_BEND_X, 1.02, Backrooms.RETURN_SEAM_Z + 4.5))
+    # A normal approach remains in traversal mode until the player has
+    # crossed the real entrance, even though the lighting is ready.
+    player.global_position = maze.to_global(Vector3(Backrooms.RETURN_BEND_X, 1.02, Backrooms.RETURN_SEAM_Z - 0.5))
+    loop.call("_process", 0.016)
+    if not require(bool(player.get("backrooms_mode")) and bool(loop.get("backrooms_active")), "Return finalized before crossing the casino entrance"):
+        return false
+    # Reproduce the in-game bug: the player turns off the centerline
+    # immediately in the hall instead of walking 4.2 m straight ahead.
+    var side_offset := 2.1 if rotated else -2.1
+    player.global_position = maze.to_global(Vector3(Backrooms.RETURN_BEND_X + side_offset, 1.02, Backrooms.RETURN_SEAM_Z + 1.4))
     pose = player.global_transform
     loop.call("_process", 0.016)
     if not require(current_scene == next and player.get_parent() == next and loop.get_parent() == next and player.global_transform.is_equal_approx(pose), "Return teleported or replaced player/controller"):
         return false
     if not require(not bool(player.get("backrooms_mode")) and not player.has_node("Camera3D/BackroomsFlashlight") and not bool(loop.get("backrooms_active")) and next.has_node("ArrivalConnector/ExitGate_Collision"), "Traversal-only equipment or gate leaked"):
         return false
+    if not require(is_equal_approx(float(player.call("movement_speed", false)), 4.0) and is_equal_approx(float(player.call("movement_speed", true)), 6.3), "Casino walk/sprint speeds not restored"):
+        return false
+    var settings := root.get_node_or_null("GameSettings")
+    if settings != null:
+        var original_mode = settings.get_option("sprint_mode")
+        settings.set_option("sprint_mode", "toggle")
+        var shift := InputEventKey.new()
+        shift.keycode = KEY_SHIFT
+        shift.pressed = true
+        root.push_input(shift, true)
+        var sprint_restored := bool(player.get("_sprint_toggled"))
+        root.push_input(shift, true)
+        var toggle_restored := not bool(player.get("_sprint_toggled"))
+        settings.set_option("sprint_mode", original_mode)
+        if not require(sprint_restored and toggle_restored, "Shift sprint toggle not restored in casino"):
+            return false
     if not require(next_world.environment == destination, "Visible hall environment was replaced at scene handoff"):
         return false
     if not require(state.finished == rotated and bool(loop.get("won")) == rotated and (rotated or state.round_ready), "Victory or ordinary next round missing"):
