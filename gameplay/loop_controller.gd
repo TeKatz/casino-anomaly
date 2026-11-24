@@ -62,6 +62,9 @@ var backrooms_environment: Environment
 var backrooms_exit_connector: Node3D
 var backrooms_pickup: Node3D
 var backrooms_scored := false
+var backrooms_return_environment: Environment
+var backrooms_return_lighting_ready := false
+var backrooms_return_light_weight := 0.0
 var _pending_portal_ms := 0.0
 
 
@@ -194,7 +197,12 @@ func _place_markers() -> bool:
 
 func _on_language_changed(key: String) -> void:
 	if backrooms_active:
-		if key == "voxel_gi":
+		if key == "image_contrast" and staged_environment != null:
+			var contrast_settings := get_node_or_null("/root/GameSettings")
+			if contrast_settings != null:
+				staged_environment.adjustment_enabled = true
+				staged_environment.adjustment_contrast = float(contrast_settings.get_option("image_contrast"))
+		if key == "voxel_gi" and not backrooms_return_lighting_ready:
 			var settings := get_node_or_null("/root/GameSettings")
 			var probe := room.get_node_or_null("Lighting/BackroomsVoxelGI") as VoxelGI
 			if probe != null and settings != null:
@@ -629,6 +637,9 @@ func _enter_backrooms(lane: String) -> void:
 	backrooms_active = true
 	choice_taken = true
 	backrooms_scored = false
+	backrooms_return_environment = null
+	backrooms_return_lighting_ready = false
+	backrooms_return_light_weight = 0.0
 	# Do not reparent the live player, Camera3D, pause CanvasLayer or
 	# controller here. The active SceneTree root remains the casino shell.
 	# The maze joins that shell at its existing world-space transform.
@@ -699,8 +710,10 @@ func _process_backrooms() -> void:
 		_stage_backrooms_return()
 	if local.x > Backrooms.EXIT_X + 1.3 and absf(local.z - Backrooms.EXIT_Z) < 1.1 and not backrooms_scored:
 		_finish_backrooms()
-	if backrooms_scored and local.x > Backrooms.EXIT_X + Backrooms.EXIT_LENGTH + HANDOFF_AFTER_TURN and absf(local.z - Backrooms.EXIT_Z) < 1.6:
-		_handoff_backrooms_return()
+	if backrooms_scored:
+		_update_backrooms_return_lighting(local.x)
+		if local.z > Backrooms.RETURN_SEAM_Z + HANDOFF_AFTER_TURN and absf(local.x - Backrooms.RETURN_BEND_X) < 1.6:
+			_handoff_backrooms_return()
 
 
 func _stage_backrooms_return() -> void:
@@ -725,6 +738,10 @@ func _stage_backrooms_return() -> void:
 	get_tree().root.add_child(next)
 	staged = next
 	staged_gi_warmed = false
+	var settings := get_node_or_null("/root/GameSettings")
+	if staged_environment != null and settings != null:
+		staged_environment.adjustment_enabled = true
+		staged_environment.adjustment_contrast = float(settings.get_option("image_contrast"))
 	Backrooms.open_return(backrooms_exit_connector)
 	var state = get_node_or_null("/root/LoopState")
 	if state != null:
@@ -755,7 +772,47 @@ func _finish_backrooms() -> void:
 	var soundscape := staged.get_node_or_null("RoomSoundscape")
 	if soundscape != null:
 		soundscape.call("activate")
-	_activate_reflections_sequentially(staged)
+	# Reflections are captured only once the final casino environment is
+	# active, while the casino is still hidden behind the new return bend.
+
+
+func _update_backrooms_return_lighting(local_x: float) -> void:
+	if backrooms_return_lighting_ready or not is_instance_valid(staged) or staged_environment == null:
+		return
+	# The sealed exit makes this one-way. Keep the furthest blend value
+	# if the player looks back or briefly walks backwards in the corridor.
+	var weight: float = maxf(backrooms_return_light_weight, Backrooms.return_light_weight(local_x))
+	if weight <= 0.0:
+		return
+	if is_equal_approx(weight, backrooms_return_light_weight) and backrooms_return_environment != null:
+		return
+	backrooms_return_light_weight = weight
+	var old_env := room.get_node("Lighting/Environment") as WorldEnvironment
+	var torch := player.get_node_or_null("Camera3D/BackroomsFlashlight") as SpotLight3D
+	if torch != null:
+		torch.light_energy = 0.95 * (1.0 - weight)
+	if weight >= 1.0:
+		# Activate the EXACT destination resource before the blind turn,
+		# not when the player has already walked into the visible hall.
+		var next_env := staged.get_node_or_null("WorldEnvironment") as WorldEnvironment
+		if next_env == null:
+			return
+		old_env.environment = null
+		next_env.environment = staged_environment
+		if staged.has_method("apply_image_contrast"):
+			staged.call("apply_image_contrast")
+		var old_probe := room.get_node_or_null("Lighting/BackroomsVoxelGI") as VoxelGI
+		if old_probe != null:
+			old_probe.hide()
+		backrooms_return_environment = null
+		backrooms_return_lighting_ready = true
+		_activate_reflections_sequentially(staged)
+		return
+	if backrooms_return_environment == null:
+		backrooms_return_environment = staged_environment.duplicate() as Environment
+	Backrooms.blend_return_environment(backrooms_environment, staged_environment, backrooms_return_environment, weight)
+	if old_env.environment != backrooms_return_environment:
+		old_env.environment = backrooms_return_environment
 
 
 func _stop_backrooms_hum(target: Node3D) -> void:
@@ -769,6 +826,11 @@ func _stop_backrooms_hum(target: Node3D) -> void:
 
 func _handoff_backrooms_return() -> void:
 	if not backrooms_active or not backrooms_scored or not is_instance_valid(staged) or not is_instance_valid(backrooms_host):
+		return
+	# Safety fallback for unusually large frame steps; ordinary walking
+	# completes this well before the player sees the casino.
+	_update_backrooms_return_lighting(Backrooms.LIGHT_BLEND_END)
+	if not backrooms_return_lighting_ready:
 		return
 	transitioning = true
 	var previous := room
@@ -791,11 +853,8 @@ func _handoff_backrooms_return() -> void:
 	reparent(upcoming, true)
 	player.call("end_streaming_handoff")
 	room = upcoming
-	var environment_node := upcoming.get_node_or_null("WorldEnvironment") as WorldEnvironment
-	if environment_node != null:
-		environment_node.environment = staged_environment
-	if upcoming.has_method("apply_image_contrast"):
-		upcoming.call("apply_image_contrast")
+	# Do not reassign or reconfigure the active environment here. It has
+	# been rendering the casino since before the turn in the connector.
 	upcoming.remove_meta("_streaming_standby")
 	upcoming.remove_meta("_streaming_lighting_prepared")
 	get_tree().current_scene = upcoming
@@ -811,6 +870,9 @@ func _handoff_backrooms_return() -> void:
 	backrooms_host = null
 	backrooms_lane = ""
 	backrooms_environment = null
+	backrooms_return_environment = null
+	backrooms_return_lighting_ready = false
+	backrooms_return_light_weight = 0.0
 	backrooms_exit_connector = null
 	backrooms_pickup = null
 	_place_markers()

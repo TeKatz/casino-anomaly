@@ -182,7 +182,7 @@ func _exercise(lane: String, streak: int, rotated: bool) -> bool:
     var next := loop.get("staged") as Node3D
     if not require(next != null and state.correct_streak == streak and not bool(loop.get("backrooms_scored")), "Approach to exit was scored early"):
         return false
-    if not require(maze.to_global(Vector3(Backrooms.EXIT_X + Backrooms.EXIT_LENGTH, 0, Backrooms.EXIT_Z)).distance_to(next.to_global(Vector3(0, 0, portals.ENTRY_Z))) < 0.01, "Return corridor misses the casino entrance"):
+    if not require(maze.to_global(Vector3(Backrooms.RETURN_BEND_X, 0, Backrooms.RETURN_SEAM_Z)).distance_to(next.to_global(Vector3(0, 0, portals.ENTRY_Z))) < 0.01, "Return corridor misses the casino entrance"):
         return false
     player.global_position = maze.to_global(Vector3(Backrooms.EXIT_X + 1.6, 1.02, Backrooms.EXIT_Z))
     loop.call("_process", 0.016)
@@ -193,12 +193,32 @@ func _exercise(lane: String, streak: int, rotated: bool) -> bool:
     loop.call("_finish_backrooms")
     if not require(state.correct_streak == streak + 1 and state.visited_loops == visits + 1, "Duplicate completion awarded another step"):
         return false
-    player.global_position = maze.to_global(Vector3(Backrooms.EXIT_X + Backrooms.EXIT_LENGTH + 4.5, 1.02, Backrooms.EXIT_Z))
+    var next_world := next.get_node("WorldEnvironment") as WorldEnvironment
+    var destination := loop.get("staged_environment") as Environment
+    var original := loop.get("backrooms_environment") as Environment
+    if not require(next_world.environment == null and env.environment != destination and not bool(loop.get("backrooms_return_lighting_ready")), "Casino environment activated before return passage"):
+        return false
+    player.global_position = maze.to_global(Vector3((Backrooms.LIGHT_BLEND_START + Backrooms.LIGHT_BLEND_END) * 0.5, 1.02, Backrooms.EXIT_Z))
+    loop.call("_process", 0.016)
+    var blended := env.environment
+    if not require(blended != null and blended != original and blended != destination and is_equal_approx(blended.ambient_light_energy, lerpf(original.ambient_light_energy, destination.ambient_light_energy, 0.5)) and is_equal_approx(torch.light_energy, 0.475), "Return lighting does not blend continuously on a runtime copy"):
+        return false
+    player.global_position = maze.to_global(Vector3(Backrooms.LIGHT_BLEND_END + 0.05, 1.02, Backrooms.EXIT_Z))
+    loop.call("_process", 0.016)
+    if not require(next_world.environment == destination and env.environment == null and bool(loop.get("backrooms_return_lighting_ready")) and Backrooms.LIGHT_BLEND_END < Backrooms.RETURN_BEND_X - Backrooms.HALF_WIDTH and is_zero_approx(torch.light_energy), "Final environment not active before blind bend"):
+        return false
+    if not require(maze.has_node("BackroomsExitConnector/StraightInnerWall_Collision") and maze.has_node("BackroomsExitConnector/TurnOuterWall_Collision"), "Blind return corridor is missing solid walls"):
+        return false
+    await process_frame
+    await process_frame
+    player.global_position = maze.to_global(Vector3(Backrooms.RETURN_BEND_X, 1.02, Backrooms.RETURN_SEAM_Z + 4.5))
     pose = player.global_transform
     loop.call("_process", 0.016)
     if not require(current_scene == next and player.get_parent() == next and loop.get_parent() == next and player.global_transform.is_equal_approx(pose), "Return teleported or replaced player/controller"):
         return false
     if not require(not bool(player.get("backrooms_mode")) and not player.has_node("Camera3D/BackroomsFlashlight") and not bool(loop.get("backrooms_active")) and next.has_node("ArrivalConnector/ExitGate_Collision"), "Traversal-only equipment or gate leaked"):
+        return false
+    if not require(next_world.environment == destination, "Visible hall environment was replaced at scene handoff"):
         return false
     if not require(state.finished == rotated and bool(loop.get("won")) == rotated and (rotated or state.round_ready), "Victory or ordinary next round missing"):
         return false
