@@ -31,7 +31,7 @@ static func configure_data(baked: VoxelGIData, previous: VoxelGIData) -> void:
         baked.normal_bias = previous.normal_bias
     else:
         baked.interior = true
-        baked.energy = 0.45
+        baked.energy = 0.18
         baked.propagation = 0.40
         baked.use_two_bounces = true
         baked.bias = 0.70

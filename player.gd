@@ -2,6 +2,9 @@ extends CharacterBody3D
 
 const WALK_SPEED := 4.0
 const SPRINT_SPEED := 6.3
+const BACKROOMS_WALK_SPEED := 2.1
+const BACKROOMS_FLASHLIGHT_ENERGY := 0.95
+const BACKROOMS_FLASHLIGHT_RANGE := 9.0
 const MOUSE_SENSITIVITY := 0.002
 const GRAVITY := 18.0
 const WALK_ACCELERATION := 13.0
@@ -91,6 +94,11 @@ func set_backrooms_mode(enabled: bool) -> void:
     backrooms_mode = enabled
     _sprint_toggled = false
     _footstep_distance = 0.0
+    if enabled:
+        # Clamp residual sprint velocity at the reveal, not several steps later.
+        var horizontal := Vector2(velocity.x, velocity.z).limit_length(BACKROOMS_WALK_SPEED)
+        velocity.x = horizontal.x
+        velocity.z = horizontal.y
     if not enabled and is_instance_valid(backrooms_flashlight):
         backrooms_flashlight.free()
         backrooms_flashlight = null
@@ -103,10 +111,10 @@ func equip_backrooms_flashlight() -> bool:
     backrooms_flashlight.name = "BackroomsFlashlight"
     backrooms_flashlight.position = Vector3(0.18, -0.12, -0.12)
     backrooms_flashlight.light_color = Color(0.94, 0.96, 1.0)
-    backrooms_flashlight.light_energy = 2.2
-    backrooms_flashlight.spot_range = 15.0
-    backrooms_flashlight.spot_angle = 28.0
-    backrooms_flashlight.spot_angle_attenuation = 1.5
+    backrooms_flashlight.light_energy = BACKROOMS_FLASHLIGHT_ENERGY
+    backrooms_flashlight.spot_range = BACKROOMS_FLASHLIGHT_RANGE
+    backrooms_flashlight.spot_angle = 24.0
+    backrooms_flashlight.spot_angle_attenuation = 1.8
     backrooms_flashlight.shadow_enabled = true
     backrooms_flashlight.light_bake_mode = Light3D.BAKE_DISABLED
     camera.add_child(backrooms_flashlight)
@@ -180,7 +188,7 @@ func _physics_process(delta: float) -> void:
     var sprint := _sprint_toggled if str(_setting("sprint_mode", "hold")) == "toggle" \
         else Input.is_physical_key_pressed(KEY_SHIFT)
     sprint = sprint and not backrooms_mode
-    var speed := SPRINT_SPEED if sprint else (3.1 if backrooms_mode else WALK_SPEED)
+    var speed := SPRINT_SPEED if sprint else (BACKROOMS_WALK_SPEED if backrooms_mode else WALK_SPEED)
     var target := direction * speed
     var acceleration := WALK_ACCELERATION if axis.length_squared() > 0.0 else WALK_DECELERATION
     velocity.x = move_toward(velocity.x, target.x, acceleration * delta)

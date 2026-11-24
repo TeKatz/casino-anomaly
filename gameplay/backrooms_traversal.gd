@@ -57,7 +57,35 @@ static func build_entrance(maze: Node3D) -> void:
         box(collar, "Jamb_" + suffix, Vector3(ENTRY_X - 0.25, 1.5, ENTRY_Z + side * (HALF_WIDTH + OPENING_HALF) * 0.5),
             Vector3(0.20, 3.0, HALF_WIDTH - OPENING_HALF), WALL)
     box(collar, "Soffit", Vector3(ENTRY_X - 0.68, 3.25, ENTRY_Z), Vector3(1.22, 0.5, 2.62), CEILING)
-    box(collar, "Threshold", Vector3(ENTRY_X - 0.5, -0.13, ENTRY_Z), Vector3(1.24, 0.24, 2.44), FLOOR)
+    # The existing TurnFloor bridges the entrance. No extra coplanar
+    # carpet threshold is needed; its end is fitted at reveal.
+
+static func fit_entrance_floor(connector: Node3D, maze: Node3D, direction: float) -> void:
+    var timber := connector.get_node_or_null("TurnFloor") as MeshInstance3D
+    var body := connector.get_node_or_null("TurnFloor_Collision") as StaticBody3D
+    var carpet := maze.get_node_or_null("Architecture/Floor/Mesh") as MeshInstance3D
+    if timber == null or body == null or carpet == null:
+        push_error("Backrooms entrance floor nodes missing")
+        return
+    var mesh := timber.mesh as BoxMesh
+    var collision := body.get_node_or_null("Shape") as CollisionShape3D
+    if mesh == null or collision == null or not collision.shape is BoxShape3D:
+        push_error("Backrooms entrance floor must use a box mesh and collider")
+        return
+    # Use the actual editable carpet mesh edge, not a second hardcoded
+    # threshold. Both lanes (and rotated halls) use the same local math.
+    var edge := carpet.to_global(Vector3(carpet.get_aabb().position.x, 0.0, ENTRY_Z))
+    var end_z := connector.to_local(edge).z
+    var start_z := timber.position.z - direction * mesh.size.z * 0.5
+    var length := (end_z - start_z) * direction
+    if length <= 0.0:
+        push_error("Invalid Backrooms entrance floor span")
+        return
+    var size := Vector3(mesh.size.x, mesh.size.y, length)
+    timber.position.z = (start_z + end_z) * 0.5
+    mesh.size = size
+    body.position = timber.position
+    (collision.shape as BoxShape3D).size = size
 
 static func add_pickup_light(maze: Node3D, at: Vector3) -> void:
     # A weak local pool, not a player light. The first few steps must stay
@@ -66,8 +94,8 @@ static func add_pickup_light(maze: Node3D, at: Vector3) -> void:
     light.name = "FlashlightPickupLight"
     light.position = Vector3(at.x, 2.45, at.z + 0.40)
     light.light_color = Color(0.87, 0.84, 0.68)
-    light.light_energy = 0.36
-    light.omni_range = 5.0
+    light.light_energy = 0.16
+    light.omni_range = 3.6
     light.omni_attenuation = 1.2
     light.shadow_enabled = true
     light.light_bake_mode = Light3D.BAKE_DISABLED
@@ -95,7 +123,7 @@ static func build_exit(maze: Node3D) -> Node3D:
     light.name = "ReturnLight"
     light.position = Vector3(end - 2.2, 2.7, EXIT_Z)
     light.light_color = Color(1.0, 0.85, 0.60)
-    light.light_energy = 0.35
+    light.light_energy = 0.16
     light.omni_range = 3.0
     corridor.add_child(light)
     # Prevent a walk into the void if the next casino cannot be instantiated.

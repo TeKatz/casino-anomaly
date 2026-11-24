@@ -608,15 +608,13 @@ func _enter_backrooms(lane: String) -> void:
 	if connector == null or not portals.lock_departure(previous, lane):
 		return
 	transitioning = true
-	# Seal immediately behind the corner, not inside the player capsule.
-	var direction: float = portals.lane_sign(lane)
-	var gate_mat: Material = (connector.get_node("TurnOuterWall") as MeshInstance3D).material_override
-	Backrooms.box(connector, "BackroomsRevealGate", Vector3(portals.BEND_X, 1.76, _lane_z(lane) + direction * 0.25),
-		Vector3(2.62, 3.52, 0.20), gate_mat)
+	# The original lock_departure gate already seals the route. Do not add
+	# another wall at the bend. Butt the oak floor against the carpet edge.
+	Backrooms.fit_entrance_floor(connector, backrooms_maze, portals.lane_sign(lane))
 	for child in connector.get_children():
 		if child is OmniLight3D:
 			var passage_light := child as OmniLight3D
-			passage_light.light_energy *= 0.18
+			passage_light.light_energy *= 0.10
 			passage_light.light_color = Color(0.84, 0.81, 0.64)
 			passage_light.light_volumetric_fog_energy = 0.0
 	connector.reparent(backrooms_maze, true)
@@ -642,8 +640,13 @@ func _enter_backrooms(lane: String) -> void:
 	(room.get_node("Lighting") as Node3D).show()
 	var settings := get_node_or_null("/root/GameSettings")
 	var probe := room.get_node_or_null("Lighting/BackroomsVoxelGI") as VoxelGI
-	if probe != null and settings != null and not bool(settings.get_option("voxel_gi")):
-		probe.hide()
+	if probe != null:
+		# Old local bakes can still be present after pulling this update.
+		# Cap indirect light immediately, without rewriting the bake file.
+		if probe.data != null:
+			probe.data.energy = minf(probe.data.energy, 0.18)
+		if settings != null and not bool(settings.get_option("voxel_gi")):
+			probe.hide()
 	player.call("set_backrooms_mode", true)
 	var sound := get_node_or_null("/root/AudioDirector")
 	if sound != null:

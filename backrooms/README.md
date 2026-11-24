@@ -1,7 +1,7 @@
 # Backrooms labyrinth — chosen sketch 02
 
 Open `res://backrooms/backrooms_labyrinth.tscn` in Godot 4.5.1. This standalone
-scene is **not** yet linked to the casino anomaly rotation or player controller.
+scene is linked to the casino anomaly rotation by the runtime traversal controller.
 F6 renders the fixed entrance preview camera. Use the 3D editor to inspect the
 whole scene; there is no runtime layout generation.
 
@@ -45,11 +45,12 @@ saves it and launches a separate GPU-backed process. It writes only
 open scene. Subsequent editor/runtime opens load the same external resource
 when present; fresh checkouts without it keep direct lights. No geometry is
 generated or rewritten by the baker. Existing casino wing resources are untouched.
-Re-bake after changes to walls or light fixtures. The first bake uses a dim
+Re-bake after changes to walls or light fixtures, including the darker lighting pass.
+The runtime caps older bake energy at 0.18 until a fresh bake is available. The first bake uses a dim
 interior GI preset; subsequent bakes retain the previous data settings.
 Commit the baked .res alongside any intentional scene edits, not .godot caches.
 Console fallback (no --headless):
 `Godot_v4.5.1-stable_win64_console.exe --path . --rendering-method forward_plus --script res://tools/bake_backrooms_voxel_gi.gd`.
 
-No player, flashlight, sound, enemies, props, anomaly logic, or main-scene
-changes are included in this blockout.
+The standalone scene remains an editable blockout. Runtime joins, the player,
+flashlight and anomaly logic are described in `TRAVERSAL.md`.

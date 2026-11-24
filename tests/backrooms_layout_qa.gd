@@ -95,7 +95,7 @@ func _run() -> void:
 	var active := 0
 	for fixture in fixtures.get_children():
 		var spot := fixture.get_node("Downlight") as SpotLight3D
-		check(spot != null and spot.shadow_enabled and spot.light_energy <= 0.45, "Invalid fixture " + str(fixture.name))
+		check(spot != null and spot.shadow_enabled and spot.light_energy <= 0.217, "Invalid fixture " + str(fixture.name))
 		if spot != null and spot.visible:
 			active += 1
 	check(active == 14, "Expected 14 dim active spots")

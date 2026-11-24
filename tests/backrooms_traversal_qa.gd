@@ -107,7 +107,7 @@ func _exercise(lane: String, streak: int, rotated: bool) -> bool:
         return false
     if not require(root.get_camera_3d() == camera and camera.is_current() and camera.is_inside_tree() and player.can_process() and player.is_physics_processing() and player.is_processing_unhandled_input() and not paused, "Camera or input disabled after reveal"):
         return false
-    if not require(bool(player.get("backrooms_mode")) and maze.has_node("BackroomsArrivalConnector/BackroomsRevealGate_Collision") and maze.has_node("BackroomsArrivalConnector/OneWayGate_Collision"), "Dark traversal mode or blocking wall missing"):
+    if not require(bool(player.get("backrooms_mode")) and not maze.has_node("BackroomsArrivalConnector/BackroomsRevealGate_Collision") and maze.has_node("BackroomsArrivalConnector/OneWayGate_Collision"), "Dark traversal mode or blocking wall missing"):
         return false
     if not require(state.correct_streak == streak and state.visited_loops == visits and state.mistakes == mistakes and state.anomaly_id == "backrooms", "Entry changed progress"):
         return false
@@ -123,7 +123,20 @@ func _exercise(lane: String, streak: int, rotated: bool) -> bool:
         return false
     if not require(root.get_camera_3d() == camera and player.can_process() and not bool(player.get("interaction_locked")) and not paused, "Camera or input lost after old geometry teardown"):
         return false
-    if not require(maze.has_node("FlashlightPickupLight"), "Unlit approach to flashlight"):
+    var pickup_light := maze.get_node_or_null("FlashlightPickupLight") as OmniLight3D
+    if not require(pickup_light != null and pickup_light.light_energy <= 0.16, "Missing dim pickup light"):
+        return false
+    var connector := maze.get_node("BackroomsArrivalConnector") as Node3D
+    var oak := connector.get_node("TurnFloor") as MeshInstance3D
+    var oak_shape := connector.get_node("TurnFloor_Collision/Shape") as CollisionShape3D
+    var carpet := maze.get_node("Architecture/Floor/Mesh") as MeshInstance3D
+    var edge := carpet.to_global(Vector3(carpet.get_aabb().position.x, 0, Backrooms.ENTRY_Z))
+    var oak_end := connector.to_global(Vector3(oak.position.x, 0, oak.position.z + portals.lane_sign(lane) * (oak.mesh as BoxMesh).size.z * 0.5))
+    var edge_local := connector.to_local(edge)
+    if not require(absf(edge_local.z - connector.to_local(oak_end).z) < 0.001 and (oak.mesh as BoxMesh).size.is_equal_approx((oak_shape.shape as BoxShape3D).size) and not maze.has_node("EntranceJoin/Threshold"), "Oak/carpet seam overlaps, gaps or stale collider"):
+        return false
+    var env := maze.get_node("Lighting/Environment") as WorldEnvironment
+    if not require(env.environment.ambient_light_energy <= 0.0351, "Backrooms ambient light too bright"):
         return false
     # Verify the actual input routing and pause menu remain alive. Push
     # events through the viewport, never directly invoke the menu handler.
@@ -141,11 +154,24 @@ func _exercise(lane: String, streak: int, rotated: bool) -> bool:
         return false
     player.global_position = maze.to_global(Vector3(-14.5, 1.02, 0.5))
     await physics_frame
+    var hint := pickup.get_node_or_null("PickupHUD/Overlay/PickupPrompt") as Label
+    pickup.call("update_prompt", player)
+    if not require(hint != null and hint.visible and pickup.find_children("*", "Label3D", true, false).is_empty(), "Pickup hint is not screen-space"):
+        return false
+    var original_rotation := camera.rotation
+    camera.rotation.y += PI
+    pickup.call("update_prompt", player)
+    if not require(hint.visible, "Pickup hint depends on camera facing direction"):
+        return false
+    camera.rotation = original_rotation
     var key := InputEventKey.new()
     key.keycode = KEY_E
     key.pressed = true
     root.push_input(key, true)
     if not require(bool(pickup.get("taken")) and not pickup.visible and player.has_node("Camera3D/BackroomsFlashlight"), "E did not collect the nearby torch"):
+        return false
+    var torch := player.get_node("Camera3D/BackroomsFlashlight") as SpotLight3D
+    if not require(not hint.visible and torch.light_energy <= 0.95 and torch.spot_range <= 9.0, "Pickup hint or beam tuning incorrect"):
         return false
     root.push_input(key, true)
     if not require(player.get_node("Camera3D").find_children("BackroomsFlashlight", "SpotLight3D", false, false).size() == 1, "Repeated E duplicated flashlight"):
