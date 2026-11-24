@@ -159,8 +159,18 @@ func _exercise(lane: String, streak: int, rotated: bool) -> bool:
     if not require(absf(edge_local.z - connector.to_local(oak_end).z) < 0.001 and (oak.mesh as BoxMesh).size.is_equal_approx((oak_shape.shape as BoxShape3D).size) and not maze.has_node("EntranceJoin/Threshold"), "Oak/carpet seam overlaps, gaps or stale collider"):
         return false
     var env := maze.get_node("Lighting/Environment") as WorldEnvironment
-    if not require(env.environment.ambient_light_energy <= 0.0351, "Backrooms ambient light too bright"):
+    var dark_target := loop.get("backrooms_environment") as Environment
+    if not require(dark_target != null and dark_target.ambient_light_energy <= 0.0351, "Backrooms final ambient light too bright"):
         return false
+    if not require(env.environment == dark_target or env.environment == loop.get("backrooms_entry_blend"), "Soft entry transition used an unexpected environment"):
+        return false
+    if not rotated:
+        # Normal traversal must settle into the original authored darkness.
+        await create_timer(0.95).timeout
+        if not require(env.environment == dark_target and env.environment.ambient_light_energy <= 0.0351, "Soft entry did not settle into the dark Backrooms"):
+            return false
+    # The rotated/final-room scenario intentionally proceeds without this
+    # wait to exercise cancellation of a still-running entry tween.
     # Verify the actual input routing and pause menu remain alive. Push
     # events through the viewport, never directly invoke the menu handler.
     var esc := InputEventKey.new()
