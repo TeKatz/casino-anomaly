@@ -151,6 +151,35 @@ func _run() -> void:
         if voice == null or not (voice.stream is AudioStreamOggVorbis) or voice.bus != "UI":
             _fail("Missing Kenney menu voice: " + event)
             return
+    var style_api = preload("res://ui/menu_style.gd")
+    var probe := Button.new()
+    menu.add_child(probe)
+    style_api.attach_sound(probe, "navigation")
+    var before := int(sound.get("play_count"))
+    probe.pressed.emit()
+    if str(sound.get("last_event")) != "navigation" or int(sound.get("play_count")) != before + 1:
+        _fail("Navigation sound missing or duplicated")
+        return
+    style_api.attach_sound(probe, "back")
+    probe.pressed.emit()
+    if str(sound.get("last_event")) != "back" or int(sound.get("play_count")) != before + 2:
+        _fail("Back sound missing or duplicated")
+        return
+    style_api.attach_sound(probe, "confirmation")
+    probe.pressed.emit()
+    if str(sound.get("last_event")) != "confirmation" or int(sound.get("play_count")) != before + 3:
+        _fail("Confirmation sound missing or duplicated")
+        return
+    var sound_dropdown := OptionButton.new()
+    menu.add_child(sound_dropdown)
+    style_api.apply_dropdown(sound_dropdown)
+    sound_dropdown.pressed.emit()
+    sound_dropdown.get_popup().about_to_popup.emit()
+    if str(sound.get("last_event")) != "dropdown" or int(sound.get("play_count")) != before + 4:
+        _fail("Dropdown opening sound missing or duplicated")
+        return
+    probe.queue_free()
+    sound_dropdown.queue_free()
     var play_button := menu_buttons.get_node_or_null("PlayButton") as Button
     var focus_surface := play_button.get_theme_stylebox("focus")
     var normal_surface := play_button.get_theme_stylebox("normal")
