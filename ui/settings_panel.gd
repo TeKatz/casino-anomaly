@@ -188,8 +188,8 @@ func _tab_hover(button: Button, entered: bool) -> void:
     var glow: Color = Color(1.16, 1.07, 0.9) if entered else Color.WHITE
     if chosen and not entered:
         glow = Color("#ffe3ac")
-    var tween := create_tween()
-    tween.tween_property(button, "modulate", glow, 0.14)
+    button.modulate = glow
+    # LuminousButton owns hover animation; avoid competing tweens on tabs.
 
 
 func _switch_tab(index: int) -> void:
@@ -319,6 +319,7 @@ func _toggle(caption: String, key: String, description: String = "") -> void:
     checkbox.tooltip_text = description
     line.get_child(0).tooltip_text = description
     checkbox.add_theme_color_override("font_color", PALE)
+    MenuStyle.apply_toggle(checkbox)
     checkbox.toggled.connect(func(enabled: bool) -> void:
         settings_node.set_option(key, enabled)
     )
@@ -339,17 +340,7 @@ func _slider(caption: String, key: String, low: float, high: float, step: float,
     slider.custom_minimum_size = Vector2(146, 32)
     slider.tooltip_text = description
     line.get_child(0).tooltip_text = description
-    var track := StyleBoxFlat.new()
-    track.bg_color = Color("#0c1623")
-    track.border_color = Color("#607688")
-    track.set_border_width_all(1)
-    track.set_corner_radius_all(5)
-    slider.add_theme_stylebox_override("slider", track)
-    var fill := StyleBoxFlat.new()
-    fill.bg_color = Color("#96775f")
-    fill.set_corner_radius_all(5)
-    slider.add_theme_stylebox_override("grabber_area", fill)
-    slider.add_theme_stylebox_override("grabber_area_highlight", fill)
+    MenuStyle.apply_slider(slider)
     slider.min_value = low
     slider.max_value = high
     slider.step = step

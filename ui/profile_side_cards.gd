@@ -250,15 +250,8 @@ func _fill(slot: int) -> void:
     progress.min_value = 0.0
     progress.max_value = 100.0
     progress.value = float(summary.get("percent", 0.0))
-    var back := StyleBoxFlat.new()
-    back.bg_color = Color("#101f2c")
-    back.set_corner_radius_all(5)
-    progress.add_theme_stylebox_override("background", back)
-    var fill := StyleBoxFlat.new()
-    fill.bg_color = GOLD
-    fill.set_corner_radius_all(5)
-    progress.add_theme_stylebox_override("fill", fill)
     archive_body.add_child(progress)
+    MenuStyle.apply_progress(progress, float(summary.get("percent", 0.0)))
     _label(archive_body, _word("%.0f %% der Sammlung", "%.0f %% of the collection") \
         % float(summary.get("percent", 0.0)), 14)
 

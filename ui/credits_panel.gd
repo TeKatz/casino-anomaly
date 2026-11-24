@@ -115,6 +115,9 @@ Books with magnifier — [url=https://sketchfab.com/3d-models/books-with-magnifi
 Licensed under [url=https://creativecommons.org/licenses/by-sa/4.0/]Creative Commons Attribution-ShareAlike 4.0[/url].
 Original model and textures retained; scaled and placed in the game.
 
+[color=#e6bb81][b]UI ASSETS — CC0[/b][/color]
+Kenney UI Pack 2.0 — [url=https://kenney.nl/assets/ui-pack]Kenney[/url], CC0 1.0. Adapted vector shapes and colors.
+
 [color=#e6bb81][b]MODELS & TEXTURES — CC0[/b][/color]
 [url=https://polyhaven.com/]Poly Haven[/url] — architecture materials, chandeliers, furniture, props and decor.
 [url=https://ambientcg.com/view?id=Fabric037]ambientCG[/url] — Fabric037.

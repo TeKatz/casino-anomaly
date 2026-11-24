@@ -12,6 +12,8 @@ const MenuStyle = preload("res://ui/menu_style.gd")
 const MenuIcons = preload("res://ui/menu_icons.gd")
 var _motion: Tween
 var _keyboard_navigation := false
+var _hovered := false
+var _held := false
 
 
 func _ready() -> void:
@@ -44,6 +46,10 @@ func _ready() -> void:
     focus_entered.connect(_refresh_focus)
     focus_exited.connect(_refresh_focus)
     resized.connect(_center_pivot)
+    visibility_changed.connect(_reset_motion)
+    var settings := get_node_or_null("/root/GameSettings")
+    if settings != null:
+        settings.connect("options_changed", _on_motion_option)
     _center_pivot()
 
 
@@ -87,25 +93,47 @@ func _refresh_focus() -> void:
 
 
 func _hover_changed(entered: bool) -> void:
+    _hovered = entered
     if disabled:
+        _animate_size(Vector2.ONE, 0.0)
         return
-    _animate_size(Vector2(1.017, 1.017) if entered else Vector2.ONE, 0.22)
+    _refresh_motion()
 
 
 func _press_changed(pressed: bool) -> void:
-    if disabled:
-        return
-    _animate_size(Vector2(0.985, 0.985) if pressed else Vector2.ONE, 0.12)
+    _held = pressed
+    _refresh_motion()
+
+
+func _refresh_motion() -> void:
+    var target := Vector2.ONE
+    if not disabled:
+        if _held:
+            target = Vector2(0.985, 0.985)
+        elif _hovered:
+            target = Vector2(1.022, 1.022)
+    _animate_size(target, 0.12 if _held else 0.19)
 
 
 func _animate_size(target: Vector2, duration: float) -> void:
     if _motion != null and _motion.is_running():
         _motion.kill()
-    if bool(Controls.pref(self, "reduced_menu_motion", false)):
+    if duration <= 0.0 or bool(Controls.pref(self, "reduced_menu_motion", false)):
         scale = Vector2.ONE
         self_modulate = Color.WHITE
         return
-    _motion = create_tween().set_parallel(true)
+    _motion = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS).set_parallel(true)
     _motion.tween_property(self, "scale", target, duration).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
     var tint := Color(1.06, 1.07, 1.09, 1.0) if target.x > 1.0 else Color.WHITE
     _motion.tween_property(self, "self_modulate", tint, duration).set_trans(Tween.TRANS_CUBIC)
+
+
+func _on_motion_option(key: String) -> void:
+    if key == "reduced_menu_motion" and bool(Controls.pref(self, key, false)):
+        _reset_motion()
+
+
+func _reset_motion() -> void:
+    _hovered = false
+    _held = false
+    _animate_size(Vector2.ONE, 0.0)

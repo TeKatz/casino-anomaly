@@ -135,8 +135,8 @@ func _card(parent: Node) -> VBoxContainer:
     var panel := PanelContainer.new()
     panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     var style := StyleBoxFlat.new()
-    style.bg_color = Color("#17221e")
-    style.border_color = Color("#514b37")
+    style.bg_color = Color("#202228")
+    style.border_color = Color("#655237")
     style.set_border_width_all(1)
     style.set_corner_radius_all(6)
     style.content_margin_left = 12
@@ -157,15 +157,8 @@ func _progress_bar(parent: Node, current: float, maximum: float) -> void:
     bar.show_percentage = false
     bar.max_value = maxf(1.0, maximum)
     bar.value = current
-    var track := StyleBoxFlat.new()
-    track.bg_color = Color("#343c35")
-    track.set_corner_radius_all(4)
-    var fill := StyleBoxFlat.new()
-    fill.bg_color = GOLD
-    fill.set_corner_radius_all(4)
-    bar.add_theme_stylebox_override("background", track)
-    bar.add_theme_stylebox_override("fill", fill)
     parent.add_child(bar)
+    MenuStyle.apply_progress(bar, current)
 
 
 func _render_archive(profiles: Node) -> void:

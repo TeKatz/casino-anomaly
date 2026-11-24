@@ -7,10 +7,7 @@ const GREEN := Color("#75c899")
 const RED := Color("#df8490")
 const AMBER := Color("#f2ae70")
 const PALE := Color("#f5e9dc")
-const SKIN_WIDTH := 256
-const SKIN_HEIGHT := 48
-const INSET := 5.0
-const RADIUS := 10.0
+const KENNEY_FACE := """<svg xmlns="http://www.w3.org/2000/svg" width="192" height="64" viewBox="0 0 192 64"><defs><linearGradient id="surface" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0" stop-color="#TOP"/><stop offset="1" stop-color="#BOTTOM"/></linearGradient></defs><rect x="0" y="0" width="192" height="64" rx="6" fill="#EDGE"/><rect x="2" y="2" width="188" height="60" rx="4" fill="#RIM"/><rect x="4" y="4" width="184" height="56" rx="2" fill="url(#surface)"/></svg>"""
 static var _skin_cache: Dictionary = {}
 
 
@@ -31,71 +28,36 @@ static func button_skin(state: String, featured: bool = false, accent: String = 
     if _skin_cache.has(key):
         return _skin_cache[key] as StyleBoxTexture
 
-    var top := Color("#334b62")
-    var bottom := Color("#142438")
+    var top := Color("#303137")
+    var bottom := Color("#1b1c21")
+    var rim := accent_color(accent).darkened(0.20)
     match state:
         "hover":
-            top = Color("#4d657c")
-            bottom = Color("#1c354a")
+            top = Color("#45413a")
+            bottom = Color("#29272a")
+            rim = accent_color(accent).lightened(0.22)
         "pressed":
-            top = Color("#1e2e43")
-            bottom = Color("#101e30")
+            top = Color("#191a1e")
+            bottom = Color("#101115")
         "disabled":
-            top = Color("#1b2938")
-            bottom = Color("#101b2a")
+            top = Color("#222328")
+            bottom = Color("#18191d")
+            rim = Color("#55565d")
     if featured and state == "normal":
-        top = Color("#465e72")
-        bottom = Color("#21374b")
-    if featured and state == "hover":
-        top = Color("#5a7085")
-        bottom = Color("#294256")
-    var rim := accent_color(accent)
-    if state == "disabled":
-        rim = Color("#62717b")
-
-    var image := Image.create_empty(SKIN_WIDTH, SKIN_HEIGHT, false, Image.FORMAT_RGBA8)
-    var half_x := float(SKIN_WIDTH) * 0.5
-    var half_y := float(SKIN_HEIGHT) * 0.5
-    for y in range(SKIN_HEIGHT):
-        var v := float(y) / float(SKIN_HEIGHT - 1)
-        for x in range(SKIN_WIDTH):
-            var px := float(x) + 0.5 - half_x
-            var py := float(y) + 0.5 - half_y
-            # Signed distance to a perfectly symmetrical rounded rectangle.
-            var dx := absf(px) - (half_x - INSET - RADIUS)
-            var dy := absf(py) - (half_y - INSET - RADIUS)
-            var outside := Vector2(maxf(dx, 0.0), maxf(dy, 0.0)).length()
-            var distance := outside + minf(maxf(dx, dy), 0.0) - RADIUS
-            if distance > 6.0:
-                continue
-            if distance > 0.5:
-                var shadow := (1.0 - clampf((distance - 0.5) / 5.5, 0.0, 1.0)) * 0.29
-                image.set_pixel(x, y, Color(0.0, 0.0, 0.0, shadow))
-                continue
-
-            var coverage := clampf(0.5 - distance, 0.0, 1.0)
-            var nx := float(x) / float(SKIN_WIDTH)
-            var surface := top.lerp(bottom, pow(v, 0.82))
-            # A wide satin reflection, not a line or decorative ornament.
-            var reflection := exp(-pow((v - 0.14) / 0.37, 2.0)) * 0.145
-            var center_light := exp(-pow((nx - 0.31) / 0.58, 2.0)) * 0.08
-            surface = surface.lerp(Color("#c1d8e4"), reflection + center_light)
-            var bounce := exp(-pow((v - 0.87) / 0.19, 2.0)) * 0.043
-            surface = surface.lerp(Color("#678fa7"), bounce)
-
-            # Clearly visible colored metal rim, 2-3 source pixels thick.
-            # Nine-slice preserves the exact same rim on both ends.
-            var rim_width := 3.0 if state == "hover" else 2.4
-            var edge := clampf((distance + rim_width) / rim_width, 0.0, 1.0)
-            var strength := 0.98 if state == "hover" else 0.91
-            var polished := rim.lerp(Color.WHITE, 0.18 * (1.0 - v))
-            surface = surface.lerp(polished, edge * strength)
-            # A very faint colored reflection inside the face ties it together.
-            surface = surface.lerp(rim, (1.0 - edge) * 0.025)
-            if state == "disabled":
-                surface = surface.lerp(Color("#142230"), 0.45)
-            image.set_pixel(x, y, Color(surface.r, surface.g, surface.b, coverage))
-
+        top = Color("#423a2e")
+        bottom = Color("#242326")
+        rim = accent_color(accent)
+    elif featured and state == "hover":
+        top = Color("#514738")
+        bottom = Color("#302b27")
+    # Geometry adapted from Kenney UI Pack 2.0 (CC0). Rasterize each palette
+    # variant once; keep the existing symmetric nine-slice and compact sizing.
+    var svg := KENNEY_FACE.replace("RIM", rim.to_html(false)).replace("TOP", top.to_html(false)).replace("BOTTOM", bottom.to_html(false)).replace("EDGE", rim.darkened(0.40).to_html(false))
+    var image := Image.new()
+    var result := image.load_svg_from_string(svg)
+    if result != OK:
+        image = Image.create_empty(192, 64, false, Image.FORMAT_RGBA8)
+        image.fill(top)
     var style := StyleBoxTexture.new()
     style.texture = ImageTexture.create_from_image(image)
     # Both vertical caps must fit inside the smallest 36px settings dropdown.
@@ -117,9 +79,9 @@ static func button_skin(state: String, featured: bool = false, accent: String = 
 static func keyboard_focus_skin() -> StyleBoxFlat:
     var focus := StyleBoxFlat.new()
     focus.bg_color = Color.TRANSPARENT
-    focus.border_color = Color("#d4e5ed", 0.90)
+    focus.border_color = Color("#f0d9a0", 0.96)
     focus.set_border_width_all(2)
-    focus.set_corner_radius_all(17)
+    focus.set_corner_radius_all(6)
     return focus
 
 
@@ -139,8 +101,8 @@ static func apply_button(button: Button, active: bool = false, accent: String = 
     button.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
     button.add_theme_color_override("font_color", PALE)
     button.add_theme_color_override("font_hover_color", Color.WHITE)
-    button.add_theme_color_override("font_pressed_color", Color("#e4f3f6"))
-    button.add_theme_color_override("font_disabled_color", Color("#74818f"))
+    button.add_theme_color_override("font_pressed_color", Color("#f0d9a0"))
+    button.add_theme_color_override("font_disabled_color", Color("#929198"))
     button.add_theme_color_override("icon_normal_color", accent_color(accent))
     button.add_theme_color_override("icon_hover_color", Color("#f6f6f2"))
     button.add_theme_color_override("icon_pressed_color", accent_color(accent).lightened(0.18))
@@ -158,13 +120,15 @@ static func apply_dropdown(button: OptionButton) -> void:
     apply_button(button)
     # Godot defaults to only 4px, putting the icon against the border.
     button.add_theme_constant_override("arrow_margin", 23)
+    button.add_theme_icon_override("arrow", preload("res://ui/kenney/arrow.svg"))
+    button.add_theme_stylebox_override("focus", keyboard_focus_skin())
     button.add_theme_constant_override("h_separation", 12)
     button.add_theme_color_override("font_color", PALE)
     var popup := button.get_popup()
     if popup != null:
         popup.add_theme_stylebox_override("panel", panel())
         var selected := StyleBoxFlat.new()
-        selected.bg_color = Color("#35495b")
+        selected.bg_color = Color("#40372b")
         selected.border_color = GOLD
         selected.set_border_width_all(1)
         selected.set_corner_radius_all(7)
@@ -175,12 +139,64 @@ static func apply_dropdown(button: OptionButton) -> void:
 
 static func panel() -> StyleBoxFlat:
     var box := StyleBoxFlat.new()
-    box.bg_color = Color("#0d1928")
-    box.border_color = Color("#9d886d", 0.92)
+    box.bg_color = Color("#17181d")
+    box.border_color = Color("#9d8050", 0.92)
     box.set_border_width_all(2)
-    box.set_corner_radius_all(18)
+    box.set_corner_radius_all(12)
     box.corner_detail = 12
     box.shadow_color = Color(0, 0, 0, 0.78)
     box.shadow_size = 32
     box.shadow_offset = Vector2(0, 9)
     return box
+
+
+static func flat_surface(bg: Color, edge: Color, radius: int = 5, border: int = 1) -> StyleBoxFlat:
+    var style := StyleBoxFlat.new()
+    style.bg_color = bg
+    style.border_color = edge
+    style.set_border_width_all(border)
+    style.set_corner_radius_all(radius)
+    return style
+
+
+static func apply_toggle(toggle: CheckButton) -> void:
+    toggle.add_theme_icon_override("checked", preload("res://ui/kenney/check_on.svg"))
+    toggle.add_theme_icon_override("unchecked", preload("res://ui/kenney/check_off.svg"))
+    toggle.add_theme_icon_override("checked_disabled", preload("res://ui/kenney/check_on_disabled.svg"))
+    toggle.add_theme_icon_override("unchecked_disabled", preload("res://ui/kenney/check_off_disabled.svg"))
+    toggle.add_theme_stylebox_override("focus", keyboard_focus_skin())
+    toggle.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+    toggle.pressed.connect(func() -> void:
+        var sound := toggle.get_node_or_null("/root/UISfx")
+        if sound != null:
+            sound.call("play_click")
+    )
+
+
+static func apply_slider(slider: HSlider) -> void:
+    var track := flat_surface(Color("#111216"), Color("#6e604c"))
+    track.content_margin_top = 3
+    track.content_margin_bottom = 3
+    slider.add_theme_stylebox_override("slider", track)
+    slider.add_theme_stylebox_override("grabber_area", flat_surface(Color("#a38149"), Color("#a38149"), 5, 0))
+    slider.add_theme_stylebox_override("grabber_area_highlight", flat_surface(Color("#c9a45c"), Color("#c9a45c"), 5, 0))
+    slider.add_theme_icon_override("grabber", preload("res://ui/kenney/slider.svg"))
+    slider.add_theme_icon_override("grabber_highlight", preload("res://ui/kenney/slider_hover.svg"))
+    slider.add_theme_icon_override("grabber_disabled", preload("res://ui/kenney/slider_disabled.svg"))
+    slider.add_theme_stylebox_override("focus", keyboard_focus_skin())
+    slider.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+
+
+static func apply_progress(bar: ProgressBar, target: float) -> void:
+    bar.add_theme_stylebox_override("background", flat_surface(Color("#111216"), Color("#514633"), 4))
+    bar.add_theme_stylebox_override("fill", flat_surface(Color("#c9a45c"), Color("#e0c38a"), 4, 0))
+    bar.value = target
+    # Presentation only. The profile continues to be the source of truth.
+    if not bar.is_inside_tree():
+        return
+    var settings := bar.get_node_or_null("/root/GameSettings")
+    if settings != null and bool(settings.call("get_option", "reduced_menu_motion")):
+        return
+    bar.value = bar.min_value
+    var motion := bar.create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+    motion.tween_property(bar, "value", target, 0.32).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)

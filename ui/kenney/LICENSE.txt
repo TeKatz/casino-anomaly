@@ -1,0 +1,8 @@
+UI Pack (2.0)
+Created/distributed by Kenney (www.kenney.nl)
+Creation date: 12-06-2024
+License: Creative Commons Zero (CC0)
+http://creativecommons.org/publicdomain/zero/1.0/
+This content is free to use in personal, educational and commercial projects.
+Source: https://kenney.nl/assets/ui-pack
+Adapted assets: Grey button_rectangle_gradient, arrow_basic_s_small, check_square_grey, check_square_color_checkmark, slide_hangle. Recolored and resized for Casino Anomaly.
