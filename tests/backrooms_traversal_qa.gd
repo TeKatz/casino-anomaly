@@ -19,12 +19,18 @@ func _run() -> void:
     if not require(Catalog.discoverable_ids().has("backrooms"), "Missing discoverable catalog entry"):
         quit(1)
         return
+    var settings = root.get_node("GameSettings")
+    var saved_settings: Dictionary = settings.options.duplicate(true)
+    settings.set_option("door_symbols", true)
+    settings.set_option("soft_light_transitions", true)
     if not await _exercise("right", 1, false):
         quit(1)
         return
     if not await _exercise("left", 11, true):
         quit(1)
         return
+    settings._change(saved_settings, true)
+    settings.save_options()
     # End the simulated play session as the menu would, releasing all
     # audio players before the headless engine shuts down.
     var sound := root.get_node_or_null("AudioDirector")

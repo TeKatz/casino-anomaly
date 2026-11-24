@@ -18,9 +18,23 @@ const GATE_X := -47.7
 const GATE_HEIGHT := 3.54
 
 
+static func exit_lane(sign: Label3D) -> String:
+    if sign.has_meta("_exit_lane"):
+        return str(sign.get_meta("_exit_lane"))
+    # The two authored exit plaques sit at the west wall; other Label3D
+    # nodes (bar, branding, etc.) are never portal markers.
+    if absf(sign.position.x - (EXIT_X + 0.46)) > 0.6:
+        return ""
+    if absf(sign.position.z - EXIT_Z_LEFT) < 0.6:
+        return "left"
+    if absf(sign.position.z - EXIT_Z_RIGHT) < 0.6:
+        return "right"
+    return ""
+
 static func choice_label(context: Node, is_anomaly: bool) -> String:
     # Staged rooms are not necessarily in the tree yet.
-    var settings := context.get_node_or_null("/root/GameSettings") if context.is_inside_tree() else null
+    var tree := Engine.get_main_loop() as SceneTree
+    var settings := tree.root.get_node_or_null("GameSettings") if tree != null else null
     var symbols := settings != null and bool(settings.call("get_option", "door_symbols"))
     var caption := Loc.t("world.anomaly", context) if is_anomaly else Loc.t("world.normal", context)
     return ("! " if is_anomaly else "= ") + caption if symbols else caption
@@ -84,11 +98,11 @@ func prepare_room(room: Node3D) -> bool:
     for node in architecture.get_children():
         if node is Label3D:
             var sign := node as Label3D
-            if sign.text == "EXIT":
-                # Left = Anomalie (+Z), right = Normal (-Z).
-                var is_anomaly := absf(sign.position.z - EXIT_Z_LEFT) < 0.6
+            var lane := exit_lane(sign)
+            if not lane.is_empty():
+                sign.set_meta("_exit_lane", lane)
                 sign.set_meta("_choice_sign", true)
-                sign.text = choice_label(room, is_anomaly)
+                sign.text = choice_label(room, lane == "left")
             continue
         if not node is MeshInstance3D:
             continue

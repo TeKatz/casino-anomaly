@@ -100,7 +100,7 @@ func _ready() -> void:
 	doors.name = "DoorChoices"
 	add_child(doors)
 	if not _place_markers():
-		push_error("Casino needs both original EXIT signs as portal markers")
+		push_error("Casino needs both physical exit connectors")
 		queue_free()
 		return
 	var settings = get_node_or_null("/root/GameSettings")
@@ -185,26 +185,18 @@ func _exit_tree() -> void:
 
 
 func _place_markers() -> bool:
+	# The portal geometry is the source of truth. Text labels (even a
+	# missing or edited visual plaque) must never control room streaming.
+	for lane in ["left", "right"]:
+		if not is_instance_valid(portals.get_connector(room, lane)):
+			return false
 	for child in doors.get_children():
 		child.free()
-	var signs: Array[Label3D] = []
-	var architecture := room.get_node_or_null("Architecture") as Node3D
-	if architecture == null:
-		return false
-	for part in architecture.get_children():
-		if part is Label3D and (part as Label3D).text in ["EXIT", "ANOMALIE", "ANOMALY", "NORMAL"]:
-			signs.append(part as Label3D)
-	if signs.size() != 2:
-		return false
-	signs.sort_custom(func(a: Label3D, b: Label3D) -> bool:
-		return room.to_local(a.global_position).z > room.to_local(b.global_position).z
-	)
-	for i in range(2):
+	for lane in ["left", "right"]:
 		var marker := Marker3D.new()
-		marker.name = "LeftDoor" if i == 0 else "RightDoor"
+		marker.name = "LeftDoor" if lane == "left" else "RightDoor"
 		doors.add_child(marker)
-		var local := room.to_local(signs[i].global_position)
-		marker.global_position = room.to_global(Vector3(local.x, 1.6, local.z))
+		marker.global_position = room.to_global(Vector3(portals.EXIT_X, 1.6, portals.lane_z(lane)))
 	return true
 
 
@@ -234,6 +226,8 @@ func _on_language_changed(key: String) -> void:
 	_refresh_exit_signs(room)
 	if staged != null and is_instance_valid(staged):
 		_refresh_exit_signs(staged)
+	if key != "language":
+		return
 	var state = get_node_or_null("/root/LoopState")
 	if state != null:
 		_update_level_sign(room, int(state.correct_streak), won)
@@ -260,9 +254,11 @@ func _refresh_exit_signs(target_room: Node3D) -> void:
 	if architecture == null:
 		return
 	for node in architecture.get_children():
-		if node is Label3D and (node.has_meta("_choice_sign") or node.text in ["ANOMALIE", "ANOMALY", "NORMAL"]):
-			var left_side: bool = absf(node.position.z - EXIT_Z_LEFT) < 0.6
-			node.text = StreamPortals.choice_label(self, left_side)
+		if node is Label3D:
+			var lane := StreamPortals.exit_lane(node as Label3D)
+			if not lane.is_empty():
+				node.set_meta("_exit_lane", lane)
+				node.text = StreamPortals.choice_label(self, lane == "left")
 
 
 func _candidate_lane(local_z: float) -> String:
@@ -821,10 +817,11 @@ func _blend_entry(weight: float, source: Environment, env: WorldEnvironment) -> 
 
 
 func _finish_entry_blend(env: WorldEnvironment) -> void:
-	if is_instance_valid(env):
+	if is_instance_valid(env) and env.environment == backrooms_entry_blend:
 		env.environment = backrooms_environment
 		env.remove_meta("_return_blend")
 	backrooms_entry_blend = null
+	backrooms_entry_tween = null
 
 
 func _physics_process(_delta: float) -> void:
@@ -882,6 +879,9 @@ func _finish_backrooms() -> void:
 	var verdict: Dictionary = state.complete_backrooms(backrooms_lane == "left")
 	if not bool(verdict.get("valid", false)):
 		return
+	if backrooms_entry_tween != null and backrooms_entry_tween.is_running():
+		backrooms_entry_tween.kill()
+		_finish_entry_blend(room.get_node("Lighting/Environment") as WorldEnvironment)
 	backrooms_scored = true
 	Backrooms.seal_exit(backrooms_exit_connector)
 	# Behind the closed gate the maze can no longer be seen or reached.

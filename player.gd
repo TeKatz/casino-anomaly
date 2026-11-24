@@ -78,6 +78,8 @@ func _setting(key: String, fallback: Variant) -> Variant:
 func set_interaction_locked(locked: bool) -> void:
     interaction_locked = locked
     if locked:
+        _mouse_pending = Vector2.ZERO
+        _sprint_toggled = false
         velocity = Vector3.ZERO
         _footstep_distance = 0.80
 
@@ -320,6 +322,9 @@ func _movement_direction(axis: Vector2) -> Vector3:
 
 
 func _notification(what: int) -> void:
+    if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
+        _mouse_pending = Vector2.ZERO
+        _sprint_toggled = false
     if what == NOTIFICATION_APPLICATION_FOCUS_OUT and is_inside_tree() and bool(_setting("pause_unfocused", false)) and not interaction_locked and not _streaming_handoff and not get_tree().paused:
         var loading := get_node_or_null("/root/SceneLoader")
         var dev := get_node_or_null("AnomalyDevMenu")

@@ -21,6 +21,10 @@ func _run() -> void:
     if state == null:
         _fail("Run save autoload is missing")
         return
+    var settings = root.get_node("GameSettings")
+    var saved: Dictionary = settings.options.duplicate(true)
+    settings.set_option("language", "en")
+    settings.set_option("door_symbols", true)
     state.save_path = "user://casino_streaming_qa.cfg"
     state.start_new_run()
     state.complete_tutorial()
@@ -68,10 +72,10 @@ func _run() -> void:
         return
     var signs := {}
     for child in architecture.get_children():
-        if child is Label3D and (child.text == "ANOMALY" or child.text == "NORMAL"):
+        if child is Label3D and (child.text == "! ANOMALY" or child.text == "= NORMAL"):
             signs[child.text] = child.position.z
-    if signs.size() != 2 or absf(float(signs["ANOMALY"]) - shape.EXIT_Z_LEFT) > 0.5 \
-            or absf(float(signs["NORMAL"]) - shape.EXIT_Z_RIGHT) > 0.5:
+    if signs.size() != 2 or absf(float(signs["! ANOMALY"]) - shape.EXIT_Z_LEFT) > 0.5 \
+            or absf(float(signs["= NORMAL"]) - shape.EXIT_Z_RIGHT) > 0.5:
         _fail("The physical left/right door labels disagree with the game's choices")
         return
     for lane in ["left", "right"]:
@@ -312,6 +316,17 @@ func _run() -> void:
         _fail("The preselected anomaly was lost during room handoff")
         return
 
+    # Relabel the active room after handoff, then verify marker identities.
+    settings.set_option("language", "de")
+    settings.set_option("door_symbols", false)
+    if not bool(controller.call("_place_markers")):
+        _fail("Language/toggle invalidated physical portals")
+        return
+    settings.set_option("door_symbols", true)
+    for child in second.get_node("Architecture").get_children():
+        if child is Label3D and Portals.exit_lane(child) == "left" and child.text != "! ANOMALIE":
+            _fail("Localized door decoration was not applied")
+            return
     # Keep this ordinary-hall regression deterministic even when the new
     # traversal anomaly is present in the random catalog.
     state.anomaly_id = ""
@@ -375,6 +390,8 @@ func _run() -> void:
 
     third.queue_free()
     await process_frame
+    settings._change(saved, true)
+    settings.save_options()
     DirAccess.remove_absolute(ProjectSettings.globalize_path(state.save_path))
     print("Casino Anomaly seamless two-room streaming QA PASS")
     quit(0)

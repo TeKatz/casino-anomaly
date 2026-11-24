@@ -197,6 +197,17 @@ func _input(event: InputEvent) -> void:
     if settings != null and bool(settings.get_meta("_binding_capture", false)):
         return
     if Controls.pressed(event, "pause") or (open and event.is_action_pressed("ui_cancel")):
+        if open and settings_panel.visible:
+            var preview := settings_panel.get("preview_dialog") as ConfirmationDialog
+            var reset := settings_panel.get("reset_dialog") as ConfirmationDialog
+            if preview != null and preview.visible:
+                settings.call("cancel_display_preview")
+                get_viewport().set_input_as_handled()
+                return
+            if reset != null and reset.visible:
+                reset.hide()
+                get_viewport().set_input_as_handled()
+                return
         if confirmation.visible:
             confirmation.hide()
         elif open and archive_panel.visible:

@@ -656,7 +656,10 @@ func _apply_node(node: Node, keys: Array) -> void:
             var distance := str(options["shadow_distance"])
             light.distance_fade_enabled = bool(original[1]) or distance != "original"
             light.distance_fade_shadow = float(original[2]) if distance == "original" else float({"off": 0, "low": 12, "medium": 20, "high": 38, "ultra": 48}[distance])
-            light.distance_fade_begin = float(original[3]) if distance == "original" else maxf(light.distance_fade_shadow + 8.0, float(original[3]))
+            # Quality may drop shadows, not the actual illumination (which
+            # is also a gameplay clue). Keep authored light-fade distance,
+            # or a distant bound for lights with no authored fade.
+            light.distance_fade_begin = float(original[3]) if distance == "original" or bool(original[1]) else 10000.0
             light.distance_fade_length = float(original[4])
     elif (node is CPUParticles3D or node is GPUParticles3D) and keys.has("particle_quality"):
         if not str(node.name).begins_with("AmbientDust"):
