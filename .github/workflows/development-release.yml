@@ -173,6 +173,7 @@ jobs:
             @('tests/dev_anomaly_tool_qa.gd', 'Casino Anomaly developer anomaly picker QA PASS'),
             @('tests/anomaly_variations_qa.gd', 'Casino Anomaly ten subtle anomalies QA PASS'),
             @('tests/streaming_qa.gd', 'Casino Anomaly seamless two-room streaming QA PASS'),
+            @('tests/backrooms_traversal_qa.gd', 'Casino Anomaly Backrooms traversal QA PASS'),
             @('tests/settings_pause_qa.gd', 'Casino Anomaly pause, persistent settings and world-camera input QA PASS'),
             @('tests/menu_visual_qa.gd', 'Casino Anomaly abstract UI and credits QA PASS'),
             @('tests/profile_side_cards_qa.gd', 'Casino Anomaly profile side-card layout QA PASS'),

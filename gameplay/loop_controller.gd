@@ -142,6 +142,10 @@ func debug_restore_random() -> bool:
 
 
 func _exit_tree() -> void:
+	# Reparenting the persistent controller temporarily exits the tree.
+	# Ownership only ends on actual scene teardown, not on a handoff.
+	if transitioning:
+		return
 	if is_instance_valid(backrooms_maze) and backrooms_maze != room:
 		backrooms_maze.queue_free()
 	if backrooms_active:
@@ -183,7 +187,16 @@ func _place_markers() -> bool:
 
 
 func _on_language_changed(key: String) -> void:
-	if key != "language" or backrooms_active:
+	if backrooms_active:
+		if key == "voxel_gi":
+			var settings := get_node_or_null("/root/GameSettings")
+			var probe := room.get_node_or_null("Lighting/BackroomsVoxelGI") as VoxelGI
+			if probe != null and settings != null:
+				probe.visible = bool(settings.get_option("voxel_gi"))
+		if key == "language" and is_instance_valid(staged):
+			_refresh_exit_signs(staged)
+		return
+	if key != "language":
 		return
 	_refresh_exit_signs(room)
 	if staged != null and is_instance_valid(staged):
@@ -242,7 +255,7 @@ func _process(delta: float) -> void:
 		_process_backrooms()
 		return
 	var local := room.to_local(player.global_position)
-	if _backrooms_selected():
+	if not choice_taken and _backrooms_selected():
 		_process_backrooms_approach(local)
 		return
 	if local.x < PRELOAD_AT_X and not choice_taken:
@@ -279,7 +292,7 @@ func _stage_transform(lane: String) -> Transform3D:
 
 
 func _stage_next(lane: String) -> void:
-	if _backrooms_selected() and not backrooms_active:
+	if not choice_taken and _backrooms_selected() and not backrooms_active:
 		_stage_backrooms(lane)
 		return
 	# Immediate path for developer/integration calls and for a player who
@@ -298,7 +311,7 @@ func _stage_next(lane: String) -> void:
 
 
 func _schedule_stage_next(lane: String) -> void:
-	if _backrooms_selected() and not backrooms_active:
+	if not choice_taken and _backrooms_selected() and not backrooms_active:
 		_stage_backrooms(lane)
 		return
 	# One bounded stage per _process frame. The threshold is far ahead of
@@ -412,6 +425,8 @@ func _activate_reflections_sequentially(target_room: Node3D) -> void:
 
 
 func _commit_choice(lane: String) -> void:
+	if choice_taken:
+		return
 	if _backrooms_selected():
 		# The binary choice is not committed at the ordinary threshold.
 		# Only the actual blind-corner crossing enters this special round.
@@ -581,6 +596,7 @@ func _enter_backrooms(lane: String) -> void:
 	var connector := portals.get_connector(previous, lane) as Node3D
 	if connector == null or not portals.lock_departure(previous, lane):
 		return
+	transitioning = true
 	# Seal immediately behind the corner, not inside the player capsule.
 	var direction: float = portals.lane_sign(lane)
 	var gate_mat: Material = (connector.get_node("TurnOuterWall") as MeshInstance3D).material_override
@@ -634,6 +650,8 @@ func _enter_backrooms(lane: String) -> void:
 	room.add_child(backrooms_pickup)
 	previous.hide()
 	previous.queue_free()
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	transitioning = false
 
 
 func _physics_process(_delta: float) -> void:
@@ -681,6 +699,7 @@ func _stage_backrooms_return() -> void:
 	get_tree().root.add_child(next)
 	staged = next
 	staged_gi_warmed = false
+	Backrooms.open_return(backrooms_exit_connector)
 	var state = get_node_or_null("/root/LoopState")
 	if state != null:
 		_update_level_sign(next, int(state.correct_streak), false)

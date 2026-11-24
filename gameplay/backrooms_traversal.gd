@@ -53,7 +53,7 @@ static func build_entrance(maze: Node3D) -> void:
     for side in [-1.0, 1.0]:
         var suffix := "N" if side < 0 else "S"
         box(collar, "Return_" + suffix, Vector3(ENTRY_X - 0.68, 1.76, ENTRY_Z + side * 1.31),
-            Vector3(1.22, 3.52, 0.18), WALL)
+            Vector3(1.0, 3.52, 0.18), WALL)
         box(collar, "Jamb_" + suffix, Vector3(ENTRY_X - 0.25, 1.5, ENTRY_Z + side * (HALF_WIDTH + OPENING_HALF) * 0.5),
             Vector3(0.20, 3.0, HALF_WIDTH - OPENING_HALF), WALL)
     box(collar, "Soffit", Vector3(ENTRY_X - 0.68, 3.25, ENTRY_Z), Vector3(1.22, 0.5, 2.62), CEILING)
@@ -72,7 +72,7 @@ static func build_exit(maze: Node3D) -> Node3D:
             Vector3(wall_end - start, 3.52, 0.18), WALL)
         box(corridor, "Jamb_" + suffix, Vector3(EXIT_X + 0.28, 1.5, EXIT_Z + side * (HALF_WIDTH + OPENING_HALF) * 0.5),
             Vector3(0.22, 3.0, HALF_WIDTH - OPENING_HALF), WALL)
-    box(corridor, "Floor", Vector3((EXIT_X + end + 0.55) * 0.5, -0.115, EXIT_Z),
+    box(corridor, "Floor", Vector3((EXIT_X + end + 0.55) * 0.5, -0.12, EXIT_Z),
         Vector3(EXIT_LENGTH + 0.55, 0.23, 2.44), FLOOR)
     box(corridor, "Ceiling", Vector3((start + wall_end) * 0.5, 3.60, EXIT_Z),
         Vector3(wall_end - start, 0.18, 2.62), CEILING)
@@ -84,7 +84,16 @@ static func build_exit(maze: Node3D) -> Node3D:
     light.light_energy = 0.35
     light.omni_range = 3.0
     corridor.add_child(light)
+    # Prevent a walk into the void if the next casino cannot be instantiated.
+    # The temporary cap is removed only when its real entry sleeve exists.
+    box(corridor, "ReturnStandbyCap", Vector3(end - 0.85, 1.76, EXIT_Z), Vector3(0.22, 3.52, 2.62), WALL)
     return corridor
+
+static func open_return(corridor: Node3D) -> void:
+    for name in ["ReturnStandbyCap", "ReturnStandbyCap_Collision"]:
+        var node := corridor.get_node_or_null(name)
+        if node != null:
+            node.free()
 
 static func seal_exit(corridor: Node3D) -> void:
     if not corridor.has_node("ExitGate"):
