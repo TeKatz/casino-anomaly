@@ -94,3 +94,23 @@ editor after the bake begins does not affect that bake.
 `lighting/` on `dev`. Real-time VoxelGI is available during gameplay and
 now also previewed in the Godot editor. Regenerate the bake only after
 changing geometry or lighting that contributes to the static bake.
+
+
+## Backrooms standalone scene
+
+The same **Project → Tools → Casino: VoxelGI neu backen...** action also
+supports `res://backrooms/backrooms_labyrinth.tscn`. The currently active
+scene determines which offline script is launched. A Backrooms bake writes
+only `backrooms/backrooms_voxel_gi.res`, with the authored
+`Lighting/BackroomsVoxelGI` probe and saved static geometry/lights. Hidden
+lights are excluded. No neon proxies, casino resources or scene files are
+modified by the Backrooms baker.
+
+After successful exit the editor reloads the Backrooms resource if the scene
+is still open. Otherwise reopen it. Without a bake, the standalone scene
+uses direct lights. The first bake uses lower GI energy for a dark interior;
+subsequent bakes preserve previous probe data settings. Commit the separate
+.res file after visual inspection. The process still requires a real GPU
+and Forward+; CI does not generate voxel data.
+
+Console: `Godot_v4.5.1-stable_win64_console.exe --path . --rendering-method forward_plus --script res://tools/bake_backrooms_voxel_gi.gd`.

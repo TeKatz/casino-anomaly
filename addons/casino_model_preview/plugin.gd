@@ -2,11 +2,14 @@
 extends EditorPlugin
 
 const SketchfabImport = preload("res://addons/casino_model_preview/asset_installer.gd")
+const VoxelTargets = preload("res://addons/casino_model_preview/voxel_bake_targets.gd")
 const BAKE_MENU_NAME := "Casino: Importierte Modelle bearbeitbar machen"
 const VOXEL_MENU_NAME := "Casino: VoxelGI neu backen..."
 var _voxel_confirm: ConfirmationDialog
 var _voxel_info: AcceptDialog
 var _voxel_process_pid := -1
+var _voxel_confirm_scene := ""
+var _voxel_running_scene := ""
 var _waiting_for_model_import := false
 var _model_import_refresh_pending := false
 ## Guard the authored main.tscn when the in-editor Sketchfab preview hides
@@ -21,10 +24,6 @@ func _enter_tree() -> void:
     add_tool_menu_item(VOXEL_MENU_NAME, _ask_voxel_bake)
     _voxel_confirm = ConfirmationDialog.new()
     _voxel_confirm.title = "Casino Anomaly – VoxelGI"
-    _voxel_confirm.dialog_text = ("Alle offenen Szenen speichern und VoxelGI mit den aktuellen " +
-        "Neon-Positionen neu backen?\n\n" +
-        "Der Vorgang benötigt eine GPU und läuft in einem separaten Godot-Prozess. " +
-        "Verändere main.tscn währenddessen nicht.")
     _voxel_confirm.ok_button_text = "Speichern und backen"
     add_child(_voxel_confirm)
     _voxel_confirm.confirmed.connect(_start_voxel_bake)
@@ -61,59 +60,87 @@ func _exit_tree() -> void:
 
 
 func _ask_voxel_bake() -> void:
+    if _voxel_process_pid > 0:
+        _voxel_message("Ein VoxelGI-Bake wird bereits ausgeführt oder ausgewertet.")
+        return
     var root := EditorInterface.get_edited_scene_root()
-    if root == null or root.scene_file_path != "res://main.tscn":
-        _voxel_message("Öffne zuerst main.tscn im Godot-Editor.")
+    var scene_path := root.scene_file_path if root != null else ""
+    var target := VoxelTargets.for_scene(scene_path)
+    if target.is_empty():
+        _voxel_message("Öffne main.tscn oder backrooms/backrooms_labyrinth.tscn im Godot-Editor.")
         return
-    if _voxel_process_pid > 0 and OS.is_process_running(_voxel_process_pid):
-        _voxel_message("Ein VoxelGI-Bake läuft bereits. Bitte nicht doppelt starten.")
-        return
+    _voxel_confirm_scene = scene_path
+    _voxel_confirm.dialog_text = ("Alle offenen Szenen speichern und VoxelGI für " +
+        str(target["label"]) + " neu backen?\n\n" +
+        "Der Vorgang benötigt eine GPU und läuft in einem separaten Godot-Prozess. " +
+        "Verändere die gewählte Szene währenddessen nicht.\n\n" +
+        "Ausgabe: " + str(target["output"]))
     _voxel_confirm.popup_centered()
 
 
 func _start_voxel_bake() -> void:
-    var root := EditorInterface.get_edited_scene_root()
-    if root == null or root.scene_file_path != "res://main.tscn":
-        _voxel_message("Die Casino-Szene ist nicht mehr geöffnet. Bake abgebrochen.")
+    if _voxel_process_pid > 0:
+        _voxel_message("Ein VoxelGI-Bake läuft bereits.")
         return
+    var root := EditorInterface.get_edited_scene_root()
+    var scene_path := root.scene_file_path if root != null else ""
+    var target := VoxelTargets.for_scene(scene_path)
+    if scene_path != _voxel_confirm_scene or target.is_empty():
+        _voxel_message("Die gewählte Szene hat sich geändert. Bake abgebrochen.")
+        return
+    _voxel_confirm_scene = ""
     # Explicit confirmation authorizes saving all open artist scenes.
-    # The offline process reads ONLY the saved main.tscn from disk.
+    # The selected offline baker reads only its own saved scene.
     EditorInterface.save_all_scenes()
+    if EditorInterface.save_scene() != OK:
+        _voxel_message("Die ausgewählte Szene konnte nicht gespeichert werden. Bake abgebrochen.")
+        return
     var executable := OS.get_executable_path()
-    # On Windows prefer Godot's bundled console binary, if installed.
-    # It shows the actual bake progress and any GPU error to the artist.
     if OS.get_name() == "Windows" and executable.to_lower().ends_with(".exe") \
             and not executable.to_lower().ends_with("_console.exe"):
         var console_path := executable.substr(0, executable.length() - 4) + "_console.exe"
         if FileAccess.file_exists(console_path):
             executable = console_path
-    var args := PackedStringArray([
-        "--path", ProjectSettings.globalize_path("res://"),
-        "--script", "res://tools/bake_voxel_gi.gd"
-    ])
+    var args := VoxelTargets.process_args(scene_path, ProjectSettings.globalize_path("res://"))
     # Never --headless: VoxelGI.bake() requires a rendering device.
     _voxel_process_pid = OS.create_process(executable, args, true)
     if _voxel_process_pid <= 0:
         _voxel_message("Godot-Bake-Prozess konnte nicht gestartet werden.\n" +
             "Du kannst das Skript weiterhin über die Konsole ausführen.")
         return
+    _voxel_running_scene = scene_path
     set_process(true)
-    print("Casino: VoxelGI-Bake gestartet (PID ", _voxel_process_pid, ").")
-    _voxel_message("VoxelGI-Baking gestartet. Bitte die Konsole auf " +
-        "'Casino Anomaly VoxelGI OFFLINE BAKE PASS' prüfen.\n\n" +
-        "Danach main.tscn neu öffnen, beide .res prüfen und committen.")
+    print("Casino: VoxelGI-Bake für ", target["label"], " gestartet (PID ", _voxel_process_pid, ").")
+    _voxel_message("VoxelGI-Baking für " + str(target["label"]) + " gestartet.\n\n" +
+        "Die Konsole zeigt den Fortschritt an. Bearbeite diese Szene erst nach Abschluss wieder.")
 
 
 func _process(_delta: float) -> void:
     if _voxel_process_pid <= 0 or OS.is_process_running(_voxel_process_pid):
         return
+    var exit_code := OS.get_process_exit_code(_voxel_process_pid)
+    var scene_path := _voxel_running_scene
+    var target := VoxelTargets.for_scene(scene_path)
     _voxel_process_pid = -1
+    _voxel_running_scene = ""
     set_process(false)
     var fs := EditorInterface.get_resource_filesystem()
     if fs != null:
         fs.scan()
-    print("Casino: Bake-Prozess beendet. Ergebnis in der Konsole prüfen; " +
-        "main.tscn für die neue VoxelGI-Vorschau erneut öffnen.")
+    if exit_code != 0:
+        _voxel_message("VoxelGI-Bake nicht erfolgreich bestätigt (Exit-Code " + str(exit_code) +
+            ").\nBitte die Konsole prüfen.")
+        return
+    var root := EditorInterface.get_edited_scene_root()
+    if scene_path == VoxelTargets.BACKROOMS_SCENE and root != null and root.scene_file_path == scene_path:
+        var probe := root.get_node_or_null("Lighting/BackroomsVoxelGI")
+        if probe != null and probe.has_method("reload_baked_data") and bool(probe.call("reload_baked_data")):
+            _voxel_message("Backrooms-VoxelGI erfolgreich gebacken und in der geöffneten Szene aktualisiert.\n\n" +
+                "Committe die neue Ressource: " + str(target["output"]))
+            return
+    _voxel_message("VoxelGI-Bake für " + str(target.get("label", scene_path)) +
+        " erfolgreich beendet.\n\nSzene erneut öffnen, Beleuchtung prüfen und committen: " +
+        str(target.get("output", "")))
 
 
 func _voxel_message(message: String) -> void:
