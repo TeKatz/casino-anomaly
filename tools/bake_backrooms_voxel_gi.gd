@@ -70,7 +70,7 @@ func _bake() -> void:
     configure_data(probe.data, previous)
     # Save to a temporary resource first. Never replace a working bake with
     # an incomplete one, and never serialize the temporary scene.
-    var temporary := OUTPUT_PATH.get_basename() + ".pending-" + str(OS.get_process_id()) + ".res"
+    var temporary := "res://.godot/backrooms_voxel_gi.pending-" + str(OS.get_process_id()) + ".res"
     var result := ResourceSaver.save(probe.data, temporary)
     if result != OK:
         DirAccess.remove_absolute(temporary)
