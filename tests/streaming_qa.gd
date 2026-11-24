@@ -305,9 +305,10 @@ func _run() -> void:
                 _fail("VoxelGI visibility jumped exactly when the room was revealed")
                 return
             index += 1
-    await process_frame
-    await process_frame
-    await process_frame
+    for frame in range(240):
+        if not is_instance_valid(first):
+            break
+        await process_frame
     for child in (second.get_node("CasinoAtmosphere") as Node3D).get_children():
         if child is ReflectionProbe and not child.visible:
             _fail("Active hall should restore its reflections after handoff")
@@ -352,8 +353,11 @@ func _run() -> void:
     if int(controller.get("_pending_stage_phase")) != 2             or controller.get("staged") != null:
         _fail("Incremental staging did not isolate portal preparation")
         return
-    await process_frame
-    controller.call("_schedule_stage_next", "right")
+    for frame in range(240):
+        if is_instance_valid(controller.get("staged")):
+            break
+        await process_frame
+        controller.call("_schedule_stage_next", "right")
     var third := controller.get("staged") as Node3D
     if third == null or controller.get("_pending_stage") != null:
         _fail("Incremental staging did not attach the third continuous loop")
@@ -387,8 +391,10 @@ func _run() -> void:
     if current_scene != third or player.global_position.distance_to(another_pose.origin) > 0.001:
         _fail("Second handoff moved the player")
         return
-    await process_frame
-    await process_frame
+    for frame in range(240):
+        if not is_instance_valid(second):
+            break
+        await process_frame
     if is_instance_valid(second):
         _fail("Second old hall survived after the next handoff")
         return

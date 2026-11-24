@@ -9,6 +9,8 @@ const StreamingTrace = preload("res://gameplay/streaming_trace.gd")
 ## No camera teleports, fades or extra button presses.
 
 const RuntimeCache = preload("res://gameplay/runtime_asset_cache.gd")
+const RoomAssembly = preload("res://gameplay/room_assembly.gd")
+const RoomDisposal = preload("res://gameplay/room_disposal.gd")
 const Controls = preload("res://gameplay/input_bindings.gd")
 const DemoAnomalies = preload("res://gameplay/demo_anomalies.gd")
 const NeonLevelSign = preload("res://gameplay/neon_level_sign.gd")
@@ -59,6 +61,8 @@ const PERF_SAMPLE_LIMIT := 2048
 # activation across consecutive frames instead of forcing all three at the
 # invisible threshold. _stage_next() remains the immediate safety fallback.
 var _pending_stage: Node3D
+var _assembly: RefCounted
+var _disposal := RoomDisposal.new()
 var _pending_lane := ""
 var _pending_stage_phase := 0
 var _pending_return := false
@@ -185,9 +189,8 @@ func _exit_tree() -> void:
 	if is_instance_valid(_pending_maze):
 		_pending_maze.free()
 		_pending_maze = null
-	if _pending_stage != null and is_instance_valid(_pending_stage):
-		_pending_stage.free()
-		_pending_stage = null
+	_cancel_pending_stage()
+	_disposal.clear()
 	if staged != null and is_instance_valid(staged):
 		staged.queue_free()
 		staged = null
@@ -298,6 +301,8 @@ func _process(delta: float) -> void:
 			print("Casino streaming frame spike: %.1f ms (%d frames after staging)" %
 				[delta * 1000.0, 13 - _stage_spike_frames])
 		_stage_spike_frames -= 1
+	if not transitioning:
+		_disposal.advance()
 	if transitioning or won or room == null or player == null:
 		return
 	if backrooms_active:
@@ -307,7 +312,7 @@ func _process(delta: float) -> void:
 	if not choice_taken and _backrooms_selected():
 		_process_backrooms_approach(local)
 		return
-	if local.x < PRELOAD_AT_X and not choice_taken:
+	if (local.x < PRELOAD_AT_X or is_instance_valid(_pending_stage)) and not choice_taken:
 		_schedule_stage_next(_candidate_lane(local.z))
 	# The second room is still completely out of view here. Enabling its
 	# already-loaded VoxelGI data now avoids the obvious post-entry pop.
@@ -390,10 +395,10 @@ func _stage_next(lane: String) -> void:
 			staged.global_transform = _stage_transform(lane)
 			staged_lane = lane
 		return
-	for ignored in range(3):
+	for ignored in range(6):
 		if staged != null or _pending_stage == null and _pending_stage_phase == 0 and ignored > 0:
 			break
-		_advance_pending_stage(lane)
+		_advance_pending_stage(lane, false, true)
 
 
 func _schedule_stage_next(lane: String) -> void:
@@ -410,7 +415,18 @@ func _schedule_stage_next(lane: String) -> void:
 	_advance_pending_stage(lane)
 
 
-func _advance_pending_stage(lane: String, returning: bool = false) -> void:
+func _cancel_pending_stage() -> void:
+	if is_instance_valid(_assembly):
+		_assembly.cancel()
+		_assembly = null
+	if is_instance_valid(_pending_stage):
+		_pending_stage.free()
+	_pending_stage = null
+	_pending_stage_phase = 0
+	_pending_return = false
+
+
+func _advance_pending_stage(lane: String, returning: bool = false, immediate: bool = false) -> void:
 	if _pending_stage == null:
 		_pending_return = returning
 		_pending_stage_start_us = Time.get_ticks_usec()
@@ -464,17 +480,36 @@ func _advance_pending_stage(lane: String, returning: bool = false) -> void:
 
 	if _pending_stage_phase == 2:
 		var next := _pending_stage
-		next.transform = Backrooms.return_transform(room, portals.ENTRY_Z) if _pending_return else _stage_transform(lane)
-		var attach_start_us := Time.get_ticks_usec()
-		var trace_attach := StreamingTrace.begin()
-		get_tree().root.add_child(next)
-		StreamingTrace.finish("casino.attach_ready", trace_attach)
+		if _assembly == null:
+			next.transform = Backrooms.return_transform(room, portals.ENTRY_Z) if _pending_return else _stage_transform(lane)
+			_assembly = RoomAssembly.new()
+			_assembly.begin(next)
+		if not _assembly.advance(get_tree().root, immediate):
+			return
+		_assembly = null
+		next.remove_meta("_streaming_assembly")
+		var trace_init := StreamingTrace.begin()
+		# Room scripts must see the complete authored hierarchy, including
+		# restored owners, before they schedule their normal runtime setup.
+		for section in next.get_children():
+			if section.has_method("initialize_room_section"):
+				section.call("initialize_room_section")
+		next.call("initialize_streamed_hall")
+		StreamingTrace.finish("casino.initialize_hall", trace_init)
+		_pending_stage_phase = 3
+		if not immediate:
+			return
+
+	if _pending_stage_phase == 3:
+		var next := _pending_stage
+		var models := next.get_node_or_null("ModelInteriors")
+		if models != null and models.has_method("advance_streaming_population"):
+			if not bool(models.call("advance_streaming_population", immediate)):
+				return
+		if not _pending_return:
+			next.global_transform = _stage_transform(lane)
 		var trace_signs := StreamingTrace.begin()
 		_refresh_exit_signs(next)
-		var attach_ms := float(Time.get_ticks_usec() - attach_start_us) / 1000.0
-		if _pending_instance_ms >= 16.7 or _pending_portal_ms >= 16.7 or attach_ms >= 16.7:
-			print("Casino staging: instantiate=%.1f ms, portals=%.1f ms, attach/ready=%.1f ms (spread across frames)" %
-				[_pending_instance_ms, _pending_portal_ms, attach_ms])
 		var state = get_node_or_null("/root/LoopState")
 		if state != null:
 			_update_level_sign(next, int(state.correct_streak), false)
@@ -659,6 +694,9 @@ func _handoff() -> void:
 	reparent(upcoming, true)
 	player.call("end_streaming_handoff")
 	room = upcoming
+	var old_environment := previous.get_node_or_null("WorldEnvironment") as WorldEnvironment
+	if old_environment != null:
+		old_environment.environment = null
 	var environment_node := upcoming.get_node_or_null("WorldEnvironment") as WorldEnvironment
 	if environment_node != null:
 		environment_node.environment = staged_environment
@@ -667,8 +705,7 @@ func _handoff() -> void:
 	upcoming.remove_meta("_streaming_standby")
 	upcoming.remove_meta("_streaming_lighting_prepared")
 	get_tree().current_scene = upcoming
-	previous.hide()
-	previous.queue_free()
+	_disposal.enqueue(previous)
 	# Reuse the ALREADY ACTIVE baked GI. Never turn it off/on at the scene
 	# swap: even one deferred frame would create a visible light pop.
 	var arrival_rig := upcoming.get_node_or_null("VoxelGIRig") as Node3D
@@ -724,10 +761,7 @@ func _schedule_backrooms(lane: String) -> void:
 			backrooms_lane = lane
 		return
 	if is_instance_valid(_pending_stage):
-		_pending_stage.free()
-		_pending_stage = null
-		_pending_stage_phase = 0
-		_pending_return = false
+		_cancel_pending_stage()
 	if is_instance_valid(staged):
 		staged.free()
 		staged = null
@@ -966,10 +1000,10 @@ func _process_backrooms() -> void:
 func _stage_backrooms_return() -> void:
 	# Only used as a safety fallback if a player reaches the scoring plane
 	# before the three ordinary preparation frames have completed.
-	for phase in range(3):
+	for phase in range(6):
 		if is_instance_valid(staged):
 			return
-		_advance_pending_stage("", true)
+		_advance_pending_stage("", true, true)
 
 
 func _finish_backrooms() -> void:
@@ -1107,8 +1141,7 @@ func _handoff_backrooms_return() -> void:
 	upcoming.remove_meta("_streaming_standby")
 	upcoming.remove_meta("_streaming_lighting_prepared")
 	get_tree().current_scene = upcoming
-	old_host.hide()
-	old_host.queue_free()
+	_disposal.enqueue(old_host)
 	staged = null
 	staged_lane = ""
 	staged_gi_warmed = false

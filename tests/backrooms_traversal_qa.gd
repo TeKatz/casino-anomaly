@@ -222,7 +222,10 @@ func _exercise(lane: String, streak: int, rotated: bool) -> bool:
     loop.call("_process", 0.016)
     if not require(loop.get("staged") == null and int(loop.get("_pending_stage_phase")) == 2, "Return casino portal work was not split"):
         return false
-    loop.call("_process", 0.016)
+    for frame in range(240):
+        if is_instance_valid(loop.get("staged")):
+            break
+        await process_frame
     var next := loop.get("staged") as Node3D
     if not require(next != null and state.correct_streak == streak and not bool(loop.get("backrooms_scored")), "Approach to exit was scored early"):
         return false
@@ -295,8 +298,10 @@ func _exercise(lane: String, streak: int, rotated: bool) -> bool:
         return false
     if not require(state.finished == rotated and bool(loop.get("won")) == rotated and (rotated or state.round_ready), "Victory or ordinary next round missing"):
         return false
-    await process_frame
-    await process_frame
+    for frame in range(240):
+        if not is_instance_valid(maze) and not is_instance_valid(casino):
+            break
+        await process_frame
     if not require(not is_instance_valid(maze) and not is_instance_valid(casino) and is_instance_valid(next), "Old maze/host leaked or return casino freed"):
         return false
     if not require(root.get_camera_3d() == camera and camera.is_current() and player.can_process() and not paused, "Camera or input lost during return handoff"):

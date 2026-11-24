@@ -30,140 +30,124 @@ func _has_authored_room_layout() -> bool:
     return floor != null and floor.owner == hall
 
 func _ready() -> void:
-    call_deferred("_populate")
+    if get_parent().has_meta("_streaming_assembly"):
+        return
+    initialize_room_section()
+
+func initialize_room_section() -> void:
+    if get_parent().has_meta("_streaming_standby"):
+        begin_streaming_population()
+    else:
+        call_deferred("_populate")
+
+var _population_jobs: Array[Callable] = []
+var _population_cursor := 0
+var _population_started := false
+var _population_done := false
 
 func _populate() -> void:
-    var populate_start_us := Time.get_ticks_usec()
-    var trace_start := StreamingTrace.begin()
-    var hall: Node3D = get_parent() as Node3D
+    begin_streaming_population()
+    advance_streaming_population(true)
+
+func begin_streaming_population() -> void:
+    if _population_started:
+        return
+    _population_started = true
+    var hall := get_parent() as Node3D
     if hall == null:
         push_error("Poly Haven placement layer must be inside the casino hall")
+        _population_done = true
         return
-    var bar: Node3D = hall.get_node_or_null("CornerBar") as Node3D
-    var decor: Node3D = hall.get_node_or_null("Decor") as Node3D
-    var lounge: Node3D = hall.get_node_or_null("Lounge") as Node3D
-    if bar == null or decor == null or lounge == null:
+    var decor := hall.get_node_or_null("Decor") as Node3D
+    if hall.get_node_or_null("CornerBar") == null or decor == null or hall.get_node_or_null("Lounge") == null:
         push_error("The room must exist before the Poly Haven models are positioned")
+        _population_done = true
         return
 
-    # Replace the primitive sphere-chain chandelier with the donated real model.
-    var hero = _place("Chandelier_02", "MainChandelier", Vector3(-1.4, 4.18, -6.8), 1.55)
+    _population_jobs.append(_populate_hero.bind(decor))
+    for entry in [[Vector3(0.3, 4.48, 5.8), 1.28],
+            [Vector3(-17.5, 4.47, -6.5), 1.25],
+            [Vector3(-31.0, 4.47, -6.5), 1.25],
+            [Vector3(-41.0, 4.47, -6.5), 1.25]]:
+        _population_jobs.append(_place.bind("Chandelier_01", "CeilingChandelier", entry[0], entry[1]))
+    for lamp in [Vector3(0.3, 4.4, 5.8), Vector3(-17.5, 4.4, -6.5),
+            Vector3(-31.0, 4.4, -6.5), Vector3(-41.0, 4.4, -6.5)]:
+        _population_jobs.append(_soft_light.bind(lamp, 0.26, 5.8))
+    if _asset_available("bar_chair_round_01"):
+        for x in [-7.5, -6.05, -4.6, -3.15, -1.7, -0.25, 1.2]:
+            _population_jobs.append(_populate_stool.bind("CounterStool", Vector3(x + BAR_SHIFT_X, 0.005, -8.30), 0.0))
+        for z in [-4.98, -6.55, -8.05]:
+            _population_jobs.append(_populate_stool.bind("SideStool", Vector3(3.45 + BAR_SHIFT_X, 0.005, z), PI / 2.0))
+    for entry in [[Vector3(-18.4, 0.56, -2.75), 0.63],
+            [Vector3(-38.8, 0.56, -2.75), 0.63],
+            [Vector3(-0.45 + BAR_SHIFT_X, 1.35, -9.42), 0.68]]:
+        _population_jobs.append(_place.bind("brass_candleholders", "SingleBrassCandleholder",
+            entry[0], entry[1], 0.0, false, false, "brass_candleholder_03"))
+    for i in range(5):
+        var x := -18.4 - float(i) * 5.1
+        _population_jobs.append(_place.bind("sofa_02", "LoungeSofa",
+            Vector3(x, 0.005, -1.14), 1.08, PI, true, false, "", 2.42))
+        _population_jobs.append(_place.bind("round_wooden_table_01", "LoungeCoffeeTable",
+            Vector3(x, 0.005, -2.75), 0.56, 0.0, true, false, "", 1.22))
+    _population_jobs.append(_place.bind("chess_set", "LoungeChessSet",
+        Vector3(-28.6, 0.565, -2.75), 0.19, 0.0, false, false, "", 0.70))
+    _population_jobs.append(_display_plinth.bind(Vector3(-8.45, 0.005, -1.04), 0.62, 0.72))
+    _population_jobs.append(_place.bind("concrete_cat_statue", "ConcreteCatDisplay",
+        Vector3(-8.45, 0.625, -1.04), 0.49, PI, false, false, "", 0.58))
+    _population_jobs.append(_display_plinth.bind(Vector3(-44.20, 0.005, -1.35), 0.74, 0.88))
+    _population_jobs.append(_place.bind("horse_statue_01", "HorseStatueDisplay",
+        Vector3(-44.20, 0.745, -1.35), 1.10, -PI / 2.0, false, false, "", 0.85))
+    for pos in [Vector3(-2.75, 0.005, 12.15), Vector3(-40.5, 0.005, -1.2)]:
+        _population_jobs.append(_pedestal.bind(pos))
+        _population_jobs.append(_place.bind("marble_bust_01", "MarbleBust", pos + Vector3(0, 1.02, 0), 0.87, PI, false))
+    for x in [-17.4, -29.4, -40.7]:
+        _population_jobs.append(_place.bind("fancy_picture_frame_01", "FramedPainting",
+            Vector3(x, 2.65, -0.16), 1.22, PI, false, true))
+    _population_jobs.append(_place.bind("security_camera_01", "EntranceSecurityCamera",
+        Vector3(5.80, 4.75, 10.8), 0.42, -PI / 2.0))
+    _population_jobs.append(_place.bind("security_camera_01", "WestSecurityCamera",
+        Vector3(-44.7, 4.7, -12.64), 0.42, 1.25))
+    _population_jobs.append(_place.bind("CoffeeCart_01", "CoffeeServiceCart",
+        Vector3(-15.85, 0.005, -0.54), 1.33, PI, true))
+    _population_jobs.append(_cabinet_plinth.bind(Vector3(-2.5 + BAR_SHIFT_X, 0.0, -12.03)))
+    _population_jobs.append(_place.bind("modern_wooden_cabinet", "BarServiceCabinet",
+        Vector3(-2.5 + BAR_SHIFT_X, 0.245, -12.03), 1.02, 0.0, true))
+
+func advance_streaming_population(immediate: bool = false) -> bool:
+    if _population_done:
+        return true
+    if not _population_started:
+        begin_streaming_population()
+    var started := Time.get_ticks_usec()
+    var trace_start := StreamingTrace.begin()
+    var count := 0
+    while _population_cursor < _population_jobs.size():
+        _population_jobs[_population_cursor].call()
+        _population_cursor += 1
+        count += 1
+        if not immediate and (count >= 4 or Time.get_ticks_usec() - started >= 2500):
+            break
+    StreamingTrace.finish("models.populate_batch", trace_start)
+    if _population_cursor < _population_jobs.size():
+        return false
+    _population_jobs.clear()
+    _population_done = true
+    print("Poly Haven 3D interior: ", placed_model_count, " model instances from ",
+        successful_model_ids.size(), " source assets")
+    return true
+
+func _populate_hero(decor: Node3D) -> void:
+    var hero := _place("Chandelier_02", "MainChandelier", Vector3(-1.4, 4.18, -6.8), 1.55)
     if hero != null:
         for child in decor.get_children():
             if child.name.begins_with("Chandelier"):
                 child.queue_free()
         _soft_light(Vector3(-1.4, 4.5, -6.8), 0.48, 6.3)
 
-    for entry in [
-        [Vector3(0.3, 4.48, 5.8), 1.28],
-        [Vector3(-17.5, 4.47, -6.5), 1.25],
-        [Vector3(-31.0, 4.47, -6.5), 1.25],
-        [Vector3(-41.0, 4.47, -6.5), 1.25]
-    ]:
-        _place("Chandelier_01", "CeilingChandelier", entry[0], entry[1])
-    # Low-cost real lighting is separate from the decorative geometry.
-    for lamp in [
-        Vector3(0.3, 4.4, 5.8),
-        Vector3(-17.5, 4.4, -6.5),
-        Vector3(-31.0, 4.4, -6.5),
-        Vector3(-41.0, 4.4, -6.5)
-    ]:
-        _soft_light(lamp, 0.26, 5.8)
-
-    # All ten bar stools come from the imported Poly Haven model only.
-    # Keep front and side rows separated around the curved corner.
-    if _asset_available("bar_chair_round_01"):
-        for x in [-7.5, -6.05, -4.6, -3.15, -1.7, -0.25, 1.2]:
-            var stool := _place("bar_chair_round_01", "CounterStool",
-                Vector3(x + BAR_SHIFT_X, 0.005, -8.30), 1.03, 0.0, true)
-            if stool != null:
-                _stool_cushion(stool)
-        for z in [-4.98, -6.55, -8.05]:
-            var stool := _place("bar_chair_round_01", "SideStool",
-                Vector3(3.45 + BAR_SHIFT_X, 0.005, z), 1.03, PI / 2.0, true)
-            if stool != null:
-                _stool_cushion(stool)
-
-    # The bar's three shelves now use dedicated editor-selectable, fully
-    # volumetric signature bottle scenes (see main.tscn). Do not layer the
-    # previous wine cluster on top of these newly authored bottle assets.
-
-    # This Poly Haven glTF contains THREE physically separate candleholders.
-    # Select only the tall third variant; never put a complete trio on a
-    # single coffee table again.
-    for entry in [
-        [Vector3(-18.4, 0.56, -2.75), 0.63],
-        [Vector3(-38.8, 0.56, -2.75), 0.63],
-        [Vector3(-0.45 + BAR_SHIFT_X, 1.35, -9.42), 0.68]
-    ]:
-        _place("brass_candleholders", "SingleBrassCandleholder",
-            entry[0], entry[1], 0.0, false, false, "brass_candleholder_03")
-
-    # A further 90-degree correction: the imported sofa's front axis
-    # is different from the assumed one, leaving the previous row crosswise.
-    # PI aligns each sofa length with the lounge wall again.
-    # Replace all five primitive sofas and tables, never stack duplicates.
-    for i in range(5):
-        var x := -18.4 - float(i) * 5.1
-        _place("sofa_02", "LoungeSofa",
-            Vector3(x, 0.005, -1.14), 1.08, PI, true, false, "", 2.42)
-        _place("round_wooden_table_01", "LoungeCoffeeTable",
-            Vector3(x, 0.005, -2.75), 0.56, 0.0, true, false, "", 1.22)
-    # The complete chessboard is deliberately unique; no repeated identical
-    # board on every table. It has its own small reserved table.
-    _place("chess_set", "LoungeChessSet",
-        Vector3(-28.6, 0.565, -2.75), 0.19, 0.0, false, false, "", 0.70)
-    # Two small animal sculptures mark distinct landmarks for future
-    # anomaly spotting. Their plinths are away from the carpet corridor.
-    _display_plinth(Vector3(-8.45, 0.005, -1.04), 0.62, 0.72)
-    _place("concrete_cat_statue", "ConcreteCatDisplay",
-        Vector3(-8.45, 0.625, -1.04), 0.49, PI, false, false, "", 0.58)
-    _display_plinth(Vector3(-44.20, 0.005, -1.35), 0.74, 0.88)
-    _place("horse_statue_01", "HorseStatueDisplay",
-        Vector3(-44.20, 0.745, -1.35), 1.10, -PI / 2.0, false, false, "", 0.85)
-
-    # Statues get actual pedestals so their bases are not floating or sunken.
-    for pos in [Vector3(-2.75, 0.005, 12.15), Vector3(-40.5, 0.005, -1.2)]:
-        _pedestal(pos)
-        # Imported bust faces the side wall at yaw 0. A half turn faces into
-        # the casino route at both locations.
-        _place("marble_bust_01", "MarbleBust", pos + Vector3(0, 1.02, 0), 0.87, PI, false)
-
-    # South wall paintings, oriented toward the walking route.
-    for x in [-17.4, -29.4, -40.7]:
-        _place("fancy_picture_frame_01", "FramedPainting",
-            Vector3(x, 2.65, -0.16), 1.22, PI, false, true)
-
-    # A couple of unobtrusive security cameras. Retain a visible distinction
-    # between architecture and movable anomaly targets for later gameplay.
-    _place("security_camera_01", "EntranceSecurityCamera",
-        Vector3(5.80, 4.75, 10.8), 0.42, -PI / 2.0)
-    # This particular glTF lens is oriented along its local +Z, not the
-    # default -Z Camera3D forward vector. Aim diagonally from the far corner
-    # toward the room center (+X, +Z), not toward the far wall.
-    _place("security_camera_01", "WestSecurityCamera",
-        Vector3(-44.7, 4.7, -12.64), 0.42, 1.25)
-
-    # Smaller service furnishings belong at the bar edge and never obstruct
-    # the 3.14-meter-wide main carpet corridor.
-    # Park cart halfway between adjacent sofas, with its back close to the
-    # panelled wall (inside face near z=0); keep its wheels and physics solid.
-    _place("CoffeeCart_01", "CoffeeServiceCart",
-        Vector3(-15.85, 0.005, -0.54), 1.33, PI, true)
-
-    # The donor cabinet is a LOW WIDE sideboard (2.44 x 0.68 m originally).
-    # Its old 1.4m normalization made it almost 5m wide and put it directly
-    # on the floor. Restore credible dimensions and raise on a solid plinth.
-    _cabinet_plinth(Vector3(-2.5 + BAR_SHIFT_X, 0.0, -12.03))
-    _place("modern_wooden_cabinet", "BarServiceCabinet",
-        Vector3(-2.5 + BAR_SHIFT_X, 0.245, -12.03), 1.02, 0.0, true)
-
-    StreamingTrace.finish("models.populate", trace_start)
-    var elapsed_ms := float(Time.get_ticks_usec() - populate_start_us) / 1000.0
-    if elapsed_ms >= 20.0 and hall.has_meta("_streaming_standby"):
-        print("Casino deferred model placement: %.1f ms" % elapsed_ms)
-    print("Poly Haven 3D interior: ", placed_model_count, " model instances from ",
-        successful_model_ids.size(), " source assets")
+func _populate_stool(label: String, position_in_room: Vector3, yaw: float) -> void:
+    var stool := _place("bar_chair_round_01", label, position_in_room, 1.03, yaw, true)
+    if stool != null:
+        _stool_cushion(stool)
 
 func _display_plinth(ground: Vector3, height: float, width: float) -> void:
     _statue_plinth_index += 1

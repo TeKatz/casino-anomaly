@@ -25,6 +25,15 @@ var hybrid_mode_initialized := false
 var _settings: Node
 
 func _ready() -> void:
+    if get_parent().has_meta("_streaming_assembly"):
+        set_process(false)
+        set_process_unhandled_key_input(false)
+        return
+    initialize_room_section()
+
+func initialize_room_section() -> void:
+    set_process(true)
+    set_process_unhandled_key_input(true)
     # The one-time scene baker captures static neon frames and spotlights.
     # Do not build transient particle/spill effects during that process.
     if get_parent().has_meta("_baking_room"):

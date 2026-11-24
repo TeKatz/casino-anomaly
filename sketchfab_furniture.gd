@@ -30,6 +30,11 @@ const AUTHORED_GROUP := "EditableImportedModels"
 
 
 func _ready() -> void:
+    if get_parent().has_meta("_streaming_assembly"):
+        return
+    initialize_room_section()
+
+func initialize_room_section() -> void:
     # Geometry for the GI bake stays authored and deliberately excludes
     # runtime furniture replacement (as before).
     if get_parent().has_meta("_baking_room"):

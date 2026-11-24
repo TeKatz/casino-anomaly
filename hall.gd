@@ -52,6 +52,11 @@ var decor: Node3D
 var lights: Node3D
 
 func _ready() -> void:
+    if has_meta("_streaming_assembly"):
+        return
+    initialize_streamed_hall()
+
+func initialize_streamed_hall() -> void:
     var showcase := has_meta("_menu_showcase")
     wood = OAK.duplicate() as StandardMaterial3D
     wood.uv1_scale = Vector3.ONE

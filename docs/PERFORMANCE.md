@@ -84,3 +84,20 @@ Do not interpret CPU monitors as GPU timings.
 No thresholds or staging sequence were changed by this diagnostic. Avoid
 moving an unverified hitch or enabling unsafe render-node worker threads
 until its actual phase is known.
+
+## Incremental casino attachment and retirement
+
+The runtime still instantiates the authoritative main.tscn once per hall.
+Its known authored sections are detached off-tree, then attached in small
+batches (2.5 ms soft CPU budget, at most 12 subtree attachments per tick).
+Owners are restored, room-level initialization is delayed until the complete
+hierarchy exists, and Poly Haven population uses ordered jobs (2.5 ms,
+at most four placements per tick). The next hall is not published as staged
+until population completes. Immediate fallback drains the queue if the player
+reaches the choice gate unusually early. The original source scene, its
+editor-selectable nodes, geometry, choices and lighting remain authoritative.
+Old sealed rooms are hidden, disabled and destroyed bottom-up after handoff
+(2.5 ms / 96 nodes per tick); the adopted arrival connector is excluded.
+Trace labels distinguish shell attachment, section splitting, chunk attachment,
+population and disposal. Budgets are soft CPU limits, not GPU frame guarantees:
+individual subtree operations and PackedScene.instantiate() are indivisible.
