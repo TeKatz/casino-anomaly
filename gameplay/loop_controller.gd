@@ -18,7 +18,8 @@ const FlashlightPickup = preload("res://gameplay/backrooms_flashlight_pickup.gd"
 const BACKROOMS_ID := "backrooms"
 const BACKROOMS_REVEAL_DISTANCE := 1.35
 
-const PRELOAD_AT_X := -31.0
+const PRELOAD_AT_X := -27.0
+const BACKROOMS_RETURN_PRELOAD_RADIUS := 15.0
 # Prepare GPU-backed baked GI while the next casino is still hidden by the
 # opaque L-bend. There is enough corridor before the entrance for upload.
 const GI_PREWARM_AT_X := -43.0
@@ -49,6 +50,9 @@ var _stage_spike_frames := 0
 var _pending_stage: Node3D
 var _pending_lane := ""
 var _pending_stage_phase := 0
+var _pending_return := false
+var _pending_maze: Node3D
+var _pending_maze_phase := 0
 var _pending_stage_start_us := 0
 var _pending_instance_ms := 0.0
 var backrooms_active := false
@@ -163,6 +167,9 @@ func _exit_tree() -> void:
 			sound.call("set_backrooms_mode", false)
 	# Both attached standby rooms and not-yet-attached partial instances
 	# belong to this controller; leaving for the menu must release both.
+	if is_instance_valid(_pending_maze):
+		_pending_maze.free()
+		_pending_maze = null
 	if _pending_stage != null and is_instance_valid(_pending_stage):
 		_pending_stage.free()
 		_pending_stage = null
@@ -202,7 +209,7 @@ func _on_language_changed(key: String) -> void:
 			if contrast_settings != null:
 				staged_environment.adjustment_enabled = true
 				staged_environment.adjustment_contrast = float(contrast_settings.get_option("image_contrast"))
-		if key == "voxel_gi" and not backrooms_return_lighting_ready:
+		if key == "voxel_gi" and not backrooms_scored:
 			var settings := get_node_or_null("/root/GameSettings")
 			var probe := room.get_node_or_null("Lighting/BackroomsVoxelGI") as VoxelGI
 			if probe != null and settings != null:
@@ -288,8 +295,12 @@ func _process(delta: float) -> void:
 		# or right (-Z). Hand off well inside the NEXT hall, when its
 		# entrance is behind the player. Never rely on an X-only threshold.
 		var turned_distance: float = (local.z - _lane_z(staged_lane)) * portals.lane_sign(staged_lane)
-		if absf(local.x - portals.BEND_X) <= TURN_X_TOLERANCE                 and turned_distance >= portals.TURN_LENGTH + HANDOFF_AFTER_TURN:
-			_handoff()
+		# Use the destination entrance plane. Once the player is inside the
+		# new hall, sideways movement must not strand the previous scene.
+		if is_instance_valid(staged) and turned_distance >= portals.TURN_LENGTH + 0.75:
+			var arrival := staged.to_local(player.global_position)
+			if arrival.z <= portals.ENTRY_Z - 0.75:
+				_handoff()
 
 
 func _stage_transform(lane: String) -> Transform3D:
@@ -338,8 +349,9 @@ func _schedule_stage_next(lane: String) -> void:
 	_advance_pending_stage(lane)
 
 
-func _advance_pending_stage(lane: String) -> void:
+func _advance_pending_stage(lane: String, returning: bool = false) -> void:
 	if _pending_stage == null:
+		_pending_return = returning
 		_pending_stage_start_us = Time.get_ticks_usec()
 		var next := ROOM.instantiate() as Node3D
 		_pending_instance_ms = float(Time.get_ticks_usec() - _pending_stage_start_us) / 1000.0
@@ -378,7 +390,7 @@ func _advance_pending_stage(lane: String) -> void:
 
 	if _pending_stage_phase == 2:
 		var next := _pending_stage
-		next.transform = _stage_transform(lane)
+		next.transform = Backrooms.return_transform(room, portals.ENTRY_Z) if _pending_return else _stage_transform(lane)
 		var attach_start_us := Time.get_ticks_usec()
 		get_tree().root.add_child(next)
 		var attach_ms := float(Time.get_ticks_usec() - attach_start_us) / 1000.0
@@ -389,8 +401,15 @@ func _advance_pending_stage(lane: String) -> void:
 		if state != null:
 			_update_level_sign(next, int(state.correct_streak), false)
 		staged = next
-		staged_lane = lane
+		staged_lane = "" if _pending_return else lane
 		staged_gi_warmed = false
+		if _pending_return:
+			var settings := get_node_or_null("/root/GameSettings")
+			if staged_environment != null and settings != null:
+				staged_environment.adjustment_enabled = true
+				staged_environment.adjustment_contrast = float(settings.get_option("image_contrast"))
+			Backrooms.open_return(backrooms_exit_connector)
+		_pending_return = false
 		_pending_stage = null
 		_pending_lane = ""
 		_pending_stage_phase = 0
@@ -477,6 +496,7 @@ func _commit_choice(lane: String) -> void:
 	if departing_rig != null:
 		departing_rig.call("set_streaming_active", false)
 	choice_taken = true
+	_retire_departing_casino(room, lane)
 	# Reflection probes used to turn on one/two frames AFTER the handoff;
 	# reflected ceiling/bar highlights visibly popped into view. Start
 	# their one-shot capture while hidden around the blind L-corner.
@@ -494,6 +514,24 @@ func _commit_choice(lane: String) -> void:
 	var candidates: Array[String] = demo.available_ids(staged)
 	state.prepare_round(candidates)
 	demo.apply(staged, str(state.anomaly_id))
+
+
+func _retire_departing_casino(target: Node3D, lane: String) -> void:
+	# Both gates are already closed. Keep the chosen connector and the
+	# global environment, but stop submitting the inaccessible old hall.
+	for child in target.get_children():
+		if child == player or child == self or child.name == "StreamingPortals":
+			continue
+		if child is Node3D:
+			(child as Node3D).hide()
+			child.process_mode = Node.PROCESS_MODE_DISABLED
+	var generated := target.get_node_or_null("StreamingPortals")
+	var chosen := portals.get_connector(target, lane) as Node3D
+	if generated != null:
+		for child in generated.get_children():
+			if child != chosen and child is Node3D:
+				(child as Node3D).hide()
+				child.process_mode = Node.PROCESS_MODE_DISABLED
 
 
 func _handoff() -> void:
@@ -531,6 +569,7 @@ func _handoff() -> void:
 	upcoming.remove_meta("_streaming_standby")
 	upcoming.remove_meta("_streaming_lighting_prepared")
 	get_tree().current_scene = upcoming
+	previous.hide()
 	previous.queue_free()
 	# Reuse the ALREADY ACTIVE baked GI. Never turn it off/on at the scene
 	# swap: even one deferred frame would create a visible light pop.
@@ -559,7 +598,7 @@ func _process_backrooms_approach(local: Vector3) -> void:
 	if local.x >= PRELOAD_AT_X:
 		return
 	var lane := _candidate_lane(local.z)
-	_stage_backrooms(lane)
+	_schedule_backrooms(lane)
 	if not is_instance_valid(backrooms_maze):
 		return
 	var distance: float = (local.z - _lane_z(lane)) * portals.lane_sign(lane)
@@ -570,6 +609,14 @@ func _process_backrooms_approach(local: Vector3) -> void:
 
 
 func _stage_backrooms(lane: String) -> void:
+	# Immediate safety fallback for direct calls, not the normal frame path.
+	for phase in range(3):
+		_schedule_backrooms(lane)
+		if is_instance_valid(backrooms_maze):
+			return
+
+
+func _schedule_backrooms(lane: String) -> void:
 	if backrooms_active:
 		return
 	if is_instance_valid(backrooms_maze):
@@ -577,34 +624,46 @@ func _stage_backrooms(lane: String) -> void:
 			backrooms_maze.global_transform = Backrooms.entrance_transform(room, portals, lane)
 			backrooms_lane = lane
 		return
-	# A stale normal standby is never allowed to coexist with the maze.
 	if is_instance_valid(_pending_stage):
 		_pending_stage.free()
 		_pending_stage = null
 		_pending_stage_phase = 0
+		_pending_return = false
 	if is_instance_valid(staged):
 		staged.free()
 		staged = null
 		staged_lane = ""
 		staged_gi_warmed = false
-	var maze := Backrooms.MAZE.instantiate() as Node3D
-	if maze == null:
-		push_error("Backrooms scene cannot be staged")
-		return
-	var preview := maze.get_node_or_null("PreviewCamera")
-	if preview != null:
-		preview.free()
-	var env := maze.get_node("Lighting/Environment") as WorldEnvironment
-	backrooms_environment = env.environment
-	env.environment = null
-	var lighting := maze.get_node("Lighting") as Node3D
-	lighting.hide()
-	maze.transform = Backrooms.entrance_transform(room, portals, lane)
-	Backrooms.build_entrance(maze)
-	backrooms_exit_connector = Backrooms.build_exit(maze)
-	get_tree().root.add_child(maze)
-	backrooms_maze = maze
-	backrooms_lane = lane
+	var started := Time.get_ticks_usec()
+	if not is_instance_valid(_pending_maze):
+		_pending_maze = Backrooms.MAZE.instantiate() as Node3D
+		if _pending_maze == null:
+			push_error("Backrooms scene cannot be staged")
+			return
+		_pending_maze_phase = 1
+	elif _pending_maze_phase == 1:
+		var preview := _pending_maze.get_node_or_null("PreviewCamera")
+		if preview != null:
+			preview.free()
+		var env := _pending_maze.get_node("Lighting/Environment") as WorldEnvironment
+		backrooms_environment = env.environment
+		env.environment = null
+		(_pending_maze.get_node("Lighting") as Node3D).hide()
+		Backrooms.build_entrance(_pending_maze)
+		backrooms_exit_connector = Backrooms.build_exit(_pending_maze)
+		Backrooms.Occlusion.maze_walls(_pending_maze)
+		_pending_maze_phase = 2
+	else:
+		_pending_maze.transform = Backrooms.entrance_transform(room, portals, lane)
+		get_tree().root.add_child(_pending_maze)
+		backrooms_maze = _pending_maze
+		backrooms_lane = lane
+		_pending_maze = null
+		_pending_maze_phase = 0
+	var elapsed_ms := float(Time.get_ticks_usec() - started) / 1000.0
+	if elapsed_ms >= 16.7:
+		print("Backrooms staging phase: %.1f ms" % elapsed_ms)
+	_stage_spike_frames = 12
 
 
 func _enter_backrooms(lane: String) -> void:
@@ -706,8 +765,8 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _process_backrooms() -> void:
 	var local := room.to_local(player.global_position)
-	if local.distance_to(Vector3(Backrooms.EXIT_X, local.y, Backrooms.EXIT_Z)) < 10.0:
-		_stage_backrooms_return()
+	if not is_instance_valid(staged) and (is_instance_valid(_pending_stage) or local.distance_to(Vector3(Backrooms.EXIT_X, local.y, Backrooms.EXIT_Z)) < BACKROOMS_RETURN_PRELOAD_RADIUS):
+		_advance_pending_stage("", true)
 	if local.x > Backrooms.EXIT_X + 1.3 and absf(local.z - Backrooms.EXIT_Z) < 1.1 and not backrooms_scored:
 		_finish_backrooms()
 	if backrooms_scored:
@@ -719,36 +778,12 @@ func _process_backrooms() -> void:
 
 
 func _stage_backrooms_return() -> void:
-	if is_instance_valid(staged):
-		return
-	var next := ROOM.instantiate() as Node3D
-	if next == null:
-		return
-	next.set_meta("_streaming_standby", true)
-	var duplicate_player := next.get_node_or_null("Player")
-	if duplicate_player != null:
-		duplicate_player.free()
-	if not portals.prepare_room(next):
-		next.free()
-		return
-	_set_reflections_visible(next, false)
-	var environment_node := next.get_node_or_null("WorldEnvironment") as WorldEnvironment
-	staged_environment = environment_node.environment if environment_node != null else null
-	if environment_node != null:
-		environment_node.environment = null
-	next.transform = Backrooms.return_transform(room, portals.ENTRY_Z)
-	get_tree().root.add_child(next)
-	staged = next
-	staged_gi_warmed = false
-	var settings := get_node_or_null("/root/GameSettings")
-	if staged_environment != null and settings != null:
-		staged_environment.adjustment_enabled = true
-		staged_environment.adjustment_contrast = float(settings.get_option("image_contrast"))
-	Backrooms.open_return(backrooms_exit_connector)
-	var state = get_node_or_null("/root/LoopState")
-	if state != null:
-		_update_level_sign(next, int(state.correct_streak), false)
-	_prewarm_next_gi()
+	# Only used as a safety fallback if a player reaches the scoring plane
+	# before the three ordinary preparation frames have completed.
+	for phase in range(3):
+		if is_instance_valid(staged):
+			return
+		_advance_pending_stage("", true)
 
 
 func _finish_backrooms() -> void:
@@ -765,6 +800,11 @@ func _finish_backrooms() -> void:
 		return
 	backrooms_scored = true
 	Backrooms.seal_exit(backrooms_exit_connector)
+	# Behind the closed gate the maze can no longer be seen or reached.
+	# Keep its WorldEnvironment alive for blending, but hide geometry and
+	# local lights now instead of rendering three GI volumes together.
+	_retire_backrooms_geometry()
+	_prewarm_next_gi()
 	finishing = bool(verdict.get("finished", false))
 	_update_level_sign(staged, int(verdict["streak"]), finishing)
 	if not finishing:
@@ -776,6 +816,18 @@ func _finish_backrooms() -> void:
 		soundscape.call("activate")
 	# Reflections are captured only once the final casino environment is
 	# active, while the casino is still hidden behind the new return bend.
+
+
+func _retire_backrooms_geometry() -> void:
+	for child in room.get_children():
+		if child == backrooms_exit_connector:
+			continue
+		if child is Node3D:
+			(child as Node3D).hide()
+			child.process_mode = Node.PROCESS_MODE_DISABLED
+	# WorldEnvironment remains in the tree even when its Node3D parent is
+	# hidden. Keep the blend resource, but never re-enable the old probe.
+	_stop_backrooms_hum(room)
 
 
 func _update_backrooms_return_lighting(local_x: float) -> void:

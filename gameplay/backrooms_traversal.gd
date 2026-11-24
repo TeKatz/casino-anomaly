@@ -1,6 +1,7 @@
 extends RefCounted
 ## Runtime-only joins around the saved Backrooms layout. No authored wall,
 ## fixture, transform, or baked resource is rewritten.
+const Occlusion = preload("res://gameplay/streaming_occlusion.gd")
 const MAZE = preload("res://backrooms/backrooms_labyrinth.tscn")
 const WALL = preload("res://backrooms/materials/wall.tres")
 const FLOOR = preload("res://backrooms/materials/floor.tres")
@@ -43,6 +44,8 @@ static func box(parent: Node3D, label: String, at: Vector3, size: Vector3, mat: 
     mesh.mesh = geometry
     mesh.material_override = mat
     parent.add_child(mesh)
+    if solid and (label.contains("Wall") or label.contains("Gate") or label == "ReturnStandbyCap"):
+        Occlusion.add_box(mesh)
     if solid:
         var body := StaticBody3D.new()
         body.name = label + "_Collision"

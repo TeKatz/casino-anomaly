@@ -199,6 +199,12 @@ func _run() -> void:
     if shape.get_connector(first, "right").has_node("VerdictPlaque"):
         _fail("Unchosen corridor unexpectedly contains a verdict plaque")
         return
+    if (first.get_node("Architecture") as Node3D).visible or (first.get_node("CasinoAtmosphere") as Node3D).visible or not shape.get_connector(first, "left").visible:
+        _fail("Sealed casino still rendering or chosen corridor disappeared")
+        return
+    if not first.has_node("Architecture/NorthWestWall/StreamingOccluder"):
+        _fail("Opaque structural wall is missing its occluder")
+        return
     var old_rig := first.get_node("VoxelGIRig") as Node3D
     if bool(old_rig.get("streaming_active")) or not bool(staged_gi.get("streaming_active")):
         _fail("Committed departure must transfer the GI budget to the next room")

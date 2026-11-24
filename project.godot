@@ -37,6 +37,8 @@ enabled=PackedStringArray("res://addons/casino_model_preview/plugin.cfg")
 
 [rendering]
 
+occlusion_culling/use_occlusion_culling=true
+
 renderer/rendering_method.mobile="gl_compatibility"
 textures/default_filters/anisotropic_filtering_level=3
 textures/default_filters/texture_mipmap_bias=0.25

@@ -90,6 +90,13 @@ func _exercise(lane: String, streak: int, rotated: bool) -> bool:
         return false
     player.global_position = casino.to_global(Vector3(-35.0, 1.02, portals.lane_z(lane)))
     loop.call("_process", 0.016)
+    # Actual approach must split maze instantiate, join and attach.
+    if not require(loop.get("backrooms_maze") == null and int(loop.get("_pending_maze_phase")) == 1, "Maze was instantiated and attached in one frame"):
+        return false
+    loop.call("_process", 0.016)
+    if not require(loop.get("backrooms_maze") == null and int(loop.get("_pending_maze_phase")) == 2, "Maze join was not isolated from attach"):
+        return false
+    loop.call("_process", 0.016)
     var maze := loop.get("backrooms_maze") as Node3D
     if not require(maze != null and not bool(loop.get("choice_taken")) and loop.get("staged") == null, "Hidden standby maze was not staged"):
         return false
@@ -194,6 +201,12 @@ func _exercise(lane: String, streak: int, rotated: bool) -> bool:
     # Stand inside before the exit: next hall is available but unscored.
     player.global_position = maze.to_global(Vector3(Backrooms.EXIT_X - 0.8, 1.02, Backrooms.EXIT_Z))
     loop.call("_process", 0.016)
+    if not require(loop.get("staged") == null and int(loop.get("_pending_stage_phase")) == 1, "Return casino instantiated and attached in one frame"):
+        return false
+    loop.call("_process", 0.016)
+    if not require(loop.get("staged") == null and int(loop.get("_pending_stage_phase")) == 2, "Return casino portal work was not split"):
+        return false
+    loop.call("_process", 0.016)
     var next := loop.get("staged") as Node3D
     if not require(next != null and state.correct_streak == streak and not bool(loop.get("backrooms_scored")), "Approach to exit was scored early"):
         return false
@@ -204,6 +217,10 @@ func _exercise(lane: String, streak: int, rotated: bool) -> bool:
     if not require(state.correct_streak == streak + 1 and state.visited_loops == visits + 1 and state.mistakes == mistakes and bool(state.last_verdict.get("correct")) and str(state.last_verdict.get("anomaly_id")) == "backrooms", "Traversal did not award exactly one step without mistakes"):
         return false
     if not require(bool(state.last_verdict.get("choice_anomaly")) == (lane == "left") and maze.has_node("BackroomsExitConnector/ExitGate_Collision"), "Wrong door recorded or missing exit seal"):
+        return false
+    if not require(not (maze.get_node("Architecture") as Node3D).visible and not (maze.get_node("Lighting") as Node3D).visible and (maze.get_node("BackroomsExitConnector") as Node3D).visible, "Sealed maze still rendering behind the exit gate"):
+        return false
+    if not require(maze.has_node("BackroomsExitConnector/ExitGate/StreamingOccluder"), "Return gate has no opaque occluder"):
         return false
     loop.call("_finish_backrooms")
     if not require(state.correct_streak == streak + 1 and state.visited_loops == visits + 1, "Duplicate completion awarded another step"):

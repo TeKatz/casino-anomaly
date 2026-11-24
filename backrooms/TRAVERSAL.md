@@ -38,3 +38,13 @@ sprint and audio are restored on return. The authored main and Backrooms scene f
 Test: `Godot --headless --path . --script res://tests/backrooms_traversal_qa.gd`
 after editor import and the existing asset preparation. GPU lighting and
 actual visual traversal should also be checked locally in Forward+.
+
+## Streaming cost
+
+Maze preparation and return casino assembly use three separate frame phases.
+Once a physical exit gate seals the previous area, its visual geometry and
+light volumes are disabled, leaving only the traversable connector and the
+active environment. Structural opaque boxes carry inset occluders; no door
+opening, collision or authored material is changed. The normal casino
+handoff also uses the entrance plane rather than a narrow centerline.
+Actual frame-time and GPU improvement must be measured in Forward+.

@@ -1,5 +1,6 @@
 extends RefCounted
 const Loc = preload("res://gameplay/localization.gd")
+const Occlusion = preload("res://gameplay/streaming_occlusion.gd")
 const WorldVerdictDisplay = preload("res://gameplay/world_verdict_display.gd")
 ## Runtime geometry for two physically separated L-shaped exit passages.
 ## The next hall remains out of sight behind a solid corner. All geometry,
@@ -132,6 +133,7 @@ func prepare_room(room: Node3D) -> bool:
         Vector3(3.36, 2.48, 0.36), entry_mat)
     _build_entry_sleeve(generated, wooden_frame, floor_mat, trim_mat)
 
+    Occlusion.casino_walls(room)
     # Solid corner walls hide everything beyond the bend from someone
     # looking straight through either of the casino EXIT signs.
     for lane in ["left", "right"]:
@@ -406,6 +408,8 @@ func _box(parent: Node3D, label: String, center: Vector3,
     if material != null:
         mesh.material_override = material
     parent.add_child(mesh)
+    if collidable and (label.contains("Wall") or label.contains("Gate") or label.contains("Overdoor") or label == "SolidDoor"):
+        Occlusion.add_box(mesh)
     if not collidable:
         return
     var body := StaticBody3D.new()
