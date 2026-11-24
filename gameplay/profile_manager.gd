@@ -221,7 +221,7 @@ func get_summary(slot: int, mode: String = "classic") -> Dictionary:
 
 
 func active_summary() -> Dictionary:
-    return get_summary(active_slot)
+    return get_summary(active_slot, active_mode)
 
 
 func get_records() -> Dictionary:
@@ -277,6 +277,8 @@ func record_decision(verdict: Dictionary) -> void:
             record["recognized"] = bool(record.get("recognized", false))
             record["missed"] = int(record.get("missed", 0)) + 1
         records[family] = record
+    if not id.is_empty():
+        stats["discovery_drought"] = 0 if first else int(stats.get("discovery_drought", 0)) + 1
     var report := verdict.duplicate(true)
     report["xp_earned"] = Progress.award(stats, records, verdict, first)
     Progress.evaluate(stats, records)

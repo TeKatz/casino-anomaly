@@ -44,7 +44,9 @@ static func migrate(stats: Dictionary, records: Dictionary) -> void:
         anomalies += count
         if bool(record.get("recognized", false)):
             discoveries += 1
-            record["variants"] = {id: true}
+            var found: Dictionary = record.get("variants", {})
+            found[id] = true
+            record["variants"] = found
         records[id] = record
     var backrooms := int(records.get("backrooms", {}).get("correct", 0))
     var normal := maxi(0, int(stats.get("correct", 0)) - anomalies)

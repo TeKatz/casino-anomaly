@@ -177,9 +177,6 @@ func _exit_tree() -> void:
 	# Ownership only ends on actual scene teardown, not on a handoff.
 	if transitioning:
 		return
-	var run_state := get_node_or_null("/root/LoopState")
-	if run_state != null and str(run_state.get("mode")) == "time_trial" and bool(run_state.get("active")):
-		run_state.call("save_run")
 	if StreamingTrace.enabled:
 		StreamingTrace.stop()
 	if is_instance_valid(backrooms_maze) and backrooms_maze != room:

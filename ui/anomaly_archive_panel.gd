@@ -208,13 +208,16 @@ func _render_archive(profiles: Node) -> void:
             "exceptional": Color("#bf9bdf"), "singularity": GOLD}
         _label(card, Catalog.rarity_name(rarity, _de()).to_upper(), 12, colors.get(rarity, MUTED))
         _label(card, _field(entry, "title"), 18, GOLD)
-        _label(card, _field(entry, "description"), 14, MUTED)
+        var found: Dictionary = record.get("variants", {})
+        # If only a variant was identified, never reveal the unobserved
+        # base form's exact clue. The known variant details appear below.
+        if bool(found.get(id, false)):
+            _label(card, _field(entry, "description"), 14, MUTED)
         var correct := int(record.get("correct", 0))
         _label(card, Progress.mastery(correct, _de()) + " · " + str(correct) + " / 5", 14, GOLD)
         _progress_bar(card, float(mini(correct, 5)), 5)
         _label(card, _word("Richtig: %d · Übersehen: %d", "Correct: %d · Missed: %d") % [correct, int(record.get("missed", 0))], 13, MUTED)
         var variants := Catalog.family_entries(id)
-        var found: Dictionary = record.get("variants", {})
         if variants.size() > 1:
             var known := 0
             for variant in variants:

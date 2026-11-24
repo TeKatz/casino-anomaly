@@ -128,10 +128,19 @@ func _roll_random_anomaly(available_anomalies: Array[String]) -> String:
     if groups.size() > 1:
         groups.erase(Catalog.family(last_anomaly_id))
     var records := {}
+    var drought := 0
     if is_inside_tree():
         var profiles := get_node_or_null("/root/ProfileManager")
         if profiles != null and profiles.active_slot > 0 and save_path == profiles.run_path(profiles.active_slot, mode):
             records = profiles.get_records()
+            drought = int(profiles.get_stats().get("discovery_drought", 0))
+    if drought >= 8:
+        var undiscovered := {}
+        for family in groups:
+            if not bool(records.get(family, {}).get("recognized", false)):
+                undiscovered[family] = groups[family]
+        if not undiscovered.is_empty():
+            groups = undiscovered
     var weights := PackedFloat32Array()
     var families := groups.keys()
     for family in families:
@@ -260,7 +269,7 @@ func _resolve_decision(choose_anomaly: bool, correct: bool) -> Dictionary:
         "debugged": round_debugged,
         "traversal": actual_id == BACKROOMS_ID,
         "mode": mode, "failed": failed, "assisted": run_assisted, "normal_chain": normal_chain,
-        "progress": progress_number(), "goal": Modes.target(mode),
+        "progress": previous_streak if failed else progress_number(), "goal": Modes.target(mode),
         "elapsed_seconds": elapsed_seconds,
         "score_seconds": elapsed_seconds + mistakes * Modes.PENALTY_SECONDS
     }
@@ -271,7 +280,7 @@ func _resolve_decision(choose_anomaly: bool, correct: bool) -> Dictionary:
     save_run()
     # Local QA instances may use the same script; only the live autoload
     # can update the selected player's permanent discovery history.
-    if self == get_node_or_null("/root/LoopState"):
+    if is_inside_tree() and self == get_node_or_null("/root/LoopState"):
         var profiles := get_node_or_null("/root/ProfileManager")
         if profiles != null and profiles.active_slot > 0 \
                 and save_path == profiles.run_path(profiles.active_slot, mode):

@@ -179,6 +179,7 @@ jobs:
           foreach ($spec in @(
             @('tests/loop_gameplay_qa.gd', 'Casino Anomaly playable tutorial, save and loop gameplay QA PASS'),
             @('tests/profile_archive_qa.gd', 'Casino Anomaly profile archive QA PASS'),
+            @('tests/progression_qa.gd', 'Casino Anomaly progression QA PASS'),
             @('tests/playing_cards_qa.gd', 'Casino Anomaly extracted playing cards QA PASS'),
             @('tests/table_furniture_qa.gd', 'Casino Anomaly authored table furniture QA PASS'),
             @('tests/premium_tables_and_bottles_qa.gd', 'Casino Anomaly premium tables and editable bottles QA PASS'),

@@ -329,8 +329,9 @@ func _run_action(action: String) -> void:
     get_tree().paused = false
     Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
     if action == "new":
-        state.start_new_run()
-        if bool(Controls.pref(self, "skip_tutorial", false)):
+        var mode_id := str(state.get("mode"))
+        state.start_new_run(mode_id)
+        if mode_id != "classic" or bool(Controls.pref(self, "skip_tutorial", false)):
             state.complete_tutorial()
             get_tree().change_scene_to_file("res://main.tscn")
         else:
@@ -343,6 +344,9 @@ func _run_action(action: String) -> void:
 
 
 func _request_quit() -> void:
+    var state := get_node_or_null("/root/LoopState")
+    if state != null and str(state.get("mode")) == "time_trial" and bool(state.get("active")):
+        state.call("save_run")
     if not bool(Controls.pref(self, "confirm_quit", false)):
         get_tree().quit()
         return
@@ -354,6 +358,9 @@ func _request_quit() -> void:
     confirmation.popup_centered()
 
 func _go_to_main_menu() -> void:
+    var state := get_node_or_null("/root/LoopState")
+    if state != null and str(state.get("mode")) == "time_trial" and bool(state.get("active")):
+        state.call("save_run")
     get_tree().paused = false
     Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
     get_tree().change_scene_to_file("res://menu.tscn")
