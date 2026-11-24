@@ -2,6 +2,7 @@ extends SceneTree
 ## Isolated regression checks for the shared UI design system.
 const Style = preload("res://ui/menu_style.gd")
 const Luminous = preload("res://ui/luminous_button.gd")
+const Kenney = preload("res://ui/kenney_icons.gd")
 
 
 func _initialize() -> void:
@@ -26,6 +27,11 @@ func _run() -> void:
         var pixels := normal.texture.get_image()
         if pixels == null or pixels.get_pixel(96, 3).is_equal_approx(pixels.get_pixel(96, 32)):
             _fail("Vector skin failed to render a distinct rim")
+            return
+    for name in Kenney.DRAWINGS:
+        var icon := Kenney.texture(name)
+        if icon == null or icon.get_width() <= 0 or icon != Kenney.texture(name):
+            _fail("Embedded icon failed or was not cached: " + str(name))
             return
     var panel := Control.new()
     root.add_child(panel)

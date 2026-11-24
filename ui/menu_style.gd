@@ -8,6 +8,7 @@ const RED := Color("#df8490")
 const AMBER := Color("#f2ae70")
 const PALE := Color("#f5e9dc")
 const KENNEY_FACE := """<svg xmlns="http://www.w3.org/2000/svg" width="192" height="64" viewBox="0 0 192 64"><defs><linearGradient id="surface" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0" stop-color="#TOP"/><stop offset="1" stop-color="#BOTTOM"/></linearGradient></defs><rect x="0" y="0" width="192" height="64" rx="6" fill="#EDGE"/><rect x="2" y="2" width="188" height="60" rx="4" fill="#RIM"/><rect x="4" y="4" width="184" height="56" rx="2" fill="url(#surface)"/></svg>"""
+const KenneyIcons = preload("res://ui/kenney_icons.gd")
 static var _skin_cache: Dictionary = {}
 
 
@@ -54,7 +55,7 @@ static func button_skin(state: String, featured: bool = false, accent: String = 
     # variant once; keep the existing symmetric nine-slice and compact sizing.
     var svg := KENNEY_FACE.replace("RIM", rim.to_html(false)).replace("TOP", top.to_html(false)).replace("BOTTOM", bottom.to_html(false)).replace("EDGE", rim.darkened(0.40).to_html(false))
     var image := Image.new()
-    var result := image.load_svg_from_string(svg)
+    var result := image.load_svg_from_buffer(svg.to_utf8_buffer())
     if result != OK:
         image = Image.create_empty(192, 64, false, Image.FORMAT_RGBA8)
         image.fill(top)
@@ -126,7 +127,7 @@ static func apply_dropdown(button: OptionButton) -> void:
     apply_button(button)
     # Godot defaults to only 4px, putting the icon against the border.
     button.add_theme_constant_override("arrow_margin", 23)
-    button.add_theme_icon_override("arrow", preload("res://ui/kenney/arrow.svg"))
+    button.add_theme_icon_override("arrow", KenneyIcons.texture("arrow"))
     button.add_theme_stylebox_override("focus", keyboard_focus_skin())
     button.add_theme_constant_override("h_separation", 12)
     button.add_theme_color_override("font_color", PALE)
@@ -166,10 +167,10 @@ static func flat_surface(bg: Color, edge: Color, radius: int = 5, border: int = 
 
 
 static func apply_toggle(toggle: CheckButton) -> void:
-    toggle.add_theme_icon_override("checked", preload("res://ui/kenney/check_on.svg"))
-    toggle.add_theme_icon_override("unchecked", preload("res://ui/kenney/check_off.svg"))
-    toggle.add_theme_icon_override("checked_disabled", preload("res://ui/kenney/check_on_disabled.svg"))
-    toggle.add_theme_icon_override("unchecked_disabled", preload("res://ui/kenney/check_off_disabled.svg"))
+    toggle.add_theme_icon_override("checked", KenneyIcons.texture("check_on"))
+    toggle.add_theme_icon_override("unchecked", KenneyIcons.texture("check_off"))
+    toggle.add_theme_icon_override("checked_disabled", KenneyIcons.texture("check_on_disabled"))
+    toggle.add_theme_icon_override("unchecked_disabled", KenneyIcons.texture("check_off_disabled"))
     toggle.add_theme_stylebox_override("focus", keyboard_focus_skin())
     toggle.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
     toggle.pressed.connect(func() -> void:
@@ -186,9 +187,9 @@ static func apply_slider(slider: HSlider) -> void:
     slider.add_theme_stylebox_override("slider", track)
     slider.add_theme_stylebox_override("grabber_area", flat_surface(Color("#a38149"), Color("#a38149"), 5, 0))
     slider.add_theme_stylebox_override("grabber_area_highlight", flat_surface(Color("#c9a45c"), Color("#c9a45c"), 5, 0))
-    slider.add_theme_icon_override("grabber", preload("res://ui/kenney/slider.svg"))
-    slider.add_theme_icon_override("grabber_highlight", preload("res://ui/kenney/slider_hover.svg"))
-    slider.add_theme_icon_override("grabber_disabled", preload("res://ui/kenney/slider_disabled.svg"))
+    slider.add_theme_icon_override("grabber", KenneyIcons.texture("slider"))
+    slider.add_theme_icon_override("grabber_highlight", KenneyIcons.texture("slider_hover"))
+    slider.add_theme_icon_override("grabber_disabled", KenneyIcons.texture("slider_disabled"))
     slider.add_theme_stylebox_override("focus", keyboard_focus_skin())
     slider.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 

@@ -190,6 +190,12 @@ func _run() -> void:
             if absf(shared_skin.texture_margin_top - shared_skin.texture_margin_bottom) > 0.001:
                 _fail("Nine-slice vertical caps must stay balanced")
                 return
+    var kenney = preload("res://ui/kenney_icons.gd")
+    for name in kenney.DRAWINGS:
+        var icon: Texture2D = kenney.texture(name)
+        if icon == null or icon.get_width() <= 0 or icon != kenney.texture(name):
+            _fail("Embedded Kenney icon missing or uncached: " + str(name))
+            return
     var credits_source := preload("res://ui/credits_panel.gd").new()
     if not str(credits_source.call("_credit_text")).contains("freesound.org/people/leonelmail/sounds/329533/") \
             or not str(credits_source.call("_credit_text")).contains("CC0 1.0"):
