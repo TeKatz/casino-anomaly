@@ -1,0 +1,56 @@
+name: Backrooms traversal integration QA
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'gameplay/**'
+      - 'backrooms/**'
+      - 'main.tscn'
+      - 'hall.gd'
+      - 'player.gd'
+      - 'ui/anomaly_dev_menu.gd'
+      - 'tests/backrooms_traversal_qa.gd'
+      - '.github/workflows/backrooms-traversal-qa.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backrooms-traversal-qa-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  traversal:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare project assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/ensure_assets.py
+          python3 tools/ensure_fabric037.py
+          python3 tools/import_model_assets.py
+          python3 tools/unpack_sketchfab_assets.py --require-all
+          python3 tools/import_croupier_asset.py
+          python3 tools/import_tutorial_sketchfab.py
+          python3 tools/import_audio.py
+      - name: Install pinned Godot 4.5.1
+        shell: bash
+        run: |
+          curl --fail --location --retry 3 -o "$RUNNER_TEMP/godot.zip" https://github.com/godotengine/godot-builds/releases/download/4.5.1-stable/Godot_v4.5.1-stable_linux.x86_64.zip
+          unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
+          chmod +x "$RUNNER_TEMP/godot/Godot_v4.5.1-stable_linux.x86_64"
+      - name: Import and validate both traversal routes
+        shell: bash
+        run: |
+          set -euo pipefail
+          GODOT="$RUNNER_TEMP/godot/Godot_v4.5.1-stable_linux.x86_64"
+          timeout --kill-after=10s 300s "$GODOT" --headless --path . --editor --import > "$RUNNER_TEMP/import.log" 2>&1 || { cat "$RUNNER_TEMP/import.log"; exit 1; }
+          if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' "$RUNNER_TEMP/import.log"; then cat "$RUNNER_TEMP/import.log"; exit 1; fi
+          timeout --kill-after=10s 120s "$GODOT" --headless --path . --script res://tests/backrooms_traversal_qa.gd 2>&1 | tee "$RUNNER_TEMP/traversal.log"
+          grep -F 'Casino Anomaly Backrooms traversal QA PASS' "$RUNNER_TEMP/traversal.log"
+          if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' "$RUNNER_TEMP/traversal.log"; then exit 1; fi

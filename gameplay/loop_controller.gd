@@ -16,6 +16,7 @@ const ROOM = preload("res://main.tscn")
 const Backrooms = preload("res://gameplay/backrooms_traversal.gd")
 const FlashlightPickup = preload("res://gameplay/backrooms_flashlight_pickup.gd")
 const BACKROOMS_ID := "backrooms"
+const BACKROOMS_REVEAL_DISTANCE := 1.35
 
 const PRELOAD_AT_X := -31.0
 # Prepare GPU-backed baked GI while the next casino is still hidden by the
@@ -547,7 +548,7 @@ func _process_backrooms_approach(local: Vector3) -> void:
 	if not is_instance_valid(backrooms_maze):
 		return
 	var distance: float = (local.z - _lane_z(lane)) * portals.lane_sign(lane)
-	if absf(local.x - portals.BEND_X) <= 1.15 and distance >= 2.1:
+	if absf(local.x - portals.BEND_X) <= 1.15 and distance >= BACKROOMS_REVEAL_DISTANCE:
 		_enter_backrooms(lane)
 
 
@@ -600,7 +601,7 @@ func _enter_backrooms(lane: String) -> void:
 	# Seal immediately behind the corner, not inside the player capsule.
 	var direction: float = portals.lane_sign(lane)
 	var gate_mat: Material = (connector.get_node("TurnOuterWall") as MeshInstance3D).material_override
-	Backrooms.box(connector, "BackroomsRevealGate", Vector3(portals.BEND_X, 1.76, _lane_z(lane) + direction * 0.55),
+	Backrooms.box(connector, "BackroomsRevealGate", Vector3(portals.BEND_X, 1.76, _lane_z(lane) + direction * 0.25),
 		Vector3(2.62, 3.52, 0.20), gate_mat)
 	for child in connector.get_children():
 		if child is Light3D:
