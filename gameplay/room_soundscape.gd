@@ -48,7 +48,7 @@ func _source(label: String, at: Vector3, kind: String, level: float,
     emitter.name = label
     emitter.position = at
     emitter.stream = stream
-    emitter.bus = "WORLD"
+    emitter.bus = "CABINET" if kind == "cabinet" else "AMBIENCE"
     emitter.attenuation_model = AudioStreamPlayer3D.ATTENUATION_INVERSE_DISTANCE
     emitter.unit_size = 1.6
     emitter.max_distance = reach

@@ -2,6 +2,7 @@ extends CanvasLayer
 ## Pauses the CURRENT scene rather than replacing it. The UI remains active
 ## while the SceneTree is paused and follows the same player across handoffs.
 
+const Controls = preload("res://gameplay/input_bindings.gd")
 const SettingsPanel = preload("res://ui/settings_panel.gd")
 const CreditsPanel = preload("res://ui/credits_panel.gd")
 const ArchivePanel = preload("res://ui/anomaly_archive_panel.gd")
@@ -191,7 +192,10 @@ func _input(event: InputEvent) -> void:
     var dev_menu := get_parent().get_node_or_null("AnomalyDevMenu")
     if dev_menu != null and dev_menu.visible:
         return
-    if event is InputEventKey and event.pressed and not event.echo             and event.keycode == KEY_ESCAPE:
+    var settings := get_node_or_null("/root/GameSettings")
+    if settings != null and bool(settings.get_meta("_binding_capture", false)):
+        return
+    if Controls.pressed(event, "pause") or (open and event.is_action_pressed("ui_cancel")):
         if confirmation.visible:
             confirmation.hide()
         elif open and archive_panel.visible:

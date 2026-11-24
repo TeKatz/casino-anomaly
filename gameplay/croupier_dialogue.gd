@@ -2,6 +2,7 @@ extends CanvasLayer
 ## Compact, optional bilingual conversation. No save schema or game rules.
 signal closed
 
+const Controls = preload("res://gameplay/input_bindings.gd")
 const Loc = preload("res://gameplay/localization.gd")
 const MenuStyle = preload("res://ui/menu_style.gd")
 const LuminousButton = preload("res://ui/luminous_button.gd")
@@ -125,7 +126,6 @@ func _refresh_language() -> void:
 
 
 func _input(event: InputEvent) -> void:
-    if active and event is InputEventKey and event.pressed and not event.echo \
-            and event.keycode == KEY_ESCAPE:
+    if active and (Controls.pressed(event, "pause") or event.is_action_pressed("ui_cancel")):
         close_conversation()
         get_viewport().set_input_as_handled()

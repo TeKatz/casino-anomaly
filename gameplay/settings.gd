@@ -4,6 +4,7 @@ extends Node
 signal options_changed(key: String)
 signal display_preview_changed(active: bool)
 
+const Controls = preload("res://gameplay/input_bindings.gd")
 const FILE_PATH := "user://casino_settings.cfg"
 const DEFAULTS := {
     "language": "en",
@@ -52,7 +53,29 @@ const DEFAULTS := {
     "fov": 75,
     "camera_motion": true,
     "sprint_mode": "hold",
-    "hud_visible": true
+    "hud_visible": true,
+    "key_bindings": Controls.DEFAULTS,
+    "mouse_vertical_multiplier": 1.0,
+    "invert_x": false,
+    "mouse_smoothing": 0.0,
+    "controller_enabled": true,
+    "controller_sensitivity": 1.0,
+    "controller_deadzone": 0.20,
+    "controller_vibration": 0.0,
+    "ambience_volume": 1.0,
+    "footstep_volume": 1.0,
+    "cabinet_volume": 1.0,
+    "horror_volume": 1.0,
+    "pressure_volume": 1.0,
+    "reverb_mode": "normal",
+    "audio_dynamic_range": "normal",
+    "audio_device": "Default",
+    "mute_unfocused": false,
+    "mono_audio": false,
+    "audio_balance": 0.0,
+    "head_bob": 1.0,
+    "breathing_motion": 1.0,
+    "camera_sway": 1.0
 }
 const PRESETS := {
     "low": {
@@ -122,7 +145,10 @@ const PRESETS := {
 }
 const GRAPHICS_KEYS := ["window_mode","resolution","monitor","vsync","vsync_mode","fps_limit","render_scale","image_contrast","taa","aa_mode","voxel_gi","graphics_preset","upscaling","anisotropy","texture_filter","dynamic_resolution","dynamic_target_fps","shadow_quality","shadow_distance","fog_quality","reflection_quality","ssao_quality","ssil","bloom","bloom_strength","brightness","saturation","particle_quality","fps_display","performance_overlay","menu_background","menu_render_scale","menu_fps_limit","menu_camera_motion","menu_camera_speed","menu_darkness"]
 const DISPLAY_KEYS := ["window_mode", "resolution", "monitor"]
-const VOLUME_KEYS := ["master_volume", "music_volume", "sfx_volume", "ui_volume"]
+const VOLUME_KEYS := ["master_volume", "music_volume", "sfx_volume", "ui_volume", "ambience_volume", "footstep_volume", "cabinet_volume", "horror_volume", "pressure_volume"]
+const AUDIO_KEYS := VOLUME_KEYS + ["reverb_mode", "audio_dynamic_range", "audio_device", "mute_unfocused", "mono_audio", "audio_balance"]
+const CONTROL_KEYS := ["mouse_sensitivity", "mouse_vertical_multiplier", "invert_y", "invert_x", "mouse_smoothing", "sprint_mode", "key_bindings", "controller_enabled", "controller_sensitivity", "controller_deadzone", "controller_vibration"]
+const GAMEPLAY_KEYS := ["fov", "camera_motion", "head_bob", "breathing_motion", "camera_sway", "hud_visible"]
 const ENV_KEYS := ["image_contrast", "brightness", "saturation", "fog_quality", "ssao_quality", "ssil", "bloom", "bloom_strength"]
 const NODE_KEYS := ["shadow_quality", "shadow_distance", "particle_quality", "reflection_quality", "texture_filter"]
 const VIEW_KEYS := ["render_scale", "aa_mode", "taa", "upscaling", "anisotropy", "shadow_quality"]
@@ -142,6 +168,8 @@ var dynamic_bad_windows := 0
 var dynamic_good_windows := 0
 var filtered_materials: Dictionary = {}
 var dirty := false
+var audio_unfocused := false
+var master_effects: Dictionary = {}
 var menu_context := false
 var overlay: CanvasLayer
 var perf_label: Label
@@ -219,7 +247,7 @@ func _change(patch: Dictionary, keep_preset: bool) -> void:
         options_changed.emit(key)
 
 func reset_category(index: int) -> void:
-    var groups := [GRAPHICS_KEYS, VOLUME_KEYS, ["mouse_sensitivity", "invert_y", "sprint_mode"], ["fov", "camera_motion", "hud_visible"], ["language"]]
+    var groups := [GRAPHICS_KEYS, AUDIO_KEYS, CONTROL_KEYS, GAMEPLAY_KEYS, ["language"]]
     if index < 0 or index >= groups.size():
         return
     var patch := {}
@@ -361,7 +389,21 @@ func _sanitize(key: String, value: Variant) -> Variant:
             return clampf(float(value), 0.0, 1.5)
         "menu_camera_speed":
             return clampf(float(value), 0.25, 1.5)
-        "master_volume", "music_volume", "sfx_volume", "ui_volume":
+        "key_bindings":
+            return Controls.sanitize(value)
+        "mouse_vertical_multiplier", "controller_sensitivity":
+            return clampf(float(value), 0.25, 3.0)
+        "controller_deadzone":
+            return clampf(float(value), 0.05, 0.45)
+        "audio_balance":
+            return clampf(float(value), -1.0, 1.0)
+        "reverb_mode":
+            return str(value) if str(value) in ["off", "reduced", "normal"] else "normal"
+        "audio_dynamic_range":
+            return str(value) if str(value) in ["night", "normal", "full"] else "normal"
+        "audio_device":
+            return str(value).left(256)
+        "master_volume", "music_volume", "sfx_volume", "ui_volume", "ambience_volume", "footstep_volume", "cabinet_volume", "horror_volume", "pressure_volume", "mouse_smoothing", "controller_vibration", "head_bob", "breathing_motion", "camera_sway":
             return clampf(float(value), 0.0, 1.0)
         "mouse_sensitivity":
             return clampf(float(value), 0.25, 3.0)
@@ -401,10 +443,15 @@ func save_options() -> void:
 func _notification(what: int) -> void:
     if what == NOTIFICATION_WM_CLOSE_REQUEST and dirty:
         save_options()
+    if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_APPLICATION_FOCUS_IN:
+        audio_unfocused = what == NOTIFICATION_APPLICATION_FOCUS_OUT
+        _apply_volume("master_volume")
 
 func _exit_tree() -> void:
     if dirty:
         save_options()
+    for name in master_effects.keys():
+        _remove_master_effect(name)
 
 func apply_options() -> void:
     _ensure_audio_buses()
@@ -434,6 +481,15 @@ func _apply_keys(keys: Array) -> void:
     for key in VOLUME_KEYS:
         if keys.has(key):
             _apply_volume(key)
+    if keys.has("mute_unfocused"):
+        _apply_volume("master_volume")
+    if keys.has("audio_device") and DisplayServer.get_name() != "headless":
+        var device := str(options["audio_device"])
+        AudioServer.output_device = device if device in AudioServer.get_output_device_list() else "Default"
+    if _intersects(keys, ["mono_audio", "audio_balance", "audio_dynamic_range"]):
+        _apply_audio_effects()
+    if _intersects(keys, ["key_bindings", "controller_enabled", "controller_deadzone"]):
+        Controls.apply(options["key_bindings"], bool(options["controller_enabled"]), float(options["controller_deadzone"]))
     if keys.has("texture_filter"):
         _refresh_material_filters()
     if _intersects(keys, ENV_KEYS) or _intersects(keys, NODE_KEYS):
@@ -680,19 +736,76 @@ func _sample_dynamic_resolution(delta: float) -> void:
     dynamic_frames = 0
 
 func _ensure_audio_buses() -> void:
-    for bus_name in ["MUSIC", "SFX", "UI"]:
+    for bus_name in ["MUSIC", "SFX", "UI", "AMBIENCE", "FOOTSTEP", "CABINET", "HORROR", "PRESSURE"]:
         if AudioServer.get_bus_index(bus_name) == -1:
             var idx := AudioServer.get_bus_count()
             AudioServer.add_bus(idx)
             AudioServer.set_bus_name(idx, bus_name)
+    for name in ["AMBIENCE", "HORROR", "PRESSURE"]:
+        AudioServer.set_bus_send(AudioServer.get_bus_index(name), "SFX")
 
 func _apply_volume(key: String) -> void:
     var bus_name: String = "Master" if key == "master_volume" else key.trim_suffix("_volume").to_upper()
     var idx := AudioServer.get_bus_index(bus_name)
     if idx >= 0:
         var volume := float(options[key])
-        AudioServer.set_bus_mute(idx, volume <= 0.0001)
+        AudioServer.set_bus_mute(idx, volume <= 0.0001 or (key == "master_volume" and audio_unfocused and bool(options["mute_unfocused"])))
         AudioServer.set_bus_volume_db(idx, linear_to_db(maxf(volume, 0.0001)))
+
+func _remove_master_effect(name: String) -> void:
+    if not master_effects.has(name):
+        return
+    var effect: AudioEffect = master_effects[name]
+    for index in range(AudioServer.get_bus_effect_count(0) - 1, -1, -1):
+        if AudioServer.get_bus_effect(0, index) == effect:
+            AudioServer.remove_bus_effect(0, index)
+    master_effects.erase(name)
+
+func _apply_audio_effects() -> void:
+    for name in ["mono", "balance", "compression"]:
+        _remove_master_effect(name)
+    if bool(options["mono_audio"]):
+        var mono := AudioEffectStereoEnhance.new()
+        mono.pan_pullout = 0.0
+        master_effects["mono"] = mono
+        AudioServer.add_bus_effect(0, mono)
+    if not is_zero_approx(float(options["audio_balance"])):
+        var balance := AudioEffectPanner.new()
+        balance.pan = float(options["audio_balance"])
+        master_effects["balance"] = balance
+        AudioServer.add_bus_effect(0, balance)
+    if options["audio_dynamic_range"] == "night":
+        var compressor := AudioEffectCompressor.new()
+        compressor.threshold = -24.0
+        compressor.ratio = 4.0
+        compressor.gain = 3.0
+        master_effects["compression"] = compressor
+        AudioServer.add_bus_effect(0, compressor)
+
+func rebind(action: String, slot: int, code: int) -> String:
+    if not Controls.ACTIONS.has(action) or slot not in [0, 1] or not Controls.valid(code, action):
+        return "reserved"
+    var bindings: Dictionary = options["key_bindings"].duplicate(true)
+    for other in Controls.ACTIONS:
+        for index in range(2):
+            if code != 0 and int(bindings[other][index]) == code and (other != action or index != slot):
+                return other
+    bindings[action][slot] = code
+    if bindings[action] == [0, 0]:
+        return "required"
+    set_option("key_bindings", bindings)
+    return ""
+
+func _input(event: InputEvent) -> void:
+    var old := bool(get_meta("_using_gamepad", false))
+    var pad := old
+    if event is InputEventJoypadButton and event.pressed or event is InputEventJoypadMotion and absf(event.axis_value) > 0.5:
+        pad = true
+    elif event is InputEventKey and event.pressed or event is InputEventMouseButton and event.pressed or event is InputEventMouseMotion and event.relative.length() > 3.0:
+        pad = false
+    if old != pad:
+        set_meta("_using_gamepad", pad)
+        options_changed.emit("input_device")
 
 func _update_overlay() -> void:
     var enabled := bool(options["fps_display"]) or bool(options["performance_overlay"])

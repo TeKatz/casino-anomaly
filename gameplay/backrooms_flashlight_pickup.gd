@@ -1,6 +1,7 @@
 extends Node3D
 ## Physical torch with proximity/LOS interaction and a screen-space hint.
 ## The hint does not depend on the camera facing direction or depth testing.
+const Controls = preload("res://gameplay/input_bindings.gd")
 var prompt: Label
 var prompt_layer: CanvasLayer
 var taken := false
@@ -115,7 +116,7 @@ func update_prompt(player: CharacterBody3D) -> void:
         return
     _near = can_pick_up(player)
     var settings := get_node_or_null("/root/GameSettings")
-    prompt.text = "E  –  Taschenlampe aufnehmen" if settings != null and str(settings.get_option("language")) == "de" else "E  –  Pick up flashlight"
+    prompt.text = Controls.hint(self) + ("  –  Taschenlampe aufnehmen" if settings != null and str(settings.get_option("language")) == "de" else "  –  Pick up flashlight")
     _sync_prompt()
 
 func _process(_delta: float) -> void:

@@ -24,8 +24,8 @@ func _run() -> void:
     var music := director.get_node_or_null("MenuMusic") as AudioStreamPlayer
     var ambience := director.get_node_or_null("ContinuousRoomTone") as AudioStreamPlayer
     if music == null or ambience == null or music.bus != "MUSIC" \
-            or ambience.bus != "SFX":
-        _fail("Audio streams do not use the existing MUSIC and SFX buses")
+            or ambience.bus != "AMBIENCE":
+        _fail("Audio streams do not use independent MUSIC and AMBIENCE buses")
         return
     if not (director.process_mode == Node.PROCESS_MODE_ALWAYS):
         _fail("Continuous ambience must survive the paused game and scene swaps")

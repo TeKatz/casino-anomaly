@@ -7,6 +7,7 @@ extends Node3D
 ## connector stays with the new room after the old hall has been freed.
 ## No camera teleports, fades or extra button presses.
 
+const Controls = preload("res://gameplay/input_bindings.gd")
 const DemoAnomalies = preload("res://gameplay/demo_anomalies.gd")
 const NeonLevelSign = preload("res://gameplay/neon_level_sign.gd")
 const AnomalyDevMenu = preload("res://ui/anomaly_dev_menu.gd")
@@ -776,7 +777,7 @@ func _enter_backrooms(lane: String) -> void:
 		var hum := AudioStreamPlayer.new()
 		hum.name = "BackroomsHum"
 		hum.stream = sound.call("get_immersion_loop", "backrooms_hum") as AudioStream
-		hum.bus = "WORLD"
+		hum.bus = "HORROR"
 		hum.volume_db = -15.0
 		room.add_child(hum)
 		if hum.stream != null:
@@ -817,7 +818,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if not backrooms_active or not is_instance_valid(backrooms_pickup) or get_tree().paused or bool(player.get("interaction_locked")):
 		return
-	if event is InputEventKey and event.pressed and not event.echo and (event.keycode == KEY_E or event.physical_keycode == KEY_E):
+	if Controls.pressed(event, "interact"):
 		if bool(backrooms_pickup.call("collect", player)):
 			get_viewport().set_input_as_handled()
 

@@ -1,6 +1,8 @@
 extends CanvasLayer
 ## Gaze- and distance-sensitive prompt for the tutorial's starting door.
 ## Nothing is attached above the 3D door; the cue belongs to the HUD.
+const Controls = preload("res://gameplay/input_bindings.gd")
+var key_label: Label
 var root_control: Control
 var panel: PanelContainer
 var caption: Label
@@ -65,7 +67,7 @@ func _ready() -> void:
     key.add_theme_stylebox_override("panel", key_style)
     line.add_child(key)
 
-    var key_label := Label.new()
+    key_label = Label.new()
     key_label.name = "KeyLabel"
     key_label.text = "E"
     key_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -85,6 +87,14 @@ func _ready() -> void:
 
     panel.modulate.a = 0.0
     panel.visible = false
+    var settings := get_node_or_null("/root/GameSettings")
+    if settings != null:
+        settings.connect("options_changed", _binding_changed)
+    _binding_changed("key_bindings")
+
+func _binding_changed(key: String) -> void:
+    if key in ["key_bindings", "input_device", "controller_enabled"]:
+        key_label.text = Controls.hint(self)
 
 
 func set_prompt_text(value: String) -> void:

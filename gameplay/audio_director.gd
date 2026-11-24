@@ -36,7 +36,7 @@ func _ready() -> void:
 
     room_player = AudioStreamPlayer.new()
     room_player.name = "ContinuousRoomTone"
-    room_player.bus = "SFX"
+    room_player.bus = "AMBIENCE"
     room_player.process_mode = Node.PROCESS_MODE_ALWAYS
     room_player.volume_db = ROOM_DB
     add_child(room_player)
@@ -179,6 +179,16 @@ func _prepare_immersion() -> void:
         AudioServer.add_bus(index)
         AudioServer.set_bus_name(index, "WORLD")
     AudioServer.set_bus_send(index, "SFX")
+    for name in ["FOOTSTEP", "CABINET"]:
+        var child_index := AudioServer.get_bus_index(name)
+        if child_index >= 0:
+            AudioServer.set_bus_send(child_index, "WORLD")
+    var horror := AudioServer.get_bus_index("HORROR")
+    if horror >= 0:
+        AudioServer.set_bus_send(horror, "WORLD")
+    var pressure := AudioServer.get_bus_index("PRESSURE")
+    if pressure >= 0:
+        AudioServer.set_bus_send(pressure, "HORROR")
     if AudioServer.get_bus_effect_count(index) == 0:
         world_reverb = AudioEffectReverb.new()
         world_reverb.room_size = 0.53
@@ -195,13 +205,13 @@ func _prepare_immersion() -> void:
         procedural_loops[kind] = ImmersionSynth.ambience(kind)
     footstep_player = AudioStreamPlayer.new()
     footstep_player.name = "FootstepCue"
-    footstep_player.bus = "WORLD"
+    footstep_player.bus = "FOOTSTEP"
     footstep_player.max_polyphony = 3
     footstep_player.volume_db = -11.0
     add_child(footstep_player)
     pressure_player = AudioStreamPlayer.new()
     pressure_player.name = "PressureBed"
-    pressure_player.bus = "SFX"
+    pressure_player.bus = "PRESSURE"
     pressure_player.stream = procedural_loops["pressure"]
     pressure_player.volume_db = -65.0
     add_child(pressure_player)
@@ -243,6 +253,9 @@ func _process(delta: float) -> void:
         return
     if world_reverb != null:
         var wet := 0.20 if backrooms_mode else (0.26 if corridor_target else 0.045)
+        var settings := get_node_or_null("/root/GameSettings")
+        var mode := str(settings.call("get_option", "reverb_mode")) if settings != null else "normal"
+        wet *= 0.0 if mode == "off" else (0.35 if mode == "reduced" else 1.0)
         world_reverb.wet = lerpf(world_reverb.wet, wet, 1.0 - exp(-4.0 * delta))
     if pressure_player != null and pressure_player.playing:
         var state := get_node_or_null("/root/LoopState")

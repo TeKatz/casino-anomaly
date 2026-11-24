@@ -3,6 +3,8 @@ extends Node3D
 ## Crisp, single-sprite interaction plaque above the NPC. A tiny SubViewport
 ## renders one static Control composition; only the 3D sprite moves in-game.
 ## Unlike the old Label3D, this has a real keycap, satin background and border.
+const Controls = preload("res://gameplay/input_bindings.gd")
+var key_label: Label
 const VIEW_SIZE := Vector2i(448, 112)
 const BOB_AMPLITUDE := 0.025
 const BOB_SPEED := 1.8
@@ -21,6 +23,11 @@ func _ready() -> void:
     _origin = position
     _make_plaque()
     _apply_caption()
+    if not Engine.is_editor_hint():
+        var settings := get_node_or_null("/root/GameSettings")
+        if settings != null:
+            settings.connect("options_changed", _binding_changed)
+        _binding_changed("key_bindings")
     if Engine.is_editor_hint():
         visible = true
         plaque.modulate.a = 1.0
@@ -89,6 +96,7 @@ func _make_plaque() -> void:
     layout.add_child(keycap)
 
     var key := Label.new()
+    key_label = key
     key.text = "E"
     key.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     key.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -111,6 +119,11 @@ func _make_plaque() -> void:
     plaque.shaded = false
     add_child(plaque)
 
+
+func _binding_changed(key: String) -> void:
+    if key in ["key_bindings", "input_device", "controller_enabled"] and key_label != null:
+        key_label.text = Controls.hint(self)
+        viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 
 func set_prompt_text(value: String) -> void:
     prompt_text = value

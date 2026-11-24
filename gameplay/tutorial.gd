@@ -1,5 +1,6 @@
 extends Node3D
 ## Optional short conversations; the starting door remains the way forward.
+const Controls = preload("res://gameplay/input_bindings.gd")
 const Loc = preload("res://gameplay/localization.gd")
 const Conversation = preload("res://gameplay/croupier_dialogue.gd")
 const DoorPrompt = preload("res://ui/door_prompt.gd")
@@ -121,6 +122,7 @@ func is_dialogue_open() -> bool:
 func _open_conversation() -> void:
     if changing or is_dialogue_open():
         return
+    player.call("interaction_vibration")
     player.call("set_interaction_locked", true)
     croupier.call("set_hint_visible", false)
     croupier.call("set_talking", true)
@@ -136,9 +138,9 @@ func _on_conversation_closed() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-    if changing or is_dialogue_open() or not (event is InputEventKey):
+    if changing or is_dialogue_open():
         return
-    if event.keycode != KEY_E or not event.pressed or event.echo:
+    if not Controls.pressed(event, "interact"):
         return
     if _is_looking_at_croupier():
         get_viewport().set_input_as_handled()
@@ -151,6 +153,7 @@ func _unhandled_input(event: InputEvent) -> void:
     if loader == null or not loader.travel_to("res://main.tscn", true):
         push_warning("Could not show the casino loading screen.")
         return
+    player.call("interaction_vibration")
     changing = true
     loader.transition_failed.connect(_on_scene_load_failed, CONNECT_ONE_SHOT)
 

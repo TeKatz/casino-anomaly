@@ -9,6 +9,7 @@ const MOUSE_SENSITIVITY := 0.002
 const GRAVITY := 18.0
 const WALK_ACCELERATION := 13.0
 const WALK_DECELERATION := 19.0
+const Controls = preload("res://gameplay/input_bindings.gd")
 const PauseMenu = preload("res://ui/pause_menu.gd")
 
 # Camera motion is cosmetic and can be disabled for motion-sensitive players.
@@ -33,6 +34,7 @@ var backrooms_flashlight: SpotLight3D
 var collision_diagnostics := false
 var _reported_contacts: Dictionary = {}
 var _options: Variant = null
+var _mouse_pending := Vector2.ZERO
 
 func _ready() -> void:
     _camera_home = camera.position
@@ -56,8 +58,13 @@ func _ready() -> void:
 func _on_option_changed(_key: String) -> void:
     if _options == null:
         return
-    camera_motion_enabled = bool(_options.get_option("camera_motion"))
-    camera.fov = float(_options.get_option("fov"))
+    if _key in ["", "camera_motion"]:
+        camera_motion_enabled = bool(_options.get_option("camera_motion"))
+    if _key in ["", "fov"]:
+        camera.fov = float(_options.get_option("fov"))
+    if _key in ["key_bindings", "sprint_mode", "controller_enabled"]:
+        _sprint_toggled = false
+        _mouse_pending = Vector2.ZERO
 
 
 func _setting(key: String, fallback: Variant) -> Variant:
@@ -118,6 +125,7 @@ func equip_backrooms_flashlight() -> bool:
     backrooms_flashlight.shadow_enabled = true
     backrooms_flashlight.light_bake_mode = Light3D.BAKE_DISABLED
     camera.add_child(backrooms_flashlight)
+    interaction_vibration()
     return true
 
 
@@ -125,18 +133,46 @@ func _unhandled_input(event: InputEvent) -> void:
     if interaction_locked:
         return
     if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-        var sensitivity := MOUSE_SENSITIVITY * float(_setting("mouse_sensitivity", 1.0))
-        rotate_y(-event.relative.x * sensitivity)
-        var invert := -1.0 if bool(_setting("invert_y", false)) else 1.0
-        camera.rotate_x(-event.relative.y * sensitivity * invert)
-        camera.rotation.x = clamp(camera.rotation.x, -1.25, 1.25)
-    elif event is InputEventKey and event.pressed and not event.echo \
-            and not backrooms_mode and event.keycode == KEY_SHIFT and str(_setting("sprint_mode", "hold")) == "toggle":
+        var relative := event.relative
+        if float(_setting("mouse_smoothing", 0.0)) > 0.0:
+            _mouse_pending += relative
+        else:
+            _apply_look(relative)
+    elif Controls.pressed(event, "sprint") and not backrooms_mode and str(_setting("sprint_mode", "hold")) == "toggle":
         _sprint_toggled = not _sprint_toggled
     elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
         Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
+func interaction_vibration() -> void:
+    if _options == null or not bool(_options.get_meta("_using_gamepad", false)) or not bool(_setting("controller_enabled", true)):
+        return
+    var strength := float(_setting("controller_vibration", 0.0))
+    if strength > 0.0:
+        for device in Input.get_connected_joypads():
+            Input.start_joy_vibration(device, strength * 0.5, strength * 0.2, 0.12)
+
+func _apply_look(relative: Vector2) -> void:
+    var sensitivity := MOUSE_SENSITIVITY * float(_setting("mouse_sensitivity", 1.0))
+    rotate_y(-relative.x * sensitivity * (-1.0 if bool(_setting("invert_x", false)) else 1.0))
+    camera.rotate_x(-relative.y * sensitivity * float(_setting("mouse_vertical_multiplier", 1.0)) * (-1.0 if bool(_setting("invert_y", false)) else 1.0))
+    camera.rotation.x = clampf(camera.rotation.x, -1.25, 1.25)
+
+
 func _process(delta: float) -> void:
+    if not interaction_locked and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+        if _mouse_pending.length_squared() > 0.0001:
+            var smoothing := float(_setting("mouse_smoothing", 0.0))
+            var fraction := 1.0 if smoothing <= 0.0 else 1.0 - exp(-lerpf(50.0, 12.0, smoothing) * delta)
+            var portion := _mouse_pending * fraction
+            _mouse_pending -= portion
+            _apply_look(portion)
+        if bool(_setting("controller_enabled", true)):
+            var stick := Input.get_vector("casino_look_left", "casino_look_right", "casino_look_up", "casino_look_down")
+            var turn := stick * float(_setting("controller_sensitivity", 1.0)) * 2.4 * delta
+            rotate_y(-turn.x * (-1.0 if bool(_setting("invert_x", false)) else 1.0))
+            camera.rotation.x = clampf(camera.rotation.x - turn.y * (-1.0 if bool(_setting("invert_y", false)) else 1.0), -1.25, 1.25)
+    else:
+        _mouse_pending = Vector2.ZERO
     if not camera_motion_enabled:
         camera.position = _camera_home
         camera.rotation.z = _camera_roll_home
@@ -151,9 +187,9 @@ func _process(delta: float) -> void:
     _walk_blend = lerpf(_walk_blend, target_weight, 1.0 - exp(-7.0 * delta))
     _step_clock += delta * 8.8 * target_weight
 
-    var breath_y := sin(_breath_clock) * breathing_strength
-    var step_y := sin(_step_clock * 2.0) * walk_bob_strength * _walk_blend
-    var step_x := cos(_step_clock) * walk_bob_strength * 0.38 * _walk_blend
+    var breath_y := sin(_breath_clock) * breathing_strength * float(_setting("breathing_motion", 1.0))
+    var step_y := sin(_step_clock * 2.0) * walk_bob_strength * _walk_blend * float(_setting("head_bob", 1.0))
+    var step_x := cos(_step_clock) * walk_bob_strength * 0.38 * _walk_blend * float(_setting("camera_sway", 1.0))
     var target := _camera_home + Vector3(step_x, breath_y + step_y, 0.0)
     var smooth := 1.0 - exp(-10.0 * delta)
     camera.position = camera.position.lerp(target, smooth)
@@ -162,7 +198,7 @@ func _process(delta: float) -> void:
     var lateral := velocity.dot(camera.global_transform.basis.x) / SPRINT_SPEED
     var roll := _camera_roll_home + 0.003 * sin(_step_clock) * _walk_blend \
             - 0.004 * clampf(lateral, -1.0, 1.0)
-    camera.rotation.z = lerpf(camera.rotation.z, roll, smooth)
+    camera.rotation.z = lerpf(camera.rotation.z, lerpf(_camera_roll_home, roll, float(_setting("camera_sway", 1.0))), smooth)
 
 func movement_speed(sprint_requested: bool) -> float:
     if backrooms_mode:
@@ -179,23 +215,15 @@ func _physics_process(delta: float) -> void:
     elif velocity.y < 0.0:
         velocity.y = 0.0
 
-    var axis := Vector2.ZERO
-    if Input.is_physical_key_pressed(KEY_W):
-        axis.y -= 1.0
-    if Input.is_physical_key_pressed(KEY_S):
-        axis.y += 1.0
-    if Input.is_physical_key_pressed(KEY_A):
-        axis.x -= 1.0
-    if Input.is_physical_key_pressed(KEY_D):
-        axis.x += 1.0
+    var axis := Input.get_vector("casino_move_left", "casino_move_right", "casino_move_forward", "casino_move_back")
     # Movement MUST be world-space relative to the live view.
     # Reparenting to a hall rotated by 180 degrees must not reverse WASD.
     var direction := _movement_direction(axis)
     var sprint := _sprint_toggled if str(_setting("sprint_mode", "hold")) == "toggle" \
-        else Input.is_physical_key_pressed(KEY_SHIFT)
+        else Input.is_action_pressed("casino_sprint")
     sprint = sprint and not backrooms_mode
     var speed := movement_speed(sprint)
-    var target := direction * speed
+    var target := direction * speed * minf(axis.length(), 1.0)
     var acceleration := WALK_ACCELERATION if axis.length_squared() > 0.0 else WALK_DECELERATION
     velocity.x = move_toward(velocity.x, target.x, acceleration * delta)
     velocity.z = move_toward(velocity.z, target.z, acceleration * delta)

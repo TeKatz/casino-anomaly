@@ -1,4 +1,5 @@
 extends PanelContainer
+const Controls = preload("res://gameplay/input_bindings.gd")
 const Loc = preload("res://gameplay/localization.gd")
 const MenuStyle = preload("res://ui/menu_style.gd")
 const LuminousButton = preload("res://ui/luminous_button.gd")
@@ -18,6 +19,10 @@ var reset_dialog: ConfirmationDialog
 var preset_select: OptionButton
 var reset_button: Button
 var reset_all_button: Button
+var binding_action := ""
+var binding_slot := 0
+var binding_button: Button
+var binding_status: Label
 var options_box: VBoxContainer
 var tabs: Array[Button] = []
 var selected_tab := 0
@@ -185,6 +190,7 @@ func _tab_hover(button: Button, entered: bool) -> void:
 
 
 func _switch_tab(index: int) -> void:
+    _cancel_binding()
     selected_tab = index
     preset_select = null
     if scroll != null:
@@ -208,17 +214,31 @@ func _switch_tab(index: int) -> void:
             _slider(Loc.t("settings.music", self), "music_volume", 0.0, 1.0, 0.05, "%")
             _slider(Loc.t("settings.sfx", self), "sfx_volume", 0.0, 1.0, 0.05, "%")
             _slider(Loc.t("settings.ui", self), "ui_volume", 0.0, 1.0, 0.05, "%")
+            _audio_options()
         2:
             _section(Loc.t("settings.mouse_movement", self))
             _slider(Loc.t("settings.mouse_sensitivity", self), "mouse_sensitivity", 0.25, 3.0, 0.05, "×")
+            _slider(_tr("Vertical sensitivity multiplier", "Vertikaler Empfindlichkeitsfaktor"), "mouse_vertical_multiplier", 0.25, 3.0, 0.05, "×")
             _toggle(Loc.t("settings.invert_y", self), "invert_y")
+            _toggle(_tr("Invert horizontal axis", "Horizontale Achse umkehren"), "invert_x")
+            _slider(_tr("Mouse smoothing", "Mausglättung"), "mouse_smoothing", 0.0, 1.0, 0.05, "%")
             _select(Loc.t("settings.sprint", self), "sprint_mode", [
                 [Loc.t("settings.hold", self), "hold"], [Loc.t("settings.toggle", self), "toggle"]
             ])
+            _binding_options()
+            _section(_tr("Controller", "Controller"))
+            _toggle(_tr("Enable controller", "Controller aktivieren"), "controller_enabled")
+            _slider(_tr("Look sensitivity", "Blickempfindlichkeit"), "controller_sensitivity", 0.25, 3.0, 0.05, "×")
+            _slider(_tr("Stick deadzone", "Stick-Totzone"), "controller_deadzone", 0.05, 0.45, 0.01, "%")
+            _slider(_tr("Interaction vibration", "Interaktionsvibration"), "controller_vibration", 0.0, 1.0, 0.05, "%")
+            _note(_tr("Left stick: move · Right stick: look · L3: sprint · A: interact · Start: pause", "Linker Stick: bewegen · Rechter Stick: schauen · L3: sprinten · A: interagieren · Start: Pause"))
         3:
             _section(Loc.t("settings.game_view", self))
             _slider(Loc.t("settings.fov", self), "fov", 60.0, 105.0, 1.0, "°")
             _toggle(Loc.t("settings.camera_motion", self), "camera_motion")
+            _slider(_tr("Head bob", "Schrittbewegung"), "head_bob", 0.0, 1.0, 0.05, "%")
+            _slider(_tr("Breathing motion", "Atembewegung"), "breathing_motion", 0.0, 1.0, 0.05, "%")
+            _slider(_tr("Camera sway", "Seitliches Schwanken"), "camera_sway", 0.0, 1.0, 0.05, "%")
         4:
             _section(Loc.t("settings.language", self))
             _select(Loc.t("settings.language", self), "language", [
@@ -359,6 +379,7 @@ func _confirm_reset() -> void:
 
 func _on_visibility() -> void:
     if not is_visible_in_tree() and settings_node != null:
+        _cancel_binding()
         settings_node.cancel_display_preview()
         settings_node.save_options()
 
@@ -450,3 +471,96 @@ func _graphics() -> void:
     _toggle(_tr("Panorama motion", "Panoramabewegung"), "menu_camera_motion")
     _slider(_tr("Panorama speed", "Panoramageschwindigkeit"), "menu_camera_speed", 0.25, 1.5, 0.05, "%")
     _slider(_tr("Background dimming", "Hintergrundabdunklung"), "menu_darkness", 0.0, 1.5, 0.05, "%")
+
+
+func _note(value: String) -> Label:
+    var note := Label.new()
+    note.text = value
+    note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+    note.add_theme_color_override("font_color", Color("#b5c2cf"))
+    options_box.add_child(note)
+    return note
+
+func _audio_options() -> void:
+    _section(_tr("World audio", "Spielumgebung"))
+    _slider(_tr("Ambience", "Umgebungsgeräusche"), "ambience_volume", 0.0, 1.0, 0.05, "%")
+    _slider(_tr("Footsteps", "Schritte"), "footstep_volume", 0.0, 1.0, 0.05, "%")
+    _slider(_tr("Slot machines", "Spielautomaten"), "cabinet_volume", 0.0, 1.0, 0.05, "%")
+    _slider(_tr("Horror effects", "Horror-Effekte"), "horror_volume", 0.0, 1.0, 0.05, "%")
+    _slider(_tr("Low-frequency pressure", "Tieffrequenter Drucksound"), "pressure_volume", 0.0, 1.0, 0.05, "%")
+    _select(_tr("Room reverb", "Raumhall"), "reverb_mode", [[_tr("Off", "Aus"), "off"], [_tr("Reduced", "Reduziert"), "reduced"], [_tr("Normal", "Normal"), "normal"]])
+    _section(_tr("Output", "Audioausgabe"))
+    var devices := [[_tr("System default", "Systemstandard"), "Default"]]
+    for device in AudioServer.get_output_device_list():
+        if device != "Default":
+            devices.append([device, device])
+    _select(_tr("Output device", "Ausgabegerät"), "audio_device", devices)
+    _select(_tr("Dynamic range", "Dynamikumfang"), "audio_dynamic_range", [[_tr("Night (compressed)", "Nacht (komprimiert)"), "night"], [_tr("Normal / full", "Normal / voll"), "normal"]])
+    _toggle(_tr("Mute when unfocused", "Bei Fokusverlust stummschalten"), "mute_unfocused")
+    _toggle(_tr("Mono audio", "Mono-Audio"), "mono_audio")
+    _slider(_tr("Stereo balance", "Stereo-Balance"), "audio_balance", -1.0, 1.0, 0.05, "%")
+
+func _action_title(action: String) -> String:
+    var en := ["Forward", "Backward", "Left", "Right", "Sprint", "Interact", "Pause"]
+    var de := ["Vorwärts", "Rückwärts", "Links", "Rechts", "Sprinten", "Interagieren", "Pause"]
+    var index := Controls.ACTIONS.find(action)
+    return _tr(en[index], de[index]) if index >= 0 else action
+
+func _binding_options() -> void:
+    _section(_tr("Key bindings", "Tastenbelegung"))
+    _note(_tr("Select a slot, then press a key or mouse button. Esc cancels; Delete clears a secondary or unused slot. Developer shortcuts are reserved.", "Platz auswählen, dann Taste oder Maustaste drücken. Esc bricht ab; Entf leert einen Platz. Entwickler-Tasten sind reserviert."))
+    var bindings: Dictionary = settings_node.get_option("key_bindings")
+    for action in Controls.ACTIONS:
+        var line := _line(_action_title(action))
+        for index in range(2):
+            var button := LuminousButton.new()
+            MenuStyle.apply_button(button)
+            button.custom_minimum_size = Vector2(100, 40)
+            button.text = Controls.label(int(bindings[action][index]))
+            button.pressed.connect(_begin_binding.bind(action, index, button))
+            line.add_child(button)
+    binding_status = _note("")
+
+func _begin_binding(action: String, index: int, button: Button) -> void:
+    _cancel_binding()
+    binding_action = action
+    binding_slot = index
+    binding_button = button
+    settings_node.set_meta("_binding_capture", true)
+    button.text = _tr("Press…", "Drücken…")
+    binding_status.text = _tr("Waiting for input", "Warte auf Eingabe")
+
+func _cancel_binding() -> void:
+    if binding_action.is_empty():
+        return
+    if is_instance_valid(binding_button):
+        var bindings: Dictionary = settings_node.get_option("key_bindings")
+        binding_button.text = Controls.label(int(bindings[binding_action][binding_slot]))
+    binding_action = ""
+    binding_button = null
+    if settings_node != null:
+        settings_node.set_meta("_binding_capture", false)
+
+func _input(event: InputEvent) -> void:
+    if binding_action.is_empty() or not is_visible_in_tree():
+        return
+    var code := Controls.token(event)
+    if code == 0:
+        return
+    get_viewport().set_input_as_handled()
+    if code == KEY_ESCAPE:
+        _cancel_binding()
+        binding_status.text = ""
+        return
+    if code == KEY_DELETE:
+        code = 0
+    var result: String = settings_node.rebind(binding_action, binding_slot, code)
+    if not result.is_empty():
+        binding_status.text = _tr("Reserved or required key", "Reservierte oder notwendige Taste") if result in ["reserved", "required"] else _tr("Already assigned: ", "Bereits belegt: ") + _action_title(result)
+        return
+    _cancel_binding()
+    binding_status.text = _tr("Binding saved", "Belegung gespeichert")
+
+func _exit_tree() -> void:
+    if not binding_action.is_empty() and is_instance_valid(settings_node):
+        settings_node.set_meta("_binding_capture", false)
