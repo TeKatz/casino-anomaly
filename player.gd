@@ -137,7 +137,7 @@ func _unhandled_input(event: InputEvent) -> void:
     if interaction_locked:
         return
     if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-        var relative := event.relative
+        var relative: Vector2 = event.relative
         if float(_setting("mouse_smoothing", 0.0)) > 0.0:
             _mouse_pending += relative
         else:

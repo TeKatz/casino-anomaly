@@ -828,7 +828,8 @@ func _apply_ui_node(node: Control) -> void:
             node.remove_theme_font_size_override("font_size")
         else:
             node.add_theme_font_size_override("font_size", maxi(10, roundi(float(base[1]) * multiplier)))
-        for key in ["font_color", "font_hover_color", "font_pressed_color"]:
+        var colors := ["font_color", "font_hover_color", "font_pressed_color"] if node is Button else ["font_color"]
+        for key in colors:
             if not node.has_meta("_accessible_" + key):
                 node.set_meta("_accessible_" + key, [node.has_theme_color_override(key), node.get_theme_color(key)])
             var original: Array = node.get_meta("_accessible_" + key)
@@ -875,19 +876,24 @@ func _remove_master_effect(name: String) -> void:
     master_effects.erase(name)
 
 func _apply_audio_effects() -> void:
-    for name in ["mono", "balance", "compression"]:
-        _remove_master_effect(name)
-    if bool(options["mono_audio"]):
+    if not bool(options["mono_audio"]):
+        _remove_master_effect("mono")
+    elif not master_effects.has("mono"):
         var mono := AudioEffectStereoEnhance.new()
         mono.pan_pullout = 0.0
         master_effects["mono"] = mono
         AudioServer.add_bus_effect(0, mono)
-    if not is_zero_approx(float(options["audio_balance"])):
-        var balance := AudioEffectPanner.new()
-        balance.pan = float(options["audio_balance"])
-        master_effects["balance"] = balance
-        AudioServer.add_bus_effect(0, balance)
-    if options["audio_dynamic_range"] == "night":
+    if is_zero_approx(float(options["audio_balance"])):
+        _remove_master_effect("balance")
+    else:
+        if not master_effects.has("balance"):
+            var balance := AudioEffectPanner.new()
+            master_effects["balance"] = balance
+            AudioServer.add_bus_effect(0, balance)
+        (master_effects["balance"] as AudioEffectPanner).pan = float(options["audio_balance"])
+    if options["audio_dynamic_range"] != "night":
+        _remove_master_effect("compression")
+    elif not master_effects.has("compression"):
         var compressor := AudioEffectCompressor.new()
         compressor.threshold = -24.0
         compressor.ratio = 4.0

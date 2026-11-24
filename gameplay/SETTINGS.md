@@ -38,3 +38,11 @@ downscaling the original texture assets is not part of this update.
 The new graphics settings must also be evaluated in Forward+ on hardware;
 headless tests validate configuration, runtime properties and scene lifecycle,
 not image quality or GPU speed.
+
+## Controls, audio and accessibility
+
+Keyboard and mouse use two persisted physical bindings per gameplay action. Conflicts are rejected; Escape remains an emergency pause/back key and developer shortcuts are reserved. The gamepad uses left/right sticks, L3 sprint, A interaction and Start pause, with adjustable sensitivity/deadzone and optional interaction vibration. Input hints follow the active device. Individual camera motion sliders do not change player speed.
+
+Audio controls route ambience, footsteps, cabinets, horror and pressure through independent buses with the master/SFX volume hierarchy. Night mode uses a compressor; output device, balance, mono and focus mute are independent. Sound captions are non-directional and never announce a hidden anomaly.
+
+Accessibility options include motion reductions, soft Backrooms entry lighting, decorative light steadiness, UI scale and text size, high-contrast panels, UI icon palettes, extra choice symbols, caption size/background and reduced horror audio. Actual anomaly colors, scoring, route conditions and authored geometry are unchanged. Tutorial skipping preserves the guaranteed normal first room. Controller, display and audio hardware need manual testing. Dialogue is currently text-only; no voice volume is exposed.

@@ -86,6 +86,7 @@ func _ready() -> void:
     scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
     scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+    scroll.follow_focus = true
     body.add_child(scroll)
     options_box = VBoxContainer.new()
     options_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL

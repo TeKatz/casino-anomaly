@@ -13,7 +13,7 @@ static func valid(code: int, action: String) -> bool:
     if code == 0:
         return true
     if code < 0:
-        return -code in [MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT, MOUSE_BUTTON_MIDDLE, MOUSE_BUTTON_XBUTTON1, MOUSE_BUTTON_XBUTTON2]
+        return action != "pause" and -code in [MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT, MOUSE_BUTTON_MIDDLE, MOUSE_BUTTON_XBUTTON1, MOUSE_BUTTON_XBUTTON2]
     if code in [KEY_G, KEY_F9, KEY_F10, KEY_F11, KEY_F12, KEY_ALT, KEY_META, KEY_TAB, KEY_UNKNOWN]:
         return false
     return code != KEY_ESCAPE or action == "pause"

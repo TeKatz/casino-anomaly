@@ -435,6 +435,7 @@ func _advance_pending_stage(lane: String, returning: bool = false) -> void:
 		next.transform = Backrooms.return_transform(room, portals.ENTRY_Z) if _pending_return else _stage_transform(lane)
 		var attach_start_us := Time.get_ticks_usec()
 		get_tree().root.add_child(next)
+		_refresh_exit_signs(next)
 		var attach_ms := float(Time.get_ticks_usec() - attach_start_us) / 1000.0
 		if _pending_instance_ms >= 16.7 or _pending_portal_ms >= 16.7 or attach_ms >= 16.7:
 			print("Casino staging: instantiate=%.1f ms, portals=%.1f ms, attach/ready=%.1f ms (spread across frames)" %
