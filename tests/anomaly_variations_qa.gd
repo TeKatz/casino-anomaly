@@ -4,6 +4,7 @@ extends SceneTree
 const ROOM = preload("res://main.tscn")
 const Catalog = preload("res://gameplay/anomaly_catalog.gd")
 const Adapter = preload("res://gameplay/demo_anomalies.gd")
+const StreamPortals = preload("res://gameplay/stream_portals.gd")
 
 const NEW_IDS := [
     "stool_out_of_line",
@@ -615,6 +616,11 @@ func _verify_other_side(hall: Node3D, other: Node3D) -> bool:
     var trim_original_name := trim.name
     var trim_original_visible := trim.visible
     trim.name = "RenamedCladdingForQA"
+    # Exercise the same runtime geometry replacement as the real run.
+    var portals := StreamPortals.new()
+    if not portals.prepare_room(hall) or hall.get_node("Architecture/FarExitWall").visible:
+        _fail("Other Side test: streaming exit geometry not prepared")
+        return false
     var adapter := Adapter.new()
     if not adapter.apply(hall,"the_other_side"):
         _fail("Other Side apply failed")
@@ -632,6 +638,10 @@ func _verify_other_side(hall: Node3D, other: Node3D) -> bool:
     if inverted.basis.y.dot(Vector3.DOWN)<0.99 or int(event.get("cloned_meshes"))<30 or not inverted.has_node("SketchfabFurniture"):
         _fail("Other Side casino is not fully inverted")
         return false
+    var stream_copy := inverted.get_node_or_null("StreamingPortals")
+    if stream_copy == null or stream_copy.find_children("*ExitWallPier*","MeshInstance3D",true,false).is_empty() or stream_copy.find_children("*StraightFloor*","MeshInstance3D",true,false).size()<2:
+        _fail("Other Side did not clone runtime exit piers and both corridors")
+        return false
     var aperture := event.get_node("OtherSideAperture") as MeshInstance3D
     if absf(aperture.position.x+27.05)>0.01:
         _fail("Other Side aperture not at the clear lounge approach")
@@ -647,6 +657,18 @@ func _verify_other_side(hall: Node3D, other: Node3D) -> bool:
     event.set("quality","ultra")
     if event.call("_capture_size",Vector2(2560,1440))!=Vector2i(3840,2160):
         _fail("Other Side ultra capture resolution regressed")
+        return false
+    # A close, offset eye must still project the physical corners to the
+    # same texture corners. This is independent of player yaw and pitch.
+    var aperture_size := (aperture.mesh as QuadMesh).size
+    capture.size = Vector2i(1300,1000)
+    var eye := aperture.position+Vector3(0.8,-1.3,-0.95)
+    event.call("_sync_portal_camera",eye,100.0)
+    var virtual_camera := capture.get_node("OtherSideCamera") as Camera3D
+    var top_left := aperture.position+Vector3(aperture_size.x*0.5,aperture_size.y*0.5,0.0)
+    var bottom_right := aperture.position-Vector3(aperture_size.x*0.5,aperture_size.y*0.5,0.0)
+    if virtual_camera.projection!=Camera3D.PROJECTION_FRUSTUM or virtual_camera.unproject_position(top_left).distance_to(Vector2.ZERO)>2.0 or virtual_camera.unproject_position(bottom_right).distance_to(Vector2(capture.size))>2.0:
+        _fail("Other Side close-range projection is not anchored to the aperture")
         return false
     if not capture.find_children("*","CollisionObject3D",true,false).is_empty():
         _fail("Other Side cloned active gameplay physics")

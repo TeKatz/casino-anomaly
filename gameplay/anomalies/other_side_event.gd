@@ -14,7 +14,7 @@ const CLOSE_TIME := 6.0
 const REST_TIME := 8.0
 const ACTIVATION_RADIUS := 14.0
 const SOURCE_CENTER_X := -31.0
-const SECTIONS := ["Architecture","RedCarpet","SlotMachines","GamingTables","CornerBar","Lounge","Decor","ModelInteriors","SketchfabFurniture","Lighting"]
+const SECTIONS := ["Architecture","RedCarpet","SlotMachines","GamingTables","CornerBar","Lounge","Decor","ModelInteriors","SketchfabFurniture","Lighting","StreamingPortals"]
 const CARD_PATH := "res://models/playing_cards/individual/card_%02d.gltf"
 const CARD_IDS := [12,1,14,6,19,32,40,51]
 var hall: Node3D
@@ -40,13 +40,15 @@ var quality := "original"
 var cloned_meshes := 0
 var cloned_lights := 0
 var shadow_lights := 0
-var last_view_transform := Transform3D.IDENTITY
+var last_eye := Vector3.ZERO
 var has_rendered := false
 var open_fraction := 0.0
 
 
 func configure(room: Node3D, wall: MeshInstance3D) -> bool:
     hall = room
+    # Sample the eye after the player/controller updates its transform.
+    process_priority = 100
     wall_bounds = _local_bounds(wall)
     var left := CENTER_X-OPEN_WIDTH*0.5
     var right := CENTER_X+OPEN_WIDTH*0.5
@@ -123,6 +125,7 @@ func _build_world() -> void:
     capture.size = Vector2i(2560,1440)
     capture.use_hdr_2d = false
     capture.scaling_3d_scale = 1.0
+    capture.use_taa = false
     capture.render_target_update_mode = SubViewport.UPDATE_DISABLED
     add_child(capture)
     var environment_node := WorldEnvironment.new()
@@ -180,7 +183,10 @@ func _build_world() -> void:
             var bounds := _local_bounds(source)
             # The near (north) wall of the other room is the aperture.
             # Remove its flat cladding only; keep its interior columns.
-            if bounds.end.z<=-12.72 and bounds.size.x>2.0:
+            # Streaming replaces the authored exit/entry walls with piers,
+            # frames and bent corridors. Keep those meshes even beyond the
+            # north edge; only the authored near-wall cladding is removed.
+            if section_name!="StreamingPortals" and bounds.end.z<=-12.72 and bounds.size.x>2.0:
                 continue
             var copy := MeshInstance3D.new()
             copy.name = "Mesh_%04d_%s" % [cloned_meshes,str(source.name).replace("@","_")]
@@ -357,6 +363,7 @@ func _build_aperture() -> void:
     portal_material = ShaderMaterial.new()
     portal_material.shader = PORTAL_SHADER
     portal_material.set_shader_parameter("other_view",capture.get_texture())
+    portal_material.set_shader_parameter("aperture_size",quad.size)
     portal.material_override = portal_material
     add_child(portal)
     portal.position = Vector3(CENTER_X-0.65,wall_bounds.get_center().y,portal_z)
@@ -497,46 +504,61 @@ func _advance(delta: float, near: bool) -> void:
 
 
 func _render_view(camera: Camera3D, delta: float) -> void:
-    var center := hall.to_global(Vector3(CENTER_X,wall_bounds.get_center().y,wall_bounds.position.z))
-    var camera_pos := hall.to_local(camera.global_position)
-    if camera_pos.z>=wall_bounds.position.z or camera.global_position.distance_to(center)>20.0:
-        return
-    var direction := (center-camera.global_position).normalized()
-    if (-camera.global_basis.z).dot(direction)<-0.18:
-        return
-    # Warm up during the opening, not on the first fully exposed frame.
     if phase not in ["opening","open","closing"]:
         return
-    frame_clock += delta
-    var rate := 30.0 if quality in ["off","low"] else 60.0
-    var view_transform := hall.global_transform.affine_inverse()*camera.get_camera_transform()
-    # Moving cameras need a new view every frame to keep the aperture
-    # attached to the real scene. Static views can render at 30 fps.
-    var moved := view_transform.origin.distance_to(last_view_transform.origin)>0.012 or view_transform.basis.z.dot(last_view_transform.basis.z)<0.99998 or view_transform.basis.y.dot(last_view_transform.basis.y)<0.99998
-    if has_rendered and frame_clock<1.0/rate and not moved:
+    var eye := hall.to_local(camera.get_camera_transform().origin)
+    var center := portal.position
+    if eye.z>=wall_bounds.position.z or eye.distance_to(center)>20.0:
         return
-    frame_clock = 0.0
     var screen := camera.get_viewport().get_visible_rect().size
     if screen.x<2.0 or screen.y<2.0:
         return
-    var wanted := _capture_size(screen)
-    if capture.size!=wanted:
+    var wanted := _portal_capture_size(screen)
+    var size_changed := capture.size!=wanted
+    frame_clock += delta
+    var rate := 30.0 if quality in ["off","low"] else 60.0
+    # Looking around does not change a wall-aligned capture. Translation
+    # does; refresh immediately, including very small head movements.
+    # Never freeze a screen-space image just because the eye looks aside.
+    if has_rendered and not size_changed and eye.is_equal_approx(last_eye) and frame_clock<1.0/rate:
+        return
+    frame_clock = 0.0
+    if size_changed:
         capture.size = wanted
-    virtual_camera.global_transform = view_transform
-    last_view_transform = view_transform
-    virtual_camera.keep_aspect = camera.keep_aspect
-    virtual_camera.fov = camera.fov
-    virtual_camera.near = camera.near
-    virtual_camera.far = camera.far
+    _sync_portal_camera(eye,camera.far)
+    last_eye = eye
     capture.render_target_update_mode = SubViewport.UPDATE_ONCE
     if not has_rendered:
         has_rendered = true
         portal_material.set_shader_parameter("view_ready",true)
 
 
+func _portal_capture_size(screen: Vector2) -> Vector2i:
+    var aperture_size := (portal.mesh as QuadMesh).size
+    # Match the physical image plane, not the player's screen aspect.
+    # Preserve the existing quality tiers and their resolution caps.
+    var aspect := aperture_size.x/aperture_size.y
+    var target := _capture_size(Vector2(screen.x,screen.x/aspect))
+    return Vector2i(target.x,maxi(2,roundi(float(target.x)/aspect)))
+
+
+func _sync_portal_camera(eye: Vector3, far_clip: float) -> void:
+    var center := portal.position
+    var aperture_size := (portal.mesh as QuadMesh).size
+    var depth := center.z-eye.z
+    # Off-axis perspective: the near plane is the physical portal quad.
+    # Its normal is +Z, so the camera's right axis is -X. The projection
+    # depends only on the eye's position relative to the wall, not its yaw,
+    # pitch or FOV. Geometry in front of the portal is clipped naturally.
+    virtual_camera.global_transform = Transform3D(Basis(Vector3.LEFT,Vector3.UP,Vector3.FORWARD),eye)
+    virtual_camera.keep_aspect = Camera3D.KEEP_HEIGHT
+    var offset := Vector2(eye.x-center.x,center.y-eye.y)
+    virtual_camera.set_frustum(aperture_size.y,offset,depth,maxf(far_clip,depth+60.0))
+
+
 func _capture_size(screen: Vector2) -> Vector2i:
-    # Preserve the screen aspect for correct parallax. Supersample the
-    # portal in normal/high settings instead of enlarging a 1600px image.
+    # Shared quality policy for a requested image aspect. Supersample
+    # normal/high settings instead of enlarging a 1600px image.
     var cap := 2560.0
     var sample_scale := 1.25
     match quality:
