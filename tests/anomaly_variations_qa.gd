@@ -598,12 +598,29 @@ func _verify_other_side(hall: Node3D, other: Node3D) -> bool:
     var collider := hall.get_node_or_null("Architecture/SouthWestWall_Collision")
     var other_wall := other.get_node("Architecture/SouthWestWall") as MeshInstance3D
     var other_visible := other_wall.visible
+    # Find the real saved lower cladding independently. It may have an
+    # automatic editor name, so the event must not depend on its label.
+    var trim: MeshInstance3D
+    for child in wall.get_parent().get_children():
+        var mesh := child as MeshInstance3D
+        if mesh == null or not (mesh.mesh is BoxMesh):
+            continue
+        var b: AABB = (hall.global_transform.affine_inverse()*mesh.global_transform)*mesh.get_aabb()
+        if b.size.x>30.0 and b.size.y>1.5 and b.size.y<2.5 and b.size.z<0.3 and absf(b.get_center().z)<0.2:
+            trim = mesh
+            break
+    if trim == null:
+        _fail("Other Side test: missing south wall cladding")
+        return false
+    var trim_original_name := trim.name
+    var trim_original_visible := trim.visible
+    trim.name = "RenamedCladdingForQA"
     var adapter := Adapter.new()
     if not adapter.apply(hall,"the_other_side"):
         _fail("Other Side apply failed")
         return false
     var event := hall.get_node_or_null("AnomalyOtherSide")
-    if event == null or wall.visible or other.has_node("AnomalyOtherSide") or other_wall.visible!=other_visible:
+    if event == null or wall.visible or trim.visible or other.has_node("AnomalyOtherSide") or other_wall.visible!=other_visible:
         _fail("Other Side wall replacement or isolation failed")
         return false
     var capture := event.get_node_or_null("OtherSideViewport") as SubViewport
@@ -641,7 +658,13 @@ func _verify_other_side(hall: Node3D, other: Node3D) -> bool:
         _fail("Other Side cannot repeat for late observers")
         return false
     adapter.clear()
-    if hall.has_node("AnomalyOtherSide") or wall.mesh!=original_mesh or wall.material_override!=original_material or wall.visible!=original_visible or hall.get_node_or_null("Architecture/SouthWestWall_Collision")!=collider:
+    # Restore the editor name only after exercising the normal clear path.
+    var trim_restored := trim.visible==trim_original_visible
+    # Auto-generated names containing @ are not valid manual assignments.
+    # The test hall is destroyed immediately after this regression check.
+    if not str(trim_original_name).contains("@"):
+        trim.name = trim_original_name
+    if not trim_restored or hall.has_node("AnomalyOtherSide") or wall.mesh!=original_mesh or wall.material_override!=original_material or wall.visible!=original_visible or hall.get_node_or_null("Architecture/SouthWestWall_Collision")!=collider:
         _fail("Other Side cleanup changed authored room")
         return false
     return true

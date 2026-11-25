@@ -50,20 +50,17 @@ func configure(room: Node3D, wall: MeshInstance3D) -> bool:
     var left := CENTER_X-OPEN_WIDTH*0.5
     var right := CENTER_X+OPEN_WIDTH*0.5
     if wall_bounds.position.x>left or wall_bounds.end.x<right or wall_bounds.size.y<4.8:
+        push_warning("Other Side: authored wall does not contain the aperture")
         return false
-    var trim: MeshInstance3D
-    for item in wall.get_parent().get_children():
-        if item is MeshInstance3D and item.mesh is BoxMesh and str(item.name).begins_with("WoodWainscoting"):
-            var b := _local_bounds(item)
-            if b.size.x>OPEN_WIDTH and b.position.x<left and b.end.x>right and absf(b.get_center().z-wall_bounds.position.z)<0.30:
-                trim = item
-                break
+    var trim := _find_wainscoting(wall,left,right)
     if trim == null:
+        push_warning("Other Side: no matching lower wall cladding")
         return false
     portal_z = wall_bounds.end.z+POCKET_DEPTH+0.07
     # Build from the original unmodified room before replacing its wall.
     _build_world()
     if cloned_meshes<30:
+        push_warning("Other Side: not enough visible source geometry (%d meshes)" % cloned_meshes)
         return false
     panel = Node3D.new()
     panel.name = "SlidingWallSection"
@@ -75,6 +72,30 @@ func configure(room: Node3D, wall: MeshInstance3D) -> bool:
     _set_open_fraction(0.0)
     configured = true
     return true
+
+
+func _find_wainscoting(wall: MeshInstance3D, left: float, right: float) -> MeshInstance3D:
+    # In the saved main.tscn, repeated WoodWainscoting names become
+    # @MeshInstance3D@N. Match the lower cladding's actual geometry,
+    # not an editor-generated name (or a particular generated number).
+    var best: MeshInstance3D
+    var best_score := INF
+    for item in wall.get_parent().get_children():
+        var candidate := item as MeshInstance3D
+        if candidate == null or candidate == wall or not candidate.visible or not (candidate.mesh is BoxMesh):
+            continue
+        var b := _local_bounds(candidate)
+        if b.size.x<=OPEN_WIDTH or b.position.x>left or b.end.x<right:
+            continue
+        if b.size.z>0.35 or b.size.y<0.8 or b.size.y>2.8:
+            continue
+        if absf(b.position.y-wall_bounds.position.y)>0.30 or absf(b.get_center().z-wall_bounds.position.z)>0.30:
+            continue
+        var score := absf(b.get_center().z-wall_bounds.position.z)+absf(b.position.y-wall_bounds.position.y)+absf(b.size.y-2.0)*0.25
+        if score<best_score:
+            best_score = score
+            best = candidate
+    return best
 
 
 func _local_bounds(mesh: MeshInstance3D) -> AABB:
@@ -136,7 +157,7 @@ func _build_world() -> void:
             if bounds.end.z<=-12.72 and bounds.size.x>2.0:
                 continue
             var copy := MeshInstance3D.new()
-            copy.name = "%s_%04d" % [source.name,cloned_meshes]
+            copy.name = "Mesh_%04d_%s" % [cloned_meshes,str(source.name).replace("@","_")]
             copy.mesh = source.mesh
             copy.material_override = source.material_override
             copy.material_overlay = source.material_overlay
