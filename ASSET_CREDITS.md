@@ -124,3 +124,17 @@ but this attribution is retained for asset provenance.
 
 - Nieobie, [Game Icon Pack v1.4](https://nieobie.itch.io/free-icons) ([SVG source v1.4](https://github.com/Nieobie/game-icon-pack/tree/v1.4/svg)), CC0. Selected SVG icons rendered white and tinted in the existing button theme.
 - Kenney, [Interface Sounds](https://kenney.nl/assets/interface-sounds), CC0. `bong_001.ogg`, `confirmation_002.ogg`, `glass_006.ogg` copied byte-for-byte (matching user-provided Git blob hashes).
+
+
+## The Flood water audio (CC0 1.0)
+
+- **beskhu**, [water drop 1](https://freesound.org/people/beskhu/sounds/273870/), [water drop 2](https://freesound.org/people/beskhu/sounds/273869/), [water drop 3](https://freesound.org/people/beskhu/sounds/273868/).
+- **Allan Legemaate (alegemaate)**, [Water Splashes](https://freesound.org/people/alegemaate/sounds/364701/).
+
+All four sources are licensed [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/).
+The supplied recordings were prepared as 44.1 kHz mono PCM16 WAV with trimmed
+starts/tails, fades, high-pass filtering and level adjustment. Water Splashes
+was cut into four independent footstep cues. Place the prepared files under
+`audio/flood/` (water_drop_01..03.wav and water_step_01..04.wav).
+The runtime uses the recordings when imported and falls back to procedural
+audio if the optional asset pack has not yet been installed.

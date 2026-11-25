@@ -5,12 +5,14 @@ const WATER_SHADER = preload("res://gameplay/anomalies/flood_water.gdshader")
 const Synth = preload("res://gameplay/immersion_synth.gd")
 const CARD_PATH := "res://models/playing_cards/individual/card_%02d.gltf"
 const DURATION := 48.0
-const MAX_HEIGHT := 0.155
+const MAX_HEIGHT := 0.230
+const CARD_SCALE := 0.16
+const DROP_SOUND_PATH := "res://audio/flood/water_drop_%02d.wav"
 const SOURCE := Vector2(3.25,8.0)
 const RIPPLE_COUNT := 8
 const CARD_IDS := [12,1,14,6,19,25,32,40,46,51]
 static var cached_water: AudioStreamWAV
-static var cached_drop: AudioStreamWAV
+static var cached_drops: Array[AudioStreamWAV] = []
 var hall: Node3D
 var floor_regions: Array[Rect2] = []
 var surface: MeshInstance3D
@@ -179,7 +181,7 @@ func _build_cards() -> void:
             continue
         card.name = "FloatingCard_%02d" % i
         group.add_child(card)
-        card.scale = Vector3.ONE*0.11
+        card.scale = Vector3.ONE*CARD_SCALE
         card.hide()
         cards.append({"node":card,"anchor":points[i],"yaw":rng.randf_range(-PI,PI),"phase":rng.randf_range(0.0,TAU)})
 
@@ -235,13 +237,9 @@ func _build_splashes() -> void:
 
 
 func _build_droplets() -> void:
-    var shape := SphereMesh.new()
-    shape.radius = 0.012
-    shape.height = 0.047
-    shape.radial_segments = 8
-    shape.rings = 5
+    var shape := _teardrop_mesh()
     var mat := StandardMaterial3D.new()
-    mat.albedo_color = Color(0.51,0.66,0.65,0.80)
+    mat.albedo_color = Color(0.63,0.76,0.74,0.83)
     mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
     mat.render_priority = 3
     mat.roughness = 0.10
@@ -252,9 +250,34 @@ func _build_droplets() -> void:
         drop.mesh = shape
         drop.material_override = mat
         drop.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+        drop.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
         add_child(drop)
         drop.hide()
         droplet_pool.append(drop)
+
+
+func _teardrop_mesh() -> ArrayMesh:
+    # Rounded lower body and a narrow upper tip, rather than an elongated
+    # sphere. Deformation below stretches the drop as it accelerates.
+    const RINGS := 12
+    const SIDES := 16
+    var tool := SurfaceTool.new()
+    tool.begin(Mesh.PRIMITIVE_TRIANGLES)
+    for row in range(RINGS+1):
+        var t := float(row)/float(RINGS)
+        var y := lerpf(-0.035,0.050,t)
+        var radius := 0.027*pow(maxf(sin(PI*t),0.0001),0.66)*(1.18-0.78*t)
+        for side in range(SIDES+1):
+            var angle := TAU*float(side)/float(SIDES)
+            tool.add_vertex(Vector3(cos(angle)*radius,y,sin(angle)*radius))
+    for row in range(RINGS):
+        for side in range(SIDES):
+            var a := row*(SIDES+1)+side
+            var b := a+SIDES+1
+            for index in [a,b,b+1,a,b+1,a+1]:
+                tool.add_index(index)
+    tool.generate_normals()
+    return tool.commit()
 
 
 func _build_audio() -> void:
@@ -262,7 +285,15 @@ func _build_audio() -> void:
         return
     if cached_water == null:
         cached_water = Synth.water_ambience()
-        cached_drop = Synth.water_drop()
+    if cached_drops.is_empty():
+        for i in range(1,4):
+            var path := DROP_SOUND_PATH % i
+            if ResourceLoader.exists(path,"AudioStreamWAV"):
+                var sample := ResourceLoader.load(path,"AudioStreamWAV") as AudioStreamWAV
+                if sample != null:
+                    cached_drops.append(sample)
+        if cached_drops.is_empty():
+            cached_drops.append(Synth.water_drop())
     for p in [Vector3(3.0,0.30,7.5),Vector3(1.0,0.30,-5.5),Vector3(-15.0,0.30,-6.5),Vector3(-28.0,0.30,-6.5),Vector3(-41.0,0.30,-6.5)]:
         var emitter := AudioStreamPlayer3D.new()
         emitter.name = "WaterAmbience_%02d" % ambience.size()
@@ -277,11 +308,11 @@ func _build_audio() -> void:
     for i in range(4):
         var emitter := AudioStreamPlayer3D.new()
         emitter.name = "WaterDropAudio_%02d" % i
-        emitter.stream = cached_drop
+        emitter.stream = cached_drops[i%cached_drops.size()]
         emitter.bus = "AMBIENCE"
         emitter.unit_size = 1.1
         emitter.max_distance = 11.0
-        emitter.volume_db = -20.0
+        emitter.volume_db = -15.0
         add_child(emitter)
         drop_audio.append(emitter)
 
@@ -333,8 +364,10 @@ func _spawn_drop(player: Node3D) -> void:
             if drop.visible:
                 continue
             drop.position = Vector3(p.x,5.65,p.y)
+            var size := rng.randf_range(0.86,1.20)
+            drop.scale = Vector3.ONE*size
             drop.show()
-            drops.append({"node":drop,"speed":0.0})
+            drops.append({"node":drop,"speed":0.35,"size":size})
             return
 
 
@@ -345,8 +378,11 @@ func _update_drops(delta: float, player: Node3D) -> void:
     for i in range(drops.size()-1,-1,-1):
         var data := drops[i]
         var drop := data["node"] as MeshInstance3D
-        var speed := minf(float(data["speed"])+delta*9.81,9.0)
+        var speed := minf(float(data["speed"])+delta*6.2,4.6)
         data["speed"] = speed
+        var size := float(data["size"])
+        var stretch := lerpf(1.0,1.40,speed/4.6)
+        drop.scale = Vector3(size/sqrt(stretch),size*stretch,size/sqrt(stretch))
         drop.position.y -= speed*delta
         if drop.position.y<=water_height:
             var p := Vector2(drop.position.x,drop.position.z)
@@ -355,7 +391,8 @@ func _update_drops(delta: float, player: Node3D) -> void:
                 var audio := drop_audio[drop_audio_index]
                 drop_audio_index = (drop_audio_index+1)%drop_audio.size()
                 audio.position = Vector3(p.x,water_height,p.y)
-                audio.pitch_scale = rng.randf_range(0.88,1.13)
+                audio.stream = cached_drops[rng.randi_range(0,cached_drops.size()-1)]
+                audio.pitch_scale = rng.randf_range(0.94,1.06)
                 audio.play()
             drop.hide()
             drops.remove_at(i)

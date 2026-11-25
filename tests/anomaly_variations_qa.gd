@@ -556,7 +556,7 @@ func _verify_flood(hall: Node3D, other: Node3D) -> bool:
     event.set("elapsed",24.0)
     event.call("_update_progress")
     var half_height := float(event.get("water_height"))
-    if half_height <= 0.04 or half_height >= 0.15:
+    if half_height <= 0.09 or half_height >= 0.19:
         _fail("Flood midpoint height invalid")
         return false
     event.set("elapsed",48.0)
@@ -564,8 +564,16 @@ func _verify_flood(hall: Node3D, other: Node3D) -> bool:
     if not bool(event.call("contains_water",Vector3(-44,0,-6))) or not bool(event.call("contains_water",Vector3(0,0,12))) or bool(event.call("contains_water",Vector3(-20,0,5))):
         _fail("Flood does not match the full L-shaped floor")
         return false
-    if float(event.get("water_height")) < 0.14 or event.get_node("FloatingCards").get_child_count() < 8:
+    if absf(float(event.get("water_height"))-0.230)>0.002 or event.get_node("FloatingCards").get_child_count() < 8:
         _fail("Flood depth or card models missing")
+        return false
+    for card in event.get_node("FloatingCards").get_children():
+        if not is_equal_approx(card.scale.x,0.16):
+            _fail("Flood floating card scale regressed")
+            return false
+    var drop := event.get_node_or_null("CeilingDroplet_00") as MeshInstance3D
+    if drop == null or not (drop.mesh is ArrayMesh) or drop.mesh.get_aabb().size.y < 0.08:
+        _fail("Flood shaped droplet missing")
         return false
     if not event.find_children("*","CollisionObject3D",true,false).is_empty():
         _fail("Flood must never obstruct player or exits")

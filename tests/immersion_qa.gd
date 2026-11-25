@@ -28,6 +28,10 @@ func _run() -> void:
         if wave == null or wave.loop_mode != AudioStreamWAV.LOOP_DISABLED:
             _fail("Missing footstep: " + surface)
             return
+    for variant in range(4):
+        if director.get_footstep_stream("water",variant) == null:
+            _fail("Missing water footstep variant")
+            return
     var player = PlayerScript.new()
     for spec in [
         {"pos": Vector3(0.0, 0.0, 2.0), "surface": "carpet"},

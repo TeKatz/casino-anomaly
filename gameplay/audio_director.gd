@@ -16,6 +16,8 @@ var world_reverb: AudioEffectReverb
 var procedural_loops: Dictionary = {}
 var step_sounds: Dictionary = {}
 var steps_played := 0
+const WATER_STEP_PATH := "res://audio/flood/water_step_%02d.wav"
+const WATER_STEP_VARIANTS := 4
 var corridor_target := false
 var _created_world_bus := false
 var menu_enabled := false
@@ -209,8 +211,16 @@ func _prepare_immersion() -> void:
     else:
         world_reverb = AudioServer.get_bus_effect(index, 0) as AudioEffectReverb
     for surface in ["wood", "carpet", "corridor", "water"]:
-        for variant in range(2):
-            step_sounds[surface + str(variant)] = ImmersionSynth.footstep(surface, variant)
+        var count := WATER_STEP_VARIANTS if surface == "water" else 2
+        for variant in range(count):
+            var sample: AudioStreamWAV
+            if surface == "water":
+                var path := WATER_STEP_PATH % (variant+1)
+                if ResourceLoader.exists(path,"AudioStreamWAV"):
+                    sample = ResourceLoader.load(path,"AudioStreamWAV") as AudioStreamWAV
+            if sample == null:
+                sample = ImmersionSynth.footstep(surface,variant)
+            step_sounds[surface + str(variant)] = sample
     for kind in ["cabinet", "bar", "vent", "pressure", "backrooms_hum"]:
         procedural_loops[kind] = ImmersionSynth.ambience(kind)
     footstep_player = AudioStreamPlayer.new()
@@ -232,7 +242,8 @@ func get_immersion_loop(kind: String) -> AudioStreamWAV:
 
 
 func get_footstep_stream(surface: String, variant: int) -> AudioStreamWAV:
-    return step_sounds.get(surface + str(posmod(variant, 2))) as AudioStreamWAV
+    var count := WATER_STEP_VARIANTS if surface == "water" else 2
+    return step_sounds.get(surface + str(posmod(variant,count))) as AudioStreamWAV
 
 
 func play_footstep(surface: String, sprinting: bool) -> void:
@@ -244,7 +255,7 @@ func play_footstep(surface: String, sprinting: bool) -> void:
     footstep_player.stream = stream
     footstep_player.pitch_scale = (1.045 if sprinting else 1.0) + \
             (0.026 if steps_played % 3 == 0 else -0.020)
-    footstep_player.volume_db = -12.0 if surface == "carpet" else -9.0
+    footstep_player.volume_db = -12.0 if surface == "carpet" else (-6.0 if surface == "water" else -9.0)
     footstep_player.play()
     steps_played += 1
 
