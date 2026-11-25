@@ -1,0 +1,18 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://gameplay/anomaly_definition.gd" id="1_definition"]
+[ext_resource type="Script" path="res://gameplay/anomalies/silent_audience.gd" id="2_handler"]
+
+[resource]
+script = ExtResource("1_definition")
+handler = ExtResource("2_handler")
+id = "the_silent_audience"
+category_en = "Major Events"
+category_de = "Großereignisse"
+title_en = "The Silent Audience"
+title_de = "Das stumme Publikum"
+description_en = "Motionless guests slowly populate the casino wherever you aren't looking. Their heads begin to follow you; the room falls silent. At the end every guest stands up at once."
+description_de = "Reglose Gäste erscheinen nach und nach im Casino, bevorzugt außerhalb deines Blickfeldes. Ihre Köpfe folgen dir und der Raum verstummt. Zum Schluss stehen alle gleichzeitig auf."
+target_path = "ModelInteriors/LoungeSofa_01"
+rarity = "singularity"
+difficulty = 3
