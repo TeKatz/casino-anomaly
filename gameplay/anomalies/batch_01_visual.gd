@@ -53,7 +53,16 @@ func targets(room: Node3D, entry: Dictionary) -> Array[Node3D]:
                     var model := child.get_node_or_null("EditableImportedModel") as Node3D
                     if model == null:
                         model = child as Node3D
-                    for candidate in model.find_children("*", "MeshInstance3D", true, false):
+                    # glTF import may expose the sole mesh as its root or
+                    # as a child, depending on the authored scene wrapper.
+                    if model is MeshInstance3D:
+                        result.append(model)
+                        continue
+                    var meshes := model.find_children("*", "MeshInstance3D", true, false)
+                    if meshes.size() == 1:
+                        result.append(meshes[0] as Node3D)
+                        continue
+                    for candidate in meshes:
                         if candidate.name.begins_with("security_camera_01"):
                             result.append(candidate as Node3D)
                             break
