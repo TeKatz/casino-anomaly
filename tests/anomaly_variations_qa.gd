@@ -270,8 +270,8 @@ func _run() -> void:
                     return
         if id == "bare_monstera":
             for name in ["Plant_03", "Plant_04", "Plant_05"]:
-                var plant := room.get_node("Decor/" + name + "/GioraMonsteraOriginal")
-                for leaf in plant.find_children("Leaves", "Node3D", true, false):
+                var reviewed_plant := room.get_node("Decor/" + name + "/GioraMonsteraOriginal")
+                for leaf in reviewed_plant.find_children("Leaves", "Node3D", true, false):
                     if (leaf as Node3D).visible:
                         _fail("Plant leaves remained visible: " + name)
                         return
