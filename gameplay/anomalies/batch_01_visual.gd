@@ -88,10 +88,18 @@ func targets(room: Node3D, entry: Dictionary) -> Array[Node3D]:
                     return result
                 result.append(patch)
         "empty_reserve":
+            # Stable discovery ID; visual review changed the clue from
+            # missing liquid to missing paper labels. The bottle shells,
+            # contents, stoppers and decorative hardware remain untouched.
             for bottle in base.find_children("Signature_*", "Node3D", true, false):
-                var liquid := bottle.get_node_or_null("InnerLiquidVolume") as MeshInstance3D
-                if liquid != null and liquid.visible:
-                    result.append(liquid)
+                if bottle.scene_file_path.is_empty():
+                    continue
+                var paper_label := bottle.get_node_or_null("ConformalPaperLabel") as MeshInstance3D
+                if paper_label == null:
+                    result.clear()
+                    return result
+                if paper_label.visible:
+                    result.append(paper_label)
         "bare_monstera":
             for name in ["Plant_03", "Plant_04", "Plant_05"]:
                 var model := base.get_node_or_null(name + "/GioraMonsteraOriginal") as Node3D

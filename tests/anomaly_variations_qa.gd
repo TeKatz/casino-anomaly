@@ -247,6 +247,24 @@ func _run() -> void:
             return
         var baseline: Array = handler.call("snapshot", nodes, id)
         var other_baseline: Array = handler.call("snapshot", other_nodes, id)
+        var original_bottle_parts: Dictionary = {}
+        var bottle_label_count := 0
+        if id == "empty_reserve":
+            for bottle in room.get_node("CornerBar").find_children("Signature_*", "Node3D", true, false):
+                if bottle.scene_file_path.is_empty():
+                    continue
+                var paper_label := bottle.get_node_or_null("ConformalPaperLabel") as MeshInstance3D
+                if paper_label == null or not paper_label.is_visible_in_tree() or not nodes.has(paper_label):
+                    _fail("Missing-label anomaly does not target every visible signature label")
+                    return
+                bottle_label_count += 1
+                for part_name in ["HandCutGlassShell", "InnerLiquidVolume", "MetallicEngravedCap", "EightPointReserveMedallion", "OrnateCrownStopper", "NaturalWoodenStopper"]:
+                    var bottle_part := bottle.get_node_or_null(part_name) as Node3D
+                    if bottle_part != null:
+                        original_bottle_parts[bottle_part] = bottle_part.visible
+            if bottle_label_count < 6 or nodes.size() != bottle_label_count:
+                _fail("Missing-label anomaly has incomplete or duplicate label targets")
+                return
         if not adapter.apply(room, id):
             _fail("Batch 01 adapter refused " + id)
             return
@@ -258,10 +276,13 @@ func _run() -> void:
                     _fail("Batch 01 did not recolor the actual visible surface: " + id)
                     return
         if id == "empty_reserve":
-            for bottle in room.get_node("CornerBar").find_children("Signature_*", "Node3D", true, false):
-                var liquid := bottle.get_node_or_null("InnerLiquidVolume") as MeshInstance3D
-                if liquid != null and liquid.visible:
-                    _fail("A signature bottle still contains liquid")
+            for paper_label_node in nodes:
+                if paper_label_node.visible:
+                    _fail("A signature bottle still has its paper label")
+                    return
+            for bottle_part_node in original_bottle_parts:
+                if bottle_part_node.visible != original_bottle_parts[bottle_part_node]:
+                    _fail("Missing-label anomaly changed bottle glass, liquid or hardware")
                     return
         if id == "watchful_camera":
             for node in nodes:

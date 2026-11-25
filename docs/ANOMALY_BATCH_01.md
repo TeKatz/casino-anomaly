@@ -22,3 +22,7 @@ Targets are deterministic authored scene nodes; slot indices refer to visible re
 ## Visual review pass 1
 
 Blank Reels unchanged. Jackpot pulses slowly with bright gold title and private marquee material; three dark marquees; red emissive LEDs on both camera lens faces (no rotation); four cards bob gently; all eight Cards7 cards disappear; actual visible woven felt recolored (not the hidden placeholder); all three runner patches blue with matching emission; all signature bottle liquid meshes hidden; leaves hidden on plants 03–05. Animations respect reduced motion and jackpot respects reduced light motion. All ten IDs unchanged. Visual review of LED placement, actual color, animation and visibility remains required.
+
+## Visual review pass 2
+
+Nine of ten effects approved by the player; only `empty_reserve` changed. It now appears as Missing labels / Fehlende Etiketten. Every signature bottle loses its conformal paper label; glass, liquid and hardware stay unchanged. The legacy ID remains the same for saves and discovery progress. Difficulty estimate lowered to 2/5. Final visual approval of this replacement remains pending. Pack 02 has not started.
