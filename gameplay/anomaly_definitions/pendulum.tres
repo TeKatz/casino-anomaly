@@ -1,0 +1,18 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://gameplay/anomaly_definition.gd" id="1_definition"]
+[ext_resource type="Script" path="res://gameplay/anomalies/batch_03_reality.gd" id="2_handler"]
+
+[resource]
+script = ExtResource("1_definition")
+handler = ExtResource("2_handler")
+id = "pendulum"
+category_en = "Broken Reality"
+category_de = "Verzerrte Realität"
+title_en = "The Pendulum"
+title_de = "Das Pendel"
+description_en = "A chandelier swings slowly, with its associated light moving in sync."
+description_de = "Ein Kronleuchter schwingt langsam mitsamt seiner zugehörigen Lichtquelle."
+target_path = "ModelInteriors/CeilingChandelier_01"
+rarity = "common"
+difficulty = 3

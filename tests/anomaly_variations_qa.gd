@@ -308,6 +308,8 @@ func _run() -> void:
             return
     if not (await _verify_horror_batch(room, next_room)):
         return
+    if not (await _verify_reality_batch(room, next_room)):
+        return
     room.queue_free()
     next_room.queue_free()
     await process_frame
@@ -398,5 +400,57 @@ func _verify_horror_batch(hall: Node3D, other_hall: Node3D) -> bool:
             return false
         if inspector.call("snapshot", affected, horror_id) != initial:
             _fail("Pack 02 failed to restore: " + horror_id)
+            return false
+    return true
+
+
+func _verify_reality_batch(hall: Node3D, other_hall: Node3D) -> bool:
+    var reality_ids := ["unfinished_game","invisible_dealer","breathing_wall","forgotten_door","against_gravity","pendulum","black_bloom","extra_guest","wrong_reflection","they_are_listening"]
+    var reality_adapter := Adapter.new()
+    var reality_available := Catalog.available_ids(hall)
+    for reality_id in reality_ids:
+        var reality_entry := Catalog.get_entry(reality_id)
+        if reality_entry.is_empty() or Catalog.family(reality_id) != reality_id or not reality_available.has(reality_id):
+            _fail("Pack 03 unavailable: " + reality_id)
+            return false
+        var reality_probe: RefCounted = reality_entry["handler"].new()
+        var reality_nodes: Array[Node3D] = reality_probe.call("targets", hall, reality_entry)
+        var reality_other: Array[Node3D] = reality_probe.call("targets", other_hall, reality_entry)
+        if reality_nodes.is_empty() or reality_other.size() != reality_nodes.size():
+            _fail("Pack 03 target mismatch: " + reality_id)
+            return false
+        var reality_before: Array = reality_probe.call("snapshot", reality_nodes, reality_id)
+        var reality_isolated: Array = reality_probe.call("snapshot", reality_other, reality_id)
+        if not reality_adapter.apply(hall, reality_id):
+            _fail("Pack 03 apply failed: " + reality_id)
+            return false
+        if reality_probe.call("snapshot", reality_nodes, reality_id) == reality_before:
+            _fail("Pack 03 effect unchanged: " + reality_id)
+            return false
+        if reality_id == "unfinished_game":
+            var reality_ball := reality_nodes[0].get_node_or_null("AnomalyPack03/OrbitingIvoryBall") as Node3D
+            if reality_ball == null:
+                _fail("Pack 03 missing roulette ball")
+                return false
+            var reality_ball_start := reality_ball.position
+            await create_timer(0.25).timeout
+            var reality_settings := hall.get_node_or_null("/root/GameSettings")
+            if reality_settings != null and not bool(reality_settings.call("get_option", "reduced_motion")) and reality_ball.position.is_equal_approx(reality_ball_start):
+                _fail("Pack 03 roulette ball not moving")
+                return false
+        if reality_id == "extra_guest" and not reality_nodes[0].has_node("AnomalyPack03/SeatedGuest"):
+            _fail("Pack 03 seated guest missing")
+            return false
+        if reality_id == "wrong_reflection":
+            var reality_mirror := reality_nodes[0].get_node_or_null("AnomalyPack03")
+            if reality_mirror == null or not reality_mirror.has_node("ReflectionViewport/ReflectedCamera") or not reality_mirror.has_node("ReflectionOnlyCat"):
+                _fail("Pack 03 reflection setup incomplete")
+                return false
+        if reality_probe.call("snapshot", reality_other, reality_id) != reality_isolated:
+            _fail("Pack 03 leaked to another room: " + reality_id)
+            return false
+        reality_adapter.clear()
+        if reality_probe.call("snapshot", reality_nodes, reality_id) != reality_before:
+            _fail("Pack 03 failed to restore: " + reality_id)
             return false
     return true

@@ -1,0 +1,18 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://gameplay/anomaly_definition.gd" id="1_definition"]
+[ext_resource type="Script" path="res://gameplay/anomalies/batch_03_reality.gd" id="2_handler"]
+
+[resource]
+script = ExtResource("1_definition")
+handler = ExtResource("2_handler")
+id = "they_are_listening"
+category_en = "Broken Reality"
+category_de = "Verzerrte Realität"
+title_en = "They Are Listening"
+title_de = "Sie hören zu"
+description_en = "Near the entrance cabinets the ambient sound and marquee lights slowly fade; they return when you leave."
+description_de = "In der Nähe der Eingangsautomaten verstummen die Umgebungsgeräusche und die Leuchtschilder verblassen. Beim Weggehen kehren sie zurück."
+target_path = "SlotMachines"
+rarity = "rare"
+difficulty = 3
