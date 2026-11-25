@@ -1,0 +1,18 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://gameplay/anomaly_definition.gd" id="1_definition"]
+[ext_resource type="Script" path="res://gameplay/anomalies/batch_01_visual.gd" id="2_handler"]
+
+[resource]
+script = ExtResource("1_definition")
+handler = ExtResource("2_handler")
+id = "dark_marquee"
+category_en = "Casino"
+category_de = "Casino"
+title_en = "Dark marquee"
+title_de = "Dunkles Automaten-Schild"
+description_en = "The illuminated marquee and title of one entrance cabinet are dark."
+description_de = "Das Leuchtschild samt Schrift eines Spielautomaten am Eingang ist dunkel."
+target_path = "SlotMachines"
+rarity = "uncommon"
+difficulty = 3

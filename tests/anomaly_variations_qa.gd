@@ -230,6 +230,35 @@ func _run() -> void:
         _fail("Anomaly leaked to another independent room")
         return
     adapter.clear()
+    # Batch 01: ten independent family IDs, each available on the real
+    # room and isolated from the next streamed instance.
+    var batch_ids := ["blank_reels","false_jackpot","dark_marquee","watchful_camera","floating_hand","missing_hand","burgundy_felt","blue_runner","empty_reserve","bare_monstera"]
+    for id in batch_ids:
+        var entry := Catalog.get_entry(id)
+        if entry.is_empty() or Catalog.family(id) != id or not available.has(id):
+            _fail("Batch 01 family missing or unavailable: " + id)
+            return
+        var handler: RefCounted = entry["handler"].new()
+        var nodes: Array[Node3D] = handler.call("targets", room, entry)
+        var other_nodes: Array[Node3D] = handler.call("targets", next_room, entry)
+        if nodes.is_empty() or other_nodes.size() != nodes.size():
+            _fail("Batch 01 target mismatch: " + id)
+            return
+        var baseline: Array = handler.call("snapshot", nodes, id)
+        var other_baseline: Array = handler.call("snapshot", other_nodes, id)
+        if not adapter.apply(room, id):
+            _fail("Batch 01 adapter refused " + id)
+            return
+        if handler.call("snapshot", nodes, id) == baseline:
+            _fail("Batch 01 did not change the target: " + id)
+            return
+        if handler.call("snapshot", other_nodes, id) != other_baseline:
+            _fail("Batch 01 leaked to another room: " + id)
+            return
+        adapter.clear()
+        if handler.call("snapshot", nodes, id) != baseline:
+            _fail("Batch 01 did not restore the baseline: " + id)
+            return
     room.queue_free()
     next_room.queue_free()
     await process_frame

@@ -1,0 +1,18 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://gameplay/anomaly_definition.gd" id="1_definition"]
+[ext_resource type="Script" path="res://gameplay/anomalies/batch_01_visual.gd" id="2_handler"]
+
+[resource]
+script = ExtResource("1_definition")
+handler = ExtResource("2_handler")
+id = "false_jackpot"
+category_en = "Casino"
+category_de = "Casino"
+title_en = "False jackpot"
+title_de = "Falscher Jackpot"
+description_en = "One entrance cabinet's illuminated title reads JACKPOT instead of its normal name."
+description_de = "Ein Spielautomat am Eingang trägt statt seines normalen Namens die Aufschrift JACKPOT."
+target_path = "SlotMachines"
+rarity = "common"
+difficulty = 2

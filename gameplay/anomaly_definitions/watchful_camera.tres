@@ -1,0 +1,18 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://gameplay/anomaly_definition.gd" id="1_definition"]
+[ext_resource type="Script" path="res://gameplay/anomalies/batch_01_visual.gd" id="2_handler"]
+
+[resource]
+script = ExtResource("1_definition")
+handler = ExtResource("2_handler")
+id = "watchful_camera"
+category_en = "Objects"
+category_de = "Gegenstände"
+title_en = "Watchful camera"
+title_de = "Die verdrehte Kamera"
+description_en = "The west security camera has turned sharply away from its normal direction."
+description_de = "Die westliche Überwachungskamera ist deutlich aus ihrer normalen Blickrichtung gedreht."
+target_path = "ModelInteriors"
+rarity = "common"
+difficulty = 3
