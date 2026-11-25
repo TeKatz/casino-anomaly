@@ -318,7 +318,7 @@ func _run() -> void:
 func _verify_horror_batch(hall: Node3D, other_hall: Node3D) -> bool:
     var horror_ids := ["synchronized_busts","inverted_cat","lightless_horse","watching_canvases","stay_here","last_kings","ownerless_shadow","empty_footsteps","crimson_hall","silent_countdown"]
     var horror_adapter := Adapter.new()
-    var horror_counts := {"synchronized_busts": 2, "inverted_cat": 1, "watching_canvases": 3, "stay_here": 3, "ownerless_shadow": 1, "empty_footsteps": 1}
+    var horror_counts := {"synchronized_busts": 2, "inverted_cat": 2, "watching_canvases": 3, "stay_here": 3, "ownerless_shadow": 1, "empty_footsteps": 1}
     var available_horror := Catalog.available_ids(hall)
     for horror_id in horror_ids:
         var horror_entry := Catalog.get_entry(horror_id)
@@ -341,7 +341,7 @@ func _verify_horror_batch(hall: Node3D, other_hall: Node3D) -> bool:
             return false
         if horror_id in ["ownerless_shadow", "empty_footsteps"]:
             var mark_group := affected[0].get_node_or_null("AnomalyHorrorMark")
-            var expected_marks := 1 if horror_id == "ownerless_shadow" else 6
+            var expected_marks := 1 if horror_id == "ownerless_shadow" else 28
             if mark_group == null or mark_group.get_child_count() != expected_marks:
                 _fail("Pack 02 missing floor marks: " + horror_id)
                 return false
@@ -349,7 +349,29 @@ func _verify_horror_batch(hall: Node3D, other_hall: Node3D) -> bool:
                 if not mark_mesh is MeshInstance3D or mark_mesh.material_override.albedo_texture == null:
                     _fail("Pack 02 floor mark missing generated texture")
                     return false
+        if horror_id == "synchronized_busts":
+            for n in range(affected.size()):
+                var pivot: Vector3 = inspector.call("_bust_pivot", affected[n])
+                var original: Transform3D = initial[n]["transform"]
+                if not (original * pivot).is_equal_approx(affected[n].transform * pivot):
+                    _fail("Bust moved away from its physical pivot")
+                    return false
+        if horror_id == "silent_countdown":
+            var tick_node := affected[floori(float(affected.size()) * 0.5)].get_node_or_null("AnomalyCountdownTick") as AudioStreamPlayer3D
+            if tick_node == null or not tick_node.stream is AudioStreamWAV or tick_node.volume_db > -24.0 or tick_node.bus != "HORROR":
+                _fail("Countdown quiet tick missing or too loud")
+                return false
+        if horror_id == "empty_footsteps":
+            var foot_group := affected[0].get_node("AnomalyHorrorMark")
+            var first_mat := (foot_group.get_child(0) as MeshInstance3D).material_override
+            var last_mat := (foot_group.get_child(27) as MeshInstance3D).material_override
+            if first_mat == last_mat:
+                _fail("Footprints share alpha material")
+                return false
         horror_adapter.clear()
+        if horror_id == "silent_countdown" and affected[floori(float(affected.size()) * 0.5)].has_node("AnomalyCountdownTick"):
+            _fail("Countdown tick leaked after clear")
+            return false
         if inspector.call("snapshot", affected, horror_id) != initial:
             _fail("Pack 02 failed to restore: " + horror_id)
             return false

@@ -16,3 +16,7 @@ Exactly ten new discoverable families and definitions, no variants. Pack 01 appr
 | `silent_countdown` | All entrance slot machine titles display the same silently decreasing countdown. |
 
 The two animations respect reduced motion. The busts oscillate gently over 12 seconds; the countdown starts at 01:00, stops at zero and has no consequence. Both remain identifiable with motion disabled. Floor decals use locally generated original SVG imagery, without extra import dependencies. The visual quality and placement need in-game review, including both streamed orientations and GI modes. The existing CI anomaly regression verifies registration, target counts, application, isolation and cleanup.
+
+## Visual review 1
+
+13, 16 and 19 accepted unchanged. 11 rotates around the measured local mesh bounds base center; 12 replaces inverted cat with both animal statues missing (stable ID retained); 14 blinks with staggered 5.5-second cycles; 15 slow red pulse; 17 softer, elongated shadow silhouette with graded opacity; 18 28 sequential fading footprints, velocity-adaptive with slow idle pace; 20 one spatial, low-level HORROR bus synthesized tick per second, stopping at zero. No new families, assets or changes to player movement. Visual approval remains pending.

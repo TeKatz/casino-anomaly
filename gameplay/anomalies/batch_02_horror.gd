@@ -1,11 +1,13 @@
 extends RefCounted
-## Pack 02: quiet, reversible environmental horror. No audio, camera
-## overrides, collision changes, or player-dependent sudden reveals.
+## Pack 02: quiet, reversible environmental horror. No camera overrides,
+## collision changes or sudden reveals. Countdown has one quiet local tick.
 var saved: Array[Dictionary] = []
 var spawned: Array[Node3D] = []
 var motion: Tween
+const FOOT_COUNT := 28
+const FOOT_SPACING := 0.55
 
-const SHADOW_SVG := """<svg xmlns="http://www.w3.org/2000/svg" width="256" height="640" viewBox="0 0 256 640"><path fill="#09080b" fill-opacity=".38" d="M111 622L80 420 43 302 21 184 41 155 65 188 93 289 94 174Q70 142 80 93Q85 53 128 49Q170 54 177 94Q185 142 161 175L163 289 191 188 216 155 235 184 213 302 176 420 145 622Z"/><path fill="#080709" fill-opacity=".78" d="M115 622L91 415 53 297 35 184 44 176 59 199 107 341 108 166Q88 138 91 96Q94 66 128 64Q160 67 166 96Q169 138 148 166L149 341 197 199 212 176 221 184 203 297 165 415 141 622 128 441Z"/></svg>"""
+const SHADOW_SVG := """<svg xmlns="http://www.w3.org/2000/svg" width="384" height="960" viewBox="0 0 256 640"><defs><linearGradient id="fade" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox"><stop offset="0" stop-color="#100b0d" stop-opacity=".25"/><stop offset=".42" stop-color="#100b0d" stop-opacity=".65"/><stop offset="1" stop-color="#100b0d" stop-opacity=".9"/></linearGradient></defs><path d="M119 622 Q116 609 118 584 L108 388 Q103 364 99 329 L89 273 83 212 Q80 195 88 182 L109 167 113 151 Q96 141 95 116 L94 92 Q97 65 122 62 Q149 61 155 88 L157 116 Q154 140 141 151 L144 166 168 178 Q179 183 179 210 L176 278 169 335 Q167 348 160 346 Q153 341 155 328 L158 249 151 221 151 323 147 384 150 590 Q156 607 150 622 L132 622 130 591 125 429 121 591 125 622Z" fill="none" stroke="#100b0d" stroke-opacity="0.025" stroke-width="28" stroke-linejoin="round"/><path d="M119 622 Q116 609 118 584 L108 388 Q103 364 99 329 L89 273 83 212 Q80 195 88 182 L109 167 113 151 Q96 141 95 116 L94 92 Q97 65 122 62 Q149 61 155 88 L157 116 Q154 140 141 151 L144 166 168 178 Q179 183 179 210 L176 278 169 335 Q167 348 160 346 Q153 341 155 328 L158 249 151 221 151 323 147 384 150 590 Q156 607 150 622 L132 622 130 591 125 429 121 591 125 622Z" fill="none" stroke="#100b0d" stroke-opacity="0.045" stroke-width="20" stroke-linejoin="round"/><path d="M119 622 Q116 609 118 584 L108 388 Q103 364 99 329 L89 273 83 212 Q80 195 88 182 L109 167 113 151 Q96 141 95 116 L94 92 Q97 65 122 62 Q149 61 155 88 L157 116 Q154 140 141 151 L144 166 168 178 Q179 183 179 210 L176 278 169 335 Q167 348 160 346 Q153 341 155 328 L158 249 151 221 151 323 147 384 150 590 Q156 607 150 622 L132 622 130 591 125 429 121 591 125 622Z" fill="none" stroke="#100b0d" stroke-opacity="0.07" stroke-width="13" stroke-linejoin="round"/><path d="M119 622 Q116 609 118 584 L108 388 Q103 364 99 329 L89 273 83 212 Q80 195 88 182 L109 167 113 151 Q96 141 95 116 L94 92 Q97 65 122 62 Q149 61 155 88 L157 116 Q154 140 141 151 L144 166 168 178 Q179 183 179 210 L176 278 169 335 Q167 348 160 346 Q153 341 155 328 L158 249 151 221 151 323 147 384 150 590 Q156 607 150 622 L132 622 130 591 125 429 121 591 125 622Z" fill="none" stroke="#100b0d" stroke-opacity="0.1" stroke-width="7" stroke-linejoin="round"/><path d="M119 622 Q116 609 118 584 L108 388 Q103 364 99 329 L89 273 83 212 Q80 195 88 182 L109 167 113 151 Q96 141 95 116 L94 92 Q97 65 122 62 Q149 61 155 88 L157 116 Q154 140 141 151 L144 166 168 178 Q179 183 179 210 L176 278 169 335 Q167 348 160 346 Q153 341 155 328 L158 249 151 221 151 323 147 384 150 590 Q156 607 150 622 L132 622 130 591 125 429 121 591 125 622Z" fill="url(#fade)"/></svg>"""
 const FOOT_SVG := """<svg xmlns="http://www.w3.org/2000/svg" width="128" height="256" viewBox="0 0 128 256"><g fill="#110a0a" fill-opacity=".85"><path d="M57 237Q30 225 37 192Q44 168 42 148Q35 128 31 104Q24 71 48 58Q76 45 94 75Q108 102 91 132Q74 154 80 181Q96 222 69 237Z"/><ellipse cx="83" cy="35" rx="16" ry="23"/><ellipse cx="57" cy="29" rx="12" ry="17"/><ellipse cx="38" cy="38" rx="10" ry="14"/><ellipse cx="23" cy="50" rx="8" ry="11"/><ellipse cx="15" cy="66" rx="6" ry="9"/></g></svg>"""
 const EYES_SVG := """<svg xmlns="http://www.w3.org/2000/svg" width="512" height="384" viewBox="0 0 512 384"><rect width="512" height="384" fill="#08080b"/><g fill="#d5d0be"><path d="M105 188Q150 155 193 185Q150 208 105 188Z"/><path d="M319 185Q362 155 407 188Q362 208 319 185Z"/></g><g fill="#171418"><ellipse cx="150" cy="184" rx="9" ry="12"/><ellipse cx="362" cy="184" rx="9" ry="12"/></g></svg>"""
 
@@ -42,6 +44,9 @@ func targets(room: Node3D, entry: Dictionary) -> Array[Node3D]:
                 result.clear()
         "inverted_cat":
             result = _group(base, "ConcreteCatDisplay")
+            result.append_array(_group(base, "HorseStatueDisplay"))
+            if result.size() != 2:
+                result.clear()
         "lightless_horse":
             for statue in _group(base, "HorseStatueDisplay"):
                 for piece in _meshes(statue):
@@ -97,8 +102,10 @@ func snapshot(nodes: Array[Node3D], id: String) -> Array[Dictionary]:
     for node in nodes:
         var state := {"node": node}
         match id:
-            "synchronized_busts", "inverted_cat":
+            "synchronized_busts":
                 state["transform"] = node.transform
+            "inverted_cat":
+                state["visible"] = node.visible
             "lightless_horse", "watching_canvases":
                 state["material"] = (node as MeshInstance3D).material_override
             "stay_here", "silent_countdown":
@@ -134,7 +141,7 @@ func _surface_material(color: Color, texture: Texture2D = null, transparent: boo
     return mat
 
 
-func _floor_mark(parent: Node3D, at: Vector3, dimensions: Vector2, mat: StandardMaterial3D, yaw: float, flip: bool = false) -> void:
+func _floor_mark(parent: Node3D, at: Vector3, dimensions: Vector2, mat: StandardMaterial3D, yaw: float, flip: bool = false) -> MeshInstance3D:
     var mark := MeshInstance3D.new()
     var plane := PlaneMesh.new()
     plane.size = dimensions
@@ -147,6 +154,7 @@ func _floor_mark(parent: Node3D, at: Vector3, dimensions: Vector2, mat: Standard
     mark.rotation.y = yaw
     if flip:
         mark.scale.x = -1.0
+    return mark
 
 
 func _marks(floor_mesh: MeshInstance3D, id: String, tex: Texture2D) -> void:
@@ -161,13 +169,19 @@ func _marks(floor_mesh: MeshInstance3D, id: String, tex: Texture2D) -> void:
     spawned.append(mark_root)
     var mat := _surface_material(Color.WHITE, tex, true)
     if id == "ownerless_shadow":
-        _floor_mark(mark_root, Vector3(middle.x, height, middle.z), Vector2(1.35, 3.25), mat, 0.0)
+        # Long narrow silhouette, softer penumbra and fading distal end.
+        _floor_mark(mark_root, Vector3(middle.x, height, middle.z), Vector2(1.25, 3.8), mat, 0.0)
     else:
-        # Six alternating barefoot impressions in a 3m trail on the west
-        # carpet; no collisions or actual moving character.
-        for i in range(6):
+        # Each impression gets an independent alpha; the trail stays in
+        # place as the invisible walker advances down the hall.
+        var spacing := minf(FOOT_SPACING, (bounds.size.x - 1.0) / float(FOOT_COUNT - 1))
+        for i in range(FOOT_COUNT):
             var side := -0.14 if i % 2 == 0 else 0.14
-            _floor_mark(mark_root, Vector3(middle.x + (float(i) - 2.5) * 0.52, height, middle.z + side), Vector2(0.16, 0.34), mat, PI * 0.5, i % 2 == 1)
+            var foot_mat := mat.duplicate() as StandardMaterial3D
+            var foot := _floor_mark(mark_root, Vector3(middle.x + (float(i) - float(FOOT_COUNT - 1) * 0.5) * spacing, height, middle.z + side), Vector2(0.16, 0.31), foot_mat, PI * 0.5, i % 2 == 1)
+            foot.name = "Foot_%02d" % i
+            foot_mat.albedo_color.a = 0.85 if i < 4 else 0.0
+        _animate_footprints(floor_mesh, mark_root, spacing)
 
 
 func _reduced(room: Node3D) -> bool:
@@ -192,19 +206,16 @@ func apply(room: Node3D, entry: Dictionary) -> bool:
     for node in nodes:
         match id:
             "synchronized_busts":
-                node.rotate_object_local(Vector3.UP, deg_to_rad(65.0))
+                _rotate_bust(node, node.transform, _bust_pivot(node), 65.0)
             "inverted_cat":
-                # The wrapper is anchored to the bottom of the 0.49m
-                # statue. Raise it before inversion to clear its pedestal.
-                node.position.y += 0.68
-                node.rotate_object_local(Vector3.FORWARD, PI)
+                node.visible = false
             "lightless_horse":
                 (node as MeshInstance3D).material_override = _surface_material(Color("#09090b"))
             "watching_canvases":
                 (node as MeshInstance3D).material_override = _surface_material(Color.WHITE, tex)
             "stay_here":
                 (node as Label3D).text = "STAY HERE"
-                (node as Label3D).modulate = Color("#e1c28e")
+                (node as Label3D).modulate = Color("#ff6262")
             "last_kings":
                 node.visible = false
             "ownerless_shadow", "empty_footsteps":
@@ -217,15 +228,41 @@ func apply(room: Node3D, entry: Dictionary) -> bool:
                 (node as Label3D).modulate = Color("#edc6a1")
     if id == "synchronized_busts":
         _turn_busts(room, nodes)
+    elif id == "watching_canvases":
+        _blink_eyes(room, nodes)
+    elif id == "stay_here":
+        _pulse_signs(room, nodes)
     elif id == "silent_countdown":
         _countdown(room, nodes)
     return true
 
 
+func _bust_pivot(bust: Node3D) -> Vector3:
+    var inverse := bust.global_transform.affine_inverse()
+    var bounds := AABB()
+    var first := true
+    for mesh in _meshes(bust):
+        var local_bounds: AABB = (inverse * mesh.global_transform) * mesh.get_aabb()
+        bounds = local_bounds if first else bounds.merge(local_bounds)
+        first = false
+    if first:
+        return Vector3.ZERO
+    return Vector3(bounds.get_center().x, bounds.position.y, bounds.get_center().z)
+
+
+func _rotate_bust(bust: Node3D, original: Transform3D, pivot: Vector3, degrees: float) -> void:
+    # Rotate around the visual base in parent space, not the imported
+    # offset origin. This also preserves the author's scale and height.
+    var new_basis := original.basis * Basis(Vector3.UP, deg_to_rad(degrees))
+    bust.transform = Transform3D(new_basis, original * pivot - new_basis * pivot)
+
+
 func _turn_busts(room: Node3D, nodes: Array[Node3D]) -> void:
     var origins: Array[Transform3D] = []
+    var pivots: Array[Vector3] = []
     for state in saved:
         origins.append(state["transform"])
+        pivots.append(_bust_pivot(state["node"] as Node3D))
     motion = room.create_tween().set_loops()
     motion.tween_method(func(phase: float) -> void:
         if room.has_meta("_streaming_standby"):
@@ -233,20 +270,123 @@ func _turn_busts(room: Node3D, nodes: Array[Node3D]) -> void:
         var offset := 65.0 if _reduced(room) else 65.0 + 45.0 * (0.5 - 0.5 * cos(phase * TAU))
         for index in range(nodes.size()):
             if is_instance_valid(nodes[index]):
-                nodes[index].transform = origins[index]
-                nodes[index].rotate_object_local(Vector3.UP, deg_to_rad(offset))
+                _rotate_bust(nodes[index], origins[index], pivots[index], offset)
     , 0.0, 1.0, 12.0)
+
+
+func _blink_eyes(room: Node3D, nodes: Array[Node3D]) -> void:
+    # Keep the approved open-eye artwork; pre-render six closing stages.
+    var frames: Array[Texture2D] = []
+    for frame in range(7):
+        var openness := 1.0 - float(frame) / 6.0
+        var replacement := "<g transform=\"translate(0,184) scale(1,%f) translate(0,-184)\">" % maxf(openness, 0.025)
+        var picture := EYES_SVG.replace('<g fill="#d5d0be">', replacement + '<g fill="#d5d0be">').replace("</svg>", "</g></svg>")
+        frames.append(_svg_texture(picture))
+    var materials: Array[StandardMaterial3D] = []
+    for canvas in nodes:
+        materials.append((canvas as MeshInstance3D).material_override as StandardMaterial3D)
+    motion = room.create_tween().set_loops()
+    motion.tween_method(func(phase: float) -> void:
+        if room.has_meta("_streaming_standby"):
+            return
+        for i in range(materials.size()):
+            var local := fposmod(phase + float(i) * 1.27, 5.5)
+            var closure := 0.0
+            if local > 4.95:
+                closure = sin((local - 4.95) / 0.55 * PI)
+            var index := 0 if _reduced(room) else clampi(roundi(closure * 6.0), 0, 6)
+            if frames[index] != null:
+                materials[i].albedo_texture = frames[index]
+    , 0.0, 5.5, 5.5)
+
+
+func _pulse_signs(room: Node3D, nodes: Array[Node3D]) -> void:
+    motion = room.create_tween().set_loops()
+    motion.tween_method(func(phase: float) -> void:
+        if room.has_meta("_streaming_standby"):
+            return
+        var settings := room.get_node_or_null("/root/GameSettings")
+        var steady := _reduced(room) or (settings != null and (bool(settings.call("get_option", "reduce_light_motion")) or bool(settings.call("get_option", "soft_light_transitions"))))
+        var pulse := 1.0 if steady else 0.5 - 0.5 * cos(phase * TAU)
+        for sign in nodes:
+            if is_instance_valid(sign):
+                (sign as Label3D).modulate = Color("#b83038").lerp(Color("#ff8585"), pulse)
+    , 0.0, 1.0, 3.6)
+
+
+func _animate_footprints(floor_mesh: Node3D, mark_root: Node3D, spacing: float) -> void:
+    # The room root owns the actual player after the streaming handoff.
+    var hall := floor_mesh.get_parent().get_parent() as Node3D
+    if hall == null:
+        return
+    var clock := [0.0, spacing * 3.0]
+    var marks := mark_root.get_children()
+    var cycle := float(FOOT_COUNT) * spacing + 3.0
+    motion = hall.create_tween().set_loops()
+    motion.tween_method(func(phase: float) -> void:
+        var dt := phase - float(clock[0])
+        if dt < 0.0:
+            dt += 1.0
+        clock[0] = phase
+        if hall.has_meta("_streaming_standby"):
+            return
+        var player_body := hall.get_node_or_null("Player") as CharacterBody3D
+        # Use measured horizontal velocity, with a slow idle pace so the
+        # clue remains observable even when the player stops to watch.
+        var pace := 1.0
+        if player_body != null:
+            pace = clampf(Vector2(player_body.velocity.x, player_body.velocity.z).length(), 0.9, 6.3)
+        clock[1] = fposmod(float(clock[1]) + pace * dt, cycle)
+        for index in range(marks.size()):
+            if not is_instance_valid(marks[index]):
+                continue
+            var mat := (marks[index] as MeshInstance3D).material_override as StandardMaterial3D
+            var age := float(clock[1]) - float(index) * spacing
+            var alpha := smoothstep(0.0, 0.25, age) * (1.0 - smoothstep(1.4, 2.8, age))
+            mat.albedo_color.a = 0.85 if _reduced(hall) else alpha * 0.85
+    , 0.0, 1.0, 1.0)
+
+
+func _quiet_tick() -> AudioStreamWAV:
+    # Short damped mechanical click, band-limited and with a soft envelope.
+    # No asset imports, no looping audio, no loud onset.
+    var rate := 22050
+    var frames := 1323
+    var bytes := PackedByteArray()
+    bytes.resize(frames * 2)
+    for i in range(frames):
+        var t := float(i) / float(rate)
+        var envelope := minf(1.0, t / 0.003) * exp(-t * 95.0) * maxf(0.0, 1.0 - t / 0.06)
+        var sample := (sin(TAU * 830.0 * t) * 0.65 + sin(TAU * 1270.0 * t) * 0.35) * envelope * 0.55
+        bytes.encode_s16(i * 2, roundi(sample * 32767.0))
+    var stream := AudioStreamWAV.new()
+    stream.format = AudioStreamWAV.FORMAT_16_BITS
+    stream.mix_rate = rate
+    stream.data = bytes
+    return stream
 
 
 func _countdown(room: Node3D, nodes: Array[Node3D]) -> void:
     # Start counting only once the hall is active. Zero has no consequence.
     # The quiet clock is just a visual clue, not a gameplay time limit.
     var elapsed := [0.0]
+    var tick := AudioStreamPlayer3D.new()
+    tick.name = "AnomalyCountdownTick"
+    tick.stream = _quiet_tick()
+    tick.bus = "HORROR"
+    tick.volume_db = -24.0
+    tick.unit_size = 1.5
+    tick.max_distance = 8.0
+    tick.attenuation_model = AudioStreamPlayer3D.ATTENUATION_INVERSE_DISTANCE
+    nodes[floori(float(nodes.size()) * 0.5)].add_child(tick)
+    spawned.append(tick)
     motion = room.create_tween().set_loops()
     motion.tween_callback(func() -> void:
-        if room.has_meta("_streaming_standby") or _reduced(room):
+        if room.has_meta("_streaming_standby") or _reduced(room) or float(elapsed[0]) >= 60.0:
             return
         elapsed[0] = minf(60.0, float(elapsed[0]) + 1.0)
+        if is_instance_valid(tick):
+            tick.play()
         var seconds := 60 - int(elapsed[0])
         var value := "%02d:%02d" % [floori(float(seconds) / 60.0), seconds % 60]
         for title in nodes:
