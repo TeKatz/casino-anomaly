@@ -241,7 +241,8 @@ func _run() -> void:
         var handler: RefCounted = entry["handler"].new()
         var nodes: Array[Node3D] = handler.call("targets", room, entry)
         var other_nodes: Array[Node3D] = handler.call("targets", next_room, entry)
-        if nodes.is_empty() or other_nodes.size() != nodes.size():
+        var expected_counts := {"blank_reels": 3, "false_jackpot": 2, "dark_marquee": 6, "watchful_camera": 2, "floating_hand": 4, "missing_hand": 8, "burgundy_felt": 1, "blue_runner": 3}
+        if nodes.is_empty() or other_nodes.size() != nodes.size() or (expected_counts.has(id) and nodes.size() != int(expected_counts[id])):
             _fail("Batch 01 target mismatch: " + id)
             return
         var baseline: Array = handler.call("snapshot", nodes, id)
@@ -249,6 +250,31 @@ func _run() -> void:
         if not adapter.apply(room, id):
             _fail("Batch 01 adapter refused " + id)
             return
+        if id == "burgundy_felt" or id == "blue_runner":
+            for node in nodes:
+                var mesh := node as MeshInstance3D
+                var mat := mesh.get_active_material(0) as StandardMaterial3D
+                if not mesh.is_visible_in_tree() or mat == null or not mat.emission_enabled or mat.emission != mat.albedo_color:
+                    _fail("Batch 01 did not recolor the actual visible surface: " + id)
+                    return
+        if id == "empty_reserve":
+            for bottle in room.get_node("CornerBar").find_children("Signature_*", "Node3D", true, false):
+                var liquid := bottle.get_node_or_null("InnerLiquidVolume") as MeshInstance3D
+                if liquid != null and liquid.visible:
+                    _fail("A signature bottle still contains liquid")
+                    return
+        if id == "watchful_camera":
+            for node in nodes:
+                if not node.has_node("AnomalyRecordingLED"):
+                    _fail("Camera recording LED missing")
+                    return
+        if id == "bare_monstera":
+            for name in ["Plant_03", "Plant_04", "Plant_05"]:
+                var plant := room.get_node("Decor/" + name + "/GioraMonsteraOriginal")
+                for leaf in plant.find_children("Leaves", "Node3D", true, false):
+                    if (leaf as Node3D).visible:
+                        _fail("Plant leaves remained visible: " + name)
+                        return
         if handler.call("snapshot", nodes, id) == baseline:
             _fail("Batch 01 did not change the target: " + id)
             return

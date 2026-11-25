@@ -18,3 +18,7 @@ Force each ID using the developer anomaly menu. Compare to a normal room, make t
 | `bare_monstera` | The leaves of one of the lounge plants have disappeared. |
 
 Targets are deterministic authored scene nodes; slot indices refer to visible revised cabinets in scene order. No new external assets or collision modifications. Runtime material overrides are private to the affected mesh. Only visual testing can establish clue readability and final tuning. The existing anomaly QA now also checks availability, effect, restoration and cross-room isolation for each new family.
+
+## Visual review pass 1
+
+Blank Reels unchanged. Jackpot pulses slowly with bright gold title and private marquee material; three dark marquees; red emissive LEDs on both camera lens faces (no rotation); four cards bob gently; all eight Cards7 cards disappear; actual visible woven felt recolored (not the hidden placeholder); all three runner patches blue with matching emission; all signature bottle liquid meshes hidden; leaves hidden on plants 03–05. Animations respect reduced motion and jackpot respects reduced light motion. All ten IDs unchanged. Visual review of LED placement, actual color, animation and visibility remains required.
