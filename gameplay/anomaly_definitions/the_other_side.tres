@@ -1,0 +1,18 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://gameplay/anomaly_definition.gd" id="1_definition"]
+[ext_resource type="Script" path="res://gameplay/anomalies/other_side.gd" id="2_handler"]
+
+[resource]
+script = ExtResource("1_definition")
+handler = ExtResource("2_handler")
+id = "the_other_side"
+category_en = "Major Events"
+category_de = "Großereignisse"
+title_en = "The Other Side"
+title_de = "Die andere Seite"
+description_en = "A section of the casino wall slides away, revealing another casino standing upside down. Loose objects fall upwards before the wall closes again."
+description_de = "Ein Abschnitt der Casinowand gleitet zur Seite und enthüllt ein kopfüber stehendes Casino. Lose Gegenstände fallen nach oben, bevor sich die Wand wieder schließt."
+target_path = "Architecture/SouthWestWall"
+rarity = "singularity"
+difficulty = 2

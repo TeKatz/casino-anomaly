@@ -312,6 +312,8 @@ func _run() -> void:
         return
     if not _verify_flood(room,next_room):
         return
+    if not _verify_other_side(room,next_room):
+        return
     room.queue_free()
     next_room.queue_free()
     await process_frame
@@ -581,5 +583,65 @@ func _verify_flood(hall: Node3D, other: Node3D) -> bool:
     adapter.clear()
     if hall.has_node("AnomalyFlood") or floor.mesh != original_mesh or floor.material_override != original_material:
         _fail("Flood cleanup modified base room")
+        return false
+    return true
+
+
+func _verify_other_side(hall: Node3D, other: Node3D) -> bool:
+    if not Catalog.discoverable_ids().has("the_other_side") or not Catalog.available_ids(hall).has("the_other_side"):
+        _fail("Major event The Other Side unavailable")
+        return false
+    var wall := hall.get_node("Architecture/SouthWestWall") as MeshInstance3D
+    var original_mesh := wall.mesh
+    var original_visible := wall.visible
+    var original_material := wall.material_override
+    var collider := hall.get_node_or_null("Architecture/SouthWestWall_Collision")
+    var other_wall := other.get_node("Architecture/SouthWestWall") as MeshInstance3D
+    var other_visible := other_wall.visible
+    var adapter := Adapter.new()
+    if not adapter.apply(hall,"the_other_side"):
+        _fail("Other Side apply failed")
+        return false
+    var event := hall.get_node_or_null("AnomalyOtherSide")
+    if event == null or wall.visible or other.has_node("AnomalyOtherSide") or other_wall.visible!=other_visible:
+        _fail("Other Side wall replacement or isolation failed")
+        return false
+    var capture := event.get_node_or_null("OtherSideViewport") as SubViewport
+    var inverted := event.get_node_or_null("OtherSideViewport/InvertedCasino") as Node3D
+    var panel := event.get_node_or_null("SlidingWallSection") as Node3D
+    if capture == null or inverted == null or panel == null or not capture.own_world_3d or capture.find_world_3d()==hall.get_world_3d():
+        _fail("Other Side needs an isolated visual world")
+        return false
+    if inverted.basis.y.dot(Vector3.DOWN)<0.99 or int(event.get("cloned_meshes"))<30 or not inverted.has_node("SketchfabFurniture"):
+        _fail("Other Side casino is not fully inverted")
+        return false
+    if not capture.find_children("*","CollisionObject3D",true,false).is_empty():
+        _fail("Other Side cloned active gameplay physics")
+        return false
+    hall.set_meta("_streaming_standby",true)
+    event.call("_process",3.0)
+    hall.remove_meta("_streaming_standby")
+    if str(event.get("phase"))!="waiting" or float(event.get("elapsed"))!=0.0:
+        _fail("Other Side advanced during streaming standby")
+        return false
+    event.set("reduced",false)
+    event.call("_advance",0.1,true)
+    event.call("_advance",6.0,true)
+    if str(event.get("phase"))!="open" or panel.position.x>-3.9 or not event.get_node("OtherSideAperture").visible:
+        _fail("Other Side did not fully open")
+        return false
+    event.call("_advance",26.0,true)
+    event.call("_advance",6.0,true)
+    if str(event.get("phase"))!="rest" or absf(panel.position.x)>0.01:
+        _fail("Other Side did not close")
+        return false
+    event.call("_advance",8.0,true)
+    event.call("_advance",0.1,true)
+    if str(event.get("phase"))!="opening":
+        _fail("Other Side cannot repeat for late observers")
+        return false
+    adapter.clear()
+    if hall.has_node("AnomalyOtherSide") or wall.mesh!=original_mesh or wall.material_override!=original_material or wall.visible!=original_visible or hall.get_node_or_null("Architecture/SouthWestWall_Collision")!=collider:
+        _fail("Other Side cleanup changed authored room")
         return false
     return true
