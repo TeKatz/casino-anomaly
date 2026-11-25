@@ -434,13 +434,19 @@ func _verify_reality_batch(hall: Node3D, other_hall: Node3D) -> bool:
             if reality_ball == null:
                 _fail("Pack 03 missing roulette ball")
                 return false
-            var wheel_top := -INF
+            # Compare the orbit with the actual source mesh track, excluding
+            # the generated ball. The high spindle is not a valid reference.
+            var wheel_bounds: AABB = AABB()
+            var first_part := true
             for wheel_part in reality_nodes[0].find_children("*", "MeshInstance3D", true, false):
                 if wheel_part.mesh != null and wheel_part.visible and not reality_nodes[0].get_node("AnomalyPack03").is_ancestor_of(wheel_part):
                     var part_bounds: AABB = (reality_nodes[0].global_transform.affine_inverse() * wheel_part.global_transform) * wheel_part.get_aabb()
-                    wheel_top = maxf(wheel_top, part_bounds.end.y)
-            if reality_ball.position.y > wheel_top - 0.15:
-                _fail("Pack 03 roulette ball still above the lowered track")
+                    wheel_bounds = part_bounds if first_part else wheel_bounds.merge(part_bounds)
+                    first_part = false
+            var orbit_radius := minf(wheel_bounds.size.x,wheel_bounds.size.z)*0.40
+            var track_height: float = reality_probe.call("_roulette_track_height",reality_nodes[0],wheel_bounds,orbit_radius)
+            if first_part or absf(reality_ball.position.y-track_height-0.022) > 0.002 or reality_ball.position.y >= wheel_bounds.end.y:
+                _fail("Pack 03 roulette ball not seated on wheel track")
                 return false
             var reality_ball_start := reality_ball.position
             await create_timer(0.25).timeout
@@ -459,15 +465,26 @@ func _verify_reality_batch(hall: Node3D, other_hall: Node3D) -> bool:
             if absf(door_root.position.z - reality_wall.get_aabb().position.z) > 0.13:
                 _fail("Pack 03 door detached from the wall")
                 return false
+            if absf(door_root.position.x-(reality_wall.get_aabb().end.x-7.9)) > 0.01:
+                _fail("Pack 03 door not in the reviewed free wall bay")
+                return false
         if reality_id == "black_bloom":
             var bloom_root := reality_nodes[0].get_node_or_null("AnomalyPack03") as Node3D
-            if bloom_root == null or bloom_root.get_child_count() < 8:
+            if bloom_root == null or bloom_root.get_child_count() < 18:
                 _fail("Pack 03 organic strands missing")
                 return false
+            var bloom_bounds := AABB()
+            var first_strand := true
             for strand in bloom_root.get_children():
                 if not (strand is MeshInstance3D) or not (strand.mesh is ArrayMesh):
                     _fail("Pack 03 organic strand not 3D geometry")
                     return false
+                var strand_bounds: AABB = strand.transform * strand.get_aabb()
+                bloom_bounds = strand_bounds if first_strand else bloom_bounds.merge(strand_bounds)
+                first_strand = false
+            if bloom_bounds.size.x < reality_wall.get_aabb().size.x*0.88:
+                _fail("Pack 03 organic strands no longer cover the wall width")
+                return false
         if reality_id == "against_gravity":
             var drop_emitter := reality_nodes[0].get_node_or_null("AnomalyPack03")
             if drop_emitter == null or not drop_emitter.has_node("DropletCeiling") or drop_emitter.find_children("*", "RigidBody3D", false, false).size() != reality_nodes.size():

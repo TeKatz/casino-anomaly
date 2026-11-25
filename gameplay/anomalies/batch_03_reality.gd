@@ -43,6 +43,7 @@ shader_type spatial;
 render_mode cull_disabled;
 uniform float growth = 0.5;
 varying float strand_progress;
+varying float strand_length;
 float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1,311.7))) * 43758.5453); }
 float noise2(vec2 p) {
     vec2 i=floor(p), f=fract(p); f=f*f*(3.0-2.0*f);
@@ -54,12 +55,13 @@ float tissue(vec2 p) {
 void vertex() {
     // UV2 stores radius and the delayed start of each individual strand.
     strand_progress = clamp((growth - UV2.y) / (1.0 - UV2.y), 0.0, 1.0);
+    strand_length = COLOR.r * 32.0;
     float taper = 1.0 - smoothstep(max(0.0,strand_progress-0.075), max(0.001,strand_progress), UV.x);
     VERTEX -= NORMAL * UV2.x * (1.0-taper);
 }
 void fragment() {
     if (strand_progress <= 0.001 || UV.x > strand_progress) { discard; }
-    vec2 p = UV * vec2(95.0, 12.0);
+    vec2 p = UV * vec2(max(95.0, strand_length*48.0), 12.0);
     float grain = tissue(p);
     float ridge = 0.5 + 0.5*sin(UV.y*37.699 + noise2(vec2(UV.x*32.0,UV.y*5.0))*5.0);
     float fibers = ridge * (0.25 + 0.75*noise2(p*0.45));
@@ -264,13 +266,77 @@ func _roulette(room: Node3D, wheel: Node3D) -> void:
     var bounds := _bounds(wheel)
     var center := bounds.get_center()
     var radius := minf(bounds.size.x, bounds.size.z) * 0.40
-    # Keep the reviewed orbit radius; lower the ball a further 6 cm.
-    var level := maxf(bounds.position.y + 0.022, bounds.end.y - 0.165)
-    var ball := _sphere(_root(wheel), "OrbitingIvoryBall", 0.022, _material(Color("#e9e0c9"), 0.0, 0.26), Vector3(center.x + radius, level, center.z))
+    const BALL_RADIUS := 0.022
+    # The spindle is much taller than the wooden ball track. Sample the
+    # imported wheel's triangles at the accepted orbit, not its top AABB.
+    var track := _roulette_track_height(wheel, bounds, radius)
+    var level := track + BALL_RADIUS
+    var ball := _sphere(_root(wheel), "OrbitingIvoryBall", BALL_RADIUS, _material(Color("#e9e0c9"), 0.0, 0.26), Vector3(center.x + radius, level, center.z))
     _animate(room, 4.5, func(phase: float) -> void:
         var angle := TAU * (0.15 if _reduced(room) else phase)
         ball.position = Vector3(center.x + cos(angle) * radius, level, center.z + sin(angle) * radius)
     )
+
+
+func _roulette_track_height(wheel: Node3D, bounds: AABB, radius: float) -> float:
+    const SAMPLES := 16
+    var center := bounds.get_center()
+    var sample_points: Array[Vector2] = []
+    var heights: Array[float] = []
+    for index in range(SAMPLES):
+        var angle := TAU * float(index) / float(SAMPLES)
+        sample_points.append(Vector2(center.x + cos(angle)*radius, center.z + sin(angle)*radius))
+        heights.append(-INF)
+    var inverse := wheel.global_transform.affine_inverse()
+    for part in _meshes(wheel):
+        # The anomaly's own ball is not part of the source wheel geometry.
+        var effect := wheel.get_node_or_null("AnomalyPack03")
+        if effect != null and effect.is_ancestor_of(part):
+            continue
+        var transform_to_wheel := inverse * part.global_transform
+        var part_bounds: AABB = transform_to_wheel * part.get_aabb()
+        var candidates: Array[int] = []
+        for index in range(SAMPLES):
+            var point := sample_points[index]
+            if point.x >= part_bounds.position.x and point.x <= part_bounds.end.x and point.y >= part_bounds.position.z and point.y <= part_bounds.end.z:
+                candidates.append(index)
+        if candidates.is_empty():
+            continue
+        var faces := part.mesh.get_faces()
+        for i in range(0, faces.size()-2, 3):
+            var a: Vector3 = transform_to_wheel * faces[i]
+            var b: Vector3 = transform_to_wheel * faces[i+1]
+            var c: Vector3 = transform_to_wheel * faces[i+2]
+            var low_x := minf(a.x,minf(b.x,c.x))
+            var high_x := maxf(a.x,maxf(b.x,c.x))
+            var low_z := minf(a.z,minf(b.z,c.z))
+            var high_z := maxf(a.z,maxf(b.z,c.z))
+            var ab := Vector2(b.x-a.x,b.z-a.z)
+            var ac := Vector2(c.x-a.x,c.z-a.z)
+            var denominator := ab.cross(ac)
+            if absf(denominator) < 0.00000001:
+                continue
+            for index in candidates:
+                var point := sample_points[index]
+                if point.x < low_x or point.x > high_x or point.y < low_z or point.y > high_z:
+                    continue
+                var ap := point - Vector2(a.x,a.z)
+                var u := ap.cross(ac)/denominator
+                var v := ab.cross(ap)/denominator
+                if u >= -0.0001 and v >= -0.0001 and u+v <= 1.0001:
+                    var y := a.y + u*(b.y-a.y) + v*(c.y-a.y)
+                    heights[index] = maxf(heights[index], y)
+    var valid: Array[float] = []
+    for height in heights:
+        if is_finite(height):
+            valid.append(height)
+    if valid.size() >= SAMPLES / 2:
+        # Median removes isolated decorative ridges and keeps a smooth
+        # horizontal orbit across the rotationally symmetric track.
+        valid.sort()
+        return valid[int(valid.size()/2.0)]
+    # Conservative lower-bowl fallback for imported meshes without CPU faces.
+    return bounds.position.y + bounds.size.y * 0.25
 
 
 func _dealer(room: Node3D, nodes: Array[Node3D]) -> void:
@@ -327,7 +393,7 @@ func _door(wall: MeshInstance3D) -> void:
     var bounds := wall.get_aabb()
     # The wainscoting projects 7 cm beyond the inner wall face.
     # The frame rear projects 4 cm behind this origin; seat it on the trim.
-    root.position = Vector3(bounds.end.x - 6.3, bounds.position.y + 1.25, bounds.position.z - 0.112)
+    root.position = Vector3(bounds.end.x - 7.9, bounds.position.y + 1.25, bounds.position.z - 0.112)
     var wood := _material(Color("#a39b90"), 0.0, 0.92)
     wood.albedo_texture = load("res://assets/wood_table_worn/wood_table_worn_diff_2k.jpg") as Texture2D
     wood.normal_enabled = true
@@ -388,69 +454,119 @@ func _pendulum(room: Node3D, chandelier: Node3D, lamp: Light3D) -> void:
 func _bloom(room: Node3D, wall: MeshInstance3D) -> void:
     var marker := _root(wall)
     var bounds := wall.get_aabb()
-    # Above the timber panels, between the two adjacent wall columns.
-    # +Z of this marker points into the casino, directly off the wall.
-    marker.position = Vector3(bounds.get_center().x - 2.0, bounds.get_center().y + 0.35, bounds.position.z - 0.004)
+    # Occupy nearly the whole 40 m wall, above the wooden wainscoting.
+    # +Z of the marker points into the casino, +X towards the lounge.
+    marker.position = Vector3(bounds.get_center().x, bounds.get_center().y + 0.65, bounds.position.z - 0.004)
     marker.rotation.y = PI
+    var span := bounds.size.x * 0.5
+    var pillars: Array[AABB] = []
+    for item in wall.get_parent().get_children():
+        if item is MeshInstance3D and item.mesh != null and item.get_meta("decor_type", "") == "pillar":
+            var box: AABB = (marker.global_transform.affine_inverse() * item.global_transform) * item.get_aabb()
+            if box.position.z < 0.07 and box.end.z > 0.025 and absf(box.get_center().x) < span:
+                pillars.append(box)
     var shader := Shader.new()
     shader.code = BLOOM_SHADER
     var mat := ShaderMaterial.new()
     mat.shader = shader
-    mat.set_shader_parameter("growth", 0.28)
-    # Separate irregular tendrils, not a filled circular silhouette.
-    # Each entry is start, direction/length, radius, delayed onset.
-    var strands: Array[Array] = [
-        [Vector2(-0.62,-0.05), Vector2(-1.65,0.72), 0.036, 0.00],
-        [Vector2(-0.72,-0.13), Vector2(-1.48,-0.76), 0.029, 0.08],
-        [Vector2(-0.38,0.12), Vector2(-0.72,1.10), 0.025, 0.15],
-        [Vector2(-0.43,-0.19), Vector2(0.58,-0.85), 0.021, 0.21],
-        [Vector2(0.38,0.15), Vector2(1.92,0.47), 0.039, 0.03],
-        [Vector2(0.50,0.08), Vector2(1.65,-0.96), 0.030, 0.12],
-        [Vector2(0.30,0.27), Vector2(0.63,0.99), 0.024, 0.17],
-        [Vector2(0.68,-0.04), Vector2(-0.71,0.53), 0.019, 0.28],
-        [Vector2(-1.40,0.29), Vector2(-0.64,0.79), 0.017, 0.35],
-        [Vector2(1.36,0.25), Vector2(0.62,0.82), 0.018, 0.38]
+    mat.set_shader_parameter("growth", 0.34)
+    # Primary tendrils snake outwards from the center. Independent paths
+    # reach the last wall bays, leaving open wall between the thin ridges.
+    # Each entry: start, end, radius, onset (X in fractions of half-width).
+    var trunks: Array[Array] = [
+        [Vector2(-0.025,0.04),Vector2(-0.94,0.62),0.050,0.00],
+        [Vector2(-0.035,-0.18),Vector2(-0.88,-0.89),0.042,0.06],
+        [Vector2(-0.065,0.35),Vector2(-0.76,1.03),0.032,0.10],
+        [Vector2(0.025,0.09),Vector2(0.94,-0.42),0.053,0.02],
+        [Vector2(0.04,0.24),Vector2(0.87,1.05),0.040,0.07],
+        [Vector2(0.07,-0.22),Vector2(0.73,-0.97),0.032,0.12]
     ]
-    for i in range(strands.size()):
-        var data: Array = strands[i]
-        var strand := _bloom_strand(data[0], data[1], float(data[2]), float(data[3]), float(i)*1.73)
-        _mesh(marker, "OrganicStrand_%02d" % i, strand, mat, Vector3.ZERO)
-    _animate(room, 21.0, func(phase: float) -> void:
-        var growth := 0.24 + 0.76 * (0.5 - 0.5*cos(phase*TAU))
-        mat.set_shader_parameter("growth", 0.88 if _reduced(room) else growth)
+    for i in range(trunks.size()):
+        var data: Array = trunks[i]
+        var start := Vector2(data[0].x*span,data[0].y)
+        var finish := Vector2(data[1].x*span,data[1].y)
+        var direction := finish-start
+        var seed := float(i)*1.73
+        var onset := float(data[3])
+        var strand := _bloom_strand(start,direction,float(data[2]),onset,seed,pillars)
+        _mesh(marker,"OrganicStrand_%02d" % i,strand,mat,Vector3.ZERO)
+        # Branches grow from actual points on the winding main path only
+        # once the primary growth front has reached their junction.
+        for j in range(2):
+            var junction := 0.27 + 0.32*float(j)
+            var branch_start := _bloom_point(start,direction,seed,junction)
+            var branch_end := Vector2(
+                clampf(branch_start.x+signf(direction.x)*span*(0.20 if j == 0 else 0.24),-span*0.95,span*0.95),
+                clampf(branch_start.y+(0.78 if (i+j)%2 == 0 else -0.76),-1.05,1.18))
+            var branch_delay := onset + (1.0-onset)*junction
+            var branch := _bloom_strand(branch_start,branch_end-branch_start,float(data[2])*0.52,branch_delay,seed+4.4+float(j)*2.3,pillars)
+            _mesh(marker,"OrganicBranch_%02d_%02d" % [i,j],branch,mat,Vector3.ZERO)
+    # A slow wall-length spread, then retreat, without widening into a mass.
+    _animate(room, 32.0, func(phase: float) -> void:
+        var growth := 0.34 + 0.66 * (0.5 - 0.5*cos(phase*TAU))
+        mat.set_shader_parameter("growth", 1.0 if _reduced(room) else growth)
     )
 
 
 func _bloom_point(origin: Vector2, direction: Vector2, seed: float, t: float) -> Vector2:
-    var sideways := Vector2(-direction.y, direction.x).normalized()
-    var wiggle := (sin(t*9.4+seed)-sin(seed))*0.095 + (sin(t*21.0+seed*0.6)-sin(seed*0.6))*0.041
-    return origin + direction*t + sideways*wiggle
+    var sideways := Vector2(-direction.y,direction.x).normalized()
+    var length := direction.length()
+    var frequency := maxf(9.4,length*2.3)
+    var wiggle := (sin(t*frequency+seed)-sin(seed))*minf(0.28,0.095+length*0.012)
+    wiggle += (sin(t*frequency*2.31+seed*0.6)-sin(seed*0.6))*minf(0.105,0.041+length*0.004)
+    var point := origin+direction*t+sideways*wiggle
+    point.y = clampf(point.y,-1.40,1.48)
+    return point
 
 
-func _bloom_strand(origin: Vector2, direction: Vector2, thickness: float, delay: float, seed: float) -> ArrayMesh:
+func _bloom_depth(point: Vector2, pillars: Array[AABB]) -> float:
+    var depth := 0.0
+    for box in pillars:
+        if point.y < box.position.y or point.y > box.end.y:
+            continue
+        var distance := absf(point.x-box.get_center().x)-box.size.x*0.5
+        # Rise over each timber column and settle back onto the plaster.
+        var weight := 1.0-smoothstep(0.0,0.10,distance)
+        depth = maxf(depth,weight*(box.end.z+0.003))
+    return depth
+
+
+func _bloom_strand(origin: Vector2, direction: Vector2, thickness: float, delay: float, seed: float, pillars: Array[AABB]) -> ArrayMesh:
     var tool := SurfaceTool.new()
     tool.begin(Mesh.PRIMITIVE_TRIANGLES)
-    const SEGMENTS := 56
+    var length := direction.length()
+    var segments := clampi(int(ceil(length*18.0)),56,360)
     const SIDES := 12
-    for segment in range(SEGMENTS):
+    # Indexed rings: evaluate each center only once, keep fine geometry on
+    # long paths without the old duplicated triangle vertices.
+    for segment in range(segments+1):
+        var t := float(segment)/float(segments)
+        var point := _bloom_point(origin,direction,seed,t)
+        var before := _bloom_point(origin,direction,seed,t-0.001)
+        var after := _bloom_point(origin,direction,seed,t+0.001)
+        var depth := _bloom_depth(point,pillars)
+        var tangent := Vector3(after.x-before.x,after.y-before.y,_bloom_depth(after,pillars)-_bloom_depth(before,pillars)).normalized()
+        if tangent.length_squared() < 0.00001:
+            tangent = Vector3(direction.x,direction.y,0.0).normalized()
+        var across := Vector3(-tangent.y,tangent.x,0.0).normalized()
+        var outward := tangent.cross(across).normalized()
+        var radius := thickness*(0.78+0.15*sin(t*23.0+seed)+0.12*sin(t*53.0+seed))*lerpf(1.0,0.15,pow(t,1.8))
+        radius = maxf(0.0015,radius)
+        for side in range(SIDES+1):
+            var u := float(side)/float(SIDES)
+            var angle := u*TAU
+            var n := across*cos(angle)+outward*sin(angle)
+            tool.set_normal(n)
+            tool.set_color(Color(clampf(length/32.0,0.0,1.0),0.0,0.0,1.0))
+            tool.set_uv(Vector2(t,u))
+            tool.set_uv2(Vector2(radius,delay))
+            tool.add_vertex(Vector3(point.x,point.y,depth)+n*radius)
+    for segment in range(segments):
         for side in range(SIDES):
-            for corner in [Vector2i(segment,side), Vector2i(segment+1,side), Vector2i(segment+1,side+1),
-                    Vector2i(segment,side), Vector2i(segment+1,side+1), Vector2i(segment,side+1)]:
-                var t := float(corner.x)/float(SEGMENTS)
-                var u := float(corner.y)/float(SIDES)
-                var point := _bloom_point(origin, direction, seed, t)
-                var tangent := (_bloom_point(origin,direction,seed,t+0.002)-_bloom_point(origin,direction,seed,t-0.002)).normalized()
-                var across := Vector2(-tangent.y,tangent.x)
-                var angle := u*TAU
-                var n := Vector3(across.x*cos(angle),across.y*cos(angle),sin(angle))
-                var radius := thickness * (0.78+0.15*sin(t*23.0+seed)+0.12*sin(t*53.0+seed)) * lerpf(1.0,0.15,pow(t,1.8))
-                radius = maxf(0.0015,radius)
-                tool.set_normal(n)
-                tool.set_uv(Vector2(t,u))
-                tool.set_uv2(Vector2(radius,delay))
-                # The embedded back half is hidden by the actual wall,
-                # leaving a small raised, textured ridge in the room.
-                tool.add_vertex(Vector3(point.x,point.y,0.0)+n*radius)
+            var a := segment*(SIDES+1)+side
+            var b := a+SIDES+1
+            for index in [a,b,b+1,a,b+1,a+1]:
+                tool.add_index(index)
     tool.generate_tangents()
     return tool.commit()
 
