@@ -434,6 +434,14 @@ func _verify_reality_batch(hall: Node3D, other_hall: Node3D) -> bool:
             if reality_ball == null:
                 _fail("Pack 03 missing roulette ball")
                 return false
+            var wheel_top := -INF
+            for wheel_part in reality_nodes[0].find_children("*", "MeshInstance3D", true, false):
+                if wheel_part.mesh != null and wheel_part.visible and not reality_nodes[0].get_node("AnomalyPack03").is_ancestor_of(wheel_part):
+                    var part_bounds: AABB = (reality_nodes[0].global_transform.affine_inverse() * wheel_part.global_transform) * wheel_part.get_aabb()
+                    wheel_top = maxf(wheel_top, part_bounds.end.y)
+            if reality_ball.position.y > wheel_top - 0.15:
+                _fail("Pack 03 roulette ball still above the lowered track")
+                return false
             var reality_ball_start := reality_ball.position
             await create_timer(0.25).timeout
             var reality_settings := hall.get_node_or_null("/root/GameSettings")
@@ -443,6 +451,23 @@ func _verify_reality_batch(hall: Node3D, other_hall: Node3D) -> bool:
         if reality_id == "invisible_dealer" and reality_nodes.size() != 16:
             _fail("Both card tables must be animated")
             return false
+        if reality_id == "forgotten_door":
+            var door_root := reality_nodes[0].get_node_or_null("AnomalyPack03") as Node3D
+            if door_root == null or not door_root.has_node("DoorCollision/Shape") or not door_root.has_node("DoorBacking"):
+                _fail("Pack 03 door backing/collision missing")
+                return false
+            if absf(door_root.position.z - reality_wall.get_aabb().position.z) > 0.13:
+                _fail("Pack 03 door detached from the wall")
+                return false
+        if reality_id == "black_bloom":
+            var bloom_root := reality_nodes[0].get_node_or_null("AnomalyPack03") as Node3D
+            if bloom_root == null or bloom_root.get_child_count() < 8:
+                _fail("Pack 03 organic strands missing")
+                return false
+            for strand in bloom_root.get_children():
+                if not (strand is MeshInstance3D) or not (strand.mesh is ArrayMesh):
+                    _fail("Pack 03 organic strand not 3D geometry")
+                    return false
         if reality_id == "against_gravity":
             var drop_emitter := reality_nodes[0].get_node_or_null("AnomalyPack03")
             if drop_emitter == null or not drop_emitter.has_node("DropletCeiling") or drop_emitter.find_children("*", "RigidBody3D", false, false).size() != reality_nodes.size():
@@ -460,9 +485,18 @@ func _verify_reality_batch(hall: Node3D, other_hall: Node3D) -> bool:
             return false
         if reality_id == "wrong_reflection":
             var reality_mirror := reality_nodes[0].get_node_or_null("AnomalyPack03")
-            if reality_mirror == null or not reality_mirror.has_node("ReflectionViewport/ReflectedCamera") or not reality_mirror.has_node("ReflectionOnlyCat") or not reality_mirror.has_node("MirrorSurface"):
+            if reality_mirror == null or not reality_mirror.has_node("ReflectionViewport/ReflectedCamera") or not reality_mirror.has_node("ReflectionOnlyCroupier") or not reality_mirror.has_node("MirrorSurface"):
                 _fail("Pack 03 reflection setup incomplete")
                 return false
+            var viewport := reality_mirror.get_node("ReflectionViewport") as SubViewport
+            var reflection_actor := reality_mirror.get_node("ReflectionOnlyCroupier") as Node3D
+            if viewport.size.x < 1400 or not reality_mirror.has_node("MirrorCollision/Shape") or reflection_actor.scene_file_path != "res://models/croupier/scene.gltf":
+                _fail("Pack 03 mirror quality, collision or croupier regression")
+                return false
+            for reflected_mesh in reflection_actor.find_children("*", "MeshInstance3D", true, false):
+                if reflected_mesh.layers != (1 << 19):
+                    _fail("Pack 03 reflected croupier visible outside mirror layer")
+                    return false
         if reality_probe.call("snapshot", reality_other, reality_id) != reality_isolated:
             _fail("Pack 03 leaked to another room: " + reality_id)
             return false

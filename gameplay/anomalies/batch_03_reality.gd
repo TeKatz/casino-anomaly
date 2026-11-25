@@ -1,6 +1,6 @@
 extends RefCounted
 ## Pack 03: room-local animated anomalies. Original resources and gameplay
-## collisions remain untouched. All generated nodes and tweens are owned
+## collisions remain untouched; temporary anomaly colliders are local. All generated nodes and tweens are owned
 ## by this effect and are removed on clear/streaming handoff.
 const Guest = preload("res://gameplay/anomalies/seated_guest.gd")
 const Mirror = preload("res://gameplay/anomalies/wrong_reflection.gd")
@@ -40,24 +40,35 @@ void fragment() {
 """
 const BLOOM_SHADER := """
 shader_type spatial;
-render_mode unshaded, blend_mix, depth_draw_never, cull_disabled;
+render_mode cull_disabled;
 uniform float growth = 0.5;
+varying float strand_progress;
 float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1,311.7))) * 43758.5453); }
 float noise2(vec2 p) {
     vec2 i=floor(p), f=fract(p); f=f*f*(3.0-2.0*f);
     return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x),f.y);
 }
+float tissue(vec2 p) {
+    return noise2(p)*0.55 + noise2(p*3.1)*0.28 + noise2(p*9.2)*0.17;
+}
+void vertex() {
+    // UV2 stores radius and the delayed start of each individual strand.
+    strand_progress = clamp((growth - UV2.y) / (1.0 - UV2.y), 0.0, 1.0);
+    float taper = 1.0 - smoothstep(max(0.0,strand_progress-0.075), max(0.001,strand_progress), UV.x);
+    VERTEX -= NORMAL * UV2.x * (1.0-taper);
+}
 void fragment() {
-    vec2 p = (UV - vec2(0.5)) * 2.0;
-    float r = length(p);
-    float a = atan(p.y,p.x);
-    float n = noise2(p*9.0)*0.26 + noise2(p*22.0)*0.09;
-    float tendrils = pow(max(0.0, sin(a*19.0 + noise2(p*7.0)*9.0)), 4.0);
-    float edge = growth*(0.70 + n + tendrils*0.42);
-    float body = 1.0-smoothstep(edge-0.13,edge+0.025,r);
-    float vein = tendrils*(1.0-smoothstep(edge,edge+0.22,r))*smoothstep(0.10,0.35,r);
-    ALBEDO = vec3(0.014,0.009,0.013) + noise2(p*45.0)*0.017;
-    ALPHA = clamp((body*1.12 + vein*0.62)*(0.80+noise2(p*38.0)*0.20),0.0,0.97) * (1.0-smoothstep(0.91,1.0,r));
+    if (strand_progress <= 0.001 || UV.x > strand_progress) { discard; }
+    vec2 p = UV * vec2(95.0, 12.0);
+    float grain = tissue(p);
+    float ridge = 0.5 + 0.5*sin(UV.y*37.699 + noise2(vec2(UV.x*32.0,UV.y*5.0))*5.0);
+    float fibers = ridge * (0.25 + 0.75*noise2(p*0.45));
+    ALBEDO = mix(vec3(0.017,0.010,0.012),vec3(0.094,0.049,0.052),grain*0.68 + fibers*0.18);
+    ROUGHNESS = mix(0.40,0.81,grain);
+    SPECULAR = 0.38;
+    vec2 relief = vec2(tissue(p+vec2(0.15,0.0))-tissue(p-vec2(0.15,0.0)),tissue(p+vec2(0.0,0.15))-tissue(p-vec2(0.0,0.15)));
+    NORMAL_MAP = vec3(vec2(0.5) - relief*0.42,1.0);
+    NORMAL_MAP_DEPTH = 0.65;
 }
 """
 
@@ -253,9 +264,8 @@ func _roulette(room: Node3D, wheel: Node3D) -> void:
     var bounds := _bounds(wheel)
     var center := bounds.get_center()
     var radius := minf(bounds.size.x, bounds.size.z) * 0.40
-    var level := bounds.end.y - 0.105
-    # The visible outer lip is higher than the ball track. Keep the
-    # accepted radius and lower the centre 8cm into the bowl.
+    # Keep the reviewed orbit radius; lower the ball a further 6 cm.
+    var level := maxf(bounds.position.y + 0.022, bounds.end.y - 0.165)
     var ball := _sphere(_root(wheel), "OrbitingIvoryBall", 0.022, _material(Color("#e9e0c9"), 0.0, 0.26), Vector3(center.x + radius, level, center.z))
     _animate(room, 4.5, func(phase: float) -> void:
         var angle := TAU * (0.15 if _reduced(room) else phase)
@@ -315,7 +325,9 @@ func _door(wall: MeshInstance3D) -> void:
     # The entrance wall is intentionally hidden by streaming portals.
     # Use the intact south-west wall, in the open stretch before the lounge.
     var bounds := wall.get_aabb()
-    root.position = Vector3(bounds.end.x - 6.3, bounds.position.y + 1.24, bounds.position.z - 0.31)
+    # The wainscoting projects 7 cm beyond the inner wall face.
+    # The frame rear projects 4 cm behind this origin; seat it on the trim.
+    root.position = Vector3(bounds.end.x - 6.3, bounds.position.y + 1.25, bounds.position.z - 0.112)
     var wood := _material(Color("#a39b90"), 0.0, 0.92)
     wood.albedo_texture = load("res://assets/wood_table_worn/wood_table_worn_diff_2k.jpg") as Texture2D
     wood.normal_enabled = true
@@ -327,6 +339,8 @@ func _door(wall: MeshInstance3D) -> void:
     var inset := wood.duplicate() as StandardMaterial3D
     inset.albedo_color = Color("#c0b7ad")
     var metal := _material(Color("#716c5d"), 0.72, 0.64)
+    # Fill the small depth difference between the wood trim and upper wall.
+    _box(root, "DoorBacking", Vector3(1.17, 2.50, 0.12), Vector3(0, 0, 0.052), frame)
     _box(root, "WeatheredDoor", Vector3(0.96, 2.35, 0.075), Vector3.ZERO, wood)
     for side in [-1.0, 1.0]:
         _box(root, "Jamb", Vector3(0.095, 2.50, 0.13), Vector3(side * 0.53, 0, -0.025), frame)
@@ -335,6 +349,16 @@ func _door(wall: MeshInstance3D) -> void:
         _box(root, "RecessedPanel", Vector3(0.70, 0.86, 0.026), Vector3(0, -0.54 + float(index)*1.08, -0.047), inset)
     _box(root, "LockPlate", Vector3(0.095, 0.21, 0.018), Vector3(0.34, -0.05, -0.054), metal)
     _sphere(root, "DoorKnob", 0.047, metal, Vector3(0.34, -0.02, -0.098))
+    var body := StaticBody3D.new()
+    body.name = "DoorCollision"
+    root.add_child(body)
+    var collider := CollisionShape3D.new()
+    collider.name = "Shape"
+    var collision_box := BoxShape3D.new()
+    collision_box.size = Vector3(1.17, 2.55, 0.25)
+    collider.shape = collision_box
+    body.add_child(collider)
+    collider.position = Vector3(0, 0.025, -0.025)
 
 
 func _liquid(room: Node3D, nodes: Array[Node3D]) -> void:
@@ -364,19 +388,71 @@ func _pendulum(room: Node3D, chandelier: Node3D, lamp: Light3D) -> void:
 func _bloom(room: Node3D, wall: MeshInstance3D) -> void:
     var marker := _root(wall)
     var bounds := wall.get_aabb()
-    marker.position = Vector3(bounds.get_center().x, bounds.get_center().y + 0.3, bounds.position.z - 0.19)
+    # Above the timber panels, between the two adjacent wall columns.
+    # +Z of this marker points into the casino, directly off the wall.
+    marker.position = Vector3(bounds.get_center().x - 2.0, bounds.get_center().y + 0.35, bounds.position.z - 0.004)
     marker.rotation.y = PI
-    var shape := QuadMesh.new()
-    shape.size = Vector2(11.5, 4.5)
     var shader := Shader.new()
     shader.code = BLOOM_SHADER
     var mat := ShaderMaterial.new()
     mat.shader = shader
-    mat.set_shader_parameter("growth", 0.55)
-    _mesh(marker, "OrganicStain", shape, mat, Vector3.ZERO).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-    _animate(room, 11.0, func(phase: float) -> void:
-        mat.set_shader_parameter("growth", 0.88 if _reduced(room) else 0.30 + 0.95 * (0.5 - 0.5*cos(phase*TAU)))
+    mat.set_shader_parameter("growth", 0.28)
+    # Separate irregular tendrils, not a filled circular silhouette.
+    # Each entry is start, direction/length, radius, delayed onset.
+    var strands: Array[Array] = [
+        [Vector2(-0.62,-0.05), Vector2(-1.65,0.72), 0.036, 0.00],
+        [Vector2(-0.72,-0.13), Vector2(-1.48,-0.76), 0.029, 0.08],
+        [Vector2(-0.38,0.12), Vector2(-0.72,1.10), 0.025, 0.15],
+        [Vector2(-0.43,-0.19), Vector2(0.58,-0.85), 0.021, 0.21],
+        [Vector2(0.38,0.15), Vector2(1.92,0.47), 0.039, 0.03],
+        [Vector2(0.50,0.08), Vector2(1.65,-0.96), 0.030, 0.12],
+        [Vector2(0.30,0.27), Vector2(0.63,0.99), 0.024, 0.17],
+        [Vector2(0.68,-0.04), Vector2(-0.71,0.53), 0.019, 0.28],
+        [Vector2(-1.40,0.29), Vector2(-0.64,0.79), 0.017, 0.35],
+        [Vector2(1.36,0.25), Vector2(0.62,0.82), 0.018, 0.38]
+    ]
+    for i in range(strands.size()):
+        var data: Array = strands[i]
+        var strand := _bloom_strand(data[0], data[1], float(data[2]), float(data[3]), float(i)*1.73)
+        _mesh(marker, "OrganicStrand_%02d" % i, strand, mat, Vector3.ZERO)
+    _animate(room, 21.0, func(phase: float) -> void:
+        var growth := 0.24 + 0.76 * (0.5 - 0.5*cos(phase*TAU))
+        mat.set_shader_parameter("growth", 0.88 if _reduced(room) else growth)
     )
+
+
+func _bloom_point(origin: Vector2, direction: Vector2, seed: float, t: float) -> Vector2:
+    var sideways := Vector2(-direction.y, direction.x).normalized()
+    var wiggle := (sin(t*9.4+seed)-sin(seed))*0.095 + (sin(t*21.0+seed*0.6)-sin(seed*0.6))*0.041
+    return origin + direction*t + sideways*wiggle
+
+
+func _bloom_strand(origin: Vector2, direction: Vector2, thickness: float, delay: float, seed: float) -> ArrayMesh:
+    var tool := SurfaceTool.new()
+    tool.begin(Mesh.PRIMITIVE_TRIANGLES)
+    const SEGMENTS := 56
+    const SIDES := 12
+    for segment in range(SEGMENTS):
+        for side in range(SIDES):
+            for corner in [Vector2i(segment,side), Vector2i(segment+1,side), Vector2i(segment+1,side+1),
+                    Vector2i(segment,side), Vector2i(segment+1,side+1), Vector2i(segment,side+1)]:
+                var t := float(corner.x)/float(SEGMENTS)
+                var u := float(corner.y)/float(SIDES)
+                var point := _bloom_point(origin, direction, seed, t)
+                var tangent := (_bloom_point(origin,direction,seed,t+0.002)-_bloom_point(origin,direction,seed,t-0.002)).normalized()
+                var across := Vector2(-tangent.y,tangent.x)
+                var angle := u*TAU
+                var n := Vector3(across.x*cos(angle),across.y*cos(angle),sin(angle))
+                var radius := thickness * (0.78+0.15*sin(t*23.0+seed)+0.12*sin(t*53.0+seed)) * lerpf(1.0,0.15,pow(t,1.8))
+                radius = maxf(0.0015,radius)
+                tool.set_normal(n)
+                tool.set_uv(Vector2(t,u))
+                tool.set_uv2(Vector2(radius,delay))
+                # The embedded back half is hidden by the actual wall,
+                # leaving a small raised, textured ridge in the room.
+                tool.add_vertex(Vector3(point.x,point.y,0.0)+n*radius)
+    tool.generate_tangents()
+    return tool.commit()
 
 
 func _listening(room: Node3D, nodes: Array[Node3D]) -> void:

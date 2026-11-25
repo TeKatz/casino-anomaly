@@ -4,7 +4,8 @@ extends Node3D
 ## the room, clipping the wall and its trim without modifying wall layers.
 const MIRROR_LAYER := 1 << 18
 const PHANTOM_LAYER := 1 << 19
-const MODEL := "res://models/concrete_cat_statue/concrete_cat_statue_1k.gltf"
+const MODEL := "res://models/croupier/scene.gltf"
+const CROUPIER_PROPORTIONS := Vector3(2.32, 1.16, 2.38)
 const WIDTH := 1.65
 const HEIGHT := 1.85
 var hall: Node3D
@@ -41,15 +42,18 @@ func configure(room: Node3D, wall: MeshInstance3D) -> bool:
         return false
     top_level = true
     global_transform = room.global_transform
-    # Between sofa 02 and 03, in front of the wall's wooden trim.
+    # Between sofa 02 and 03. Seat the backing on the actual wall,
+    # accounting for the 7 cm protrusion of the existing wainscoting.
     var bounds: AABB = (room.global_transform.affine_inverse() * wall.global_transform) * wall.get_aabb()
-    position = room.to_global(Vector3(-26.05, 1.65, bounds.position.z - 0.48))
+    position = room.to_global(Vector3(-26.05, 1.65, bounds.position.z - 0.12))
     rotation = room.global_rotation + Vector3(0, PI, 0)
     center = global_position
     normal = global_basis.z.normalized()
     capture = SubViewport.new()
     capture.name = "ReflectionViewport"
-    capture.size = Vector2i(640, 718)
+    # Preserve the physical mirror aspect ratio at roughly 5x the pixels.
+    capture.size = Vector2i(1440, 1615)
+    capture.msaa_3d = Viewport.MSAA_2X
     capture.world_3d = hall.get_world_3d()
     capture.render_target_update_mode = SubViewport.UPDATE_DISABLED
     add_child(capture)
@@ -80,10 +84,24 @@ func configure(room: Node3D, wall: MeshInstance3D) -> bool:
     for side in [-1.0,1.0]:
         _frame(Vector3(WIDTH+0.14,0.07,0.10),Vector3(0,side*(HEIGHT*0.5+0.035),0.018),frame)
         _frame(Vector3(0.07,HEIGHT,0.10),Vector3(side*(WIDTH*0.5+0.035),0,0.018),frame)
-    phantom.name = "ReflectionOnlyCat"
+    # Closed backing meets the wall behind the decorative frame.
+    _frame(Vector3(WIDTH+0.14,HEIGHT+0.14,0.12),Vector3(0,0,-0.065),frame)
+    var body := StaticBody3D.new()
+    body.name = "MirrorCollision"
+    add_child(body)
+    var collider := CollisionShape3D.new()
+    collider.name = "Shape"
+    var collision_box := BoxShape3D.new()
+    collision_box.size = Vector3(WIDTH+0.14,HEIGHT+0.14,0.19)
+    collider.shape = collision_box
+    body.add_child(collider)
+    collider.position = Vector3(0,0,-0.03)
+    phantom.name = "ReflectionOnlyCroupier"
     add_child(phantom)
-    phantom.position = Vector3(0, -0.93, 2.7)
-    phantom.scale = Vector3.ONE * 2.65
+    phantom.position = Vector3(0, -1.65, 2.7)
+    phantom.rotation.y = PI
+    phantom.scale = CROUPIER_PROPORTIONS
+    _pose_phantom()
     for item in phantom.find_children("*","MeshInstance3D",true,false):
         _reflection_only(item as MeshInstance3D)
     if phantom is MeshInstance3D:
@@ -105,6 +123,20 @@ func _frame(dimensions: Vector3, at: Vector3, mat: Material) -> void:
     mesh.position = at
 
 
+func _pose_phantom() -> void:
+    # Use the same imported full-body idle as the tutorial NPC. Freeze
+    # the pose without changing shared animation resources or adding NPC logic.
+    for item in phantom.find_children("*", "AnimationPlayer", true, false):
+        var animator := item as AnimationPlayer
+        for clip in animator.get_animation_list():
+            var simple := clip.to_lower()
+            if simple.ends_with("idle") and not simple.contains("sitting"):
+                animator.play(clip)
+                animator.seek(0.4, true)
+                animator.pause()
+                return
+
+
 func _reflection_only(mesh: MeshInstance3D) -> void:
     mesh.layers = PHANTOM_LAYER
     mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -112,11 +144,17 @@ func _reflection_only(mesh: MeshInstance3D) -> void:
 
 
 func _process(delta: float) -> void:
-    if not configured or not is_instance_valid(hall) or hall.has_meta("_streaming_standby"):
+    if not configured or not is_instance_valid(hall):
+        return
+    if hall.has_meta("_streaming_standby"):
+        phantom.hide()
+        _restore_camera()
         return
     var active_player := hall.get_node_or_null("Player") as Node3D
     var camera := active_player.get_node_or_null("Camera3D") as Camera3D if active_player != null else null
     if camera == null:
+        phantom.hide()
+        _restore_camera()
         return
     if camera != player_camera:
         _restore_camera()
@@ -125,7 +163,7 @@ func _process(delta: float) -> void:
         camera.cull_mask = (original_camera_mask | MIRROR_LAYER) & ~PHANTOM_LAYER
         phantom.show()
     elapsed += delta
-    if elapsed < 0.045:
+    if elapsed < 1.0 / 30.0:
         return
     elapsed = 0.0
     var pos := player_camera.global_position
