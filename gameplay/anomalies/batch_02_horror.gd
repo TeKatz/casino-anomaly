@@ -6,8 +6,11 @@ var spawned: Array[Node3D] = []
 var motion: Tween
 const FOOT_COUNT := 28
 const FOOT_SPACING := 0.55
+const ShadowProjection = preload("res://gameplay/anomalies/shadow_projection.gd")
+# SVG toes point along local -Z. With -90 degrees around Y they point +X,
+# matching the increasing-X order of the footprints.
+const FOOT_YAW := -PI * 0.5
 
-const SHADOW_SVG := """<svg xmlns="http://www.w3.org/2000/svg" width="384" height="960" viewBox="0 0 256 640"><defs><linearGradient id="fade" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox"><stop offset="0" stop-color="#100b0d" stop-opacity=".25"/><stop offset=".42" stop-color="#100b0d" stop-opacity=".65"/><stop offset="1" stop-color="#100b0d" stop-opacity=".9"/></linearGradient></defs><path d="M119 622 Q116 609 118 584 L108 388 Q103 364 99 329 L89 273 83 212 Q80 195 88 182 L109 167 113 151 Q96 141 95 116 L94 92 Q97 65 122 62 Q149 61 155 88 L157 116 Q154 140 141 151 L144 166 168 178 Q179 183 179 210 L176 278 169 335 Q167 348 160 346 Q153 341 155 328 L158 249 151 221 151 323 147 384 150 590 Q156 607 150 622 L132 622 130 591 125 429 121 591 125 622Z" fill="none" stroke="#100b0d" stroke-opacity="0.025" stroke-width="28" stroke-linejoin="round"/><path d="M119 622 Q116 609 118 584 L108 388 Q103 364 99 329 L89 273 83 212 Q80 195 88 182 L109 167 113 151 Q96 141 95 116 L94 92 Q97 65 122 62 Q149 61 155 88 L157 116 Q154 140 141 151 L144 166 168 178 Q179 183 179 210 L176 278 169 335 Q167 348 160 346 Q153 341 155 328 L158 249 151 221 151 323 147 384 150 590 Q156 607 150 622 L132 622 130 591 125 429 121 591 125 622Z" fill="none" stroke="#100b0d" stroke-opacity="0.045" stroke-width="20" stroke-linejoin="round"/><path d="M119 622 Q116 609 118 584 L108 388 Q103 364 99 329 L89 273 83 212 Q80 195 88 182 L109 167 113 151 Q96 141 95 116 L94 92 Q97 65 122 62 Q149 61 155 88 L157 116 Q154 140 141 151 L144 166 168 178 Q179 183 179 210 L176 278 169 335 Q167 348 160 346 Q153 341 155 328 L158 249 151 221 151 323 147 384 150 590 Q156 607 150 622 L132 622 130 591 125 429 121 591 125 622Z" fill="none" stroke="#100b0d" stroke-opacity="0.07" stroke-width="13" stroke-linejoin="round"/><path d="M119 622 Q116 609 118 584 L108 388 Q103 364 99 329 L89 273 83 212 Q80 195 88 182 L109 167 113 151 Q96 141 95 116 L94 92 Q97 65 122 62 Q149 61 155 88 L157 116 Q154 140 141 151 L144 166 168 178 Q179 183 179 210 L176 278 169 335 Q167 348 160 346 Q153 341 155 328 L158 249 151 221 151 323 147 384 150 590 Q156 607 150 622 L132 622 130 591 125 429 121 591 125 622Z" fill="none" stroke="#100b0d" stroke-opacity="0.1" stroke-width="7" stroke-linejoin="round"/><path d="M119 622 Q116 609 118 584 L108 388 Q103 364 99 329 L89 273 83 212 Q80 195 88 182 L109 167 113 151 Q96 141 95 116 L94 92 Q97 65 122 62 Q149 61 155 88 L157 116 Q154 140 141 151 L144 166 168 178 Q179 183 179 210 L176 278 169 335 Q167 348 160 346 Q153 341 155 328 L158 249 151 221 151 323 147 384 150 590 Q156 607 150 622 L132 622 130 591 125 429 121 591 125 622Z" fill="url(#fade)"/></svg>"""
 const FOOT_SVG := """<svg xmlns="http://www.w3.org/2000/svg" width="128" height="256" viewBox="0 0 128 256"><g fill="#110a0a" fill-opacity=".85"><path d="M57 237Q30 225 37 192Q44 168 42 148Q35 128 31 104Q24 71 48 58Q76 45 94 75Q108 102 91 132Q74 154 80 181Q96 222 69 237Z"/><ellipse cx="83" cy="35" rx="16" ry="23"/><ellipse cx="57" cy="29" rx="12" ry="17"/><ellipse cx="38" cy="38" rx="10" ry="14"/><ellipse cx="23" cy="50" rx="8" ry="11"/><ellipse cx="15" cy="66" rx="6" ry="9"/></g></svg>"""
 const EYES_SVG := """<svg xmlns="http://www.w3.org/2000/svg" width="512" height="384" viewBox="0 0 512 384"><rect width="512" height="384" fill="#08080b"/><g fill="#d5d0be"><path d="M105 188Q150 155 193 185Q150 208 105 188Z"/><path d="M319 185Q362 155 407 188Q362 208 319 185Z"/></g><g fill="#171418"><ellipse cx="150" cy="184" rx="9" ry="12"/><ellipse cx="362" cy="184" rx="9" ry="12"/></g></svg>"""
 
@@ -75,7 +78,8 @@ func targets(room: Node3D, entry: Dictionary) -> Array[Node3D]:
                 result.clear()
         "ownerless_shadow", "empty_footsteps":
             if base is MeshInstance3D and base.mesh != null and base.visible:
-                result.append(base)
+                if entry["id"] != "ownerless_shadow" or ShadowProjection.available():
+                    result.append(base)
         "crimson_hall":
             for fixture in base.get_children():
                 if fixture is Light3D and fixture.visible and str(fixture.name).begins_with("WarmCasinoLamp_"):
@@ -157,7 +161,7 @@ func _floor_mark(parent: Node3D, at: Vector3, dimensions: Vector2, mat: Standard
     return mark
 
 
-func _marks(floor_mesh: MeshInstance3D, id: String, tex: Texture2D) -> void:
+func _marks(floor_mesh: MeshInstance3D, tex: Texture2D) -> void:
     # Mesh bounds are in authored local coordinates; use those rather than
     # hard-coded global positions so a reversed streamed hall still works.
     var bounds := floor_mesh.get_aabb()
@@ -168,20 +172,16 @@ func _marks(floor_mesh: MeshInstance3D, id: String, tex: Texture2D) -> void:
     floor_mesh.add_child(mark_root)
     spawned.append(mark_root)
     var mat := _surface_material(Color.WHITE, tex, true)
-    if id == "ownerless_shadow":
-        # Long narrow silhouette, softer penumbra and fading distal end.
-        _floor_mark(mark_root, Vector3(middle.x, height, middle.z), Vector2(1.25, 3.8), mat, 0.0)
-    else:
-        # Each impression gets an independent alpha; the trail stays in
-        # place as the invisible walker advances down the hall.
-        var spacing := minf(FOOT_SPACING, (bounds.size.x - 1.0) / float(FOOT_COUNT - 1))
-        for i in range(FOOT_COUNT):
-            var side := -0.14 if i % 2 == 0 else 0.14
-            var foot_mat := mat.duplicate() as StandardMaterial3D
-            var foot := _floor_mark(mark_root, Vector3(middle.x + (float(i) - float(FOOT_COUNT - 1) * 0.5) * spacing, height, middle.z + side), Vector2(0.16, 0.31), foot_mat, PI * 0.5, i % 2 == 1)
-            foot.name = "Foot_%02d" % i
-            foot_mat.albedo_color.a = 0.85 if i < 4 else 0.0
-        _animate_footprints(floor_mesh, mark_root, spacing)
+    # Each impression gets an independent alpha; the trail stays in
+    # place as the invisible walker advances down the hall.
+    var spacing := minf(FOOT_SPACING, (bounds.size.x - 1.0) / float(FOOT_COUNT - 1))
+    for i in range(FOOT_COUNT):
+        var side := -0.14 if i % 2 == 0 else 0.14
+        var foot_mat := mat.duplicate() as StandardMaterial3D
+        var foot := _floor_mark(mark_root, Vector3(middle.x + (float(i) - float(FOOT_COUNT - 1) * 0.5) * spacing, height, middle.z + side), Vector2(0.16, 0.31), foot_mat, FOOT_YAW, i % 2 == 1)
+        foot.name = "Foot_%02d" % i
+        foot_mat.albedo_color.a = 0.85 if i < 4 else 0.0
+    _animate_footprints(floor_mesh, mark_root, spacing)
 
 
 func _reduced(room: Node3D) -> bool:
@@ -198,9 +198,8 @@ func apply(room: Node3D, entry: Dictionary) -> bool:
     var tex: Texture2D
     match id:
         "watching_canvases": tex = _svg_texture(EYES_SVG)
-        "ownerless_shadow": tex = _svg_texture(SHADOW_SVG)
         "empty_footsteps": tex = _svg_texture(FOOT_SVG)
-    if id in ["watching_canvases", "ownerless_shadow", "empty_footsteps"] and tex == null:
+    if id in ["watching_canvases", "empty_footsteps"] and tex == null:
         return false
     saved = snapshot(nodes, id)
     for node in nodes:
@@ -218,8 +217,14 @@ func apply(room: Node3D, entry: Dictionary) -> bool:
                 (node as Label3D).modulate = Color("#ff6262")
             "last_kings":
                 node.visible = false
-            "ownerless_shadow", "empty_footsteps":
-                _marks(node as MeshInstance3D, id, tex)
+            "ownerless_shadow":
+                var shadow_root := ShadowProjection.install(node as MeshInstance3D)
+                if shadow_root == null:
+                    clear()
+                    return false
+                spawned.append(shadow_root)
+            "empty_footsteps":
+                _marks(node as MeshInstance3D, tex)
             "crimson_hall":
                 (node as Light3D).light_color = Color("#ff263e")
                 (node as Light3D).light_energy *= 3.0
@@ -351,13 +356,15 @@ func _quiet_tick() -> AudioStreamWAV:
     # Short damped mechanical click, band-limited and with a soft envelope.
     # No asset imports, no looping audio, no loud onset.
     var rate := 22050
-    var frames := 1323
+    var frames := 2205
     var bytes := PackedByteArray()
     bytes.resize(frames * 2)
     for i in range(frames):
         var t := float(i) / float(rate)
-        var envelope := minf(1.0, t / 0.003) * exp(-t * 95.0) * maxf(0.0, 1.0 - t / 0.06)
-        var sample := (sin(TAU * 830.0 * t) * 0.65 + sin(TAU * 1270.0 * t) * 0.35) * envelope * 0.55
+        # Slightly longer, clearer mechanical tick: audible body plus
+        # a damped click, with no clipping or aggressive high frequencies.
+        var envelope := minf(1.0, t / 0.002) * exp(-t * 39.0) * maxf(0.0, 1.0 - t / 0.10)
+        var sample := (sin(TAU * 760.0 * t) * 0.46 + sin(TAU * 1420.0 * t) * 0.34 + sin(TAU * 2350.0 * t) * 0.20) * envelope * 0.92
         bytes.encode_s16(i * 2, roundi(sample * 32767.0))
     var stream := AudioStreamWAV.new()
     stream.format = AudioStreamWAV.FORMAT_16_BITS
@@ -374,19 +381,21 @@ func _countdown(room: Node3D, nodes: Array[Node3D]) -> void:
     tick.name = "AnomalyCountdownTick"
     tick.stream = _quiet_tick()
     tick.bus = "HORROR"
-    tick.volume_db = -24.0
-    tick.unit_size = 1.5
-    tick.max_distance = 8.0
+    tick.volume_db = -9.0
+    tick.unit_size = 5.0
+    tick.max_distance = 22.0
+    tick.set_meta("tick_count", 0)
     tick.attenuation_model = AudioStreamPlayer3D.ATTENUATION_INVERSE_DISTANCE
     nodes[floori(float(nodes.size()) * 0.5)].add_child(tick)
     spawned.append(tick)
     motion = room.create_tween().set_loops()
     motion.tween_callback(func() -> void:
-        if room.has_meta("_streaming_standby") or _reduced(room) or float(elapsed[0]) >= 60.0:
+        if room.has_meta("_streaming_standby") or float(elapsed[0]) >= 60.0:
             return
         elapsed[0] = minf(60.0, float(elapsed[0]) + 1.0)
         if is_instance_valid(tick):
             tick.play()
+            tick.set_meta("tick_count", int(tick.get_meta("tick_count", 0)) + 1)
         var seconds := 60 - int(elapsed[0])
         var value := "%02d:%02d" % [floori(float(seconds) / 60.0), seconds % 60]
         for title in nodes:

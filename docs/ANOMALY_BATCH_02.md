@@ -20,3 +20,7 @@ The two animations respect reduced motion. The busts oscillate gently over 12 se
 ## Visual review 1
 
 13, 16 and 19 accepted unchanged. 11 rotates around the measured local mesh bounds base center; 12 replaces inverted cat with both animal statues missing (stable ID retained); 14 blinks with staggered 5.5-second cycles; 15 slow red pulse; 17 softer, elongated shadow silhouette with graded opacity; 18 28 sequential fading footprints, velocity-adaptive with slow idle pace; 20 one spatial, low-level HORROR bus synthesized tick per second, stopping at zero. No new families, assets or changes to player movement. Visual approval remains pending.
+
+## Visual review 2
+
+Seven effects accepted (11–16 and 19). 17 replaces the drawn SVG with an isolated one-shot render of the existing licensed croupier model in its idle pose, projected onto the carpet with a soft opacity shader. No actual NPC/light/collider in the hall; model import required. 18 rotates the footprint texture 180 degrees so toes agree with the existing travel order; tempo/fade unchanged. 20 raises the spatial tick to -9 dB with 22m reach and a stronger damped waveform; the timer now ticks independent of reduced visual motion and honors the HORROR mixer. Tests check direction, projection structure, playback invocation, isolation and cleanup. Actual render and audibility require manual review.

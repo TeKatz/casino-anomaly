@@ -306,7 +306,7 @@ func _run() -> void:
         if handler.call("snapshot", nodes, id) != baseline:
             _fail("Batch 01 did not restore the baseline: " + id)
             return
-    if not _verify_horror_batch(room, next_room):
+    if not (await _verify_horror_batch(room, next_room)):
         return
     room.queue_free()
     next_room.queue_free()
@@ -339,16 +339,35 @@ func _verify_horror_batch(hall: Node3D, other_hall: Node3D) -> bool:
         if inspector.call("snapshot", affected, horror_id) == initial or inspector.call("snapshot", unaffected, horror_id) != isolated:
             _fail("Pack 02 ineffective or leaked between rooms: " + horror_id)
             return false
-        if horror_id in ["ownerless_shadow", "empty_footsteps"]:
+        if horror_id == "ownerless_shadow":
+            var shadow_group := affected[0].get_node_or_null("AnomalyHorrorMark")
+            if shadow_group == null:
+                _fail("Projected human shadow missing")
+                return false
+            var shadow_capture := shadow_group.get_node_or_null("SilhouetteCapture") as SubViewport
+            var shadow_plane := shadow_group.get_node_or_null("ShadowProjection") as MeshInstance3D
+            if shadow_capture == null or not shadow_capture.own_world_3d or not shadow_capture.transparent_bg or shadow_plane == null or not shadow_plane.material_override is ShaderMaterial:
+                _fail("Shadow is not rendered from an isolated model projection")
+                return false
+            if shadow_capture.find_children("ShadowPose", "Node3D", true, false).is_empty():
+                _fail("Shadow capture missing human model")
+                return false
+        if horror_id == "empty_footsteps":
             var mark_group := affected[0].get_node_or_null("AnomalyHorrorMark")
-            var expected_marks := 1 if horror_id == "ownerless_shadow" else 28
-            if mark_group == null or mark_group.get_child_count() != expected_marks:
+            if mark_group == null or mark_group.get_child_count() != 28:
                 _fail("Pack 02 missing floor marks: " + horror_id)
                 return false
             for mark_mesh in mark_group.get_children():
                 if not mark_mesh is MeshInstance3D or mark_mesh.material_override.albedo_texture == null:
                     _fail("Pack 02 floor mark missing generated texture")
                     return false
+            var first_foot := mark_group.get_child(0) as Node3D
+            var next_foot := mark_group.get_child(1) as Node3D
+            var travel := (next_foot.position - first_foot.position).normalized()
+            var toes := (first_foot.basis * Vector3.FORWARD).normalized()
+            if toes.dot(travel) < 0.8:
+                _fail("Footprint toes point against the travel direction")
+                return false
         if horror_id == "synchronized_busts":
             for n in range(affected.size()):
                 var pivot: Vector3 = inspector.call("_bust_pivot", affected[n])
@@ -358,8 +377,13 @@ func _verify_horror_batch(hall: Node3D, other_hall: Node3D) -> bool:
                     return false
         if horror_id == "silent_countdown":
             var tick_node := affected[floori(float(affected.size()) * 0.5)].get_node_or_null("AnomalyCountdownTick") as AudioStreamPlayer3D
-            if tick_node == null or not tick_node.stream is AudioStreamWAV or tick_node.volume_db > -24.0 or tick_node.bus != "HORROR":
-                _fail("Countdown quiet tick missing or too loud")
+            if tick_node == null or not tick_node.stream is AudioStreamWAV or tick_node.volume_db > -9.0 or tick_node.volume_db < -12.0 or tick_node.max_distance < 20.0 or tick_node.bus != "HORROR":
+                _fail("Countdown tick missing or level/range regressed")
+                return false
+            # Verify the real timer invokes playback, not merely the node.
+            await create_timer(1.15).timeout
+            if int(tick_node.get_meta("tick_count", 0)) < 1 or (affected[0] as Label3D).text == "01:00":
+                _fail("Countdown timer did not trigger tick playback")
                 return false
         if horror_id == "empty_footsteps":
             var foot_group := affected[0].get_node("AnomalyHorrorMark")
