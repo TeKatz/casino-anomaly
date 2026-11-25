@@ -4,10 +4,13 @@ extends RefCounted
 ## by this effect and are removed on clear/streaming handoff.
 const Guest = preload("res://gameplay/anomalies/seated_guest.gd")
 const Mirror = preload("res://gameplay/anomalies/wrong_reflection.gd")
+const RisingDrops = preload("res://gameplay/anomalies/rising_drops.gd")
+const ListeningView = preload("res://gameplay/anomalies/listening_view.gd")
 var saved: Array[Dictionary] = []
 var roots: Array[Node3D] = []
 var motion: Tween
 var audio_original: Dictionary = {}
+var glow_original: Array[Dictionary] = []
 
 const BREATH_SHADER := """
 shader_type spatial;
@@ -17,15 +20,15 @@ uniform sampler2D bumps : hint_normal, filter_linear_mipmap_anisotropic, repeat_
 uniform bool has_bumps = false;
 uniform vec4 tint : source_color = vec4(1.0);
 uniform vec3 uv_scale = vec3(1.0);
-uniform float amplitude = 0.18;
+uniform float amplitude = 0.45;
 uniform float rough = 0.9;
 void vertex() {
     // Only the inner (-X) wall face. Local patch tapers smoothly into
     // the untouched wall and stops before the ceiling/collision boundary.
-    float weight = exp(-pow(VERTEX.z / 3.6, 2.0) - pow((VERTEX.y - 0.65) / 1.4, 2.0));
+    float weight = exp(-pow(VERTEX.z / 6.2, 2.0) - pow((VERTEX.y - 0.85) / 1.6, 2.0));
     if (NORMAL.x < -0.5) {
         VERTEX.x -= amplitude * weight;
-        NORMAL = normalize(vec3(-1.0, -2.0 * amplitude * weight * (VERTEX.y - 0.65) / 1.96, -2.0 * amplitude * weight * VERTEX.z / 12.96));
+        NORMAL = normalize(vec3(-1.0, -2.0 * amplitude * weight * (VERTEX.y - 0.85) / 2.56, -2.0 * amplitude * weight * VERTEX.z / 38.44));
     }
 }
 void fragment() {
@@ -49,12 +52,12 @@ void fragment() {
     float r = length(p);
     float a = atan(p.y,p.x);
     float n = noise2(p*9.0)*0.26 + noise2(p*22.0)*0.09;
-    float tendrils = pow(max(0.0, sin(a*13.0 + noise2(p*5.0)*6.0)), 7.0);
-    float edge = growth*(0.62 + n + tendrils*0.22);
+    float tendrils = pow(max(0.0, sin(a*19.0 + noise2(p*7.0)*9.0)), 4.0);
+    float edge = growth*(0.70 + n + tendrils*0.42);
     float body = 1.0-smoothstep(edge-0.13,edge+0.025,r);
-    float vein = tendrils*(1.0-smoothstep(edge,edge+0.15,r))*smoothstep(0.15,0.45,r);
+    float vein = tendrils*(1.0-smoothstep(edge,edge+0.22,r))*smoothstep(0.10,0.35,r);
     ALBEDO = vec3(0.014,0.009,0.013) + noise2(p*45.0)*0.017;
-    ALPHA = clamp((body*0.86 + vein*0.34)*(0.55+noise2(p*38.0)*0.45),0.0,0.92) * (1.0-smoothstep(0.8,1.0,r));
+    ALPHA = clamp((body*1.12 + vein*0.62)*(0.80+noise2(p*38.0)*0.20),0.0,0.97) * (1.0-smoothstep(0.91,1.0,r));
 }
 """
 
@@ -91,10 +94,15 @@ func targets(room: Node3D, entry: Dictionary) -> Array[Node3D]:
             if not _meshes(base).is_empty():
                 result.append(base)
         "invisible_dealer":
-            for child in base.get_children():
-                if child is Node3D and child.visible and child.has_meta("source_card_index"):
-                    result.append(child as Node3D)
-            if result.size() != 8:
+            for table_name in ["Cards5", "Cards7"]:
+                var table := base.get_node_or_null(table_name) as Node3D
+                if table == null or not table.visible:
+                    result.clear()
+                    return result
+                for child in table.get_children():
+                    if child is Node3D and child.visible and child.has_meta("source_card_index"):
+                        result.append(child as Node3D)
+            if result.size() != 16:
                 result.clear()
         "breathing_wall":
             if base is MeshInstance3D and base.mesh is BoxMesh and base.get_active_material(0) is StandardMaterial3D:
@@ -103,15 +111,15 @@ func targets(room: Node3D, entry: Dictionary) -> Array[Node3D]:
             if base is MeshInstance3D and base.mesh != null:
                 result.append(base)
         "against_gravity":
-            for bottle in base.find_children("Signature_*", "Node3D", true, false):
-                if not str(bottle.name).begins_with("Signature_1_") or bottle.scene_file_path.is_empty():
+            for bottle in base.find_children("Signature_3_*", "Node3D", true, false):
+                if bottle.scene_file_path.is_empty():
                     continue
                 var shell := bottle.get_node_or_null("HandCutGlassShell") as MeshInstance3D
-                if shell != null and shell.visible:
-                    result.append(shell)
-                if result.size() == 4:
-                    break
-            if result.size() != 4:
+                if shell == null or not shell.visible:
+                    result.clear()
+                    return result
+                result.append(shell)
+            if result.size() < 6:
                 result.clear()
         "pendulum":
             var lamp := room.get_node_or_null("ModelInteriors/ChandelierWarmLight_02") as Light3D
@@ -122,11 +130,8 @@ func targets(room: Node3D, entry: Dictionary) -> Array[Node3D]:
             if Guest.available() and not _meshes(base).is_empty():
                 result.append(base)
         "wrong_reflection":
-            if ResourceLoader.exists(Mirror.MODEL, "PackedScene") and room.get_node_or_null("Architecture/SouthWestWall") is MeshInstance3D:
-                for mesh in _meshes(base):
-                    if str(mesh.name).to_lower().contains("canvas"):
-                        result.append(mesh)
-                        break
+            if ResourceLoader.exists(Mirror.MODEL, "PackedScene") and base is MeshInstance3D:
+                result.append(base)
         "they_are_listening":
             for cabinet in base.get_children():
                 if cabinet is Node3D and cabinet.visible and cabinet.has_meta("slot_cabinet_revision"):
@@ -234,7 +239,7 @@ func apply(room: Node3D, entry: Dictionary) -> bool:
             mirror.name = "AnomalyPack03"
             nodes[0].add_child(mirror)
             roots.append(mirror)
-            if not mirror.configure(room, nodes[0] as MeshInstance3D, room.get_node("Architecture/SouthWestWall") as MeshInstance3D):
+            if not mirror.configure(room, nodes[0] as MeshInstance3D):
                 clear()
                 return false
         "they_are_listening": _listening(room, nodes)
@@ -248,7 +253,9 @@ func _roulette(room: Node3D, wheel: Node3D) -> void:
     var bounds := _bounds(wheel)
     var center := bounds.get_center()
     var radius := minf(bounds.size.x, bounds.size.z) * 0.40
-    var level := bounds.end.y - 0.025
+    var level := bounds.end.y - 0.105
+    # The visible outer lip is higher than the ball track. Keep the
+    # accepted radius and lower the centre 8cm into the bowl.
     var ball := _sphere(_root(wheel), "OrbitingIvoryBall", 0.022, _material(Color("#e9e0c9"), 0.0, 0.26), Vector3(center.x + radius, level, center.z))
     _animate(room, 4.5, func(phase: float) -> void:
         var angle := TAU * (0.15 if _reduced(room) else phase)
@@ -258,20 +265,24 @@ func _roulette(room: Node3D, wheel: Node3D) -> void:
 
 func _dealer(room: Node3D, nodes: Array[Node3D]) -> void:
     var original: Array[Vector3] = []
-    var deck := Vector3(-0.44, nodes[0].position.y, -0.30)
+    var piles: Array[Vector3] = []
     for i in range(nodes.size()):
         original.append(nodes[i].position)
-        nodes[i].position = deck + Vector3(0.0, 0.004 * float(i), 0.0)
+        var deck := Vector3(-0.44, nodes[i].position.y, -0.30)
+        var pile := deck + Vector3(0.0, 0.004 * float(i % 8), 0.0)
+        piles.append(pile)
+        nodes[i].position = pile
     _animate(room, 14.0, func(phase: float) -> void:
         for i in range(nodes.size()):
-            var start := float(i) * 0.055
-            var spread := smoothstep(start, start + 0.12, phase)
-            var gather := smoothstep(0.73 + float(7-i)*0.025, 0.88 + float(7-i)*0.017, phase)
+            var card := i % 8
+            var local := fposmod(phase + (0.22 if i >= 8 else 0.0), 1.0)
+            var start := float(card) * 0.055
+            var spread := smoothstep(start, start + 0.12, local)
+            var gather := smoothstep(0.73 + float(7-card)*0.025, 0.88 + float(7-card)*0.017, local)
             var weight := spread * (1.0 - gather)
             if _reduced(room):
                 weight = 0.0
-            var pile := deck + Vector3(0.0, 0.004 * float(i), 0.0)
-            nodes[i].position = pile.lerp(original[i], weight)
+            nodes[i].position = piles[i].lerp(original[i], weight)
             nodes[i].position.y += sin(weight * PI) * 0.025
     )
 
@@ -295,16 +306,16 @@ func _breath(room: Node3D, wall: MeshInstance3D) -> void:
     mat.set_shader_parameter("rough", original.roughness)
     wall.material_override = mat
     _animate(room, 6.0, func(phase: float) -> void:
-        mat.set_shader_parameter("amplitude", 0.22 if _reduced(room) else 0.10 + 0.24 * (0.5 - 0.5 * cos(phase * TAU)))
+        mat.set_shader_parameter("amplitude", 0.55 if _reduced(room) else 0.16 + 0.68 * pow(0.5 - 0.5 * cos(phase * TAU), 1.35))
     )
 
 
 func _door(wall: MeshInstance3D) -> void:
     var root := _root(wall)
-    # The entrance back wall is normal to -Z. Mount on its public side,
-    # beside (not over) the playable portal. No extra collision/interaction.
+    # The entrance wall is intentionally hidden by streaming portals.
+    # Use the intact south-west wall, in the open stretch before the lounge.
     var bounds := wall.get_aabb()
-    root.position = Vector3(bounds.end.x - 1.5, bounds.position.y + 1.24, bounds.position.z - 0.21)
+    root.position = Vector3(bounds.end.x - 6.3, bounds.position.y + 1.24, bounds.position.z - 0.31)
     var wood := _material(Color("#a39b90"), 0.0, 0.92)
     wood.albedo_texture = load("res://assets/wood_table_worn/wood_table_worn_diff_2k.jpg") as Texture2D
     wood.normal_enabled = true
@@ -327,37 +338,11 @@ func _door(wall: MeshInstance3D) -> void:
 
 
 func _liquid(room: Node3D, nodes: Array[Node3D]) -> void:
-    var drops: Array[MeshInstance3D] = []
-    var starts: Array[Vector3] = []
-    var heights: Array[float] = []
-    for shell_node in nodes:
-        var shell := shell_node as MeshInstance3D
-        var bottle := shell.get_parent() as Node3D
-        var root := _root(shell)
-        var top := shell.get_aabb().get_center()
-        top.y = shell.get_aabb().end.y + 0.04
-        var liquid := bottle.get_node_or_null("InnerLiquidVolume") as MeshInstance3D
-        var tint := Color("#a76224")
-        if liquid != null and liquid.get_active_material(0) is StandardMaterial3D:
-            tint = (liquid.get_active_material(0) as StandardMaterial3D).albedo_color
-            tint.a = 1.0
-        for i in range(4):
-            var mat := _material(tint, 0.0, 0.13)
-            mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-            var droplet := _sphere(root, "RisingLiquid", 0.024, mat, top + Vector3(0, float(i)*0.24, 0))
-            droplet.scale.y = 1.6
-            drops.append(droplet)
-            starts.append(top)
-            heights.append(maxf(0.6, 5.70 - room.to_local(shell.to_global(top)).y))
-    _animate(room, 6.0, func(phase: float) -> void:
-        for i in range(drops.size()):
-            var p := fposmod(phase + float(i%4)*0.25 + floorf(float(i)/4.0)*0.08, 1.0)
-            if _reduced(room):
-                p = 0.22 + float(i%4)*0.15
-            drops[i].position = starts[i] + Vector3(sin(p*TAU + float(i))*0.035, p*heights[i], 0.0)
-            var mat := drops[i].material_override as StandardMaterial3D
-            mat.albedo_color.a = smoothstep(0.0,0.08,p)*(1.0-smoothstep(0.85,1.0,p))
-    )
+    var emitter := RisingDrops.new()
+    emitter.name = "AnomalyPack03"
+    nodes[0].add_child(emitter)
+    roots.append(emitter)
+    emitter.configure(room, nodes)
 
 
 func _pendulum(room: Node3D, chandelier: Node3D, lamp: Light3D) -> void:
@@ -379,10 +364,10 @@ func _pendulum(room: Node3D, chandelier: Node3D, lamp: Light3D) -> void:
 func _bloom(room: Node3D, wall: MeshInstance3D) -> void:
     var marker := _root(wall)
     var bounds := wall.get_aabb()
-    marker.position = Vector3(bounds.get_center().x, bounds.get_center().y + 0.6, bounds.position.z - 0.015)
+    marker.position = Vector3(bounds.get_center().x, bounds.get_center().y + 0.3, bounds.position.z - 0.19)
     marker.rotation.y = PI
     var shape := QuadMesh.new()
-    shape.size = Vector2(3.2, 2.8)
+    shape.size = Vector2(11.5, 4.5)
     var shader := Shader.new()
     shader.code = BLOOM_SHADER
     var mat := ShaderMaterial.new()
@@ -390,7 +375,7 @@ func _bloom(room: Node3D, wall: MeshInstance3D) -> void:
     mat.set_shader_parameter("growth", 0.55)
     _mesh(marker, "OrganicStain", shape, mat, Vector3.ZERO).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
     _animate(room, 11.0, func(phase: float) -> void:
-        mat.set_shader_parameter("growth", 0.65 if _reduced(room) else 0.26 + 0.70 * (0.5 - 0.5*cos(phase*TAU)))
+        mat.set_shader_parameter("growth", 0.88 if _reduced(room) else 0.30 + 0.95 * (0.5 - 0.5*cos(phase*TAU)))
     )
 
 
@@ -399,14 +384,22 @@ func _listening(room: Node3D, nodes: Array[Node3D]) -> void:
     # usual adapter clear. Restore the persistent audio in either case.
     var cleanup_marker := _root(nodes[0])
     cleanup_marker.tree_exiting.connect(_restore_audio)
+    var view := ListeningView.new()
+    view.name = "ListeningView"
+    cleanup_marker.add_child(view)
     var materials: Array[StandardMaterial3D] = []
     var baseline: Array[float] = []
+    var base_colors: Array[Color] = []
     for strip_node in nodes:
         var strip := strip_node as MeshInstance3D
         var mat := strip.get_active_material(0).duplicate() as StandardMaterial3D
         baseline.append(mat.emission_energy_multiplier)
+        base_colors.append(mat.albedo_color)
         strip.material_override = mat
         materials.append(mat)
+    for lamp in room.get_node("Lighting").get_children():
+        if lamp is Light3D and str(lamp.name) in ["WarmCasinoLamp_01", "WarmCasinoLamp_02"]:
+            glow_original.append({"node": lamp, "energy": lamp.light_energy})
     var clock := [0.0, 0.0]
     var origin := room.to_global(Vector3(0, 0, 5.0))
     _animate(room, 1.0, func(phase: float) -> void:
@@ -418,11 +411,17 @@ func _listening(room: Node3D, nodes: Array[Node3D]) -> void:
         if player == null:
             return
         var distance := Vector2(player.global_position.x-origin.x, player.global_position.z-origin.z).length()
-        var target := 1.0-smoothstep(3.0,9.0,distance)
+        var target := 1.0-smoothstep(4.5,11.0,distance)
         clock[1] = lerpf(float(clock[1]),target,1.0-exp(-dt*2.0))
         var weight := float(clock[1])
         for i in range(materials.size()):
-            materials[i].emission_energy_multiplier = lerpf(baseline[i],0.06,weight)
+            materials[i].emission_energy_multiplier = lerpf(baseline[i],0.0,weight)
+            materials[i].albedo_color = base_colors[i].lerp(Color("#111014"), weight * 0.94)
+        for state in glow_original:
+            var lamp := state["node"] as Light3D
+            if is_instance_valid(lamp):
+                lamp.light_energy = lerpf(float(state["energy"]), float(state["energy"]) * 0.22, weight)
+        view.set_intensity(weight, _reduced(room))
         var director := room.get_node_or_null("/root/AudioDirector")
         if director != null:
             var tone := director.get("room_player") as AudioStreamPlayer
@@ -471,3 +470,8 @@ func _restore_audio() -> void:
         if is_instance_valid(emitter):
             emitter.volume_db = audio_original[emitter]
     audio_original.clear()
+    for state in glow_original:
+        var lamp := state["node"] as Light3D
+        if is_instance_valid(lamp):
+            lamp.light_energy = state["energy"]
+    glow_original.clear()

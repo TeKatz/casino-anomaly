@@ -440,12 +440,27 @@ func _verify_reality_batch(hall: Node3D, other_hall: Node3D) -> bool:
             if reality_settings != null and not bool(reality_settings.call("get_option", "reduced_motion")) and reality_ball.position.is_equal_approx(reality_ball_start):
                 _fail("Pack 03 roulette ball not moving")
                 return false
+        if reality_id == "invisible_dealer" and reality_nodes.size() != 16:
+            _fail("Both card tables must be animated")
+            return false
+        if reality_id == "against_gravity":
+            var drop_emitter := reality_nodes[0].get_node_or_null("AnomalyPack03")
+            if drop_emitter == null or not drop_emitter.has_node("DropletCeiling") or drop_emitter.find_children("*", "RigidBody3D", false, false).size() != reality_nodes.size():
+                _fail("Upper bottle row physics incomplete")
+                return false
+            for drop_body in drop_emitter.find_children("*", "RigidBody3D", false, false):
+                if drop_body.gravity_scale >= 0 or drop_body.collision_layer != 0 or drop_body.physics_material_override.bounce < 0.5:
+                    _fail("Droplets must bounce without colliding with player")
+                    return false
+        if reality_id == "they_are_listening" and not reality_nodes[0].has_node("AnomalyPack03/ListeningView"):
+            _fail("Listening screen effect missing")
+            return false
         if reality_id == "extra_guest" and not reality_nodes[0].has_node("AnomalyPack03/SeatedGuest"):
             _fail("Pack 03 seated guest missing")
             return false
         if reality_id == "wrong_reflection":
             var reality_mirror := reality_nodes[0].get_node_or_null("AnomalyPack03")
-            if reality_mirror == null or not reality_mirror.has_node("ReflectionViewport/ReflectedCamera") or not reality_mirror.has_node("ReflectionOnlyCat"):
+            if reality_mirror == null or not reality_mirror.has_node("ReflectionViewport/ReflectedCamera") or not reality_mirror.has_node("ReflectionOnlyCat") or not reality_mirror.has_node("MirrorSurface"):
                 _fail("Pack 03 reflection setup incomplete")
                 return false
         if reality_probe.call("snapshot", reality_other, reality_id) != reality_isolated:
