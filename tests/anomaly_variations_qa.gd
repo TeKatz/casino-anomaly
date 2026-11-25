@@ -315,6 +315,8 @@ func _run() -> void:
         return
     if not _verify_other_side(room,next_room):
         return
+    if not _verify_silent_audience(room,next_room):
+        return
     room.queue_free()
     next_room.queue_free()
     await process_frame
@@ -704,5 +706,88 @@ func _verify_other_side(hall: Node3D, other: Node3D) -> bool:
         trim.name = trim_original_name
     if not trim_restored or hall.has_node("AnomalyOtherSide") or wall.mesh!=original_mesh or wall.material_override!=original_material or wall.visible!=original_visible or hall.get_node_or_null("Architecture/SouthWestWall_Collision")!=collider:
         _fail("Other Side cleanup changed authored room")
+        return false
+    return true
+
+
+func _verify_silent_audience(hall: Node3D, other: Node3D) -> bool:
+    # Major event 33: registration, real seats, safe staging, actual
+    # imported skeletal clips, synchronized finale and complete cleanup.
+    if not Catalog.discoverable_ids().has("the_silent_audience") or not Catalog.available_ids(hall).has("the_silent_audience"):
+        _fail("Silent Audience unavailable in the anomaly catalog")
+        return false
+    var sofa := hall.get_node("ModelInteriors/LoungeSofa_01") as Node3D
+    var base_transform := sofa.transform
+    var adapter := Adapter.new()
+    if not adapter.apply(hall,"the_silent_audience"):
+        _fail("Silent Audience failed to apply")
+        return false
+    var effect := hall.get_node_or_null("AnomalySilentAudience") as Node3D
+    if effect == null or other.has_node("AnomalySilentAudience"):
+        _fail("Silent Audience leaked into another room")
+        return false
+    var count := int(effect.get("target_count"))
+    var sites: Array = effect.get("seats")
+    if count < 15 or count > 25 or sites.size() < count or not (effect.get("guests") as Array).is_empty():
+        _fail("Silent Audience should begin empty with 15-25 planned people")
+        return false
+    var kinds := {}
+    for site in sites:
+        kinds[str(site["kind"])] = int(kinds.get(str(site["kind"]),0))+1
+    if int(kinds.get("sofa",0)) < 5 or int(kinds.get("bar",0)) < 7 or int(kinds.get("extra_stool",0)) < 4:
+        _fail("Silent Audience has no real seating across lounge, bar and gaming tables")
+        return false
+    # A staged room has no live actor progression or persistent audio duck.
+    hall.set_meta("_streaming_standby",true)
+    effect.call("_process",70.0)
+    hall.remove_meta("_streaming_standby")
+    if float(effect.get("elapsed")) > 0.001 or not (effect.get("guests") as Array).is_empty() or not (effect.get("audio_baseline") as Dictionary).is_empty():
+        _fail("Silent Audience advanced while the room was staged")
+        return false
+    # Force two controlled offscreen arrivals: a real sofa and a newly
+    # created cosmetic stool, both attached only to this anomaly root.
+    var sofa_index := -1
+    for i in range(sites.size()):
+        if str(sites[i]["kind"]) == "sofa":
+            sofa_index = i
+            break
+    if sofa_index < 0 or not bool(effect.call("_spawn_seat",sofa_index)):
+        _fail("Silent Audience could not seat its animated lounge guest")
+        return false
+    sites = effect.get("seats")
+    var stool_index := -1
+    for i in range(sites.size()):
+        if str(sites[i]["kind"]) == "extra_stool":
+            stool_index = i
+            break
+    if stool_index < 0 or not bool(effect.call("_spawn_seat",stool_index)):
+        _fail("Silent Audience could not create a seated gaming-table guest")
+        return false
+    var guests: Array = effect.get("guests")
+    if guests.size() != 2 or not effect.find_children("*","CollisionObject3D",true,false).is_empty():
+        _fail("Silent Audience spawned active colliders or wrong guest count")
+        return false
+    for person in guests:
+        var animator := person["animator"] as AnimationPlayer
+        var skeleton := person["skeleton"] as Skeleton3D
+        if animator == null or skeleton == null or skeleton.find_bone("Head_06") < 0 or not animator.has_animation(str(person["stand_clip"])):
+            _fail("Silent Audience figures must retain a real animated skeleton")
+            return false
+    effect.set("target_count",2)
+    effect.call("_stand_together")
+    if not bool(effect.get("finale_started")):
+        _fail("Silent Audience did not start its synchronized finale")
+        return false
+    for person in guests:
+        if not (person["animator"] as AnimationPlayer).is_playing():
+            _fail("Silent Audience did not animate all standing guests together")
+            return false
+    effect.call("_freeze_finale")
+    if not bool(effect.get("finale_frozen")):
+        _fail("Silent Audience did not freeze the final standing tableau")
+        return false
+    adapter.clear()
+    if hall.has_node("AnomalySilentAudience") or other.has_node("AnomalySilentAudience") or not sofa.transform.is_equal_approx(base_transform):
+        _fail("Silent Audience cleanup changed the original casino")
         return false
     return true
