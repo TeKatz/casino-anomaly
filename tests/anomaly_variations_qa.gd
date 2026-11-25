@@ -310,6 +310,8 @@ func _run() -> void:
         return
     if not (await _verify_reality_batch(room, next_room)):
         return
+    if not _verify_flood(room,next_room):
+        return
     room.queue_free()
     next_room.queue_free()
     await process_frame
@@ -524,4 +526,52 @@ func _verify_reality_batch(hall: Node3D, other_hall: Node3D) -> bool:
         if reality_probe.call("snapshot", reality_nodes, reality_id) != reality_before:
             _fail("Pack 03 failed to restore: " + reality_id)
             return false
+    return true
+
+
+func _verify_flood(hall: Node3D, other: Node3D) -> bool:
+    if not Catalog.discoverable_ids().has("the_flood") or not Catalog.available_ids(hall).has("the_flood"):
+        _fail("Major event The Flood unavailable in real casino")
+        return false
+    var adapter := Adapter.new()
+    var floor := hall.get_node("Architecture/OakMainWing") as MeshInstance3D
+    var original_mesh := floor.mesh
+    var original_material := floor.material_override
+    if not adapter.apply(hall,"the_flood"):
+        _fail("The Flood apply failed")
+        return false
+    var event := hall.get_node_or_null("AnomalyFlood")
+    if event == null or not event.has_node("FloodSurface") or not event.has_node("FloatingCards") or other.has_node("AnomalyFlood"):
+        _fail("Flood geometry/cards missing or leaked across rooms")
+        return false
+    if not bool(event.call("contains_water",Vector3(3.25,0,8.0))) or bool(event.call("contains_water",Vector3(-42,0,-6))):
+        _fail("Flood must start as a local puddle")
+        return false
+    hall.set_meta("_streaming_standby",true)
+    event.call("_process",3.0)
+    hall.remove_meta("_streaming_standby")
+    if float(event.get("elapsed")) != 0.0:
+        _fail("Flood advanced in staged room")
+        return false
+    event.set("elapsed",24.0)
+    event.call("_update_progress")
+    var half_height := float(event.get("water_height"))
+    if half_height <= 0.04 or half_height >= 0.15:
+        _fail("Flood midpoint height invalid")
+        return false
+    event.set("elapsed",48.0)
+    event.call("_update_progress")
+    if not bool(event.call("contains_water",Vector3(-44,0,-6))) or not bool(event.call("contains_water",Vector3(0,0,12))) or bool(event.call("contains_water",Vector3(-20,0,5))):
+        _fail("Flood does not match the full L-shaped floor")
+        return false
+    if float(event.get("water_height")) < 0.14 or event.get_node("FloatingCards").get_child_count() < 8:
+        _fail("Flood depth or card models missing")
+        return false
+    if not event.find_children("*","CollisionObject3D",true,false).is_empty():
+        _fail("Flood must never obstruct player or exits")
+        return false
+    adapter.clear()
+    if hall.has_node("AnomalyFlood") or floor.mesh != original_mesh or floor.material_override != original_material:
+        _fail("Flood cleanup modified base room")
+        return false
     return true

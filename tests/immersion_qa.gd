@@ -23,7 +23,7 @@ func _run() -> void:
         if loop == null or loop.loop_mode != AudioStreamWAV.LOOP_FORWARD:
             _fail("Non-looping positional bed: " + kind)
             return
-    for surface in ["wood", "carpet", "corridor"]:
+    for surface in ["wood", "carpet", "corridor", "water"]:
         var wave := director.get_footstep_stream(surface, 0) as AudioStreamWAV
         if wave == null or wave.loop_mode != AudioStreamWAV.LOOP_DISABLED:
             _fail("Missing footstep: " + surface)

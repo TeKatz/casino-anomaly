@@ -21,6 +21,8 @@ static func _wave(samples: PackedFloat32Array, looped: bool, rate: int = RATE, l
 
 
 static func footstep(surface: String, variant: int) -> AudioStreamWAV:
+    if surface == "water":
+        return _water_step(variant)
     var length := 0.25 if surface == "corridor" else 0.22
     var count := int(float(RATE) * length)
     var samples := PackedFloat32Array()
@@ -93,3 +95,62 @@ static func _fluorescent_hum() -> AudioStreamWAV:
     for i in range(guard):
         samples[count + i] = samples[i]
     return _wave(samples, true, rate, count)
+
+
+## Original procedural water cues. Deterministic, cached and never streamed
+## or synthesized per frame. All loops use a smooth, phase-closed seam.
+static func _water_step(variant: int) -> AudioStreamWAV:
+    var count := int(RATE*0.37)
+    var samples := PackedFloat32Array()
+    samples.resize(count)
+    var rng := RandomNumberGenerator.new()
+    rng.seed = 9431+variant*599
+    var low := 0.0
+    var mid := 0.0
+    for i in range(count):
+        var t := float(i)/float(RATE)
+        var noise := rng.randf_range(-1.0,1.0)
+        low = lerpf(low,noise,0.035)
+        mid = lerpf(mid,noise,0.22)
+        var impact := sin(TAU*78.0*t)*exp(-t*35.0)*0.28
+        var splash := (mid-low)*0.8*exp(-t*12.0)+(noise-mid)*0.15*exp(-t*19.0)
+        var second := maxf(0.0,t-0.095)
+        var slosh := (low*1.3+mid*0.37)*exp(-second*19.0)*smoothstep(0.095,0.12,t)
+        var bubble := sin(TAU*(460.0*t-580.0*t*t))*exp(-t*22.0)*0.095
+        samples[i] = (impact+splash+slosh+bubble)*smoothstep(0.0,0.005,t)*(1.0-smoothstep(0.33,0.37,t))*0.87
+    return _wave(samples,false)
+
+
+static func water_ambience() -> AudioStreamWAV:
+    var duration := 5.0
+    var count := int(RATE*duration)
+    var samples := PackedFloat32Array()
+    samples.resize(count)
+    var rng := RandomNumberGenerator.new()
+    rng.seed = 717012
+    var low := 0.0
+    var mid := 0.0
+    for i in range(count):
+        var t := float(i)/float(RATE)
+        var noise := rng.randf_range(-1.0,1.0)
+        low = lerpf(low,noise,0.012)
+        mid = lerpf(mid,noise,0.13)
+        var swell := 0.70+0.18*sin(TAU*0.4*t)+0.12*sin(TAU*0.6*t+0.7)
+        var seam := smoothstep(0.0,0.028,t)*smoothstep(0.0,0.028,duration-t)
+        samples[i] = ((mid-low)*0.50+low*0.55+(noise-mid)*0.025)*swell*seam
+    return _wave(samples,true)
+
+
+static func water_drop() -> AudioStreamWAV:
+    var count := int(RATE*0.23)
+    var samples := PackedFloat32Array()
+    samples.resize(count)
+    var rng := RandomNumberGenerator.new()
+    rng.seed = 49123
+    for i in range(count):
+        var t := float(i)/float(RATE)
+        var plop := sin(TAU*(820.0*t-1350.0*t*t))*exp(-t*24.0)*0.38
+        var tail := sin(TAU*(370.0*t+420.0*t*t))*exp(-t*37.0)*0.18
+        var noise := rng.randf_range(-1.0,1.0)*exp(-t*85.0)*0.095
+        samples[i] = (plop+tail+noise)*smoothstep(0.0,0.003,t)
+    return _wave(samples,false)

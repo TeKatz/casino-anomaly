@@ -310,6 +310,14 @@ func _update_footsteps(traveled: float, sprinting: bool) -> void:
     var sound := get_node_or_null("/root/AudioDirector")
     if sound != null:
         var surface := _surface_underfoot()
+        var room := get_parent() as Node3D
+        if not backrooms_mode and room != null:
+            var flood := room.get_node_or_null("AnomalyFlood")
+            if flood != null:
+                var local := room.to_local(global_position)
+                if bool(flood.call("contains_water",local)):
+                    surface = "water"
+                    flood.call("register_step",local,sprinting)
         sound.play_footstep(surface, sprinting)
         var comfort := get_node_or_null("ComfortHUD")
         if comfort != null:

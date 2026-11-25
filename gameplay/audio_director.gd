@@ -208,7 +208,7 @@ func _prepare_immersion() -> void:
         AudioServer.add_bus_effect(index, world_reverb)
     else:
         world_reverb = AudioServer.get_bus_effect(index, 0) as AudioEffectReverb
-    for surface in ["wood", "carpet", "corridor"]:
+    for surface in ["wood", "carpet", "corridor", "water"]:
         for variant in range(2):
             step_sounds[surface + str(variant)] = ImmersionSynth.footstep(surface, variant)
     for kind in ["cabinet", "bar", "vent", "pressure", "backrooms_hum"]:
