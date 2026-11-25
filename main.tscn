@@ -11367,7 +11367,7 @@ cast_shadow = 0
 mesh = SubResource("BoxMesh_23xmf")
 
 [node name="EntryCove" type="MeshInstance3D" parent="CasinoAtmosphere"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1.1, -5.88, 5.53, 7.5038114)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1.1, -5.9760423, 5.53, 7.5038114)
 material_override = SubResource("StandardMaterial3D_pjuso")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_swlj1")
@@ -11562,12 +11562,12 @@ material_override = SubResource("StandardMaterial3D_s4o1y")
 mesh = SubResource("BoxMesh_7mmqq")
 
 [node name="SouthWestWall" type="MeshInstance3D" parent="Architecture"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 3, 0.18)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26.220314, 3, 0.18)
 material_override = SubResource("StandardMaterial3D_3exxq")
 mesh = SubResource("BoxMesh_5aa3q")
 
 [node name="SouthWestWall_Collision" type="StaticBody3D" parent="Architecture"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 3, 0.18)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26.403194, 3, 0.18)
 metadata/collision_for = "SouthWestWall"
 
 [node name="@CollisionShape3D@8" type="CollisionShape3D" parent="Architecture/SouthWestWall_Collision"]
@@ -11579,12 +11579,12 @@ material_override = SubResource("StandardMaterial3D_shlp4")
 mesh = SubResource("BoxMesh_2n44k")
 
 [node name="LeftMainWall" type="MeshInstance3D" parent="Architecture"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.18, 3, 7)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.18, 3, 7.2649603)
 material_override = SubResource("StandardMaterial3D_86lig")
 mesh = SubResource("BoxMesh_ldnlw")
 
 [node name="LeftMainWall_Collision" type="StaticBody3D" parent="Architecture"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.18, 3, 7)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.18, 3, 7.5228586)
 metadata/collision_for = "LeftMainWall"
 
 [node name="@CollisionShape3D@9" type="CollisionShape3D" parent="Architecture/LeftMainWall_Collision"]
