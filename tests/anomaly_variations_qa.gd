@@ -421,6 +421,8 @@ func _verify_reality_batch(hall: Node3D, other_hall: Node3D) -> bool:
             return false
         var reality_before: Array = reality_probe.call("snapshot", reality_nodes, reality_id)
         var reality_isolated: Array = reality_probe.call("snapshot", reality_other, reality_id)
+        var reality_wall := hall.get_node("Architecture/SouthWestWall") as MeshInstance3D
+        var reality_wall_layers := reality_wall.layers
         if not reality_adapter.apply(hall, reality_id):
             _fail("Pack 03 apply failed: " + reality_id)
             return false
@@ -450,6 +452,9 @@ func _verify_reality_batch(hall: Node3D, other_hall: Node3D) -> bool:
             _fail("Pack 03 leaked to another room: " + reality_id)
             return false
         reality_adapter.clear()
+        if reality_wall.layers != reality_wall_layers:
+            _fail("Pack 03 reflection layer remained after cleanup")
+            return false
         if reality_probe.call("snapshot", reality_nodes, reality_id) != reality_before:
             _fail("Pack 03 failed to restore: " + reality_id)
             return false

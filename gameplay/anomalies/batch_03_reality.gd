@@ -258,7 +258,6 @@ func _roulette(room: Node3D, wheel: Node3D) -> void:
 
 func _dealer(room: Node3D, nodes: Array[Node3D]) -> void:
     var original: Array[Vector3] = []
-    var table := nodes[0].get_parent() as Node3D
     var deck := Vector3(-0.44, nodes[0].position.y, -0.30)
     for i in range(nodes.size()):
         original.append(nodes[i].position)
@@ -306,9 +305,16 @@ func _door(wall: MeshInstance3D) -> void:
     # beside (not over) the playable portal. No extra collision/interaction.
     var bounds := wall.get_aabb()
     root.position = Vector3(bounds.end.x - 1.5, bounds.position.y + 1.24, bounds.position.z - 0.21)
-    var wood := _material(Color("#34302c"), 0.0, 0.92)
-    var frame := _material(Color("#25211d"), 0.0, 0.83)
-    var inset := _material(Color("#4b4540"), 0.0, 0.9)
+    var wood := _material(Color("#a39b90"), 0.0, 0.92)
+    wood.albedo_texture = load("res://assets/wood_table_worn/wood_table_worn_diff_2k.jpg") as Texture2D
+    wood.normal_enabled = true
+    wood.normal_texture = load("res://assets/wood_table_worn/wood_table_worn_nor_gl_2k.jpg") as Texture2D
+    wood.normal_scale = 0.6
+    wood.roughness_texture = load("res://assets/wood_table_worn/wood_table_worn_rough_2k.jpg") as Texture2D
+    var frame := wood.duplicate() as StandardMaterial3D
+    frame.albedo_color = Color("#69615a")
+    var inset := wood.duplicate() as StandardMaterial3D
+    inset.albedo_color = Color("#c0b7ad")
     var metal := _material(Color("#716c5d"), 0.72, 0.64)
     _box(root, "WeatheredDoor", Vector3(0.96, 2.35, 0.075), Vector3.ZERO, wood)
     for side in [-1.0, 1.0]:
@@ -345,7 +351,7 @@ func _liquid(room: Node3D, nodes: Array[Node3D]) -> void:
             heights.append(maxf(0.6, 5.70 - room.to_local(shell.to_global(top)).y))
     _animate(room, 6.0, func(phase: float) -> void:
         for i in range(drops.size()):
-            var p := fposmod(phase + float(i%4)*0.25 + float(i/4)*0.08, 1.0)
+            var p := fposmod(phase + float(i%4)*0.25 + floorf(float(i)/4.0)*0.08, 1.0)
             if _reduced(room):
                 p = 0.22 + float(i%4)*0.15
             drops[i].position = starts[i] + Vector3(sin(p*TAU + float(i))*0.035, p*heights[i], 0.0)
@@ -389,6 +395,10 @@ func _bloom(room: Node3D, wall: MeshInstance3D) -> void:
 
 
 func _listening(room: Node3D, nodes: Array[Node3D]) -> void:
+    # The room may be torn down directly by Quit/Restart, without the
+    # usual adapter clear. Restore the persistent audio in either case.
+    var cleanup_marker := _root(nodes[0])
+    cleanup_marker.tree_exiting.connect(_restore_audio)
     var materials: Array[StandardMaterial3D] = []
     var baseline: Array[float] = []
     for strip_node in nodes:
@@ -441,10 +451,7 @@ func clear() -> void:
         if is_instance_valid(root_node):
             root_node.free()
     roots.clear()
-    for emitter in audio_original:
-        if is_instance_valid(emitter):
-            emitter.volume_db = audio_original[emitter]
-    audio_original.clear()
+    _restore_audio()
     for state in saved:
         var node := state["node"] as Node3D
         if not is_instance_valid(node):
@@ -457,3 +464,10 @@ func clear() -> void:
         if node is Light3D:
             node.light_energy = state["energy"]
     saved.clear()
+
+
+func _restore_audio() -> void:
+    for emitter in audio_original:
+        if is_instance_valid(emitter):
+            emitter.volume_db = audio_original[emitter]
+    audio_original.clear()

@@ -72,8 +72,12 @@ func configure(room: Node3D, painting: MeshInstance3D, backing: MeshInstance3D) 
     wall.layers = MIRROR_LAYER
     phantom.name = "ReflectionOnlyCat"
     add_child(phantom)
-    phantom.global_position = center + normal * 2.3 - hall.global_basis.y.normalized() * (center.y - hall.global_position.y - 0.02)
-    phantom.scale = Vector3.ONE * 3.0
+    # The canvas belongs to a 2.63x imported model. Explicit world
+    # transform prevents accidentally scaling the reflection-only prop
+    # by that factor again. Source cat is 0.283m tall.
+    var prop_position := hall.to_local(center + normal * 2.3)
+    prop_position.y = 0.02
+    phantom.global_transform = Transform3D(hall.global_basis.orthonormalized().scaled(Vector3.ONE * 2.65), hall.to_global(prop_position))
     phantom.hide()
     for item in phantom.find_children("*", "MeshInstance3D", true, false):
         var mesh := item as MeshInstance3D
@@ -110,7 +114,7 @@ func _process(delta: float) -> void:
     elapsed = 0.0
     var pos := player_camera.global_position
     var distance := (pos - center).dot(normal)
-    if distance < 0.1 or pos.distance_to(center) > 14.0:
+    if distance < 0.1 or pos.distance_to(center) > 14.0 or (-player_camera.global_basis.z).dot((center-pos).normalized()) < 0.25:
         return
     var reflected_pos := pos - 2.0 * distance * normal
     var forward := -player_camera.global_basis.z.normalized()
@@ -124,7 +128,7 @@ func _process(delta: float) -> void:
     reflected_camera.near = maxf(0.05, distance - 0.30)
     reflected_camera.far = player_camera.far
     var screen := player_camera.get_viewport().get_visible_rect().size
-    if screen.y > 0.0:
+    if screen.x > 0.0 and screen.y > 0.0:
         var desired := Vector2i(640, clampi(roundi(640.0 * screen.y / screen.x), 240, 640))
         if capture.size != desired:
             capture.size = desired
