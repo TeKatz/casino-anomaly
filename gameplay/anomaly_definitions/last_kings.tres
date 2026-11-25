@@ -1,0 +1,18 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://gameplay/anomaly_definition.gd" id="1_definition"]
+[ext_resource type="Script" path="res://gameplay/anomalies/batch_02_horror.gd" id="2_handler"]
+
+[resource]
+script = ExtResource("1_definition")
+handler = ExtResource("2_handler")
+id = "last_kings"
+category_en = "Uncanny"
+category_de = "Unheimlich"
+title_en = "The last kings"
+title_de = "Die letzten Könige"
+description_en = "All chess pieces except the two kings are gone."
+description_de = "Alle Schachfiguren außer den beiden Königen sind verschwunden."
+target_path = "ModelInteriors"
+rarity = "common"
+difficulty = 3

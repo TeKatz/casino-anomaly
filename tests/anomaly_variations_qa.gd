@@ -306,8 +306,51 @@ func _run() -> void:
         if handler.call("snapshot", nodes, id) != baseline:
             _fail("Batch 01 did not restore the baseline: " + id)
             return
+    if not _verify_horror_batch(room, next_room):
+        return
     room.queue_free()
     next_room.queue_free()
     await process_frame
     print("Casino Anomaly ten subtle anomalies QA PASS")
     quit(0)
+
+
+func _verify_horror_batch(hall: Node3D, other_hall: Node3D) -> bool:
+    var horror_ids := ["synchronized_busts","inverted_cat","lightless_horse","watching_canvases","stay_here","last_kings","ownerless_shadow","empty_footsteps","crimson_hall","silent_countdown"]
+    var horror_adapter := Adapter.new()
+    var horror_counts := {"synchronized_busts": 2, "inverted_cat": 1, "watching_canvases": 3, "stay_here": 3, "ownerless_shadow": 1, "empty_footsteps": 1}
+    var available_horror := Catalog.available_ids(hall)
+    for horror_id in horror_ids:
+        var horror_entry := Catalog.get_entry(horror_id)
+        if horror_entry.is_empty() or Catalog.family(horror_id) != horror_id or not available_horror.has(horror_id):
+            _fail("Pack 02 family unavailable: " + horror_id)
+            return false
+        var inspector: RefCounted = horror_entry["handler"].new()
+        var affected: Array[Node3D] = inspector.call("targets", hall, horror_entry)
+        var unaffected: Array[Node3D] = inspector.call("targets", other_hall, horror_entry)
+        if affected.is_empty() or unaffected.size() != affected.size() or (horror_counts.has(horror_id) and affected.size() != int(horror_counts[horror_id])):
+            _fail("Pack 02 incomplete targets: " + horror_id)
+            return false
+        var initial: Array = inspector.call("snapshot", affected, horror_id)
+        var isolated: Array = inspector.call("snapshot", unaffected, horror_id)
+        if not horror_adapter.apply(hall, horror_id):
+            _fail("Pack 02 failed to apply: " + horror_id)
+            return false
+        if inspector.call("snapshot", affected, horror_id) == initial or inspector.call("snapshot", unaffected, horror_id) != isolated:
+            _fail("Pack 02 ineffective or leaked between rooms: " + horror_id)
+            return false
+        if horror_id in ["ownerless_shadow", "empty_footsteps"]:
+            var mark_group := affected[0].get_node_or_null("AnomalyHorrorMark")
+            var expected_marks := 1 if horror_id == "ownerless_shadow" else 6
+            if mark_group == null or mark_group.get_child_count() != expected_marks:
+                _fail("Pack 02 missing floor marks: " + horror_id)
+                return false
+            for mark_mesh in mark_group.get_children():
+                if not mark_mesh is MeshInstance3D or mark_mesh.material_override.albedo_texture == null:
+                    _fail("Pack 02 floor mark missing generated texture")
+                    return false
+        horror_adapter.clear()
+        if inspector.call("snapshot", affected, horror_id) != initial:
+            _fail("Pack 02 failed to restore: " + horror_id)
+            return false
+    return true
