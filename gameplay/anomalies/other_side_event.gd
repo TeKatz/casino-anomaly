@@ -3,8 +3,9 @@ extends Node3D
 ## of the casino. Only visual instances enter the private World3D; no
 ## gameplay, player, colliders, scripts, portals, GI rigs or audio are cloned.
 const PORTAL_SHADER = preload("res://gameplay/anomalies/other_side_portal.gdshader")
-const CENTER_X := -10.55
-const OPEN_WIDTH := 3.90
+## Clear approach between lounge groups 02 and 03, away from the card table.
+const CENTER_X := -26.40
+const OPEN_WIDTH := 2.40
 const SLIDE := 4.08
 const POCKET_DEPTH := 0.42
 const OPEN_TIME := 6.0
@@ -12,7 +13,7 @@ const HOLD_TIME := 26.0
 const CLOSE_TIME := 6.0
 const REST_TIME := 8.0
 const ACTIVATION_RADIUS := 14.0
-const SOURCE_CENTER_X := -17.0
+const SOURCE_CENTER_X := -31.0
 const SECTIONS := ["Architecture","RedCarpet","SlotMachines","GamingTables","CornerBar","Lounge","Decor","ModelInteriors","SketchfabFurniture","Lighting"]
 const CARD_PATH := "res://models/playing_cards/individual/card_%02d.gltf"
 const CARD_IDS := [12,1,14,6,19,32,40,51]
@@ -119,18 +120,43 @@ func _build_world() -> void:
     capture = SubViewport.new()
     capture.name = "OtherSideViewport"
     capture.own_world_3d = true
-    capture.size = Vector2i(1600,900)
+    capture.size = Vector2i(2560,1440)
+    capture.use_hdr_2d = false
+    capture.scaling_3d_scale = 1.0
     capture.render_target_update_mode = SubViewport.UPDATE_DISABLED
     add_child(capture)
     var environment_node := WorldEnvironment.new()
     environment_node.name = "InvertedEnvironment"
     var env := Environment.new()
     env.background_mode = Environment.BG_COLOR
-    env.background_color = Color("#10171b")
+    env.background_color = Color("#080b10")
     env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-    env.ambient_light_color = Color("#c2d5de")
-    env.ambient_light_energy = 0.53
+    env.ambient_light_color = Color("#8896a9")
+    env.ambient_light_energy = 0.19
     env.ambient_light_sky_contribution = 0.0
+    # Independent post-processing; avoid the flat full-room fill of the
+    # first version. Forward+ calculates contact shadows and reflections
+    # directly from the inverted geometry, without the real hall's GI.
+    env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+    env.tonemap_exposure = 0.86
+    env.ssao_enabled = true
+    env.ssao_radius = 0.84
+    env.ssao_intensity = 1.45
+    env.ssao_light_affect = 0.28
+    env.ssil_enabled = true
+    env.ssil_radius = 2.2
+    env.ssil_intensity = 0.70
+    env.ssr_enabled = true
+    env.ssr_max_steps = 48
+    env.glow_enabled = true
+    env.glow_intensity = 0.25
+    env.glow_bloom = 0.012
+    env.glow_hdr_threshold = 1.15
+    env.volumetric_fog_enabled = true
+    env.volumetric_fog_density = 0.013
+    env.volumetric_fog_albedo = Color("#8396ac")
+    env.volumetric_fog_length = 30.0
+    env.volumetric_fog_ambient_inject = 0.02
     environment_node.environment = env
     capture.add_child(environment_node)
     inverted = Node3D.new()
@@ -185,6 +211,14 @@ func _build_world() -> void:
             label.double_sided = source.double_sided
             group.add_child(label)
             label.transform = inverse*source.global_transform
+            if source.text.strip_edges().to_upper()=="TABLE GAMES":
+                # The original sign is attached to the removed near wall.
+                # Keep it as a smaller inverted detail on the far wall,
+                # rather than letting it float across the opening.
+                label.position.z = -0.13
+                label.rotation.y = PI
+                label.pixel_size *= 0.72
+                label.modulate = Color("#bba889")
         for item in section.find_children("*","Light3D",true,false):
             var source := item as Light3D
             if not _source_visible(source,section) or source.light_energy<=0.0:
@@ -192,15 +226,27 @@ func _build_world() -> void:
             _copy_light(source,group,inverse)
     # Cool, low-key fill from the inverted ceiling/floor. Original light
     # fixtures and emissive materials remain recognizable, but colder.
-    for x in [-22.0,-12.0,-2.0]:
+    for offset in [-9.0,0.0,9.0]:
         var fill := OmniLight3D.new()
         fill.name = "OtherworldFill"
-        fill.light_color = Color("#a3c9de")
-        fill.light_energy = 0.92
-        fill.omni_range = 11.0
+        fill.light_color = Color("#8faac7")
+        fill.light_energy = 0.24
+        fill.omni_range = 8.5
+        fill.omni_attenuation = 1.4
         fill.shadow_enabled = false
         capture.add_child(fill)
-        fill.position = Vector3(x,3.2,portal_z+6.0)
+        fill.position = Vector3(CENTER_X+offset,3.8,portal_z+7.0)
+    # A low cool pool at the base of the inverted chandelier emphasizes
+    # its silhouette; the original fixtures remain the primary lights.
+    var accent := OmniLight3D.new()
+    accent.name = "InvertedChandelierAccent"
+    accent.light_color = Color("#9db8db")
+    accent.light_energy = 0.48
+    accent.omni_range = 5.0
+    accent.shadow_enabled = true
+    accent.light_volumetric_fog_energy = 0.28
+    capture.add_child(accent)
+    accent.position = Vector3(CENTER_X,1.7,portal_z+6.6)
     virtual_camera = Camera3D.new()
     virtual_camera.name = "OtherSideCamera"
     capture.add_child(virtual_camera)
@@ -225,15 +271,15 @@ func _copy_light(source: Light3D, group: Node3D, inverse: Transform3D) -> void:
     else:
         return
     light.name = "InvertedLight_%03d" % cloned_lights
-    light.light_color = source.light_color.lerp(Color("#a7cfeb"),0.55)
-    light.light_energy = source.light_energy*0.82
+    light.light_color = source.light_color.lerp(Color("#a7cfeb"),0.32)
+    light.light_energy = source.light_energy*0.95
     light.light_specular = source.light_specular
     var local_position := (inverse*source.global_transform).origin
     # Limit extra shadow maps to a small number of relevant interior lights.
-    light.shadow_enabled = source.shadow_enabled and shadow_lights<3 and absf(local_position.x-SOURCE_CENTER_X)<8.0 and local_position.z<0.0
+    light.shadow_enabled = source.shadow_enabled and shadow_lights<8 and absf(local_position.x-SOURCE_CENTER_X)<14.0 and local_position.z<0.0
     if light.shadow_enabled:
         shadow_lights += 1
-    light.light_volumetric_fog_energy = 0.0
+    light.light_volumetric_fog_energy = minf(source.light_volumetric_fog_energy,0.42)
     group.add_child(light)
     light.transform = inverse*source.global_transform
     cloned_lights += 1
@@ -387,9 +433,22 @@ func _read_settings() -> void:
     # Independent of reflection enablement: the view itself is an anomaly,
     # not a reflection. Use that quality preference only to cap resolution.
     quality = str(settings.call("get_option","reflection_quality")) if settings != null else "original"
-    var msaa := Viewport.MSAA_2X if quality in ["high","ultra"] else Viewport.MSAA_DISABLED
+    var msaa := Viewport.MSAA_DISABLED
+    if quality in ["medium","original"]:
+        msaa = Viewport.MSAA_2X
+    elif quality in ["high","ultra"]:
+        msaa = Viewport.MSAA_4X
     if capture.msaa_3d != msaa:
         capture.msaa_3d = msaa
+    var env := (capture.get_node("InvertedEnvironment") as WorldEnvironment).environment
+    var fog_quality := str(settings.call("get_option","fog_quality")) if settings != null else "original"
+    var ao_quality := str(settings.call("get_option","ssao_quality")) if settings != null else "original"
+    env.volumetric_fog_enabled = fog_quality!="off"
+    env.ssao_enabled = ao_quality!="off"
+    env.ssil_enabled = bool(settings.call("get_option","ssil")) if settings != null else true
+    env.ssr_enabled = quality!="off"
+    env.ssr_max_steps = 24 if quality in ["off","low"] else 48
+    env.glow_enabled = bool(settings.call("get_option","bloom")) if settings != null else true
 
 
 func _set_open_fraction(value: float) -> void:
@@ -449,7 +508,7 @@ func _render_view(camera: Camera3D, delta: float) -> void:
     if phase not in ["opening","open","closing"]:
         return
     frame_clock += delta
-    var rate := 60.0 if quality in ["high","ultra"] else 30.0
+    var rate := 30.0 if quality in ["off","low"] else 60.0
     var view_transform := hall.global_transform.affine_inverse()*camera.get_camera_transform()
     # Moving cameras need a new view every frame to keep the aperture
     # attached to the real scene. Static views can render at 30 fps.
@@ -460,14 +519,7 @@ func _render_view(camera: Camera3D, delta: float) -> void:
     var screen := camera.get_viewport().get_visible_rect().size
     if screen.x<2.0 or screen.y<2.0:
         return
-    var cap := 1600.0
-    match quality:
-        "off","low": cap = 960.0
-        "medium": cap = 1280.0
-        "high": cap = 1920.0
-        "ultra": cap = 2560.0
-    var scale_factor := minf(1.0,cap/maxf(screen.x,screen.y))
-    var wanted := Vector2i(maxi(2,roundi(screen.x*scale_factor)),maxi(2,roundi(screen.y*scale_factor)))
+    var wanted := _capture_size(screen)
     if capture.size!=wanted:
         capture.size = wanted
     virtual_camera.global_transform = view_transform
@@ -480,6 +532,28 @@ func _render_view(camera: Camera3D, delta: float) -> void:
     if not has_rendered:
         has_rendered = true
         portal_material.set_shader_parameter("view_ready",true)
+
+
+func _capture_size(screen: Vector2) -> Vector2i:
+    # Preserve the screen aspect for correct parallax. Supersample the
+    # portal in normal/high settings instead of enlarging a 1600px image.
+    var cap := 2560.0
+    var sample_scale := 1.25
+    match quality:
+        "off","low":
+            cap = 1280.0
+            sample_scale = 0.85
+        "medium":
+            cap = 1920.0
+            sample_scale = 1.0
+        "high":
+            cap = 3200.0
+            sample_scale = 1.5
+        "ultra":
+            cap = 3840.0
+            sample_scale = 1.75
+    var factor := minf(sample_scale,cap/maxf(screen.x,screen.y))
+    return Vector2i(maxi(2,roundi(screen.x*factor)),maxi(2,roundi(screen.y*factor)))
 
 
 func _process(delta: float) -> void:

@@ -632,6 +632,22 @@ func _verify_other_side(hall: Node3D, other: Node3D) -> bool:
     if inverted.basis.y.dot(Vector3.DOWN)<0.99 or int(event.get("cloned_meshes"))<30 or not inverted.has_node("SketchfabFurniture"):
         _fail("Other Side casino is not fully inverted")
         return false
+    var aperture := event.get_node("OtherSideAperture") as MeshInstance3D
+    if absf(aperture.position.x+27.05)>0.01:
+        _fail("Other Side aperture not at the clear lounge approach")
+        return false
+    var env := (capture.get_node("InvertedEnvironment") as WorldEnvironment).environment
+    if env.ambient_light_energy>0.25 or env.tonemap_exposure>1.0:
+        _fail("Other Side lighting washed out")
+        return false
+    event.set("quality","original")
+    if event.call("_capture_size",Vector2(1920,1080))!=Vector2i(2400,1350):
+        _fail("Other Side default capture resolution regressed")
+        return false
+    event.set("quality","ultra")
+    if event.call("_capture_size",Vector2(2560,1440))!=Vector2i(3840,2160):
+        _fail("Other Side ultra capture resolution regressed")
+        return false
     if not capture.find_children("*","CollisionObject3D",true,false).is_empty():
         _fail("Other Side cloned active gameplay physics")
         return false
