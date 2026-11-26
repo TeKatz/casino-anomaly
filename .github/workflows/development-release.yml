@@ -60,6 +60,8 @@ jobs:
       - name: Read-only render asset audit
         shell: pwsh
         run: |
+          python -m unittest discover -s tests -p test_run_godot_qa.py
+          if ($LASTEXITCODE -ne 0) { throw 'Godot QA runner regression' }
           python -m unittest discover -s tests -p test_render_asset_audit.py
           if ($LASTEXITCODE -ne 0) { throw 'Render asset audit regression' }
           python tools/audit_render_assets.py > render-asset-audit.json

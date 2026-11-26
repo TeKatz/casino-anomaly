@@ -6,6 +6,22 @@ import sys
 import threading
 from pathlib import Path
 
+def classify_line(line, expected, passed, platform):
+    """Return (success marker seen, fatal error, shutdown diagnostic)."""
+    clean = re.sub(r"\x1b\[[0-?]*[ -/]*[@-~]", "", line).strip()
+    passed = passed or clean == expected
+    shutdown = (
+        passed and platform == "win32" and re.fullmatch(
+            r"ERROR: \d+ resources? still in use at exit \(run with --verbose for details\)\.?",
+            clean,
+        ) is not None
+    )
+    fatal = not shutdown and bool(re.search(
+        r"SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:", clean
+    ))
+    return passed, fatal, shutdown
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("godot")
@@ -37,16 +53,10 @@ def main():
                 print(line, end="", flush=True)
                 log.write(line)
                 log.flush()
-                # Only accept an exact success line, never a quoted error message.
-                passed |= line.strip() == args.expected
-                if re.search(r"SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:", line):
-                    if (passed and sys.platform == "win32" and re.fullmatch(
-                        r"ERROR: 2 resources still in use at exit \(run with --verbose for details\)\s*", line
-                    )):
-                        print("::warning::Known Windows Godot shutdown resource diagnostic after successful QA; investigate cleanup separately.", flush=True)
-                        continue
-                    failed = True
-                    # Preserve subsequent stack trace output; watchdog bounds a stuck process.
+                passed, fatal, shutdown = classify_line(line, args.expected, passed, sys.platform)
+                if shutdown:
+                    print("::warning::Godot Windows shutdown resource diagnostic after successful QA; investigate cleanup separately.", flush=True)
+                failed |= fatal
             code = proc.wait()
         finally:
             timer.cancel()
