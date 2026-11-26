@@ -111,5 +111,86 @@ func _run() -> void:
         return
     world.queue_free()
     await process_frame
+    if not (await _corner_recovery()):
+        return
     print("Casino Anomaly Escort native animation and behavior QA PASS")
     quit(0)
+
+# Real physics fixture with a floor and two perpendicular obstacles. It
+# reproduces a corner where every strictly-away heading is blocked.
+func _box(parent: Node3D, center: Vector3, size: Vector3) -> void:
+    var body: StaticBody3D = StaticBody3D.new()
+    body.position = center
+    parent.add_child(body)
+    var collision: CollisionShape3D = CollisionShape3D.new()
+    var shape: BoxShape3D = BoxShape3D.new()
+    shape.size = size
+    collision.shape = shape
+    body.add_child(collision)
+
+func _corner_recovery() -> bool:
+    var room: Node3D = Node3D.new()
+    room.name = "EscortCornerFixture"
+    root.add_child(room)
+    _box(room,Vector3(-20,-0.15,-6),Vector3(12,0.30,12))
+    _box(room,Vector3(-21.1,1.3,-6),Vector3(0.20,2.6,4.0))
+    _box(room,Vector3(-20,1.3,-7.1),Vector3(4.0,2.6,0.20))
+    var avatar: CharacterBody3D = CharacterBody3D.new()
+    avatar.name = "Player"
+    avatar.position = Vector3(-19.55,0.95,-5.55)
+    room.add_child(avatar)
+    var guard = Actor.new()
+    room.add_child(guard)
+    if not guard.configure(room):
+        _fail("Corner fixture could not load native rig")
+        return false
+    guard.set_physics_process(false)
+    guard.nav_requested = true # exercise the fallback without a baked mesh
+    guard.position = Vector3(-20.62,0.035,-6.62)
+    guard.positioned = true
+    guard.show()
+    await physics_frame
+    var initial: Vector3 = guard.global_position
+    var away: Vector3 = guard._flat(initial-avatar.global_position).normalized()
+    if guard._direction_clear(away,0.65):
+        _fail("Corner fixture must block the direct retreat")
+        return false
+    guard.state = Actor.State.RETREAT
+    guard.set_physics_process(true)
+    var escaped: bool = false
+    var entered_escape: bool = false
+    for i in range(150):
+        await physics_frame
+        entered_escape = entered_escape or guard.state == Actor.State.ESCAPE
+        if guard._flat(guard.global_position-initial).length()>1.0:
+            escaped = true
+            break
+    if not entered_escape or not escaped:
+        _fail("Guard remains cornered despite a clear lateral escape route")
+        return false
+    # A sprint in an open lane triggers an authored forward escape instead
+    # of demanding an impossible backwards animation cadence.
+    guard.set_physics_process(false)
+    guard.position = Vector3(-18.0,0.035,-4.0)
+    avatar.position = Vector3(-18.0,0.95,-1.15)
+    avatar.velocity = Vector3(0,0,-6.3)
+    guard.velocity = Vector3.ZERO
+    guard.last_motion = Vector3.ZERO
+    guard.rotation.y = 0.0
+    guard.state = Actor.State.OBSERVE
+    guard.escape_path.clear()
+    await physics_frame
+    guard.set_physics_process(true)
+    var sprint_escape: bool = false
+    for i in range(45):
+        await physics_frame
+        sprint_escape = sprint_escape or guard.state == Actor.State.ESCAPE
+        if guard.signed_motion_speed < -Actor.MAX_RETREAT-0.15:
+            _fail("Sprint triggered an excessive reverse gait")
+            return false
+    if not sprint_escape:
+        _fail("Sprint anticipation did not trigger escape")
+        return false
+    room.queue_free()
+    await process_frame
+    return true

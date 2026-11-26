@@ -245,8 +245,13 @@ func drive(signed_speed: float, delta: float) -> void:
     if not ready_to_play:
         return
     var desired: float = clampf(signed_speed,-WALK_STRIDE_SPEED,JOG_STRIDE_SPEED)
-    blend = move_toward(blend,desired,delta*12.0)
+    blend = move_toward(blend,desired,delta*16.0)
+    if absf(signed_speed)<0.035 and absf(blend)<0.04:
+        blend = 0.0
     tree.set("parameters/Locomotion/blend_position",blend)
-    # Scale the authored stride to actual velocity, not requested movement.
-    var nominal: float = maxf(absf(blend),WALK_STRIDE_SPEED)
-    tree.set("parameters/Speed/scale",clampf(absf(signed_speed)/nominal,0.82,3.2) if absf(signed_speed)>0.15 else 1.0)
+    # The weighted gait blend already accounts for slow motion. Scale
+    # against its actual nominal stride rather than always a full walk.
+    # The reverse cadence is deliberately bounded; fast escapes use Jog.
+    var nominal: float = maxf(absf(blend),0.12)
+    var rate: float = 1.0 if absf(signed_speed)<0.035 else clampf(absf(signed_speed)/nominal,0.35,2.2 if signed_speed<0.0 else 2.5)
+    tree.set("parameters/Speed/scale",rate)

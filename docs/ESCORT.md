@@ -4,8 +4,13 @@ A single Security Guard waits at the west aisle, activates on camera visibility,
 approaches, observes at a 2.25–2.95 m band, and backs off when approached.
 It follows only within its room. Physical steering uses capsule collision/floor
 probes and an isolated NavigationAgent/NavigationRegion, with a local fallback
-while the navigation mesh is baking. It cannot guarantee the requested gap
-when cornered or chased at sprint speed; it never teleports.
+while the navigation mesh is baking. A committed escape route searches beyond
+the normal retreat fan when a corner blocks retreat, allowing a temporary
+sideways or forward route around the player with minimum separation checks.
+Sprint anticipation triggers a forward escape with the authored walk/jog
+blend; the normal backward gait is speed-limited. Eye contact is temporarily
+broken while turning into an escape path. It never teleports or receives
+player momentum. A completely sealed space can still prevent escape.
 
 ## Source asset
 From the repository root, run:
@@ -28,5 +33,5 @@ lets the guard keep up if the player moves away. No Silent Audience behavior is 
 ## Review
 Select The Escort in the developer anomaly menu after the reference room.
 Check scale, foot placement, forward/backward motion, and corners. Headless
-QA checks real imported clips, bone motion, spawn clearance, state transitions
-and cleanup; it does not certify rendered animation quality.
+QA checks real imported clips, bone motion, spawn clearance, state transitions,
+corner recovery with physical obstacles, sprint anticipation and cleanup; it does not certify rendered animation quality.
