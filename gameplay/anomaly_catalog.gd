@@ -3,6 +3,57 @@ extends RefCounted
 ## anomaly_definitions/; it is automatically available in gameplay and archive.
 ## ResourceLoader.list_directory works with exported .pck resources in Godot 4.5.
 const DEFINITION_DIR := "res://gameplay/anomaly_definitions"
+# Deliberately less specific than archive descriptions. Every family has its
+# own clue; variants inherit the family's clue rather than reveal the variant.
+const REVIEW_HINTS := {
+    "against_gravity": ["Some movement defied its natural direction.", "Eine Bewegung widersprach ihrer natürlichen Richtung."],
+    "amber_ceiling_light": ["Compare the warmth of the light between areas.", "Vergleiche die Wärme des Lichts in den Bereichen."],
+    "backrooms": ["The usual route did not lead where it should.", "Der gewohnte Weg führte nicht ans erwartete Ziel."],
+    "bar_label": ["Read familiar words more carefully.", "Lies vertraute Schriftzüge etwas genauer."],
+    "bare_monstera": ["Something living-looking seemed unusually sparse.", "Etwas Lebendigwirkendes erschien ungewöhnlich kahl."],
+    "black_bloom": ["Watch for subtle changes on large surfaces.", "Achte auf kleine Veränderungen großer Flächen."],
+    "blank_reels": ["A familiar display was missing visual detail.", "Einer vertrauten Anzeige fehlten visuelle Details."],
+    "blue_runner": ["A familiar surface had an unfamiliar color.", "Eine vertraute Fläche hatte eine fremde Farbe."],
+    "breathing_wall": ["Not every solid surface stayed still.", "Nicht jede feste Oberfläche blieb regungslos."],
+    "burgundy_felt": ["Compare the colors around the gaming area.", "Vergleiche die Farben im Spielbereich."],
+    "bust_turned": ["Pay attention to which way objects face.", "Achte darauf, wohin Gegenstände ausgerichtet sind."],
+    "candleholder_shifted": ["Small objects were not quite centered.", "Kleine Gegenstände standen nicht ganz mittig."],
+    "cool_ceiling_light": ["The light felt colder in one area.", "In einem Bereich wirkte das Licht kälter."],
+    "crimson_hall": ["The overall lighting mood had changed.", "Die allgemeine Lichtstimmung hatte sich verändert."],
+    "crooked_painting": ["Look for slight departures from straight lines.", "Achte auf kleine Abweichungen von geraden Linien."],
+    "dark_marquee": ["Some familiar illuminated details were absent.", "Einige vertraute Leuchtdetails fehlten."],
+    "empty_footsteps": ["The floor showed signs of an unseen presence.", "Der Boden verriet eine unsichtbare Anwesenheit."],
+    "empty_reserve": ["Compare the small details of repeated objects.", "Vergleiche kleine Details ähnlicher Gegenstände."],
+    "entrance_label": ["A familiar word was almost, but not quite, right.", "Ein vertrautes Wort war beinahe, aber nicht ganz richtig."],
+    "extra_guest": ["The quiet areas held more than expected.", "In den ruhigen Bereichen war mehr als erwartet."],
+    "false_jackpot": ["A display was demanding unusual attention.", "Eine Anzeige zog ungewöhnlich viel Aufmerksamkeit auf sich."],
+    "floating_hand": ["Something was not resting where it should.", "Etwas ruhte nicht dort, wo es sollte."],
+    "forgotten_door": ["A familiar wall had an unfamiliar detail.", "Eine vertraute Wand hatte ein fremdes Detail."],
+    "horse_spotlight_off": ["A decorative area was lit unusually.", "Ein dekorativer Bereich war ungewöhnlich beleuchtet."],
+    "inverted_cat": ["Some decorative spaces were unexpectedly empty.", "Einige dekorative Plätze waren unerwartet leer."],
+    "invisible_dealer": ["Watch what happens at unattended games.", "Beobachte, was an unbeaufsichtigten Spielen passiert."],
+    "last_kings": ["A familiar arrangement had lost some pieces.", "Einer vertrauten Anordnung fehlten einzelne Teile."],
+    "lightless_horse": ["One object responded strangely to the light.", "Ein Gegenstand reagierte seltsam auf das Licht."],
+    "missing_hand": ["Look for what is absent, not just what is new.", "Achte auf Fehlendes, nicht nur auf Neues."],
+    "ownerless_shadow": ["Light and its traces did not quite agree.", "Licht und seine Spuren passten nicht ganz zusammen."],
+    "pendulum": ["Look above eye level for subtle movement.", "Achte oberhalb der Augenhöhe auf kleine Bewegungen."],
+    "plant_forward": ["Compare objects along the walking route.", "Vergleiche Gegenstände entlang des Laufwegs."],
+    "plant_misplaced": ["The usual arrangement of decor was disturbed.", "Die gewohnte Anordnung der Dekoration war gestört."],
+    "silent_countdown": ["Notice displays and sounds that share a rhythm.", "Achte auf Anzeigen und Geräusche mit gleichem Rhythmus."],
+    "stay_here": ["Familiar messages conveyed an unusual intent.", "Vertraute Hinweise vermittelten eine fremde Absicht."],
+    "stool_out_of_line": ["Repeated objects did not line up as usual.", "Ähnliche Gegenstände standen nicht wie gewohnt in Reihe."],
+    "synchronized_busts": ["Some still objects seemed to move together.", "Manche regungslosen Dinge schienen sich gemeinsam zu bewegen."],
+    "table_label": ["Check the lettering between different areas.", "Prüfe die Beschriftung der verschiedenen Bereiche."],
+    "the_escort": ["Your position seemed to influence a presence.", "Dein Standort schien eine Anwesenheit zu beeinflussen."],
+    "the_flood": ["The floor behaved differently as time passed.", "Der Boden verhielt sich mit der Zeit anders."],
+    "the_other_side": ["The room concealed an impossible perspective.", "Der Raum verbarg eine unmögliche Perspektive."],
+    "they_are_listening": ["Notice how the atmosphere changes with location.", "Achte darauf, wie sich die Atmosphäre je nach Ort verändert."],
+    "unfinished_game": ["Something continued without the expected end.", "Etwas setzte sich ohne das erwartete Ende fort."],
+    "watchful_camera": ["Small technical details indicated unusual activity.", "Kleine technische Details verrieten ungewöhnliche Aktivität."],
+    "watching_canvases": ["Some decoration seemed less static than usual.", "Manche Dekoration wirkte weniger regungslos als gewohnt."],
+    "west_chandelier_dim": ["Compare the light sources above the room.", "Vergleiche die Lichtquellen oberhalb des Raums."],
+    "wrong_reflection": ["Compare the room with what it seems to reflect.", "Vergleiche den Raum mit dem, was er zu spiegeln scheint."],
+}
 static var _loaded := false
 static var _entries: Array[Dictionary] = []
 
@@ -98,3 +149,17 @@ static func rarity_name(rarity: String, de: bool) -> String:
         "rare": ["Selten", "Rare"], "exceptional": ["Außergewöhnlich", "Exceptional"],
         "singularity": ["Singularität", "Singularity"]}
     return str(names.get(rarity, names["common"])[0 if de else 1])
+
+
+static func review_hint(id: String, de: bool) -> String:
+    var pair: Array = REVIEW_HINTS.get(family(id), [])
+    return str(pair[1 if de else 0]) if pair.size() == 2 else ""
+
+
+static func missed_review_hint(verdict: Dictionary, de: bool) -> String:
+    var id := str(verdict.get("anomaly_id", ""))
+    if id.is_empty() or bool(verdict.get("correct", false)) or bool(verdict.get("choice_anomaly", false)) or bool(verdict.get("traversal", false)):
+        return ""
+    if not bool(verdict.get("expected_anomaly", true)):
+        return ""
+    return review_hint(id, de)

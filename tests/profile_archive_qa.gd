@@ -109,6 +109,16 @@ func _run() -> void:
         _fail("Profile 4 progress did not survive a profile switch")
         return
 
+    for entry in Catalog.entries():
+        var id := str(entry["id"])
+        for de in [false, true]:
+            var clue := Catalog.review_hint(id, de)
+            if clue.is_empty() or clue == str(entry["description_de" if de else "description_en"]):
+                _fail("Missing or overly explicit localized hint: " + id)
+                return
+    if not Catalog.missed_review_hint({"anomaly_id": "bar_label", "correct": true}, false).is_empty() or not Catalog.missed_review_hint({"anomaly_id": "", "correct": false, "choice_anomaly": true}, false).is_empty():
+        _fail("Hints must appear only for missed anomalies")
+        return
     var picker := ProfilePanel.new()
     var archive := ArchivePanel.new()
     var plaque := WorldVerdictDisplay.new()
@@ -130,6 +140,15 @@ func _run() -> void:
             _fail("Archive exposed locked anomaly detail: " + field)
             return
     archive.show_mode("last")
+    var clue_en := Catalog.review_hint("bar_label", false)
+    var clue_de := Catalog.review_hint("bar_label", true)
+    if not _all_label_text(archive).contains(clue_en) and not _all_label_text(archive).contains(clue_de):
+        _fail("Missed hint absent from verdict menu")
+        return
+    var plaque_hint := plaque.get_node_or_null("MissedHint") as Label3D
+    if plaque_hint == null or not plaque_hint.visible or (not plaque_hint.text.contains(clue_en) and not plaque_hint.text.contains(clue_de)):
+        _fail("Missed hint absent from physical plaque")
+        return
     for field in ["title_de", "title_en", "description_de", "description_en"]:
         var private_value := str(catalog_entry.get(field, ""))
         if not private_value.is_empty() and _all_label_text(archive).contains(private_value):

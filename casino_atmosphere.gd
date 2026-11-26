@@ -163,8 +163,8 @@ func _ensure_table_key_lights() -> void:
             lamp.light_size = 0.035
             lamp.shadow_enabled = true
             lamp.shadow_opacity = 1.0
-            lamp.shadow_bias = 0.014
-            lamp.shadow_normal_bias = 0.10
+            lamp.shadow_bias = 0.055
+            lamp.shadow_normal_bias = 0.15
             lamp.shadow_blur = 0.38
             lamp.light_volumetric_fog_energy = 0.12
             # Expensive shadows are relevant to the nearby player, not to

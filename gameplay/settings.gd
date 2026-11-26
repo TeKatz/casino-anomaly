@@ -659,6 +659,18 @@ func _apply_node(node: Node, keys: Array, seen_materials: Dictionary = {}) -> vo
         if not light.has_meta("_shadow_base"):
             light.set_meta("_shadow_base", [light.shadow_enabled, light.distance_fade_enabled, light.distance_fade_shadow, light.distance_fade_begin, light.distance_fade_length])
         var original: Array = light.get_meta("_shadow_base")
+        # Imported furniture has fine, overlapping self-shadow detail. The
+        # previous tiny table bias could resolve as black, flickering acne.
+        # Stabilize both authored and generated casino lights without
+        # removing their shadows or changing any graphics preferences.
+        if bool(original[0]):
+            var light_name := str(light.name)
+            if light_name.begins_with("TableKey_"):
+                light.shadow_bias = maxf(light.shadow_bias, 0.055)
+                light.shadow_normal_bias = maxf(light.shadow_normal_bias, 0.15)
+            elif light_name.begins_with("WarmCasinoLamp"):
+                light.shadow_bias = maxf(light.shadow_bias, 0.065)
+                light.shadow_normal_bias = maxf(light.shadow_normal_bias, 0.15)
         if keys.has("shadow_quality"):
             light.shadow_enabled = bool(original[0]) and options["shadow_quality"] != "off" and not light.has_meta("_showcase_no_shadow")
         if keys.has("shadow_distance"):

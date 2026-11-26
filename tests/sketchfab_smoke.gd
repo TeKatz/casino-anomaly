@@ -48,6 +48,21 @@ func _test() -> void:
                     push_error("Sketchfab furniture missing collision: " + asset)
                     quit(1)
                     return
+                if asset == "blackjack_table":
+                    var body := node.get_node_or_null("FurnitureCollider") as StaticBody3D
+                    if body == null or body.get_child_count() != 1:
+                        push_error("Blackjack must use one cheap collision shape")
+                        quit(1)
+                        return
+                    var collider := body.get_child(0) as CollisionShape3D
+                    if collider == null or not collider.shape is ConvexPolygonShape3D:
+                        push_error("Blackjack still uses expensive triangle physics")
+                        quit(1)
+                        return
+                    if (collider.shape as ConvexPolygonShape3D).points.size() != 16:
+                        push_error("Blackjack collider is no longer the 16-point tabletop prism")
+                        quit(1)
+                        return
                 if asset == "roulette_table":
                     if node.get_meta("placement_type", "") != "roulette_wheel":
                         push_error("Roulette model must now be the resized wheel")

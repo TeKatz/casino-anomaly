@@ -218,6 +218,7 @@ func _spawn(slug: String, label: String, spot: Vector3, max_width: float,
         push_error("Sketchfab model does not instantiate as a 3D node: " + slug)
         return null
     wrapper.add_child(model)
+    RuntimeCache.stabilize_imported_model(model)
     var size: AABB = RuntimeCache.imported_bounds(FOLDER + slug + "/" + filename, model, _mesh_bounds)
     if size.size.y < 0.001 or maxf(size.size.x, size.size.z) < 0.001:
         wrapper.queue_free()
@@ -319,33 +320,27 @@ func _roulette_table(spot: Vector3) -> Node3D:
             collision.free()
     return table
 
-# The old rectangular plate blocks empty corners around the curved felt.
-# Build a static triangle collider in wrapper-local coordinates, using the
-# imported meshes (including their nested transforms and normalization).
-# Only migrate the legacy box, preserving subsequent artist edits.
+# A single low-complexity convex prism follows the chamfered tabletop.
+# Migrate both the old plate and the later all-triangle ConcavePolygonShape3D
+# in authored scenes and generated furniture. Never generate a physics mesh
+# from the render mesh, and never replace subsequent custom convex shapes.
 func _fit_blackjack_collision(wrapper: Node3D) -> bool:
     var body := wrapper.get_node_or_null("FurnitureCollider") as StaticBody3D
     if body == null or body.get_child_count() == 0:
         return false
     var collider := body.get_child(0) as CollisionShape3D
-    if collider == null or not (collider.shape is BoxShape3D):
+    if collider == null or not (collider.shape is BoxShape3D or collider.shape is ConcavePolygonShape3D):
         return false
-    var faces := PackedVector3Array()
-    var inverse := wrapper.global_transform.affine_inverse()
-    for node in wrapper.find_children("*", "MeshInstance3D", true, false):
-        var part := node as MeshInstance3D
-        if part.mesh == null:
-            continue
-        var local_transform := inverse * part.global_transform
-        for vertex in part.mesh.get_faces():
-            faces.append(local_transform * vertex)
-    if faces.size() < 3:
-        push_warning("Casino: Blackjack mesh has no collision triangles; keeping old plate.")
-        return false
-    var fitted := ConcavePolygonShape3D.new()
-    fitted.set_faces(faces)
-    fitted.backface_collision = true
-    fitted.margin = 0.001
+    var outline := [Vector2(-1.01, -0.74), Vector2(1.01, -0.74),
+        Vector2(1.24, -0.50), Vector2(1.24, 0.50), Vector2(1.01, 0.74),
+        Vector2(-1.01, 0.74), Vector2(-1.24, 0.50), Vector2(-1.24, -0.50)]
+    var points := PackedVector3Array()
+    for y in [0.759, 0.899]:
+        for corner in outline:
+            points.append(Vector3(corner.x, y, corner.y))
+    var fitted := ConvexPolygonShape3D.new()
+    fitted.points = points
+    fitted.margin = 0.008
     body.transform = Transform3D.IDENTITY
     collider.transform = Transform3D.IDENTITY
     collider.shape = fitted
@@ -412,6 +407,8 @@ func _populate() -> void:
         poker_props_placed = 0
         var saved := get_node(AUTHORED_GROUP)
         for child in saved.get_children():
+            if child is Node3D and child.has_meta("source_asset"):
+                RuntimeCache.stabilize_imported_model(child as Node3D)
             match str(child.get_meta("source_asset", "")):
                 "retro_slot_machine":
                     replaced_slots += 1

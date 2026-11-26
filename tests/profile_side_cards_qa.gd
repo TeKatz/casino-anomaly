@@ -29,7 +29,7 @@ func _fail(reason: String) -> void:
 
 
 func _check_cards(side: Control, label: String) -> bool:
-    var height: float = minf(365.0, maxf(255.0, side.size.y - 64.0))
+    var height: float = minf(535.0, maxf(255.0, side.size.y - 64.0))
     var left := side.get_node_or_null("StatisticsCard") as PanelContainer
     var right := side.get_node_or_null("ArchiveCard") as PanelContainer
     if left == null or right == null or not left.visible or not right.visible:

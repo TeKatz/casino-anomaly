@@ -355,6 +355,8 @@ func _place(identifier: String, label: String, anchor: Vector3,
             push_error("Requested candleholder variant is missing: " + mesh_variant)
             return null
 
+    RuntimeCache.stabilize_imported_model(imported)
+
     # An authored model without runtime collision already has its final
     # transform. Computing its mesh bounds would not change a single node,
     # yet repeated that full hierarchy walk for every streamed casino hall.

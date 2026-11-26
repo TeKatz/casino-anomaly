@@ -338,6 +338,11 @@ func _render_last(profiles: Node) -> void:
     _label(body, _word("Befund: Abweichung" if anomaly_present \
         else "Befund: Unauffällig",
         "Finding: Irregular" if anomaly_present else "Finding: Clear"), 16, MUTED)
+    var clue := Catalog.missed_review_hint(verdict, _de())
+    if not clue.is_empty():
+        var clue_card := _card(body)
+        _label(clue_card, _word("HINWEIS · ÜBERSEHENE ABWEICHUNG", "HINT · MISSED IRREGULARITY"), 14, GOLD)
+        _label(clue_card, clue, 17)
     _label(body, Modes.title(str(verdict.get("mode", "classic")), _de()) + " · +" + str(verdict.get("xp_earned", 0)) + " XP", 16, GOLD)
     if str(verdict.get("mode", "classic")) == "time_trial":
         _label(body, _word("Zeit inkl. Strafen: ", "Time including penalties: ") + _format_time(float(verdict.get("score_seconds", 0.0))), 16, GOLD)

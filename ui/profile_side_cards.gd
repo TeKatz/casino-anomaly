@@ -180,7 +180,7 @@ func _layout_cards() -> void:
     var gap := 14.0
     var available := minf(center_local.position.x, size.x - center_local.end.x) - gap - 12.0
     var width := clampf(available, 160.0, 268.0)
-    var panel_height := minf(365.0, maxf(255.0, size.y - 64.0))
+    var panel_height := minf(535.0, maxf(255.0, size.y - 64.0))
     # On unusually narrow windows scale the previews rather than overlap
     # the center panel. The ordinary 1280x720 layout is unchanged.
     var fit := minf(1.0, maxf(0.0, available) / width)
@@ -240,6 +240,9 @@ func _fill(slot: int) -> void:
         % int(summary.get("completions", 0)), 14)
     _label(stats_body, _word("Erfolge: %d", "Achievements: %d") \
         % int(summary.get("achievements", 0)), 13, MUTED)
+    _label(stats_body, _word("Geprüfte Räume: %d", "Rooms inspected: %d") % int(stats.get("rooms", 0)), 14)
+    _label(stats_body, _word("Richtige Entscheidungen: %d", "Correct decisions: %d") % int(stats.get("correct", 0)), 14)
+    _label(stats_body, _word("Fehlentscheidungen: %d", "Wrong decisions: %d") % int(stats.get("mistakes", 0)), 14)
 
     _label(archive_body, _word("ENTDECKTE ANOMALIEN", "DISCOVERED ANOMALIES"), 11, MUTED)
     _label(archive_body, "%d / %d" % [int(summary.get("discovered", 0)),
@@ -270,7 +273,7 @@ func _fill(slot: int) -> void:
     else:
         _label(archive_body, _word("Zuletzt freigeschaltet:", "Unlocked entries:"),
             12, MUTED)
-        for name in unlocked.slice(0, 2):
+        for name in unlocked.slice(0, 8):
             _label(archive_body, "· " + name, 13, MUTED)
 
 

@@ -147,3 +147,35 @@ static func clear() -> void:
     _stool_material = null
     bounds_computations = 0
     gi_validations = 0
+
+
+## Exact coincident copies of the same visible static mesh can fight over
+## depth. Suppress only copies with identical transforms and materials;
+## different surfaces, skinned characters and intentionally hidden nodes
+## remain untouched. Normalize imported samplers without changing opacity
+## or double-sided foliage. No triangle processing or per-frame work.
+static func stabilize_imported_model(model: Node3D) -> void:
+    if Engine.is_editor_hint():
+        return
+    var seen: Dictionary = {}
+    var settings := model.get_node_or_null("/root/GameSettings")
+    var original_filter := settings == null or str(settings.call("get_option", "texture_filter")) == "original"
+    for candidate in model.find_children("*", "MeshInstance3D", true, false):
+        var part := candidate as MeshInstance3D
+        if part.mesh == null or not part.is_visible_in_tree() or part.skin != null:
+            continue
+        var materials: Array = []
+        for index in range(part.mesh.get_surface_count()):
+            var mat := part.get_active_material(index)
+            materials.append(mat)
+            if original_filter and mat is BaseMaterial3D and not mat.has_meta("_original_sampler"):
+                if mat.texture_filter == BaseMaterial3D.TEXTURE_FILTER_LINEAR or mat.texture_filter == BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS:
+                    mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
+        # An overlay is intentionally rendered separately, never hide it.
+        if part.material_overlay != null or not part.mesh is ArrayMesh:
+            continue
+        var key := [part.mesh.get_instance_id(), part.global_transform, materials, part.layers, part.cast_shadow]
+        if seen.has(key):
+            part.hide()
+        else:
+            seen[key] = true

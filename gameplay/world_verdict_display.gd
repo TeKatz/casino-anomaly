@@ -1,6 +1,7 @@
 extends Node3D
-## World-space review plaque: never discloses anomaly names, categories,
-## targets or descriptions. The player must identify an effect to unlock it.
+## World-space review plaque: a missed effect gets a vague, localized clue.
+## Names, exact targets and archive descriptions remain locked.
+const Catalog = preload("res://gameplay/anomaly_catalog.gd")
 ## No HUD, no collision, no VoxelGI rebaking.
 const BRASS := Color("#977b58")
 const PLATE := Color("#181b20")
@@ -13,6 +14,7 @@ var header: Label3D
 var result: Label3D
 var finding: Label3D
 var series: Label3D
+var hint: Label3D
 var indicator_material: StandardMaterial3D
 
 
@@ -74,24 +76,28 @@ func _label(label_name: String, height: float, size_value: int,
 
 
 func _construct() -> void:
-    _box("Backplate", Vector3(1.79, 1.12, 0.085),
+    _box("Backplate", Vector3(1.90, 1.50, 0.085),
         Vector3.ZERO, _material(PLATE, 0.32))
     var trim := _material(BRASS, 0.78)
     for side in [-1.0, 1.0]:
-        _box("HorizontalTrim", Vector3(1.80, 0.022, 0.095),
-            Vector3(0, side * 0.55, 0.008), trim)
-        _box("VerticalTrim", Vector3(0.022, 1.12, 0.095),
-            Vector3(side * 0.89, 0, 0.008), trim)
-    header = _label("ProtocolHeader", 0.37, 26, LETTERS)
-    result = _label("DecisionResult", 0.13, 36, LETTERS)
-    finding = _label("NeutralFinding", -0.13, 26, LETTERS)
-    series = _label("Streak", -0.38, 25, LETTERS)
+        _box("HorizontalTrim", Vector3(1.91, 0.022, 0.095),
+            Vector3(0, side * 0.74, 0.008), trim)
+        _box("VerticalTrim", Vector3(0.022, 1.50, 0.095),
+            Vector3(side * 0.945, 0, 0.008), trim)
+    header = _label("ProtocolHeader", 0.56, 26, LETTERS)
+    result = _label("DecisionResult", 0.31, 32, LETTERS)
+    finding = _label("NeutralFinding", 0.06, 25, LETTERS)
+    hint = _label("MissedHint", -0.22, 21, Color("#efd6aa"))
+    hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+    hint.width = 335.0
+    hint.visible = false
+    series = _label("Streak", -0.57, 25, LETTERS)
     indicator_material = _material(OK_COLOR)
     indicator_material.emission_enabled = true
     indicator_material.emission = OK_COLOR
     indicator_material.emission_energy_multiplier = 0.65
     _box("Indicator", Vector3(0.065, 0.065, 0.017),
-        Vector3(-0.76, 0.37, 0.058), indicator_material)
+        Vector3(-0.81, 0.56, 0.058), indicator_material)
 
 
 func _de() -> bool:
@@ -124,6 +130,16 @@ func _render() -> void:
     finding.text = ("BEFUND: ABWEICHUNG" if anomaly_present \
         else "BEFUND: UNAUFFÄLLIG") if de \
         else ("FINDING: IRREGULAR" if anomaly_present else "FINDING: CLEAR")
+    var clue := Catalog.missed_review_hint(verdict, de)
+    hint.visible = not clue.is_empty()
+    hint.text = (("HINWEIS: " if de else "HINT: ") + clue) if hint.visible else ""
+    if hint.visible:
+        finding.text = "BEFUND: ÜBERSEHEN" if de else "FINDING: MISSED"
+    else:
+        # Distribute the four lines naturally when no hint is needed.
+        finding.position.y = -0.02
+    if hint.visible:
+        finding.position.y = 0.06
     var mode := str(verdict.get("mode", "classic"))
     var goal := int(verdict.get("goal", 12))
     var progress := int(verdict.get("progress", verdict.get("streak", 0)))
