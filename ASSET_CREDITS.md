@@ -37,6 +37,19 @@ game or models are shared.
 
 License: https://creativecommons.org/licenses/by/4.0/
 
+
+## The Silent Audience — five user-provided rigged people (adapted)
+
+Original Sketchfab downloads and their actual license.txt are included in the optimized guest asset pack at models/silent_audience/<model>/license.txt. Character bones and skinned meshes are preserved. Source textures were resized and recompressed, and unused female morph targets/source animation were removed. The gun/smoking meshes of the second Guard are hidden in the supplied game-ready glTF. The independent game code is not claimed to be part of the creators' artwork.
+
+- **Security Guard – Rigged 3D Model** — [Q.SARDOR](https://sketchfab.com/qsardor57913), [original](https://sketchfab.com/3d-models/security-guard-rigged-3d-model-1e3307732bbf4453b30f021bfec5bcaf), **CC BY 4.0**.
+- **old man in coat – human riged model** — [mohsenmousavi2313](https://sketchfab.com/mohsenmousavi2313), [original](https://sketchfab.com/3d-models/old-man-in-coat-human-riged-model-e8052f5928ef42f1ae5b5af02eb1a36b), **CC BY 4.0**.
+- **Indian Man in suit** — [Pixel_Monster](https://sketchfab.com/ar.jethin), [original](https://sketchfab.com/3d-models/indian-man-in-suit-985dd9756d89464b9380414b5b12d8aa), **CC BY 4.0**.
+- **guard** — [DJMaesen](https://sketchfab.com/bumstrum), [original](https://sketchfab.com/3d-models/guard-9f146fae6af1482ab6bff56ed5677c28), **CC BY 4.0**.
+- **Realistic Female** — [Biviyt](https://sketchfab.com/Biviyt), [original](https://sketchfab.com/3d-models/realistic-female-b0cc2a6c26114da184252e433cf75d23), **CC BY-SA 4.0**. This adapted character asset remains under CC BY-SA 4.0; redistribution must preserve this license and original attribution.
+
+License references: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+
 ## New Poly Haven CC0 textures (architectural finish pass)
 
 - **Wooden Panels** — [Poly Haven](https://polyhaven.com/a/wooden_panels), by Dimitrios Savva, CC0. Dark timber lower wall, 2K PBR maps.

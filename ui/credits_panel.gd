@@ -102,6 +102,12 @@ Playing Cards (52 separated meshes) — [url=https://sketchfab.com/3d-models/pla
 Monstera Deliciosa Potted Mid-Century plant — [url=https://sketchfab.com/3d-models/monstera-deliciosa-potted-mid-century-plant-1ab9bf841df04c07b1819be596327629]Giora[/url]
 Blackjack Table — [url=https://sketchfab.com/3d-models/blackjack-table-baf7e3cbd14140ca81ea1a79d28fb635]Ravi Jangid[/url]
 Business Man (Croupier) — [url=https://sketchfab.com/3d-models/business-man-low-polygon-game-character-b6f6740f883b4749abac47af0045a9dd]manoeldarochadeoliveira[/url]
+
+The Silent Audience guest models (adapted for this game):
+Security Guard — [url=https://sketchfab.com/3d-models/security-guard-rigged-3d-model-1e3307732bbf4453b30f021bfec5bcaf]Q.SARDOR[/url]
+Old Man in Coat — [url=https://sketchfab.com/3d-models/old-man-in-coat-human-riged-model-e8052f5928ef42f1ae5b5af02eb1a36b]mohsenmousavi2313[/url]
+Indian Man in Suit — [url=https://sketchfab.com/3d-models/indian-man-in-suit-985dd9756d89464b9380414b5b12d8aa]Pixel_Monster[/url]
+Guard — [url=https://sketchfab.com/3d-models/guard-9f146fae6af1482ab6bff56ed5677c28]DJMaesen[/url]
 Assets have been adapted for this game. License: [url=https://creativecommons.org/licenses/by/4.0/]Creative Commons Attribution 4.0[/url].
 
 [color=#e6bb81][b]TUTORIAL MODELS — SKETCHFAB / CC BY 4.0[/b][/color]
@@ -109,6 +115,10 @@ Wall Light — [url=https://sketchfab.com/3d-models/wall-light-c723fa0a1ac347879
 Vintage Gramophone — [url=https://sketchfab.com/3d-models/vintage-gramophone-a7508a4233a344008029d21a2f0024bd]Maxim Mavrichev[/url]
 Desk Bell — [url=https://sketchfab.com/3d-models/desk-bell-cc21b304c4bb4750bdde7a8fb538b116]ClintonAbbott.Art[/url]
 Original geometry fitted to the tutorial. License: [url=https://creativecommons.org/licenses/by/4.0/]CC BY 4.0[/url].
+
+
+Realistic Female (Silent Audience, adapted) — [url=https://sketchfab.com/3d-models/realistic-female-b0cc2a6c26114da184252e433cf75d23]Biviyt[/url]
+Source 3D character licensed [url=https://creativecommons.org/licenses/by-sa/4.0/]CC BY-SA 4.0[/url]. The optimized/adapted character remains under CC BY-SA 4.0. See full credits and original license included with the asset pack.
 
 [color=#e6bb81][b]TUTORIAL RECEPTION — CC BY-SA 4.0[/b][/color]
 Books with magnifier — [url=https://sketchfab.com/3d-models/books-with-magnifier-cc153ce6258b4e538d9fc7da5b5d0fe4]shuvalov.di[/url]
