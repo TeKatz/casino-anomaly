@@ -347,3 +347,20 @@ func _process(delta: float) -> void:
 
 func _exit_tree() -> void:
     _restore_audio()
+    # Stop the imported animation rigs and detach their custom materials
+    # before freeing the skinned MeshInstance3D children. With Forward+
+    # this also avoids stale per-instance material RIDs on teardown; the
+    # dummy renderer used in headless QA is particularly strict about them.
+    for person in guests:
+        var animator := person["animator"] as AnimationPlayer
+        if is_instance_valid(animator):
+            animator.stop()
+        var figure := person["figure"] as Node3D
+        if not is_instance_valid(figure):
+            continue
+        for item in figure.find_children("*", "MeshInstance3D", true, false):
+            var mesh := item as MeshInstance3D
+            mesh.material_overlay = null
+            for surface in range(mesh.mesh.get_surface_count() if mesh.mesh != null else 0):
+                mesh.set_surface_override_material(surface, null)
+    guests.clear()
