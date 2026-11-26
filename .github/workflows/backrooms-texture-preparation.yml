@@ -1,11 +1,6 @@
 name: Prepare Backrooms clean textures
 
 on:
-  push:
-    branches: [dev]
-    paths:
-      - .github/workflows/backrooms-texture-preparation.yml
-      - tools/prepare_backrooms_textures.py
   workflow_dispatch:
 
 permissions:

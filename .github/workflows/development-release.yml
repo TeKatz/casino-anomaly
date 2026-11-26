@@ -1,27 +1,201 @@
-name: Casino Anomaly Development Release
+name: Casino Anomaly CI and Development Release
 
 on:
   push:
     branches: [dev]
+  pull_request:
+    branches: [dev, main]
   workflow_dispatch:
+    inputs:
+      diagnostics:
+        description: Run historical editor and standalone layout checks
+        type: boolean
+        default: false
+      publish:
+        description: Publish a new Development build (dev only)
+        type: boolean
+        default: false
 
 permissions:
-  contents: write
-
-concurrency:
-  group: casino-anomaly-development
-  cancel-in-progress: false
+  contents: read
 
 jobs:
-  publish:
-    if: github.ref == 'refs/heads/dev'
+  prepare-godot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Restore pinned Godot download cache
+        id: godot-cache
+        uses: actions/cache@v4
+        with:
+          path: /tmp/godot-package/godot.zip
+          key: godot-linux-x86_64-4.5.1-stable-archive-v1
+      - name: Download Godot once on cache miss
+        if: steps.godot-cache.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/godot-package
+          timeout --kill-after=5s 150s curl --fail --location --retry 2 --retry-max-time 100 --connect-timeout 15 --max-time 90 -o /tmp/godot-package/godot.zip "https://github.com/godotengine/godot-builds/releases/download/4.5.1-stable/Godot_v4.5.1-stable_linux.x86_64.zip"
+      - name: Verify archive and engine version
+        shell: bash
+        run: |
+          set -euo pipefail
+          unzip -tq /tmp/godot-package/godot.zip
+          mkdir -p /tmp/godot-verify
+          unzip -q /tmp/godot-package/godot.zip -d /tmp/godot-verify
+          engine=/tmp/godot-verify/Godot_v4.5.1-stable_linux.x86_64
+          chmod +x "$engine"
+          timeout 15s "$engine" --version | grep -E '^4\.5\.1\.stable\.official'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: godot-linux-4.5.1
+          path: /tmp/godot-package/godot.zip
+          compression-level: 0
+          retention-days: 1
+          if-no-files-found: error
+
+  linux-qa:
+    needs: prepare-godot
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        group: [baseline, flood, other_side, silent_audience, gameplay, intro-audio]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: godot-linux-4.5.1
+          path: /tmp/godot-package
+      - name: Restore pinned assets and install shared Godot
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/ensure_assets.py
+          python3 tools/ensure_fabric037.py
+          python3 tools/import_model_assets.py
+          python3 tools/unpack_sketchfab_assets.py --require-all
+          python3 tools/import_croupier_asset.py
+          python3 tools/import_tutorial_sketchfab.py
+          python3 tools/import_audio.py
+          mkdir -p /tmp/godot-bin
+          unzip -q /tmp/godot-package/godot.zip -d /tmp/godot-bin
+          chmod +x /tmp/godot-bin/Godot_v4.5.1-stable_linux.x86_64
+      - name: Import project
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p qa-logs
+          timeout --kill-after=10s 5m /tmp/godot-bin/Godot_v4.5.1-stable_linux.x86_64 --headless --path . --editor --import 2>&1 | tee qa-logs/import.log
+          if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' qa-logs/import.log; then exit 1; fi
+      - name: Run every test in group independently
+        env:
+          QA_GROUP: ${{ matrix.group }}
+        run: python3 tools/run_qa_group.py /tmp/godot-bin/Godot_v4.5.1-stable_linux.x86_64 "$QA_GROUP" --logs qa-logs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: qa-logs-linux-${{ matrix.group }}
+          path: qa-logs/
+          retention-days: 7
+
+  python-qa:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test Python tools and QA catalog
+        run: python3 -m unittest discover -s tests -p 'test_*.py'
+
+  editor-diagnostics:
+    if: github.event_name == 'workflow_dispatch' && inputs.diagnostics
+    needs: prepare-godot
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: godot-linux-4.5.1
+          path: /tmp/godot-package
+      - name: Restore assets and import
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/ensure_assets.py
+          python3 tools/ensure_fabric037.py
+          python3 tools/import_model_assets.py
+          python3 tools/unpack_sketchfab_assets.py --require-all
+          python3 tools/import_croupier_asset.py
+          python3 tools/import_tutorial_sketchfab.py
+          python3 tools/import_audio.py
+          unzip -q /tmp/godot-package/godot.zip -d /tmp/godot-bin
+          chmod +x /tmp/godot-bin/Godot_v4.5.1-stable_linux.x86_64
+          mkdir -p qa-logs
+          timeout --kill-after=10s 5m /tmp/godot-bin/Godot_v4.5.1-stable_linux.x86_64 --headless --path . --editor --import 2>&1 | tee qa-logs/import.log
+          if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' qa-logs/import.log; then exit 1; fi
+      - name: Run legacy editor placement diagnostics
+        run: python3 tools/run_qa_group.py /tmp/godot-bin/Godot_v4.5.1-stable_linux.x86_64 editor-diagnostics --logs qa-logs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: qa-logs-editor-diagnostics
+          path: qa-logs/
+
+  backrooms-diagnostics:
+    if: github.event_name == 'workflow_dispatch' && inputs.diagnostics
+    needs: prepare-godot
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: godot-linux-4.5.1
+          path: ${{ runner.temp }}
+      - name: Install shared Godot
+        run: |
+          unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
+          chmod +x "$RUNNER_TEMP/godot/Godot_v4.5.1-stable_linux.x86_64"
+      - name: Import and validate standalone scene in isolation
+        shell: bash
+        run: |
+          set -euo pipefail
+          WORK="$RUNNER_TEMP/backrooms-project"
+          mkdir -p "$WORK/models/backrooms/oxygen" "$WORK/tests" "$WORK/tools" "$WORK/addons/casino_model_preview"
+          cp tools/bake_backrooms_voxel_gi.gd "$WORK/tools/"
+          cp addons/casino_model_preview/voxel_bake_targets.gd "$WORK/addons/casino_model_preview/"
+          cp -r backrooms "$WORK/"
+          cp -r models/backrooms/oxygen/textures "$WORK/models/backrooms/oxygen/"
+          cp tests/backrooms_layout_qa.gd "$WORK/tests/"
+          printf 'config_version=5\n[application]\nconfig/name="Backrooms layout QA"\n[rendering]\nrenderer/rendering_method="forward_plus"\n' > "$WORK/project.godot"
+          GODOT="$RUNNER_TEMP/godot/Godot_v4.5.1-stable_linux.x86_64"
+          timeout --kill-after=10s 180s "$GODOT" --headless --path "$WORK" --editor --import 2>&1 | tee "$RUNNER_TEMP/backrooms-import.log"
+          if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' "$RUNNER_TEMP/backrooms-import.log"; then exit 1; fi
+          timeout --kill-after=10s 90s "$GODOT" --headless --path "$WORK" --script res://tests/backrooms_layout_qa.gd 2>&1 | tee "$RUNNER_TEMP/backrooms-qa.log"
+          grep -F 'Backrooms sketch 02 native layout QA PASS' "$RUNNER_TEMP/backrooms-qa.log"
+          if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' "$RUNNER_TEMP/backrooms-qa.log"; then exit 1; fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: qa-logs-backrooms-diagnostics
+          path: |
+            ${{ runner.temp }}/backrooms-import.log
+            ${{ runner.temp }}/backrooms-qa.log
+
+  windows-build:
     runs-on: windows-latest
-    timeout-minutes: 60
+    timeout-minutes: 75
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      source_commit: ${{ steps.version.outputs.source_commit }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          persist-credentials: true
+          persist-credentials: false
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -39,31 +213,15 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Sketchfab CC-BY 4.0 models unavailable or invalid' }
           python tools/import_croupier_asset.py
           if ($LASTEXITCODE -ne 0) { throw 'Pinned CC-BY-4.0 croupier archive unavailable or invalid' }
-          python -m unittest discover -s tests -p test_tutorial_import_sidecars.py
-          if ($LASTEXITCODE -ne 0) { throw 'Tutorial asset sidecar preservation regression' }
           python tools/import_tutorial_sketchfab.py
           if ($LASTEXITCODE -ne 0) { throw 'Optional Sketchfab tutorial props import failed' }
           python tools/import_audio.py
           if ($LASTEXITCODE -ne 0) { throw 'Pinned Casino Anomaly seamless audio archive unavailable or invalid' }
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -- assets/ models/
-          git diff --cached --quiet
-          if ($LASTEXITCODE -eq 1) {
-            git commit -m 'assets: verify and import Poly Haven PBR textures and 3D models'
-            if ($LASTEXITCODE -ne 0) { throw 'Asset commit failed' }
-            git push origin HEAD:refs/heads/dev
-            if ($LASTEXITCODE -ne 0) { throw 'Asset upload failed' }
-          }
-          "PUBLISHED_COMMIT=$((git rev-parse HEAD).Trim())" >> $env:GITHUB_ENV
+          "PUBLISHED_COMMIT=$env:GITHUB_SHA" >> $env:GITHUB_ENV
 
       - name: Read-only render asset audit
         shell: pwsh
         run: |
-          python -m unittest discover -s tests -p test_run_godot_qa.py
-          if ($LASTEXITCODE -ne 0) { throw 'Godot QA runner regression' }
-          python -m unittest discover -s tests -p test_render_asset_audit.py
-          if ($LASTEXITCODE -ne 0) { throw 'Render asset audit regression' }
           python tools/audit_render_assets.py > render-asset-audit.json
           if ($LASTEXITCODE -ne 0) { throw 'Render asset audit failed' }
       - uses: actions/upload-artifact@v4
@@ -71,29 +229,22 @@ jobs:
           name: render-asset-audit
           path: render-asset-audit.json
 
-      - name: Repair persisted signature bottle mesh nodes
+      - name: Validate persisted signature bottle meshes (read-only)
         shell: pwsh
         run: |
-          python tools/repair_signature_bottles.py --apply
-          if ($LASTEXITCODE -ne 0) { throw 'Signature bar scene migration failed' }
           python tools/repair_signature_bottles.py --check
-          if ($LASTEXITCODE -ne 0) { throw 'Signature bar serialization check failed' }
-          git add -- main.tscn
-          git diff --cached --quiet
-          if ($LASTEXITCODE -eq 1) {
-            git commit -m 'fix(scene): preserve artist-editable signature bar meshes'
-            if ($LASTEXITCODE -ne 0) { throw 'Signature bar scene commit failed' }
-            git push origin HEAD:refs/heads/dev
-            if ($LASTEXITCODE -ne 0) { throw 'Signature bar scene push failed' }
-          }
-          "PUBLISHED_COMMIT=$((git rev-parse HEAD).Trim())" >> $env:GITHUB_ENV
+          if ($LASTEXITCODE -ne 0) { throw 'Signature scene needs an explicit maintenance migration; CI never rewrites main.tscn' }
 
       - name: Embed version
+        id: version
         shell: pwsh
         run: |
           python tools/write_version.py
           if ($LASTEXITCODE -ne 0) { throw 'Version generation failed' }
-          "VERSION=$((Get-Content version.json -Raw | ConvertFrom-Json).version)" >> $env:GITHUB_ENV
+          $version = (Get-Content version.json -Raw | ConvertFrom-Json).version
+          "VERSION=$version" >> $env:GITHUB_ENV
+          "version=$version" >> $env:GITHUB_OUTPUT
+          "source_commit=$env:PUBLISHED_COMMIT" >> $env:GITHUB_OUTPUT
 
       - uses: actions/setup-dotnet@v4
         with:
@@ -142,7 +293,8 @@ jobs:
             } finally { $zip.Dispose() }
           }
 
-      - name: Godot scene smoke and Windows export
+      - name: Import Windows project
+        id: windows-import
         shell: pwsh
         run: |
           # Verify committed rendering intent BEFORE headless editor import,
@@ -153,93 +305,29 @@ jobs:
           }
           & "$env:GODOT_EDITOR" --headless --path . --editor --import 2>&1 | Tee-Object -FilePath import.log
           if ($LASTEXITCODE -ne 0 -or (Get-Content import.log -Raw) -match '(?m)(SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:)') { throw 'Godot import failed' }
-          # Convert the one-time @tool generated models into actual editable
-          # Godot scene nodes. Do not repeat this after the first successful
-          # bake: re-running would overwrite user edits made in Godot.
           $decorSource = Get-Content gameplay/tutorial_decor.tscn -Raw
           if ($decorSource.Contains('script = ExtResource("user_selected")')) {
-            & "$env:GODOT_EDITOR" --headless --path . --script res://tools/bake_tutorial_editor_scene.gd 2>&1 | Tee-Object -FilePath tutorial_bake.log
-            if ($LASTEXITCODE -ne 0 -or (Get-Content tutorial_bake.log -Raw) -notmatch 'Casino Anomaly editable tutorial decoration bake PASS') {
-              throw 'Could not save editable tutorial models'
-            }
-            git add -- gameplay/tutorial_decor.tscn
-            git diff --cached --quiet
-            if ($LASTEXITCODE -eq 1) {
-              git commit -m 'refactor(editor): persist tutorial models as editable Godot scene instances'
-              if ($LASTEXITCODE -ne 0) { throw 'Editor scene commit failed' }
-              git push origin HEAD:refs/heads/dev
-              if ($LASTEXITCODE -ne 0) { throw 'Editor scene upload failed' }
-              "PUBLISHED_COMMIT=$((git rev-parse HEAD).Trim())" >> $env:GITHUB_ENV
-            }
-            & "$env:GODOT_EDITOR" --headless --path . --editor --import 2>&1 | Tee-Object -FilePath tutorial_reimport.log
-            if ($LASTEXITCODE -ne 0 -or (Get-Content tutorial_reimport.log -Raw) -match '(?m)(SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:)') {
-              throw 'Editable tutorial scene could not be imported'
-            }
+            throw 'Tutorial decor needs explicit editor bake; CI does not rewrite authored scenes'
           }
-          & "$env:GODOT_EDITOR" --headless --path . --script res://tests/smoke.gd 2>&1 | Tee-Object -FilePath smoke.log
-          if ($LASTEXITCODE -ne 0 -or (Get-Content smoke.log -Raw) -notmatch 'Casino Anomaly scenes and PBR floor smoke PASS') { throw 'Godot scene smoke failed' }
-          foreach ($suite in @('baseline', 'flood', 'other_side', 'silent_audience')) {
-            $expected = if ($suite -eq 'baseline') { 'Casino Anomaly ten subtle anomalies QA PASS' } else { "Casino Anomaly major event QA PASS: $suite" }
-            python tools/run_godot_qa.py "$env:GODOT_EDITOR" tests/anomaly_variations_qa.gd "$expected" --suite $suite --log "qa-$suite.log"
-            if ($LASTEXITCODE -ne 0) { throw "Anomaly QA failed: $suite" }
-          }
-          python tools/run_godot_qa.py "$env:GODOT_EDITOR" tests/silent_audience_actor_qa.gd 'Casino Anomaly silent audience actor QA PASS' --log qa-actor.log
-          if ($LASTEXITCODE -ne 0) { throw 'Silent Audience actor QA failed' }
-          foreach ($spec in @(
-            @('tests/loop_gameplay_qa.gd', 'Casino Anomaly playable tutorial, save and loop gameplay QA PASS'),
-            @('tests/profile_archive_qa.gd', 'Casino Anomaly profile archive QA PASS'),
-            @('tests/progression_qa.gd', 'Casino Anomaly progression QA PASS'),
-            @('tests/playing_cards_qa.gd', 'Casino Anomaly extracted playing cards QA PASS'),
-            @('tests/table_furniture_qa.gd', 'Casino Anomaly authored table furniture QA PASS'),
-            @('tests/premium_tables_and_bottles_qa.gd', 'Casino Anomaly premium tables and editable bottles QA PASS'),
-            @('tests/dev_anomaly_tool_qa.gd', 'Casino Anomaly developer anomaly picker QA PASS'),
-            @('tests/runtime_asset_cache_qa.gd', 'Casino Anomaly runtime asset cache QA PASS'),
-            @('tests/streaming_qa.gd', 'Casino Anomaly seamless two-room streaming QA PASS'),
-            @('tests/backrooms_traversal_qa.gd', 'Casino Anomaly Backrooms traversal QA PASS'),
-            @('tests/settings_pause_qa.gd', 'Casino Anomaly pause, persistent settings and world-camera input QA PASS'),
-            @('tests/graphics_settings_qa.gd', 'Casino Anomaly extended graphics settings QA PASS'),
-            @('tests/controls_accessibility_qa.gd', 'Casino Anomaly controls audio and accessibility QA PASS'),
-            @('tests/menu_visual_qa.gd', 'Casino Anomaly abstract UI and credits QA PASS'),
-            @('tests/profile_side_cards_qa.gd', 'Casino Anomaly profile side-card layout QA PASS'),
-            @('tests/loading_transition_qa.gd', 'Casino Anomaly threaded scene loading QA PASS'),
-            @('tests/audio_loop_qa.gd', 'Casino Anomaly persistent audio and menu-only loop QA PASS'),
-            @('tests/localization_intro_qa.gd', 'Casino Anomaly bilingual intro and door interaction QA PASS'),
-            @('tests/tutorial_dressing_qa.gd', 'Casino Anomaly tutorial set dressing spatial QA PASS'),
-            @('tests/tutorial_door_interaction_qa.gd', 'Casino Anomaly tutorial door interaction QA PASS'),
-            @('tests/cinematic_lighting_qa.gd', 'Casino Anomaly cinematic lighting and reflection QA PASS'),
-            @('tests/voxel_gi_qa.gd', 'Casino Anomaly VoxelGI bake and streaming contract QA PASS')
-          )) {
-            $name = $spec[0]
-            $expected = $spec[1]
-            & "$env:GODOT_EDITOR" --headless --path . --script "res://$name" 2>&1 | Tee-Object -FilePath regression.log
-            if ($LASTEXITCODE -ne 0 -or (Get-Content regression.log -Raw) -notmatch [regex]::Escape($expected)) { throw "Godot regression failed: $name" }
-          }
-          & "$env:GODOT_EDITOR" --headless --path . --script res://tests/visual_fx_qa.gd 2>&1 | Tee-Object -FilePath visual-fx-qa.log
-          if ($LASTEXITCODE -ne 0 -or (Get-Content visual-fx-qa.log -Raw) -notmatch 'Casino Anomaly visual FX QA PASS') { throw 'Visual FX QA failed' }
-          & "$env:GODOT_EDITOR" --headless --path . --script res://tests/sketchfab_smoke.gd 2>&1 | Tee-Object -FilePath sketchfab-smoke.log
-          if ($LASTEXITCODE -ne 0 -or (Get-Content sketchfab-smoke.log -Raw) -notmatch 'Casino Anomaly Sketchfab model smoke PASS') { throw 'Sketchfab model smoke failed' }
-          & "$env:GODOT_EDITOR" --headless --path . --script res://tests/sketchfab_editor_preview_qa.gd 2>&1 | Tee-Object -FilePath sketchfab-editor-preview-qa.log
-          if ($LASTEXITCODE -ne 0 -or (Get-Content sketchfab-editor-preview-qa.log -Raw) -notmatch 'Casino Anomaly Sketchfab editor preview QA PASS') { throw 'Sketchfab editor preview failed' }
-          & "$env:GODOT_EDITOR" --headless --path . --script res://tests/editor_asset_import_qa.gd 2>&1 | Tee-Object -FilePath sketchfab-local-extraction-qa.log
-          if ($LASTEXITCODE -ne 0 -or (Get-Content sketchfab-local-extraction-qa.log -Raw) -notmatch 'Casino Sketchfab local editor extraction QA PASS') { throw 'Sketchfab local editor extraction failed' }
-          & "$env:GODOT_EDITOR" --headless --editor --path . --script res://tests/sketchfab_true_editor_qa.gd 2>&1 | Tee-Object -FilePath sketchfab-true-editor-qa.log
-          if ($LASTEXITCODE -ne 0 -or (Get-Content sketchfab-true-editor-qa.log -Raw) -notmatch 'Casino Anomaly true Godot editor model preview QA PASS') { throw 'Real Godot editor preview failed' }
-          & "$env:GODOT_EDITOR" --headless --editor --path . --script res://tests/voxel_gi_editor_preview_qa.gd 2>&1 | Tee-Object -FilePath voxel-gi-editor-preview-qa.log
-          if ($LASTEXITCODE -ne 0 -or (Get-Content voxel-gi-editor-preview-qa.log -Raw) -notmatch 'Casino VoxelGI editor preview QA PASS') { throw 'Godot editor VoxelGI preview failed' }
-          & "$env:GODOT_EDITOR" --headless --path . --script res://tests/architecture_qa.gd 2>&1 | Tee-Object -FilePath architecture-qa.log
-          if ($LASTEXITCODE -ne 0 -or (Get-Content architecture-qa.log -Raw) -notmatch 'Casino Anomaly architectural PBR finishes PASS') { throw 'Architecture finish test failed' }
-          & "$env:GODOT_EDITOR" --headless --path . --script res://tests/spatial_qa.gd 2>&1 | Tee-Object -FilePath spatial-qa.log
-          if ($LASTEXITCODE -ne 0 -or (Get-Content spatial-qa.log -Raw) -notmatch 'Casino Anomaly spatial QA PASS') { throw 'Spatial QA failed' }
-          & "$env:GODOT_EDITOR" --headless --path . --script res://tests/joinery_qa.gd 2>&1 | Tee-Object -FilePath joinery-qa.log
-          if ($LASTEXITCODE -ne 0 -or (Get-Content joinery-qa.log -Raw) -notmatch 'Casino Anomaly joinery and PBR texture QA PASS') { throw 'Joinery QA failed' }
-          & "$env:GODOT_EDITOR" --headless --path . --script res://tests/prop_visuals_qa.gd 2>&1 | Tee-Object -FilePath prop-visuals-qa.log
-          if ($LASTEXITCODE -ne 0 -or (Get-Content prop-visuals-qa.log -Raw) -notmatch 'Casino Anomaly prop visuals and orientations QA PASS') { throw 'Prop visuals QA failed' }
-          & "$env:GODOT_EDITOR" --headless --path . --script res://tests/entrance_slot_cabinet_qa.gd 2>&1 | Tee-Object -FilePath entrance-slot-qa.log
-          if ($LASTEXITCODE -ne 0 -or (Get-Content entrance-slot-qa.log -Raw) -notmatch 'Casino Anomaly entrance slot cabinet QA PASS') { throw 'Entrance slot cabinet QA failed' }
-          & "$env:GODOT_EDITOR" --headless --path . --script res://tests/screenshot_layout_qa.gd 2>&1 | Tee-Object -FilePath screenshot-layout-qa.log
-          if ($LASTEXITCODE -ne 0 -or (Get-Content screenshot-layout-qa.log -Raw) -notmatch 'Casino Anomaly ten screenshot layout QA PASS') { throw 'Screenshot layout QA failed' }
-          & "$env:GODOT_EDITOR" --headless --path . --script res://tests/texture_stability_qa.gd 2>&1 | Tee-Object -FilePath texture-stability-qa.log
-          if ($LASTEXITCODE -ne 0 -or (Get-Content texture-stability-qa.log -Raw) -notmatch 'Casino Anomaly texture stability QA PASS') { throw 'Texture stability QA failed' }
+
+      - name: Run Windows QA without fail-fast
+        shell: pwsh
+        run: |
+          python tools/run_qa_group.py "$env:GODOT_EDITOR" windows --logs qa-logs
+          if ($LASTEXITCODE -ne 0) { throw 'One or more Windows tests failed; see full QA summary' }
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: qa-logs-windows
+          path: |
+            import.log
+            qa-logs/
+          retention-days: 7
+
+      - name: Export Windows game
+        shell: pwsh
+        run: |
           New-Item -ItemType Directory -Force artifacts/game | Out-Null
           $exe = Join-Path (Get-Location) 'artifacts/game/CasinoAnomaly.exe'
           & "$env:GODOT_EDITOR" --headless --path . --export-release 'Windows Desktop' $exe 2>&1 | Tee-Object -FilePath export.log
@@ -293,15 +381,50 @@ jobs:
             artifacts/casino-anomaly-win-x64.zip
             artifacts/casino-anomaly-win-x64.zip.sha256
             artifacts/update-manifest.json
+            artifacts/release-notes.md
           retention-days: 7
           if-no-files-found: error
+
+  publish:
+    needs: [python-qa, linux-qa, windows-build]
+    if: github.ref == 'refs/heads/dev' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.publish))
+    runs-on: windows-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    concurrency:
+      group: casino-anomaly-development
+      cancel-in-progress: false
+    env:
+      VERSION: ${{ needs.windows-build.outputs.version }}
+      PUBLISHED_COMMIT: ${{ needs.windows-build.outputs.source_commit }}
+    steps:
+      - name: Skip outdated build rather than overwrite newer releases
+        id: freshness
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $head = gh api "repos/$env:GITHUB_REPOSITORY/git/ref/heads/dev" --jq '.object.sha'
+          if ($LASTEXITCODE -ne 0) { throw 'Could not verify current dev head' }
+          if ($head.Trim() -ne $env:PUBLISHED_COMMIT) {
+            "current=false" >> $env:GITHUB_OUTPUT
+            Write-Host 'A newer dev commit exists; skipping publication of this older build.'
+          } else {
+            "current=true" >> $env:GITHUB_OUTPUT
+          }
+      - uses: actions/download-artifact@v4
+        if: steps.freshness.outputs.current == 'true'
+        with:
+          name: casino-anomaly-win-x64
+          path: artifacts
 
       - name: Publish independent Development release
         id: publish_release
         # A restricted GitHub App installation can return HTTP 403 for
         # release edits. This must not invalidate a tested, uploaded build.
         # The artifact remains available, with a prominent warning below.
-        continue-on-error: true
+        if: steps.freshness.outputs.current == 'true'
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.CASINO_RELEASE_TOKEN || github.token }}
@@ -352,7 +475,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Could not update the Development release metadata' }
 
       - name: Report release permission fallback
-        if: steps.publish_release.outcome == 'failure'
+        if: failure() && steps.publish_release.outcome == 'failure'
         shell: pwsh
         run: |
           Write-Host "::warning::Development Release konnte wegen fehlender GitHub-Berechtigung nicht vollstaendig aktualisiert werden. Windows-ZIP, SHA256 und Manifest sind im Workflow-Artefakt verfuegbar. CASINO_RELEASE_TOKEN mit Release-Schreibrechten erforderlich."

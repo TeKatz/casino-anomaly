@@ -28,10 +28,13 @@ def main():
     parser.add_argument("script")
     parser.add_argument("expected")
     parser.add_argument("--suite")
+    parser.add_argument("--editor", action="store_true")
     parser.add_argument("--log", default="godot-qa.log")
     parser.add_argument("--seconds", type=int, default=300)
     args = parser.parse_args()
     cmd = [args.godot, "--headless", "--path", ".", "--script", "res://" + args.script]
+    if args.editor:
+        cmd.insert(1, "--editor")
     if args.suite:
         cmd += ["--", args.suite]
     print("QA start:", args.script, args.suite or "", flush=True)

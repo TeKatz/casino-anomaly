@@ -1,10 +1,6 @@
 name: Import Oxygen Backrooms assets
 
 on:
-  push:
-    branches: [dev]
-    paths:
-      - .github/workflows/import-oxygen-backrooms.yml
   workflow_dispatch:
 
 permissions:

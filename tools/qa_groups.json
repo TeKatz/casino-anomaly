@@ -1,0 +1,218 @@
+{
+  "baseline": [
+    {
+      "script": "tests/anomaly_variations_qa.gd",
+      "marker": "Casino Anomaly ten subtle anomalies QA PASS",
+      "suite": "baseline",
+      "seconds": 300
+    }
+  ],
+  "flood": [
+    {
+      "script": "tests/anomaly_variations_qa.gd",
+      "marker": "Casino Anomaly major event QA PASS: flood",
+      "suite": "flood",
+      "seconds": 300
+    }
+  ],
+  "other_side": [
+    {
+      "script": "tests/anomaly_variations_qa.gd",
+      "marker": "Casino Anomaly major event QA PASS: other_side",
+      "suite": "other_side",
+      "seconds": 300
+    }
+  ],
+  "silent_audience": [
+    {
+      "script": "tests/anomaly_variations_qa.gd",
+      "marker": "Casino Anomaly major event QA PASS: silent_audience",
+      "suite": "silent_audience",
+      "seconds": 300
+    },
+    {
+      "script": "tests/silent_audience_actor_qa.gd",
+      "marker": "Casino Anomaly silent audience actor QA PASS"
+    }
+  ],
+  "gameplay": [
+    {
+      "script": "tests/loop_gameplay_qa.gd",
+      "marker": "Casino Anomaly playable tutorial, save and loop gameplay QA PASS"
+    },
+    {
+      "script": "tests/streaming_qa.gd",
+      "marker": "Casino Anomaly seamless two-room streaming QA PASS"
+    },
+    {
+      "script": "tests/backrooms_traversal_qa.gd",
+      "marker": "Casino Anomaly Backrooms traversal QA PASS"
+    }
+  ],
+  "intro-audio": [
+    {
+      "script": "tests/croupier_intro_qa.gd",
+      "marker": "Casino Anomaly croupier welcome desk and dialogue QA PASS"
+    },
+    {
+      "script": "tests/localization_intro_qa.gd",
+      "marker": "Casino Anomaly bilingual intro and door interaction QA PASS"
+    },
+    {
+      "script": "tests/audio_loop_qa.gd",
+      "marker": "Casino Anomaly persistent audio and menu-only loop QA PASS"
+    },
+    {
+      "script": "tests/immersion_qa.gd",
+      "marker": "Casino Anomaly immersion QA PASS"
+    }
+  ],
+  "windows": [
+    {
+      "script": "tests/profile_archive_qa.gd",
+      "marker": "Casino Anomaly profile archive QA PASS"
+    },
+    {
+      "script": "tests/progression_qa.gd",
+      "marker": "Casino Anomaly progression QA PASS"
+    },
+    {
+      "script": "tests/playing_cards_qa.gd",
+      "marker": "Casino Anomaly extracted playing cards QA PASS"
+    },
+    {
+      "script": "tests/table_furniture_qa.gd",
+      "marker": "Casino Anomaly authored table furniture QA PASS"
+    },
+    {
+      "script": "tests/premium_tables_and_bottles_qa.gd",
+      "marker": "Casino Anomaly premium tables and editable bottles QA PASS"
+    },
+    {
+      "script": "tests/dev_anomaly_tool_qa.gd",
+      "marker": "Casino Anomaly developer anomaly picker QA PASS"
+    },
+    {
+      "script": "tests/runtime_asset_cache_qa.gd",
+      "marker": "Casino Anomaly runtime asset cache QA PASS"
+    },
+    {
+      "script": "tests/settings_pause_qa.gd",
+      "marker": "Casino Anomaly pause, persistent settings and world-camera input QA PASS"
+    },
+    {
+      "script": "tests/graphics_settings_qa.gd",
+      "marker": "Casino Anomaly extended graphics settings QA PASS"
+    },
+    {
+      "script": "tests/controls_accessibility_qa.gd",
+      "marker": "Casino Anomaly controls audio and accessibility QA PASS"
+    },
+    {
+      "script": "tests/menu_visual_qa.gd",
+      "marker": "Casino Anomaly abstract UI and credits QA PASS"
+    },
+    {
+      "script": "tests/profile_side_cards_qa.gd",
+      "marker": "Casino Anomaly profile side-card layout QA PASS"
+    },
+    {
+      "script": "tests/loading_transition_qa.gd",
+      "marker": "Casino Anomaly threaded scene loading QA PASS"
+    },
+    {
+      "script": "tests/tutorial_dressing_qa.gd",
+      "marker": "Casino Anomaly tutorial set dressing spatial QA PASS"
+    },
+    {
+      "script": "tests/tutorial_door_interaction_qa.gd",
+      "marker": "Casino Anomaly tutorial door interaction QA PASS"
+    },
+    {
+      "script": "tests/cinematic_lighting_qa.gd",
+      "marker": "Casino Anomaly cinematic lighting and reflection QA PASS"
+    },
+    {
+      "script": "tests/voxel_gi_qa.gd",
+      "marker": "Casino Anomaly VoxelGI bake and streaming contract QA PASS"
+    },
+    {
+      "script": "tests/smoke.gd",
+      "marker": "Casino Anomaly scenes and PBR floor smoke PASS"
+    },
+    {
+      "script": "tests/visual_fx_qa.gd",
+      "marker": "Casino Anomaly visual FX QA PASS"
+    },
+    {
+      "script": "tests/sketchfab_smoke.gd",
+      "marker": "Casino Anomaly Sketchfab model smoke PASS"
+    },
+    {
+      "script": "tests/sketchfab_editor_preview_qa.gd",
+      "marker": "Casino Anomaly Sketchfab editor preview QA PASS"
+    },
+    {
+      "script": "tests/editor_asset_import_qa.gd",
+      "marker": "Casino Sketchfab local editor extraction QA PASS"
+    },
+    {
+      "script": "tests/sketchfab_true_editor_qa.gd",
+      "marker": "Casino Anomaly true Godot editor model preview QA PASS",
+      "editor": true
+    },
+    {
+      "script": "tests/voxel_gi_editor_preview_qa.gd",
+      "marker": "Casino VoxelGI editor preview QA PASS",
+      "editor": true
+    },
+    {
+      "script": "tests/architecture_qa.gd",
+      "marker": "Casino Anomaly architectural PBR finishes PASS"
+    },
+    {
+      "script": "tests/spatial_qa.gd",
+      "marker": "Casino Anomaly spatial QA PASS: illuminated floors, 22+ solid pillars, bar clearance, 10 separated chairs, safe coffee cart, no orbs or plant collisions"
+    },
+    {
+      "script": "tests/joinery_qa.gd",
+      "marker": "Casino Anomaly joinery and PBR texture QA PASS"
+    },
+    {
+      "script": "tests/prop_visuals_qa.gd",
+      "marker": "Casino Anomaly prop visuals and orientations QA PASS"
+    },
+    {
+      "script": "tests/entrance_slot_cabinet_qa.gd",
+      "marker": "Casino Anomaly entrance slot cabinet QA PASS"
+    },
+    {
+      "script": "tests/screenshot_layout_qa.gd",
+      "marker": "Casino Anomaly ten screenshot layout QA PASS"
+    },
+    {
+      "script": "tests/texture_stability_qa.gd",
+      "marker": "Casino Anomaly texture stability QA PASS"
+    },
+    {
+      "script": "tests/ui_design_qa.gd",
+      "marker": "Casino Anomaly shared UI design QA PASS"
+    }
+  ],
+  "editor-diagnostics": [
+    {
+      "script": "tests/editor_layout_qa.gd",
+      "marker": "Casino Anomaly editor layout QA PASS"
+    },
+    {
+      "script": "tests/editor_full_scene_qa.gd",
+      "marker": "Casino Anomaly complete Godot editor scene QA PASS"
+    }
+  ],
+  "backrooms-diagnostics": [
+    {
+      "script": "tests/backrooms_layout_qa.gd",
+      "marker": "Backrooms sketch 02 native layout QA PASS"
+    }
+  ]
+}
