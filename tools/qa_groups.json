@@ -67,7 +67,27 @@
       "marker": "Casino Anomaly immersion QA PASS"
     }
   ],
-  "windows": [
+  "editor-diagnostics": [
+    {
+      "script": "tests/editor_layout_qa.gd",
+      "marker": "Casino Anomaly editor layout QA PASS"
+    },
+    {
+      "script": "tests/editor_full_scene_qa.gd",
+      "marker": "Casino Anomaly complete Godot editor scene QA PASS"
+    },
+    {
+      "script": "tests/ui_design_qa.gd",
+      "marker": "Casino Anomaly shared UI design QA PASS"
+    }
+  ],
+  "backrooms-diagnostics": [
+    {
+      "script": "tests/backrooms_layout_qa.gd",
+      "marker": "Backrooms sketch 02 native layout QA PASS"
+    }
+  ],
+  "windows-profiles-settings": [
     {
       "script": "tests/profile_archive_qa.gd",
       "marker": "Casino Anomaly profile archive QA PASS"
@@ -77,24 +97,8 @@
       "marker": "Casino Anomaly progression QA PASS"
     },
     {
-      "script": "tests/playing_cards_qa.gd",
-      "marker": "Casino Anomaly extracted playing cards QA PASS"
-    },
-    {
-      "script": "tests/table_furniture_qa.gd",
-      "marker": "Casino Anomaly authored table furniture QA PASS"
-    },
-    {
-      "script": "tests/premium_tables_and_bottles_qa.gd",
-      "marker": "Casino Anomaly premium tables and editable bottles QA PASS"
-    },
-    {
       "script": "tests/dev_anomaly_tool_qa.gd",
       "marker": "Casino Anomaly developer anomaly picker QA PASS"
-    },
-    {
-      "script": "tests/runtime_asset_cache_qa.gd",
-      "marker": "Casino Anomaly runtime asset cache QA PASS"
     },
     {
       "script": "tests/settings_pause_qa.gd",
@@ -109,12 +113,14 @@
       "marker": "Casino Anomaly controls audio and accessibility QA PASS"
     },
     {
-      "script": "tests/menu_visual_qa.gd",
-      "marker": "Casino Anomaly abstract UI and credits QA PASS"
-    },
-    {
       "script": "tests/profile_side_cards_qa.gd",
       "marker": "Casino Anomaly profile side-card layout QA PASS"
+    }
+  ],
+  "windows-ui-tutorial": [
+    {
+      "script": "tests/menu_visual_qa.gd",
+      "marker": "Casino Anomaly abstract UI and credits QA PASS"
     },
     {
       "script": "tests/loading_transition_qa.gd",
@@ -127,44 +133,28 @@
     {
       "script": "tests/tutorial_door_interaction_qa.gd",
       "marker": "Casino Anomaly tutorial door interaction QA PASS"
+    }
+  ],
+  "windows-casino-geometry": [
+    {
+      "script": "tests/playing_cards_qa.gd",
+      "marker": "Casino Anomaly extracted playing cards QA PASS"
     },
     {
-      "script": "tests/cinematic_lighting_qa.gd",
-      "marker": "Casino Anomaly cinematic lighting and reflection QA PASS"
+      "script": "tests/table_furniture_qa.gd",
+      "marker": "Casino Anomaly authored table furniture QA PASS"
     },
     {
-      "script": "tests/voxel_gi_qa.gd",
-      "marker": "Casino Anomaly VoxelGI bake and streaming contract QA PASS"
+      "script": "tests/premium_tables_and_bottles_qa.gd",
+      "marker": "Casino Anomaly premium tables and editable bottles QA PASS"
     },
     {
       "script": "tests/smoke.gd",
       "marker": "Casino Anomaly scenes and PBR floor smoke PASS"
     },
     {
-      "script": "tests/visual_fx_qa.gd",
-      "marker": "Casino Anomaly visual FX QA PASS"
-    },
-    {
       "script": "tests/sketchfab_smoke.gd",
       "marker": "Casino Anomaly Sketchfab model smoke PASS"
-    },
-    {
-      "script": "tests/sketchfab_editor_preview_qa.gd",
-      "marker": "Casino Anomaly Sketchfab editor preview QA PASS"
-    },
-    {
-      "script": "tests/editor_asset_import_qa.gd",
-      "marker": "Casino Sketchfab local editor extraction QA PASS"
-    },
-    {
-      "script": "tests/sketchfab_true_editor_qa.gd",
-      "marker": "Casino Anomaly true Godot editor model preview QA PASS",
-      "editor": true
-    },
-    {
-      "script": "tests/voxel_gi_editor_preview_qa.gd",
-      "marker": "Casino VoxelGI editor preview QA PASS",
-      "editor": true
     },
     {
       "script": "tests/architecture_qa.gd",
@@ -193,26 +183,42 @@
     {
       "script": "tests/texture_stability_qa.gd",
       "marker": "Casino Anomaly texture stability QA PASS"
-    },
-    {
-      "script": "tests/ui_design_qa.gd",
-      "marker": "Casino Anomaly shared UI design QA PASS"
     }
   ],
-  "editor-diagnostics": [
+  "windows-render-editor": [
     {
-      "script": "tests/editor_layout_qa.gd",
-      "marker": "Casino Anomaly editor layout QA PASS"
+      "script": "tests/runtime_asset_cache_qa.gd",
+      "marker": "Casino Anomaly runtime asset cache QA PASS"
     },
     {
-      "script": "tests/editor_full_scene_qa.gd",
-      "marker": "Casino Anomaly complete Godot editor scene QA PASS"
-    }
-  ],
-  "backrooms-diagnostics": [
+      "script": "tests/cinematic_lighting_qa.gd",
+      "marker": "Casino Anomaly cinematic lighting and reflection QA PASS"
+    },
     {
-      "script": "tests/backrooms_layout_qa.gd",
-      "marker": "Backrooms sketch 02 native layout QA PASS"
+      "script": "tests/voxel_gi_qa.gd",
+      "marker": "Casino Anomaly VoxelGI bake and streaming contract QA PASS"
+    },
+    {
+      "script": "tests/visual_fx_qa.gd",
+      "marker": "Casino Anomaly visual FX QA PASS"
+    },
+    {
+      "script": "tests/sketchfab_editor_preview_qa.gd",
+      "marker": "Casino Anomaly Sketchfab editor preview QA PASS"
+    },
+    {
+      "script": "tests/editor_asset_import_qa.gd",
+      "marker": "Casino Sketchfab local editor extraction QA PASS"
+    },
+    {
+      "script": "tests/sketchfab_true_editor_qa.gd",
+      "marker": "Casino Anomaly true Godot editor model preview QA PASS",
+      "editor": true
+    },
+    {
+      "script": "tests/voxel_gi_editor_preview_qa.gd",
+      "marker": "Casino VoxelGI editor preview QA PASS",
+      "editor": true
     }
   ]
 }

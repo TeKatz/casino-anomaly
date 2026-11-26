@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       diagnostics:
-        description: Run historical editor and standalone layout checks
+        description: Run historical editor, UI and standalone layout checks
         type: boolean
         default: false
       publish:
@@ -63,6 +63,9 @@ jobs:
       fail-fast: false
       matrix:
         group: [baseline, flood, other_side, silent_audience, gameplay, intro-audio]
+    concurrency:
+      group: casino-qa-linux-${{ github.ref }}-${{ matrix.group }}
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
@@ -136,7 +139,7 @@ jobs:
           mkdir -p qa-logs
           timeout --kill-after=10s 5m /tmp/godot-bin/Godot_v4.5.1-stable_linux.x86_64 --headless --path . --editor --import 2>&1 | tee qa-logs/import.log
           if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' qa-logs/import.log; then exit 1; fi
-      - name: Run legacy editor placement diagnostics
+      - name: Run historical editor and UI diagnostics
         run: python3 tools/run_qa_group.py /tmp/godot-bin/Godot_v4.5.1-stable_linux.x86_64 editor-diagnostics --logs qa-logs
       - uses: actions/upload-artifact@v4
         if: always()
@@ -185,9 +188,140 @@ jobs:
             ${{ runner.temp }}/backrooms-import.log
             ${{ runner.temp }}/backrooms-qa.log
 
-  windows-build:
+  prepare-windows:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - name: Restore Windows Godot archive
+        id: godot-cache
+        uses: actions/cache@v4
+        with:
+          path: /tmp/godot-win-package/godot.zip
+          key: godot-win-x86_64-4.5.1-stable-archive-v1
+      - name: Download pinned Windows Godot once
+        if: steps.godot-cache.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/godot-win-package
+          timeout --kill-after=5s 150s curl --fail --location --retry 2 --retry-max-time 100 --connect-timeout 15 --max-time 90 -o /tmp/godot-win-package/godot.zip "https://github.com/godotengine/godot-builds/releases/download/4.5.1-stable/Godot_v4.5.1-stable_win64.exe.zip"
+      - name: Verify Windows archive
+        run: |
+          unzip -tq /tmp/godot-win-package/godot.zip
+          unzip -Z1 /tmp/godot-win-package/godot.zip | grep -Fx Godot_v4.5.1-stable_win64_console.exe
+      - uses: actions/upload-artifact@v4
+        with:
+          name: godot-win-4.5.1
+          path: /tmp/godot-win-package/godot.zip
+          compression-level: 0
+          retention-days: 1
+          if-no-files-found: error
+
+  windows-qa:
+    needs: prepare-windows
     runs-on: windows-latest
-    timeout-minutes: 75
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        group: [windows-profiles-settings, windows-ui-tutorial, windows-casino-geometry, windows-render-editor]
+    concurrency:
+      group: casino-qa-win-${{ github.ref }}-${{ matrix.group }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Import verified Poly Haven textures and 3D model dependencies
+        shell: pwsh
+        run: |
+          python tools/ensure_assets.py
+          if ($LASTEXITCODE -ne 0) { throw 'Source textures unavailable or invalid' }
+          python tools/ensure_fabric037.py
+          if ($LASTEXITCODE -ne 0) { throw 'ambientCG Fabric037 source unavailable or invalid' }
+          python tools/import_model_assets.py
+          if ($LASTEXITCODE -ne 0) { throw '3D model dependencies unavailable or invalid' }
+          python tools/unpack_sketchfab_assets.py --require-all
+          if ($LASTEXITCODE -ne 0) { throw 'Sketchfab CC-BY 4.0 models unavailable or invalid' }
+          python tools/import_croupier_asset.py
+          if ($LASTEXITCODE -ne 0) { throw 'Pinned CC-BY-4.0 croupier archive unavailable or invalid' }
+          python tools/import_tutorial_sketchfab.py
+          if ($LASTEXITCODE -ne 0) { throw 'Optional Sketchfab tutorial props import failed' }
+          python tools/import_audio.py
+          if ($LASTEXITCODE -ne 0) { throw 'Pinned Casino Anomaly seamless audio archive unavailable or invalid' }
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: godot-win-4.5.1
+          path: ${{ runner.temp }}/casino-anomaly-godot
+      - name: Install shared Windows Godot
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $work = Join-Path $env:RUNNER_TEMP 'casino-anomaly-godot'
+          $editorDir = Join-Path $work 'editor'
+          Expand-Archive (Join-Path $work 'godot.zip') $editorDir -Force
+          $editor = Join-Path $editorDir 'Godot_v4.5.1-stable_win64_console.exe'
+          if (!(Test-Path $editor)) { throw 'Godot executable missing' }
+          $version = & $editor --version
+          if ($LASTEXITCODE -ne 0 -or "$version" -notmatch '^4\.5\.1\.stable\.official') { throw "Unexpected Godot version: $version" }
+          "GODOT_EDITOR=$editor" >> $env:GITHUB_ENV
+      - name: Import Windows project
+        timeout-minutes: 5
+        shell: pwsh
+        run: |
+          & "$env:GODOT_EDITOR" --headless --path . --editor --import 2>&1 | Tee-Object -FilePath import.log
+          if ($LASTEXITCODE -ne 0 -or (Get-Content import.log -Raw) -match '(?m)(SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:)') { throw 'Godot import failed' }
+      - name: Run all group tests independently
+        shell: pwsh
+        env:
+          QA_GROUP: ${{ matrix.group }}
+        run: |
+          python tools/run_qa_group.py "$env:GODOT_EDITOR" "$env:QA_GROUP" --logs qa-logs
+          if ($LASTEXITCODE -ne 0) { throw "Windows QA group failed: $env:QA_GROUP" }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: qa-logs-${{ matrix.group }}
+          path: |
+            import.log
+            qa-logs/
+          retention-days: 7
+
+  updater-qa:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Compile updater and run contract tests
+        shell: pwsh
+        run: |
+          dotnet publish src/CasinoAnomaly.Updater/CasinoAnomaly.Updater.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:DebugType=None -o artifacts/updater
+          if ($LASTEXITCODE -ne 0) { throw 'Updater compilation failed' }
+          & ./artifacts/updater/CasinoAnomaly.Updater.exe --self-test
+          if ($LASTEXITCODE -ne 0) { throw 'Updater contract failed' }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: casino-anomaly-updater
+          path: artifacts/updater/CasinoAnomaly.Updater.exe
+          retention-days: 7
+          if-no-files-found: error
+
+  windows-build:
+    needs: [prepare-windows, updater-qa]
+    runs-on: windows-latest
+    timeout-minutes: 25
+    concurrency:
+      group: casino-build-win-${{ github.ref }}
+      cancel-in-progress: true
     outputs:
       version: ${{ steps.version.outputs.version }}
       source_commit: ${{ steps.version.outputs.source_commit }}
@@ -246,44 +380,46 @@ jobs:
           "version=$version" >> $env:GITHUB_OUTPUT
           "source_commit=$env:PUBLISHED_COMMIT" >> $env:GITHUB_OUTPUT
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/download-artifact@v4
         with:
-          dotnet-version: '10.0.x'
-
-      - name: Compile updater and run contract tests
-        shell: pwsh
-        run: |
-          dotnet publish src/CasinoAnomaly.Updater/CasinoAnomaly.Updater.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:DebugType=None -o artifacts/updater
-          if ($LASTEXITCODE -ne 0) { throw 'Updater compilation failed' }
-          & ./artifacts/updater/CasinoAnomaly.Updater.exe --self-test
-          if ($LASTEXITCODE -ne 0) { throw 'Updater contract failed' }
+          name: casino-anomaly-updater
+          path: artifacts/updater
 
       - uses: actions/cache@v4
         with:
           path: ~/AppData/Roaming/Godot/export_templates/4.5.1.stable
           key: anomaly-godot-4.5.1-win-x64-v1
 
-      - name: Install pinned Godot 4.5.1
+      - uses: actions/download-artifact@v4
+        with:
+          name: godot-win-4.5.1
+          path: ${{ runner.temp }}/casino-anomaly-godot
+      - name: Install shared Windows Godot
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $work = Join-Path $env:RUNNER_TEMP 'casino-anomaly-godot'
+          $editorDir = Join-Path $work 'editor'
+          Expand-Archive (Join-Path $work 'godot.zip') $editorDir -Force
+          $editor = Join-Path $editorDir 'Godot_v4.5.1-stable_win64_console.exe'
+          if (!(Test-Path $editor)) { throw 'Godot executable missing' }
+          $version = & $editor --version
+          if ($LASTEXITCODE -ne 0 -or "$version" -notmatch '^4\.5\.1\.stable\.official') { throw "Unexpected Godot version: $version" }
+          "GODOT_EDITOR=$editor" >> $env:GITHUB_ENV
+      - name: Install Windows export template
+        timeout-minutes: 5
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
           $ProgressPreference = 'SilentlyContinue'
           $base = 'https://github.com/godotengine/godot-builds/releases/download/4.5.1-stable'
           $work = Join-Path $env:RUNNER_TEMP 'casino-anomaly-godot'
-          $editorDir = Join-Path $work 'editor'
-          New-Item -ItemType Directory -Force $editorDir | Out-Null
-          $archive = Join-Path $work 'editor.zip'
-          Invoke-WebRequest "$base/Godot_v4.5.1-stable_win64.exe.zip" -OutFile $archive
-          Expand-Archive $archive $editorDir -Force
-          $editor = Join-Path $editorDir 'Godot_v4.5.1-stable_win64_console.exe'
-          if (!(Test-Path $editor)) { throw 'Godot executable missing' }
-          "GODOT_EDITOR=$editor" >> $env:GITHUB_ENV
           $templates = Join-Path $env:APPDATA 'Godot/export_templates/4.5.1.stable'
           $template = Join-Path $templates 'windows_release_x86_64.exe'
           New-Item -ItemType Directory -Force $templates | Out-Null
           if (!(Test-Path $template)) {
             $archivePath = Join-Path $work 'templates.tpz'
-            Invoke-WebRequest "$base/Godot_v4.5.1-stable_export_templates.tpz" -OutFile $archivePath
+            Invoke-WebRequest "$base/Godot_v4.5.1-stable_export_templates.tpz" -OutFile $archivePath -TimeoutSec 180
             Add-Type -AssemblyName System.IO.Compression.FileSystem
             $zip = [System.IO.Compression.ZipFile]::OpenRead($archivePath)
             try {
@@ -294,6 +430,7 @@ jobs:
           }
 
       - name: Import Windows project
+        timeout-minutes: 5
         id: windows-import
         shell: pwsh
         run: |
@@ -310,22 +447,8 @@ jobs:
             throw 'Tutorial decor needs explicit editor bake; CI does not rewrite authored scenes'
           }
 
-      - name: Run Windows QA without fail-fast
-        shell: pwsh
-        run: |
-          python tools/run_qa_group.py "$env:GODOT_EDITOR" windows --logs qa-logs
-          if ($LASTEXITCODE -ne 0) { throw 'One or more Windows tests failed; see full QA summary' }
-
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: qa-logs-windows
-          path: |
-            import.log
-            qa-logs/
-          retention-days: 7
-
       - name: Export Windows game
+        timeout-minutes: 10
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force artifacts/game | Out-Null
@@ -384,9 +507,17 @@ jobs:
             artifacts/release-notes.md
           retention-days: 7
           if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: windows-export-logs
+          path: |
+            import.log
+            export.log
+          retention-days: 7
 
   publish:
-    needs: [python-qa, linux-qa, windows-build]
+    needs: [python-qa, linux-qa, windows-qa, updater-qa, windows-build]
     if: github.ref == 'refs/heads/dev' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.publish))
     runs-on: windows-latest
     timeout-minutes: 20
