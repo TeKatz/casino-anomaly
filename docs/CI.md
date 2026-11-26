@@ -1,8 +1,8 @@
 # Casino Anomaly CI
 
-The single automatic CI workflow is `.github/workflows/development-release.yml` (dev pushes, PRs into dev/main). It runs independent Python tooling tests, six Linux groups, four independent Windows groups, an independent updater contract check and a separate Windows export/build. Linux and Windows jobs each share a pinned, cached Godot archive; matrix fail-fast is disabled. The export/build waits only for its engine and updater binary, not for unrelated QA. A failure does not cancel another group or skip the other scripts in the same group. A broken project import is an actual prerequisite failure. Each script gets a separate Godot process, user data, timeout and log. The Windows build is still available as an artifact if Linux fails; public publication waits for all mandatory groups and the successful Windows build. Older commits cannot replace newer releases.
+The automatic CI workflow is `.github/workflows/development-release.yml` (dev pushes, PRs into dev/main). It exposes five checks: Python QA, Linux QA, Windows QA, Windows Build (including updater contract tests), and Development Release. All ten QA catalog groups are retained but execute within two platform jobs. Each imports the project once, and every selected script runs in its own Godot process with isolated user data, timeout, and log. A nonzero test result never prevents later groups from executing. A broken shared project import is an actual prerequisite failure. Linux and Windows archives are pinned and cached; Windows QA and Build use the same cache key, so only a cold cache can require two independent Windows downloads. Build is independent of all QA jobs; only publication requires all four prerequisite jobs to succeed. Older commits cannot replace newer releases. Superseded QA and build jobs are cancelled per branch, not publication.
 
-The catalog `tools/qa_groups.json` assigns each GDScript exactly once, except anomaly_variations_qa.gd which has four distinct suites. Python tests validate inventory coverage. New tests must be added to the catalog. The two historical editor-placement tests, the previously unregistered UI design baseline, and the original standalone Backrooms sketch geometry contract are retained as opt-in diagnostics (Actions > Run workflow > diagnostics). They encode old authored layout assumptions or isolated editor behavior and do not block normal release; other UI, editor, collision, geometry, and traversal regressions are still required. Headless testing does not certify actual GPU visuals.
+The catalog `tools/qa_groups.json` assigns each GDScript exactly once, except anomaly_variations_qa.gd which has four distinct suites. Python tests validate inventory coverage. New tests must be added to the catalog. The two historical editor-placement tests, the previously unregistered UI design baseline, and the original standalone Backrooms sketch geometry contract are retained as opt-in diagnostics (Actions > Casino Anomaly Manual Diagnostics > Run workflow). They encode old authored layout assumptions or isolated editor behavior and do not block normal release; other UI, editor, collision, geometry, and traversal regressions are still required. Headless testing does not certify actual GPU visuals.
 
 No old test script was deleted. Removed duplicate or one-time workflow entry points:
 - architecture-qa.yml
@@ -25,7 +25,7 @@ Their contents remain in Git history; asset import and bake tools remain availab
 
 Run individual groups locally:
 ```sh
-python tools/run_qa_group.py /path/to/godot baseline --logs qa-logs
+python tools/run_qa_group.py /path/to/godot baseline flood other_side --logs qa-logs
 python -m unittest discover -s tests -p 'test_*.py'
 ```
 

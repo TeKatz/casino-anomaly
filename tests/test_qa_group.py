@@ -18,9 +18,9 @@ class QAGroupTests(unittest.TestCase):
             calls.append((cmd, kwargs["env"]["APPDATA"], kwargs["env"]["XDG_DATA_HOME"]))
             return subprocess.CompletedProcess(cmd, 1 if len(calls) == 1 else 0)
         with tempfile.TemporaryDirectory() as logdir:
-            with patch.object(run_qa_group, "GROUPS", {"test": group}), \
+            with patch.object(run_qa_group, "GROUPS", {"test": group[:1], "other": group[1:]}), \
                     patch.object(run_qa_group.subprocess, "run", side_effect=fake_run), \
-                    patch("sys.argv", ["run_qa_group.py", "godot", "test", "--logs", logdir]), \
+                    patch("sys.argv", ["run_qa_group.py", "godot", "test", "other", "--logs", logdir]), \
                     patch.dict(os.environ, {"GITHUB_STEP_SUMMARY": ""}):
                 self.assertEqual(run_qa_group.main(), 1)
             self.assertEqual(len(calls), 2)

@@ -7,10 +7,6 @@ on:
     branches: [dev, main]
   workflow_dispatch:
     inputs:
-      diagnostics:
-        description: Run historical editor, UI and standalone layout checks
-        type: boolean
-        default: false
       publish:
         description: Publish a new Development build (dev only)
         type: boolean
@@ -20,10 +16,24 @@ permissions:
   contents: read
 
 jobs:
-  prepare-godot:
-    runs-on: ubuntu-latest
-    timeout-minutes: 6
+  python-qa:
+    name: Python QA
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
     steps:
+      - uses: actions/checkout@v4
+      - name: Test Python tools and QA catalog
+        run: python3 -m unittest discover -s tests -p 'test_*.py'
+
+  linux-qa:
+    name: Linux QA
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    concurrency:
+      group: casino-qa-linux-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v4
       - name: Restore pinned Godot download cache
         id: godot-cache
         uses: actions/cache@v4
@@ -47,31 +57,6 @@ jobs:
           engine=/tmp/godot-verify/Godot_v4.5.1-stable_linux.x86_64
           chmod +x "$engine"
           timeout 15s "$engine" --version | grep -E '^4\.5\.1\.stable\.official'
-      - uses: actions/upload-artifact@v4
-        with:
-          name: godot-linux-4.5.1
-          path: /tmp/godot-package/godot.zip
-          compression-level: 0
-          retention-days: 1
-          if-no-files-found: error
-
-  linux-qa:
-    needs: prepare-godot
-    runs-on: ubuntu-24.04
-    timeout-minutes: 25
-    strategy:
-      fail-fast: false
-      matrix:
-        group: [baseline, flood, other_side, silent_audience, gameplay, intro-audio]
-    concurrency:
-      group: casino-qa-linux-${{ github.ref }}-${{ matrix.group }}
-      cancel-in-progress: true
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          name: godot-linux-4.5.1
-          path: /tmp/godot-package
       - name: Restore pinned assets and install shared Godot
         shell: bash
         run: |
@@ -93,140 +78,21 @@ jobs:
           mkdir -p qa-logs
           timeout --kill-after=10s 5m /tmp/godot-bin/Godot_v4.5.1-stable_linux.x86_64 --headless --path . --editor --import 2>&1 | tee qa-logs/import.log
           if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' qa-logs/import.log; then exit 1; fi
-      - name: Run every test in group independently
-        env:
-          QA_GROUP: ${{ matrix.group }}
-        run: python3 tools/run_qa_group.py /tmp/godot-bin/Godot_v4.5.1-stable_linux.x86_64 "$QA_GROUP" --logs qa-logs
+      - name: Run all Linux suites (no fail-fast)
+        run: python3 tools/run_qa_group.py /tmp/godot-bin/Godot_v4.5.1-stable_linux.x86_64 baseline flood other_side silent_audience gameplay intro-audio --logs qa-logs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: qa-logs-linux-${{ matrix.group }}
+          name: qa-logs-linux
           path: qa-logs/
           retention-days: 7
 
-  python-qa:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v4
-      - name: Test Python tools and QA catalog
-        run: python3 -m unittest discover -s tests -p 'test_*.py'
-
-  editor-diagnostics:
-    if: github.event_name == 'workflow_dispatch' && inputs.diagnostics
-    needs: prepare-godot
-    runs-on: ubuntu-24.04
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          name: godot-linux-4.5.1
-          path: /tmp/godot-package
-      - name: Restore assets and import
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 tools/ensure_assets.py
-          python3 tools/ensure_fabric037.py
-          python3 tools/import_model_assets.py
-          python3 tools/unpack_sketchfab_assets.py --require-all
-          python3 tools/import_croupier_asset.py
-          python3 tools/import_tutorial_sketchfab.py
-          python3 tools/import_audio.py
-          unzip -q /tmp/godot-package/godot.zip -d /tmp/godot-bin
-          chmod +x /tmp/godot-bin/Godot_v4.5.1-stable_linux.x86_64
-          mkdir -p qa-logs
-          timeout --kill-after=10s 5m /tmp/godot-bin/Godot_v4.5.1-stable_linux.x86_64 --headless --path . --editor --import 2>&1 | tee qa-logs/import.log
-          if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' qa-logs/import.log; then exit 1; fi
-      - name: Run historical editor and UI diagnostics
-        run: python3 tools/run_qa_group.py /tmp/godot-bin/Godot_v4.5.1-stable_linux.x86_64 editor-diagnostics --logs qa-logs
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: qa-logs-editor-diagnostics
-          path: qa-logs/
-
-  backrooms-diagnostics:
-    if: github.event_name == 'workflow_dispatch' && inputs.diagnostics
-    needs: prepare-godot
-    runs-on: ubuntu-latest
-    timeout-minutes: 12
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          name: godot-linux-4.5.1
-          path: ${{ runner.temp }}
-      - name: Install shared Godot
-        run: |
-          unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
-          chmod +x "$RUNNER_TEMP/godot/Godot_v4.5.1-stable_linux.x86_64"
-      - name: Import and validate standalone scene in isolation
-        shell: bash
-        run: |
-          set -euo pipefail
-          WORK="$RUNNER_TEMP/backrooms-project"
-          mkdir -p "$WORK/models/backrooms/oxygen" "$WORK/tests" "$WORK/tools" "$WORK/addons/casino_model_preview"
-          cp tools/bake_backrooms_voxel_gi.gd "$WORK/tools/"
-          cp addons/casino_model_preview/voxel_bake_targets.gd "$WORK/addons/casino_model_preview/"
-          cp -r backrooms "$WORK/"
-          cp -r models/backrooms/oxygen/textures "$WORK/models/backrooms/oxygen/"
-          cp tests/backrooms_layout_qa.gd "$WORK/tests/"
-          printf 'config_version=5\n[application]\nconfig/name="Backrooms layout QA"\n[rendering]\nrenderer/rendering_method="forward_plus"\n' > "$WORK/project.godot"
-          GODOT="$RUNNER_TEMP/godot/Godot_v4.5.1-stable_linux.x86_64"
-          timeout --kill-after=10s 180s "$GODOT" --headless --path "$WORK" --editor --import 2>&1 | tee "$RUNNER_TEMP/backrooms-import.log"
-          if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' "$RUNNER_TEMP/backrooms-import.log"; then exit 1; fi
-          timeout --kill-after=10s 90s "$GODOT" --headless --path "$WORK" --script res://tests/backrooms_layout_qa.gd 2>&1 | tee "$RUNNER_TEMP/backrooms-qa.log"
-          grep -F 'Backrooms sketch 02 native layout QA PASS' "$RUNNER_TEMP/backrooms-qa.log"
-          if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' "$RUNNER_TEMP/backrooms-qa.log"; then exit 1; fi
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: qa-logs-backrooms-diagnostics
-          path: |
-            ${{ runner.temp }}/backrooms-import.log
-            ${{ runner.temp }}/backrooms-qa.log
-
-  prepare-windows:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 6
-    steps:
-      - name: Restore Windows Godot archive
-        id: godot-cache
-        uses: actions/cache@v4
-        with:
-          path: /tmp/godot-win-package/godot.zip
-          key: godot-win-x86_64-4.5.1-stable-archive-v1
-      - name: Download pinned Windows Godot once
-        if: steps.godot-cache.outputs.cache-hit != 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p /tmp/godot-win-package
-          timeout --kill-after=5s 150s curl --fail --location --retry 2 --retry-max-time 100 --connect-timeout 15 --max-time 90 -o /tmp/godot-win-package/godot.zip "https://github.com/godotengine/godot-builds/releases/download/4.5.1-stable/Godot_v4.5.1-stable_win64.exe.zip"
-      - name: Verify Windows archive
-        run: |
-          unzip -tq /tmp/godot-win-package/godot.zip
-          unzip -Z1 /tmp/godot-win-package/godot.zip | grep -Fx Godot_v4.5.1-stable_win64_console.exe
-      - uses: actions/upload-artifact@v4
-        with:
-          name: godot-win-4.5.1
-          path: /tmp/godot-win-package/godot.zip
-          compression-level: 0
-          retention-days: 1
-          if-no-files-found: error
-
   windows-qa:
-    needs: prepare-windows
+    name: Windows QA
     runs-on: windows-latest
-    timeout-minutes: 40
-    strategy:
-      fail-fast: false
-      matrix:
-        group: [windows-profiles-settings, windows-ui-tutorial, windows-casino-geometry, windows-render-editor]
+    timeout-minutes: 75
     concurrency:
-      group: casino-qa-win-${{ github.ref }}-${{ matrix.group }}
+      group: casino-qa-win-${{ github.ref }}
       cancel-in-progress: true
     steps:
       - uses: actions/checkout@v4
@@ -253,10 +119,22 @@ jobs:
           python tools/import_audio.py
           if ($LASTEXITCODE -ne 0) { throw 'Pinned Casino Anomaly seamless audio archive unavailable or invalid' }
 
-      - uses: actions/download-artifact@v4
+      - name: Restore pinned Windows Godot archive
+        id: godot-cache
+        uses: actions/cache@v4
         with:
-          name: godot-win-4.5.1
-          path: ${{ runner.temp }}/casino-anomaly-godot
+          path: ${{ runner.temp }}/casino-anomaly-godot/godot.zip
+          key: godot-windows-x86_64-4.5.1-stable-archive-v1
+      - name: Download pinned Windows Godot on cache miss
+        if: steps.godot-cache.outputs.cache-hit != 'true'
+        timeout-minutes: 3
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $work = Join-Path $env:RUNNER_TEMP 'casino-anomaly-godot'
+          New-Item -ItemType Directory -Force $work | Out-Null
+          curl.exe --fail --location --retry 2 --retry-max-time 100 --connect-timeout 15 --max-time 90 --output (Join-Path $work 'godot.zip') 'https://github.com/godotengine/godot-builds/releases/download/4.5.1-stable/Godot_v4.5.1-stable_win64.exe.zip'
+          if ($LASTEXITCODE -ne 0) { throw 'Godot download failed' }
       - name: Install shared Windows Godot
         shell: pwsh
         run: |
@@ -275,50 +153,24 @@ jobs:
         run: |
           & "$env:GODOT_EDITOR" --headless --path . --editor --import 2>&1 | Tee-Object -FilePath import.log
           if ($LASTEXITCODE -ne 0 -or (Get-Content import.log -Raw) -match '(?m)(SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:)') { throw 'Godot import failed' }
-      - name: Run all group tests independently
+      - name: Run all Windows suites (no fail-fast)
         shell: pwsh
-        env:
-          QA_GROUP: ${{ matrix.group }}
         run: |
-          python tools/run_qa_group.py "$env:GODOT_EDITOR" "$env:QA_GROUP" --logs qa-logs
-          if ($LASTEXITCODE -ne 0) { throw "Windows QA group failed: $env:QA_GROUP" }
+          python tools/run_qa_group.py "$env:GODOT_EDITOR" windows-profiles-settings windows-ui-tutorial windows-casino-geometry windows-render-editor --logs qa-logs
+          if ($LASTEXITCODE -ne 0) { throw 'One or more Windows tests failed; see complete QA summary' }
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: qa-logs-${{ matrix.group }}
+          name: qa-logs-windows
           path: |
             import.log
             qa-logs/
           retention-days: 7
 
-  updater-qa:
-    runs-on: windows-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-      - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '10.0.x'
-      - name: Compile updater and run contract tests
-        shell: pwsh
-        run: |
-          dotnet publish src/CasinoAnomaly.Updater/CasinoAnomaly.Updater.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:DebugType=None -o artifacts/updater
-          if ($LASTEXITCODE -ne 0) { throw 'Updater compilation failed' }
-          & ./artifacts/updater/CasinoAnomaly.Updater.exe --self-test
-          if ($LASTEXITCODE -ne 0) { throw 'Updater contract failed' }
-      - uses: actions/upload-artifact@v4
-        with:
-          name: casino-anomaly-updater
-          path: artifacts/updater/CasinoAnomaly.Updater.exe
-          retention-days: 7
-          if-no-files-found: error
-
   windows-build:
-    needs: [prepare-windows, updater-qa]
+    name: Windows Build
     runs-on: windows-latest
-    timeout-minutes: 25
+    timeout-minutes: 35
     concurrency:
       group: casino-build-win-${{ github.ref }}
       cancel-in-progress: true
@@ -380,20 +232,37 @@ jobs:
           "version=$version" >> $env:GITHUB_OUTPUT
           "source_commit=$env:PUBLISHED_COMMIT" >> $env:GITHUB_OUTPUT
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/setup-dotnet@v4
         with:
-          name: casino-anomaly-updater
-          path: artifacts/updater
-
+          dotnet-version: '10.0.x'
+      - name: Compile updater and run contract tests
+        shell: pwsh
+        run: |
+          dotnet publish src/CasinoAnomaly.Updater/CasinoAnomaly.Updater.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:DebugType=None -o artifacts/updater
+          if ($LASTEXITCODE -ne 0) { throw 'Updater compilation failed' }
+          & ./artifacts/updater/CasinoAnomaly.Updater.exe --self-test
+          if ($LASTEXITCODE -ne 0) { throw 'Updater contract failed' }
       - uses: actions/cache@v4
         with:
           path: ~/AppData/Roaming/Godot/export_templates/4.5.1.stable
           key: anomaly-godot-4.5.1-win-x64-v1
 
-      - uses: actions/download-artifact@v4
+      - name: Restore pinned Windows Godot archive
+        id: godot-cache
+        uses: actions/cache@v4
         with:
-          name: godot-win-4.5.1
-          path: ${{ runner.temp }}/casino-anomaly-godot
+          path: ${{ runner.temp }}/casino-anomaly-godot/godot.zip
+          key: godot-windows-x86_64-4.5.1-stable-archive-v1
+      - name: Download pinned Windows Godot on cache miss
+        if: steps.godot-cache.outputs.cache-hit != 'true'
+        timeout-minutes: 3
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $work = Join-Path $env:RUNNER_TEMP 'casino-anomaly-godot'
+          New-Item -ItemType Directory -Force $work | Out-Null
+          curl.exe --fail --location --retry 2 --retry-max-time 100 --connect-timeout 15 --max-time 90 --output (Join-Path $work 'godot.zip') 'https://github.com/godotengine/godot-builds/releases/download/4.5.1-stable/Godot_v4.5.1-stable_win64.exe.zip'
+          if ($LASTEXITCODE -ne 0) { throw 'Godot download failed' }
       - name: Install shared Windows Godot
         shell: pwsh
         run: |
@@ -517,7 +386,8 @@ jobs:
           retention-days: 7
 
   publish:
-    needs: [python-qa, linux-qa, windows-qa, updater-qa, windows-build]
+    name: Development Release
+    needs: [python-qa, linux-qa, windows-qa, windows-build]
     if: github.ref == 'refs/heads/dev' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.publish))
     runs-on: windows-latest
     timeout-minutes: 20
