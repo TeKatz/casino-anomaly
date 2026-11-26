@@ -18,12 +18,22 @@ func apply(room: Node3D, entry: Dictionary) -> bool:
         return false
     # Use all five supplied rigged characters when installed. Keep the
     # existing tested event as a non-breaking fallback for other checkouts.
-    effect = Premium.new() if Premium.models_available() else Audience.new()
+    var using_premium: bool = Premium.models_available()
+    effect = Premium.new() if using_premium else Audience.new()
     effect.name = "AnomalySilentAudience"
     room.add_child(effect)
     if not bool(effect.call("configure", room)):
+        if not using_premium:
+            clear()
+            return false
+        push_warning("Silent Audience premium models failed to initialize; using original crowd.")
         clear()
-        return false
+        effect = Audience.new()
+        effect.name = "AnomalySilentAudience"
+        room.add_child(effect)
+        if not bool(effect.call("configure", room)):
+            clear()
+            return false
     return true
 
 
