@@ -214,3 +214,14 @@ func _process(delta: float) -> void:
         var jaw := int(roles["jaw"])
         var amplitude := maxf(0.0,sin(phase*2.2))*0.045
         skeleton.set_bone_pose_rotation(jaw,skeleton.get_bone_pose_rotation(jaw)*Quaternion(Vector3.RIGHT,amplitude))
+
+func _exit_tree() -> void:
+    # Important for the strict headless renderer and the room-stream teardown:
+    # release imported skinned mesh instances before their material RIDs.
+    if is_instance_valid(figure):
+        for item in figure.find_children("*","MeshInstance3D",true,false):
+            var mesh := item as MeshInstance3D
+            mesh.material_overlay = null
+            if mesh.mesh!=null:
+                for surface in range(mesh.mesh.get_surface_count()):
+                    mesh.set_surface_override_material(surface,null)

@@ -57,3 +57,11 @@ jobs:
           "$GODOT" --headless --path . --script res://tests/anomaly_variations_qa.gd > /tmp/anomalies.log 2>&1 || { cat /tmp/anomalies.log; exit 1; }
           grep -Fq 'Casino Anomaly ten subtle anomalies QA PASS' /tmp/anomalies.log || { cat /tmp/anomalies.log; exit 1; }
           if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' /tmp/anomalies.log; then cat /tmp/anomalies.log; exit 1; fi
+      - name: Verify semantic humanoid skeletons and no-sliding seat transitions
+        shell: bash
+        run: |
+          set -euo pipefail
+          GODOT=/tmp/godot-bin/Godot_v4.5.1-stable_linux.x86_64
+          "$GODOT" --headless --path . --script res://tests/silent_audience_actor_qa.gd > /tmp/actor.log 2>&1 || { cat /tmp/actor.log; exit 1; }
+          grep -Fq 'Casino Anomaly silent audience actor QA PASS' /tmp/actor.log || { cat /tmp/actor.log; exit 1; }
+          if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' /tmp/actor.log; then cat /tmp/actor.log; exit 1; fi
