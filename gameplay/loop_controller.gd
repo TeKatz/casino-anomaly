@@ -1235,6 +1235,8 @@ func _activate_completion_exit(upcoming: Node3D) -> void:
 		push_error("Could not prepare completion exit")
 		call_deferred("_leave_completed_run")
 	if is_instance_valid(doors):
+		for child in doors.get_children():
+			child.free()
 		doors.hide()
 
 

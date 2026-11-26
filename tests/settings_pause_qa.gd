@@ -161,6 +161,29 @@ func _run() -> void:
                     (control as Node).name, button_state, source_caps, (control as Control).custom_minimum_size.y])
                 return
 
+    subpanel.call("_switch_tab",5)
+    await process_frame
+    var scale_dropdown: OptionButton = subpanel.find_child("Option_ui_scale",true,false) as OptionButton
+    if scale_dropdown == null or scale_dropdown.item_count != 16:
+        _fail("UI scale must use sixteen fixed 5% dropdown steps")
+        return
+    var previous_scale: float = root.content_scale_factor
+    scale_dropdown.select(10)
+    scale_dropdown.item_selected.emit(10)
+    if not is_equal_approx(root.content_scale_factor,previous_scale):
+        _fail("UI scale changed before the selection event finished")
+        return
+    await process_frame
+    await process_frame
+    if not is_equal_approx(root.content_scale_factor,1.25):
+        _fail("UI scale dropdown did not apply the selected step")
+        return
+    root.get_node("GameSettings").set_option("ui_scale",previous_scale)
+    for dialog_name in ["preview_dialog","reset_dialog"]:
+        var dialog: ConfirmationDialog = subpanel.get(dialog_name) as ConfirmationDialog
+        if dialog == null or not dialog.has_meta("_casino_confirmation") or not dialog.get_ok_button().get_theme_stylebox("normal") is StyleBoxTexture:
+            _fail("Settings modal lost shared casino theme")
+            return
     var loop := room.get_node_or_null("LoopController")
     if loop == null or loop.get_node_or_null("GameHUD") != null:
         _fail("Gameplay must not expose progress, mistakes, or helper HUD text")

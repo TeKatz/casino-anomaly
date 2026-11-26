@@ -211,6 +211,15 @@ func _run() -> void:
         _fail("Winning must hand off seamlessly into a single physically enclosed exit")
         return
 
+    # Ensure the central opening is not still blocked by one of the old
+    # generated piers (Godot auto-renames duplicate child names).
+    await physics_frame
+    var final_player: CharacterBody3D = final_room.get_node("Player") as CharacterBody3D
+    var ray: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(final_room.to_global(Vector3(-44.0,1.6,-6.68)),final_room.to_global(Vector3(-48.1,1.6,-6.68)),1)
+    ray.exclude = [final_player.get_rid()]
+    if not final_room.get_world_3d().direct_space_state.intersect_ray(ray).is_empty():
+        _fail("Final exit remains physically blocked")
+        return
     scene.queue_free()
     second.queue_free()
     final_room.queue_free()

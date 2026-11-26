@@ -139,7 +139,7 @@ func prepare_room(room: Node3D) -> bool:
         Vector2(-8.53, -4.82),
         Vector2(-2.58, 0.20)
     ]:
-        _box(generated, "ExitWallPier",
+        _box(generated, "ExitWallPier_%d" % int(span.x*100),
             Vector3(EXIT_X, 3.0, (span.x + span.y) * 0.5),
             Vector3(0.36, HALL_HEIGHT, span.y - span.x), wall_mat)
     for z in [EXIT_Z_LEFT, EXIT_Z_RIGHT]:
@@ -409,7 +409,7 @@ func _far_wood_panels(parent: Node3D, mat: Material) -> void:
         Vector2(-8.53, -4.82),
         Vector2(-2.58, 0.0)
     ]:
-        _box(parent, "ExitWainscoting",
+        _box(parent, "ExitWainscoting_%d" % int(span.x*100),
             Vector3(-45.99, 1.02, (span.x + span.y) * 0.5),
             Vector3(0.12, 2.0, span.y - span.x), mat, false)
 
@@ -481,14 +481,14 @@ func prepare_final_exit(room: Node3D) -> bool:
     generated.add_child(exit)
     for span in [Vector2(-13.20,FINAL_EXIT_Z-1.12),Vector2(FINAL_EXIT_Z+1.12,0.20)]:
         var limits: Vector2 = span
-        _box(exit,"FinalWallPier",Vector3(EXIT_X,3.0,(limits.x+limits.y)*0.5),Vector3(0.36,HALL_HEIGHT,limits.y-limits.x),wall)
-        _box(exit,"FinalWainscot",Vector3(-45.99,1.02,(limits.x+limits.y)*0.5),Vector3(0.12,2.0,limits.y-limits.x),trim,false)
+        _box(exit,"FinalWallPier_%d" % int(limits.x*100),Vector3(EXIT_X,3.0,(limits.x+limits.y)*0.5),Vector3(0.36,HALL_HEIGHT,limits.y-limits.x),wall)
+        _box(exit,"FinalWainscot_%d" % int(limits.x*100),Vector3(-45.99,1.02,(limits.x+limits.y)*0.5),Vector3(0.12,2.0,limits.y-limits.x),trim,false)
     _box(exit,"FinalOverdoor",Vector3(EXIT_X,4.76,FINAL_EXIT_Z),Vector3(0.36,2.48,2.24),wall)
     _build_wood_exit_frame(exit,"Final",FINAL_EXIT_Z,trim)
     _box(exit,"FinalFloor",Vector3(-47.65,-0.115,FINAL_EXIT_Z),Vector3(3.3,0.23,2.24),floor)
     _box(exit,"FinalCeiling",Vector3(-47.65,3.60,FINAL_EXIT_Z),Vector3(3.3,0.18,2.24),trim)
     for side in [-1.0,1.0]:
-        _box(exit,"FinalSideWall",Vector3(-47.65,1.76,FINAL_EXIT_Z+float(side)*1.21),Vector3(3.3,3.52,0.18),wall)
+        _box(exit,"FinalSideWall_"+("North" if float(side)>0.0 else "South"),Vector3(-47.65,1.76,FINAL_EXIT_Z+float(side)*1.21),Vector3(3.3,3.52,0.18),wall)
     var black: StandardMaterial3D = StandardMaterial3D.new()
     black.albedo_color = Color("#08090b")
     black.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
