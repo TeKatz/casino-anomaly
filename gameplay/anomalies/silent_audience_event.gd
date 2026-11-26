@@ -131,6 +131,57 @@ func _find_clip(animator: AnimationPlayer, fragment: String) -> String:
     return ""
 
 
+func _seated_performance(figure: Node3D, animator: AnimationPlayer,
+        sitting: String, seed: int) -> AnimationTree:
+    var speech := _find_clip(animator,"cycle_talking")
+    if speech.is_empty():
+        return null
+    var seated := animator.get_animation(sitting)
+    var talking := animator.get_animation(speech)
+    seated.loop_mode = Animation.LOOP_LINEAR
+    talking.loop_mode = Animation.LOOP_LINEAR
+    var idle_node := AnimationNodeAnimation.new()
+    idle_node.animation = sitting
+    var speech_node := AnimationNodeAnimation.new()
+    speech_node.animation = speech
+    var speech_blend := AnimationNodeBlend2.new()
+    speech_blend.filter_enabled = true
+    speech_blend.sync = true
+    var facial_tracks := 0
+    for i in range(talking.get_track_count()):
+        var path := talking.track_get_path(i)
+        var lower := str(path).to_lower()
+        for part in ["lower_lip_","upper_lip_","jaw_","tongue_"]:
+            if lower.contains(part):
+                speech_blend.set_filter_path(path,true)
+                facial_tracks += 1
+                break
+    if facial_tracks < 5:
+        return null
+    var time_seek := AnimationNodeTimeSeek.new()
+    var rate := AnimationNodeTimeScale.new()
+    var graph := AnimationNodeBlendTree.new()
+    graph.add_node("Seated",idle_node,Vector2(0,0))
+    graph.add_node("SeatTime",time_seek,Vector2(170,0))
+    graph.add_node("SeatRate",rate,Vector2(320,0))
+    graph.add_node("Mouth",speech_node,Vector2(160,170))
+    graph.add_node("SilentSpeech",speech_blend,Vector2(480,90))
+    graph.connect_node("SeatTime",0,"Seated")
+    graph.connect_node("SeatRate",0,"SeatTime")
+    graph.connect_node("SilentSpeech",0,"SeatRate")
+    graph.connect_node("SilentSpeech",1,"Mouth")
+    graph.connect_node("output",0,"SilentSpeech")
+    var tree := AnimationTree.new()
+    tree.name = "IndividualBehavior"
+    figure.add_child(tree)
+    tree.anim_player = tree.get_path_to(animator)
+    tree.tree_root = graph
+    tree.active = true
+    tree.set("parameters/SeatRate/scale",0.70+float(seed%7)*0.082)
+    tree.set("parameters/SeatTime/seek_request",float((seed*37)%83)*0.1)
+    tree.set("parameters/SilentSpeech/blend_amount",0.0)
+    return tree
+
 func _spawn_stool(at: Vector3) -> Node3D:
     var stool := STOOL.instantiate() as Node3D
     if stool == null:
@@ -148,7 +199,7 @@ func _spawn_stool(at: Vector3) -> Node3D:
 func _spawn_seat(index: int) -> bool:
     if index < 0 or index >= seats.size() or model == null:
         return false
-    var seat := seats[index]
+    var seat: Dictionary = seats[index]
     var stool: Node3D
     if str(seat["kind"]) == "extra_stool":
         stool = _spawn_stool(seat["stool_at"] as Vector3)
@@ -159,19 +210,21 @@ func _spawn_seat(index: int) -> bool:
         if is_instance_valid(stool):
             stool.free()
         return false
-    figure.name = "AudienceMember_%02d" % guests.size()
+    var variant := guests.size()
+    figure.name = "AudienceMember_%02d" % variant
     figure.hide()
     add_child(figure)
-    var height_scale := rng.randf_range(0.955, 1.045)
-    figure.scale = Vector3(1.88, 1.12, 1.84) * height_scale
+    var broadness := 0.90+float((variant*11)%13)*0.018
+    var height := 0.955+float((variant*7)%11)*0.011
+    figure.scale = Vector3(1.88*broadness,1.12*height,1.84*broadness)
     figure.rotation.y = float(seat["yaw"])
     var animator: AnimationPlayer
     var sitting := ""
     var standing := ""
-    for item in figure.find_children("*", "AnimationPlayer", true, false):
+    for item in figure.find_children("*","AnimationPlayer",true,false):
         var candidate := item as AnimationPlayer
-        var idle_clip := _find_clip(candidate, "sitting_idle")
-        var stand_clip := _find_clip(candidate, "sitting_end")
+        var idle_clip := _find_clip(candidate,"sitting_idle")
+        var stand_clip := _find_clip(candidate,"sitting_end")
         if not idle_clip.is_empty() and not stand_clip.is_empty():
             animator = candidate
             sitting = idle_clip
@@ -179,70 +232,161 @@ func _spawn_seat(index: int) -> bool:
             break
     var skeleton: Skeleton3D
     var hip_index := -1
-    for item in figure.find_children("*", "Skeleton3D", true, false):
+    for item in figure.find_children("*","Skeleton3D",true,false):
         var candidate := item as Skeleton3D
-        var index_in_rig := candidate.find_bone("Hips_01")
-        if index_in_rig >= 0 and candidate.find_bone("Head_06") >= 0:
+        var idx := candidate.find_bone("Hips_01")
+        if idx >= 0 and candidate.find_bone("Head_06") >= 0:
             skeleton = candidate
-            hip_index = index_in_rig
+            hip_index = idx
             break
     if animator == null or skeleton == null:
         figure.free()
         if is_instance_valid(stool):
             stool.free()
-        push_warning("Silent Audience: seated character has no valid rig")
         return false
     animator.play(sitting)
-    animator.seek(0.4, true)
+    animator.seek(0.45+float(variant%6)*0.88,true)
     animator.pause()
     skeleton.force_update_all_bone_transforms()
-    var old_hip := to_local(skeleton.to_global(skeleton.get_bone_global_pose(hip_index).origin))
-    figure.position += (seat["anchor"] as Vector3) - old_hip
-    skeleton.force_update_all_bone_transforms()
-    var head := skeleton.find_bone("Head_06")
-    var chest := skeleton.find_bone("Chest_04")
-    var head_y := skeleton.to_global(skeleton.get_bone_global_pose(head).origin).y
-    _appearance(figure, head_y - 0.13, guests.size())
+    var local_hip := to_local(skeleton.to_global(skeleton.get_bone_global_pose(hip_index).origin))
+    figure.position += (seat["anchor"] as Vector3)-local_hip
+    _appearance(figure,variant)
+    _head_details(skeleton,variant)
+    var tree := _seated_performance(figure,animator,sitting,variant)
+    var collider := _make_collision(seat["anchor"] as Vector3,variant)
     if is_instance_valid(stool):
         stool.show()
     figure.show()
-    guests.append({"figure": figure, "animator": animator, "stand_clip": standing,
-        "skeleton": skeleton, "head": head, "chest": chest,
-        "base_head": skeleton.get_bone_pose_rotation(head),
-        "base_chest": skeleton.get_bone_pose_rotation(chest) if chest >= 0 else Quaternion.IDENTITY,
-        "yaw": 0.0, "appeared": elapsed, "kind": seat["kind"]})
+    var head := skeleton.find_bone("Head_06")
+    var chest := skeleton.find_bone("Chest_04")
+    guests.append({"figure":figure,"animator":animator,"tree":tree,"stand_clip":standing,
+        "skeleton":skeleton,"head":head,"chest":chest,"hip":hip_index,
+        "base_head":skeleton.get_bone_pose_rotation(head),
+        "base_chest":skeleton.get_bone_pose_rotation(chest) if chest>=0 else Quaternion.IDENTITY,
+        "yaw":0.0,"appeared":elapsed,"kind":seat["kind"],
+        "anchor":seat["anchor"],"seat_yaw":seat["yaw"],"collider":collider,
+        "personality":variant%3,"posture":float((variant*7)%11)*0.007,
+        "speech_phase":float(variant)*2.197,"standing":false,"blocked":false,
+        "start_pos":figure.position,"target_pos":figure.position,
+        "sit_pose":[],"upright_pose":[],"stand_duration":5.8,
+        "stand_delay":0.0})
     seats.remove_at(index)
     last_appearance = elapsed
     return true
 
 
-func _appearance(figure: Node3D, cutoff: float, index: int) -> void:
-    # The source's real suit/skin textures are retained; only per-instance
-    # material overrides are adjusted. One shared face shader for all rigs.
-    var palette := [Color(0.43, 0.45, 0.50), Color(0.50, 0.43, 0.42),
-        Color(0.39, 0.45, 0.47), Color(0.49, 0.48, 0.40), Color(0.43, 0.40, 0.48)]
-    var tint: Color = palette[index % palette.size()]
-    var mask := ShaderMaterial.new()
-    mask.shader = FACE_SHADER
-    mask.set_shader_parameter("cutoff", cutoff)
-    for item in figure.find_children("*", "MeshInstance3D", true, false):
+func _make_collision(anchor: Vector3, variant: int) -> StaticBody3D:
+    var body := StaticBody3D.new()
+    body.name = "AudienceCollision_%02d" % variant
+    body.collision_layer = 1
+    body.collision_mask = 0
+    add_child(body)
+    body.position = Vector3(anchor.x,0.0,anchor.z)
+    var shape_node := CollisionShape3D.new()
+    shape_node.name = "Torso"
+    body.add_child(shape_node)
+    var capsule := CapsuleShape3D.new()
+    capsule.radius = 0.285
+    capsule.height = 1.30
+    shape_node.shape = capsule
+    shape_node.position.y = 1.15
+    return body
+
+func _appearance(figure: Node3D, index: int) -> void:
+    # The glTF separates the business suit and human skin into skinned
+    # meshes. The licensed, textured face remains completely unobscured.
+    var cloth := [
+        Color("#404b5a"),Color("#57443f"),Color("#4c5148"),Color("#474156"),
+        Color("#666055"),Color("#313b47"),Color("#69554c"),Color("#344b4e"),
+        Color("#69565e"),Color("#56534a")
+    ]
+    var skin := [
+        Color(1.0,0.94,0.88),Color(0.89,0.81,0.75),Color(0.98,0.83,0.72),
+        Color(0.82,0.72,0.67),Color(0.93,0.89,0.81),Color(0.87,0.79,0.71)
+    ]
+    for item in figure.find_children("*","MeshInstance3D",true,false):
         var mesh := item as MeshInstance3D
         if mesh.mesh == null:
             continue
-        mesh.material_overlay = mask
+        mesh.material_overlay = null
         mesh.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
-        for i in range(mesh.mesh.get_surface_count()):
-            var original := mesh.get_active_material(i) as StandardMaterial3D
+        var is_suit := str(mesh.name).to_lower().contains("suit")
+        var is_skin := str(mesh.name).to_lower().contains("body")
+        for surface in range(mesh.mesh.get_surface_count()):
+            var original := mesh.get_active_material(surface) as StandardMaterial3D
             if original == null:
                 continue
-            var dark := original.duplicate() as StandardMaterial3D
-            dark.albedo_color *= tint
-            dark.roughness = 0.83
-            dark.metallic = 0.0
-            dark.metallic_specular = 0.16
-            dark.emission_enabled = false
-            mesh.set_surface_override_material(i, dark)
+            if is_suit and original.albedo_texture != null:
+                var jacket := ShaderMaterial.new()
+                jacket.shader = SUIT_SHADER
+                jacket.set_shader_parameter("atlas",original.albedo_texture)
+                jacket.set_shader_parameter("jacket",cloth[index%cloth.size()])
+                jacket.set_shader_parameter("fabric_grain",0.018+float(index%4)*0.008)
+                mesh.set_surface_override_material(surface,jacket)
+            else:
+                var modified := original.duplicate() as StandardMaterial3D
+                modified.albedo_color *= skin[index%skin.size()] if is_skin else Color(0.91,0.90,0.89)
+                modified.roughness = 0.69
+                modified.emission_enabled = false
+                mesh.set_surface_override_material(surface,modified)
 
+
+func _head_details(skeleton: Skeleton3D, index: int) -> void:
+    # Rig-attached discreet hair/glasses distinguish faces even when two
+    # guests wear the same suit. These follow the original head bone.
+    var head := skeleton.find_bone("Head_06")
+    if head < 0:
+        return
+    var style := index%6
+    if style in [0,4]:
+        return
+    var attachment := BoneAttachment3D.new()
+    attachment.name = "PersonalDetail"
+    attachment.bone_name = "Head_06"
+    skeleton.add_child(attachment)
+    var dark := StandardMaterial3D.new()
+    dark.albedo_color = [Color("#241e1b"),Color("#46403a"),Color("#352926")][index%3]
+    dark.roughness = 0.95
+    if style in [1,5]:
+        # Sleek, low-profile spectacles rather than a dark silhouette.
+        var metal := StandardMaterial3D.new()
+        metal.albedo_color = Color("#928b7a") if style==1 else Color("#37383d")
+        metal.metallic = 0.55
+        metal.roughness = 0.44
+        for side in [-1.0,1.0]:
+            var rim := MeshInstance3D.new()
+            rim.name = "SpectacleRim"
+            var torus := TorusMesh.new()
+            torus.inner_radius = 0.041
+            torus.outer_radius = 0.045
+            torus.ring_segments = 6
+            torus.rings = 24
+            rim.mesh = torus
+            rim.material_override = metal
+            attachment.add_child(rim)
+            rim.rotation.x = PI*0.5
+            rim.position = Vector3(side*0.047,0.082,0.115)
+        var bridge := MeshInstance3D.new()
+        bridge.name = "SpectacleBridge"
+        var bridge_mesh := BoxMesh.new()
+        bridge_mesh.size = Vector3(0.024,0.006,0.008)
+        bridge.mesh = bridge_mesh
+        bridge.material_override = metal
+        attachment.add_child(bridge)
+        bridge.position = Vector3(0.0,0.080,0.117)
+    elif style in [2,3]:
+        var hair := MeshInstance3D.new()
+        hair.name = "DistinctHairline"
+        var crown := SphereMesh.new()
+        crown.radius = 0.096
+        crown.height = 0.19
+        crown.radial_segments = 16
+        crown.rings = 8
+        hair.mesh = crown
+        hair.material_override = dark
+        attachment.add_child(hair)
+        hair.position = Vector3(0,0.172,0.006)
+        hair.scale = Vector3(0.95,0.37,0.83) if style==2 else Vector3(1.0,0.47,0.74)
 
 func _watch(delta: float, player: Node3D) -> void:
     for person in guests:
