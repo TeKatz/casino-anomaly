@@ -29,7 +29,7 @@ var worktop_reach := 0.48
 var arm_reference: Dictionary = {}
 var stature := 0.0
 var motion_clock := 0.0
-const MODEL_STATURES := [1.85, 1.77, 1.83, 1.86, 1.68]
+const HEAD_TO_ANKLE := [1.68, 1.61, 1.66, 1.69, 1.55]
 
 func configure(packed: PackedScene, identifier: String, seat: Dictionary, serial: int) -> bool:
     variant = serial
@@ -79,13 +79,15 @@ func configure(packed: PackedScene, identifier: String, seat: Dictionary, serial
     skeleton.force_update_all_bone_transforms()
     # Normalize real standing proportions: head joint to lowest toe is
     # roughly full stature minus the crown and shoe sole, not full height.
-    var measured: float = _point("head").y - minf(_point("left_toe").y, _point("right_toe").y)
+    var measured: float = _point("head").y - minf(_point("left_foot").y, _point("right_foot").y)
     if measured < 0.01:
         return false
-    stature = float(MODEL_STATURES[style])
-    var joint_height: float = stature - (0.17 if style == 4 else 0.15)
-    figure.scale *= joint_height / measured
+    # These targets are 12-15% larger than the original in-game figures.
+    # In particular the high-heeled female rig needs ankle-based scaling,
+    # otherwise toe-based normalization almost cancels the increase.
+    figure.scale *= float(HEAD_TO_ANKLE[style]) / measured
     skeleton.force_update_all_bone_transforms()
+    stature = _point("head").y - minf(_point("left_toe").y, _point("right_toe").y) + 0.12
     figure.position -= _point("hip")
     for side in ["left", "right"]:
         var foot: String = str(side) + "_foot"
@@ -274,7 +276,21 @@ func _hand_target(side: String, phase: float, motion: float) -> Vector3:
     # Each character has a different conversational rhythm; the envelope
     # never switches abruptly, including across the loop boundary.
     var talk: float = pow(0.5+0.5*sin(phase+float(style)*0.71), 2.0)*motion
-    var gesture: float = (0.12 + float(style)*0.013)*intensity*talk
+    # Distinct rhythms, not just five playback speeds of the same motion.
+    # Guard: short measured emphasis; old man: broad slow lift;
+    # suit: alternating hands; guard in hat: two beats; woman: flowing reply.
+    var gesture: float = 0.0
+    match style:
+        0:
+            gesture = 0.17*intensity*talk*(0.76+0.24*sin(phase*3.0))
+        1:
+            gesture = 0.20*intensity*talk
+        2:
+            gesture = 0.19*pow(0.5+0.5*sin(phase+lateral*1.1),3.0)*motion
+        3:
+            gesture = 0.22*intensity*talk*(0.75+0.25*sin(phase*4.0))
+        4:
+            gesture = 0.20*(0.65+0.35*sin(phase+lateral*1.5))*talk
     var shoulder: Vector3 = _point(side+"_arm")
     var target: Vector3
     if seat_kind == "sofa":
@@ -341,6 +357,13 @@ func _animate(role: String, pitch: float, yaw: float = 0.0) -> void:
 func _sample_loop(seconds: float) -> void:
     # Integer harmonics of the same phase give exact continuous loop seams.
     # No animation track ever translates the root, hip, knees or feet.
+    # Solve from the same authored base on every sample. Shortest-arc IK
+    # rotations applied to the last sampled pose would otherwise accumulate
+    # twist, causing wrist drift and discontinuities across repeated loops.
+    for role in ["left_arm","right_arm","left_forearm","right_forearm","left_hand","right_hand"]:
+        var index: int = int(roles[role])
+        var rotation_value: Quaternion = seated_pose[index]["q"]
+        skeleton.set_bone_pose_rotation(index, rotation_value)
     var phase := TAU * fposmod(seconds, loop_period) / loop_period + float(variant)*1.73
     var motion := 0.0 if reduced_motion else 1.0
     var speech := pow(0.5 + 0.5*sin(phase), 4.0) * motion
