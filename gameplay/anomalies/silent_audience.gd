@@ -1,6 +1,7 @@
 extends RefCounted
 ## Major event 33. Entirely room-owned and reversible.
 const Audience = preload("res://gameplay/anomalies/silent_audience_event.gd")
+const Premium = preload("res://gameplay/anomalies/silent_audience_premium.gd")
 var effect: Node3D
 
 
@@ -15,7 +16,9 @@ func apply(room: Node3D, entry: Dictionary) -> bool:
     clear()
     if not can_apply(room, entry):
         return false
-    effect = Audience.new()
+    # Use all five supplied rigged characters when installed. Keep the
+    # existing tested event as a non-breaking fallback for other checkouts.
+    effect = Premium.new() if Premium.models_available() else Audience.new()
     effect.name = "AnomalySilentAudience"
     room.add_child(effect)
     if not bool(effect.call("configure", room)):
