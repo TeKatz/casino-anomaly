@@ -313,7 +313,7 @@ func _appearance(figure: Node3D, index: int) -> void:
         var is_suit := str(mesh.name).to_lower().contains("suit")
         var is_skin := str(mesh.name).to_lower().contains("body")
         for surface in range(mesh.mesh.get_surface_count()):
-            var original := mesh.get_active_material(surface) as StandardMaterial3D
+            var original := mesh.get_active_material(surface) as BaseMaterial3D
             if original == null:
                 continue
             if is_suit and original.albedo_texture != null:
@@ -324,7 +324,7 @@ func _appearance(figure: Node3D, index: int) -> void:
                 jacket.set_shader_parameter("fabric_grain",0.018+float(index%4)*0.008)
                 mesh.set_surface_override_material(surface,jacket)
             else:
-                var modified := original.duplicate() as StandardMaterial3D
+                var modified := original.duplicate() as BaseMaterial3D
                 modified.albedo_color *= skin[index%skin.size()] if is_skin else Color(0.91,0.90,0.89)
                 modified.roughness = 0.69
                 modified.emission_enabled = false

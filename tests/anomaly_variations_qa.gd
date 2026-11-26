@@ -789,6 +789,11 @@ func _verify_silent_audience(hall: Node3D, other: Node3D) -> bool:
             if str(mesh.name).to_lower().contains("suit") and mesh.get_surface_override_material(0) is ShaderMaterial:
                 unique_suit = true
         if not skin_visible or not unique_suit:
+            var descriptions: Array[String] = []
+            for node in figure.find_children("*","MeshInstance3D",true,false):
+                var m := node as MeshInstance3D
+                descriptions.append("%s (%s) override=%s overlay=%s" % [str(m.name),m.get_active_material(0).get_class() if m.get_active_material(0)!=null else "null",str(m.get_surface_override_material(0)),str(m.material_overlay)])
+            print("Silent Audience appearance diagnostic: ",descriptions)
             _fail("Silent Audience must show genuine faces and individualized clothing")
             return false
     effect.set("target_count",2)
