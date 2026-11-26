@@ -67,8 +67,8 @@ func configure(packed: PackedScene, identifier: String, seat: Dictionary, serial
     skeleton.force_update_all_bone_transforms()
     figure.position -= _point("hip")
     for side in ["left", "right"]:
-        var foot := side + "_foot"
-        var toe := side + "_toe"
+        var foot: String = str(side) + "_foot"
+        var toe: String = str(side) + "_toe"
         var index := int(roles[foot])
         foot_reference[side] = {
             "rotation": skeleton.get_bone_global_pose(index).basis.orthonormalized().get_rotation_quaternion(),
@@ -153,7 +153,7 @@ func _aim(role: String, child_role: String, direction: Vector3) -> void:
 func _solve_leg(side: String, outward: float) -> void:
     var thigh := side + "_thigh"
     var calf := side + "_calf"
-    var foot := side + "_foot"
+    var foot: String = str(side) + "_foot"
     var hip := _point(thigh)
     var upper := hip.distance_to(_point(calf))
     var lower := _point(calf).distance_to(_point(foot))
@@ -199,9 +199,9 @@ func _sitting_pose() -> void:
     _solve_leg("right", -spread)
     for side in ["left","right"]:
         var sign_side := 1.0 if side == "left" else -1.0
-        var arm := side + "_arm"
-        var forearm := side + "_forearm"
-        var hand := side + "_hand"
+        var arm: String = str(side) + "_arm"
+        var forearm: String = str(side) + "_forearm"
+        var hand: String = str(side) + "_hand"
         var elbow_direction := Vector3.DOWN + seat_right * sign_side * (0.18 if seat_kind == "sofa" else 0.09)
         elbow_direction += seat_forward * (0.24 if seat_kind == "table" else 0.10)
         _aim(arm, forearm, elbow_direction)
