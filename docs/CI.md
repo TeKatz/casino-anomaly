@@ -30,3 +30,5 @@ python -m unittest discover -s tests -p 'test_*.py'
 ```
 
 Godot's exact shutdown resource-retention diagnostic is reported as a warning after an exact PASS marker on Windows and Linux, and never overrides a nonzero exit, timeout, or actual runtime error. Linux full-asset CI confirmed the same shutdown diagnostic (baseline, Flood, Silent Audience, croupier intro). Resource lifetime remains a separate unresolved issue; the warning and full logs are retained.
+
+Windows headless renderer regressions: the asynchronous SceneLoader request disables nested worker loading only on headless displays; real GPU loading is unchanged. Loading and prop fixtures now wait for disposal; real editor tests wait for filesystem scan completion. Exact, observed Windows headless shutdown RID diagnostics are warning-only for the two editor scripts and the prop script after their PASS markers. Runtime RID initialization errors, other scripts, unrecognized RID types, nonzero exits and timeouts remain fatal. These warning exceptions are diagnostic debt, not evidence of a resolved engine resource leak.

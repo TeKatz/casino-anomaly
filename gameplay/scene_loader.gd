@@ -197,7 +197,12 @@ func _begin_loading() -> void:
     await get_tree().process_frame
     if not active or failed:
         return
-    var err := ResourceLoader.load_threaded_request(target_path, "PackedScene", true)
+    # Headless uses the Dummy renderer, whose RID stores can race when
+    # glTF/mesh dependencies are initialized by multiple loading workers.
+    # Keep the asynchronous request and progress polling, but serialize
+    # dependency loading there. The real GPU game retains parallel loading.
+    var use_sub_threads := DisplayServer.get_name() != "headless"
+    var err := ResourceLoader.load_threaded_request(target_path, "PackedScene", use_sub_threads)
     if err != OK:
         _fail("ResourceLoader request error: %s" % err)
         return

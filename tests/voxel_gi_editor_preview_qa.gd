@@ -66,5 +66,29 @@ func _run() -> void:
     if headless:
         print("Casino VoxelGI editor preview QA: Dummy renderer, checked resources and transient volume structure; GPU-only lighting validation skipped")
     hall.queue_free()
+    await process_frame
+    await process_frame
+    if is_instance_valid(hall):
+        _fail("Editor QA fixture was not freed")
+        return
+    if not await _wait_for_editor_idle():
+        _fail("Editor filesystem scan did not finish")
+        return
     print("Casino VoxelGI editor preview QA PASS")
     quit(0)
+
+
+func _wait_for_editor_idle() -> bool:
+    # Quitting a real editor while its initial filesystem scan is still
+    # running leaves editor-owned viewport/text/texture RIDs behind.
+    var filesystem := EditorInterface.get_resource_filesystem()
+    if filesystem == null:
+        return false
+    var deadline := Time.get_ticks_msec() + 20000
+    while filesystem.is_scanning():
+        if Time.get_ticks_msec() >= deadline:
+            return false
+        await process_frame
+    await process_frame
+    await process_frame
+    return true

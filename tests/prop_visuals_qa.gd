@@ -113,6 +113,11 @@ func _run() -> void:
         return
     generated_a.queue_free()
     generated_b.queue_free()
+    await process_frame
+    await process_frame
+    if is_instance_valid(generated_a) or is_instance_valid(generated_b):
+        _fail("Temporary runtime bottle fixtures were not freed")
+        return
 
     if signature_count < 6 or families.size() != 6:
         _fail("Bar must retain editable signature bottles from all six designs")
@@ -240,5 +245,10 @@ func _run() -> void:
         return
 
     world.queue_free()
+    await process_frame
+    await process_frame
+    if is_instance_valid(world):
+        _fail("QA casino fixture was not freed")
+        return
     print("Casino Anomaly prop visuals and orientations QA PASS")
     quit(0)

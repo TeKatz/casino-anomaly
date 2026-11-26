@@ -33,6 +33,32 @@ class LogClassifierTests(unittest.TestCase):
             with self.subTest(line=line):
                 self.assertEqual(self.classify(line), (True, True, False))
 
+    def test_editor_shutdown_is_narrowly_scoped(self):
+        leak = "ERROR: 6 RID allocations of type 'N16RendererViewport8ViewportE' were leaked at exit."
+        script = "tests/sketchfab_true_editor_qa.gd"
+        self.assertEqual(classify_line(leak, self.marker, True, "win32", script, True), (True, False, True))
+        self.assertEqual(classify_line(leak, self.marker, False, "win32", script, True), (False, True, False))
+        self.assertEqual(classify_line(leak, self.marker, True, "win32", script, False), (True, True, False))
+        self.assertEqual(classify_line(leak, self.marker, True, "win32", "tests/smoke.gd", True), (True, True, False))
+        self.assertEqual(classify_line(leak.replace("N16RendererViewport8ViewportE", "unknown"), self.marker, True, "win32", script, True), (True, True, False))
+
+    def test_prop_shutdown_is_narrowly_scoped(self):
+        script = "tests/prop_visuals_qa.gd"
+        for leak in (
+            "ERROR: Pages in use exist at exit in PagedAllocator: N20RasterizerSceneDummy21GeometryInstanceDummyE",
+            "ERROR: 16 RID allocations of type 'N13RendererDummy9DummyMeshE' were leaked at exit.",
+        ):
+            self.assertEqual(classify_line(leak, self.marker, True, "win32", script), (True, False, True))
+            self.assertEqual(classify_line(leak, self.marker, False, "win32", script), (False, True, False))
+            self.assertEqual(classify_line(leak, self.marker, True, "win32", "tests/smoke.gd"), (True, True, False))
+
+    def test_loading_renderer_errors_are_never_downgraded(self):
+        for line in ('ERROR: Attempting to initialize the wrong RID',
+                     'ERROR: Parameter "mem" is null.',
+                     'ERROR: unimplemented base type encountered in renderer scene cull'):
+            self.assertEqual(classify_line(line, self.marker, True, "win32",
+                                           "tests/loading_transition_qa.gd"), (True, True, False))
+
     def test_marker_is_exact(self):
         self.assertEqual(self.classify(self.marker, passed=False), (True, False, False))
         self.assertEqual(self.classify("ERROR: " + self.marker, passed=False), (False, True, False))

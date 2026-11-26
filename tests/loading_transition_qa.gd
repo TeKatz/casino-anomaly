@@ -67,5 +67,12 @@ func _run() -> void:
     state.save_path = previous_save
     if FileAccess.file_exists(test_save):
         DirAccess.remove_absolute(ProjectSettings.globalize_path(test_save))
+    # Release the actual active scene before stopping the renderer.
+    var finished_scene := current_scene
+    current_scene = null
+    if is_instance_valid(finished_scene):
+        finished_scene.queue_free()
+    await process_frame
+    await process_frame
     print("Casino Anomaly threaded scene loading QA PASS")
     quit(0)

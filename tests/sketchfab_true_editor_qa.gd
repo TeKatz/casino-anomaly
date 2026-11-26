@@ -55,6 +55,14 @@ func _run() -> void:
             _fail("Converted slot model overlaps its procedural placeholder")
             return
         world.queue_free()
+        await process_frame
+        await process_frame
+        if is_instance_valid(world):
+            _fail("Editor QA fixture was not freed")
+            return
+        if not await _wait_for_editor_idle():
+            _fail("Editor filesystem scan did not finish")
+            return
         print("Casino Anomaly true Godot editor model preview QA PASS")
         quit(0)
         return
@@ -88,5 +96,29 @@ func _run() -> void:
         _fail("Editor-only placeholder is not hidden")
         return
     world.queue_free()
+    await process_frame
+    await process_frame
+    if is_instance_valid(world):
+        _fail("Editor QA fixture was not freed")
+        return
+    if not await _wait_for_editor_idle():
+        _fail("Editor filesystem scan did not finish")
+        return
     print("Casino Anomaly true Godot editor model preview QA PASS")
     quit(0)
+
+
+func _wait_for_editor_idle() -> bool:
+    # Quitting a real editor while its initial filesystem scan is still
+    # running leaves editor-owned viewport/text/texture RIDs behind.
+    var filesystem := EditorInterface.get_resource_filesystem()
+    if filesystem == null:
+        return false
+    var deadline := Time.get_ticks_msec() + 20000
+    while filesystem.is_scanning():
+        if Time.get_ticks_msec() >= deadline:
+            return false
+        await process_frame
+    await process_frame
+    await process_frame
+    return true
