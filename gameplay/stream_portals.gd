@@ -442,3 +442,65 @@ func _box(parent: Node3D, label: String, center: Vector3,
     collision.shape = RuntimeCache.portal_shape(dimensions)
     body.add_child(collision)
     parent.add_child(body)
+
+
+## The completion hall has a single walk-through opening using the
+## existing casino materials. The old two decision corridors are removed.
+const FINAL_EXIT_Z := -6.68
+const FINAL_EXIT_TRIGGER_X := -47.65
+
+func prepare_final_exit(room: Node3D) -> bool:
+    var generated: Node3D = room.get_node_or_null("StreamingPortals") as Node3D
+    var architecture: Node3D = room.get_node_or_null("Architecture") as Node3D
+    if generated == null or architecture == null:
+        return false
+    if generated.has_node("FinalExit"):
+        return true
+    var source: MeshInstance3D = architecture.get_node_or_null("FarExitWall") as MeshInstance3D
+    if source == null:
+        return false
+    var wall: Material = source.material_override
+    var trim: Material = wall
+    var wood: MeshInstance3D = architecture.get_node_or_null("WoodWainscoting") as MeshInstance3D
+    if wood != null and wood.material_override != null:
+        trim = wood.material_override
+    var floor: Material = trim
+    var oak: MeshInstance3D = architecture.get_node_or_null("OakWestWing") as MeshInstance3D
+    if oak != null and oak.get_active_material(0) != null:
+        floor = oak.get_active_material(0)
+    for child in generated.get_children():
+        var label: String = str(child.name)
+        if label.begins_with("ExitWallPier") or label.begins_with("ExitOverdoor") or label.begins_with("WoodExitFrame") or label.begins_with("ExitWainscoting") or label in ["Connector_Left","Connector_Right"]:
+            generated.remove_child(child)
+            child.queue_free()
+    for child in architecture.get_children():
+        if child is Label3D and not exit_lane(child as Label3D).is_empty():
+            (child as Label3D).hide()
+    var exit: Node3D = Node3D.new()
+    exit.name = "FinalExit"
+    generated.add_child(exit)
+    for span in [Vector2(-13.20,FINAL_EXIT_Z-1.12),Vector2(FINAL_EXIT_Z+1.12,0.20)]:
+        var limits: Vector2 = span
+        _box(exit,"FinalWallPier",Vector3(EXIT_X,3.0,(limits.x+limits.y)*0.5),Vector3(0.36,HALL_HEIGHT,limits.y-limits.x),wall)
+        _box(exit,"FinalWainscot",Vector3(-45.99,1.02,(limits.x+limits.y)*0.5),Vector3(0.12,2.0,limits.y-limits.x),trim,false)
+    _box(exit,"FinalOverdoor",Vector3(EXIT_X,4.76,FINAL_EXIT_Z),Vector3(0.36,2.48,2.24),wall)
+    _build_wood_exit_frame(exit,"Final",FINAL_EXIT_Z,trim)
+    _box(exit,"FinalFloor",Vector3(-47.65,-0.115,FINAL_EXIT_Z),Vector3(3.3,0.23,2.24),floor)
+    _box(exit,"FinalCeiling",Vector3(-47.65,3.60,FINAL_EXIT_Z),Vector3(3.3,0.18,2.24),trim)
+    for side in [-1.0,1.0]:
+        _box(exit,"FinalSideWall",Vector3(-47.65,1.76,FINAL_EXIT_Z+float(side)*1.21),Vector3(3.3,3.52,0.18),wall)
+    var black: StandardMaterial3D = StandardMaterial3D.new()
+    black.albedo_color = Color("#08090b")
+    black.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+    _box(exit,"FinalBackWall",Vector3(-49.22,1.76,FINAL_EXIT_Z),Vector3(0.18,3.52,2.24),black)
+    var sign: Label3D = Label3D.new()
+    sign.name = "FinalExitSign"
+    sign.text = "EXIT"
+    sign.font_size = 84
+    sign.pixel_size = 0.0045
+    sign.modulate = Color("#ffe1a0")
+    sign.outline_size = 6
+    sign.position = Vector3(-45.78,3.15,FINAL_EXIT_Z)
+    sign.rotation.y = PI*0.5
+    exit.add_child(sign)
+    return true

@@ -9,6 +9,8 @@ const CreditsPanel = preload("res://ui/credits_panel.gd")
 const ProfilePanel = preload("res://ui/profile_panel.gd")
 const ProfileSideCards = preload("res://ui/profile_side_cards.gd")
 const ArchivePanel = preload("res://ui/anomaly_archive_panel.gd")
+const RunResults = preload("res://ui/run_results_panel.gd")
+var results_overlay: Control
 const Loc = preload("res://gameplay/localization.gd")
 var settings_overlay: Control
 var credits_overlay: Control
@@ -82,6 +84,8 @@ func _ready() -> void:
         var first_launch := not get_tree().root.has_meta("_casino_intro_seen")
         $StartupIntro.begin(first_launch and not bool(Controls.pref(self, "skip_creator_intro", false)))
         $StartupIntro.finished.connect(_on_startup_finished)
+    if state != null and bool(state.get("report_pending")):
+        _show_run_results(state.call("get_run_report"))
     if bool(Controls.pref(self, "auto_updates", true)):
         call_deferred("_check_update")
 
@@ -210,7 +214,7 @@ func _show_overlay(overlay: Control) -> void:
     if overlay_tween != null and overlay_tween.is_running():
         overlay_tween.kill()
     var previous := active_overlay
-    for candidate in [profile_overlay, archive_overlay, credits_overlay, settings_overlay]:
+    for candidate in [profile_overlay, archive_overlay, credits_overlay, settings_overlay, results_overlay]:
         if candidate != null and candidate != overlay and candidate != previous:
             candidate.visible = false
     active_overlay = overlay
@@ -360,6 +364,8 @@ func _unhandled_input(event: InputEvent) -> void:
         MenuStyle.play_sound("back")
         if active_overlay == archive_overlay:
             _back_from_profile_archive()
+        elif active_overlay == results_overlay:
+            _close_run_results()
         else:
             _hide_overlay(active_overlay)
         get_viewport().set_input_as_handled()
@@ -469,3 +475,28 @@ func _install_update() -> void:
         _set_status("menu.launch_updater_failed")
         return
     get_tree().quit()
+
+
+func _show_run_results(report: Dictionary) -> void:
+    if report.is_empty():
+        return
+    var results: PanelContainer = RunResults.new()
+    results.call("set_report",report)
+    results_overlay = _build_overlay(results)
+    results.connect("back_pressed",_close_run_results)
+    _show_overlay(results_overlay)
+    var screen: ColorRect = $Transition as ColorRect
+    screen.move_to_front()
+    screen.show()
+    screen.modulate.a = 1.0
+    var fade: Tween = create_tween()
+    fade.tween_property(screen,"modulate:a",0.0,0.55)
+    fade.tween_callback(screen.hide)
+
+
+func _close_run_results() -> void:
+    var state: Node = get_node_or_null("/root/LoopState")
+    if state != null:
+        state.call("acknowledge_run_report")
+    if is_instance_valid(results_overlay):
+        _hide_overlay(results_overlay)

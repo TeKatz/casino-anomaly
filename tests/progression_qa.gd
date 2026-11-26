@@ -122,6 +122,31 @@ func _run() -> void:
     for tab in ["archive", "stats", "achievements", "modes", "last"]:
         archive.show_mode(tab)
         await process_frame
+    # A real Classic completion awards the new Nightmare unlock, keeps
+    # the entire run's discoveries and level delta, and survives reload.
+    if not require(profiles.select_mode("classic"),"Could not switch to Classic for results"):
+        return
+    _start(live,"classic")
+    _answer(live,"",false)
+    _answer(live,"table_label",true)
+    _answer(live,"",true)
+    for i in range(12):
+        _answer(live,"",false)
+    var report: Dictionary = live.get_run_report()
+    if not require(live.finished and live.report_pending and int(report.get("rooms",0)) == 15 and int(report.get("resets",0)) == 1 and int(report.get("identified",{}).get("table_label",0)) == 1 and bool(report.get("new_discoveries",{}).get("table_label",false)) and bool(report.get("new_modes",{}).get("nightmare",false)) and bool(report.get("new_achievements",{}).get("classic_completions_1",false)) and int(report.get("xp_earned",0)) > 0,"Run results lost discoveries, resets, XP or actual first-clear unlock"):
+        return
+    if not require(live.load_run() and live.report_pending and live.get_run_report() == report,"Completed run report lost on reload"):
+        return
+    var results = preload("res://ui/run_results_panel.gd").new()
+    results.set_report(report)
+    root.add_child(results)
+    await process_frame
+    if not require(results.find_child("RunResultsContinue",true,false) != null,"Results screen missing continue button"):
+        return
+    results.queue_free()
+    live.acknowledge_run_report()
+    if not require(live.load_run() and not live.report_pending and live.get_run_report() == report,"Dismissed results must not reopen or erase the report"):
+        return
     if not require(profiles.delete_profile(5), "Could not remove test profile"):
         return
     picker.queue_free()

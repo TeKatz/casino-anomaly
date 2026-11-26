@@ -49,6 +49,7 @@ var choice_taken := false
 var transitioning := false
 var finishing := false
 var won := false
+var completion_exit_started := false
 var _stage_spike_frames := 0
 var _perf_trace := false
 var _trace_badge: PanelContainer
@@ -314,7 +315,10 @@ func _process(delta: float) -> void:
 		_stage_spike_frames -= 1
 	if not transitioning:
 		_disposal.advance()
-	if transitioning or won or room == null or player == null:
+	if transitioning or room == null or player == null:
+		return
+	if won:
+		_check_completion_exit()
 		return
 	var run_state := get_node_or_null("/root/LoopState")
 	if run_state != null:
@@ -662,8 +666,8 @@ func _commit_choice(lane: String) -> void:
 	finishing = bool(verdict.get("finished", false))
 	_update_level_sign(staged, int(verdict.get("streak", 0)), finishing)
 	if finishing:
-		# Enter the final hall naturally; never stop the character inside
-		# a connector or cover their view with a victory overlay.
+		# Author the single final exit while the hall is still out of sight.
+		portals.prepare_final_exit(staged)
 		return
 
 	# Populate the NEXT room while the player is still in the connector.
@@ -742,11 +746,7 @@ func _handoff() -> void:
 	# the blind connector; neither is toggled after the room is visible.
 	_place_markers()
 	if finishing:
-		# Both dead-end connectors are physically closed in the final room.
-		# The player is free to look around and see the neon 12.
-		portals.lock_departure(upcoming, "left")
-		won = true
-		finishing = false
+		_activate_completion_exit(upcoming)
 	player.call("restore_streaming_view")
 	transitioning = false
 	StreamingTrace.finish("casino.handoff_queue_free", trace_handoff)
@@ -1092,6 +1092,8 @@ func _finish_backrooms() -> void:
 		var candidates: Array[String] = demo.available_ids(staged)
 		state.prepare_round(candidates)
 		demo.apply(staged, str(state.anomaly_id))
+	else:
+		portals.prepare_final_exit(staged)
 	var soundscape := staged.get_node_or_null("RoomSoundscape")
 	if soundscape != null:
 		soundscape.call("activate")
@@ -1221,8 +1223,53 @@ func _handoff_backrooms_return() -> void:
 	backrooms_pickup = null
 	_place_markers()
 	if finishing:
-		portals.lock_departure(upcoming, "left")
-		won = true
-		finishing = false
+		_activate_completion_exit(upcoming)
 	player.call("restore_streaming_view")
 	transitioning = false
+
+
+func _activate_completion_exit(upcoming: Node3D) -> void:
+	won = true
+	finishing = false
+	if not portals.prepare_final_exit(upcoming):
+		push_error("Could not prepare completion exit")
+		call_deferred("_leave_completed_run")
+	if is_instance_valid(doors):
+		doors.hide()
+
+
+func _check_completion_exit() -> void:
+	if completion_exit_started:
+		return
+	var local: Vector3 = room.to_local(player.global_position)
+	if local.x <= StreamPortals.FINAL_EXIT_TRIGGER_X and absf(local.z-StreamPortals.FINAL_EXIT_Z)<1.12:
+		_leave_completed_run()
+
+
+func _leave_completed_run() -> void:
+	if completion_exit_started:
+		return
+	completion_exit_started = true
+	player.call("set_interaction_locked",true)
+	var layer: CanvasLayer = CanvasLayer.new()
+	layer.name = "CompletionFade"
+	layer.layer = 120
+	add_child(layer)
+	var shade: ColorRect = ColorRect.new()
+	shade.color = Color.BLACK
+	shade.modulate.a = 0.0
+	layer.add_child(shade)
+	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var fade: Tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+	fade.tween_property(shade,"modulate:a",1.0,0.65)
+	await fade.finished
+	get_tree().root.set_meta("_casino_intro_seen",true)
+	get_tree().paused = false
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	var result: int = get_tree().change_scene_to_file("res://menu.tscn")
+	if result != OK:
+		completion_exit_started = false
+		layer.queue_free()
+		player.call("set_interaction_locked",false)
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		push_warning("Could not return to menu after completion: %s" % result)

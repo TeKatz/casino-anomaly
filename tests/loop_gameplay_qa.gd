@@ -207,8 +207,8 @@ func _run() -> void:
         return
     loop.call("_handoff")
     if not bool(loop.get("won")) or loop.get("room") != final_room \
-            or final_room.get_node_or_null("StreamingPortals/Connector_Left/OneWayGate_Collision") == null:
-        _fail("Winning must hand off seamlessly into a physically capped final hall")
+            or final_room.get_node_or_null("StreamingPortals/FinalExit/FinalBackWall_Collision") == null or final_room.has_node("StreamingPortals/Connector_Left") or final_room.has_node("StreamingPortals/Connector_Right"):
+        _fail("Winning must hand off seamlessly into a single physically enclosed exit")
         return
 
     scene.queue_free()
