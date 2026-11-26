@@ -14,7 +14,16 @@ var footstep_player: AudioStreamPlayer
 var pressure_player: AudioStreamPlayer
 var world_reverb: AudioEffectReverb
 var procedural_loops: Dictionary = {}
+# Cached, non-looping variants per surface and gait. Optional licensed
+# recordings are installed locally; public builds keep deterministic synths.
+const STEP_GROUPS := {
+    "wood_walk": 6, "wood_run": 6, "carpet_walk": 6, "carpet_run": 6,
+    "wet_carpet_walk": 12, "corridor": 2, "water": 4,
+}
+const STEP_PATH := "res://audio/footsteps/%s/%s_%02d.wav"
 var step_sounds: Dictionary = {}
+var _last_step: Dictionary = {}
+var _step_rng := RandomNumberGenerator.new()
 var steps_played := 0
 const WATER_STEP_PATH := "res://audio/flood/water_step_%02d.wav"
 const WATER_STEP_VARIANTS := 4
@@ -177,6 +186,7 @@ func _exit_tree() -> void:
     world_reverb = null
     procedural_loops.clear()
     step_sounds.clear()
+    _last_step.clear()
 
 
 func _prepare_immersion() -> void:
@@ -210,17 +220,26 @@ func _prepare_immersion() -> void:
         AudioServer.add_bus_effect(index, world_reverb)
     else:
         world_reverb = AudioServer.get_bus_effect(index, 0) as AudioEffectReverb
-    for surface in ["wood", "carpet", "corridor", "water"]:
-        var count := WATER_STEP_VARIANTS if surface == "water" else 2
-        for variant in range(count):
-            var sample: AudioStreamWAV
-            if surface == "water":
-                var path := WATER_STEP_PATH % (variant+1)
-                if ResourceLoader.exists(path,"AudioStreamWAV"):
-                    sample = ResourceLoader.load(path,"AudioStreamWAV") as AudioStreamWAV
+    _step_rng.randomize()
+    for key in STEP_GROUPS:
+        var group := str(key)
+        var variants: Array[AudioStreamWAV] = []
+        var source_surface := group.trim_suffix("_walk").trim_suffix("_run")
+        for variant in range(int(STEP_GROUPS[group])):
+            var sample: AudioStreamWAV = null
+            var path := ""
+            if group == "water":
+                path = WATER_STEP_PATH % (variant + 1)
+            elif group != "corridor":
+                path = STEP_PATH % [group, group, variant + 1]
+            if not path.is_empty() and ResourceLoader.exists(path, "AudioStreamWAV"):
+                sample = ResourceLoader.load(path, "AudioStreamWAV") as AudioStreamWAV
             if sample == null:
-                sample = ImmersionSynth.footstep(surface,variant)
-            step_sounds[surface + str(variant)] = sample
+                var seed_variant := variant + (100 if group.ends_with("_run") else 0)
+                sample = ImmersionSynth.footstep(source_surface, seed_variant)
+            sample.loop_mode = AudioStreamWAV.LOOP_DISABLED
+            variants.append(sample)
+        step_sounds[group] = variants
     for kind in ["cabinet", "bar", "vent", "pressure", "backrooms_hum"]:
         procedural_loops[kind] = ImmersionSynth.ambience(kind)
     footstep_player = AudioStreamPlayer.new()
@@ -241,21 +260,48 @@ func get_immersion_loop(kind: String) -> AudioStreamWAV:
     return procedural_loops.get(kind) as AudioStreamWAV
 
 
-func get_footstep_stream(surface: String, variant: int) -> AudioStreamWAV:
-    var count := WATER_STEP_VARIANTS if surface == "water" else 2
-    return step_sounds.get(surface + str(posmod(variant,count))) as AudioStreamWAV
+func footstep_group(surface: String, sprinting: bool) -> String:
+    match surface:
+        "wood", "carpet":
+            return surface + ("_run" if sprinting else "_walk")
+        "wet_carpet":
+            return "wet_carpet_walk"
+        _:
+            return surface
+
+
+func get_footstep_stream(surface: String, variant: int, sprinting: bool = false) -> AudioStreamWAV:
+    var variants: Array = step_sounds.get(footstep_group(surface, sprinting), [])
+    if variants.is_empty():
+        return null
+    return variants[posmod(variant, variants.size())] as AudioStreamWAV
+
+
+func _next_step_index(group: String, count: int) -> int:
+    if count <= 1:
+        return 0
+    var last := int(_last_step.get(group, -1))
+    var index := _step_rng.randi_range(0, count - 2 if last >= 0 else count - 1)
+    if last >= 0 and index >= last:
+        index += 1
+    _last_step[group] = index
+    return index
 
 
 func play_footstep(surface: String, sprinting: bool) -> void:
     if not world_ambience_enabled or footstep_player == null:
         return
-    var stream := get_footstep_stream(surface, steps_played)
+    var group := footstep_group(surface, sprinting)
+    var variants: Array = step_sounds.get(group, [])
+    if variants.is_empty():
+        return
+    var stream := get_footstep_stream(surface, _next_step_index(group, variants.size()), sprinting)
     if stream == null:
         return
     footstep_player.stream = stream
-    footstep_player.pitch_scale = (1.045 if sprinting else 1.0) + \
-            (0.026 if steps_played % 3 == 0 else -0.020)
-    footstep_player.volume_db = -12.0 if surface == "carpet" else (-6.0 if surface == "water" else -9.0)
+    footstep_player.pitch_scale = _step_rng.randf_range(0.96, 1.04)
+    var base_db := -12.0 if surface in ["carpet", "wet_carpet"] else (-6.0 if surface == "water" else -9.0)
+    footstep_player.volume_db = base_db + _step_rng.randf_range(-1.5, 1.5)
     footstep_player.play()
     steps_played += 1
 

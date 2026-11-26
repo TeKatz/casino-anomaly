@@ -59,7 +59,7 @@ func _ready() -> void:
     var bottom := HBoxContainer.new()
     column.add_child(bottom)
     var note := Label.new()
-    note.text = "CC0  /  CC BY 4.0  /  CC BY-SA 4.0"
+    note.text = "CC0  /  CC BY 3.0 & 4.0  /  CC BY-SA 4.0"
     note.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     note.add_theme_color_override("font_color", Color("#96a3af"))
     bottom.add_child(note)
@@ -93,6 +93,11 @@ Engine: Godot 4.5  ·  [url=https://godotengine.org/license/]MIT License[/url]
 [color=#e6bb81][b]MUSIC & AMBIENCE[/b][/color]
 Menu music: "hmm" — Xythe, [url=https://freesound.org/people/Xythe/sounds/115831/]Freesound #115831[/url], CC0 1.0.
 Room tone: "Room Tone In An Apartment Living Room 2" — leonelmail, [url=https://freesound.org/people/leonelmail/sounds/329533/]Freesound #329533[/url], CC0 1.0. Edited into a seamless loop for the game.
+
+[color=#e6bb81][b]FOOTSTEP RECORDINGS (OPTIONAL LOCAL PACK)[/b][/color]
+Dan Sfx — [url=https://cdansantana.itch.io/fsp2fs]Free Sound Pack 02 - Footsteps[/url], royalty-free for game use. Converted to mono PCM and mixed for wet carpet.
+bewagne — [url=https://freesound.org/people/bewagne/sounds/187617/]Wet Soggy Squishy Footsteps[/url], [url=https://creativecommons.org/licenses/by/3.0/]CC BY 3.0[/url]. Cropped, filtered, level-adjusted and mixed with carpet.
+patchytherat — [url=https://freesound.org/people/patchytherat/sounds/531571/]Squishy Footsteps to Walking in a Puddle[/url], [url=https://creativecommons.org/publicdomain/zero/1.0/]CC0 1.0[/url]. Cropped and mixed.
 
 [color=#e6bb81][b]3D MODELS — SKETCHFAB / CC BY 4.0[/b][/color]
 Roulette Table — [url=https://sketchfab.com/3d-models/roulette-table-18a27b0e326644a0b47887d07e0d0f99]Robilben[/url]

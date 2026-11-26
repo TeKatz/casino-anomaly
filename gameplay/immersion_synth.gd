@@ -23,7 +23,7 @@ static func _wave(samples: PackedFloat32Array, looped: bool, rate: int = RATE, l
 static func footstep(surface: String, variant: int) -> AudioStreamWAV:
     if surface == "water":
         return _water_step(variant)
-    var length := 0.25 if surface == "corridor" else 0.22
+    var length := 0.30 if surface == "wet_carpet" else (0.25 if surface == "corridor" else 0.22)
     var count := int(float(RATE) * length)
     var samples := PackedFloat32Array()
     samples.resize(count)
@@ -35,8 +35,10 @@ static func footstep(surface: String, variant: int) -> AudioStreamWAV:
         var envelope := pow(maxf(0.0, 1.0 - t / length), 4.0)
         filtered_noise = lerpf(filtered_noise, rng.randf_range(-1.0, 1.0), 0.18)
         var body := 0.0
-        if surface == "carpet":
+        if surface in ["carpet", "wet_carpet"]:
             body = 0.46 * sin(TAU * 72.0 * t) + 0.19 * filtered_noise
+            if surface == "wet_carpet":
+                body += 0.18 * filtered_noise * sin(TAU * 36.0 * t) * exp(-pow((t - 0.08) / 0.045, 2.0))
         elif surface == "corridor":
             body = 0.48 * sin(TAU * 125.0 * t) + 0.25 * filtered_noise
             body += 0.14 * sin(TAU * 410.0 * t) * exp(-t * 49.0)

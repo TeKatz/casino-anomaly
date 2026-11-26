@@ -32,7 +32,34 @@ func _run() -> void:
         if director.get_footstep_stream("water",variant) == null:
             _fail("Missing water footstep variant")
             return
+    for spec in [["wood", false, 6], ["wood", true, 6], ["carpet", false, 6], ["carpet", true, 6], ["wet_carpet", false, 12]]:
+        var surface := str(spec[0])
+        var sprinting := bool(spec[1])
+        var count := int(spec[2])
+        var group: String = director.footstep_group(surface, sprinting)
+        if director.step_sounds[group].size() != count:
+            _fail("Incorrect footstep bank size: " + group)
+            return
+        var previous := -1
+        for i in range(count * 4):
+            var index: int = director._next_step_index(group, count)
+            var sample := director.get_footstep_stream(surface, index, sprinting) as AudioStreamWAV
+            if index < 0 or index >= count or index == previous or sample == null or sample.loop_mode != AudioStreamWAV.LOOP_DISABLED:
+                _fail("Invalid or repeated footstep: " + group)
+                return
+            previous = index
+    if director.footstep_group("wet_carpet", true) != "wet_carpet_walk" or director.get_footstep_stream("wood", 0) == director.get_footstep_stream("wood", 0, true):
+        _fail("Gait isolation failed")
+        return
     var player = PlayerScript.new()
+    player.set_backrooms_mode(true)
+    if player._surface_underfoot() != "wet_carpet":
+        _fail("Backrooms must use damp carpet")
+        return
+    player.set_backrooms_mode(false)
+    if player._surface_underfoot() != "wood":
+        _fail("Casino footstep surface did not restore")
+        return
     for spec in [
         {"pos": Vector3(0.0, 0.0, 2.0), "surface": "carpet"},
         {"pos": Vector3(-22.0, 0.0, -5.0), "surface": "carpet"},

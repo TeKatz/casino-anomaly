@@ -17,3 +17,7 @@ models/sketchfab/
 # Exact CC0 UAL asset installed by tools/import_escort_animations.py.
 /models/escort_animations/UAL1_Standard.glb
 /models/escort_animations/UAL1_Standard.glb.import
+
+# Optional licensed footstep recordings: install locally, never publish raw assets.
+/audio/footsteps/
+/audio_drop/Casino_Anomaly_Footsteps.zip

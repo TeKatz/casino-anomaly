@@ -155,3 +155,12 @@ audio if the optional asset pack has not yet been installed.
 ## The Escort animation library
 
 Universal Animation Library (Standard), by Quaternius, CC0 1.0 Universal. Original: https://quaternius.com/packs/universalanimationlibrary.html. The user-supplied GLB is checksum-pinned and installed by tools/import_escort_animations.py. Only authored Idle, Walk_Formal and Jog_Fwd clips drive the Security Guard through Godot's native humanoid retargeting. The backward gait reverses the formal walk. The original character asset/license remains unchanged.
+
+
+## Optional footstep recordings
+
+- Dan Sfx — [Free Sound Pack 02 - Footsteps](https://cdansantana.itch.io/fsp2fs), royalty-free for commercial/noncommercial game use. Standalone redistribution is not expressly authorized, so the source archive and imported WAV files are not tracked in this public repository.
+- bewagne — [Wet Soggy Squishy Footsteps](https://freesound.org/people/bewagne/sounds/187617/), [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/), cropped, mono-converted, filtered, faded, level-adjusted and mixed with carpet.
+- patchytherat — [Squishy Footsteps to Walking in a Puddle](https://freesound.org/people/patchytherat/sounds/531571/), [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/), adapted and mixed with carpet.
+
+See audio/README.md for local installation. Original synthetic fallback sounds remain available without these files.

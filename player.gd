@@ -244,7 +244,11 @@ func _physics_process(delta: float) -> void:
     move_and_slide()
     if collision_diagnostics:
         _report_collision_contacts()
-    _update_footsteps(global_position.distance_to(before), sprint)
+    var displacement := global_position - before
+    var traveled := Vector2(displacement.x, displacement.z).length()
+    # Use actual ground speed, not the held sprint key (e.g. at a wall).
+    var running := not backrooms_mode and traveled / maxf(delta, 0.0001) > WALK_SPEED + 0.15
+    _update_footsteps(traveled, running)
 
 
 func set_collision_diagnostics(enabled: bool) -> void:
@@ -292,7 +296,7 @@ func classify_casino_surface(local: Vector3) -> String:
 
 func _surface_underfoot() -> String:
     if backrooms_mode:
-        return "carpet"
+        return "wet_carpet"
     var room := get_parent() as Node3D
     if room == null or not room.has_node("RedCarpet"):
         return "wood" # Tutorial has no carpet.
@@ -303,7 +307,7 @@ func _update_footsteps(traveled: float, sprinting: bool) -> void:
     if not is_on_floor() or traveled < 0.001:
         return
     _footstep_distance += traveled
-    var stride := 1.95 if sprinting else 1.50
+    var stride := 1.05 if backrooms_mode else (1.95 if sprinting else 1.50)
     if _footstep_distance < stride:
         return
     _footstep_distance = fmod(_footstep_distance, stride)
