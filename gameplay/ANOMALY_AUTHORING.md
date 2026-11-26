@@ -58,3 +58,8 @@ next startup. The menu owns the choice of the active profile; the
 New progress fields can be introduced with defaults in the reader.
 If the saved format ever changes incompatibly, bump the appropriate
 version and add a migration rather than deleting existing progress.
+
+
+## Room distribution (Classic)
+
+Classic uses a 65% base anomaly chance, raised to 75% / 88% after one / two consecutive normal rooms and lowered to 45% after three or more consecutive anomalies. With eligible anomalies, a fourth consecutive normal room is forbidden and the rolling 12-room window contains at least seven anomalies (including the mandatory clean first room). The last eleven organically resolved room types persist in the run save and survive incorrect answers, reloads and room handoffs. Debugged rooms are excluded; an empty available pool takes precedence over the quota, and older saves only recover the known normal streak. Other modes, rarity weights, family repeat prevention, variants, discovery preference and achievements are unchanged. The ten-normal-chain achievement remains attainable outside Classic (e.g. Endless or Time Trial).

@@ -8,12 +8,20 @@ const REQUIRED_CORRECT := 12
 const BACKROOMS_ID := "backrooms"
 const SAVE_VERSION := 1
 const DEFAULT_SAVE_PATH := "user://anomaly_run.cfg"
+# Classic's reference room counts in the same rolling window. Seven
+# anomalies / twelve organic rooms when eligible effects are available.
+const CLASSIC_HISTORY_LIMIT := REQUIRED_CORRECT - 1
+const CLASSIC_MAX_NORMAL := 5
+const CLASSIC_MAX_NORMAL_CHAIN := 3
+const CLASSIC_BASE_CHANCE := 0.65
 
 var save_path: String = DEFAULT_SAVE_PATH
 var mode := "classic"
 var elapsed_seconds := 0.0
 var run_assisted := false
 var normal_chain := 0
+# True = anomaly, false = normal. Independent of player decisions/XP.
+var classic_room_history: Array[bool] = []
 var active := false
 var tutorial_done := false
 var finished := false
@@ -41,6 +49,7 @@ func reset_runtime() -> void:
     elapsed_seconds = 0.0
     run_assisted = false
     normal_chain = 0
+    classic_room_history.clear()
     active = false
     tutorial_done = false
     finished = false
@@ -64,6 +73,7 @@ func start_new_run(next_mode: String = "classic") -> void:
     elapsed_seconds = 0.0
     run_assisted = false
     normal_chain = 0
+    classic_room_history.clear()
     active = true
     tutorial_done = false
     finished = false
@@ -114,10 +124,48 @@ func prepare_round(available_anomalies: Array[String]) -> void:
     save_run()
 
 
+# Room type is decided separately from rarity/family/variant weighting.
+# The window tracks completed rooms, not rolls: reloading or preloading
+# a prepared room cannot consume or reset the distribution.
+func _classic_anomaly_chance() -> float:
+    var normal_count: int = classic_room_history.count(false)
+    var normal_tail: int = 0
+    var anomaly_tail: int = 0
+    for i in range(classic_room_history.size()-1,-1,-1):
+        if classic_room_history[i]:
+            if normal_tail > 0:
+                break
+            anomaly_tail += 1
+        else:
+            if anomaly_tail > 0:
+                break
+            normal_tail += 1
+    if normal_count >= CLASSIC_MAX_NORMAL or normal_tail >= CLASSIC_MAX_NORMAL_CHAIN:
+        return 1.0
+    if normal_tail == 2:
+        return 0.88
+    if normal_tail == 1:
+        return 0.75
+    if anomaly_tail >= 3:
+        return 0.45
+    return CLASSIC_BASE_CHANCE
+
+
+func _remember_classic_room(id: String) -> void:
+    if mode != "classic" or round_debugged:
+        return
+    classic_room_history.append(not id.is_empty())
+    while classic_room_history.size() > CLASSIC_HISTORY_LIMIT:
+        classic_room_history.pop_front()
+
+
 func _roll_random_anomaly(available_anomalies: Array[String]) -> String:
     if mode == "expedition":
         return BACKROOMS_ID if available_anomalies.has(BACKROOMS_ID) else ""
-    if available_anomalies.is_empty() or rng.randf() >= (0.75 if mode == "research" else 0.5):
+    if available_anomalies.is_empty():
+        return ""
+    var chance: float = _classic_anomaly_chance() if mode == "classic" else (0.75 if mode == "research" else 0.5)
+    if chance < 1.0 and rng.randf() >= chance:
         return ""
     var groups := {}
     for id in available_anomalies:
@@ -234,6 +282,7 @@ func complete_backrooms(choose_anomaly: bool) -> Dictionary:
 
 func _resolve_decision(choose_anomaly: bool, correct: bool) -> Dictionary:
     var actual_id := anomaly_id
+    _remember_classic_room(actual_id)
     var previous_streak := correct_streak
     visited_loops += 1
     if correct:
@@ -295,6 +344,7 @@ func save_run() -> void:
     config.set_value("run", "elapsed_seconds", elapsed_seconds)
     config.set_value("run", "assisted", run_assisted)
     config.set_value("run", "normal_chain", normal_chain)
+    config.set_value("run", "classic_room_history", classic_room_history)
     config.set_value("run", "active", active)
     config.set_value("run", "tutorial_done", tutorial_done)
     config.set_value("run", "finished", finished)
@@ -343,6 +393,24 @@ func load_run() -> bool:
         last_anomaly_id = ""
     var saved_verdict: Variant = config.get_value("run", "last_verdict", {})
     last_verdict = saved_verdict if saved_verdict is Dictionary else {}
+    classic_room_history.clear()
+    if mode == "classic":
+        var saved_history: Variant = config.get_value("run", "classic_room_history", null)
+        if saved_history is Array:
+            for item in saved_history:
+                if item is bool:
+                    classic_room_history.append(bool(item))
+                    if classic_room_history.size() > CLASSIC_HISTORY_LIMIT:
+                        classic_room_history.pop_front()
+        elif visited_loops > 0:
+            # Old saves contain only the correctly answered normal chain,
+            # not complete room history. Preserve the known suffix, never
+            # invent previous anomalies or reset the player's progress.
+            var known_normals: int = mini(normal_chain,visited_loops)
+            if known_normals == 0 and bool(last_verdict.get("valid",false)) and not bool(last_verdict.get("debugged",false)) and str(last_verdict.get("anomaly_id","")).is_empty():
+                known_normals = 1
+            for i in range(mini(known_normals,CLASSIC_HISTORY_LIMIT)):
+                classic_room_history.append(false)
     debug_clear_next_round()
     if visited_loops == 0 and round_ready:
         anomaly_id = ""

@@ -40,6 +40,11 @@
       "script": "tests/escort_qa.gd",
       "marker": "Casino Anomaly Escort native animation and behavior QA PASS",
       "seconds": 180
+    },
+    {
+      "script": "tests/classic_distribution_qa.gd",
+      "marker": "Casino Anomaly Classic room distribution QA PASS",
+      "seconds": 120
     }
   ],
   "intro-audio": [
