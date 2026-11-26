@@ -43,7 +43,10 @@ func configure(packed: PackedScene, identifier: String, seat: Dictionary, serial
     _resolve_roles()
     for required in ["hip","head","left_thigh","right_thigh","left_calf","right_calf","left_foot","right_foot"]:
         if not roles.has(required):
-            push_warning("Audience %s rig missing %s" % [identifier,required])
+            var names: Array[String] = []
+            for bone in range(skeleton.get_bone_count()):
+                names.append(skeleton.get_bone_name(bone))
+            push_warning("Audience %s rig missing %s; imported bones: %s" % [identifier,required,str(names)])
             return false
     skeleton.force_update_all_bone_transforms()
     var head := _bone_height("head")
@@ -70,11 +73,18 @@ func configure(packed: PackedScene, identifier: String, seat: Dictionary, serial
     return true
 
 func _name_key(name: String) -> String:
-    return name.to_lower().replace("mixamorig:","").replace("cc_base_","")
+    # Godot sanitizes glTF bone names (notably the Mixamo namespace
+    # colon). Accept both source names and imported variants.
+    var key := name.to_lower().strip_edges()
+    if key.begins_with("mixamorig"):
+        key = key.trim_prefix("mixamorig").lstrip(":_ .-")
+    if key.begins_with("cc_base"):
+        key = key.trim_prefix("cc_base").lstrip(":_ .-")
+    return key
 
 func _resolve_roles() -> void:
     var pattern := {
-        "hip":["hips_","pelvis_"], "head":["head_"],
+        "hip":["hips_","hip_","pelvis_"], "head":["head_"],
         "chest":["chest_","spine2_","spine02_","spine1_"],
         "left_thigh":["leftupleg_","l_thigh_","l_leg_2_","upper_leg_l_"],
         "right_thigh":["rightupleg_","r_thigh_","r_leg_2_","upper_leg_r_"],
@@ -86,7 +96,7 @@ func _resolve_roles() -> void:
         "right_arm":["rightarm_","r_upperarm_","r_arm_2_","upper_arm_r_"],
         "left_forearm":["leftforearm_","l_forearm_","l_elbow_2_","lower_arm_l_"],
         "right_forearm":["rightforearm_","r_forearm_","r_elbow_2_","lower_arm_r_"],
-        "jaw":["jaw_"]
+        "jaw":["jaw_","jawroot_"]
     }
     for role in pattern:
         for bone in range(skeleton.get_bone_count()):
