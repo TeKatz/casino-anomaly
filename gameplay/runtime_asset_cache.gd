@@ -162,7 +162,18 @@ static func stabilize_imported_model(model: Node3D) -> void:
     var original_filter := settings == null or str(settings.call("get_option", "texture_filter")) == "original"
     for candidate in model.find_children("*", "MeshInstance3D", true, false):
         var part := candidate as MeshInstance3D
-        if part.mesh == null or not part.is_visible_in_tree() or part.skin != null:
+        if part.mesh == null or part.skin != null:
+            continue
+        # A standby room may be globally invisible while being assembled.
+        # Respect visibility inside the imported model, not its ancestors.
+        var locally_visible := true
+        var ancestor: Node = part
+        while ancestor != model and ancestor != null:
+            if ancestor is Node3D and not (ancestor as Node3D).visible:
+                locally_visible = false
+                break
+            ancestor = ancestor.get_parent()
+        if not locally_visible:
             continue
         var materials: Array = []
         for index in range(part.mesh.get_surface_count()):
@@ -172,7 +183,7 @@ static func stabilize_imported_model(model: Node3D) -> void:
                 if mat.texture_filter == BaseMaterial3D.TEXTURE_FILTER_LINEAR or mat.texture_filter == BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS:
                     mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
         # An overlay is intentionally rendered separately, never hide it.
-        if part.material_overlay != null or not part.mesh is ArrayMesh:
+        if part.material_overlay != null or not part.mesh is ArrayMesh or part.get_child_count() != 0:
             continue
         var key := [part.mesh.get_instance_id(), part.global_transform, materials, part.layers, part.cast_shadow]
         if seen.has(key):

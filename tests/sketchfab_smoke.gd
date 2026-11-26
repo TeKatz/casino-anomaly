@@ -4,6 +4,34 @@ func _initialize() -> void:
     call_deferred("_test")
 
 func _test() -> void:
+    # The static import cleanup must work even inside an invisible standby
+    # room and must not hide a mesh with a different transform or material.
+    var model := Node3D.new()
+    model.visible = false
+    root.add_child(model)
+    var mesh := ArrayMesh.new()
+    var arrays := []
+    arrays.resize(Mesh.ARRAY_MAX)
+    arrays[Mesh.ARRAY_VERTEX] = PackedVector3Array([Vector3.ZERO, Vector3.RIGHT, Vector3.UP])
+    mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+    var first := MeshInstance3D.new()
+    first.mesh = mesh
+    model.add_child(first)
+    var duplicate := MeshInstance3D.new()
+    duplicate.mesh = mesh
+    model.add_child(duplicate)
+    var distinct := MeshInstance3D.new()
+    distinct.mesh = mesh
+    distinct.position.z = 0.1
+    model.add_child(distinct)
+    var cache := preload("res://gameplay/runtime_asset_cache.gd")
+    cache.stabilize_imported_model(model)
+    if not first.visible or duplicate.visible or not distinct.visible:
+        push_error("Static imported depth cleanup changed nonduplicate geometry or skipped standby")
+        model.free()
+        quit(1)
+        return
+    model.free()
     var scene: PackedScene = load("res://main.tscn")
     if scene == null:
         push_error("Main hall scene is missing")

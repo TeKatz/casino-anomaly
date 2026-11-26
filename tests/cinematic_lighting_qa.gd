@@ -84,6 +84,8 @@ func _run() -> void:
                 or key_light.light_energy < 1.3 \
                 or key_light.spot_range < 8.0 \
                 or key_light.spot_range > 8.5 \
+                or key_light.shadow_bias < 0.055 \
+                or key_light.shadow_normal_bias < 0.15 \
                 or key_light.shadow_normal_bias > 0.18 \
                 or key_light.shadow_blur > 0.6 \
                 or key_light.shadow_opacity < 0.99 \

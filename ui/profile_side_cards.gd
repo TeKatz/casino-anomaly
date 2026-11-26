@@ -271,7 +271,7 @@ func _fill(slot: int) -> void:
         _label(archive_body, _word("Noch keine Anomalien entschlüsselt.",
             "No anomalies identified yet."), 13, MUTED)
     else:
-        _label(archive_body, _word("Zuletzt freigeschaltet:", "Unlocked entries:"),
+        _label(archive_body, _word("Freigeschaltete Einträge:", "Unlocked entries:"),
             12, MUTED)
         for name in unlocked.slice(0, 8):
             _label(archive_body, "· " + name, 13, MUTED)
