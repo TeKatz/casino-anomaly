@@ -391,44 +391,167 @@ func _head_details(skeleton: Skeleton3D, index: int) -> void:
 func _watch(delta: float, player: Node3D) -> void:
     for person in guests:
         var rig := person["skeleton"] as Skeleton3D
-        var body := person["figure"] as Node3D
+        var figure := person["figure"] as Node3D
         var head := int(person["head"])
         var chest := int(person["chest"])
+        var duration := elapsed-float(person["appeared"])
+        var phase := float(person["speech_phase"])
         var desired := 0.0
-        if not reduced_motion and elapsed - float(person["appeared"]) > 6.5:
-            var toward := body.to_local(player.global_position)
-            if toward.length() < 20.0:
-                desired = clampf(atan2(toward.x, toward.z), -0.68, 0.68)
-        var yaw := move_toward(float(person["yaw"]), desired, delta * HEAD_SPEED)
+        if not reduced_motion and duration>6.5:
+            var toward := figure.to_local(player.global_position)
+            if toward.length()<20.0:
+                # Never snap to the player. Individuals don't all stare:
+                # some turn toward their neighbour or toward the table.
+                var attention := [0.85,0.0,0.50,0.95,0.2][int(phase*10.0)%5]
+                desired = clampf(atan2(toward.x,toward.z),-0.62,0.62)*attention
+        var yaw := move_toward(float(person["yaw"]),desired,delta*HEAD_SPEED)
         person["yaw"] = yaw
-        rig.set_bone_pose_rotation(head, (person["base_head"] as Quaternion) * Quaternion(Vector3.UP, yaw))
-        if chest >= 0:
-            var synchronized := 0.0 if reduced_motion else sin(elapsed * 0.52) * 0.012
-            rig.set_bone_pose_rotation(chest, (person["base_chest"] as Quaternion) * Quaternion(Vector3.RIGHT, synchronized))
+        var id := int(person["personality"])
+        var lean := (float(person["posture"])-0.035) * (1.0 if id==0 else -0.7)
+        rig.set_bone_pose_rotation(head,
+            (person["base_head"] as Quaternion) * Quaternion(Vector3.UP,yaw))
+        if chest>=0:
+            var breath := 0.0 if reduced_motion else sin(elapsed*(0.39+float(id)*0.09)+phase)*0.009
+            rig.set_bone_pose_rotation(chest,
+                (person["base_chest"] as Quaternion) * Quaternion(Vector3.RIGHT,lean+breath))
+        var tree := person["tree"] as AnimationTree
+        if tree != null:
+            var talking := not reduced_motion and duration>4.0 and (int(phase)%4 in [0,2])
+            var window := sin(elapsed*(0.51+float(id)*0.11)+phase)
+            tree.set("parameters/SilentSpeech/blend_amount",0.88 if talking and window>0.05 else 0.0)
+
+
+func _find_landing(person: Dictionary) -> Dictionary:
+    # Search only the open floor in front of each seat. For bar stools
+    # 'forward' points through the counter, so step back toward the aisle.
+    var anchor: Vector3 = person["anchor"]
+    var facing := Basis(Vector3.UP,float(person["seat_yaw"]))
+    var forward: Vector3 = facing*Vector3(0,0,1 if person["kind"]=="sofa" else -1)
+    var side: Vector3 = facing*Vector3.RIGHT
+    var space := hall.get_world_3d().direct_space_state
+    var body := person["collider"] as StaticBody3D
+    var capsule := CapsuleShape3D.new()
+    capsule.radius = 0.29
+    capsule.height = 1.74
+    for reach in [0.68,0.94,1.12,0.48]:
+        for sidestep in [0.0,-0.24,0.24,-0.44,0.44]:
+            var candidate := anchor+forward*reach+side*sidestep
+            var from := hall.to_global(Vector3(candidate.x,2.35,candidate.z))
+            var below := hall.to_global(Vector3(candidate.x,-0.45,candidate.z))
+            var floor_query := PhysicsRayQueryParameters3D.create(from,below)
+            floor_query.exclude = [body.get_rid()]
+            var floor_hit := space.intersect_ray(floor_query)
+            if floor_hit.is_empty():
+                continue
+            var floor_y := hall.to_local(floor_hit["position"] as Vector3).y
+            if floor_y < -0.20 or floor_y > 0.18:
+                continue
+            var shape_query := PhysicsShapeQueryParameters3D.new()
+            shape_query.shape = capsule
+            shape_query.collision_mask = 1
+            shape_query.exclude = [body.get_rid()]
+            shape_query.transform = Transform3D(hall.global_transform.basis.orthonormalized(),
+                hall.to_global(Vector3(candidate.x,floor_y+0.98,candidate.z)))
+            if space.intersect_shape(shape_query,2).is_empty():
+                return {"x":candidate.x,"z":candidate.z,"floor":floor_y}
+    return {}
 
 
 func _stand_together() -> void:
-    if finale_started or guests.size() != target_count:
+    if finale_started or guests.size()!=target_count:
         return
     finale_started = true
     finale_at = elapsed
-    for person in guests:
+    finish_after = 0.0
+    for i in range(guests.size()):
+        var person: Dictionary = guests[i]
+        var figure := person["figure"] as Node3D
+        var rig := person["skeleton"] as Skeleton3D
         var animator := person["animator"] as AnimationPlayer
-        # Same-frame, six-second stand-up. No pursuit and no interaction.
-        animator.play(str(person["stand_clip"]), 0.45)
+        var tree := person["tree"] as AnimationTree
+        if tree != null:
+            tree.active = false
+        var seated := Pose.snapshot(rig)
+        # Sample a genuine upright pose from the same rig; this avoids
+        # the imported sitting_end clip's unbounded forward/root movement.
+        var idle := _find_clip(animator,"Rig|idle")
+        if idle.is_empty():
+            idle = _find_clip(animator,"idle")
+        if idle.is_empty():
+            person["blocked"] = true
+            continue
+        animator.play(idle)
+        animator.seek(0.3+float(i%5)*0.35,true)
+        animator.pause()
+        rig.force_update_all_bone_transforms()
+        var upright := Pose.snapshot(rig)
+        var foot_y := INF
+        for foot_name in ["Foot_L_065","Foot_R_069"]:
+            var bone_id := rig.find_bone(foot_name)
+            if bone_id>=0:
+                foot_y = minf(foot_y,hall.to_local(rig.to_global(rig.get_bone_global_pose(bone_id).origin)).y)
+        animator.stop()
+        Pose.restore(rig,seated)
+        var landing := _find_landing(person)
+        if landing.is_empty() or not is_finite(foot_y):
+            person["blocked"] = true
+            continue
+        person["sit_pose"] = seated
+        person["upright_pose"] = upright
+        person["start_pos"] = figure.position
+        person["target_pos"] = figure.position+Vector3(
+            float(landing["x"])-(person["anchor"] as Vector3).x,
+            float(landing["floor"])+0.095-foot_y,
+            float(landing["z"])-(person["anchor"] as Vector3).z)
+        person["stand_duration"] = 4.3+float((i*7)%8)*0.37
+        person["stand_delay"] = float((i*3)%7)*0.075
+        person["standing"] = true
+        finish_after = maxf(finish_after,float(person["stand_duration"])+float(person["stand_delay"]))
+    finish_after += 0.2
+
+
+func _advance_standing() -> void:
+    if not finale_started or finale_frozen:
+        return
+    var time := elapsed-finale_at
+    for person in guests:
+        if not bool(person["standing"]):
+            continue
+        var figure := person["figure"] as Node3D
+        var rig := person["skeleton"] as Skeleton3D
+        var body := person["collider"] as StaticBody3D
+        var rate := clampf((time-float(person["stand_delay"]))/
+            float(person["stand_duration"]),0.0,1.0)
+        var phase := smoothstep(0.0,1.0,rate)
+        # First step clear of the chair/counter, then rise to standing.
+        var outward := smoothstep(0.0,0.43,rate)
+        var start: Vector3 = person["start_pos"]
+        var destination: Vector3 = person["target_pos"]
+        figure.position = start.lerp(destination,Vector3(outward,phase,outward))
+        Pose.blend(rig,person["sit_pose"],person["upright_pose"],
+            phase,int(person["personality"]))
+        var anchor: Vector3 = person["anchor"]
+        var new_origin := Vector3(anchor.x,0.0,anchor.z).lerp(
+            Vector3(anchor.x+destination.x-start.x,0.0,anchor.z+destination.z-start.z),outward)
+        body.position = new_origin
+        var shape := body.get_node("Torso") as CollisionShape3D
+        if shape != null:
+            shape.position.y = lerpf(1.15,0.97,phase)
+            var capsule := shape.shape as CapsuleShape3D
+            capsule.height = lerpf(1.30,1.74,phase)
 
 
 func _freeze_finale() -> void:
     if finale_frozen:
         return
     finale_frozen = true
+    # A few figures remain seated if the surrounding solid geometry makes
+    # a standing landing impossible. They never clip through the counter.
     for person in guests:
-        var animator := person["animator"] as AnimationPlayer
-        var clip := str(person["stand_clip"])
-        if animator.has_animation(clip):
-            animator.seek(animator.get_animation(clip).length, true)
-            animator.pause()
-
+        if bool(person["standing"]):
+            var body := person["collider"] as StaticBody3D
+            if is_instance_valid(body):
+                (body.get_node("Torso") as CollisionShape3D).shape.height = 1.74
 
 func _silence(weight: float) -> void:
     var director := get_node_or_null("/root/AudioDirector")
@@ -484,8 +607,10 @@ func _process(delta: float) -> void:
         _watch(delta, player)
         if guests.size() == target_count and elapsed - last_appearance >= FINALE_DELAY:
             _stand_together()
-    elif not finale_frozen and elapsed - finale_at >= 6.25:
-        _freeze_finale()
+    else:
+        _advance_standing()
+        if not finale_frozen and elapsed-finale_at>=finish_after:
+            _freeze_finale()
     _silence(smoothstep(0.08, 0.98, float(guests.size()) / float(maxi(1, target_count))))
 
 
