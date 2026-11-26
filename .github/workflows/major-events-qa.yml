@@ -26,7 +26,43 @@ permissions:
   contents: read
 
 jobs:
+  prepare-godot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Restore pinned Godot download cache
+        id: godot-cache
+        uses: actions/cache@v4
+        with:
+          path: /tmp/godot-package/godot.zip
+          key: godot-linux-x86_64-4.5.1-stable-archive-v1
+      - name: Download Godot once on cache miss
+        if: steps.godot-cache.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/godot-package
+          timeout --kill-after=5s 150s curl --fail --location --retry 2 --retry-max-time 100 --connect-timeout 15 --max-time 90 -o /tmp/godot-package/godot.zip "https://github.com/godotengine/godot-builds/releases/download/4.5.1-stable/Godot_v4.5.1-stable_linux.x86_64.zip"
+      - name: Verify archive and engine version
+        shell: bash
+        run: |
+          set -euo pipefail
+          unzip -tq /tmp/godot-package/godot.zip
+          mkdir -p /tmp/godot-verify
+          unzip -q /tmp/godot-package/godot.zip -d /tmp/godot-verify
+          engine=/tmp/godot-verify/Godot_v4.5.1-stable_linux.x86_64
+          chmod +x "$engine"
+          timeout 15s "$engine" --version | grep -E '^4\.5\.1\.stable\.official'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: godot-linux-4.5.1
+          path: /tmp/godot-package/godot.zip
+          compression-level: 0
+          retention-days: 1
+          if-no-files-found: error
+
   anomalies:
+    needs: prepare-godot
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
@@ -44,13 +80,17 @@ jobs:
           python3 tools/import_model_assets.py
           python3 tools/unpack_sketchfab_assets.py --require-all
           python3 tools/import_croupier_asset.py
-      - name: Install Godot 4.5.1
+      - name: Fetch shared Godot archive
+        uses: actions/download-artifact@v4
+        with:
+          name: godot-linux-4.5.1
+          path: /tmp/godot-package
+      - name: Install shared Godot 4.5.1
         shell: bash
         run: |
           set -euo pipefail
-          curl --fail --location --retry 3 -o /tmp/godot.zip "https://github.com/godotengine/godot-builds/releases/download/4.5.1-stable/Godot_v4.5.1-stable_linux.x86_64.zip"
           mkdir -p /tmp/godot-bin
-          unzip -q /tmp/godot.zip -d /tmp/godot-bin
+          unzip -q /tmp/godot-package/godot.zip -d /tmp/godot-bin
           chmod +x /tmp/godot-bin/Godot_v4.5.1-stable_linux.x86_64
       - name: Parse and import all new scene and shader resources
         shell: bash
