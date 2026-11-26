@@ -11,13 +11,20 @@ Their tails/heads have been crossfaded and both Ogg streams are explicitly
 configured with loop=true in AudioDirector. The imported binaries are ignored
 by Git to avoid storing a duplicate of the same 1.3 MB pack.
 
+## Recorded footsteps
 
-## Optional recorded footsteps
+The 36 prepared 48 kHz mono WAV clips belong directly in the project under
+`audio/footsteps/` (wood_walk, wood_run, carpet_walk, carpet_run: six each;
+wet_carpet_walk: twelve). They are ordinary game resources, not a separate
+download or runtime extraction dependency. Once committed, a regular pull and
+Godot's normal import process are sufficient. The Windows export preset uses
+all resources, so the clips are included in development and release builds.
 
-The local, user-supplied `Casino_Anomaly_Footsteps.zip` contains 36 prepared WAV clips: 6 each of wood/carpet walk/run and 12 wet carpet walk. It is **not tracked** because the Dan Sfx license grants game use but does not expressly grant standalone asset redistribution.
+For the one-time asset commit, apply the supplied binary Git patch from the
+repository root, then commit the staged files. No Python importer is required.
+The original source ZIP is redundant and should not be committed.
 
-1. Save the supplied ZIP in `audio_drop/Casino_Anomaly_Footsteps.zip` (or pass its path explicitly).
-2. From the repository root run `python tools/import_footsteps.py` (or `python tools/import_footsteps.py --archive "C:/path/Casino_Anomaly_Footsteps.zip"`).
-3. Open Godot and let it import the files. Local exports should include the imported WAV resources (export all resources). Public CI without this pack uses synthesized fallback steps.
-
-The existing FOOTSTEP volume control and WORLD reverb bus apply to these recordings. Corridor and Flood cues remain separate; Backrooms always use wet carpet walking. Source credits are in the game Credits panel and ASSET_CREDITS.md.
+The existing FOOTSTEP volume control and WORLD reverb bus apply. Corridor and
+Flood cues remain separate; Backrooms always use wet carpet walking. Source
+credits are in the game Credits panel, ASSET_CREDITS.md and the asset directory.
+Synthesized fallback steps remain available for checkouts lacking the WAVs.

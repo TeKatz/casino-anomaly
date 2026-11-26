@@ -14,8 +14,8 @@ var footstep_player: AudioStreamPlayer
 var pressure_player: AudioStreamPlayer
 var world_reverb: AudioEffectReverb
 var procedural_loops: Dictionary = {}
-# Cached, non-looping variants per surface and gait. Optional licensed
-# recordings are installed locally; public builds keep deterministic synths.
+# Cached, non-looping variants per surface and gait. Recorded WAVs are
+# ordinary game resources; deterministic synths remain as missing-file fallback.
 const STEP_GROUPS := {
     "wood_walk": 6, "wood_run": 6, "carpet_walk": 6, "carpet_run": 6,
     "wet_carpet_walk": 12, "corridor": 2, "water": 4,

@@ -18,6 +18,5 @@ models/sketchfab/
 /models/escort_animations/UAL1_Standard.glb
 /models/escort_animations/UAL1_Standard.glb.import
 
-# Optional licensed footstep recordings: install locally, never publish raw assets.
-/audio/footsteps/
+# Do not commit the redundant source ZIP; game-ready WAVs are tracked directly.
 /audio_drop/Casino_Anomaly_Footsteps.zip

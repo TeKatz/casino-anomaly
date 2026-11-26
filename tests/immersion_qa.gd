@@ -32,6 +32,10 @@ func _run() -> void:
         if director.get_footstep_stream("water",variant) == null:
             _fail("Missing water footstep variant")
             return
+    # A checkout without the asset commit can still run synthetic QA.
+    # Once the recordings directory exists, every real clip must be imported
+    # and selected; partial packs and silently substituted samples fail.
+    var recordings_present := DirAccess.dir_exists_absolute("res://audio/footsteps")
     for spec in [["wood", false, 6], ["wood", true, 6], ["carpet", false, 6], ["carpet", true, 6], ["wet_carpet", false, 12]]:
         var surface := str(spec[0])
         var sprinting := bool(spec[1])
@@ -40,6 +44,13 @@ func _run() -> void:
         if director.step_sounds[group].size() != count:
             _fail("Incorrect footstep bank size: " + group)
             return
+        if recordings_present:
+            for variant in range(count):
+                var path := "res://audio/footsteps/%s/%s_%02d.wav" % [group, group, variant + 1]
+                var recorded := director.get_footstep_stream(surface, variant, sprinting) as AudioStreamWAV
+                if not ResourceLoader.exists(path, "AudioStreamWAV") or recorded == null or recorded.resource_path != path or recorded.mix_rate != 48000 or recorded.stereo:
+                    _fail("Missing or invalid recorded footstep: " + path)
+                    return
         var previous := -1
         for i in range(count * 4):
             var index: int = director._next_step_index(group, count)
