@@ -402,7 +402,7 @@ func _watch(delta: float, player: Node3D) -> void:
             if toward.length()<20.0:
                 # Never snap to the player. Individuals don't all stare:
                 # some turn toward their neighbour or toward the table.
-                var attention := [0.85,0.0,0.50,0.95,0.2][int(phase*10.0)%5]
+                var attention: float = [0.85,0.0,0.50,0.95,0.2][int(phase*10.0)%5]
                 desired = clampf(atan2(toward.x,toward.z),-0.62,0.62)*attention
         var yaw := move_toward(float(person["yaw"]),desired,delta*HEAD_SPEED)
         person["yaw"] = yaw
@@ -435,7 +435,7 @@ func _find_landing(person: Dictionary) -> Dictionary:
     capsule.height = 1.74
     for reach in [0.68,0.94,1.12,0.48]:
         for sidestep in [0.0,-0.24,0.24,-0.44,0.44]:
-            var candidate := anchor+forward*reach+side*sidestep
+            var candidate: Vector3 = anchor+forward*reach+side*sidestep
             var from := hall.to_global(Vector3(candidate.x,2.35,candidate.z))
             var below := hall.to_global(Vector3(candidate.x,-0.45,candidate.z))
             var floor_query := PhysicsRayQueryParameters3D.create(from,below)
