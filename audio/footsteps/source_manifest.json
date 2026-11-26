@@ -1,0 +1,182 @@
+[
+  {
+    "file": "wood_walk/wood_walk_01.wav",
+    "source": "wood/FSPWood_Walk_01.wav"
+  },
+  {
+    "file": "wood_walk/wood_walk_02.wav",
+    "source": "wood/FSPWood_Walk_02.wav"
+  },
+  {
+    "file": "wood_walk/wood_walk_03.wav",
+    "source": "wood/FSPWood_Walk_03.wav"
+  },
+  {
+    "file": "wood_walk/wood_walk_04.wav",
+    "source": "wood/FSPWood_Walk_04.wav"
+  },
+  {
+    "file": "wood_walk/wood_walk_05.wav",
+    "source": "wood/FSPWood_Walk_05.wav"
+  },
+  {
+    "file": "wood_walk/wood_walk_06.wav",
+    "source": "wood/FSPWood_Walk_06.wav"
+  },
+  {
+    "file": "wood_run/wood_run_01.wav",
+    "source": "wood/FSPWood_Run_01.wav"
+  },
+  {
+    "file": "wood_run/wood_run_02.wav",
+    "source": "wood/FSPWood_Run_02.wav"
+  },
+  {
+    "file": "wood_run/wood_run_03.wav",
+    "source": "wood/FSPWood_Run_03.wav"
+  },
+  {
+    "file": "wood_run/wood_run_04.wav",
+    "source": "wood/FSPWood_Run_04.wav"
+  },
+  {
+    "file": "wood_run/wood_run_05.wav",
+    "source": "wood/FSPWood_Run_05.wav"
+  },
+  {
+    "file": "wood_run/wood_run_06.wav",
+    "source": "wood/FSPWood_Run_06.wav"
+  },
+  {
+    "file": "carpet_walk/carpet_walk_01.wav",
+    "source": "carpet/FSPCarp_Walk_01.wav"
+  },
+  {
+    "file": "carpet_walk/carpet_walk_02.wav",
+    "source": "carpet/FSPCarp_Walk_02.wav"
+  },
+  {
+    "file": "carpet_walk/carpet_walk_03.wav",
+    "source": "carpet/FSPCarp_Walk_03.wav"
+  },
+  {
+    "file": "carpet_walk/carpet_walk_04.wav",
+    "source": "carpet/FSPCarp_Walk_04.wav"
+  },
+  {
+    "file": "carpet_walk/carpet_walk_05.wav",
+    "source": "carpet/FSPCarp_Walk_05.wav"
+  },
+  {
+    "file": "carpet_walk/carpet_walk_06.wav",
+    "source": "carpet/FSPCarp_Walk_06.wav"
+  },
+  {
+    "file": "carpet_run/carpet_run_01.wav",
+    "source": "carpet/FSPCarp_Run_01.wav"
+  },
+  {
+    "file": "carpet_run/carpet_run_02.wav",
+    "source": "carpet/FSPCarp_Run_02.wav"
+  },
+  {
+    "file": "carpet_run/carpet_run_03.wav",
+    "source": "carpet/FSPCarp_Run_03.wav"
+  },
+  {
+    "file": "carpet_run/carpet_run_04.wav",
+    "source": "carpet/FSPCarp_Run_04.wav"
+  },
+  {
+    "file": "carpet_run/carpet_run_05.wav",
+    "source": "carpet/FSPCarp_Run_05.wav"
+  },
+  {
+    "file": "carpet_run/carpet_run_06.wav",
+    "source": "carpet/FSPCarp_Run_06.wav"
+  },
+  {
+    "file": "wet_carpet_walk/wet_carpet_walk_01.wav",
+    "source": "carpet/FSPCarp_Walk_01.wav",
+    "overlay": "bewagne",
+    "overlay_start_s": 1.185,
+    "overlay_end_s": 1.485
+  },
+  {
+    "file": "wet_carpet_walk/wet_carpet_walk_02.wav",
+    "source": "carpet/FSPCarp_Walk_02.wav",
+    "overlay": "bewagne",
+    "overlay_start_s": 1.625,
+    "overlay_end_s": 1.925
+  },
+  {
+    "file": "wet_carpet_walk/wet_carpet_walk_03.wav",
+    "source": "carpet/FSPCarp_Walk_03.wav",
+    "overlay": "bewagne",
+    "overlay_start_s": 3.555,
+    "overlay_end_s": 3.855
+  },
+  {
+    "file": "wet_carpet_walk/wet_carpet_walk_04.wav",
+    "source": "carpet/FSPCarp_Walk_04.wav",
+    "overlay": "bewagne",
+    "overlay_start_s": 4.605,
+    "overlay_end_s": 4.905
+  },
+  {
+    "file": "wet_carpet_walk/wet_carpet_walk_05.wav",
+    "source": "carpet/FSPCarp_Walk_05.wav",
+    "overlay": "bewagne",
+    "overlay_start_s": 6.165,
+    "overlay_end_s": 6.465
+  },
+  {
+    "file": "wet_carpet_walk/wet_carpet_walk_06.wav",
+    "source": "carpet/FSPCarp_Walk_06.wav",
+    "overlay": "bewagne",
+    "overlay_start_s": 8.335,
+    "overlay_end_s": 8.635
+  },
+  {
+    "file": "wet_carpet_walk/wet_carpet_walk_07.wav",
+    "source": "carpet/FSPCarp_Walk_01.wav",
+    "overlay": "bewagne",
+    "overlay_start_s": 10.445,
+    "overlay_end_s": 10.745
+  },
+  {
+    "file": "wet_carpet_walk/wet_carpet_walk_08.wav",
+    "source": "carpet/FSPCarp_Walk_02.wav",
+    "overlay": "bewagne",
+    "overlay_start_s": 12.445,
+    "overlay_end_s": 12.745
+  },
+  {
+    "file": "wet_carpet_walk/wet_carpet_walk_09.wav",
+    "source": "carpet/FSPCarp_Walk_03.wav",
+    "overlay": "patchytherat",
+    "overlay_start_s": 2.345,
+    "overlay_end_s": 2.645
+  },
+  {
+    "file": "wet_carpet_walk/wet_carpet_walk_10.wav",
+    "source": "carpet/FSPCarp_Walk_04.wav",
+    "overlay": "patchytherat",
+    "overlay_start_s": 3.025,
+    "overlay_end_s": 3.325
+  },
+  {
+    "file": "wet_carpet_walk/wet_carpet_walk_11.wav",
+    "source": "carpet/FSPCarp_Walk_05.wav",
+    "overlay": "patchytherat",
+    "overlay_start_s": 3.755,
+    "overlay_end_s": 4.055
+  },
+  {
+    "file": "wet_carpet_walk/wet_carpet_walk_12.wav",
+    "source": "carpet/FSPCarp_Walk_06.wav",
+    "overlay": "patchytherat",
+    "overlay_start_s": 4.435,
+    "overlay_end_s": 4.735
+  }
+]
