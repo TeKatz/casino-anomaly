@@ -780,14 +780,11 @@ func _verify_silent_audience(hall: Node3D, other: Node3D) -> bool:
         if animator == null or skeleton == null or skeleton.find_bone("Head_06") < 0 or tree==null or not tree.active:
             _fail("Silent Audience needs animated skeletons with individual face/body idle trees")
             return false
-        var skin_visible := false
-        var unique_suit := false
-        for item in figure.find_children("*","MeshInstance3D",true,false):
-            var mesh := item as MeshInstance3D
-            if str(mesh.name).to_lower().contains("body") and mesh.material_overlay==null:
-                skin_visible = true
-            if str(mesh.name).to_lower().contains("suit") and mesh.get_surface_override_material(0) is ShaderMaterial:
-                unique_suit = true
+        # Source glTF has three skinned meshes: suit, facial internals,
+        # skin. Godot imports them as Object_79/Object_81/Object_83.
+        var render_meshes := figure.find_children("*","MeshInstance3D",true,false)
+        var skin_visible := render_meshes.size()>=3 and (render_meshes[2] as MeshInstance3D).material_overlay==null
+        var unique_suit := render_meshes.size()>=3 and (render_meshes[0] as MeshInstance3D).get_surface_override_material(0) is ShaderMaterial
         if not skin_visible or not unique_suit:
             var descriptions: Array[String] = []
             for node in figure.find_children("*","MeshInstance3D",true,false):

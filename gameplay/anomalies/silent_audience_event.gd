@@ -304,14 +304,19 @@ func _appearance(figure: Node3D, index: int) -> void:
         Color(1.0,0.94,0.88),Color(0.89,0.81,0.75),Color(0.98,0.83,0.72),
         Color(0.82,0.72,0.67),Color(0.93,0.89,0.81),Color(0.87,0.79,0.71)
     ]
-    for item in figure.find_children("*","MeshInstance3D",true,false):
-        var mesh := item as MeshInstance3D
+    # Godot imports the three named glTF skinned meshes as Object_79,
+    # Object_81 and Object_83. Use their stable source order rather than
+    # relying on the names of the generated MeshInstance3D nodes:
+    # 0 = business suit, 1 = internal face details, 2 = body/skin.
+    var parts := figure.find_children("*","MeshInstance3D",true,false)
+    for mesh_index in range(parts.size()):
+        var mesh := parts[mesh_index] as MeshInstance3D
         if mesh.mesh == null:
             continue
         mesh.material_overlay = null
         mesh.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
-        var is_suit := str(mesh.name).to_lower().contains("suit")
-        var is_skin := str(mesh.name).to_lower().contains("body")
+        var is_suit := mesh_index==0
+        var is_skin := mesh_index==2
         for surface in range(mesh.mesh.get_surface_count()):
             var original := mesh.get_active_material(surface) as BaseMaterial3D
             if original == null:
