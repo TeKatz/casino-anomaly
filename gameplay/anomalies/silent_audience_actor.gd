@@ -51,7 +51,7 @@ func configure(packed: PackedScene, identifier: String, seat: Dictionary, serial
     var measured := head-low
     if measured<0.01:
         return false
-    var desired := 1.43+0.036*float((serial*7)%7)
+    var desired := 1.43+0.036*float((serial*5)%9)
     figure.scale = Vector3.ONE*(desired/measured)
     _individual_materials()
     standing_pose = Pose.snapshot(skeleton)
@@ -76,16 +76,16 @@ func _resolve_roles() -> void:
     var pattern := {
         "hip":["hips_","pelvis_"], "head":["head_"],
         "chest":["chest_","spine2_","spine02_","spine1_"],
-        "left_thigh":["leftupleg_","l_thigh_","l_leg_2_"],
-        "right_thigh":["rightupleg_","r_thigh_","r_leg_2_"],
-        "left_calf":["leftleg_","l_calf_","l_knee_2_"],
-        "right_calf":["rightleg_","r_calf_","r_knee_2_"],
-        "left_foot":["leftfoot_","l_foot_"],
-        "right_foot":["rightfoot_","r_foot_"],
-        "left_arm":["leftarm_","l_upperarm_","l_arm_2_"],
-        "right_arm":["rightarm_","r_upperarm_","r_arm_2_"],
-        "left_forearm":["leftforearm_","l_forearm_","l_elbow_2_"],
-        "right_forearm":["rightforearm_","r_forearm_","r_elbow_2_"],
+        "left_thigh":["leftupleg_","l_thigh_","l_leg_2_","upper_leg_l_"],
+        "right_thigh":["rightupleg_","r_thigh_","r_leg_2_","upper_leg_r_"],
+        "left_calf":["leftleg_","l_calf_","l_knee_2_","lower_leg_l_"],
+        "right_calf":["rightleg_","r_calf_","r_knee_2_","lower_leg_r_"],
+        "left_foot":["leftfoot_","l_foot_","foot_l_"],
+        "right_foot":["rightfoot_","r_foot_","foot_r_"],
+        "left_arm":["leftarm_","l_upperarm_","l_arm_2_","upper_arm_l_"],
+        "right_arm":["rightarm_","r_upperarm_","r_arm_2_","upper_arm_r_"],
+        "left_forearm":["leftforearm_","l_forearm_","l_elbow_2_","lower_arm_l_"],
+        "right_forearm":["rightforearm_","r_forearm_","r_elbow_2_","lower_arm_r_"],
         "jaw":["jaw_"]
     }
     for role in pattern:
