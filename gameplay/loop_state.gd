@@ -333,6 +333,14 @@ func load_run() -> bool:
     anomaly_id = str(config.get_value("run", "anomaly_id", ""))
     last_anomaly_id = str(config.get_value("run", "last_anomaly_id", ""))
     round_debugged = bool(config.get_value("run", "round_debugged", false))
+    # A saved room can reference a retired anomaly after an update.
+    # Reroll only that pending room; never reset the run, streak or profile.
+    if not anomaly_id.is_empty() and Catalog.get_entry(anomaly_id).is_empty():
+        anomaly_id = ""
+        round_ready = false
+        round_debugged = false
+    if not last_anomaly_id.is_empty() and Catalog.get_entry(last_anomaly_id).is_empty():
+        last_anomaly_id = ""
     var saved_verdict: Variant = config.get_value("run", "last_verdict", {})
     last_verdict = saved_verdict if saved_verdict is Dictionary else {}
     debug_clear_next_round()

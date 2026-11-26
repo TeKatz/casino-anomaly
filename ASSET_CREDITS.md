@@ -38,7 +38,7 @@ game or models are shared.
 License: https://creativecommons.org/licenses/by/4.0/
 
 
-## The Silent Audience — five user-provided rigged people (adapted)
+## Retained character assets — five user-provided rigged people (adapted)
 
 Original Sketchfab downloads and their actual license.txt are included in the optimized guest asset pack at models/silent_audience/<model>/license.txt. Character bones and skinned meshes are preserved. Source textures were resized and recompressed, and unused female morph targets/source animation were removed. The gun/smoking meshes of the second Guard are hidden in the supplied game-ready glTF. The independent game code is not claimed to be part of the creators' artwork.
 

@@ -109,7 +109,7 @@ func _verify_adjusted_definitions() -> bool:
 func _run() -> void:
     var args := OS.get_cmdline_user_args()
     var suite := "all" if args.is_empty() else args[0]
-    if suite not in ["all", "baseline", "flood", "other_side", "silent_audience"]:
+    if suite not in ["all", "baseline", "flood", "other_side"]:
         _fail("Unknown QA suite: " + suite)
         return
     print("QA suite: ", suite)
@@ -134,7 +134,6 @@ func _run() -> void:
         match suite:
             "flood": passed = _verify_flood(room, isolated_room)
             "other_side": passed = _verify_other_side(room, isolated_room)
-            "silent_audience": passed = _verify_silent_audience(room, isolated_room)
         if not passed:
             _fail("Major event suite failed: " + suite)
             return
@@ -350,9 +349,6 @@ func _run() -> void:
             return
         print("QA major event: other_side")
         if not _verify_other_side(room,next_room):
-            return
-        print("QA major event: silent_audience")
-        if not _verify_silent_audience(room,next_room):
             return
     room.queue_free()
     next_room.queue_free()
@@ -745,104 +741,5 @@ func _verify_other_side(hall: Node3D, other: Node3D) -> bool:
         trim.name = trim_original_name
     if not trim_restored or hall.has_node("AnomalyOtherSide") or wall.mesh!=original_mesh or wall.material_override!=original_material or wall.visible!=original_visible or hall.get_node_or_null("Architecture/SouthWestWall_Collision")!=collider:
         _fail("Other Side cleanup changed authored room")
-        return false
-    return true
-
-
-func _verify_silent_audience(hall: Node3D, other: Node3D) -> bool:
-    # Major event 33: registration, real seats, safe staging, actual
-    # imported rigs, permanent seated behavior and complete cleanup.
-    if not Catalog.discoverable_ids().has("the_silent_audience") or not Catalog.available_ids(hall).has("the_silent_audience"):
-        _fail("Silent Audience unavailable in the anomaly catalog")
-        return false
-    var sofa := hall.get_node("ModelInteriors/LoungeSofa_01") as Node3D
-    var base_transform := sofa.transform
-    var adapter := Adapter.new()
-    if not adapter.apply(hall,"the_silent_audience"):
-        _fail("Silent Audience failed to apply")
-        return false
-    var effect := hall.get_node_or_null("AnomalySilentAudience") as Node3D
-    if effect == null or other.has_node("AnomalySilentAudience"):
-        _fail("Silent Audience leaked into another room")
-        return false
-    if effect.get_script() != preload("res://gameplay/anomalies/silent_audience_premium.gd"):
-        _fail("Silent Audience must use the five production models")
-        return false
-    return _verify_premium_audience(effect, hall, other, adapter, sofa, base_transform)
-
-
-func _verify_premium_audience(effect: Node3D, hall: Node3D, other: Node3D,
-        adapter: RefCounted, sofa: Node3D, base_transform: Transform3D) -> bool:
-    var count := int(effect.get("target_count"))
-    var sites: Array = effect.get("seat_sites")
-    var guests: Array = effect.get("guests")
-    if count < 15 or count > 25 or sites.size() != count or not guests.is_empty():
-        _fail("Premium audience must begin empty with a complete seating plan")
-        return false
-    var kinds := {}
-    for site in sites:
-        var kind := str(site["kind"])
-        kinds[kind] = int(kinds.get(kind, 0)) + 1
-        if not site.has("surface") or float(site.get("front",0.0)) <= 0.0:
-            _fail("Silent Audience seating needs real cushion surface and front clearance")
-            return false
-    if int(kinds.get("sofa", 0)) < 10 or int(kinds.get("bar", 0)) < 6 or int(kinds.get("table", 0)) < 4:
-        _fail("Premium audience missing seating areas")
-        return false
-    hall.set_meta("_streaming_standby", true)
-    effect.call("_process", 70.0)
-    hall.remove_meta("_streaming_standby")
-    if float(effect.get("elapsed")) != 0.0 or not guests.is_empty() or not (effect.get("original_audio") as Dictionary).is_empty():
-        _fail("Premium audience advanced while staged")
-        return false
-    var identities := {}
-    for i in range(count):
-        var before := (effect.get("seat_sites") as Array).size()
-        print("QA premium audience spawn: ", i + 1, "/", count)
-        if not bool(effect.call("_spawn", 0)):
-            _fail("Premium audience could not spawn guest %d" % i)
-            return false
-        if (effect.get("seat_sites") as Array).size() != before - 1:
-            _fail("Premium audience spawn did not consume one seat")
-            return false
-    guests = effect.get("guests")
-    if guests.size() != count or effect.find_children("*", "StaticBody3D", true, false).size() != count:
-        _fail("Premium audience population or collision count mismatch")
-        return false
-    for actor in guests:
-        var skeleton := actor.get("skeleton") as Skeleton3D
-        var body := actor.get("physical") as StaticBody3D
-        var shape := actor.get("collider") as CollisionShape3D
-        var figure := actor.get("figure") as Node3D
-        if skeleton == null or figure == null or body == null or body.collision_layer == 0 or shape == null or not shape.shape is CapsuleShape3D:
-            _fail("Premium audience missing real rig or collision")
-            return false
-        var roles: Dictionary = actor.get("roles")
-        for role in ["hip", "head", "left_thigh", "right_thigh", "left_calf", "right_calf", "left_foot", "right_foot"]:
-            if not roles.has(role):
-                _fail("Premium audience missing semantic role: " + role)
-                return false
-        if (actor.get("seated_pose") as Array).is_empty() or actor.has_method("start_standing"):
-            _fail("Premium audience missing skeletal poses")
-            return false
-        identities[str(actor.get("appearance_id"))] = true
-    if identities.size() != 5:
-        _fail("Premium audience did not use all five character models")
-        return false
-    # Advance the real event well past the previous standing finale.
-    var anchors: Array[Vector3] = []
-    for actor in guests:
-        anchors.append((actor.get("figure") as Node3D).position)
-    effect.call("_process", 180.0)
-    for i in range(guests.size()):
-        var actor: Node3D = guests[i]
-        actor.call("_process", 180.0)
-        var figure := actor.get("figure") as Node3D
-        if not figure.position.is_equal_approx(anchors[i]) or actor.has_method("start_standing"):
-            _fail("Audience must stay seated indefinitely")
-            return false
-    adapter.call("clear")
-    if hall.has_node("AnomalySilentAudience") or other.has_node("AnomalySilentAudience") or not sofa.transform.is_equal_approx(base_transform):
-        _fail("Premium audience cleanup changed authored room")
         return false
     return true

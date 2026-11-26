@@ -2,6 +2,7 @@ extends SceneTree
 
 const StateScript = preload("res://gameplay/loop_state.gd")
 const DemoScript = preload("res://gameplay/demo_anomalies.gd")
+const Catalog = preload("res://gameplay/anomaly_catalog.gd")
 
 func _initialize() -> void:
     call_deferred("_run")
@@ -89,6 +90,24 @@ func _run() -> void:
         _fail("Continue save does not survive a new state instance")
         return
 
+    # A previously saved Silent Audience room must never become an
+    # invisible anomaly or cost the player their existing run progress.
+    var retired_id := "the_silent_audience"
+    if not Catalog.get_entry(retired_id).is_empty() or Catalog.discoverable_ids().has(retired_id) or available.has(retired_id) or demo.apply(scene, retired_id):
+        _fail("Retired anomaly is still available")
+        return
+    restored.anomaly_id = retired_id
+    restored.last_anomaly_id = retired_id
+    restored.correct_streak = 7
+    restored.round_ready = true
+    restored.save_run()
+    if not restored.load_run() or restored.round_ready or not restored.anomaly_id.is_empty() or not restored.last_anomaly_id.is_empty() or restored.correct_streak != 7 or restored.visited_loops != 2 or restored.mistakes != 1:
+        _fail("Retired anomaly save migration damaged the run")
+        return
+    restored.prepare_round(available)
+    if not restored.round_ready or (not restored.anomaly_id.is_empty() and not available.has(restored.anomaly_id)):
+        _fail("Retired room did not reroll into a valid room")
+        return
     restored.correct_streak = 11
     restored.anomaly_id = ""
     restored.round_ready = true

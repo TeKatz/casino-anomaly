@@ -23,18 +23,6 @@
       "seconds": 300
     }
   ],
-  "silent_audience": [
-    {
-      "script": "tests/anomaly_variations_qa.gd",
-      "marker": "Casino Anomaly major event QA PASS: silent_audience",
-      "suite": "silent_audience",
-      "seconds": 300
-    },
-    {
-      "script": "tests/silent_audience_actor_qa.gd",
-      "marker": "Casino Anomaly silent audience actor QA PASS"
-    }
-  ],
   "gameplay": [
     {
       "script": "tests/loop_gameplay_qa.gd",
