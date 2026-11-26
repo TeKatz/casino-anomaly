@@ -1,75 +1,95 @@
 extends Node3D
-## Licensed humanoid skeletons use semantic bone roles, not copied root motion.
-## Continuous analytic idle movement avoids snapping at animation loop boundaries.
+## Permanent seated performance on the original five heterogeneous rigs.
+## Solve against anatomical joint positions in actor space, not imported bone axes.
 const Pose = preload("res://gameplay/anomalies/silent_audience_pose.gd")
+const STYLES := ["security_guard", "old_man", "suit_man", "guard", "female"]
 var skeleton: Skeleton3D
 var figure: Node3D
 var physical: StaticBody3D
 var collider: CollisionShape3D
 var roles: Dictionary = {}
-var standing_pose: Array[Dictionary] = []
 var seated_pose: Array[Dictionary] = []
-var standing := false
-var rising := false
-var start_rise_at := 0.0
-var rise_duration := 4.0
-var stand_y := 0.0
-var seat_y := 0.0
-var age := 0.0
-var variant := 0
+var animated_roles: Dictionary = {}
+var foot_reference: Dictionary = {}
+var seat_forward := Vector3.BACK
+var seat_right := Vector3.RIGHT
 var seat_kind := "sofa"
 var appearance_id := ""
-var visible_player: Node3D
+var age := 0.0
+var variant := 0
+var style := 0
+var loop_period := 10.0
+var floor_y := 0.0
+var reduced_motion := false
 
 func configure(packed: PackedScene, identifier: String, seat: Dictionary, serial: int) -> bool:
     variant = serial
     appearance_id = identifier
+    style = maxi(0, STYLES.find(identifier))
     seat_kind = str(seat["kind"])
     position = seat["anchor"]
+    floor_y = float(seat.get("floor_y", 0.0)) - position.y
+    var yaw := float(seat["yaw"])
+    seat_forward = Basis(Vector3.UP, yaw) * Vector3.BACK
+    seat_right = Basis(Vector3.UP, yaw) * Vector3.RIGHT
     figure = packed.instantiate() as Node3D
     if figure == null:
         return false
     figure.name = "GuestModel"
+    figure.hide()
     add_child(figure)
-    figure.rotation.y = float(seat["yaw"])
+    # The female source actually faces -Z, unlike all four male sources.
+    figure.rotation.y = yaw + (PI if identifier == "female" else 0.0)
+    for item in figure.find_children("*", "AnimationTree", true, false):
+        (item as AnimationTree).active = false
     for item in figure.find_children("*", "AnimationPlayer", true, false):
         (item as AnimationPlayer).stop()
+        (item as AnimationPlayer).active = false
     for node in figure.find_children("*", "Skeleton3D", true, false):
-        if (node as Skeleton3D).get_bone_count() >= 30:
-            skeleton = node as Skeleton3D
-            break
+        var candidate := node as Skeleton3D
+        if skeleton == null or candidate.get_bone_count() > skeleton.get_bone_count():
+            skeleton = candidate
     if skeleton == null:
         return false
     _resolve_roles()
-    for required in ["hip","head","left_thigh","right_thigh","left_calf","right_calf","left_foot","right_foot"]:
+    for required in ["hip","head","chest","left_thigh","right_thigh","left_calf","right_calf","left_foot","right_foot","left_toe","right_toe","left_arm","right_arm","left_forearm","right_forearm","left_hand","right_hand"]:
         if not roles.has(required):
-            var names: Array[String] = []
-            for bone in range(skeleton.get_bone_count()):
-                names.append(skeleton.get_bone_name(bone))
-            push_warning("Audience %s rig missing %s; imported bones: %s" % [identifier,required,str(names)])
+            push_warning("Audience %s rig missing %s" % [identifier, required])
             return false
+    skeleton.reset_bone_poses()
     skeleton.force_update_all_bone_transforms()
-    var head := _bone_height("head")
-    var low := minf(_bone_height("left_foot"),_bone_height("right_foot"))
-    var measured := head-low
-    if measured<0.01:
+    var measured := _point("head").y - minf(_point("left_foot").y, _point("right_foot").y)
+    if measured < 0.01:
         return false
-    var desired := 1.43+0.036*float((serial*5)%9)
-    figure.scale = Vector3.ONE*(desired/measured)
-    _individual_materials()
-    standing_pose = Pose.snapshot(skeleton)
+    # Keep natural differences between the five silhouettes, not random giant guests.
+    var desired: float = [1.48, 1.43, 1.46, 1.49, 1.38][style]
+    figure.scale *= desired / measured
+    skeleton.force_update_all_bone_transforms()
+    figure.position -= _point("hip")
+    for side in ["left", "right"]:
+        var foot := side + "_foot"
+        var toe := side + "_toe"
+        var index := int(roles[foot])
+        foot_reference[side] = {
+            "rotation": skeleton.get_bone_global_pose(index).basis.orthonormalized().get_rotation_quaternion(),
+            "clearance": clampf(_point(foot).y - _point(toe).y + 0.035, 0.055, 0.16)
+        }
     _sitting_pose()
     seated_pose = Pose.snapshot(skeleton)
-    var hip_pos := to_local(skeleton.to_global(skeleton.get_bone_global_pose(int(roles["hip"])).origin))
-    figure.position -= hip_pos
-    seat_y = figure.position.y
-    Pose.restore(skeleton,standing_pose)
-    skeleton.force_update_all_bone_transforms()
-    var feet := minf(_bone_height("left_foot"),_bone_height("right_foot"))
-    stand_y = figure.position.y-(position.y+feet)
-    Pose.restore(skeleton,seated_pose)
-    figure.position.y = seat_y
+    for role in ["chest","head","left_arm","right_arm","left_forearm","right_forearm","jaw"]:
+        if roles.has(role):
+            var index := int(roles[role])
+            var basis := _actor_basis(index)
+            animated_roles[role] = {"index":index, "rest":skeleton.get_bone_pose_rotation(index),
+                "pitch":(basis.inverse()*seat_right).normalized(),
+                "yaw":(basis.inverse()*Vector3.UP).normalized()}
+    loop_period = [9.2, 12.0, 10.4, 8.8, 11.2][style]
+    var settings := get_node_or_null("/root/GameSettings")
+    reduced_motion = settings != null and bool(settings.call("get_option", "reduced_motion"))
+    _individual_materials()
     _make_collision()
+    _sample_loop(0.0)
+    figure.show()
     return true
 
 func _name_key(name: String) -> String:
@@ -96,6 +116,10 @@ func _resolve_roles() -> void:
         "right_arm":["rightarm_","r_upperarm_","r_arm_2_","upper_arm_r_"],
         "left_forearm":["leftforearm_","l_forearm_","l_elbow_2_","lower_arm_l_"],
         "right_forearm":["rightforearm_","r_forearm_","r_elbow_2_","lower_arm_r_"],
+        "left_hand":["lefthand_","l_hand_","l_wrist_2_","hand_l_"],
+        "right_hand":["righthand_","r_hand_","r_wrist_2_","hand_r_"],
+        "left_toe":["lefttoebase_","l_toebase_","l_toes_2_","toe_l_"],
+        "right_toe":["righttoebase_","r_toebase_","r_toes_2_","toe_r_"],
         "jaw":["jaw_","jawroot_"]
     }
     for role in pattern:
@@ -108,38 +132,89 @@ func _resolve_roles() -> void:
             if roles.has(role):
                 break
 
-func _bone_height(role: String) -> float:
-    if not roles.has(role):
-        return 0.0
-    skeleton.force_update_all_bone_transforms()
-    return to_local(skeleton.to_global(skeleton.get_bone_global_pose(int(roles[role])).origin)).y
 
-func _apply_world_hinge(role: String, axis: Vector3, degrees: float) -> void:
-    if not roles.has(role):
+func _point(role: String) -> Vector3:
+    return to_local(skeleton.to_global(skeleton.get_bone_global_pose(int(roles[role])).origin))
+
+func _actor_basis(index: int) -> Basis:
+    return (global_transform.affine_inverse().basis * skeleton.global_transform.basis *
+        skeleton.get_bone_global_pose(index).basis).orthonormalized()
+
+func _aim(role: String, child_role: String, direction: Vector3) -> void:
+    var index := int(roles[role])
+    var from := _point(child_role) - _point(role)
+    if from.length_squared() < 0.00000001 or direction.length_squared() < 0.00000001:
         return
-    var idx := int(roles[role])
-    var to_bone := skeleton.get_bone_global_pose(idx).basis.orthonormalized().inverse()
-    var local_axis := (to_bone*axis).normalized()
-    var original := skeleton.get_bone_pose_rotation(idx)
-    skeleton.set_bone_pose_rotation(idx,original*Quaternion(local_axis,deg_to_rad(degrees)))
+    var inverse := _actor_basis(index).inverse()
+    var turn := Quaternion((inverse * from).normalized(), (inverse * direction).normalized())
+    skeleton.set_bone_pose_rotation(index, (skeleton.get_bone_pose_rotation(index) * turn).normalized())
+    skeleton.force_update_all_bone_transforms()
+
+func _solve_leg(side: String, outward: float) -> void:
+    var thigh := side + "_thigh"
+    var calf := side + "_calf"
+    var foot := side + "_foot"
+    var hip := _point(thigh)
+    var upper := hip.distance_to(_point(calf))
+    var lower := _point(calf).distance_to(_point(foot))
+    var reference: Dictionary = foot_reference[side]
+    var clearance := float(reference["clearance"])
+    # Sofa and gaming stools use the actual floor; high bar stools can use
+    # their foot rail rather than stretching a short rig through the floor.
+    var support := floor_y
+    if seat_kind == "bar" and hip.y - (support + clearance) > lower + upper * 0.40:
+        support = minf(floor_y + 0.20, hip.y - lower * 0.65 - clearance)
+        support = maxf(support, floor_y)
+    var reach := upper * (0.96 if seat_kind == "sofa" else 0.80)
+    var ankle := hip + seat_forward * reach + seat_right * outward
+    ankle.y = support + clearance
+    var offset := ankle - hip
+    var distance := clampf(offset.length(), absf(upper-lower)+0.001, upper+lower-0.002)
+    var axis := offset.normalized()
+    var bend := (seat_forward - axis * seat_forward.dot(axis)).normalized()
+    if bend.length_squared() < 0.001:
+        bend = Vector3.UP
+    var along := (upper*upper - lower*lower + distance*distance) / (2.0*distance)
+    var perpendicular := sqrt(maxf(0.0, upper*upper - along*along))
+    var knee := hip + axis*along + bend*perpendicular
+    _aim(thigh, calf, knee - hip)
+    _aim(calf, foot, hip + axis*distance - _point(calf))
+    # Preserve the source's foot pitch (including the woman's heels) while
+    # aligning the lower leg. Do not inherit the calf's arbitrary rotation.
+    var index := int(roles[foot])
+    var parent := skeleton.get_bone_parent(index)
+    var parent_rotation := skeleton.get_bone_global_pose(parent).basis.orthonormalized().get_rotation_quaternion() if parent >= 0 else Quaternion.IDENTITY
+    skeleton.set_bone_pose_rotation(index, (parent_rotation.inverse() * (reference["rotation"] as Quaternion)).normalized())
+    skeleton.force_update_all_bone_transforms()
 
 func _sitting_pose() -> void:
-    var id := variant%6
-    var lean: float = [-8.0,6.0,-15.0,9.0,-4.0,3.0][id]
-    var spread: float = [0.0,5.0,11.0,3.0,-7.0,8.0][id]
-    _apply_world_hinge("left_thigh",Vector3.RIGHT,-68.0+spread)
-    _apply_world_hinge("right_thigh",Vector3.RIGHT,-70.0-spread*0.65)
-    _apply_world_hinge("left_calf",Vector3.RIGHT,75.0-spread*0.5)
-    _apply_world_hinge("right_calf",Vector3.RIGHT,80.0+spread*0.3)
-    _apply_world_hinge("left_arm",Vector3.RIGHT,12.0+float(id%3)*10.0)
-    _apply_world_hinge("right_arm",Vector3.RIGHT,26.0+float((id+1)%3)*7.0)
-    _apply_world_hinge("left_forearm",Vector3.RIGHT,-15.0-float(id%2)*12.0)
-    _apply_world_hinge("right_forearm",Vector3.RIGHT,-22.0+float(id%3)*4.0)
-    _apply_world_hinge("chest",Vector3.RIGHT,lean)
-    _apply_world_hinge("head",Vector3.RIGHT,-lean*0.35)
-    _apply_world_hinge("head",Vector3.FORWARD,[-5.0,0.0,3.0,-2.0,5.0,0.0][id])
-    var hip := int(roles["hip"])
-    skeleton.set_bone_pose_position(hip,skeleton.get_bone_pose_position(hip)+Vector3(0,-0.13-float(id%3)*0.025,0))
+    # Five individual signatures: guarded, stooped, relaxed, attentive,
+    # and compact. Seat kind selects a second posture layer.
+    var lean: float = [0.04,0.14,-0.04,0.07,0.02][style]
+    if seat_kind == "table":
+        lean += 0.07
+    _aim("chest","head",Vector3.UP + seat_forward * lean)
+    var spread: float = [0.055,0.035,0.08,0.045,0.015][style]
+    _solve_leg("left", spread)
+    _solve_leg("right", -spread)
+    for side in ["left","right"]:
+        var sign_side := 1.0 if side == "left" else -1.0
+        var arm := side + "_arm"
+        var forearm := side + "_forearm"
+        var hand := side + "_hand"
+        var elbow_direction := Vector3.DOWN + seat_right * sign_side * (0.18 if seat_kind == "sofa" else 0.09)
+        elbow_direction += seat_forward * (0.24 if seat_kind == "table" else 0.10)
+        _aim(arm, forearm, elbow_direction)
+        # Wrists rest toward the lap or counter; never extend sideways.
+        var elbow := _point(forearm)
+        var knee := _point(side + "_calf")
+        var lap := knee - seat_forward * (0.10 + 0.025*float(style%3))
+        lap.y += 0.08
+        var toward := lap - elbow
+        if seat_kind == "bar":
+            toward = seat_forward * 0.75 + Vector3.DOWN * (0.32 + 0.07*float(style%3))
+        _aim(forearm, hand, toward)
+    skeleton.force_update_all_bone_transforms()
 
 func _individual_materials() -> void:
     var cloth := [Color("#e0e0db"),Color("#aeb4bf"),Color("#c7b6aa"),
@@ -160,6 +235,7 @@ func _individual_materials() -> void:
             material.roughness = maxf(material.roughness,0.48)
             mesh.set_surface_override_material(surface,material)
 
+
 func _make_collision() -> void:
     physical = StaticBody3D.new()
     physical.name = "GuestBody"
@@ -170,60 +246,49 @@ func _make_collision() -> void:
     collider.name = "BodyCapsule"
     physical.add_child(collider)
     var capsule := CapsuleShape3D.new()
-    capsule.radius = 0.29
-    capsule.height = 1.15
+    capsule.radius = 0.28
+    capsule.height = 1.10
     collider.shape = capsule
-    collider.position.y = 0.49
+    collider.position = Vector3(0, 0.38, 0)
 
-func start_standing(offset: float) -> bool:
-    # No unobstructed way out of bar chairs: remain seated instead of
-    # intersecting the solid counter or translating through the stool.
-    if seat_kind!="sofa":
-        return false
-    start_rise_at = age+offset
-    rise_duration = 3.2+float((variant*7)%9)*0.22
-    rising = true
-    return true
+func _animate(role: String, pitch: float, yaw: float = 0.0) -> void:
+    if not animated_roles.has(role):
+        return
+    var data: Dictionary = animated_roles[role]
+    var q: Quaternion = data["rest"]
+    q = q * Quaternion(data["pitch"], pitch) * Quaternion(data["yaw"], yaw)
+    skeleton.set_bone_pose_rotation(int(data["index"]), q.normalized())
+
+func _sample_loop(seconds: float) -> void:
+    # Integer harmonics of the same phase give exact continuous loop seams.
+    # No animation track ever translates the root, hip, knees or feet.
+    var phase := TAU * fposmod(seconds, loop_period) / loop_period + float(variant)*1.73
+    var motion := 0.0 if reduced_motion else 1.0
+    var speech := pow(0.5 + 0.5*sin(phase), 4.0) * motion
+    var nod := sin(phase*3.0) * speech
+    var breath := sin(phase*2.0) * motion
+    _animate("chest", 0.012*breath)
+    _animate("head", 0.045*nod + 0.016*sin(phase)*motion,
+        (0.035+0.012*float(style))*sin(phase)*motion)
+    var dominant := "left" if style in [1,4] else "right"
+    for side in ["left","right"]:
+        var emphasis := 1.0 if side == dominant else 0.30
+        var strength := emphasis * (0.045+0.013*float(style))
+        _animate(side+"_arm", strength*speech*sin(phase*2.0), 0.012*breath)
+        _animate(side+"_forearm", strength*1.6*speech*(0.55+0.45*sin(phase*4.0)))
+    # Only the guard and female glTFs expose a jaw; other models communicate
+    # through body language, rather than deforming the entire face.
+    _animate("jaw", 0.055*speech*(0.5+0.5*sin(phase*9.0)))
 
 func _process(delta: float) -> void:
-    if skeleton==null:
+    if skeleton == null or seated_pose.is_empty():
         return
-    var parent_room := get_parent().get_parent() as Node3D
-    if parent_room!=null and parent_room.has_meta("_streaming_standby"):
+    var event := get_parent()
+    var room := event.get_parent() if event != null else null
+    if room != null and room.has_meta("_streaming_standby"):
         return
-    age += delta
-    if rising:
-        var t := clampf((age-start_rise_at)/rise_duration,0.0,1.0)
-        var height_t := smoothstep(0.12,0.91,t)
-        # World X/Z never change; skeletal limbs move while hips rise.
-        figure.position.y = lerpf(seat_y,stand_y,height_t)
-        Pose.blend(skeleton,seated_pose,standing_pose,smoothstep(0.0,1.0,t),variant%3)
-        collider.position.y = lerpf(0.49,-position.y+0.87,height_t)
-        (collider.shape as CapsuleShape3D).height = lerpf(1.15,1.72,height_t)
-        if t>=1.0:
-            rising = false
-            standing = true
-        return
-    if standing:
-        Pose.restore(skeleton,standing_pose)
-    else:
-        Pose.restore(skeleton,seated_pose)
-    var phase := age*(0.55+float(variant%5)*0.11)+float(variant)*1.73
-    var breath := sin(phase)*0.011
-    if roles.has("chest"):
-        var chest := int(roles["chest"])
-        skeleton.set_bone_pose_rotation(chest,skeleton.get_bone_pose_rotation(chest)*Quaternion(Vector3.RIGHT,breath))
-    if roles.has("head"):
-        var head := int(roles["head"])
-        var yaw: float = sin(phase*0.47)*[0.04,0.01,0.07,0.03,0.09,0.02][variant%6]
-        if visible_player!=null and is_instance_valid(visible_player) and variant%3==0:
-            var facing := to_local(visible_player.global_position)
-            yaw += clampf(atan2(facing.x,facing.z)*0.25,-0.22,0.22)
-        skeleton.set_bone_pose_rotation(head,skeleton.get_bone_pose_rotation(head)*Quaternion(Vector3.UP,yaw))
-    if not standing and not rising and roles.has("jaw") and variant%4==1:
-        var jaw := int(roles["jaw"])
-        var amplitude := maxf(0.0,sin(phase*2.2))*0.045
-        skeleton.set_bone_pose_rotation(jaw,skeleton.get_bone_pose_rotation(jaw)*Quaternion(Vector3.RIGHT,amplitude))
+    age = fposmod(age + delta, loop_period)
+    _sample_loop(age)
 
 func _exit_tree() -> void:
     # Important for the strict headless renderer and the room-stream teardown:

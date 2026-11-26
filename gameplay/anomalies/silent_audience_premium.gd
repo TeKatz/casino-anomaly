@@ -5,7 +5,6 @@ const Actor = preload("res://gameplay/anomalies/silent_audience_actor.gd")
 const STOOL = preload("res://models/casino_furniture/gaming_stool.tscn")
 const FIRST_APPEARANCE := 5.0
 const INTERVAL := 2.65
-const FINALE_DELAY := 7.0
 const PATHS := [
     ["security_guard","res://models/silent_audience/security_guard/scene.gltf"],
     ["old_man","res://models/silent_audience/old_man/scene.gltf"],
@@ -20,8 +19,6 @@ var guests: Array[Node3D] = []
 var target_count := 0
 var elapsed := 0.0
 var next_guest := FIRST_APPEARANCE
-var final_at := 0.0
-var finale_started := false
 var configured := false
 var original_audio: Dictionary = {}
 var rng := RandomNumberGenerator.new()
@@ -59,8 +56,9 @@ func _collect_seats() -> void:
     for i in [1,3]:
         _place_on(hall.get_node_or_null("ModelInteriors/SideStool_%02d" % i) as Node3D,"bar",PI*0.5)
     for x in [-13.6,-20.3,-27.2,-41.1]:
-        seat_sites.append({"anchor":Vector3(x,0.73,-8.68),"yaw":PI,
-            "kind":"table","stool":Vector3(x,0.005,-8.68)})
+        # GamingStool crown is at 0.638 m; hip rests above it.
+        seat_sites.append({"anchor":Vector3(x,0.728,-8.68),"yaw":PI,
+            "kind":"table","floor_y":0.0,"stool":Vector3(x,0.005,-8.68)})
 
 func _place_on(prop: Node3D,kind: String,yaw: float,lateral: float=0.0) -> void:
     if prop==null or not prop.visible:
@@ -81,7 +79,7 @@ func _place_on(prop: Node3D,kind: String,yaw: float,lateral: float=0.0) -> void:
     var facing := yaw
     if kind=="sofa":
         facing = (hall.global_transform.affine_inverse()*prop.global_transform).basis.orthonormalized().get_euler().y+lateral*0.12
-    seat_sites.append({"anchor":hall.to_local(prop.to_global(hip)),"yaw":facing,"kind":kind})
+    seat_sites.append({"anchor":hall.to_local(prop.to_global(hip)),"yaw":facing,"kind":kind,"floor_y":0.0})
 
 func _hidden(camera: Camera3D,player: CollisionObject3D,site: Dictionary) -> bool:
     var location := hall.to_global((site["anchor"] as Vector3)+Vector3(0,0.55,0))
@@ -166,24 +164,13 @@ func _process(delta: float) -> void:
     if camera==null:
         return
     elapsed += delta
-    if not finale_started and guests.size()<target_count and elapsed>=next_guest:
+    if guests.size()<target_count and elapsed>=next_guest:
         var hidden := _find_unseen(camera,player)
         if hidden>=0 and _spawn(hidden):
             next_guest=elapsed+INTERVAL+rng.randf_range(-0.35,0.40)
         else:
             next_guest=elapsed+0.3
-    for actor in guests:
-        actor.set("visible_player",player)
     _silence(smoothstep(0.10,1.0,float(guests.size())/float(maxi(1,target_count))))
-    if guests.size()==target_count and not finale_started:
-        if final_at==0.0:
-            final_at=elapsed+FINALE_DELAY
-        if elapsed>=final_at:
-            finale_started=true
-            var offset := 0.0
-            for actor in guests:
-                actor.call("start_standing",offset)
-                offset=fmod(offset+0.14,0.62)
 
 func _exit_tree() -> void:
     for source in original_audio:

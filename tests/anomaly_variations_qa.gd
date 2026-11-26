@@ -751,7 +751,7 @@ func _verify_other_side(hall: Node3D, other: Node3D) -> bool:
 
 func _verify_silent_audience(hall: Node3D, other: Node3D) -> bool:
     # Major event 33: registration, real seats, safe staging, actual
-    # imported skeletal clips, synchronized finale and complete cleanup.
+    # imported rigs, permanent seated behavior and complete cleanup.
     if not Catalog.discoverable_ids().has("the_silent_audience") or not Catalog.available_ids(hall).has("the_silent_audience"):
         _fail("Silent Audience unavailable in the anomaly catalog")
         return false
@@ -765,143 +765,10 @@ func _verify_silent_audience(hall: Node3D, other: Node3D) -> bool:
     if effect == null or other.has_node("AnomalySilentAudience"):
         _fail("Silent Audience leaked into another room")
         return false
-    # Both implementations are supported: the premium event has a different
-    # actor/seat contract, so validate it separately rather than reading Nil.
-    if effect.get_script() == preload("res://gameplay/anomalies/silent_audience_premium.gd"):
-        return _verify_premium_audience(effect, hall, other, adapter, sofa, base_transform)
-    var count := int(effect.get("target_count"))
-    var sites: Array = effect.get("seats")
-    if count < 15 or count > 25 or sites.size() < count or not (effect.get("guests") as Array).is_empty():
-        _fail("Silent Audience should begin empty with 15-25 planned people")
+    if effect.get_script() != preload("res://gameplay/anomalies/silent_audience_premium.gd"):
+        _fail("Silent Audience must use the five production models")
         return false
-    var kinds := {}
-    for site in sites:
-        kinds[str(site["kind"])] = int(kinds.get(str(site["kind"]),0))+1
-    if int(kinds.get("sofa",0)) < 10 or int(kinds.get("bar",0)) < 6 or int(kinds.get("extra_stool",0)) < 4:
-        _fail("Silent Audience has no real seating across lounge, bar and gaming tables")
-        return false
-    # A staged room has no live actor progression or persistent audio duck.
-    hall.set_meta("_streaming_standby",true)
-    effect.call("_process",70.0)
-    hall.remove_meta("_streaming_standby")
-    if float(effect.get("elapsed")) > 0.001 or not (effect.get("guests") as Array).is_empty() or not (effect.get("audio_baseline") as Dictionary).is_empty():
-        _fail("Silent Audience advanced while the room was staged")
-        return false
-    # Force two controlled offscreen arrivals: a real sofa and a newly
-    # created cosmetic stool, both attached only to this anomaly root.
-    var sofa_index := -1
-    for i in range(sites.size()):
-        if str(sites[i]["kind"]) == "sofa":
-            sofa_index = i
-            break
-    if sofa_index < 0 or not bool(effect.call("_spawn_seat",sofa_index)):
-        _fail("Silent Audience could not seat its animated lounge guest")
-        return false
-    sites = effect.get("seats")
-    var stool_index := -1
-    for i in range(sites.size()):
-        if str(sites[i]["kind"]) == "extra_stool":
-            stool_index = i
-            break
-    if stool_index < 0 or not bool(effect.call("_spawn_seat",stool_index)):
-        _fail("Silent Audience could not create a seated gaming-table guest")
-        return false
-    var guests: Array = effect.get("guests")
-    var colliders := effect.find_children("*","StaticBody3D",true,false)
-    if guests.size()!=2 or colliders.size()!=2:
-        _fail("Silent Audience should have one blocking body per visible guest")
-        return false
-    for body in colliders:
-        if (body as StaticBody3D).collision_layer==0 or not ((body as StaticBody3D).get_node("Torso") as CollisionShape3D).shape is CapsuleShape3D:
-            _fail("Silent Audience character colliders must be real capsules")
-            return false
-    for person in guests:
-        var animator := person["animator"] as AnimationPlayer
-        var skeleton := person["skeleton"] as Skeleton3D
-        var tree := person["tree"] as AnimationTree
-        var figure := person["figure"] as Node3D
-        if animator == null or skeleton == null or skeleton.find_bone("Head_06") < 0 or tree==null or not tree.active:
-            _fail("Silent Audience needs animated skeletons with individual face/body idle trees")
-            return false
-        # Source glTF has three skinned meshes: suit, facial internals,
-        # skin. Godot imports them as Object_79/Object_81/Object_83.
-        var render_meshes := figure.find_children("*","MeshInstance3D",true,false)
-        var skin_visible := render_meshes.size()>=3 and (render_meshes[2] as MeshInstance3D).material_overlay==null
-        var unique_suit := render_meshes.size()>=3 and (render_meshes[0] as MeshInstance3D).get_surface_override_material(0) is ShaderMaterial
-        if not skin_visible or not unique_suit:
-            var descriptions: Array[String] = []
-            for node in figure.find_children("*","MeshInstance3D",true,false):
-                var m := node as MeshInstance3D
-                descriptions.append("%s (%s) override=%s overlay=%s" % [str(m.name),m.get_active_material(0).get_class() if m.get_active_material(0)!=null else "null",str(m.get_surface_override_material(0)),str(m.material_overlay)])
-            print("Silent Audience appearance diagnostic: ",descriptions)
-            _fail("Silent Audience must show genuine faces and individualized clothing")
-            return false
-    # Exercise the entire 20-guest population, not just the isolated sofa
-    # and table actors. Standing targets must be distinct and collisions real.
-    for i in range(count - 2):
-        var remaining := (effect.get("seats") as Array).size()
-        print("QA Silent Audience spawn: ", i + 3, "/", count)
-        if remaining == 0 or not bool(effect.call("_spawn_seat",0)):
-            _fail("Silent Audience cannot populate its full seating plan")
-            return false
-        if (effect.get("seats") as Array).size() != remaining - 1:
-            _fail("Silent Audience spawn did not consume exactly one seat")
-            return false
-    if not (effect.get("seats") as Array).is_empty():
-        _fail("Silent Audience has unexpected unused seats")
-        return false
-    guests = effect.get("guests")
-    if guests.size()!=count or effect.find_children("*","StaticBody3D",true,false).size()!=count:
-        _fail("Silent Audience full population lost live collisions")
-        return false
-    var cloth_colors := {}
-    for person in guests:
-        var parts := (person["figure"] as Node3D).find_children("*","MeshInstance3D",true,false)
-        if parts.size()<3:
-            continue
-        var jacket := (parts[0] as MeshInstance3D).get_surface_override_material(0) as ShaderMaterial
-        if jacket != null:
-            cloth_colors[str(jacket.get_shader_parameter("jacket"))] = true
-    if cloth_colors.size()<6:
-        _fail("Silent Audience needs at least six visible wardrobe colors")
-        return false
-    effect.call("_stand_together")
-    if not bool(effect.get("finale_started")):
-        _fail("Silent Audience did not start its synchronized finale")
-        return false
-    if float(effect.get("finish_after"))<=0.0:
-        _fail("Silent Audience finale did not plan collision-safe individual rise timing")
-        return false
-    var standing_count := 0
-    for person in guests:
-        if bool(person["standing"]):
-            standing_count += 1
-            if (person["sit_pose"] as Array).is_empty() or (person["upright_pose"] as Array).is_empty():
-                _fail("Silent Audience must blend genuine rigged seated/standing poses")
-                return false
-    if standing_count < 12:
-        _fail("Silent Audience has too few collision-safe rising positions: %d" % standing_count)
-        return false
-    var reserved: Array = effect.get("reserved_landings")
-    if reserved.size()!=standing_count:
-        _fail("Silent Audience did not reserve the target floor positions")
-        return false
-    for i in range(reserved.size()):
-        for j in range(i+1,reserved.size()):
-            if (reserved[i] as Vector2).distance_to(reserved[j] as Vector2)<0.70:
-                _fail("Silent Audience standing guests overlap")
-                return false
-    effect.set("elapsed",float(effect.get("finale_at"))+float(effect.get("finish_after")))
-    effect.call("_advance_standing")
-    effect.call("_freeze_finale")
-    if not bool(effect.get("finale_frozen")):
-        _fail("Silent Audience did not freeze the final standing tableau")
-        return false
-    adapter.clear()
-    if hall.has_node("AnomalySilentAudience") or other.has_node("AnomalySilentAudience") or not sofa.transform.is_equal_approx(base_transform):
-        _fail("Silent Audience cleanup changed the original casino")
-        return false
-    return true
+    return _verify_premium_audience(effect, hall, other, adapter, sofa, base_transform)
 
 
 func _verify_premium_audience(effect: Node3D, hall: Node3D, other: Node3D,
@@ -952,45 +819,25 @@ func _verify_premium_audience(effect: Node3D, hall: Node3D, other: Node3D,
             if not roles.has(role):
                 _fail("Premium audience missing semantic role: " + role)
                 return false
-        if (actor.get("seated_pose") as Array).is_empty() or (actor.get("standing_pose") as Array).is_empty():
+        if (actor.get("seated_pose") as Array).is_empty() or actor.has_method("start_standing"):
             _fail("Premium audience missing skeletal poses")
             return false
         identities[str(actor.get("appearance_id"))] = true
     if identities.size() != 5:
         _fail("Premium audience did not use all five character models")
         return false
-    # Trigger the production finale, not an imitation of its control flow.
-    effect.set("final_at", 1.0)
-    effect.set("elapsed", 2.0)
-    effect.call("_process", 0.0)
-    if not bool(effect.get("finale_started")):
-        _fail("Premium audience finale did not start")
-        return false
-    var standing_count := 0
-    var landing_points: Array[Vector2] = []
+    # Advance the real event well past the previous standing finale.
+    var anchors: Array[Vector3] = []
     for actor in guests:
+        anchors.append((actor.get("figure") as Node3D).position)
+    effect.call("_process", 180.0)
+    for i in range(guests.size()):
+        var actor: Node3D = guests[i]
+        actor.call("_process", 180.0)
         var figure := actor.get("figure") as Node3D
-        var before := Vector2(figure.position.x, figure.position.z)
-        var should_stand := str(actor.get("seat_kind")) == "sofa"
-        if bool(actor.get("rising")) != should_stand:
-            _fail("Premium audience unsafe seat transition")
+        if not figure.position.is_equal_approx(anchors[i]) or actor.has_method("start_standing"):
+            _fail("Audience must stay seated indefinitely")
             return false
-        actor.call("_process", 6.0)
-        if bool(actor.get("standing")) != should_stand or before.distance_to(Vector2(figure.position.x, figure.position.z)) > 0.00001:
-            _fail("Premium audience standing pose or horizontal sliding regression")
-            return false
-        if should_stand:
-            standing_count += 1
-            var spot: Vector3 = actor.global_position
-            var landing := Vector2(spot.x, spot.z)
-            for existing in landing_points:
-                if existing.distance_to(landing) < 0.70:
-                    _fail("Premium audience standing guests overlap")
-                    return false
-            landing_points.append(landing)
-    if standing_count < 10:
-        _fail("Premium audience too few safe sofa transitions")
-        return false
     adapter.call("clear")
     if hall.has_node("AnomalySilentAudience") or other.has_node("AnomalySilentAudience") or not sofa.transform.is_equal_approx(base_transform):
         _fail("Premium audience cleanup changed authored room")
