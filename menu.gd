@@ -373,6 +373,9 @@ func _on_quit() -> void:
         dialog.title = "Casino Anomaly"
         dialog.dialog_text = "Spiel beenden?" if Controls.pref(self, "language", "en") == "de" else "Quit the game?"
         add_child(dialog)
+        MenuStyle.apply_confirmation(dialog,true)
+        dialog.ok_button_text = "Beenden" if Controls.pref(self,"language","en") == "de" else "Quit"
+        dialog.cancel_button_text = "Abbrechen" if Controls.pref(self,"language","en") == "de" else "Cancel"
         MenuStyle.attach_sound(dialog.get_ok_button(), "navigation")
         MenuStyle.attach_sound(dialog.get_cancel_button(), "back")
         dialog.confirmed.connect(_quit_confirmed)

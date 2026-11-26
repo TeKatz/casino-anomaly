@@ -135,6 +135,7 @@ func _ready() -> void:
     preview_dialog = ConfirmationDialog.new()
     preview_dialog.process_mode = Node.PROCESS_MODE_ALWAYS
     add_child(preview_dialog)
+    MenuStyle.apply_confirmation(preview_dialog)
     MenuStyle.attach_sound(preview_dialog.get_ok_button(), "navigation")
     MenuStyle.attach_sound(preview_dialog.get_cancel_button(), "back")
     preview_dialog.confirmed.connect(func() -> void: settings_node.confirm_display_preview())
@@ -142,6 +143,7 @@ func _ready() -> void:
     reset_dialog = ConfirmationDialog.new()
     reset_dialog.process_mode = Node.PROCESS_MODE_ALWAYS
     add_child(reset_dialog)
+    MenuStyle.apply_confirmation(reset_dialog)
     MenuStyle.attach_sound(reset_dialog.get_ok_button(), "navigation")
     MenuStyle.attach_sound(reset_dialog.get_cancel_button(), "back")
     reset_dialog.confirmed.connect(_confirm_reset)
@@ -293,6 +295,7 @@ func _line(caption: String) -> HBoxContainer:
 func _select(caption: String, key: String, choices: Array, description: String = "") -> void:
     var line := _line(caption)
     var dropdown := OptionButton.new()
+    dropdown.name = "Option_" + key
     dropdown.custom_minimum_size = Vector2(215, 36)
     # Long hardware names must not change the natural width of the panel.
     dropdown.fit_to_longest_item = false
@@ -307,7 +310,7 @@ func _select(caption: String, key: String, choices: Array, description: String =
         dropdown.add_item(str(choices[i][0]))
         dropdown.set_item_metadata(i, choices[i][1])
         dropdown.get_popup().set_item_tooltip(i, str(choices[i][0]))
-        if choices[i][1] == settings_node.get_option(key):
+        if choices[i][1] == settings_node.get_option(key) or (key == "ui_scale" and is_equal_approx(float(choices[i][1]),float(settings_node.get_option(key)))):
             dropdown.select(i)
     if dropdown.selected >= 0:
         dropdown.tooltip_text = dropdown.get_item_text(dropdown.selected) + ("\n" + description if not description.is_empty() else "")
@@ -315,6 +318,8 @@ func _select(caption: String, key: String, choices: Array, description: String =
         dropdown.tooltip_text = dropdown.get_item_text(index) + ("\n" + description if not description.is_empty() else "")
         if key in ["window_mode", "resolution", "monitor"]:
             settings_node.preview_display(key, choices[index][1])
+        elif key == "ui_scale":
+            settings_node.call_deferred("set_option",key,choices[index][1])
         else:
             settings_node.set_option(key, choices[index][1])
         if key == "graphics_preset":
@@ -384,6 +389,8 @@ func _category(index: int) -> String:
 func _request_reset(all_settings: bool) -> void:
     reset_everything = all_settings
     reset_dialog.title = _tr("Restore defaults", "Standardwerte")
+    reset_dialog.ok_button_text = _tr("Restore","Zurücksetzen")
+    reset_dialog.cancel_button_text = _tr("Cancel","Abbrechen")
     reset_dialog.dialog_text = _tr("Restore the selected settings to their defaults? Save games are unaffected.", "Ausgewählte Einstellungen zurücksetzen? Spielstände bleiben erhalten.")
     reset_dialog.popup_centered()
 
@@ -616,7 +623,10 @@ func _accessibility() -> void:
     _toggle(_tr("Steady decorative lighting", "Dekorative Lichtbewegung reduzieren"), "reduce_light_motion", _tr("Only decorative pulses; actual anomaly lights stay unchanged.", "Nur dekoratives Pulsieren; echte Lichtanomalien bleiben unverändert."))
     _toggle(_tr("Soften lighting transitions", "Lichtübergänge abmildern"), "soft_light_transitions", _tr("Blends the Backrooms entry environment. Does not remove lighting anomalies.", "Überblendet die Umgebung am Backrooms-Eingang. Entfernt keine Lichtanomalien."))
     _section(_tr("Readability", "Lesbarkeit"))
-    _slider(_tr("UI scale", "UI-Skalierung"), "ui_scale", 0.75, 1.5, 0.05, "%")
+    var scale_choices: Array = []
+    for percent in range(75,151,5):
+        scale_choices.append(["%d%%" % percent,float(percent)/100.0])
+    _select(_tr("UI scale", "UI-Skalierung"), "ui_scale", scale_choices, _tr("Applied after selecting a fixed step.", "Wird nach Auswahl einer festen Stufe angewendet."))
     _select(_tr("Menu text size", "Menü-Schriftgröße"), "ui_text_size", _size_choices())
     _toggle(_tr("High contrast UI", "Kontrastreiche UI"), "high_contrast_ui")
     _select(_tr("Color assistance (UI icons)", "Farbhilfe (UI-Symbole)"), "color_assistance", [[_tr("Off", "Aus"), "off"], ["Protanopia", "protan"], ["Deuteranopia", "deutan"], ["Tritanopia", "tritan"]], _tr("Changes UI accent icons only; the casino colors are unmodified.", "Ändert nur UI-Akzentsymbole; Casinofarben bleiben unverändert."))

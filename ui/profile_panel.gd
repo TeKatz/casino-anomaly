@@ -133,11 +133,13 @@ func _ready() -> void:
     delete_dialog = ConfirmationDialog.new()
     delete_dialog.confirmed.connect(_delete_target)
     add_child(delete_dialog)
+    MenuStyle.apply_confirmation(delete_dialog,true)
     MenuStyle.attach_sound(delete_dialog.get_ok_button(), "navigation")
     MenuStyle.attach_sound(delete_dialog.get_cancel_button(), "back")
     new_run_dialog = ConfirmationDialog.new()
     new_run_dialog.confirmed.connect(_new_run)
     add_child(new_run_dialog)
+    MenuStyle.apply_confirmation(new_run_dialog)
     MenuStyle.attach_sound(new_run_dialog.get_ok_button(), "confirmation")
     MenuStyle.attach_sound(new_run_dialog.get_cancel_button(), "back")
 
@@ -293,6 +295,8 @@ func _request_new_run() -> void:
         return
     var state := get_node_or_null("/root/LoopState")
     if state != null and state.has_continue() and bool(Controls.pref(self, "confirm_new_run", true)):
+        new_run_dialog.ok_button_text = _word("Neuer Durchlauf","New run")
+        new_run_dialog.cancel_button_text = _word("Abbrechen","Cancel")
         new_run_dialog.title = _word("Neuer Durchlauf", "New run")
         new_run_dialog.dialog_text = _word(
             "Durchlauf dieses Modus überschreiben? Andere Modi und Profilfortschritt bleiben erhalten.",
@@ -339,6 +343,8 @@ func _request_delete_slot(slot: int) -> void:
         return
     delete_target = slot
     delete_dialog.title = _word("Profil löschen", "Delete profile")
+    delete_dialog.ok_button_text = _word("Löschen","Delete")
+    delete_dialog.cancel_button_text = _word("Abbrechen","Cancel")
     delete_dialog.dialog_text = _word(
         "Speicherplatz %d und sämtliche Entdeckungen unwiderruflich löschen?",
         "Permanently delete slot %d and all discoveries?") % slot

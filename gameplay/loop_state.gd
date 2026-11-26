@@ -33,6 +33,9 @@ var anomaly_id := ""
 var last_anomaly_id := ""
 var round_debugged := false
 var last_verdict: Dictionary = {}
+# Accumulated independently of the profile's bounded decision journal.
+var run_report: Dictionary = {}
+var report_pending := false
 # Developer overrides are one-shot and intentionally not written to saves.
 var debug_next_round_requested := false
 var debug_next_anomaly_id := ""
@@ -61,6 +64,8 @@ func reset_runtime() -> void:
     last_anomaly_id = ""
     round_debugged = false
     last_verdict.clear()
+    run_report.clear()
+    report_pending = false
     debug_clear_next_round()
 
 
@@ -85,6 +90,8 @@ func start_new_run(next_mode: String = "classic") -> void:
     last_anomaly_id = ""
     round_debugged = false
     last_verdict.clear()
+    run_report.clear()
+    report_pending = false
     debug_clear_next_round()
     save_run()
 
@@ -326,15 +333,71 @@ func _resolve_decision(choose_anomaly: bool, correct: bool) -> Dictionary:
     anomaly_id = ""
     round_debugged = false
     last_verdict = verdict.duplicate(true)
-    save_run()
     # Local QA instances may use the same script; only the live autoload
     # can update the selected player's permanent discovery history.
+    var award: Dictionary = {}
     if is_inside_tree() and self == get_node_or_null("/root/LoopState"):
         var profiles := get_node_or_null("/root/ProfileManager")
         if profiles != null and profiles.active_slot > 0 \
                 and save_path == profiles.run_path(profiles.active_slot, mode):
-            profiles.record_decision(verdict)
+            award = profiles.record_decision(verdict)
+    _accumulate_report(verdict,award)
+    if finished:
+        report_pending = true
+    save_run()
     return verdict
+
+
+func _accumulate_report(verdict: Dictionary, award: Dictionary) -> void:
+    var id: String = str(verdict.get("anomaly_id",""))
+    var correct: bool = bool(verdict.get("correct",false))
+    run_report["tracked_rooms"] = int(run_report.get("tracked_rooms",0))+1
+    run_report["mode"] = mode
+    run_report["rooms"] = visited_loops
+    run_report["correct"] = visited_loops-mistakes
+    run_report["mistakes"] = mistakes
+    run_report["resets"] = mistakes if mode in ["classic","nightmare","endless"] else 0
+    run_report["streak"] = int(verdict.get("progress",correct_streak))
+    run_report["finished"] = finished
+    run_report["failed"] = bool(verdict.get("failed",false))
+    run_report["assisted"] = run_assisted
+    run_report["elapsed_seconds"] = elapsed_seconds
+    run_report["score_seconds"] = float(verdict.get("score_seconds",0.0))
+    if bool(verdict.get("debugged",false)):
+        run_report["debugged_rooms"] = int(run_report.get("debugged_rooms",0))+1
+        return
+    if not id.is_empty():
+        if correct:
+            var identified: Dictionary = run_report.get("identified",{})
+            identified[id] = int(identified.get(id,0))+1
+            run_report["identified"] = identified
+            if bool(award.get("new_discovery",false)):
+                var discovered: Dictionary = run_report.get("new_discoveries",{})
+                discovered[Catalog.family(id)] = true
+                run_report["new_discoveries"] = discovered
+        else:
+            run_report["missed_anomalies"] = int(run_report.get("missed_anomalies",0))+1
+    elif correct:
+        run_report["normal_correct"] = int(run_report.get("normal_correct",0))+1
+    if not award.is_empty():
+        if not run_report.has("xp_before"):
+            run_report["xp_before"] = int(award.get("xp_before",0))
+        run_report["xp_after"] = int(award.get("xp_after",0))
+        run_report["xp_earned"] = int(run_report.get("xp_earned",0))+int(award.get("xp_earned",0))
+        for key in ["new_achievements","new_modes"]:
+            var collected: Dictionary = run_report.get(key,{})
+            for value in award.get(key,[]):
+                collected[str(value)] = true
+            run_report[key] = collected
+
+
+func get_run_report() -> Dictionary:
+    return run_report.duplicate(true)
+
+
+func acknowledge_run_report() -> void:
+    report_pending = false
+    save_run()
 
 
 func save_run() -> void:
@@ -356,6 +419,8 @@ func save_run() -> void:
     config.set_value("run", "last_anomaly_id", last_anomaly_id)
     config.set_value("run", "round_debugged", round_debugged)
     config.set_value("run", "last_verdict", last_verdict)
+    config.set_value("run", "run_report", run_report)
+    config.set_value("run", "report_pending", report_pending)
     var error := config.save(save_path)
     if error != OK:
         push_warning("Anomaly run could not be saved: %s" % error)
@@ -393,9 +458,12 @@ func load_run() -> bool:
         last_anomaly_id = ""
     var saved_verdict: Variant = config.get_value("run", "last_verdict", {})
     last_verdict = saved_verdict if saved_verdict is Dictionary else {}
+    var saved_report: Variant = config.get_value("run","run_report",{})
+    run_report = saved_report.duplicate(true) if saved_report is Dictionary else {}
+    report_pending = bool(config.get_value("run","report_pending",false)) and finished and not run_report.is_empty()
     classic_room_history.clear()
     if mode == "classic":
-        var saved_history: Variant = config.get_value("run", "classic_room_history", null)
+        var saved_history: Variant = config.get_value("run", "classic_room_history", []) if config.has_section_key("run","classic_room_history") else null
         if saved_history is Array:
             for item in saved_history:
                 if item is bool:

@@ -234,3 +234,37 @@ static func apply_progress(bar: ProgressBar, target: float) -> void:
         else:
             bar.value = value
     , bar.min_value, target, 0.32).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+
+
+## Shared native modal skin, including its embedded title bar.
+static func apply_confirmation(dialog: ConfirmationDialog, destructive: bool = false) -> void:
+    var skin: Theme = Theme.new()
+    skin.default_font_size = 17
+    var frame: StyleBoxFlat = panel()
+    frame.shadow_size = 12
+    frame.expand_margin_top = 38.0
+    skin.set_stylebox("embedded_border","Window",frame)
+    skin.set_stylebox("embedded_unfocused_border","Window",frame)
+    skin.set_color("title_color","Window",GOLD)
+    skin.set_font_size("title_font_size","Window",20)
+    skin.set_constant("title_height","Window",38)
+    skin.set_color("font_color","Label",PALE)
+    var body: StyleBoxFlat = flat_surface(Color("#17181d"),Color("#17181d"),4,0)
+    body.content_margin_left = 22.0
+    body.content_margin_right = 22.0
+    body.content_margin_top = 18.0
+    body.content_margin_bottom = 18.0
+    skin.set_stylebox("panel","AcceptDialog",body)
+    skin.set_constant("buttons_separation","AcceptDialog",16)
+    dialog.theme = skin
+    dialog.min_size = Vector2i(420,150)
+    dialog.dialog_autowrap = true
+    dialog.get_label().custom_minimum_size.x = 360.0
+    dialog.get_label().autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+    apply_button(dialog.get_ok_button(),true,"red" if destructive else "green")
+    apply_button(dialog.get_cancel_button())
+    dialog.get_ok_button().custom_minimum_size = Vector2(132,42)
+    dialog.get_cancel_button().custom_minimum_size = Vector2(132,42)
+    attach_sound(dialog.get_ok_button(),"confirmation")
+    attach_sound(dialog.get_cancel_button(),"back")
+    dialog.set_meta("_casino_confirmation",true)

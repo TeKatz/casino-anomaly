@@ -240,12 +240,18 @@ func latest_report() -> Dictionary:
     return history.back().duplicate(true) if not history.is_empty() else {}
 
 
-func record_decision(verdict: Dictionary) -> void:
+func record_decision(verdict: Dictionary) -> Dictionary:
     # Developer-forced rooms never count toward player collection/statistics.
     if not profile_exists(active_slot) or not bool(verdict.get("valid", false)) \
             or bool(verdict.get("debugged", false)):
-        return
+        return {}
     Progress.migrate(stats, records)
+    var previous_xp: int = int(stats.get("xp",0))
+    var previous_achievements: Dictionary = (stats.get("achievements",{}) as Dictionary).duplicate()
+    var previous_unlocks: Array[String] = []
+    for mode_id in Modes.IDS:
+        if Modes.unlock(str(mode_id),stats,records):
+            previous_unlocks.append(str(mode_id))
     var id := str(verdict.get("anomaly_id", ""))
     var correct := bool(verdict.get("correct", false))
     stats["rooms"] = int(stats.get("rooms", 0)) + 1
@@ -282,10 +288,25 @@ func record_decision(verdict: Dictionary) -> void:
     var report := verdict.duplicate(true)
     report["xp_earned"] = Progress.award(stats, records, verdict, first)
     Progress.evaluate(stats, records)
+    var earned: Array[String] = []
+    var current_achievements: Dictionary = stats.get("achievements",{})
+    for achievement_id in current_achievements:
+        if bool(current_achievements[achievement_id]) and not bool(previous_achievements.get(achievement_id,false)):
+            earned.append(str(achievement_id))
+    var unlocked_modes: Array[String] = []
+    for mode_id in Modes.IDS:
+        if not previous_unlocks.has(str(mode_id)) and Modes.unlock(str(mode_id),stats,records):
+            unlocked_modes.append(str(mode_id))
+    report["new_achievements"] = earned
+    report["new_modes"] = unlocked_modes
+    report["new_discovery"] = first
+    report["xp_before"] = previous_xp
+    report["xp_after"] = int(stats.get("xp",0))
     history.append(report)
     while history.size() > HISTORY_LIMIT:
         history.pop_front()
     _save_progress()
+    return report
 
 
 func _migration_marker() -> String:

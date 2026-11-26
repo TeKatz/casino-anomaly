@@ -106,8 +106,7 @@ func _ready() -> void:
     confirmation.cancel_button_text = Loc.t("pause.cancel", self)
     confirmation.process_mode = Node.PROCESS_MODE_ALWAYS
     panel_root.add_child(confirmation)
-    MenuStyle.apply_button(confirmation.get_ok_button(), true)
-    MenuStyle.apply_button(confirmation.get_cancel_button())
+    MenuStyle.apply_confirmation(confirmation)
     MenuStyle.attach_sound(confirmation.get_cancel_button(), "back")
     visible = false
     var game_settings = get_node_or_null("/root/GameSettings")
