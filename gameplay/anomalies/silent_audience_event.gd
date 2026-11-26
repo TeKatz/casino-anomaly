@@ -527,7 +527,8 @@ func _advance_standing() -> void:
         var outward := smoothstep(0.0,0.43,rate)
         var start: Vector3 = person["start_pos"]
         var destination: Vector3 = person["target_pos"]
-        figure.position = start.lerp(destination,Vector3(outward,phase,outward))
+        figure.position = Vector3(lerpf(start.x,destination.x,outward),
+            lerpf(start.y,destination.y,phase),lerpf(start.z,destination.z,outward))
         Pose.blend(rig,person["sit_pose"],person["upright_pose"],
             phase,int(person["personality"]))
         var anchor: Vector3 = person["anchor"]
@@ -551,7 +552,7 @@ func _freeze_finale() -> void:
         if bool(person["standing"]):
             var body := person["collider"] as StaticBody3D
             if is_instance_valid(body):
-                (body.get_node("Torso") as CollisionShape3D).shape.height = 1.74
+                ((body.get_node("Torso") as CollisionShape3D).shape as CapsuleShape3D).height = 1.74
 
 func _silence(weight: float) -> void:
     var director := get_node_or_null("/root/AudioDirector")

@@ -734,7 +734,7 @@ func _verify_silent_audience(hall: Node3D, other: Node3D) -> bool:
     var kinds := {}
     for site in sites:
         kinds[str(site["kind"])] = int(kinds.get(str(site["kind"]),0))+1
-    if int(kinds.get("sofa",0)) < 5 or int(kinds.get("bar",0)) < 7 or int(kinds.get("extra_stool",0)) < 4:
+    if int(kinds.get("sofa",0)) < 10 or int(kinds.get("bar",0)) < 6 or int(kinds.get("extra_stool",0)) < 4:
         _fail("Silent Audience has no real seating across lounge, bar and gaming tables")
         return false
     # A staged room has no live actor progression or persistent audio duck.
@@ -764,24 +764,53 @@ func _verify_silent_audience(hall: Node3D, other: Node3D) -> bool:
         _fail("Silent Audience could not create a seated gaming-table guest")
         return false
     var guests: Array = effect.get("guests")
-    if guests.size() != 2 or not effect.find_children("*","CollisionObject3D",true,false).is_empty():
-        _fail("Silent Audience spawned active colliders or wrong guest count")
+    var colliders := effect.find_children("*","StaticBody3D",true,false)
+    if guests.size()!=2 or colliders.size()!=2:
+        _fail("Silent Audience should have one blocking body per visible guest")
         return false
+    for body in colliders:
+        if (body as StaticBody3D).collision_layer==0 or not ((body as StaticBody3D).get_node("Torso") as CollisionShape3D).shape is CapsuleShape3D:
+            _fail("Silent Audience character colliders must be real capsules")
+            return false
     for person in guests:
         var animator := person["animator"] as AnimationPlayer
         var skeleton := person["skeleton"] as Skeleton3D
-        if animator == null or skeleton == null or skeleton.find_bone("Head_06") < 0 or not animator.has_animation(str(person["stand_clip"])):
-            _fail("Silent Audience figures must retain a real animated skeleton")
+        var tree := person["tree"] as AnimationTree
+        var figure := person["figure"] as Node3D
+        if animator == null or skeleton == null or skeleton.find_bone("Head_06") < 0 or tree==null or not tree.active:
+            _fail("Silent Audience needs animated skeletons with individual face/body idle trees")
+            return false
+        var skin_visible := false
+        var unique_suit := false
+        for item in figure.find_children("*","MeshInstance3D",true,false):
+            var mesh := item as MeshInstance3D
+            if str(mesh.name).to_lower().contains("body") and mesh.material_overlay==null:
+                skin_visible = true
+            if str(mesh.name).to_lower().contains("suit") and mesh.get_surface_override_material(0) is ShaderMaterial:
+                unique_suit = true
+        if not skin_visible or not unique_suit:
+            _fail("Silent Audience must show genuine faces and individualized clothing")
             return false
     effect.set("target_count",2)
     effect.call("_stand_together")
     if not bool(effect.get("finale_started")):
         _fail("Silent Audience did not start its synchronized finale")
         return false
+    if float(effect.get("finish_after"))<=0.0:
+        _fail("Silent Audience finale did not plan collision-safe individual rise timing")
+        return false
+    var standing_count := 0
     for person in guests:
-        if not (person["animator"] as AnimationPlayer).is_playing():
-            _fail("Silent Audience did not animate all standing guests together")
-            return false
+        if bool(person["standing"]):
+            standing_count += 1
+            if (person["sit_pose"] as Array).is_empty() or (person["upright_pose"] as Array).is_empty():
+                _fail("Silent Audience must blend genuine rigged seated/standing poses")
+                return false
+    if standing_count==0:
+        _fail("Silent Audience had no collision-safe standing positions")
+        return false
+    effect.set("elapsed",float(effect.get("finale_at"))+float(effect.get("finish_after")))
+    effect.call("_advance_standing")
     effect.call("_freeze_finale")
     if not bool(effect.get("finale_frozen")):
         _fail("Silent Audience did not freeze the final standing tableau")
