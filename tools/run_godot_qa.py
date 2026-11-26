@@ -11,7 +11,7 @@ def classify_line(line, expected, passed, platform):
     clean = re.sub(r"\x1b\[[0-?]*[ -/]*[@-~]", "", line).strip()
     passed = passed or clean == expected
     shutdown = (
-        passed and platform == "win32" and re.fullmatch(
+        passed and platform in ("win32", "linux") and re.fullmatch(
             r"ERROR: \d+ resources? still in use at exit \(run with --verbose for details\)\.?",
             clean,
         ) is not None
@@ -58,7 +58,7 @@ def main():
                 log.flush()
                 passed, fatal, shutdown = classify_line(line, args.expected, passed, sys.platform)
                 if shutdown:
-                    print("::warning::Godot Windows shutdown resource diagnostic after successful QA; investigate cleanup separately.", flush=True)
+                    print("::warning::Godot shutdown resource diagnostic after successful QA; investigate cleanup separately.", flush=True)
                 failed |= fatal
             code = proc.wait()
         finally:

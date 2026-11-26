@@ -22,8 +22,10 @@ class LogClassifierTests(unittest.TestCase):
     def test_no_marker_yet(self):
         self.assertEqual(self.classify(self.leak, passed=False), (False, True, False))
 
-    def test_linux_stays_strict(self):
-        self.assertEqual(self.classify(self.leak, platform="linux"), (True, True, False))
+    def test_linux_known_shutdown_diagnostic(self):
+        self.assertEqual(self.classify(self.leak, platform="linux"), (True, False, True))
+        self.assertEqual(self.classify(self.leak, passed=False, platform="linux"), (False, True, False))
+        self.assertEqual(self.classify("ERROR: unrelated error", platform="linux"), (True, True, False))
 
     def test_real_errors_stay_fatal(self):
         for line in ("ERROR: failed", "SCRIPT ERROR: invalid value", "Parse Error: invalid syntax",

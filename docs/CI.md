@@ -28,3 +28,5 @@ Run individual groups locally:
 python tools/run_qa_group.py /path/to/godot baseline --logs qa-logs
 python -m unittest discover -s tests -p 'test_*.py'
 ```
+
+Godot's exact shutdown resource-retention diagnostic is reported as a warning after an exact PASS marker on Windows and Linux, and never overrides a nonzero exit, timeout, or actual runtime error. Linux full-asset CI confirmed the same shutdown diagnostic (baseline, Flood, Silent Audience, croupier intro). Resource lifetime remains a separate unresolved issue; the warning and full logs are retained.
