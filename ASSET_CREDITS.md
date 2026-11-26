@@ -154,4 +154,4 @@ audio if the optional asset pack has not yet been installed.
 
 ## The Escort animation library
 
-Universal Animation Library (Standard), by Quaternius, CC0 1.0 Universal. Original: https://quaternius.com/packs/universalanimationlibrary.html. The user-supplied GLB is checksum-pinned and installed by tools/import_escort_animations.py. Only authored Idle and Walk_Formal clips drive the Security Guard through Godot's native humanoid retargeting. The backward gait reverses the formal walk. The original character asset/license remains unchanged.
+Universal Animation Library (Standard), by Quaternius, CC0 1.0 Universal. Original: https://quaternius.com/packs/universalanimationlibrary.html. The user-supplied GLB is checksum-pinned and installed by tools/import_escort_animations.py. Only authored Idle, Walk_Formal and Jog_Fwd clips drive the Security Guard through Godot's native humanoid retargeting. The backward gait reverses the formal walk. The original character asset/license remains unchanged.

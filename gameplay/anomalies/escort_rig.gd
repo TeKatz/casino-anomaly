@@ -26,6 +26,11 @@ var figure: Node3D
 var source: Node3D
 var idle_name: StringName
 var walk_name: StringName
+var jog_name: StringName
+# Original root-motion data: 1.30m / 1.333s walk, 5.0m / 0.933s jog.
+# The guard is approximately 6% taller than the source mannequin.
+const WALK_STRIDE_SPEED := 1.04
+const JOG_STRIDE_SPEED := 5.68
 var blend := 0.0
 var ready_to_play := false
 
@@ -117,7 +122,8 @@ func configure() -> bool:
     player = players[0] as AnimationPlayer
     var idle_key: StringName = _find_clip(player,"idle")
     var walk_key: StringName = _find_clip(player,"walkformal")
-    if idle_key.is_empty() or walk_key.is_empty():
+    var jog_key: StringName = _find_clip(player,"jogfwd")
+    if idle_key.is_empty() or walk_key.is_empty() or jog_key.is_empty():
         return false
     player.stop()
     var source_names: Dictionary = {}
@@ -142,7 +148,8 @@ func configure() -> bool:
                     side_name+"Hand"+digit+str(i+1),source_names,target_names)
     var idle: Animation = _clone_clip(player.get_animation(idle_key),source_names)
     var walk: Animation = _clone_clip(player.get_animation(walk_key),source_names)
-    if idle.get_track_count() < 18 or walk.get_track_count() < 18 or walk.length < 0.5:
+    var jog: Animation = _clone_clip(player.get_animation(jog_key),source_names)
+    if idle.get_track_count() < 18 or walk.get_track_count() < 18 or jog.get_track_count() < 18 or walk.length < 0.5:
         return false
     # Measure the visible original rig once in model/world coordinates.
     target.reset_bone_poses()
@@ -197,15 +204,18 @@ func configure() -> bool:
     var library: AnimationLibrary = AnimationLibrary.new()
     library.add_animation(&"Idle",idle)
     library.add_animation(&"WalkFormal",walk)
+    library.add_animation(&"Jog",jog)
     player.add_animation_library(&"escort",library)
     idle_name = &"escort/Idle"
     walk_name = &"escort/WalkFormal"
+    jog_name = &"escort/Jog"
     var blend_space: AnimationNodeBlendSpace1D = AnimationNodeBlendSpace1D.new()
-    blend_space.min_space = -1.0
-    blend_space.max_space = 1.0
-    blend_space.add_blend_point(_clip_node(walk_name,true),-1.0)
+    blend_space.min_space = -WALK_STRIDE_SPEED
+    blend_space.max_space = JOG_STRIDE_SPEED
+    blend_space.add_blend_point(_clip_node(walk_name,true),-WALK_STRIDE_SPEED)
     blend_space.add_blend_point(_clip_node(idle_name,false),0.0)
-    blend_space.add_blend_point(_clip_node(walk_name,false),1.0)
+    blend_space.add_blend_point(_clip_node(walk_name,false),WALK_STRIDE_SPEED)
+    blend_space.add_blend_point(_clip_node(jog_name,false),JOG_STRIDE_SPEED)
     var graph: AnimationNodeBlendTree = AnimationNodeBlendTree.new()
     graph.add_node(&"Locomotion",blend_space,Vector2(0,0))
     graph.add_node(&"Speed",AnimationNodeTimeScale.new(),Vector2(220,0))
@@ -234,7 +244,9 @@ func _clip_node(key: StringName, reverse: bool) -> AnimationNodeAnimation:
 func drive(signed_speed: float, delta: float) -> void:
     if not ready_to_play:
         return
-    var desired: float = clampf(signed_speed/1.35,-1.0,1.0)
-    blend = move_toward(blend,desired,delta*4.0)
+    var desired: float = clampf(signed_speed,-WALK_STRIDE_SPEED,JOG_STRIDE_SPEED)
+    blend = move_toward(blend,desired,delta*12.0)
     tree.set("parameters/Locomotion/blend_position",blend)
-    tree.set("parameters/Speed/scale",clampf(absf(signed_speed)/1.35,0.82,2.5) if absf(signed_speed)>0.15 else 1.0)
+    # Scale the authored stride to actual velocity, not requested movement.
+    var nominal: float = maxf(absf(blend),WALK_STRIDE_SPEED)
+    tree.set("parameters/Speed/scale",clampf(absf(signed_speed)/nominal,0.82,3.2) if absf(signed_speed)>0.15 else 1.0)

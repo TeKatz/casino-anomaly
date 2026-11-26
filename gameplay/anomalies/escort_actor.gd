@@ -6,7 +6,8 @@ enum State { WAIT, APPROACH, OBSERVE, RETREAT }
 const NEAR := 2.25
 const FAR := 2.95
 const TARGET := 2.60
-const WALK := 1.65
+const WALK := 1.25
+const MAX_FOLLOW := 6.3
 const MAX_RETREAT := 4.6
 const ACCEL := 8.0
 var state: State = State.WAIT
@@ -87,7 +88,11 @@ func _navigation_baked() -> void:
     nav_region = NavigationRegion3D.new()
     nav_region.name = "EscortRoomNavigation"
     nav_region.navigation_mesh = nav_mesh
-    hall.add_child(nav_region)
+    # Parent ownership is the actor; top-level transform keeps the mesh
+    # fixed in room space even when the character walks.
+    add_child(nav_region)
+    nav_region.top_level = true
+    nav_region.global_transform = hall.global_transform
     nav_region.set_navigation_map(nav_map)
     nav_ready = true
 
@@ -212,7 +217,9 @@ func _physics_process(delta: float) -> void:
     var speed: float = 0.0
     if state == State.APPROACH:
         desired = toward
-        speed = minf(WALK,maxf(0.0,(distance-TARGET)*2.2))
+        var leaving: float = maxf(0.0,_flat(p.velocity).dot(toward))
+        var pursuit_speed: float = clampf(leaving+0.60,WALK,MAX_FOLLOW)
+        speed = minf(pursuit_speed,maxf(0.0,(distance-TARGET)*2.2))
         if not _direction_clear(desired,0.65):
             desired = _path_direction(desired,p.global_position,delta)
     elif state == State.RETREAT:
@@ -238,7 +245,8 @@ func _physics_process(delta: float) -> void:
 func _exit_tree() -> void:
     if is_instance_valid(nav_region):
         nav_region.set_navigation_map(RID())
-        nav_region.queue_free()
+        # Owned child is disposed with this actor; detach it from the
+        # private map before releasing the RID.
     if nav_map.is_valid():
         NavigationServer3D.free_rid(nav_map)
         nav_map = RID()

@@ -22,7 +22,8 @@ are not altered. The mannequin is hidden; native RetargetModifier3D transfers
 authored rotations onto the Security Guard. The model keeps its bone lengths
 and scale. Reverse formal walk is a temporary substitute for a dedicated
 backpedal clip; this library has none. The AnimationTree blends forward,
-idle, and reverse with speed matching. No Silent Audience behavior is restored.
+idle, reverse and a forward jog with measured stride-speed matching; the jog
+lets the guard keep up if the player moves away. No Silent Audience behavior is restored.
 
 ## Review
 Select The Escort in the developer anomaly menu after the reference room.

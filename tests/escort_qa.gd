@@ -30,6 +30,10 @@ func _run() -> void:
         _fail("Native animation rig unavailable")
         return
     actor.set_physics_process(false)
+    await physics_frame
+    if not actor._place_initial():
+        _fail("No clear floor spawn in real casino aisle")
+        return
     var rig = actor.rig
     if rig.target.find_bone("LeftFoot") < 0 or rig.target.find_bone("RightHand") < 0 or not rig.modifier.is_rotation_enabled():
         _fail("Required humanoid mappings missing")
@@ -62,10 +66,6 @@ func _run() -> void:
     if observed.size() < 2 or not changed:
         _fail("Native retarget did not animate actual guard thigh")
         return
-    await physics_frame
-    if not actor._place_initial():
-        _fail("No clear floor spawn in real casino aisle")
-        return
     var initial: Vector3 = actor.global_position
     world.set_meta("_streaming_standby",true)
     actor._physics_process(0.2)
@@ -73,6 +73,38 @@ func _run() -> void:
     if not actor.global_position.is_equal_approx(initial):
         _fail("Guard moved in standby room")
         return
+    # Real body movement and physics, not solely the distance function.
+    var avatar: CharacterBody3D = world.get_node_or_null("Player") as CharacterBody3D
+    if avatar == null:
+        _fail("Room player missing")
+        return
+    avatar.set_physics_process(false)
+    avatar.velocity = Vector3.ZERO
+    var axis: Vector3 = world.global_basis.x.normalized()
+    if not actor._direction_clear(axis,0.65):
+        axis = -axis
+    if not actor._direction_clear(axis,0.65):
+        _fail("No clear approach lane")
+        return
+    avatar.global_position = initial+axis*5.0+Vector3.UP*0.95
+    actor.state = Actor.State.APPROACH
+    actor.set_physics_process(true)
+    for frame in range(35):
+        await physics_frame
+    var approached: Vector3 = actor.global_position
+    if (approached-initial).dot(axis) < 0.12:
+        _fail("Guard did not walk toward a real player")
+        return
+    actor.state = Actor.State.OBSERVE
+    actor.velocity = Vector3.ZERO
+    avatar.global_position = approached+axis*1.4+Vector3.UP*0.95
+    for frame in range(35):
+        await physics_frame
+    var retreated: Vector3 = actor.global_position
+    if (retreated-approached).dot(axis) > -0.10:
+        _fail("Guard did not retreat from a real player")
+        return
+    actor.set_physics_process(false)
     adapter.clear()
     if world.has_node("AnomalyEscort"):
         _fail("Actor leaked after anomaly cleanup")
