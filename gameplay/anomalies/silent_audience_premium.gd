@@ -56,30 +56,55 @@ func _collect_seats() -> void:
     for i in [1,3]:
         _place_on(hall.get_node_or_null("ModelInteriors/SideStool_%02d" % i) as Node3D,"bar",PI*0.5)
     for x in [-13.6,-20.3,-27.2,-41.1]:
-        # GamingStool crown is at 0.638 m; hip rests above it.
-        seat_sites.append({"anchor":Vector3(x,0.728,-8.68),"yaw":PI,
-            "kind":"table","floor_y":0.0,"stool":Vector3(x,0.005,-8.68)})
+        # GamingStool crown is 0.638 m above its base. Place the pelvis
+        # relative to that surface, slightly toward the table.
+        var stool_at := Vector3(x,0.005,-8.68)
+        var surface := stool_at + Vector3(0,0.638,-0.045)
+        seat_sites.append({"anchor":surface+Vector3.UP*0.17,"surface":surface,
+            "yaw":PI,"kind":"table","floor_y":0.0,"front":0.265,
+            "worktop_y":0.96,"worktop_reach":0.50,"stool":stool_at})
 
 func _place_on(prop: Node3D,kind: String,yaw: float,lateral: float=0.0) -> void:
     if prop==null or not prop.visible:
         return
     var cushion: MeshInstance3D
-    if kind!="sofa":
-        cushion = prop.find_child("SoftSeatCrown",true,false) as MeshInstance3D
-    if cushion==null:
+    if kind != "sofa":
+        # Poly Haven bar stools use this additional authored upholstery.
+        cushion = prop.find_child("VelvetSeatCushion",true,false) as MeshInstance3D
+        if cushion == null:
+            cushion = prop.find_child("SoftSeatCrown",true,false) as MeshInstance3D
+    if cushion == null:
         for item in prop.find_children("*","MeshInstance3D",true,false):
             if str(item.name).to_lower().contains("seat"):
                 cushion = item as MeshInstance3D
                 break
-    if cushion==null or cushion.mesh==null:
+    if cushion == null or cushion.mesh == null:
         return
-    var bounds := (prop.global_transform.affine_inverse()*cushion.global_transform)*cushion.get_aabb()
-    var center := bounds.get_center()
-    var hip := Vector3(center.x+lateral,bounds.end.y+0.08,center.z-(0.08 if kind=="sofa" else 0.0))
-    var facing := yaw
-    if kind=="sofa":
-        facing = (hall.global_transform.affine_inverse()*prop.global_transform).basis.orthonormalized().get_euler().y+lateral*0.12
-    seat_sites.append({"anchor":hall.to_local(prop.to_global(hip)),"yaw":facing,"kind":kind,"floor_y":0.0})
+    var bounds: AABB = (prop.global_transform.affine_inverse()*cushion.global_transform)*cushion.get_aabb()
+    var center: Vector3 = bounds.get_center()
+    var facing: float = yaw
+    if kind == "sofa":
+        facing = (hall.global_transform.affine_inverse()*prop.global_transform).basis.orthonormalized().get_euler().y
+    var forward: Vector3 = Basis(Vector3.UP, facing)*Vector3.BACK
+    var surface: Vector3 = hall.to_local(prop.to_global(Vector3(center.x+lateral,bounds.end.y,center.z)))
+    var front_extent: float = -INF
+    # Project all cushion corners into the room's facing direction.
+    for x in [bounds.position.x,bounds.end.x]:
+        for z in [bounds.position.z,bounds.end.z]:
+            var corner: Vector3 = hall.to_local(prop.to_global(Vector3(float(x),bounds.end.y,float(z))))
+            front_extent = maxf(front_extent,(corner-surface).dot(forward))
+    # Shift the pelvis toward the front so knees clear the sofa skirt /
+    # stool rim before the shins descend. Keep hips on the upholstery.
+    var shift: float = maxf(0.045, front_extent-0.29) if kind == "sofa" else maxf(0.065, front_extent-0.26)
+    shift = minf(shift, maxf(0.0,front_extent-0.12))
+    surface += forward*shift
+    var floor: float = hall.to_local(prop.global_position).y
+    # Authored bar stools have a ring around the base. If the rig cannot
+    # reach it, keep the knee above the seat and allow the foot to hang.
+    seat_sites.append({"anchor":surface+Vector3.UP*0.17,"surface":surface,
+        "yaw":facing,"kind":kind,"floor_y":floor,"front":front_extent-shift,
+        "support_y":floor+0.30 if kind=="bar" else floor,
+        "worktop_y":floor+1.34,"worktop_reach":0.56})
 
 func _hidden(camera: Camera3D,player: CollisionObject3D,site: Dictionary) -> bool:
     var location := hall.to_global((site["anchor"] as Vector3)+Vector3(0,0.55,0))

@@ -783,6 +783,9 @@ func _verify_premium_audience(effect: Node3D, hall: Node3D, other: Node3D,
     for site in sites:
         var kind := str(site["kind"])
         kinds[kind] = int(kinds.get(kind, 0)) + 1
+        if not site.has("surface") or float(site.get("front",0.0)) <= 0.0:
+            _fail("Silent Audience seating needs real cushion surface and front clearance")
+            return false
     if int(kinds.get("sofa", 0)) < 10 or int(kinds.get("bar", 0)) < 6 or int(kinds.get("table", 0)) < 4:
         _fail("Premium audience missing seating areas")
         return false
