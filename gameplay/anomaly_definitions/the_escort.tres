@@ -1,0 +1,18 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://gameplay/anomaly_definition.gd" id="1_definition"]
+[ext_resource type="Script" path="res://gameplay/anomalies/escort.gd" id="2_handler"]
+
+[resource]
+script = ExtResource("1_definition")
+handler = ExtResource("2_handler")
+id = "the_escort"
+category_en = "Major Events"
+category_de = "Großereignisse"
+title_en = "The Escort"
+title_de = "Der Begleiter"
+description_en = "A silent security guard approaches, watches you from a fixed distance and retreats when you get too close. He follows when you move away."
+description_de = "Ein stummer Wachmann nähert sich, beobachtet dich aus einem festen Abstand und weicht zurück, sobald du ihm zu nahe kommst. Entfernst du dich, folgt er dir."
+target_path = "Architecture/OakWestWing"
+rarity = "exceptional"
+difficulty = 2

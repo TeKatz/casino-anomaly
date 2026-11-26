@@ -151,3 +151,7 @@ was cut into four independent footstep cues. Place the prepared files under
 `audio/flood/` (water_drop_01..03.wav and water_step_01..04.wav).
 The runtime uses the recordings when imported and falls back to procedural
 audio if the optional asset pack has not yet been installed.
+
+## The Escort animation library
+
+Universal Animation Library (Standard), by Quaternius, CC0 1.0 Universal. Original: https://quaternius.com/packs/universalanimationlibrary.html. The user-supplied GLB is checksum-pinned and installed by tools/import_escort_animations.py. Only authored Idle and Walk_Formal clips drive the Security Guard through Godot's native humanoid retargeting. The backward gait reverses the formal walk. The original character asset/license remains unchanged.

@@ -68,6 +68,7 @@ jobs:
           python3 tools/import_croupier_asset.py
           python3 tools/import_tutorial_sketchfab.py
           python3 tools/import_audio.py
+          python3 tools/import_escort_animations.py
           mkdir -p /tmp/godot-bin
           unzip -q /tmp/godot-package/godot.zip -d /tmp/godot-bin
           chmod +x /tmp/godot-bin/Godot_v4.5.1-stable_linux.x86_64
@@ -118,6 +119,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Optional Sketchfab tutorial props import failed' }
           python tools/import_audio.py
           if ($LASTEXITCODE -ne 0) { throw 'Pinned Casino Anomaly seamless audio archive unavailable or invalid' }
+          python tools/import_escort_animations.py
+          if ($LASTEXITCODE -ne 0) { throw 'Quaternius Escort animation asset unavailable' }
 
       - name: Restore pinned Windows Godot archive
         id: godot-cache
@@ -203,6 +206,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Optional Sketchfab tutorial props import failed' }
           python tools/import_audio.py
           if ($LASTEXITCODE -ne 0) { throw 'Pinned Casino Anomaly seamless audio archive unavailable or invalid' }
+          python tools/import_escort_animations.py
+          if ($LASTEXITCODE -ne 0) { throw 'Quaternius Escort animation asset unavailable' }
           "PUBLISHED_COMMIT=$env:GITHUB_SHA" >> $env:GITHUB_ENV
 
       - name: Read-only render asset audit

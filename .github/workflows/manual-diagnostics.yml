@@ -63,6 +63,7 @@ jobs:
           python3 tools/import_croupier_asset.py
           python3 tools/import_tutorial_sketchfab.py
           python3 tools/import_audio.py
+          python3 tools/import_escort_animations.py
           unzip -q /tmp/godot-package/godot.zip -d /tmp/godot-bin
           chmod +x /tmp/godot-bin/Godot_v4.5.1-stable_linux.x86_64
           mkdir -p qa-logs

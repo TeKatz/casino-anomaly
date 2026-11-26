@@ -35,6 +35,11 @@
     {
       "script": "tests/backrooms_traversal_qa.gd",
       "marker": "Casino Anomaly Backrooms traversal QA PASS"
+    },
+    {
+      "script": "tests/escort_qa.gd",
+      "marker": "Casino Anomaly Escort native animation and behavior QA PASS",
+      "seconds": 180
     }
   ],
   "intro-audio": [
