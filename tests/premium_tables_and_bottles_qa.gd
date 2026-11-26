@@ -61,12 +61,24 @@ func _run() -> void:
     var blackjack := imported.get_node_or_null("SketchfabBlackjack") as Node3D
     var body := blackjack.get_node_or_null("FurnitureCollider") as StaticBody3D if blackjack != null else null
     var collider := body.get_child(0) as CollisionShape3D if body != null and body.get_child_count() > 0 else null
-    if collider == null or not (collider.shape is ConcavePolygonShape3D):
-        _fail("Blackjack must use fitted mesh collision, not a rectangular plate")
+    if body == null or body.get_child_count() != 1 or collider == null or not (collider.shape is ConvexPolygonShape3D):
+        _fail("Blackjack must use one inexpensive fitted convex collider, not triangle mesh physics or a rectangular plate")
         return
-    var fitted := collider.shape as ConcavePolygonShape3D
-    if fitted.get_faces().size() < 3 or collider.disabled:
-        _fail("Blackjack fitted collision is empty or disabled")
+    var fitted := collider.shape as ConvexPolygonShape3D
+    if fitted.points.size() != 16 or collider.disabled or body.collision_layer == 0:
+        _fail("Blackjack tabletop prism must have 16 points and active collision")
+        return
+    var lower := fitted.points[0]
+    var upper := fitted.points[0]
+    for point in fitted.points:
+        lower = lower.min(point)
+        upper = upper.max(point)
+        # Chamfered corners must not reproduce the old rectangular blocker.
+        if absf(point.x) > 1.02 and absf(point.z) > 0.51:
+            _fail("Blackjack collider blocks the empty corners around the tabletop")
+            return
+    if not lower.is_equal_approx(Vector3(-1.24, 0.759, -0.74)) or not upper.is_equal_approx(Vector3(1.24, 0.899, 0.74)):
+        _fail("Blackjack collision does not cover the expected tabletop dimensions")
         return
     var gaming := world.get_node_or_null("GamingTables")
     for table in gaming.get_children():

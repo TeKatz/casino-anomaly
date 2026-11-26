@@ -178,6 +178,12 @@ func _ensure_table_key_lights() -> void:
             # spotlights into empty space after a streamed room rotated.
             lamp.look_at(table.to_global(Vector3(0.0, 0.42, 0.0)), Vector3.UP)
             _create_recessed_fixture(name, lamp.position)
+        # Apply the same bias to already-authored table keys as to freshly
+        # generated lights. Do not rely on a later settings notification.
+        var table_key := get_node_or_null(name) as SpotLight3D
+        if table_key != null:
+            table_key.shadow_bias = maxf(table_key.shadow_bias, 0.055)
+            table_key.shadow_normal_bias = maxf(table_key.shadow_normal_bias, 0.15)
         # Ensure the same rendered meshes that form the actual tables and
         # stools also cast light-dependent shadows on the PBR oak floor.
         for obj in table.get_children():

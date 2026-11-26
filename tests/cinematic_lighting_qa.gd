@@ -84,14 +84,15 @@ func _run() -> void:
                 or key_light.light_energy < 1.3 \
                 or key_light.spot_range < 8.0 \
                 or key_light.spot_range > 8.5 \
-                or key_light.shadow_bias < 0.055 \
-                or key_light.shadow_normal_bias < 0.15 \
-                or key_light.shadow_normal_bias > 0.18 \
+                or key_light.shadow_bias < 0.055 - 0.0001 \
+                or key_light.shadow_normal_bias < 0.15 - 0.0001 \
+                or key_light.shadow_normal_bias > 0.18 + 0.0001 \
                 or key_light.shadow_blur > 0.6 \
                 or key_light.shadow_opacity < 0.99 \
                 or key_light.distance_fade_shadow < 27.0 \
                 or not key_light.distance_fade_enabled:
-            _fail("Table lights must create real, local, budgeted shadows")
+            var detail := "missing light" if key_light == null else "%s enabled=%s energy=%.4f range=%.4f bias=%.8f normal_bias=%.8f blur=%.4f opacity=%.4f fade_shadow=%.4f fade_enabled=%s" % [key_light.name, key_light.shadow_enabled, key_light.light_energy, key_light.spot_range, key_light.shadow_bias, key_light.shadow_normal_bias, key_light.shadow_blur, key_light.shadow_opacity, key_light.distance_fade_shadow, key_light.distance_fade_enabled]
+            _fail("Table lights must create real, local, budgeted shadows: " + detail)
             return
     var gaming := hall.get_node_or_null("GamingTables") as Node3D
     if gaming == null:
