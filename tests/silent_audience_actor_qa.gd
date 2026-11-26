@@ -80,7 +80,10 @@ func _run() -> void:
             signatures[str(entry[0])] = guest.loop_period
             guest.free()
             await process_frame
-    if signatures.size() != 5 or signatures.values().size() != 5:
+    var periods := {}
+    for period in signatures.values():
+        periods[period] = true
+    if signatures.size() != 5 or periods.size() != 5:
         _fail("Missing individual performances")
         return
     print("Casino Anomaly silent audience actor QA PASS")
