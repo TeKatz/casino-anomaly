@@ -1,0 +1,59 @@
+name: Casino Anomaly Major Events QA
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'gameplay/anomalies/silent_audience*'
+      - 'gameplay/anomaly_definitions/the_silent_audience.tres'
+      - 'tests/anomaly_variations_qa.gd'
+      - '.github/workflows/major-events-qa.yml'
+  pull_request:
+    paths:
+      - 'gameplay/anomalies/silent_audience*'
+      - 'gameplay/anomaly_definitions/the_silent_audience.tres'
+      - 'tests/anomaly_variations_qa.gd'
+      - '.github/workflows/major-events-qa.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  anomalies:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore verified geometry and animation source assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/ensure_assets.py
+          python3 tools/ensure_fabric037.py
+          python3 tools/import_model_assets.py
+          python3 tools/unpack_sketchfab_assets.py --require-all
+          python3 tools/import_croupier_asset.py
+      - name: Install Godot 4.5.1
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 -o /tmp/godot.zip "https://github.com/godotengine/godot-builds/releases/download/4.5.1-stable/Godot_v4.5.1-stable_linux.x86_64.zip"
+          mkdir -p /tmp/godot-bin
+          unzip -q /tmp/godot.zip -d /tmp/godot-bin
+          chmod +x /tmp/godot-bin/Godot_v4.5.1-stable_linux.x86_64
+      - name: Parse and import all new scene and shader resources
+        shell: bash
+        run: |
+          set -euo pipefail
+          GODOT=/tmp/godot-bin/Godot_v4.5.1-stable_linux.x86_64
+          "$GODOT" --headless --path . --editor --import > /tmp/import.log 2>&1 || { cat /tmp/import.log; exit 1; }
+          if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' /tmp/import.log; then cat /tmp/import.log; exit 1; fi
+      - name: Check anomaly definitions, staged streaming and rigged finale
+        shell: bash
+        run: |
+          set -euo pipefail
+          GODOT=/tmp/godot-bin/Godot_v4.5.1-stable_linux.x86_64
+          "$GODOT" --headless --path . --script res://tests/anomaly_variations_qa.gd > /tmp/anomalies.log 2>&1 || { cat /tmp/anomalies.log; exit 1; }
+          grep -Fq 'Casino Anomaly ten subtle anomalies QA PASS' /tmp/anomalies.log || { cat /tmp/anomalies.log; exit 1; }
+          if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' /tmp/anomalies.log; then cat /tmp/anomalies.log; exit 1; fi
