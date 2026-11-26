@@ -7,6 +7,7 @@ const Premium = preload("res://gameplay/anomalies/silent_audience_premium.gd")
 const MODEL = preload("res://models/croupier/scene.gltf")
 
 func _initialize() -> void:
+    create_timer(240.0, true, false, true).timeout.connect(func(): _fail("QA watchdog expired"))
     call_deferred("_run")
 
 func _fail(reason: String) -> void:

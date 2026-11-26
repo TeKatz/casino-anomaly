@@ -7,12 +7,16 @@ on:
       - 'gameplay/anomalies/silent_audience*'
       - 'gameplay/anomaly_definitions/the_silent_audience.tres'
       - 'tests/anomaly_variations_qa.gd'
+      - 'tests/silent_audience_actor_qa.gd'
+      - 'tools/run_godot_qa.py'
       - '.github/workflows/major-events-qa.yml'
   pull_request:
     paths:
       - 'gameplay/anomalies/silent_audience*'
       - 'gameplay/anomaly_definitions/the_silent_audience.tres'
       - 'tests/anomaly_variations_qa.gd'
+      - 'tests/silent_audience_actor_qa.gd'
+      - 'tools/run_godot_qa.py'
       - '.github/workflows/major-events-qa.yml'
   workflow_dispatch:
 
@@ -22,7 +26,11 @@ permissions:
 jobs:
   anomalies:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [baseline, flood, other_side, silent_audience, actor]
     steps:
       - uses: actions/checkout@v4
       - name: Restore verified geometry and animation source assets
@@ -47,21 +55,27 @@ jobs:
         run: |
           set -euo pipefail
           GODOT=/tmp/godot-bin/Godot_v4.5.1-stable_linux.x86_64
-          "$GODOT" --headless --path . --editor --import > /tmp/import.log 2>&1 || { cat /tmp/import.log; exit 1; }
+          timeout --kill-after=10s 5m "$GODOT" --headless --path . --editor --import 2>&1 | tee /tmp/import.log
           if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' /tmp/import.log; then cat /tmp/import.log; exit 1; fi
-      - name: Check anomaly definitions, staged streaming and rigged finale
+      - name: Run isolated QA suite
         shell: bash
+        env:
+          QA_SUITE: ${{ matrix.suite }}
         run: |
           set -euo pipefail
           GODOT=/tmp/godot-bin/Godot_v4.5.1-stable_linux.x86_64
-          "$GODOT" --headless --path . --script res://tests/anomaly_variations_qa.gd > /tmp/anomalies.log 2>&1 || { cat /tmp/anomalies.log; exit 1; }
-          grep -Fq 'Casino Anomaly ten subtle anomalies QA PASS' /tmp/anomalies.log || { cat /tmp/anomalies.log; exit 1; }
-          if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' /tmp/anomalies.log; then cat /tmp/anomalies.log; exit 1; fi
-      - name: Verify semantic humanoid skeletons and no-sliding seat transitions
-        shell: bash
-        run: |
-          set -euo pipefail
-          GODOT=/tmp/godot-bin/Godot_v4.5.1-stable_linux.x86_64
-          "$GODOT" --headless --path . --script res://tests/silent_audience_actor_qa.gd > /tmp/actor.log 2>&1 || { cat /tmp/actor.log; exit 1; }
-          grep -Fq 'Casino Anomaly silent audience actor QA PASS' /tmp/actor.log || { cat /tmp/actor.log; exit 1; }
-          if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' /tmp/actor.log; then cat /tmp/actor.log; exit 1; fi
+          case "$QA_SUITE" in
+            actor)
+              python3 tools/run_godot_qa.py "$GODOT" tests/silent_audience_actor_qa.gd 'Casino Anomaly silent audience actor QA PASS' --log /tmp/qa.log ;;
+            baseline)
+              python3 tools/run_godot_qa.py "$GODOT" tests/anomaly_variations_qa.gd 'Casino Anomaly ten subtle anomalies QA PASS' --suite baseline --log /tmp/qa.log ;;
+            *)
+              python3 tools/run_godot_qa.py "$GODOT" tests/anomaly_variations_qa.gd "Casino Anomaly major event QA PASS: $QA_SUITE" --suite "$QA_SUITE" --log /tmp/qa.log ;;
+          esac
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: qa-logs-${{ matrix.suite }}
+          path: |
+            /tmp/import.log
+            /tmp/qa.log

@@ -21,7 +21,11 @@ const NEW_IDS := [
 
 
 func _initialize() -> void:
+    create_timer(240.0, true, false, true).timeout.connect(_on_watchdog)
     call_deferred("_run")
+
+func _on_watchdog() -> void:
+    _fail("QA watchdog expired")
 
 
 func _fail(reason: String) -> void:
@@ -103,6 +107,12 @@ func _verify_adjusted_definitions() -> bool:
 
 
 func _run() -> void:
+    var args := OS.get_cmdline_user_args()
+    var suite := "all" if args.is_empty() else args[0]
+    if suite not in ["all", "baseline", "flood", "other_side", "silent_audience"]:
+        _fail("Unknown QA suite: " + suite)
+        return
+    print("QA suite: ", suite)
     if not _verify_adjusted_definitions():
         return
     var room := ROOM.instantiate() as Node3D
@@ -113,6 +123,27 @@ func _run() -> void:
     await process_frame
     await process_frame
     await process_frame
+
+    if suite not in ["all", "baseline"]:
+        var isolated_room := ROOM.instantiate() as Node3D
+        root.add_child(isolated_room)
+        await process_frame
+        await process_frame
+        print("QA major event: ", suite)
+        var passed := false
+        match suite:
+            "flood": passed = _verify_flood(room, isolated_room)
+            "other_side": passed = _verify_other_side(room, isolated_room)
+            "silent_audience": passed = _verify_silent_audience(room, isolated_room)
+        if not passed:
+            _fail("Major event suite failed: " + suite)
+            return
+        room.queue_free()
+        isolated_room.queue_free()
+        await process_frame
+        print("Casino Anomaly major event QA PASS: ", suite)
+        quit(0)
+        return
 
     # Real room geometry: pot 04 must stay between both sofas and away
     # from the green wall. Its authored Z was -0.78 and the earlier +0.60
@@ -180,6 +211,7 @@ func _run() -> void:
             return
 
     for id in NEW_IDS:
+        print("QA anomaly: ", id)
         if not available.has(id):
             _fail("New anomaly is unavailable in the real casino room: " + id)
             return
@@ -235,6 +267,7 @@ func _run() -> void:
     # room and isolated from the next streamed instance.
     var batch_ids := ["blank_reels","false_jackpot","dark_marquee","watchful_camera","floating_hand","missing_hand","burgundy_felt","blue_runner","empty_reserve","bare_monstera"]
     for id in batch_ids:
+        print("QA anomaly: ", id)
         var entry := Catalog.get_entry(id)
         if entry.is_empty() or Catalog.family(id) != id or not available.has(id):
             _fail("Batch 01 family missing or unavailable: " + id)
@@ -311,12 +344,16 @@ func _run() -> void:
         return
     if not (await _verify_reality_batch(room, next_room)):
         return
-    if not _verify_flood(room,next_room):
-        return
-    if not _verify_other_side(room,next_room):
-        return
-    if not _verify_silent_audience(room,next_room):
-        return
+    if suite == "all":
+        print("QA major event: flood")
+        if not _verify_flood(room,next_room):
+            return
+        print("QA major event: other_side")
+        if not _verify_other_side(room,next_room):
+            return
+        print("QA major event: silent_audience")
+        if not _verify_silent_audience(room,next_room):
+            return
     room.queue_free()
     next_room.queue_free()
     await process_frame
@@ -330,6 +367,7 @@ func _verify_horror_batch(hall: Node3D, other_hall: Node3D) -> bool:
     var horror_counts := {"synchronized_busts": 2, "inverted_cat": 2, "watching_canvases": 3, "stay_here": 3, "ownerless_shadow": 1, "empty_footsteps": 1}
     var available_horror := Catalog.available_ids(hall)
     for horror_id in horror_ids:
+        print("QA anomaly: ", horror_id)
         var horror_entry := Catalog.get_entry(horror_id)
         if horror_entry.is_empty() or Catalog.family(horror_id) != horror_id or not available_horror.has(horror_id):
             _fail("Pack 02 family unavailable: " + horror_id)
@@ -416,6 +454,7 @@ func _verify_reality_batch(hall: Node3D, other_hall: Node3D) -> bool:
     var reality_adapter := Adapter.new()
     var reality_available := Catalog.available_ids(hall)
     for reality_id in reality_ids:
+        print("QA anomaly: ", reality_id)
         var reality_entry := Catalog.get_entry(reality_id)
         if reality_entry.is_empty() or Catalog.family(reality_id) != reality_id or not reality_available.has(reality_id):
             _fail("Pack 03 unavailable: " + reality_id)
@@ -795,10 +834,18 @@ func _verify_silent_audience(hall: Node3D, other: Node3D) -> bool:
             return false
     # Exercise the entire 20-guest population, not just the isolated sofa
     # and table actors. Standing targets must be distinct and collisions real.
-    while not (effect.get("seats") as Array).is_empty():
-        if not bool(effect.call("_spawn_seat",0)):
+    for i in range(count - 2):
+        var remaining := (effect.get("seats") as Array).size()
+        print("QA Silent Audience spawn: ", i + 3, "/", count)
+        if remaining == 0 or not bool(effect.call("_spawn_seat",0)):
             _fail("Silent Audience cannot populate its full seating plan")
             return false
+        if (effect.get("seats") as Array).size() != remaining - 1:
+            _fail("Silent Audience spawn did not consume exactly one seat")
+            return false
+    if not (effect.get("seats") as Array).is_empty():
+        _fail("Silent Audience has unexpected unused seats")
+        return false
     guests = effect.get("guests")
     if guests.size()!=count or effect.find_children("*","StaticBody3D",true,false).size()!=count:
         _fail("Silent Audience full population lost live collisions")

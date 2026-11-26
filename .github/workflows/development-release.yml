@@ -176,6 +176,13 @@ jobs:
           }
           & "$env:GODOT_EDITOR" --headless --path . --script res://tests/smoke.gd 2>&1 | Tee-Object -FilePath smoke.log
           if ($LASTEXITCODE -ne 0 -or (Get-Content smoke.log -Raw) -notmatch 'Casino Anomaly scenes and PBR floor smoke PASS') { throw 'Godot scene smoke failed' }
+          foreach ($suite in @('baseline', 'flood', 'other_side', 'silent_audience')) {
+            $expected = if ($suite -eq 'baseline') { 'Casino Anomaly ten subtle anomalies QA PASS' } else { "Casino Anomaly major event QA PASS: $suite" }
+            python tools/run_godot_qa.py "$env:GODOT_EDITOR" tests/anomaly_variations_qa.gd "$expected" --suite $suite --log "qa-$suite.log"
+            if ($LASTEXITCODE -ne 0) { throw "Anomaly QA failed: $suite" }
+          }
+          python tools/run_godot_qa.py "$env:GODOT_EDITOR" tests/silent_audience_actor_qa.gd 'Casino Anomaly silent audience actor QA PASS' --log qa-actor.log
+          if ($LASTEXITCODE -ne 0) { throw 'Silent Audience actor QA failed' }
           foreach ($spec in @(
             @('tests/loop_gameplay_qa.gd', 'Casino Anomaly playable tutorial, save and loop gameplay QA PASS'),
             @('tests/profile_archive_qa.gd', 'Casino Anomaly profile archive QA PASS'),
@@ -184,7 +191,6 @@ jobs:
             @('tests/table_furniture_qa.gd', 'Casino Anomaly authored table furniture QA PASS'),
             @('tests/premium_tables_and_bottles_qa.gd', 'Casino Anomaly premium tables and editable bottles QA PASS'),
             @('tests/dev_anomaly_tool_qa.gd', 'Casino Anomaly developer anomaly picker QA PASS'),
-            @('tests/anomaly_variations_qa.gd', 'Casino Anomaly ten subtle anomalies QA PASS'),
             @('tests/runtime_asset_cache_qa.gd', 'Casino Anomaly runtime asset cache QA PASS'),
             @('tests/streaming_qa.gd', 'Casino Anomaly seamless two-room streaming QA PASS'),
             @('tests/backrooms_traversal_qa.gd', 'Casino Anomaly Backrooms traversal QA PASS'),
