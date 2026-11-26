@@ -3,7 +3,8 @@ extends Node3D
 ## colliders or gameplay modifications. Every new node belongs to this root.
 const MODEL_PATH := "res://models/croupier/scene.gltf"
 const STOOL := preload("res://models/casino_furniture/gaming_stool.tscn")
-const FACE_SHADER := preload("res://gameplay/anomalies/silent_audience_face.gdshader")
+const SUIT_SHADER := preload("res://gameplay/anomalies/silent_audience_suit.gdshader")
+const Pose = preload("res://gameplay/anomalies/silent_audience_pose.gd")
 const FIRST_APPEARANCE := 5.0
 const APPEARANCE_INTERVAL := 2.65
 const FINALE_DELAY := 7.0
@@ -22,6 +23,7 @@ var last_appearance := 0.0
 var finale_started := false
 var finale_at := 0.0
 var finale_frozen := false
+var finish_after := 0.0
 var configured := false
 var reduced_motion := false
 var settings_clock := 0.0
@@ -47,47 +49,44 @@ func configure(room: Node3D) -> bool:
 
 
 func _collect_seats() -> void:
-    # Use the actual saved sofa and stool cushions. With all authored assets,
-    # there are twenty locations across the lounge, bar, tables and slots.
+    # Two separate people fit on each broad sofa. The bar is deliberately
+    # sparse: no more shoulder-to-shoulder identical heads in a single row.
     for i in range(1, 6):
-        _seat_from_prop(hall.get_node_or_null("ModelInteriors/LoungeSofa_%02d" % i) as Node3D, true, 0.0)
-    for i in range(1, 8):
-        _seat_from_prop(hall.get_node_or_null("ModelInteriors/CounterStool_%02d" % i) as Node3D, false, PI)
-    for i in range(1, 4):
-        _seat_from_prop(hall.get_node_or_null("ModelInteriors/SideStool_%02d" % i) as Node3D, false, PI * 0.5)
-    # Supplement the actual tables with matching upholstered game stools.
-    # The additional stools are cosmetic only and never block the walkway.
-    for x in [-13.6, -20.3, -27.2, -41.1]:
-        _extra_stool(Vector3(x, 0.005, -8.68), PI)
+        var sofa := hall.get_node_or_null("ModelInteriors/LoungeSofa_%02d" % i) as Node3D
+        _seat_from_prop(sofa,true,0.0,-0.46)
+        _seat_from_prop(sofa,true,0.0,0.46)
+    for i in [1,3,5,7]:
+        _seat_from_prop(hall.get_node_or_null("ModelInteriors/CounterStool_%02d" % i) as Node3D,false,PI)
+    for i in [1,3]:
+        _seat_from_prop(hall.get_node_or_null("ModelInteriors/SideStool_%02d" % i) as Node3D,false,PI*0.5)
+    for x in [-13.6,-20.3,-27.2,-41.1]:
+        _extra_stool(Vector3(x,0.005,-8.68),PI)
     if hall.has_node("SketchfabFurniture/EditableImportedModels/RetroSlotHero"):
-        _extra_stool(Vector3(3.55, 0.005, 10.40), PI * 0.5)
+        _extra_stool(Vector3(3.55,0.005,10.40),PI*0.5)
 
-
-func _seat_from_prop(prop: Node3D, is_sofa: bool, facing: float) -> void:
-    # 'visible' (local) is intentional: staged halls are often hidden
-    # wholesale during preloading but their local furniture is valid.
+func _seat_from_prop(prop: Node3D, is_sofa: bool, facing: float,
+        lateral: float = 0.0) -> void:
     if prop == null or not prop.visible:
         return
     var cushion: MeshInstance3D
     if not is_sofa:
-        cushion = prop.find_child("SoftSeatCrown", true, false) as MeshInstance3D
+        cushion = prop.find_child("SoftSeatCrown",true,false) as MeshInstance3D
     if cushion == null:
-        for item in prop.find_children("*", "MeshInstance3D", true, false):
+        for item in prop.find_children("*","MeshInstance3D",true,false):
             if str(item.name).to_lower().contains("seat"):
                 cushion = item as MeshInstance3D
                 break
     if cushion == null or cushion.mesh == null:
         return
-    var bounds := (prop.global_transform.affine_inverse() * cushion.global_transform) * cushion.get_aabb()
+    var bounds := (prop.global_transform.affine_inverse()*cushion.global_transform)*cushion.get_aabb()
     var center := bounds.get_center()
-    var hip := Vector3(center.x, bounds.end.y + 0.10, center.z - (0.10 if is_sofa else 0.0))
+    var hip := Vector3(center.x+lateral,bounds.end.y+0.10,center.z-(0.10 if is_sofa else 0.0))
     var yaw := facing
     if is_sofa:
-        var basis := (hall.global_transform.affine_inverse() * prop.global_transform).basis.orthonormalized()
-        yaw = basis.get_euler().y
-    seats.append({"anchor": to_local(prop.to_global(hip)), "yaw": yaw,
-        "kind": "sofa" if is_sofa else "bar"})
-
+        var basis := (hall.global_transform.affine_inverse()*prop.global_transform).basis.orthonormalized()
+        yaw = basis.get_euler().y + lateral * 0.18
+    seats.append({"anchor":to_local(prop.to_global(hip)),"yaw":yaw,
+        "kind":"sofa" if is_sofa else "bar"})
 
 func _extra_stool(at: Vector3, yaw: float) -> void:
     seats.append({"anchor": at + Vector3(0, 0.73, 0), "yaw": yaw,
@@ -100,19 +99,20 @@ func _read_settings() -> void:
 
 
 func _unseen(camera: Camera3D, player: CollisionObject3D, seat: Dictionary) -> bool:
-    var head := hall.to_global((seat["anchor"] as Vector3) + Vector3(0, 0.65, 0))
+    var head := hall.to_global((seat["anchor"] as Vector3)+Vector3(0,0.65,0))
+    # Keep a clear space around the actual player for the initial appearance.
+    if camera.global_position.distance_to(head)<1.75:
+        return false
     if camera.is_position_behind(head):
         return true
     var point := camera.unproject_position(head)
     var size := camera.get_viewport().get_visible_rect().size
     if point.x < -80.0 or point.y < -80.0 or point.x > size.x + 80.0 or point.y > size.y + 80.0:
         return true
-    # A visible screen coordinate can be entirely hidden by casino walls.
-    var query := PhysicsRayQueryParameters3D.create(camera.global_position, head)
+    var query := PhysicsRayQueryParameters3D.create(camera.global_position,head)
     query.exclude = [player.get_rid()]
     var hit := hall.get_world_3d().direct_space_state.intersect_ray(query)
-    return not hit.is_empty() and (hit["position"] as Vector3).distance_to(head) > 0.22
-
+    return not hit.is_empty() and (hit["position"] as Vector3).distance_to(head)>0.22
 
 func _pick_unseen(camera: Camera3D, player: CollisionObject3D) -> int:
     var choices: Array[int] = []
