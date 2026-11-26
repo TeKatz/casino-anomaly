@@ -793,7 +793,27 @@ func _verify_silent_audience(hall: Node3D, other: Node3D) -> bool:
             print("Silent Audience appearance diagnostic: ",descriptions)
             _fail("Silent Audience must show genuine faces and individualized clothing")
             return false
-    effect.set("target_count",2)
+    # Exercise the entire 20-guest population, not just the isolated sofa
+    # and table actors. Standing targets must be distinct and collisions real.
+    while not (effect.get("seats") as Array).is_empty():
+        if not bool(effect.call("_spawn_seat",0)):
+            _fail("Silent Audience cannot populate its full seating plan")
+            return false
+    guests = effect.get("guests")
+    if guests.size()!=count or effect.find_children("*","StaticBody3D",true,false).size()!=count:
+        _fail("Silent Audience full population lost live collisions")
+        return false
+    var cloth_colors := {}
+    for person in guests:
+        var parts := (person["figure"] as Node3D).find_children("*","MeshInstance3D",true,false)
+        if parts.size()<3:
+            continue
+        var jacket := (parts[0] as MeshInstance3D).get_surface_override_material(0) as ShaderMaterial
+        if jacket != null:
+            cloth_colors[str(jacket.get_shader_parameter("jacket"))] = true
+    if cloth_colors.size()<6:
+        _fail("Silent Audience needs at least six visible wardrobe colors")
+        return false
     effect.call("_stand_together")
     if not bool(effect.get("finale_started")):
         _fail("Silent Audience did not start its synchronized finale")
@@ -808,9 +828,18 @@ func _verify_silent_audience(hall: Node3D, other: Node3D) -> bool:
             if (person["sit_pose"] as Array).is_empty() or (person["upright_pose"] as Array).is_empty():
                 _fail("Silent Audience must blend genuine rigged seated/standing poses")
                 return false
-    if standing_count==0:
-        _fail("Silent Audience had no collision-safe standing positions")
+    if standing_count < 12:
+        _fail("Silent Audience has too few collision-safe rising positions: %d" % standing_count)
         return false
+    var reserved: Array = effect.get("reserved_landings")
+    if reserved.size()!=standing_count:
+        _fail("Silent Audience did not reserve the target floor positions")
+        return false
+    for i in range(reserved.size()):
+        for j in range(i+1,reserved.size()):
+            if (reserved[i] as Vector2).distance_to(reserved[j] as Vector2)<0.70:
+                _fail("Silent Audience standing guests overlap")
+                return false
     effect.set("elapsed",float(effect.get("finale_at"))+float(effect.get("finish_after")))
     effect.call("_advance_standing")
     effect.call("_freeze_finale")

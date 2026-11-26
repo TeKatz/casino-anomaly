@@ -29,6 +29,7 @@ var reduced_motion := false
 var settings_clock := 0.0
 var rng := RandomNumberGenerator.new()
 var audio_baseline: Dictionary = {}
+var reserved_landings: Array[Vector2] = []
 
 
 func configure(room: Node3D) -> bool:
@@ -441,6 +442,14 @@ func _find_landing(person: Dictionary) -> Dictionary:
     for reach in [0.68,0.94,1.12,0.48]:
         for sidestep in [0.0,-0.24,0.24,-0.44,0.44]:
             var candidate: Vector3 = anchor+forward*reach+side*sidestep
+            var point := Vector2(candidate.x,candidate.z)
+            var already_reserved := false
+            for taken in reserved_landings:
+                if taken.distance_to(point)<0.72:
+                    already_reserved = true
+                    break
+            if already_reserved:
+                continue
             var from := hall.to_global(Vector3(candidate.x,2.35,candidate.z))
             var below := hall.to_global(Vector3(candidate.x,-0.45,candidate.z))
             var floor_query := PhysicsRayQueryParameters3D.create(from,below)
@@ -468,6 +477,7 @@ func _stand_together() -> void:
     finale_started = true
     finale_at = elapsed
     finish_after = 0.0
+    reserved_landings.clear()
     for i in range(guests.size()):
         var person: Dictionary = guests[i]
         var figure := person["figure"] as Node3D
@@ -511,6 +521,7 @@ func _stand_together() -> void:
         person["stand_duration"] = 4.3+float((i*7)%8)*0.37
         person["stand_delay"] = float((i*3)%7)*0.075
         person["standing"] = true
+        reserved_landings.append(Vector2(float(landing["x"]),float(landing["z"])))
         finish_after = maxf(finish_after,float(person["stand_duration"])+float(person["stand_delay"]))
     finish_after += 0.2
 
