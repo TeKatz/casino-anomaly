@@ -60,13 +60,34 @@ func _run() -> void:
         _fail("New Game must not skip the tutorial")
         return
 
-    if not loader.travel_to("res://main.tscn", true):
-        _fail("Start-door loading cannot begin")
+    # Exercise the actual live tutorial input path, not a direct loader call.
+    var intro := current_scene as Node3D
+    var door := intro.get_node_or_null("SideGalleries/EastGallery/AccessBays/MainCasinoEntrance") as Node3D
+    var player := intro.get_node_or_null("Player") as CharacterBody3D
+    var camera := intro.get_node_or_null("Player/Camera3D") as Camera3D
+    if door == null or player == null or camera == null or intro.get_node_or_null("CroupierStation")==null:
+        _fail("Canonical tutorial path did not load the new hall")
+        return
+    player.global_position = door.to_global(Vector3(0,1.02,2.0))
+    camera.look_at(door.to_global(Vector3(0,1.55,0)),Vector3.UP)
+    if not bool(intro.call("_is_looking_at_door")):
+        _fail("Grand entrance active casino door cannot be targeted")
+        return
+    var event := InputEventAction.new()
+    event.action = "casino_interact"
+    event.pressed = true
+    intro.call("_unhandled_input",event)
+    if not bool(loader.get("active")) or not bool(intro.get("changing")) or not bool(player.get("interaction_locked")) or state.tutorial_done:
+        _fail("Start-door interaction did not lock input and start loading before completing tutorial")
+        return
+    intro.call("_unhandled_input",event)
+    if str(loader.get("target_path")) != "res://main.tscn":
+        _fail("Repeated door interaction changed the transition")
         return
     if not await _wait_for_scene("res://main.tscn", loader):
         _fail("Threaded casino transition did not finish")
         return
-    if not state.tutorial_done or not state.round_ready:
+    if not state.tutorial_done or not state.round_ready or not str(state.anomaly_id).is_empty():
         _fail("Intro completion or first clean casino round was lost")
         return
     state.save_path = previous_save

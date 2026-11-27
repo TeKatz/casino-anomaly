@@ -1,8 +1,8 @@
 extends SceneTree
-## Tutorial spatial composition QA.
+## Archived original tutorial spatial composition QA; legacy assets remain editable.
 ## Grounding and wall-face offsets are checked against authored geometry, not
 ## screenshots or hand-wavy tolerances. Models remain editable in a subscene.
-const INTRO = preload("res://gameplay/tutorial.tscn")
+const INTRO = preload("res://gameplay/legacy_tutorial.tscn")
 
 
 func _initialize() -> void:
@@ -180,7 +180,7 @@ func _run() -> void:
     if not authored.contains("[editable path=") or authored.contains('script = ExtResource("user_selected")'):
         _fail("Editor scene still relies on scripted geometry instead of saved instances")
         return
-    var tutorial_scene := FileAccess.get_file_as_string("res://gameplay/tutorial.tscn")
+    var tutorial_scene := FileAccess.get_file_as_string("res://gameplay/legacy_tutorial.tscn")
     if not tutorial_scene.contains('[editable path="Decoration"]'):
         _fail("Decoration is not expandable from tutorial.tscn editor")
         return

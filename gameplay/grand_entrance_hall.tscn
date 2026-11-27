@@ -1,6 +1,8 @@
-[gd_scene load_steps=125 format=3]
+[gd_scene load_steps=127 format=3]
 
 [ext_resource type="Script" path="res://player.gd" id="1_player"]
+[ext_resource type="Script" path="res://gameplay/tutorial.gd" id="HallTutorial"]
+[ext_resource type="PackedScene" path="res://gameplay/croupier_station.tscn" id="HallCroupier"]
 
 [ext_resource type="Texture2D" path="res://assets/herringbone_parquet/herringbone_parquet_diff_2k.jpg" id="Parquet0"]
 
@@ -528,6 +530,7 @@ size = Vector3(0.91, 0.042, 0.032)
 size = Vector3(0.042, 0.57, 0.032)
 
 [node name="GrandEntranceHall" type="Node3D"]
+script = ExtResource("HallTutorial")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("HallEnvironment")
@@ -1620,8 +1623,8 @@ material_override = SubResource("DarkBronze")
 
 [node name="TemporarySign" type="Label3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_1"]
 position = Vector3(0, 3.96, 0.195)
-text = "RESERVED 01"
-font_size = 48
+text = "UNDER CONSTRUCTION"
+font_size = 32
 pixel_size = 0.006
 modulate = Color(0.94, 0.77, 0.46, 1)
 outline_size = 4
@@ -1721,8 +1724,8 @@ material_override = SubResource("DarkBronze")
 
 [node name="TemporarySign" type="Label3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_2"]
 position = Vector3(0, 3.96, 0.195)
-text = "RESERVED 02"
-font_size = 48
+text = "UNDER CONSTRUCTION"
+font_size = 32
 pixel_size = 0.006
 modulate = Color(0.94, 0.77, 0.46, 1)
 outline_size = 4
@@ -1819,91 +1822,91 @@ shape = SubResource("Shape_51")
 
 [node name="AccessBays" type="Node3D" parent="SideGalleries/EastGallery"]
 
-[node name="MainCasino_FutureConnection" type="Node3D" parent="SideGalleries/EastGallery/AccessBays"]
+[node name="MainCasinoEntrance" type="Node3D" parent="SideGalleries/EastGallery/AccessBays"]
 position = Vector3(12.15, 0, -4)
 rotation = Vector3(0, -1.5708, 0)
 
-[node name="ClosedLeaf" type="StaticBody3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection"]
+[node name="ClosedLeaf" type="StaticBody3D" parent="SideGalleries/EastGallery/AccessBays/MainCasinoEntrance"]
 position = Vector3(0, 1.55, 0)
 
-[node name="Mesh" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection/ClosedLeaf"]
+[node name="Mesh" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasinoEntrance/ClosedLeaf"]
 mesh = SubResource("Box_54")
 material_override = SubResource("MainDoor")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection/ClosedLeaf"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SideGalleries/EastGallery/AccessBays/MainCasinoEntrance/ClosedLeaf"]
 shape = SubResource("Shape_55")
 
-[node name="WallAboveOpening" type="StaticBody3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection"]
+[node name="WallAboveOpening" type="StaticBody3D" parent="SideGalleries/EastGallery/AccessBays/MainCasinoEntrance"]
 position = Vector3(0, 3.85, 0)
 
-[node name="Mesh" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection/WallAboveOpening"]
+[node name="Mesh" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasinoEntrance/WallAboveOpening"]
 mesh = SubResource("Box_56")
 material_override = SubResource("DeepGreen")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection/WallAboveOpening"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SideGalleries/EastGallery/AccessBays/MainCasinoEntrance/WallAboveOpening"]
 shape = SubResource("Shape_57")
 
-[node name="LeftJamb" type="StaticBody3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection"]
+[node name="LeftJamb" type="StaticBody3D" parent="SideGalleries/EastGallery/AccessBays/MainCasinoEntrance"]
 position = Vector3(-1.31, 1.65, 0.22)
 
-[node name="Mesh" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection/LeftJamb"]
+[node name="Mesh" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasinoEntrance/LeftJamb"]
 mesh = SubResource("Box_58")
 material_override = SubResource("Limestone")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection/LeftJamb"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SideGalleries/EastGallery/AccessBays/MainCasinoEntrance/LeftJamb"]
 shape = SubResource("Shape_59")
 
-[node name="LeftPanel" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection"]
+[node name="LeftPanel" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasinoEntrance"]
 position = Vector3(-0.59, 1.55, 0.164)
 mesh = SubResource("Box_60")
 material_override = SubResource("HallWood")
 
-[node name="LeftHandle" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection"]
+[node name="LeftHandle" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasinoEntrance"]
 position = Vector3(-0.14, 1.12, 0.23)
 mesh = SubResource("Box_61")
 material_override = SubResource("Brass")
 
-[node name="RightJamb" type="StaticBody3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection"]
+[node name="RightJamb" type="StaticBody3D" parent="SideGalleries/EastGallery/AccessBays/MainCasinoEntrance"]
 position = Vector3(1.31, 1.65, 0.22)
 
-[node name="Mesh" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection/RightJamb"]
+[node name="Mesh" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasinoEntrance/RightJamb"]
 mesh = SubResource("Box_58")
 material_override = SubResource("Limestone")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection/RightJamb"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SideGalleries/EastGallery/AccessBays/MainCasinoEntrance/RightJamb"]
 shape = SubResource("Shape_59")
 
-[node name="RightPanel" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection"]
+[node name="RightPanel" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasinoEntrance"]
 position = Vector3(0.59, 1.55, 0.164)
 mesh = SubResource("Box_60")
 material_override = SubResource("HallWood")
 
-[node name="RightHandle" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection"]
+[node name="RightHandle" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasinoEntrance"]
 position = Vector3(0.14, 1.12, 0.23)
 mesh = SubResource("Box_61")
 material_override = SubResource("Brass")
 
-[node name="CenterSeam" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection"]
+[node name="CenterSeam" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasinoEntrance"]
 position = Vector3(0, 1.55, 0.167)
 mesh = SubResource("Box_62")
 material_override = SubResource("DarkBronze")
 
-[node name="Crown" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection"]
+[node name="Crown" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasinoEntrance"]
 position = Vector3(0, 3.37, 0.22)
 mesh = SubResource("Box_63")
 material_override = SubResource("Limestone")
 
-[node name="CrownInlay" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection"]
+[node name="CrownInlay" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasinoEntrance"]
 position = Vector3(0, 3.57, 0.22)
 mesh = SubResource("Box_64")
 material_override = SubResource("Brass")
 
-[node name="HeaderPlaque" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection"]
+[node name="HeaderPlaque" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasinoEntrance"]
 position = Vector3(0, 3.96, 0.171)
 mesh = SubResource("Box_65")
 material_override = SubResource("DarkBronze")
 
-[node name="TemporarySign" type="Label3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection"]
+[node name="TemporarySign" type="Label3D" parent="SideGalleries/EastGallery/AccessBays/MainCasinoEntrance"]
 position = Vector3(0, 3.96, 0.195)
 text = "MAIN CASINO"
 font_size = 48
@@ -1914,10 +1917,10 @@ outline_modulate = Color(0.10, 0.07, 0.04, 1)
 no_depth_test = false
 double_sided = false
 
-[node name="FutureConnectionAnchor" type="Marker3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection"]
+[node name="FutureConnectionAnchor" type="Marker3D" parent="SideGalleries/EastGallery/AccessBays/MainCasinoEntrance"]
 position = Vector3(0, 0, -0.55)
 
-[node name="Approach" type="Marker3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection"]
+[node name="Approach" type="Marker3D" parent="SideGalleries/EastGallery/AccessBays/MainCasinoEntrance"]
 position = Vector3(0, 0, 1.35)
 
 [node name="ReservedAccess_3" type="Node3D" parent="SideGalleries/EastGallery/AccessBays"]
@@ -2006,8 +2009,8 @@ material_override = SubResource("DarkBronze")
 
 [node name="TemporarySign" type="Label3D" parent="SideGalleries/EastGallery/AccessBays/ReservedAccess_3"]
 position = Vector3(0, 3.96, 0.195)
-text = "RESERVED 03"
-font_size = 48
+text = "UNDER CONSTRUCTION"
+font_size = 32
 pixel_size = 0.006
 modulate = Color(0.94, 0.77, 0.46, 1)
 outline_size = 4
@@ -2268,6 +2271,72 @@ position = Vector3(-8, 0, 1)
 
 [node name="EastGalleryJunction" type="Marker3D" parent="DesignMarkers"]
 position = Vector3(8, 0, 1)
+
+[node name="CroupierStation" parent="." instance=ExtResource("HallCroupier")]
+position = Vector3(0, 0, -7.08)
+imported_model_proportions = Vector3(1.8, 1.1, 1.8)
+
+[node name="CroupierCollision" parent="CroupierStation" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.86, -0.52)
+
+[node name="BodyShape" parent="CroupierStation/CroupierCollision" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.16751808, 0, 0.051136494)
+
+[node name="CharacterPivot" parent="CroupierStation" index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.52)
+
+[node name="ModelAnchor" parent="CroupierStation/CharacterPivot" index="0"]
+transform = Transform3D(0.6, 0, 0, 0, 1, 0, 0, 0, 0.8, 0.16751808, 0, 0.12980103)
+
+[node name="LeftLeg" parent="CroupierStation/CharacterPivot" index="1"]
+transform = Transform3D(0.24, 0, 0, 0, 0.96, 0, 0, 0, 0.27, -0.17, 0.48, 0)
+visible = false
+
+[node name="RightLeg" parent="CroupierStation/CharacterPivot" index="2"]
+transform = Transform3D(0.24, 0, 0, 0, 0.96, 0, 0, 0, 0.27, 0.17, 0.48, 0)
+visible = false
+
+[node name="Torso" parent="CroupierStation/CharacterPivot" index="3"]
+transform = Transform3D(0.65, 0, 0, 0, 0.72, 0, 0, 0, 0.3, 0, 1.28, 0)
+visible = false
+
+[node name="ShirtFront" parent="CroupierStation/CharacterPivot" index="4"]
+transform = Transform3D(0.17, 0, 0, 0, 0.49, 0, 0, 0, 0.025, 0, 1.35, 0.16)
+visible = false
+
+[node name="LeftArm" parent="CroupierStation/CharacterPivot" index="5"]
+transform = Transform3D(0.19856173, 0.08379854, 0, -0.023198128, 0.67336124, 0.05937695, 0.005923455, -0.17193736, 0.23253898, -0.41, 1.25, 0.055)
+visible = false
+
+[node name="RightArm" parent="CroupierStation/CharacterPivot" index="6"]
+transform = Transform3D(0.19856173, -0.08379854, 0, 0.023198128, 0.67336124, 0.05937695, -0.005923455, -0.17193736, 0.23253898, 0.41, 1.25, 0.055)
+visible = false
+
+[node name="LeftHand" parent="CroupierStation/CharacterPivot" index="7"]
+transform = Transform3D(0.18, 0, 0, 0, 0.19, 0, 0, 0, 0.18, -0.42, 0.92, 0.2)
+visible = false
+
+[node name="RightHand" parent="CroupierStation/CharacterPivot" index="8"]
+transform = Transform3D(0.18, 0, 0, 0, 0.19, 0, 0, 0, 0.18, 0.42, 0.92, 0.2)
+visible = false
+
+[node name="Neck" parent="CroupierStation/CharacterPivot" index="9"]
+transform = Transform3D(0.2, 0, 0, 0, 0.17, 0, 0, 0, 0.2, 0, 1.68, 0)
+visible = false
+
+[node name="Face" parent="CroupierStation/CharacterPivot" index="10"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.91, 0)
+visible = false
+
+[node name="HairCap" parent="CroupierStation/CharacterPivot" index="11"]
+transform = Transform3D(1.005, 0, 0, 0, 0.32, 0, 0, 0, 1, 0, 2.09, -0.025)
+visible = false
+
+[node name="InteractionHint" parent="CroupierStation" index="2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.15, -0.45)
+
+[node name="CounterLight" parent="CroupierStation" index="3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2, 2.65, 0.05)
 
 [node name="Player" type="CharacterBody3D" parent="."]
 position = Vector3(0, 1.02, 12)
@@ -2564,3 +2633,5 @@ material_override = SubResource("DarkBronze")
 position = Vector3(2.955, 0.48, 0.45)
 mesh = SubResource("CounterPanelSide")
 material_override = SubResource("DarkBronze")
+
+[editable path="CroupierStation"]

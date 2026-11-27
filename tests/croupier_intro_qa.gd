@@ -22,14 +22,14 @@ func _run() -> void:
     await process_frame
 
     var desk := room.get_node_or_null("CroupierStation") as Node3D
-    var counter := room.get_node_or_null("ReceptionCounterCollision") as StaticBody3D
-    var front_shape := room.get_node_or_null("ReceptionCounterCollision/ReceptionLongCollider") as CollisionShape3D
-    var front_end := room.get_node_or_null("ReceptionCounterCollision/ReceptionFrontReturnCollider") as CollisionShape3D
-    var rear_end := room.get_node_or_null("ReceptionCounterCollision/ReceptionRearReturnCollider") as CollisionShape3D
-    var front := room.get_node_or_null("ReceptionMainBody") as MeshInstance3D
-    var top := room.get_node_or_null("ReceptionMainTop") as MeshInstance3D
-    var return_front := room.get_node_or_null("ReceptionFrontReturnBody") as MeshInstance3D
-    var return_rear := room.get_node_or_null("ReceptionRearReturnBody") as MeshInstance3D
+    var counter := room.get_node_or_null("Reception/Counter/Front") as StaticBody3D
+    var front_shape := room.get_node_or_null("Reception/Counter/Front/CollisionShape3D") as CollisionShape3D
+    var front_end := room.get_node_or_null("Reception/Counter/WestReturn/CollisionShape3D") as CollisionShape3D
+    var rear_end := room.get_node_or_null("Reception/Counter/EastReturn/CollisionShape3D") as CollisionShape3D
+    var front := room.get_node_or_null("Reception/Counter/Front/Mesh") as MeshInstance3D
+    var top := room.get_node_or_null("Reception/Counter/Countertop/Mesh") as MeshInstance3D
+    var return_front := room.get_node_or_null("Reception/Counter/WestReturn/Mesh") as MeshInstance3D
+    var return_rear := room.get_node_or_null("Reception/Counter/EastReturn/Mesh") as MeshInstance3D
     var npc_body := room.get_node_or_null("CroupierStation/CroupierCollision") as StaticBody3D
     var npc_shape := room.get_node_or_null("CroupierStation/CroupierCollision/BodyShape") as CollisionShape3D
     var anchor := room.get_node_or_null("CroupierStation/CharacterPivot/ModelAnchor") as Node3D
@@ -46,84 +46,51 @@ func _run() -> void:
             or camera == null or dialogue == null:
         _fail("Missing reception geometry, wall returns, model, or dialogue")
         return
-    if desk.position.distance_to(Vector3(-2.56, 0, 0.25)) > 0.02 \
-            or absf(desk.rotation.y - PI * 0.5) > 0.03:
-        _fail("Croupier is not positioned behind the LEFT-wall reception counter")
+    if desk.position.distance_to(Vector3(0,0,-7.08)) > 0.02 or absf(desk.rotation.y)>0.03:
+        _fail("Croupier is not behind the central reception facing the entrance")
         return
-    if room.get_node_or_null("CroupierStation/MainFacing") != null \
-            or room.get_node_or_null("CroupierStation/CounterCollision") != null \
-            or room.get_node_or_null("CroupierStation/Counter/WoodFront") != null:
-        _fail("Old free-standing counter must be removed, not left underneath")
+    if room.get_node_or_null("ReceptionCounterCollision") != null or desk.get_node_or_null("CounterCollision") != null:
+        _fail("Old reception collision was duplicated")
         return
-
-    # The counter is NOT in the exit-wall corner. Keep the door at z=-4.48
-    # and the entire central x=0 corridor clear.
     var front_box := front_shape.shape as BoxShape3D
     var near_box := front_end.shape as BoxShape3D
     var far_box := rear_end.shape as BoxShape3D
-    if front_box == null or near_box == null or far_box == null \
-            or front_box.size.z < 3.0 or near_box.size.x < 1.5 \
-            or far_box.size.x < 1.5:
-        _fail("Reception counter requires three FULL-HEIGHT solid colliders")
+    if front_box == null or near_box == null or far_box == null or front_box.size.x<6.0 or near_box.size.z<1.0 or far_box.size.z<1.0:
+        _fail("Central reception counter requires three full solid sections")
         return
-    var main_near_x := front_shape.position.x + front_box.size.x * 0.5
-    var main_far_x := front_shape.position.x - front_box.size.x * 0.5
-    var return_front_wall_x := front_end.position.x - near_box.size.x * 0.5
-    var return_rear_wall_x := rear_end.position.x - far_box.size.x * 0.5
-    var return_front_tip_x := front_end.position.x + near_box.size.x * 0.5
-    var return_rear_tip_x := rear_end.position.x + far_box.size.x * 0.5
-    if main_near_x > -1.7 or main_near_x < -1.95 \
-            or return_front_wall_x > -3.575 or return_rear_wall_x > -3.575 \
-            or return_front_tip_x < main_far_x + 0.20 \
-            or return_rear_tip_x < main_far_x + 0.20:
-        _fail("Reception counter leaves a walkable opening at a wall or return")
-        return
-    var nearest_exit_bar_z := front_end.position.z - near_box.size.z * 0.5
-    if nearest_exit_bar_z < -2.0 \
-            or absf(front_shape.position.x) < 1.7:
-        _fail("Reception counter is too close to the main door or central exit path")
-        return
-    if not (npc_body.global_position.x < main_far_x - 0.40 \
-            and npc_body.global_position.x > -3.55 \
-            and absf(npc_body.global_position.z - front_shape.position.z) < 0.35):
-        _fail("Croupier must be inside the closed staff-only pocket, not on the customer side")
-        return
-    if not is_equal_approx(top.position.y + top.scale.y * 0.5, 1.144):
-        _fail("Reception surface is not sized to a 1.77 m NPC")
-        return
-    for part in [front, top, return_front, return_rear]:
-        var finish := part.get_active_material(0) as StandardMaterial3D
-        if finish == null or finish.albedo_texture == null \
-                or not finish.normal_enabled or finish.normal_texture == null \
-                or finish.roughness_texture == null:
-            _fail("Reception surface lost its actual project PBR material on " + part.name)
-            return
-    if front.scale.y < 1.0 or front.position.y - front.scale.y * 0.5 > 0.05:
-        _fail("Reception counter must be a closed solid wooden body down to the floor")
-        return
+    var counter_bounds: AABB = front.global_transform*front.get_aabb()
     var npc_capsule := npc_shape.shape as CapsuleShape3D
-    if npc_capsule == null or npc_capsule.radius < 0.33 \
-            or npc_capsule.height < 1.6:
-        _fail("The real croupier must keep his human-sized collision capsule")
+    if npc_capsule == null or npc_capsule.radius<0.33 or npc_capsule.height<1.6:
+        _fail("Croupier collision capsule regressed")
         return
-
+    if npc_shape.global_position.z+npc_capsule.radius>=counter_bounds.position.z or absf(npc_shape.global_position.x)>0.30:
+        _fail("Croupier intersects counter or is displaced from the center")
+        return
+    var top_bounds: AABB = top.global_transform*top.get_aabb()
+    if absf(top_bounds.end.y-1.09)>0.015 or counter_bounds.position.y>0.02:
+        _fail("Countertop or grounded front has incorrect dimensions")
+        return
+    for part in [front,top,return_front,return_rear]:
+        var finish := part.get_active_material(0) as StandardMaterial3D
+        if finish == null or finish.albedo_texture == null or not finish.normal_enabled or finish.normal_texture == null:
+            _fail("Reception surface lost its PBR finish: "+part.name)
+            return
     await physics_frame
     var world := room.get_world_3d().direct_space_state
     for check in [
-        [Vector3(-1.1, 0.75, 0.25), Vector3(-3.4, 0.75, 0.25), "front"],
-        [Vector3(-3.0, 0.75, -2.2), Vector3(-3.0, 0.75, -0.5), "near wall return"],
-        [Vector3(-3.0, 0.75, 2.7), Vector3(-3.0, 0.75, 1.0), "far wall return"]
+        [Vector3(0,0.75,-5.2),Vector3(0,0.75,-7.0),counter],
+        [Vector3(-3.8,0.75,-7.38),Vector3(-2.2,0.75,-7.38),room.get_node("Reception/Counter/WestReturn")],
+        [Vector3(3.8,0.75,-7.38),Vector3(2.2,0.75,-7.38),room.get_node("Reception/Counter/EastReturn")]
     ]:
-        var params := PhysicsRayQueryParameters3D.create(check[0], check[1])
-        var hit: Dictionary = world.intersect_ray(params)
-        if hit.is_empty() or hit.get("collider") != counter:
-            _fail("A player can pass through the closed counter: " + str(check[2]))
+        var params := PhysicsRayQueryParameters3D.create(check[0],check[1])
+        var hit := world.intersect_ray(params)
+        if hit.is_empty() or hit.get("collider") != check[2]:
+            _fail("Player can pass through an authored counter section")
             return
-    var npc_ray := PhysicsRayQueryParameters3D.create(
-            Vector3(-3.52, 0.86, 0.25), Vector3(-2.62, 0.86, 0.25))
+    var npc_ray := PhysicsRayQueryParameters3D.create(npc_shape.global_position+Vector3(0,0,-0.9),npc_shape.global_position)
     var npc_hit := world.intersect_ray(npc_ray)
     if npc_hit.is_empty() or npc_hit.get("collider") != npc_body:
-        _fail("The croupier's original body collision is broken")
+        _fail("Croupier body collision is broken")
         return
 
     var model_installed := ResourceLoader.exists("res://models/croupier/scene.gltf", "PackedScene")
@@ -199,9 +166,9 @@ func _run() -> void:
         _fail("The upgraded talking plaque moved away from above the NPC")
         return
 
-    # Customer side is room-facing (+X), beyond the solid counter.
-    player.position = Vector3(-0.95, 1.02, 0.25)
-    camera.look_at(desk.to_global(Vector3(0, 1.48, -0.52)), Vector3.UP)
+    # Customer side is room-facing (+Z), beyond the solid counter.
+    player.position = Vector3(0, 1.02, -5.10)
+    camera.look_at(anchor.to_global(Vector3(0, 1.53, 0)), Vector3.UP)
     await process_frame
     if not bool(room.call("_is_looking_at_croupier")):
         _fail("Looking at the croupier from the customer side must allow interaction")
@@ -209,17 +176,17 @@ func _run() -> void:
     if bool(room.call("_is_looking_at_door")):
         _fail("The start door must not steal the croupier interaction")
         return
-    # Confirm looking at the NPC from inside the blocked pocket cannot
+    # Confirm looking at the NPC from the rear staff area cannot
     # masquerade as an accessible customer-side interaction.
     var candidate := player.position
-    player.position = Vector3(-3.20, 1.02, 0.25)
-    camera.look_at(desk.to_global(Vector3(0, 1.48, -0.52)), Vector3.UP)
+    player.position = Vector3(0, 1.02, -8.65)
+    camera.look_at(anchor.to_global(Vector3(0, 1.53, 0)), Vector3.UP)
     await process_frame
     if bool(room.call("_is_looking_at_croupier")):
         _fail("The talking prompt must only be available in front of the counter")
         return
     player.position = candidate
-    camera.look_at(desk.to_global(Vector3(0, 1.48, -0.52)), Vector3.UP)
+    camera.look_at(anchor.to_global(Vector3(0, 1.53, 0)), Vector3.UP)
     await process_frame
     if not bool(room.call("_is_looking_at_croupier")):
         _fail("Returning to the customer side must restore the talking trigger")

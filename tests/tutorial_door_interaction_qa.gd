@@ -20,10 +20,10 @@ func _run() -> void:
         return
     root.add_child(room)
     await process_frame
-    var door := room.get_node("ExitDoor") as Node3D
+    var door := room.get_node("SideGalleries/EastGallery/AccessBays/MainCasinoEntrance") as Node3D
     var camera := room.get_node("Player/Camera3D") as Camera3D
     var player := room.get_node("Player") as CharacterBody3D
-    # Door is scaled in the saved scene; test in its own coordinates.
+    # Door is rotated in the saved scene; test in its own coordinates.
     player.global_position = door.to_global(Vector3(0.0, 1.24, 3.5))
     camera.look_at(door.to_global(Vector3(0.0, 1.7, 0.0)), Vector3.UP)
     if not bool(room.call("_is_looking_at_door")):
@@ -48,6 +48,30 @@ func _run() -> void:
     camera.look_at(door.to_global(Vector3(0.0, 1.5, 0.0)), Vector3.UP)
     if bool(room.call("_is_looking_at_door")):
         _fail("Door can be activated from the wrong side")
+        return
+    for gallery in room.get_node("SideGalleries").get_children():
+        for bay in gallery.get_node("AccessBays").get_children():
+            if bay == door:
+                continue
+            player.global_position = bay.to_global(Vector3(0,1.02,1.8))
+            camera.look_at(bay.to_global(Vector3(0,1.6,0)),Vector3.UP)
+            if bool(room.call("_is_looking_at_door")):
+                _fail("Reserved construction door is interactable")
+                return
+    player.global_position = door.to_global(Vector3(0,1.02,2.0))
+    camera.look_at(door.to_global(Vector3(0,1.5,0)),Vector3.UP)
+    var blocker := StaticBody3D.new()
+    room.add_child(blocker)
+    blocker.global_position = camera.global_position.lerp(door.to_global(Vector3(0,1.5,0)),0.5)
+    var collider := CollisionShape3D.new()
+    var shape := BoxShape3D.new()
+    shape.size = Vector3(0.7,2,0.7)
+    collider.shape = shape
+    blocker.add_child(collider)
+    await physics_frame
+    await physics_frame
+    if bool(room.call("_is_looking_at_door")):
+        _fail("Door can be activated through an obstruction")
         return
     room.queue_free()
     await process_frame

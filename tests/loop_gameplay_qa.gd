@@ -21,7 +21,7 @@ func _run() -> void:
         return
 
     var intro := intro_resource.instantiate() as Node3D
-    if intro.get_node_or_null("ExitDoor") == null or intro.get_node_or_null("Player/Camera3D") == null:
+    if intro.get_node_or_null("SideGalleries/EastGallery/AccessBays/MainCasinoEntrance") == null or intro.get_node_or_null("Player/Camera3D") == null:
         _fail("Tutorial room has no entry door or first-person player")
         return
     intro.free()

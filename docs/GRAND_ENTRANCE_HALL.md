@@ -1,13 +1,15 @@
 # Grand Entrance Hall — Phase 7A blockout
 
-This is an isolated, authored scene, not a replacement for the existing
-tutorial. Open `gameplay/grand_entrance_hall.tscn` in Godot 4.5 (Forward+)
+This is the live authored tutorial scene. The stable entry point
+`gameplay/tutorial.tscn` instances this hall, so existing saved runs and
+all menu/pause entry routes keep their original path. Open `gameplay/grand_entrance_hall.tscn` in Godot 4.5 (Forward+)
 and press **F6 / Run Current Scene**. Use the existing movement, sprint,
-mouse look and pause controls. F5 still starts the normal main menu.
+mouse look and pause controls. F5 starts the normal main menu and a new Classic run enters this hall.
 Alternatively: `godot --path . res://gameplay/grand_entrance_hall.tscn`.
-The four doors are deliberately solid and have no transition or interaction.
-Do not start a new run from the preview's ordinary pause menu if you want
-to stay in the blockout.
+Only the east rear door leads to the casino, using the existing E/controller
+interaction and threaded SceneLoader. The three other doors are reserved,
+solid and non-interactive. To test the complete progression, start a new
+Classic run from F5; F6 is useful for editor inspection.
 
 ## Plan (meters, local scene coordinates)
 
@@ -21,12 +23,12 @@ to stay in the blockout.
   the 4.88 m wide burgundy runner.
 - Reception centered at z -6.45; 6.4 m front, 1.09 m countertop,
   returns and open staff access behind. NPC marker at (0,0,-7.60);
-  customer marker at (0,0,-5.10). The real tutorial NPC and its behavior
-  remain unchanged in the original scene.
+  customer marker at (0,0,-5.10). The live CroupierStation preserves the original authored model overrides,
+  native idle/facial animation and optional bilingual dialogue.
 - Two open arcades per wing, divided by a central structural pier.
   Four 2.4 m wide, 3.1 m high double-door blockouts on the outer gallery
-  walls at x ±12.15 and z -4 / +2. East rear door is the future main
-  casino connection. Other three are reserved; all four are closed.
+  walls at x ±12.15 and z -4 / +2. East rear door is the active main casino connection. The other three
+  are marked UNDER CONSTRUCTION. All have solid door leaves.
   Each access has a connection and approach marker for future work.
 - Rear space behind reception (roughly x -4.5 to +4.5, z -8.8 to -13.6)
   reserved for a future double staircase. Three design markers indicate
@@ -50,8 +52,9 @@ prevents stretching on large architectural surfaces. No shared casino
 material is modified and no external assets are downloaded. The gallery
 ceiling and end walls meet adjoining geometry without overlapping visible
 planes; the countertop returns meet the front slab edge-to-edge. The
-runner, upper wall insets and reception panel trim are authored nodes. NPC
-placeholder is an editor marker, not a second tutorial implementation.
+runner, upper wall insets and reception panel trim are authored nodes. The NPC is a saved editable instance at the central reception. The previous
+room is retained only as an archived asset/geometry reference in
+`gameplay/legacy_tutorial.tscn`; no live gameplay route loads it.
 
 ## QA
 
@@ -62,6 +65,8 @@ on main/side/staff routes, floor continuity, closed door collision,
 central NPC sightline, player gravity and 49-entry catalog/main scene
 contract. All old tutorial and gameplay tests remain enabled.
 Material coverage and the reported coplanar joints are checked as well.
-Visual surface quality, lighting and real Forward+ performance still need
-manual F6 review before furnishing and tutorial integration. This scene does not add a gameplay route,
-change a profile, implement dialogue, or affect main branch.
+Visual NPC placement, materials, lighting and real Forward+ performance
+still require manual review. The live tutorial reuses existing dialogue,
+accessibility, save schema, and loading flow. No changes to the main casino
+or anomaly catalog. The legacy dressing regression continues to check the
+archived assets; all live NPC and transition tests target the new hall.

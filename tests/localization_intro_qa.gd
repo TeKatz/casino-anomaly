@@ -35,17 +35,17 @@ func _run() -> void:
     var intro := INTRO.instantiate() as Node3D
     root.add_child(intro)
     await process_frame
-    var door := intro.get_node_or_null("ExitDoor") as Node3D
+    var door := intro.get_node_or_null("SideGalleries/EastGallery/AccessBays/MainCasinoEntrance") as Node3D
     var camera := intro.get_node_or_null("Player/Camera3D") as Camera3D
     var player := intro.get_node_or_null("Player") as CharacterBody3D
     var prompt := intro.get_node_or_null("DoorInteractionHUD") as CanvasLayer
-    var old_sign := intro.get_node_or_null("ExitDoor/DoorHint")
-    var leaf := intro.get_node_or_null("ExitDoor/Door") as MeshInstance3D
+    var old_sign := intro.get_node_or_null("SideGalleries/EastGallery/AccessBays/MainCasinoEntrance/DoorHint")
+    var leaf := intro.get_node_or_null("SideGalleries/EastGallery/AccessBays/MainCasinoEntrance/ClosedLeaf/Mesh") as MeshInstance3D
     if door == null or camera == null or player == null or prompt == null or leaf == null:
         _fail("Starting room is missing the interaction or door")
         return
     var wood := leaf.material_override as StandardMaterial3D
-    if wood == null or wood.albedo_texture == null or intro.get_node_or_null("ExitDoor/Handle") == null:
+    if wood == null or wood.albedo_texture == null or intro.get_node_or_null("SideGalleries/EastGallery/AccessBays/MainCasinoEntrance/LeftHandle") == null:
         _fail("Starting door must have textured wood, hardware and detailing")
         return
 
@@ -55,7 +55,7 @@ func _run() -> void:
     if bool(prompt.get("_shown")):
         _fail("The door prompt must be hidden outside interaction range")
         return
-    player.position = Vector3(0, 1.02, -2.15)
+    player.global_position = door.to_global(Vector3(0,1.02,2.15))
     camera.look_at(door.global_position + Vector3(0, 1.6, 0), Vector3.UP)
     await process_frame
     if not bool(intro.call("_is_looking_at_door")) or not bool(prompt.get("_shown")) \

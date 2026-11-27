@@ -1,5 +1,5 @@
 extends Node3D
-## Optional short conversations; the starting door remains the way forward.
+## Single live tutorial: the existing dialogue and casino handoff.
 const Controls = preload("res://gameplay/input_bindings.gd")
 const Loc = preload("res://gameplay/localization.gd")
 const Conversation = preload("res://gameplay/croupier_dialogue.gd")
@@ -7,20 +7,18 @@ const DoorPrompt = preload("res://ui/door_prompt.gd")
 
 @onready var player: CharacterBody3D = $Player
 @onready var camera: Camera3D = $Player/Camera3D
-@onready var door: Node3D = $ExitDoor
+@onready var door: Node3D = $SideGalleries/EastGallery/AccessBays/MainCasinoEntrance
 @onready var croupier: Node3D = $CroupierStation
+@onready var door_leaf: StaticBody3D = door.get_node("ClosedLeaf")
+@onready var door_shape: CollisionShape3D = door_leaf.get_node("CollisionShape3D")
+@onready var npc_body: StaticBody3D = croupier.get_node("CroupierCollision")
+@onready var model_anchor: Node3D = croupier.get_node("CharacterPivot/ModelAnchor")
 
 var door_prompt: CanvasLayer
 var conversation: CanvasLayer
 var changing := false
 
-
 func _ready() -> void:
-    # The counter occupies the LEFT wall (x=-3.7), not the exit wall.
-    # Keep the NPC inside its enclosed booth and facing the customers (+X).
-    croupier.position = Vector3(-2.56, 0.0, 0.25)
-    croupier.rotation.y = PI * 0.5
-    _ensure_reception_collision()
     Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
     door_prompt = DoorPrompt.new()
     door_prompt.name = "DoorInteractionHUD"
@@ -34,100 +32,77 @@ func _ready() -> void:
         settings.options_changed.connect(_on_settings_changed)
     _refresh_hint()
 
-
-func _ensure_reception_collision() -> void:
-    # The three authored collision shapes also exist in tutorial.tscn.
-    # Restoring only missing ones prevents imported-scene node loss from
-    # leaving a gap that lets the player enter the staff-only pocket.
-    var body := get_node_or_null("ReceptionCounterCollision") as StaticBody3D
-    if body == null:
-        body = StaticBody3D.new()
-        body.name = "ReceptionCounterCollision"
-        add_child(body)
-    var specs: Array[Dictionary] = [
-        {"name": "ReceptionLongCollider",
-            "at": Vector3(-2.15, 0.52, 0.25),
-            "size": Vector3(0.64, 1.04, 3.16)},
-        {"name": "ReceptionFrontReturnCollider",
-            "at": Vector3(-2.91, 0.52, -1.33),
-            "size": Vector3(1.6, 1.04, 0.64)},
-        {"name": "ReceptionRearReturnCollider",
-            "at": Vector3(-2.91, 0.52, 1.83),
-            "size": Vector3(1.6, 1.04, 0.64)}
-    ]
-    for spec in specs:
-        var collider := body.get_node_or_null(str(spec["name"])) as CollisionShape3D
-        if collider == null:
-            collider = CollisionShape3D.new()
-            collider.name = str(spec["name"])
-            body.add_child(collider)
-        collider.position = spec["at"]
-        if not (collider.shape is BoxShape3D):
-            var shape := BoxShape3D.new()
-            shape.size = spec["size"]
-            collider.shape = shape
-
-
 func _refresh_hint() -> void:
     door_prompt.call("set_prompt_text", Loc.t("tutorial.enter", self))
-
+    for gallery in $SideGalleries.get_children():
+        for bay in gallery.get_node("AccessBays").get_children():
+            var sign := bay.get_node("TemporarySign") as Label3D
+            sign.text = Loc.t("tutorial.main_casino" if bay == door else "tutorial.under_construction", self)
 
 func _on_settings_changed(key: String) -> void:
     if key == "language":
         _refresh_hint()
 
+func _loader_active() -> bool:
+    var loader := get_node_or_null("/root/SceneLoader")
+    return loader != null and bool(loader.get("active"))
 
 func _process(_delta: float) -> void:
-    var can_interact := not changing and not is_dialogue_open() and not get_tree().paused and bool(Controls.pref(self, "hud_visible", true)) and bool(Controls.pref(self, "interaction_hints", true)) and bool(Controls.pref(self, "tutorial_hints", true))
+    # A failed load keeps the retry/cancel overlay open; do not unlock
+    # until it is dismissed. A successful handoff frees this scene.
+    if changing and not _loader_active():
+        changing = false
+        player.call("set_interaction_locked", false)
+    var can_interact := not changing and not _loader_active() and not is_dialogue_open() and not get_tree().paused and bool(Controls.pref(self, "hud_visible", true)) and bool(Controls.pref(self, "interaction_hints", true)) and bool(Controls.pref(self, "tutorial_hints", true))
     croupier.call("set_hint_visible", can_interact and _is_looking_at_croupier())
     door_prompt.call("set_prompt_visible", can_interact and _is_looking_at_door())
 
+func _ray_to(target: Vector3) -> Dictionary:
+    var exclude: Array[RID] = [player.get_rid()]
+    var query := PhysicsRayQueryParameters3D.create(camera.global_position, target, 1, exclude)
+    return get_world_3d().direct_space_state.intersect_ray(query)
 
 func _is_looking_at_door() -> bool:
-    # Aim at the actual DOOR PANEL rather than a tiny point in its centre.
-    # The old .985 dot threshold demanded an almost exact viewing angle.
-    # Project the camera's sight line onto the door plane in door-local
-    # space. This tracks the designer's door transforms, including scale.
+    # Use the actual rotated leaf and its collision dimensions.
     var eye := door.to_local(camera.global_position)
-    if eye.z < 0.15 or eye.z > 5.0:
+    var face := door.to_local(door_shape.global_position)
+    var half := (door_shape.shape as BoxShape3D).size * 0.5
+    var surface_z := face.z + half.z
+    if eye.z < surface_z + 0.04 or eye.z > 3.8:
         return false
-    var view_world := -camera.global_transform.basis.z
-    var forward := door.to_local(camera.global_position + view_world) - eye
-    if forward.z >= -0.15:
+    var forward := door.to_local(camera.global_position - camera.global_basis.z) - eye
+    if forward.z >= -0.10:
         return false
-    var hit := eye + forward * (eye.z / -forward.z)
-    # Authored door: 1.85m wide x 3.15m tall in local units. A small
-    # allowance around the frame makes the E prompt comfortable, without
-    # activating when looking sideways down the hallway.
-    return absf(hit.x) <= 1.18 and hit.y >= 0.05 and hit.y <= 3.30
-
+    var hit := eye + forward * ((surface_z-eye.z)/forward.z)
+    if absf(hit.x-face.x)>half.x-0.01 or hit.y<face.y-half.y+0.04 or hit.y>face.y+half.y-0.02:
+        return false
+    var ray := _ray_to(door.to_global(hit+forward*0.08))
+    return not ray.is_empty() and ray.get("collider") == door_leaf
 
 func _is_looking_at_croupier() -> bool:
-    # Target the face in station-local coordinates: moving the counter must
-    # never detach the E trigger from the actual animated NPC.
-    var center := croupier.to_global(Vector3(0, 1.53, -0.52))
-    var towards: Vector3 = center - camera.global_position
+    var center := model_anchor.to_global(Vector3(0,1.53,0))
+    var towards := center-camera.global_position
     var distance := towards.length()
-    if distance < 0.2 or distance > 3.35:
+    var local_eye := croupier.to_local(camera.global_position)
+    if distance<0.2 or distance>3.35 or local_eye.z<1.17 or absf(local_eye.x)>3.20:
         return false
-    if croupier.to_local(camera.global_position).z < 0.78:
+    if (-camera.global_basis.z).dot(towards/distance)<0.925:
         return false
-    return (-camera.global_transform.basis.z).dot(towards / distance) >= 0.925
-
+    var hit := _ray_to(center)
+    return hit.is_empty() or hit.get("collider")==npc_body
 
 func is_dialogue_open() -> bool:
     return conversation != null and bool(conversation.get("active"))
 
-
 func _open_conversation() -> void:
-    if changing or is_dialogue_open():
+    if changing or _loader_active() or is_dialogue_open():
         return
     player.call("interaction_vibration")
     player.call("set_interaction_locked", true)
     croupier.call("set_hint_visible", false)
+    door_prompt.call("set_prompt_visible", false)
     croupier.call("set_talking", true)
     conversation.call("show_conversation")
-
 
 func _on_conversation_closed() -> void:
     if changing:
@@ -136,9 +111,8 @@ func _on_conversation_closed() -> void:
     player.call("set_interaction_locked", false)
     Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
-
 func _unhandled_input(event: InputEvent) -> void:
-    if changing or is_dialogue_open():
+    if changing or _loader_active() or is_dialogue_open() or get_tree().paused:
         return
     if not Controls.pressed(event, "interact"):
         return
@@ -149,14 +123,12 @@ func _unhandled_input(event: InputEvent) -> void:
     if not _is_looking_at_door():
         return
     get_viewport().set_input_as_handled()
-    var loader = get_node_or_null("/root/SceneLoader")
+    var loader := get_node_or_null("/root/SceneLoader")
     if loader == null or not loader.travel_to("res://main.tscn", true):
         push_warning("Could not show the casino loading screen.")
         return
     player.call("interaction_vibration")
     changing = true
-    loader.transition_failed.connect(_on_scene_load_failed, CONNECT_ONE_SHOT)
-
-
-func _on_scene_load_failed(_path: String) -> void:
-    changing = false
+    player.call("set_interaction_locked", true)
+    door_prompt.call("set_prompt_visible", false)
+    croupier.call("set_hint_visible", false)

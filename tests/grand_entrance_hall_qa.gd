@@ -1,5 +1,5 @@
 extends SceneTree
-## Phase 7A is deliberately independent of the live tutorial and room streaming.
+## Authored architecture, collision, finishes and live tutorial integration.
 const HALL = preload("res://gameplay/grand_entrance_hall.tscn")
 const PLAYER = preload("res://player.gd")
 const Catalog = preload("res://gameplay/anomaly_catalog.gd")
@@ -33,6 +33,8 @@ func _run() -> void:
     var static_count := 0
     for item in hall.find_children("*","StaticBody3D",true,false):
         var body := item as StaticBody3D
+        if hall.get_node("CroupierStation").is_ancestor_of(body):
+            continue # NPC capsule is checked by the full croupier suite.
         var mesh := body.get_node_or_null("Mesh") as MeshInstance3D
         var collider := body.get_node_or_null("CollisionShape3D") as CollisionShape3D
         if mesh == null or collider == null or not mesh.mesh is BoxMesh or not collider.shape is BoxShape3D:
@@ -110,7 +112,8 @@ func _run() -> void:
         _fail("Expected one future main casino connection and three reserves")
         return
     var sight := PhysicsRayQueryParameters3D.create(Vector3(0,1.57,12),Vector3(0,1.6,-7.6),1,exclude)
-    if not space.intersect_ray(sight).is_empty():
+    var sight_hit := space.intersect_ray(sight)
+    if not sight_hit.is_empty() and sight_hit.get("collider") != hall.get_node("CroupierStation/CroupierCollision"):
         _fail("Central sightline to future NPC is blocked")
         return
     var counter_ray := PhysicsRayQueryParameters3D.create(Vector3(0,0.65,-4.8),Vector3(0,0.65,-7),1,exclude)
@@ -148,6 +151,8 @@ func _has_coplanar_overlap(a: MeshInstance3D, b: MeshInstance3D) -> bool:
 func _verify_finishes(hall: Node3D) -> bool:
     for item in hall.find_children("*","MeshInstance3D",true,false):
         var mesh := item as MeshInstance3D
+        if hall.get_node("CroupierStation").is_ancestor_of(mesh):
+            continue # Imported character materials are not architecture.
         var mat := mesh.material_override as StandardMaterial3D
         if mat == null or mat.albedo_texture == null or not mat.normal_enabled or mat.normal_texture == null:
             _fail("Unfinished architectural material: "+str(mesh.get_path()))
