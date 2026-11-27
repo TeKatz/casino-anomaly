@@ -79,11 +79,11 @@ func _run() -> void:
     if loop == null or menu == null or menu.visible or state.anomaly_id != "":
         _fail("The hidden menu must exist only during gameplay and start closed")
         return
-    if Catalog.entries().size() != 51 or (loop.call("debug_available_ids") as Array).size() < 13:
+    if Catalog.entries().size() != 50 or (loop.call("debug_available_ids") as Array).size() < 13:
         _fail("Developer picker lost an active effect")
         return
     var available_ids: Array = loop.call("debug_available_ids")
-    for retired_id in ["entrance_label__reverse","table_label__reverse","bust_turned","bust_turned__subtle","candleholder_shifted__other","crooked_painting__reverse","crooked_painting__subtle","plant_misplaced","plant_misplaced__subtle","stool_out_of_line__other","stool_out_of_line__subtle","breathing_wall"]:
+    for retired_id in ["entrance_label__reverse","table_label__reverse","bust_turned","bust_turned__subtle","candleholder_shifted__other","crooked_painting__reverse","crooked_painting__subtle","plant_misplaced","plant_misplaced__subtle","stool_out_of_line__other","stool_out_of_line__subtle","breathing_wall","cool_ceiling_light__other"]:
         if available_ids.has(retired_id) or bool(loop.call("debug_select_next_anomaly", retired_id)):
             _fail("Developer picker accepted retired effect: " + retired_id)
             return

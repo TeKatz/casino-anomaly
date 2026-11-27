@@ -14,7 +14,6 @@ const NEW_IDS := [
     "bust_turned__reverse",
     "west_chandelier_dim",
     "cool_ceiling_light",
-    "cool_ceiling_light__other",
     "amber_ceiling_light",
     "horse_spotlight_off"
 ]
@@ -86,14 +85,6 @@ func _verify_adjusted_definitions() -> bool:
             "energy_scale": 1.90,
             "difficulty": 2
         },
-        "cool_ceiling_light__other": {
-            "target_path": "ModelInteriors/ChandelierWarmLight_01/ChandelierWarmLight_01",
-            "energy_reference_path": "Lighting/WarmCasinoLamp_03",
-            "light_anchor_path": "ModelInteriors/MainChandelier_01",
-            "color": Color(0.55, 0.72, 1, 1),
-            "energy_scale": 1.65,
-            "difficulty": 3
-        },
         "amber_ceiling_light": {
             "target_path": "Lighting/WarmCasinoLamp_03",
             "color": Color("#ff641e"),
@@ -115,47 +106,44 @@ func _verify_adjusted_definitions() -> bool:
 
 
 func _verify_cool_fixture_lights(room: Node3D) -> bool:
-    # Each variant uses a separate authored chandelier light; the original
-    # room-fill lamps supply only the reference energy and remain unchanged.
-    var primary := Catalog.get_entry("cool_ceiling_light")
-    var other := Catalog.get_entry("cool_ceiling_light__other")
-    var targets: Array[Light3D] = []
-    var references: Array[Light3D] = []
-    var fixtures: Array[Node3D] = []
-    for entry in [primary, other]:
-        targets.append(room.get_node_or_null(str(entry["target_path"])) as Light3D)
-        references.append(room.get_node_or_null(str(entry["energy_reference_path"])) as Light3D)
-    fixtures.append(room.get_node_or_null("ModelInteriors/CeilingChandelier_01") as Node3D)
-    fixtures.append(room.get_node_or_null("ModelInteriors/MainChandelier_01") as Node3D)
-    if targets.has(null) or references.has(null) or fixtures.has(null) or targets[0] == targets[1]:
-        _fail("Cool variants must have two distinct authored fixture lights and their energy references")
+    # Preserve the accepted main effect and ensure the former variant's
+    # fixture and both original room-fill lights remain untouched.
+    var entry := Catalog.get_entry("cool_ceiling_light")
+    var target := room.get_node_or_null(str(entry["target_path"])) as Light3D
+    var reference := room.get_node_or_null(str(entry["energy_reference_path"])) as Light3D
+    var fixture := room.get_node_or_null(str(entry["light_anchor_path"])) as Node3D
+    var unrelated: Array[Light3D] = [
+        room.get_node_or_null("ModelInteriors/ChandelierWarmLight_01/ChandelierWarmLight_01") as Light3D,
+        room.get_node_or_null("Lighting/WarmCasinoLamp_03") as Light3D,
+        reference
+    ]
+    if target == null or fixture == null or unrelated.has(null):
+        _fail("Accepted cool fixture or reference lights are missing")
         return false
-    var before: Array[Dictionary] = []
-    var reference_before: Array[Dictionary] = []
-    for i in range(2):
-        before.append(_snapshot(targets[i]))
-        reference_before.append(_snapshot(references[i]))
+    var before := _snapshot(target)
+    var unrelated_before: Array[Dictionary] = []
+    for light in unrelated:
+        unrelated_before.append(_snapshot(light))
     var adapter := Adapter.new()
-    for i in range(2):
-        var entry: Dictionary = [primary, other][i]
-        if not adapter.apply(room, str(entry["id"])):
-            _fail("Cool fixture variant unavailable")
-            return false
-        var offset := targets[i].global_position - fixtures[i].global_position
-        if not offset.is_equal_approx(Vector3.UP * 0.12):
-            _fail("Cool light is detached from its physical chandelier: " + str(targets[i].get_path()) + " offset " + str(offset))
-            return false
-        var original_transform: Transform3D = before[i]["transform"]
-        if not targets[i].light_color.is_equal_approx(entry["color"]) or not is_equal_approx(targets[i].light_energy, float(reference_before[i]["energy"]) * float(entry["energy_scale"])) or not targets[i].transform.basis.is_equal_approx(original_transform.basis) or targets[i].visible != before[i]["visible"]:
-            _fail("Cool fixture color, absolute energy, orientation or visibility regressed")
-            return false
-        if not _same(before[1-i], _snapshot(targets[1-i])) or not _same(reference_before[0], _snapshot(references[0])) or not _same(reference_before[1], _snapshot(references[1])):
+    if not adapter.apply(room, str(entry["id"])):
+        _fail("Accepted cool fixture unavailable")
+        return false
+    var offset := target.global_position - fixture.global_position
+    if not offset.is_equal_approx(Vector3.UP * 0.12):
+        _fail("Cool light is detached from its physical chandelier: " + str(offset))
+        return false
+    var original_transform: Transform3D = before["transform"]
+    if not target.light_color.is_equal_approx(entry["color"]) or not is_equal_approx(target.light_energy, float(unrelated_before[2]["energy"]) * float(entry["energy_scale"])) or not target.transform.basis.is_equal_approx(original_transform.basis) or target.visible != before["visible"]:
+        _fail("Cool fixture color, absolute energy, orientation or visibility regressed")
+        return false
+    for i in range(unrelated.size()):
+        if not _same(unrelated_before[i], _snapshot(unrelated[i])):
             _fail("Cool fixture altered an unrelated room light")
             return false
-        adapter.clear()
-        if not _same(before[i], _snapshot(targets[i])):
-            _fail("Cool fixture light failed to restore its original state")
-            return false
+    adapter.clear()
+    if not _same(before, _snapshot(target)):
+        _fail("Cool fixture light failed to restore its original state")
+        return false
     return true
 
 
@@ -239,13 +227,13 @@ func _run() -> void:
         _fail("The 13 baseline effects must remain registered and available; additional effects are allowed")
         return
 
-    var retired := ["entrance_label__reverse","table_label__reverse","bust_turned","bust_turned__subtle","candleholder_shifted__other","crooked_painting__reverse","crooked_painting__subtle","plant_misplaced","plant_misplaced__subtle","stool_out_of_line__other","stool_out_of_line__subtle","breathing_wall"]
+    var retired := ["entrance_label__reverse","table_label__reverse","bust_turned","bust_turned__subtle","candleholder_shifted__other","crooked_painting__reverse","crooked_painting__subtle","plant_misplaced","plant_misplaced__subtle","stool_out_of_line__other","stool_out_of_line__subtle","breathing_wall","cool_ceiling_light__other"]
     for id in retired:
         if not Catalog.get_entry(id).is_empty() or available.has(id) or Adapter.new().apply(room, id):
             _fail("Retired anomaly still selectable: " + id)
             return
-    if definitions.size() != 51:
-        _fail("Phase 1 catalog must contain exactly 51 active definitions")
+    if definitions.size() != 50:
+        _fail("Catalog must contain exactly 50 active definitions after Phase 3 retirement")
         return
     var expected_difficulty := {"amber_ceiling_light__soft":3,"bar_label":1,"bust_turned__reverse":2,"candleholder_shifted":4,"empty_reserve":1,"watchful_camera":2,"blank_reels":3,"empty_footsteps":3,"last_kings":4,"lightless_horse":1,"silent_countdown":1,"watching_canvases":1,"the_escort":1,"black_bloom":1,"they_are_listening":1,"wrong_reflection":1,"bar_label__reverse":5,"bar_label__subtle":3,"plant_forward__other":3}
     for id in expected_difficulty:

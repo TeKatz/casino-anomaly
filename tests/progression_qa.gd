@@ -38,6 +38,12 @@ func _run() -> void:
     var ids := Catalog.discoverable_ids()
     if not require(ids.size() >= 14 and Catalog.entries().size() >= 30 and Catalog.family("bust_turned__reverse") == "bust_turned", "Family or variant registry incorrect"):
         return
+    # A retired cool variant retains its historical family discovery but is
+    # not an active form and cannot resolve as a selectable definition.
+    var retired_cool := {"cool_ceiling_light": {"recognized": true, "correct": 5, "variants": {"cool_ceiling_light__other": true}}}
+    var cool_counts := Progress.counts(retired_cool)
+    if not require(Catalog.get_entry("cool_ceiling_light__other").is_empty() and Catalog.family_entries("cool_ceiling_light").size() == 1 and cool_counts["discovered"] == 1 and cool_counts["mastered"] == 1 and cool_counts["variants"] == 0, "Retired cool variant changed legacy family progress or active forms"):
+        return
     # Historical records retain the original family and retired form IDs.
     var old_records := {
         "bust_turned": {"recognized": true, "correct": 5, "variants": {"bust_turned": true, "bust_turned__subtle": true}},
