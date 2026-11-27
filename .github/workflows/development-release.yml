@@ -82,7 +82,7 @@ jobs:
           timeout --kill-after=10s 5m /tmp/godot-bin/Godot_v4.5.1-stable_linux.x86_64 --headless --path . --editor --import 2>&1 | tee qa-logs/import.log
           if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' qa-logs/import.log; then exit 1; fi
       - name: Run all Linux suites (no fail-fast)
-        run: python3 tools/run_qa_group.py /tmp/godot-bin/Godot_v4.5.1-stable_linux.x86_64 baseline flood other_side gameplay intro-audio --logs qa-logs
+        run: python3 tools/run_qa_group.py /tmp/godot-bin/Godot_v4.5.1-stable_linux.x86_64 baseline flood other_side gameplay intro-audio entrance-blockout --logs qa-logs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -161,7 +161,7 @@ jobs:
       - name: Run all Windows suites (no fail-fast)
         shell: pwsh
         run: |
-          python tools/run_qa_group.py "$env:GODOT_EDITOR" windows-profiles-settings windows-ui-tutorial windows-casino-geometry windows-render-editor --logs qa-logs
+          python tools/run_qa_group.py "$env:GODOT_EDITOR" windows-profiles-settings windows-ui-tutorial windows-casino-geometry windows-render-editor entrance-blockout --logs qa-logs
           if ($LASTEXITCODE -ne 0) { throw 'One or more Windows tests failed; see complete QA summary' }
       - uses: actions/upload-artifact@v4
         if: always()

@@ -1,4 +1,10 @@
 {
+  "entrance-blockout": [
+    {
+      "script": "tests/grand_entrance_hall_qa.gd",
+      "marker": "Casino Anomaly Grand Entrance Hall blockout QA PASS"
+    }
+  ],
   "baseline": [
     {
       "script": "tests/anomaly_variations_qa.gd",
@@ -48,10 +54,6 @@
     }
   ],
   "intro-audio": [
-    {
-      "script": "tests/grand_entrance_hall_qa.gd",
-      "marker": "Casino Anomaly Grand Entrance Hall blockout QA PASS"
-    },
     {
       "script": "tests/croupier_intro_qa.gd",
       "marker": "Casino Anomaly croupier welcome desk and dialogue QA PASS"
@@ -120,10 +122,6 @@
     }
   ],
   "windows-ui-tutorial": [
-    {
-      "script": "tests/grand_entrance_hall_qa.gd",
-      "marker": "Casino Anomaly Grand Entrance Hall blockout QA PASS"
-    },
     {
       "script": "tests/menu_visual_qa.gd",
       "marker": "Casino Anomaly abstract UI and credits QA PASS"
