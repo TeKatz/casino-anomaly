@@ -16,6 +16,7 @@ const BLOOM_SHADER := """
 shader_type spatial;
 render_mode cull_disabled;
 uniform float growth = 0.5;
+uniform bool source_core = false;
 varying float strand_progress;
 varying float strand_length;
 float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1,311.7))) * 43758.5453); }
@@ -30,11 +31,12 @@ void vertex() {
     // UV2 stores radius and the delayed start of each individual strand.
     strand_progress = clamp((growth - UV2.y) / (1.0 - UV2.y), 0.0, 1.0);
     strand_length = COLOR.r * 32.0;
+    if (source_core) { strand_progress = 1.0; strand_length = 1.2; }
     float taper = 1.0 - smoothstep(max(0.0,strand_progress-0.075), max(0.001,strand_progress), UV.x);
-    VERTEX -= NORMAL * UV2.x * (1.0-taper);
+    if (!source_core) { VERTEX -= NORMAL * UV2.x * (1.0-taper); }
 }
 void fragment() {
-    if (strand_progress <= 0.001 || UV.x > strand_progress) { discard; }
+    if (!source_core && (strand_progress <= 0.001 || UV.x > strand_progress)) { discard; }
     vec2 p = UV * vec2(max(95.0, strand_length*48.0), 12.0);
     float grain = tissue(p);
     float ridge = 0.5 + 0.5*sin(UV.y*37.699 + noise2(vec2(UV.x*32.0,UV.y*5.0))*5.0);
@@ -412,11 +414,19 @@ func _bloom(room: Node3D, wall: MeshInstance3D) -> void:
             var box: AABB = (marker.global_transform.affine_inverse() * item.global_transform) * item.get_aabb()
             if box.position.z < 0.07 and box.end.z > 0.025 and absf(box.get_center().x) < span:
                 pillars.append(box)
+    # Use the actual imported frame and canvas bounds in the same space
+    # as the strand mesh. Route above their exposed front with a smooth
+    # approach, without changing the existing timber-column guidance.
+    var paintings := _bloom_painting_bounds(room, marker, span)
     var shader := Shader.new()
     shader.code = BLOOM_SHADER
     var mat := ShaderMaterial.new()
     mat.shader = shader
     mat.set_shader_parameter("growth", 0.34)
+    var core_material := ShaderMaterial.new()
+    core_material.shader = shader
+    core_material.set_shader_parameter("source_core", true)
+    var core := _mesh(marker, "OrganicSourceCore", _bloom_core_mesh(), core_material, Vector3(0.0, 0.0, 0.10))
     # Primary tendrils snake outwards from the center. Independent paths
     # reach the last wall bays, leaving open wall between the thin ridges.
     # Each entry: start, end, radius, onset (X in fractions of half-width).
@@ -430,12 +440,12 @@ func _bloom(room: Node3D, wall: MeshInstance3D) -> void:
     ]
     for i in range(trunks.size()):
         var data: Array = trunks[i]
-        var start := Vector2(data[0].x*span,data[0].y)
+        var start := Vector2(data[0].x*span*0.18,data[0].y*0.55)
         var finish := Vector2(data[1].x*span,data[1].y)
         var direction := finish-start
         var seed := float(i)*1.73
         var onset := float(data[3])
-        var strand := _bloom_strand(start,direction,float(data[2]),onset,seed,pillars)
+        var strand := _bloom_strand(start,direction,float(data[2]),onset,seed,pillars,paintings)
         _mesh(marker,"OrganicStrand_%02d" % i,strand,mat,Vector3.ZERO)
         # Branches grow from actual points on the winding main path only
         # once the primary growth front has reached their junction.
@@ -446,13 +456,62 @@ func _bloom(room: Node3D, wall: MeshInstance3D) -> void:
                 clampf(branch_start.x+signf(direction.x)*span*(0.20 if j == 0 else 0.24),-span*0.95,span*0.95),
                 clampf(branch_start.y+(0.78 if (i+j)%2 == 0 else -0.76),-1.05,1.18))
             var branch_delay := onset + (1.0-onset)*junction
-            var branch := _bloom_strand(branch_start,branch_end-branch_start,float(data[2])*0.52,branch_delay,seed+4.4+float(j)*2.3,pillars)
+            var branch := _bloom_strand(branch_start,branch_end-branch_start,float(data[2])*0.52,branch_delay,seed+4.4+float(j)*2.3,pillars,paintings)
             _mesh(marker,"OrganicBranch_%02d_%02d" % [i,j],branch,mat,Vector3.ZERO)
     # A slow wall-length spread, then retreat, without widening into a mass.
     _animate(room, 32.0, func(phase: float) -> void:
         var growth := 0.34 + 0.66 * (0.5 - 0.5*cos(phase*TAU))
         mat.set_shader_parameter("growth", 1.0 if _reduced(room) else growth)
+        core.scale = Vector3.ONE if _reduced(room) else Vector3.ONE * (1.0 + 0.025 * sin(phase * TAU * 4.0))
     )
+
+
+func _bloom_painting_bounds(room: Node3D, marker: Node3D, span: float) -> Array[AABB]:
+    var result: Array[AABB] = []
+    var interiors := room.get_node_or_null("ModelInteriors")
+    if interiors == null:
+        return result
+    var inverse := marker.global_transform.affine_inverse()
+    for frame in interiors.get_children():
+        if not (frame is Node3D) or not str(frame.name).begins_with("FramedPainting_") or not frame.visible:
+            continue
+        var bounds := AABB()
+        var first := true
+        for mesh in _meshes(frame):
+            var piece: AABB = (inverse * mesh.global_transform) * mesh.get_aabb()
+            bounds = piece if first else bounds.merge(piece)
+            first = false
+        if not first and absf(bounds.get_center().x) < span and bounds.end.z > -0.10 and bounds.position.z < 1.0:
+            result.append(bounds)
+    return result
+
+
+func _bloom_core_mesh() -> ArrayMesh:
+    # Compact irregular, fibrous nodule: one continuous indexed surface
+    # with lobes and micro-ridges, rather than a collection of spheres.
+    var tool := SurfaceTool.new()
+    tool.begin(Mesh.PRIMITIVE_TRIANGLES)
+    const RINGS := 28
+    const SIDES := 40
+    for ring in range(RINGS + 1):
+        var v := float(ring) / float(RINGS)
+        var phi := PI * v
+        for side in range(SIDES + 1):
+            var u := float(side) / float(SIDES)
+            var theta := TAU * u
+            var direction := Vector3(sin(phi)*cos(theta), cos(phi), sin(phi)*sin(theta))
+            var lobes := 1.0 + 0.10*sin(theta*5.0+phi*3.0)*sin(phi) + 0.075*cos(phi*9.0-theta*3.0)*sin(phi) + 0.034*sin(theta*17.0+phi*13.0)*sin(phi)
+            tool.set_uv(Vector2(u,v))
+            tool.add_vertex(direction * Vector3(0.46,0.36,0.23) * lobes)
+    for ring in range(RINGS):
+        for side in range(SIDES):
+            var a := ring*(SIDES+1)+side
+            var b := a+SIDES+1
+            for index in [a,b,a+1,a+1,b,b+1]:
+                tool.add_index(index)
+    tool.generate_normals()
+    tool.generate_tangents()
+    return tool.commit()
 
 
 func _bloom_point(origin: Vector2, direction: Vector2, seed: float, t: float) -> Vector2:
@@ -466,7 +525,7 @@ func _bloom_point(origin: Vector2, direction: Vector2, seed: float, t: float) ->
     return point
 
 
-func _bloom_depth(point: Vector2, pillars: Array[AABB]) -> float:
+func _bloom_depth(point: Vector2, pillars: Array[AABB], paintings: Array[AABB], thickness: float) -> float:
     var depth := 0.0
     for box in pillars:
         if point.y < box.position.y or point.y > box.end.y:
@@ -475,10 +534,19 @@ func _bloom_depth(point: Vector2, pillars: Array[AABB]) -> float:
         # Rise over each timber column and settle back onto the plaster.
         var weight := 1.0-smoothstep(0.0,0.10,distance)
         depth = maxf(depth,weight*(box.end.z+0.003))
+    # Maintain a full tube-radius clearance over the front of the frame,
+    # including corners. Fade the lift outside the expanded rectangle.
+    var clearance := thickness * 1.20 + 0.020
+    for box in paintings:
+        var dx := maxf(maxf(box.position.x-point.x, point.x-box.end.x), 0.0)
+        var dy := maxf(maxf(box.position.y-point.y, point.y-box.end.y), 0.0)
+        var distance := Vector2(dx,dy).length()
+        var weight := 1.0-smoothstep(clearance, clearance+0.20, distance)
+        depth = maxf(depth, weight*(box.end.z+clearance))
     return depth
 
 
-func _bloom_strand(origin: Vector2, direction: Vector2, thickness: float, delay: float, seed: float, pillars: Array[AABB]) -> ArrayMesh:
+func _bloom_strand(origin: Vector2, direction: Vector2, thickness: float, delay: float, seed: float, pillars: Array[AABB], paintings: Array[AABB]) -> ArrayMesh:
     var tool := SurfaceTool.new()
     tool.begin(Mesh.PRIMITIVE_TRIANGLES)
     var length := direction.length()
@@ -491,8 +559,8 @@ func _bloom_strand(origin: Vector2, direction: Vector2, thickness: float, delay:
         var point := _bloom_point(origin,direction,seed,t)
         var before := _bloom_point(origin,direction,seed,t-0.001)
         var after := _bloom_point(origin,direction,seed,t+0.001)
-        var depth := _bloom_depth(point,pillars)
-        var tangent := Vector3(after.x-before.x,after.y-before.y,_bloom_depth(after,pillars)-_bloom_depth(before,pillars)).normalized()
+        var depth := _bloom_depth(point,pillars,paintings,thickness)
+        var tangent := Vector3(after.x-before.x,after.y-before.y,_bloom_depth(after,pillars,paintings,thickness)-_bloom_depth(before,pillars,paintings,thickness)).normalized()
         if tangent.length_squared() < 0.00001:
             tangent = Vector3(direction.x,direction.y,0.0).normalized()
         var across := Vector3(-tangent.y,tangent.x,0.0).normalized()
@@ -518,6 +586,25 @@ func _bloom_strand(origin: Vector2, direction: Vector2, thickness: float, delay:
     return tool.commit()
 
 
+# Room-local zones follow the two legs of the red carpet. The original
+# entrance falloff remains exactly as before. The separate west-wing
+# envelopes peak at different strengths and fall to quiet gaps.
+func _listening_weight(at: Vector3) -> float:
+    var point := Vector2(at.x, at.z)
+    var weight := 1.0-smoothstep(4.5,11.0,point.distance_to(Vector2(0,5.0)))
+    for zone in [
+        [Vector2(-12.0,-5.05),1.25,5.1,0.62],
+        [Vector2(-24.0,-5.05),1.7,5.8,0.91],
+        [Vector2(-36.0,-5.05),1.15,5.1,0.70],
+        [Vector2(-43.0,-5.05),0.7,3.8,0.38]
+    ]:
+        var distance := point.distance_to(zone[0])
+        var local := float(zone[3]) * (1.0-smoothstep(float(zone[1]),float(zone[2]),distance))
+        # Smooth union, so there is no derivative discontinuity where zones meet.
+        weight = 1.0-(1.0-weight)*(1.0-local)
+    return clampf(weight,0.0,1.0)
+
+
 func _listening(room: Node3D, nodes: Array[Node3D]) -> void:
     # The room may be torn down directly by Quit/Restart, without the
     # usual adapter clear. Restore the persistent audio in either case.
@@ -540,7 +627,6 @@ func _listening(room: Node3D, nodes: Array[Node3D]) -> void:
         if lamp is Light3D and str(lamp.name) in ["WarmCasinoLamp_01", "WarmCasinoLamp_02"]:
             glow_original.append({"node": lamp, "energy": lamp.light_energy})
     var clock := [0.0, 0.0]
-    var origin := room.to_global(Vector3(0, 0, 5.0))
     _animate(room, 1.0, func(phase: float) -> void:
         var dt := phase - float(clock[0])
         if dt < 0.0:
@@ -549,8 +635,7 @@ func _listening(room: Node3D, nodes: Array[Node3D]) -> void:
         var player := room.get_node_or_null("Player") as Node3D
         if player == null:
             return
-        var distance := Vector2(player.global_position.x-origin.x, player.global_position.z-origin.z).length()
-        var target := 1.0-smoothstep(4.5,11.0,distance)
+        var target := _listening_weight(room.to_local(player.global_position))
         clock[1] = lerpf(float(clock[1]),target,1.0-exp(-dt*2.0))
         var weight := float(clock[1])
         for i in range(materials.size()):

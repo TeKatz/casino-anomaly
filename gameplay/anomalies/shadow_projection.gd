@@ -1,5 +1,5 @@
 extends RefCounted
-## Render the actual animated human mesh once into an isolated transparent
+## Render the actual proportionate human mesh into an isolated transparent
 ## viewport. No person, collision or extra light exists in the casino.
 const MODEL_PATH := "res://models/croupier/scene.gltf"
 const PROJECTOR := """
@@ -10,7 +10,7 @@ void fragment() {
     // A broad penumbra and slightly softer distant end. The underlying
     // illuminated carpet remains visible through the darkened projection.
     vec2 pixel = vec2(1.0 / 512.0, 1.0 / 768.0);
-    vec2 blur = pixel * mix(12.0, 4.0, UV.y);
+    vec2 blur = pixel * mix(7.0, 2.0, UV.y);
     float mask = texture(silhouette, UV).a * 0.20;
     mask += texture(silhouette, UV + vec2(blur.x, 0.0)).a * 0.12;
     mask += texture(silhouette, UV - vec2(blur.x, 0.0)).a * 0.12;
@@ -21,7 +21,7 @@ void fragment() {
     mask += texture(silhouette, UV + vec2(blur.x, -blur.y)).a * 0.08;
     mask += texture(silhouette, UV + vec2(-blur.x, blur.y)).a * 0.08;
     ALBEDO = vec3(0.008, 0.006, 0.005);
-    ALPHA = mask * mix(0.52, 0.86, UV.y);
+    ALPHA = mask * mix(0.35, 0.64, UV.y);
 }
 """
 
@@ -54,12 +54,14 @@ static func install(floor_mesh: MeshInstance3D) -> Node3D:
     var stage := Node3D.new()
     capture.add_child(stage)
     figure.name = "ShadowPose"
-    figure.scale = Vector3(2.32, 1.16, 2.38)
+    figure.scale = Vector3.ONE * 1.16
     stage.add_child(figure)
 
     # Use the same source idle pose and proportions as the intro NPC,
     # rather than relying on the misleading skinned bind-pose mesh AABB.
     var posed := false
+    var idle_player: AnimationPlayer
+    var idle_length := 0.0
     for item in figure.find_children("*", "AnimationPlayer", true, false):
         var animator := item as AnimationPlayer
         for clip in animator.get_animation_list():
@@ -68,6 +70,8 @@ static func install(floor_mesh: MeshInstance3D) -> Node3D:
                 animator.advance(0.0)
                 animator.seek(0.35, true)
                 animator.pause()
+                idle_player = animator
+                idle_length = animator.get_animation(clip).length
                 posed = true
                 break
         if posed:
@@ -108,15 +112,21 @@ static func install(floor_mesh: MeshInstance3D) -> Node3D:
     var camera := Camera3D.new()
     camera.projection = Camera3D.PROJECTION_ORTHOGONAL
     camera.size = view_size
+    camera.keep_aspect = Camera3D.KEEP_HEIGHT
     stage.add_child(camera)
-    camera.position = center + Vector3(1.25, 0.24, 4.0)
+    # Orthographic light-space silhouette: project along an elevated
+    # light ray, rather than stretching an eye-level portrait over a plane.
+    const ELEVATION := 0.70
+    camera.position = center + Vector3(0.0, sin(ELEVATION), cos(ELEVATION)) * 5.0
     camera.look_at(center, Vector3.UP)
     camera.make_current()
 
     var projection := MeshInstance3D.new()
     projection.name = "ShadowProjection"
     var plane := PlaneMesh.new()
-    plane.size = Vector2(2.1, 4.6)
+    # Match the capture's aspect in light-space and undo only the
+    # geometric foreshortening of the ground, not the human's proportions.
+    plane.size = Vector2(view_size * float(capture.size.x) / float(capture.size.y), view_size / sin(ELEVATION))
     projection.mesh = plane
     projection.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
     var shader := Shader.new()
@@ -131,4 +141,26 @@ static func install(floor_mesh: MeshInstance3D) -> Node3D:
     projection.position = Vector3(midpoint.x, bounds.end.y + 0.006, midpoint.z)
     projection.rotation.y = deg_to_rad(-7.0)
     capture.render_target_update_mode = SubViewport.UPDATE_ONCE
+    # Keep a convincing fixed silhouette as the baseline. Update the
+    # isolated capture only ten times per second while the hall is active.
+    # The source idle is sampled around the accepted standing pose; the
+    # figure never translates across the carpet.
+    var hall := floor_mesh.get_parent().get_parent() as Node3D
+    var clock := [0.0]
+    var last_pose := [0.35]
+    var timer := root.create_tween().set_loops()
+    timer.tween_callback(func() -> void:
+        if not is_instance_valid(hall) or hall.has_meta("_streaming_standby"):
+            return
+        var settings := hall.get_node_or_null("/root/GameSettings")
+        var reduced := settings != null and bool(settings.call("get_option", "reduced_motion"))
+        clock[0] = float(clock[0]) + 0.1
+        var pose := 0.35 if reduced else 0.35 + sin(float(clock[0]) * 0.72) * 0.23
+        pose = clampf(pose, 0.0, maxf(0.0, idle_length - 0.001))
+        if absf(pose - float(last_pose[0])) < 0.004:
+            return
+        last_pose[0] = pose
+        idle_player.seek(pose, true)
+        capture.render_target_update_mode = SubViewport.UPDATE_ONCE
+    ).set_delay(0.1)
     return root

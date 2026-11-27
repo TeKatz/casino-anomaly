@@ -236,7 +236,7 @@ func _run() -> void:
     if definitions.size() != 50:
         _fail("Catalog must contain exactly 50 active definitions after Phase 3 retirement")
         return
-    var expected_difficulty := {"amber_ceiling_light__soft":3,"bar_label":1,"bust_turned__reverse":2,"candleholder_shifted":4,"empty_reserve":1,"watchful_camera":2,"blank_reels":3,"empty_footsteps":3,"last_kings":4,"lightless_horse":1,"silent_countdown":1,"watching_canvases":1,"the_escort":1,"black_bloom":1,"they_are_listening":1,"wrong_reflection":1,"bar_label__reverse":5,"bar_label__subtle":3,"plant_forward__other":1,"false_jackpot":2,"floating_hand":2,"inverted_cat":2}
+    var expected_difficulty := {"amber_ceiling_light__soft":3,"bar_label":1,"bust_turned__reverse":2,"candleholder_shifted":4,"empty_reserve":1,"watchful_camera":2,"blank_reels":3,"empty_footsteps":3,"last_kings":4,"lightless_horse":1,"silent_countdown":1,"watching_canvases":1,"the_escort":1,"black_bloom":1,"they_are_listening":1,"wrong_reflection":1,"bar_label__reverse":5,"bar_label__subtle":3,"plant_forward__other":1,"false_jackpot":2,"floating_hand":2,"inverted_cat":2,"ownerless_shadow":2,"against_gravity":2}
     for id in expected_difficulty:
         if int(Catalog.get_entry(id).get("difficulty", 0)) != int(expected_difficulty[id]):
             _fail("Unexpected effective difficulty: " + id)
@@ -517,8 +517,17 @@ func _verify_horror_batch(hall: Node3D, other_hall: Node3D) -> bool:
             if shadow_capture == null or not shadow_capture.own_world_3d or not shadow_capture.transparent_bg or shadow_plane == null or not shadow_plane.material_override is ShaderMaterial:
                 _fail("Shadow is not rendered from an isolated model projection")
                 return false
-            if shadow_capture.find_children("ShadowPose", "Node3D", true, false).is_empty():
+            var poses := shadow_capture.find_children("ShadowPose", "Node3D", true, false)
+            if poses.is_empty():
                 _fail("Shadow capture missing human model")
+                return false
+            var figure := poses[0] as Node3D
+            if not is_equal_approx(figure.scale.x,figure.scale.y) or not is_equal_approx(figure.scale.y,figure.scale.z):
+                _fail("Shadow human proportions are distorted")
+                return false
+            var projection_mesh := shadow_plane.mesh as PlaneMesh
+            if projection_mesh == null or projection_mesh.size.x >= 2.1 or projection_mesh.size.y <= projection_mesh.size.x:
+                _fail("Shadow projection does not preserve the narrow elongated light-space footprint")
                 return false
         if horror_id == "empty_footsteps":
             var mark_group := affected[0].get_node_or_null("AnomalyHorrorMark")
@@ -637,8 +646,16 @@ func _verify_reality_batch(hall: Node3D, other_hall: Node3D) -> bool:
                 return false
         if reality_id == "black_bloom":
             var bloom_root := reality_nodes[0].get_node_or_null("AnomalyPack03") as Node3D
-            if bloom_root == null or bloom_root.get_child_count() < 18:
+            if bloom_root == null or bloom_root.get_child_count() < 19:
                 _fail("Pack 03 organic strands missing")
+                return false
+            var core := bloom_root.get_node_or_null("OrganicSourceCore") as MeshInstance3D
+            if core == null or not core.mesh is ArrayMesh or core.get_aabb().size.x > 1.2 or core.get_aabb().size.x < 0.5:
+                _fail("Bloom is missing its compact organic source")
+                return false
+            var painting_bounds: Array[AABB] = reality_probe.call("_bloom_painting_bounds", hall, bloom_root, reality_wall.get_aabb().size.x * 0.5)
+            if painting_bounds.is_empty():
+                _fail("Bloom painting clearance has no authored painting geometry")
                 return false
             var bloom_bounds := AABB()
             var first_strand := true
@@ -646,6 +663,14 @@ func _verify_reality_batch(hall: Node3D, other_hall: Node3D) -> bool:
                 if not (strand is MeshInstance3D) or not (strand.mesh is ArrayMesh):
                     _fail("Pack 03 organic strand not 3D geometry")
                     return false
+                if strand == core:
+                    continue
+                var vertices: PackedVector3Array = strand.mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+                for vertex in vertices:
+                    for painting in painting_bounds:
+                        if painting.has_point(vertex):
+                            _fail("Bloom strand intersects authored painting bounds")
+                            return false
                 var strand_bounds: AABB = strand.transform * strand.get_aabb()
                 bloom_bounds = strand_bounds if first_strand else bloom_bounds.merge(strand_bounds)
                 first_strand = false
@@ -654,16 +679,46 @@ func _verify_reality_batch(hall: Node3D, other_hall: Node3D) -> bool:
                 return false
         if reality_id == "against_gravity":
             var drop_emitter := reality_nodes[0].get_node_or_null("AnomalyPack03")
-            if drop_emitter == null or not drop_emitter.has_node("DropletCeiling") or drop_emitter.find_children("*", "RigidBody3D", false, false).size() != reality_nodes.size():
-                _fail("Upper bottle row physics incomplete")
+            if drop_emitter == null or not drop_emitter.find_children("*", "CollisionObject3D", true, false).is_empty():
+                _fail("Inverted rain must have no physics bodies or ceiling rebound")
                 return false
-            for drop_body in drop_emitter.find_children("*", "RigidBody3D", false, false):
-                if drop_body.gravity_scale >= 0 or drop_body.collision_layer != 0 or drop_body.physics_material_override.bounce < 0.5:
-                    _fail("Droplets must bounce without colliding with player")
+            var drops := drop_emitter.find_children("RisingLiquid_*", "MeshInstance3D", false, false)
+            var sources: Array = drop_emitter.get("sources")
+            if sources.size() != reality_nodes.size() or drops.size() != sources.size()*3:
+                _fail("Inverted rain pool does not cover the upper bottle row")
+                return false
+            for drop in drops:
+                if not drop.mesh is ArrayMesh or not drop.material_override is StandardMaterial3D or drop.material_override.transparency != BaseMaterial3D.TRANSPARENCY_ALPHA:
+                    _fail("Inverted rain needs shaped translucent liquid meshes")
                     return false
-        if reality_id == "they_are_listening" and not reality_nodes[0].has_node("AnomalyPack03/ListeningView"):
-            _fail("Listening screen effect missing")
-            return false
+            for index in range(sources.size()):
+                var start: Dictionary = drop_emitter.call("sample_drop", index, 0.025, 0.0, 0.0)
+                var middle: Dictionary = drop_emitter.call("sample_drop", index, 0.025, 0.0, float(start["duration"])*0.5)
+                var end: Dictionary = drop_emitter.call("sample_drop", index, 0.025, 0.0, float(start["duration"]))
+                var p0: Vector3 = start["position"]
+                var p1: Vector3 = middle["position"]
+                var p2: Vector3 = end["position"]
+                if p1.y <= p0.y or p2.y-p1.y <= p1.y-p0.y or p2.y >= float(drop_emitter.get("ceiling_height")) or float(end["opacity"]) > 0.001 or float(middle["opacity"]) < 0.9:
+                    _fail("Inverted rain must accelerate upward and fade before the ceiling")
+                    return false
+        if reality_id == "they_are_listening":
+            if not reality_nodes[0].has_node("AnomalyPack03/ListeningView"):
+                _fail("Listening screen effect missing")
+                return false
+            var positions := [Vector3(0,0,5),Vector3(-6,0,-5.05),Vector3(-12,0,-5.05),Vector3(-18,0,-5.05),Vector3(-24,0,-5.05),Vector3(-30,0,-5.05),Vector3(-36,0,-5.05)]
+            var weights: Array[float] = []
+            for point in positions:
+                weights.append(float(reality_probe.call("_listening_weight",point)))
+            if weights[0] < 0.99 or weights[1] > 0.15 or weights[2] < 0.60 or weights[3] > 0.15 or weights[4] < 0.88 or weights[5] > 0.15 or weights[6] < 0.65:
+                _fail("Listening intensity no longer alternates along the runner")
+                return false
+            var previous := float(reality_probe.call("_listening_weight",Vector3(-6,0,-5.05)))
+            for step in range(1,381):
+                var weight := float(reality_probe.call("_listening_weight",Vector3(-6.0-float(step)*0.1,0,-5.05)))
+                if absf(weight-previous) > 0.06:
+                    _fail("Listening has an abrupt trigger boundary")
+                    return false
+                previous = weight
         if reality_id == "extra_guest" and not reality_nodes[0].has_node("AnomalyPack03/SeatedGuest"):
             _fail("Pack 03 seated guest missing")
             return false

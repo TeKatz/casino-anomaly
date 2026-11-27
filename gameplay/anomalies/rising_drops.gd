@@ -1,9 +1,10 @@
 extends Node3D
-## Real rigid-body droplets; only collide against a dedicated ceiling
-## collider. No interaction with player, bottles, furniture or other drops.
-const CEILING_LAYER := 1 << 27
-const LIFETIME := 5.0
+## Inverted rain: a fixed pool of shaped, translucent drops with analytic
+## upward trajectories. No rigid bodies, collision shapes or ceiling bounce.
 const MAX_PER_BOTTLE := 3
+const ACCELERATION := 2.45
+const START_SPEED := 0.38
+const SPAWN_INTERVAL := 1.25
 var hall: Node3D
 var sources: Array[Vector3] = []
 var materials: Array[StandardMaterial3D] = []
@@ -16,15 +17,13 @@ var ceiling_height := 5.94
 
 func configure(room: Node3D, shells: Array[Node3D]) -> void:
     hall = room
-    top_level = true
-    global_transform = room.global_transform
+    # Stay attached to the streamed room even if its parent is repositioned.
+    transform = (get_parent() as Node3D).global_transform.affine_inverse() * room.global_transform
     var ceiling := room.get_node_or_null("Architecture/MainCeiling") as MeshInstance3D
     if ceiling != null:
         var ceiling_box: AABB = (room.global_transform.affine_inverse() * ceiling.global_transform) * ceiling.get_aabb()
         ceiling_height = ceiling_box.position.y
-    var min_x := INF
-    var max_x := -INF
-    var avg_z := 0.0
+    var shape := _drop_mesh()
     for shell_node in shells:
         var shell := shell_node as MeshInstance3D
         var bottle := shell.get_parent() as Node3D
@@ -32,103 +31,122 @@ func configure(room: Node3D, shells: Array[Node3D]) -> void:
         top.y = shell.get_aabb().end.y + 0.09
         var start := to_local(shell.to_global(top))
         sources.append(start)
-        min_x = minf(min_x, start.x)
-        max_x = maxf(max_x, start.x)
-        avg_z += start.z
         var mat := StandardMaterial3D.new()
-        mat.albedo_color = Color("#a76224")
+        var tint := Color("#a76224")
         var liquid := bottle.get_node_or_null("InnerLiquidVolume") as MeshInstance3D
         if liquid != null and liquid.get_active_material(0) is StandardMaterial3D:
-            mat.albedo_color = (liquid.get_active_material(0) as StandardMaterial3D).albedo_color
-            mat.albedo_color.a = 1.0
-        mat.roughness = 0.15
-        mat.metallic = 0.12
+            tint = (liquid.get_active_material(0) as StandardMaterial3D).albedo_color
+        tint = tint.lerp(Color(0.92, 0.77, 0.58), 0.20)
+        tint.a = 0.74
+        mat.albedo_color = tint
+        mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+        mat.roughness = 0.065
+        mat.metallic = 0.0
+        mat.metallic_specular = 0.58
+        mat.clearcoat_enabled = true
+        mat.clearcoat = 0.75
+        mat.clearcoat_roughness = 0.08
+        mat.cull_mode = BaseMaterial3D.CULL_DISABLED
         materials.append(mat)
-        next_spawn.append(float(sources.size()-1) * 0.12)
-    avg_z /= float(sources.size())
-    var roof := StaticBody3D.new()
-    roof.name = "DropletCeiling"
-    roof.collision_layer = CEILING_LAYER
-    roof.collision_mask = 0
-    var shape := CollisionShape3D.new()
-    var slab := BoxShape3D.new()
-    slab.size = Vector3(max_x-min_x+2.0, 0.20, 2.2)
-    shape.shape = slab
-    roof.add_child(shape)
-    add_child(roof)
-    roof.position = Vector3((min_x+max_x)*0.5, ceiling_height+0.10, avg_z)
-    var settings := room.get_node_or_null("/root/GameSettings")
-    reduced = settings != null and bool(settings.call("get_option","reduced_motion"))
-    # A visible initial clue even in headless apply / reduced motion.
+        next_spawn.append(0.35 + float(sources.size()-1) * 0.11)
     for i in range(sources.size()):
+        for slot in range(MAX_PER_BOTTLE):
+            var drop := MeshInstance3D.new()
+            drop.name = "RisingLiquid_%02d_%d" % [i, slot]
+            drop.mesh = shape
+            drop.material_override = materials[i]
+            drop.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+            drop.visible = false
+            add_child(drop)
+            active.append({"mesh": drop, "age": -1.0, "index": i, "radius": 0.024, "seed": float(i * 3 + slot), "duration": 1.0})
         _spawn(i, true)
 
 
+# A rounded leading end and mildly tapered trailing end; the drop is
+# oriented upward. The reusable mesh has smooth analytic surface normals.
+func _drop_mesh() -> ArrayMesh:
+    var tool := SurfaceTool.new()
+    tool.begin(Mesh.PRIMITIVE_TRIANGLES)
+    const SIDES := 16
+    const RINGS := 12
+    for ring in range(RINGS + 1):
+        var t := float(ring) / float(RINGS)
+        var y := -cos(t * PI)
+        var radial := maxf(0.0005, sin(t * PI) * (0.82 + 0.18 * t))
+        for side in range(SIDES + 1):
+            var u := float(side) / float(SIDES)
+            var angle := TAU * u
+            var normal := Vector3(cos(angle) * sin(t * PI), y, sin(angle) * sin(t * PI)).normalized()
+            tool.set_normal(normal)
+            tool.set_uv(Vector2(u, t))
+            tool.add_vertex(Vector3(cos(angle) * radial, y * 1.20, sin(angle) * radial))
+    for ring in range(RINGS):
+        for side in range(SIDES):
+            var a := ring * (SIDES + 1) + side
+            var b := a + SIDES + 1
+            for index in [a, a+1, b, a+1, b+1, b]:
+                tool.add_index(index)
+    return tool.commit()
+
+
+func _duration(index: int, radius: float) -> float:
+    var travel := maxf(0.05, ceiling_height - radius * 1.8 - sources[index].y)
+    return (-START_SPEED + sqrt(START_SPEED * START_SPEED + 2.0 * ACCELERATION * travel)) / ACCELERATION
+
+
+func sample_drop(index: int, radius: float, seed: float, age: float) -> Dictionary:
+    var duration := _duration(index, radius)
+    var t := clampf(age, 0.0, duration)
+    var progress := t / duration
+    var drift := Vector3(sin(seed * 1.7 + t * 1.6) - sin(seed * 1.7), 0.0, cos(seed * 2.1 + t * 1.3) - cos(seed * 2.1)) * 0.023
+    var at := sources[index] + Vector3.UP * (START_SPEED * t + 0.5 * ACCELERATION * t * t) + drift
+    var opacity := smoothstep(0.0, 0.06, progress) * (1.0 - smoothstep(0.77, 1.0, progress))
+    return {"position": at, "opacity": opacity, "duration": duration}
+
+
 func _spawn(index: int, initial: bool = false) -> void:
-    var body := RigidBody3D.new()
-    body.name = "RisingLiquid"
-    body.collision_layer = 0
-    body.collision_mask = CEILING_LAYER
-    body.gravity_scale = -0.36
-    body.linear_damp_mode = RigidBody3D.DAMP_MODE_REPLACE
-    body.linear_damp = 0.12
-    body.continuous_cd = true
-    body.can_sleep = false
-    var physics := PhysicsMaterial.new()
-    physics.bounce = 0.67
-    physics.friction = 0.08
-    body.physics_material_override = physics
-    var shape := CollisionShape3D.new()
-    var sphere_shape := SphereShape3D.new()
-    sphere_shape.radius = 0.031
-    shape.shape = sphere_shape
-    body.add_child(shape)
-    var mesh := MeshInstance3D.new()
-    var sphere := SphereMesh.new()
-    sphere.radius = 0.031
-    sphere.height = 0.062
-    sphere.radial_segments = 12
-    sphere.rings = 6
-    mesh.mesh = sphere
-    mesh.material_override = materials[index]
-    mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-    body.add_child(mesh)
-    body.freeze = reduced or hall.has_meta("_streaming_standby")
-    add_child(body)
-    body.position = sources[index] + Vector3(0, 0.24 if initial else 0.0, 0)
-    body.linear_velocity = Vector3(0.02 * sin(float(index)), 0.8, 0.02)
-    active.append({"body":body,"age":0.0,"index":index})
+    for record in active:
+        if int(record["index"]) != index or float(record["age"]) >= 0.0:
+            continue
+        var seed := float(record["seed"]) + clock * 0.73
+        var radius := lerpf(0.017, 0.035, 0.5 + 0.5 * sin(seed * 9.17 + 0.7))
+        var duration := _duration(index, radius)
+        record["radius"] = radius
+        record["duration"] = duration
+        record["seed"] = seed
+        record["age"] = duration * (0.12 + 0.14 * fposmod(float(index) * 0.37, 1.0)) if initial else 0.0
+        var drop := record["mesh"] as MeshInstance3D
+        drop.scale = Vector3(radius, radius, radius)
+        _update_drop(record)
+        return
 
 
-func _physics_process(delta: float) -> void:
+func _update_drop(record: Dictionary) -> void:
+    var drop := record["mesh"] as MeshInstance3D
+    var sample := sample_drop(int(record["index"]), float(record["radius"]), float(record["seed"]), float(record["age"]))
+    drop.position = sample["position"]
+    drop.transparency = 1.0 - float(sample["opacity"])
+    drop.visible = float(sample["opacity"]) > 0.001
+
+
+func _process(delta: float) -> void:
     if not is_instance_valid(hall) or hall.has_meta("_streaming_standby"):
         return
     var settings := hall.get_node_or_null("/root/GameSettings")
-    reduced = settings != null and bool(settings.call("get_option","reduced_motion"))
-    for record in active:
-        var body := record["body"] as RigidBody3D
-        if is_instance_valid(body):
-            body.freeze = reduced
+    reduced = settings != null and bool(settings.call("get_option", "reduced_motion"))
     if reduced:
         return
     clock += delta
-    for i in range(active.size()-1,-1,-1):
-        var record: Dictionary = active[i]
-        var body := record["body"] as RigidBody3D
-        if not is_instance_valid(body):
-            active.remove_at(i)
+    for record in active:
+        if float(record["age"]) < 0.0:
             continue
         record["age"] = float(record["age"]) + delta
-        if float(record["age"]) >= LIFETIME or body.position.y > ceiling_height+0.25:
-            body.queue_free()
-            active.remove_at(i)
+        if float(record["age"]) >= float(record["duration"]):
+            (record["mesh"] as MeshInstance3D).hide()
+            record["age"] = -1.0
+        else:
+            _update_drop(record)
     for i in range(sources.size()):
-        if clock < next_spawn[i]:
-            continue
-        var count := 0
-        for record in active:
-            if int(record["index"]) == i:
-                count += 1
-        if count < MAX_PER_BOTTLE:
+        if clock >= next_spawn[i]:
             _spawn(i)
-        next_spawn[i] = clock + 1.65
+            next_spawn[i] = clock + SPAWN_INTERVAL + 0.19 * sin(float(i) * 2.3 + clock * 0.7)
