@@ -18,7 +18,7 @@ func _run() -> void:
     isolated.save_path = "user://casino_dev_picker_state_qa.cfg"
     isolated.start_new_run()
     isolated.complete_tutorial()
-    var options: Array[String] = ["bar_label", "entrance_label", "table_label"]
+    var options: Array[String] = ["bar_label", "entrance_label"]
     if isolated.debug_queue_next_round("missing", options):
         _fail("Unknown anomaly IDs cannot be scheduled")
         return
@@ -49,7 +49,9 @@ func _run() -> void:
     if not isolated.round_ready or isolated.debug_next_round_requested:
         _fail("Normal gameplay was not restored after the one-shot override")
         return
-    isolated.debug_queue_next_round("table_label", options)
+    if not isolated.debug_queue_next_round("entrance_label", options):
+        _fail("Second active sign could not be queued")
+        return
     isolated.save_run()
     var resumed := StateScript.new()
     resumed.save_path = isolated.save_path
@@ -79,11 +81,11 @@ func _run() -> void:
     if loop == null or menu == null or menu.visible or state.anomaly_id != "":
         _fail("The hidden menu must exist only during gameplay and start closed")
         return
-    if Catalog.entries().size() != 50 or (loop.call("debug_available_ids") as Array).size() < 13:
+    if Catalog.entries().size() != 49 or (loop.call("debug_available_ids") as Array).size() < 13:
         _fail("Developer picker lost an active effect")
         return
     var available_ids: Array = loop.call("debug_available_ids")
-    for retired_id in ["entrance_label__reverse","table_label__reverse","bust_turned","bust_turned__subtle","candleholder_shifted__other","crooked_painting__reverse","crooked_painting__subtle","plant_misplaced","plant_misplaced__subtle","stool_out_of_line__other","stool_out_of_line__subtle","breathing_wall","cool_ceiling_light__other"]:
+    for retired_id in ["table_label","entrance_label__reverse","table_label__reverse","bust_turned","bust_turned__subtle","candleholder_shifted__other","crooked_painting__reverse","crooked_painting__subtle","plant_misplaced","plant_misplaced__subtle","stool_out_of_line__other","stool_out_of_line__subtle","breathing_wall","cool_ceiling_light__other"]:
         if available_ids.has(retired_id) or bool(loop.call("debug_select_next_anomaly", retired_id)):
             _fail("Developer picker accepted retired effect: " + retired_id)
             return
@@ -100,15 +102,23 @@ func _run() -> void:
     var list := menu.get("listing") as VBoxContainer
     var search := menu.get("search") as LineEdit
     if list == null or search == null or list.get_node_or_null("Anomaly_bar_label") == null \
-            or list.get_node_or_null("Anomaly_table_label") == null \
+            or list.get_node_or_null("Anomaly_table_label") != null \
+            or list.get_node_or_null("Anomaly_entrance_label") == null \
             or list.get_node_or_null("Anomaly_crooked_painting") == null \
             or list.get_node_or_null("Anomaly_horse_spotlight_off") == null:
         _fail("All catalog entries must appear in the generated list")
         return
+    var rows := 0
+    for row in list.get_children():
+        if str(row.name).begins_with("Anomaly_"):
+            rows += 1
+    if rows != 49:
+        _fail("Developer picker must list exactly 49 active forms")
+        return
     search.text = "Bar"
     menu.call("_rebuild_catalog")
     if list.get_node_or_null("Anomaly_bar_label") == null \
-            or list.get_node_or_null("Anomaly_table_label") != null:
+            or list.get_node_or_null("Anomaly_entrance_label") != null:
         _fail("The dynamic catalog search did not filter the rows")
         return
     menu.call("_choose_anomaly", "bar_label")
@@ -132,14 +142,18 @@ func _run() -> void:
     # The player is still in the connector. Changing G selection must
     # immediately replace the ALREADY prepared next room and its save state.
     menu.call("_open_menu")
-    menu.call("_choose_anomaly", "table_label")
-    if paused or state.anomaly_id != "table_label" \
-            or bar.text != "MIDNIGHT BAR" or table_sign.text != "TABLE G4MES":
+    var entrance_entry := Catalog.get_entry("entrance_label")
+    var entrance_sign := staged.get_node(str(entrance_entry["target_path"])) as Label3D
+    var original_entrance := entrance_sign.text
+    var original_table_color := table_sign.modulate
+    menu.call("_choose_anomaly", "entrance_label")
+    if paused or state.anomaly_id != "entrance_label" \
+            or bar.text != "MIDNIGHT BAR" or entrance_sign.text != "CASINO AN0MALY" or table_sign.text != "TABLE GAMES" or table_sign.modulate != original_table_color:
         _fail("Changing the queued effect after preloading did not update the room")
         return
     menu.call("_open_menu")
     menu.call("_force_normal")
-    if state.anomaly_id != "" or table_sign.text != "TABLE GAMES":
+    if state.anomaly_id != "" or table_sign.text != "TABLE GAMES" or table_sign.modulate != original_table_color or entrance_sign.text != original_entrance:
         _fail("Normal override did not restore the original room appearance")
         return
     menu.call("_open_menu")

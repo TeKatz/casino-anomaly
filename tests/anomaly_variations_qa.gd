@@ -228,13 +228,16 @@ func _run() -> void:
         _fail("The 13 baseline effects must remain registered and available; additional effects are allowed")
         return
 
-    var retired := ["entrance_label__reverse","table_label__reverse","bust_turned","bust_turned__subtle","candleholder_shifted__other","crooked_painting__reverse","crooked_painting__subtle","plant_misplaced","plant_misplaced__subtle","stool_out_of_line__other","stool_out_of_line__subtle","breathing_wall","cool_ceiling_light__other"]
+    var retired := ["table_label","entrance_label__reverse","table_label__reverse","bust_turned","bust_turned__subtle","candleholder_shifted__other","crooked_painting__reverse","crooked_painting__subtle","plant_misplaced","plant_misplaced__subtle","stool_out_of_line__other","stool_out_of_line__subtle","breathing_wall","cool_ceiling_light__other"]
     for id in retired:
         if not Catalog.get_entry(id).is_empty() or available.has(id) or Adapter.new().apply(room, id):
             _fail("Retired anomaly still selectable: " + id)
             return
-    if definitions.size() != 50:
-        _fail("Catalog must contain exactly 50 active definitions after Phase 3 retirement")
+    if definitions.size() != 49:
+        _fail("Catalog must contain exactly 49 active definitions after Phase 5 retirement")
+        return
+    if Catalog.discoverable_ids().has("table_label") or not Catalog.family_entries("table_label").is_empty() or not Catalog.review_hint("table_label",false).is_empty() or not Catalog.review_hint("table_label",true).is_empty():
+        _fail("Retired Table Games family or localized hint is still active")
         return
     var expected_difficulty := {"amber_ceiling_light__soft":3,"bar_label":1,"bust_turned__reverse":2,"candleholder_shifted":4,"empty_reserve":1,"watchful_camera":2,"blank_reels":3,"empty_footsteps":3,"last_kings":4,"lightless_horse":1,"silent_countdown":1,"watching_canvases":1,"the_escort":1,"black_bloom":1,"they_are_listening":1,"wrong_reflection":1,"bar_label__reverse":5,"bar_label__subtle":3,"plant_forward__other":1,"false_jackpot":2,"floating_hand":2,"inverted_cat":2,"ownerless_shadow":2,"against_gravity":2,"extra_guest":1,"forgotten_door":1,"unfinished_game":3,"the_other_side":2}
     for id in expected_difficulty:

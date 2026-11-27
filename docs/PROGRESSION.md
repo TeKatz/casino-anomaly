@@ -26,6 +26,7 @@ rarities. Families are weighted independently of variant count; variant
 IDs persist with the run, and collection records aggregate by stable family key.
 A surviving variant can represent its family even after the base form is retired.
 Retired forms and families remain in historical saves but do not count as active forms or families.
+Phase 5 retires the Table Games sign effect: 49 active forms remain. The ordinary room sign is unchanged; old discoveries, XP and achievements are retained, and a pending retired room is rerolled on resume.
 After eight anomaly encounters without a first discovery, the next
 anomalous draw favors an unidentified available family exclusively.
 The ordinary clear-room probability is unchanged outside Research.

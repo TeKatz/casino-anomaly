@@ -41,7 +41,6 @@ const REVIEW_HINTS := {
     "stay_here": ["Familiar messages conveyed an unusual intent.", "Vertraute Hinweise vermittelten eine fremde Absicht."],
     "stool_out_of_line": ["Repeated objects did not line up as usual.", "Ähnliche Gegenstände standen nicht wie gewohnt in Reihe."],
     "synchronized_busts": ["Some still objects seemed to move together.", "Manche regungslosen Dinge schienen sich gemeinsam zu bewegen."],
-    "table_label": ["Check the lettering between different areas.", "Prüfe die Beschriftung der verschiedenen Bereiche."],
     "the_escort": ["Your position seemed to influence a presence.", "Dein Standort schien eine Anwesenheit zu beeinflussen."],
     "the_flood": ["The floor behaved differently as time passed.", "Der Boden verhielt sich mit der Zeit anders."],
     "the_other_side": ["The room concealed an impossible perspective.", "Der Raum verbarg eine unmögliche Perspektive."],

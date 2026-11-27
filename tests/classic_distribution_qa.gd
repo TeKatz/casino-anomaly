@@ -5,7 +5,7 @@ extends SceneTree
 const State = preload("res://gameplay/loop_state.gd")
 const Catalog = preload("res://gameplay/anomaly_catalog.gd")
 const SAVE := "user://classic_distribution_qa.cfg"
-const OPTIONS: Array[String] = ["bar_label","bar_label__reverse","table_label","bust_turned__reverse"]
+const OPTIONS: Array[String] = ["bar_label","bar_label__reverse","entrance_label","bust_turned__reverse"]
 const EMPTY: Array[String] = []
 
 func _initialize() -> void:

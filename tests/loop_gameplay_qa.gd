@@ -59,9 +59,13 @@ func _run() -> void:
         "bar_label": ["MIDNIGHT B4R", false, 1],
         "bar_label__reverse": ["MIDNIGTH BAR", true, 5],
         "bar_label__subtle": ["MIDNIGHT BARR", true, 3],
-        "entrance_label": ["CASINO AN0MALY", false, 2],
-        "table_label": ["TABLE G4MES", false, 2]
+        "entrance_label": ["CASINO AN0MALY", false, 2]
     }
+    var table_sign := scene.get_node("Decor/Sign_TABLE_GAMES") as Label3D
+    var table_color := table_sign.modulate
+    if table_sign.text != "TABLE GAMES" or demo.apply(scene,"table_label"):
+        _fail("Retired Table Games effect or changed authored sign")
+        return
     for id in label_cases:
         var entry := Catalog.get_entry(id)
         var sign := scene.get_node_or_null(str(entry.get("target_path", ""))) as Label3D
@@ -74,6 +78,9 @@ func _run() -> void:
         var expected_color := original_color if bool(expected[1]) else Color("#f5a2a2")
         if int(entry.get("difficulty", 0)) != int(expected[2]) or not demo.apply(scene, id) or sign.text != str(expected[0]) or not sign.modulate.is_equal_approx(expected_color):
             _fail("Label replacement, variant-specific color or difficulty regressed: " + id)
+            return
+        if table_sign.text != "TABLE GAMES" or table_sign.modulate != table_color:
+            _fail("Another sign anomaly modified TABLE GAMES")
             return
         demo.clear()
         if sign.text != original or not sign.modulate.is_equal_approx(original_color):
@@ -117,7 +124,7 @@ func _run() -> void:
     if not Catalog.get_entry(retired_id).is_empty() or Catalog.discoverable_ids().has(retired_id) or available.has(retired_id) or demo.apply(scene, retired_id):
         _fail("Retired anomaly is still available")
         return
-    for removed_id in ["entrance_label__reverse","table_label__reverse","bust_turned","bust_turned__subtle","candleholder_shifted__other","crooked_painting__reverse","crooked_painting__subtle","plant_misplaced","plant_misplaced__subtle","stool_out_of_line__other","stool_out_of_line__subtle","breathing_wall","cool_ceiling_light__other"]:
+    for removed_id in ["table_label","entrance_label__reverse","table_label__reverse","bust_turned","bust_turned__subtle","candleholder_shifted__other","crooked_painting__reverse","crooked_painting__subtle","plant_misplaced","plant_misplaced__subtle","stool_out_of_line__other","stool_out_of_line__subtle","breathing_wall","cool_ceiling_light__other"]:
         if not Catalog.get_entry(removed_id).is_empty() or available.has(removed_id):
             _fail("Audit-retired definition is still available: " + removed_id)
             return
@@ -134,6 +141,18 @@ func _run() -> void:
     restored.prepare_round(available)
     if not restored.round_ready or (not restored.anomaly_id.is_empty() and not available.has(restored.anomaly_id)):
         _fail("Retired room did not reroll into a valid room")
+        return
+    # An old pending Table Games room must reroll without losing progress.
+    restored.anomaly_id = "table_label"
+    restored.last_anomaly_id = "table_label"
+    restored.round_ready = true
+    restored.save_run()
+    if not restored.load_run() or restored.round_ready or not restored.anomaly_id.is_empty() or not restored.last_anomaly_id.is_empty() or restored.correct_streak != 7 or restored.visited_loops != 2 or restored.mistakes != 1:
+        _fail("Removed Table Games room damaged an existing run")
+        return
+    restored.prepare_round(available)
+    if not restored.round_ready or restored.anomaly_id == "table_label" or (not restored.anomaly_id.is_empty() and not available.has(restored.anomaly_id)):
+        _fail("Removed Table Games room did not reroll into an active room")
         return
     restored.correct_streak = 11
     restored.anomaly_id = ""

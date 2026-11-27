@@ -31,7 +31,7 @@ func _run() -> void:
         _fail("ProfileManager/LoopState autoload missing")
         return
     var entries: Array[Dictionary] = Catalog.entries()
-    if entries.size() < 13 or Catalog.discoverable_ids().size() < 13:
+    if entries.size() != 49 or Catalog.discoverable_ids().has("table_label"):
         _fail("Packaged anomaly registry lost existing definitions")
         return
     for entry in entries:
@@ -65,6 +65,23 @@ func _run() -> void:
         return
     if not bool(profiles.get_records().get("bar_label", {}).get("recognized", false)):
         _fail("Recognized anomaly was not persisted")
+        return
+    # A formerly mastered Table Games family stays in the profile file,
+    # but does not inflate the current archive, statistics or XP.
+    var legacy := ConfigFile.new()
+    if legacy.load(profiles.progress_path(4)) != OK:
+        _fail("Could not read historical profile")
+        return
+    var historical: Dictionary = legacy.get_value("progress","records",{})
+    historical["table_label"] = {"recognized":true,"correct":5,"missed":2,"variants":{"table_label":true}}
+    var historical_stats: Dictionary = legacy.get_value("progress","stats",{})
+    legacy.set_value("progress","records",historical)
+    if legacy.save(profiles.progress_path(4)) != OK or not profiles.select_profile(4):
+        _fail("Could not reload historical Table Games profile")
+        return
+    four = profiles.get_summary(4)
+    if profiles.get_records() != historical or int(four["discovered"]) != 1 or int(four["total"]) != Catalog.discoverable_ids().size() or int(four["xp"]) != int(historical_stats.get("xp",0)):
+        _fail("Retirement changed historical profile or active summary")
         return
     state.start_new_run()
     if int(profiles.get_summary(4).get("discovered", -1)) != 1:
@@ -162,7 +179,14 @@ func _run() -> void:
             and not _all_label_text(archive).contains(str(catalog_entry.get("title_de", ""))):
         _fail("Correct identification did not unlock the archive entry")
         return
+    var active_total := Catalog.discoverable_ids().size()
+    if not _all_label_text(archive).contains("1 / %d" % active_total) or _all_label_text(archive).contains("Table Games sign") or _all_label_text(archive).contains("Table-Games-Schild") or not _all_label_text(archive).contains("1 / 49"):
+        _fail("Archive displays retired Table Games or wrong active totals")
+        return
     archive.show_mode("stats")
+    if not _all_label_text(archive).contains("1 / %d" % active_total):
+        _fail("Statistics display wrong current family total")
+        return
     archive.show_mode("last")
     if picker.get_node_or_null(".") == null or archive.get_child_count() == 0:
         _fail("Player-facing archive/profile UI did not instantiate")

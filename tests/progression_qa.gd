@@ -36,7 +36,7 @@ func _run() -> void:
     if not require(bool(stats["achievements"].get("classic_completions_1", false)), "Retroactive achievements missing"):
         return
     var ids := Catalog.discoverable_ids()
-    if not require(ids.size() >= 14 and Catalog.entries().size() >= 30 and Catalog.family("bust_turned__reverse") == "bust_turned", "Family or variant registry incorrect"):
+    if not require(ids.size() >= 14 and Catalog.entries().size() == 49 and Catalog.family("bust_turned__reverse") == "bust_turned", "Family or variant registry incorrect"):
         return
     # A retired cool variant retains its historical family discovery but is
     # not an active form and cannot resolve as a selectable definition.
@@ -48,7 +48,8 @@ func _run() -> void:
     var old_records := {
         "bust_turned": {"recognized": true, "correct": 5, "variants": {"bust_turned": true, "bust_turned__subtle": true}},
         "plant_misplaced": {"recognized": true, "correct": 5, "variants": {"plant_misplaced": true}},
-        "breathing_wall": {"recognized": true, "correct": 5, "variants": {"breathing_wall": true}}
+        "breathing_wall": {"recognized": true, "correct": 5, "variants": {"breathing_wall": true}},
+        "table_label": {"recognized": true, "correct": 5, "missed": 2, "variants": {"table_label": true}}
     }
     var old_stats := {"progression_version": Progress.VERSION, "xp": 4321, "classic_completions": 1, "achievements": {"archive_complete": true}}
     var old_snapshot := old_records.duplicate(true)
@@ -56,6 +57,17 @@ func _run() -> void:
     Progress.evaluate(old_stats, old_records)
     var counts := Progress.counts(old_records)
     if not require(counts["discovered"] == 1 and counts["mastered"] == 1 and counts["variants"] == 0 and old_records == old_snapshot and old_stats["xp"] == 4321 and old_stats["achievements"]["archive_complete"] and Modes.unlock("nightmare", old_stats, old_records), "Retirement altered legacy records, XP, unlocks or active counts"):
+        return
+    var full_collection := {}
+    for family_id in ids:
+        var forms := {}
+        for form in Catalog.family_entries(family_id):
+            forms[form["id"]] = true
+        full_collection[family_id] = {"recognized":true,"correct":5,"variants":forms}
+    var full_counts := Progress.counts(full_collection)
+    var full_stats := {"progression_version":Progress.VERSION,"xp":4321}
+    Progress.evaluate(full_stats,full_collection)
+    if not require(not ids.has("table_label") and int(full_counts["variant_total"])==49 and int(full_counts["variants"])==49 and int(full_counts["discovered"])==ids.size() and bool(full_stats["achievements"].get("archive_complete",false)) and bool(full_stats["achievements"].get("mastery_complete",false)), "Active archive or mastery completion still requires retired Table Games"):
         return
     var definitions := Progress.achievement_definitions()
     var seen := {}
@@ -146,6 +158,7 @@ func _run() -> void:
     var saved_records: Dictionary = legacy.get_value("progress", "records", {})
     saved_records["plant_misplaced"] = old_records["plant_misplaced"]
     saved_records["breathing_wall"] = old_records["breathing_wall"]
+    saved_records["table_label"] = old_records["table_label"]
     var saved_bust: Dictionary = saved_records["bust_turned"]
     saved_bust["variants"]["bust_turned"] = true
     saved_records["bust_turned"] = saved_bust
@@ -171,12 +184,12 @@ func _run() -> void:
         return
     _start(live,"classic")
     _answer(live,"",false)
-    _answer(live,"table_label",true)
+    _answer(live,"entrance_label",true)
     _answer(live,"",true)
     for i in range(12):
         _answer(live,"",false)
     var report: Dictionary = live.get_run_report()
-    if not require(live.finished and live.report_pending and int(report.get("rooms",0)) == 15 and int(report.get("resets",0)) == 1 and int(report.get("identified",{}).get("table_label",0)) == 1 and bool(report.get("new_discoveries",{}).get("table_label",false)) and bool(report.get("new_modes",{}).get("nightmare",false)) and bool(report.get("new_achievements",{}).get("classic_completions_1",false)) and int(report.get("xp_earned",0)) > 0,"Run results lost discoveries, resets, XP or actual first-clear unlock"):
+    if not require(live.finished and live.report_pending and int(report.get("rooms",0)) == 15 and int(report.get("resets",0)) == 1 and int(report.get("identified",{}).get("entrance_label",0)) == 1 and bool(report.get("new_discoveries",{}).get("entrance_label",false)) and bool(report.get("new_modes",{}).get("nightmare",false)) and bool(report.get("new_achievements",{}).get("classic_completions_1",false)) and int(report.get("xp_earned",0)) > 0,"Run results lost discoveries, resets, XP or actual first-clear unlock"):
         return
     if not require(live.load_run() and live.report_pending and live.get_run_report() == report,"Completed run report lost on reload"):
         return
