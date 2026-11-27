@@ -1,0 +1,17 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://gameplay/anomaly_definition.gd" id="1_definition"]
+[ext_resource type="Script" path="res://gameplay/anomalies/backrooms.gd" id="2_handler"]
+
+[resource]
+script = ExtResource("1_definition")
+handler = ExtResource("2_handler")
+id = "backrooms"
+category_en = "Spatial anomalies"
+category_de = "Räumliche Anomalien"
+title_en = "Backrooms"
+title_de = "Backrooms"
+description_en = "Either exit leads into a dark, unfamiliar labyrinth. Finding the way out advances the streak regardless of the chosen door."
+description_de = "Beide Ausgänge führen in ein dunkles, fremdes Labyrinth. Wer den Ausgang findet, steigt unabhängig von der Türwahl eine Stufe auf."
+target_path = "Architecture"
+rarity = "singularity"

@@ -1,0 +1,23 @@
+{
+  "asset": "roof_planks",
+  "sourcePage": "https://polyhaven.com/a/roof_planks",
+  "creator": "Rob Tuytel",
+  "license": "CC0-1.0",
+  "maps": {
+    "roof_planks_diff_2k.jpg": {
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/roof_planks/roof_planks_diff_2k.jpg",
+      "sha256": "5865ef77c2555691e9e01709a9d0d30f23c46bda238d65ef5f8faac1b91abc9f",
+      "bytes": 2384072
+    },
+    "roof_planks_rough_2k.jpg": {
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/roof_planks/roof_planks_rough_2k.jpg",
+      "sha256": "c55277e7be5b6ca1f70a089bba2077593a0f5565af7e42a9426558493ec46ac1",
+      "bytes": 869954
+    },
+    "roof_planks_nor_gl_2k.jpg": {
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/roof_planks/roof_planks_nor_gl_2k.jpg",
+      "sha256": "e47d242d20c09ebd10596d48d11f54e1077219cd9a22c5870cb8f825a3885810",
+      "bytes": 1974929
+    }
+  }
+}

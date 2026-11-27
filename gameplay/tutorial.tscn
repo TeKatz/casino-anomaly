@@ -1,0 +1,759 @@
+[gd_scene load_steps=51 format=3 uid="uid://e3engt017thr"]
+
+[ext_resource type="Script" uid="uid://bql5dmlifsh5g" path="res://gameplay/tutorial.gd" id="1"]
+[ext_resource type="Script" uid="uid://ddd0bf0443g2o" path="res://player.gd" id="2"]
+[ext_resource type="Material" path="res://brown_planks_05_material.tres" id="3"]
+[ext_resource type="Material" uid="uid://ypqadcec5lg6" path="res://herringbone_parquet_material.tres" id="3_risjm"]
+[ext_resource type="Material" uid="uid://c36ymb3ncsi5p" path="res://lower_wall_material.tres" id="4"]
+[ext_resource type="Material" uid="uid://b48o1jf2r2ksu" path="res://upper_wall_material.tres" id="4_4f880"]
+[ext_resource type="PackedScene" path="res://gameplay/croupier_station.tscn" id="5"]
+[ext_resource type="Material" path="res://bi_stretch_material.tres" id="5_rsrxc"]
+[ext_resource type="Material" path="res://bar_side_material.tres" id="6"]
+[ext_resource type="Material" path="res://bar_top_material.tres" id="7"]
+[ext_resource type="Material" uid="uid://vqf47ms2j37l" path="res://roulette_wood_material.tres" id="8"]
+[ext_resource type="Texture2D" uid="uid://dhcn33w3fatn6" path="res://assets/smoke_speckled_veneer/smoke_speckled_veneer_diff_2k.jpg" id="10_as6sm"]
+[ext_resource type="Texture2D" uid="uid://b6ep34so08lu3" path="res://assets/smoke_speckled_veneer/smoke_speckled_veneer_nor_gl_2k.jpg" id="11_84hkc"]
+[ext_resource type="Texture2D" uid="uid://btpccop4gcscg" path="res://assets/smoke_speckled_veneer/smoke_speckled_veneer_rough_2k.jpg" id="12_fngvi"]
+[ext_resource type="Texture2D" uid="uid://cciufycic5yd7" path="res://assets/brown_planks_05/brown_planks_05_diff_2k.jpg" id="13_risjm"]
+[ext_resource type="Texture2D" uid="uid://cub67xewield5" path="res://assets/brown_planks_05/brown_planks_05_nor_gl_2k.jpg" id="14_eabh4"]
+[ext_resource type="Texture2D" uid="uid://c1hf21s5jb2lm" path="res://assets/brown_planks_05/brown_planks_05_rough_2k.jpg" id="15_0tfhg"]
+[ext_resource type="PackedScene" path="res://gameplay/tutorial_decor.tscn" id="16_decor"]
+[ext_resource type="Material" path="res://floor_material.tres" id="17_floor"]
+
+[sub_resource type="Environment" id="IntroEnv"]
+background_mode = 1
+background_color = Color(0.025, 0.028, 0.027, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.72, 0.66, 0.56, 1)
+ambient_light_energy = 0.33
+tonemap_mode = 2
+
+[sub_resource type="BoxMesh" id="Floor"]
+size = Vector3(7.4, 0.24, 9.5)
+
+[sub_resource type="BoxMesh" id="Ceiling"]
+size = Vector3(7.4, 0.2, 9.5)
+
+[sub_resource type="BoxMesh" id="SideWall"]
+material = ExtResource("8")
+size = Vector3(0.25, 4.2, 9.5)
+
+[sub_resource type="BoxMesh" id="EndWall"]
+size = Vector3(7.4, 4.2, 0.25)
+
+[sub_resource type="BoxShape3D" id="FloorShape"]
+size = Vector3(7.4, 0.24, 9.5)
+
+[sub_resource type="BoxShape3D" id="SideShape"]
+size = Vector3(0.25, 4.2, 9.5)
+
+[sub_resource type="BoxShape3D" id="EndShape"]
+size = Vector3(7.4, 4.2, 0.25)
+
+[sub_resource type="BoxMesh" id="Door"]
+size = Vector3(1.85, 3.15, 0.13)
+
+[sub_resource type="BoxMesh" id="DoorPost"]
+size = Vector3(0.2, 3.36, 0.24)
+
+[sub_resource type="BoxMesh" id="DoorStile"]
+size = Vector3(0.13, 3.1, 0.13)
+
+[sub_resource type="BoxMesh" id="DoorRail"]
+size = Vector3(1.86, 0.15, 0.13)
+
+[sub_resource type="BoxMesh" id="DoorPanel"]
+size = Vector3(0.65, 1.15, 0.055)
+
+[sub_resource type="StandardMaterial3D" id="GoldMat"]
+albedo_color = Color(0.59, 0.42, 0.21, 1)
+metallic = 0.58
+roughness = 0.36
+
+[sub_resource type="BoxMesh" id="DoorPlate"]
+material = ExtResource("4_4f880")
+size = Vector3(0.15, 0.32, 0.07)
+
+[sub_resource type="BoxMesh" id="DoorHandle"]
+material = ExtResource("5_rsrxc")
+size = Vector3(0.15, 0.11, 0.14)
+
+[sub_resource type="BoxMesh" id="Trim"]
+size = Vector3(2.24, 0.14, 0.2)
+
+[sub_resource type="BoxMesh" id="ReceptionCube"]
+
+[sub_resource type="BoxShape3D" id="ReceptionLongShape"]
+size = Vector3(0.64, 1.04, 3.16)
+
+[sub_resource type="BoxShape3D" id="ReceptionEndShape"]
+size = Vector3(1.6, 1.04, 0.64)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4u6uu"]
+resource_name = "Poly Haven smoke_speckled_veneer 2K PBR"
+albedo_texture = ExtResource("10_as6sm")
+roughness = 0.54
+roughness_texture = ExtResource("12_fngvi")
+normal_enabled = true
+normal_scale = 0.55
+normal_texture = ExtResource("11_84hkc")
+uv1_scale = Vector3(1, 3, 1)
+texture_filter = 5
+
+[sub_resource type="BoxMesh" id="BoxMesh_puorx"]
+size = Vector3(0.52, 5.87, 0.52)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jyla6"]
+resource_name = "Poly Haven Brown Planks 05 2K PBR"
+albedo_color = Color(0.78, 0.69, 0.61, 1)
+albedo_texture = ExtResource("13_risjm")
+roughness = 0.68
+roughness_texture = ExtResource("15_0tfhg")
+normal_enabled = true
+normal_scale = 0.58
+normal_texture = ExtResource("14_eabh4")
+texture_filter = 5
+
+[sub_resource type="BoxMesh" id="BoxMesh_4ku7o"]
+size = Vector3(0.82, 0.28, 0.82)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_t050v"]
+resource_name = "Poly Haven Brown Planks 05 2K PBR"
+albedo_color = Color(0.78, 0.69, 0.61, 1)
+albedo_texture = ExtResource("13_risjm")
+roughness = 0.68
+roughness_texture = ExtResource("15_0tfhg")
+normal_enabled = true
+normal_scale = 0.58
+normal_texture = ExtResource("14_eabh4")
+texture_filter = 5
+
+[sub_resource type="BoxMesh" id="BoxMesh_hvc7q"]
+size = Vector3(0.7, 0.075, 0.7)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tbf0a"]
+resource_name = "Poly Haven Brown Planks 05 2K PBR"
+albedo_color = Color(0.78, 0.69, 0.61, 1)
+albedo_texture = ExtResource("13_risjm")
+roughness = 0.68
+roughness_texture = ExtResource("15_0tfhg")
+normal_enabled = true
+normal_scale = 0.58
+normal_texture = ExtResource("14_eabh4")
+texture_filter = 5
+
+[sub_resource type="BoxMesh" id="BoxMesh_di2mn"]
+size = Vector3(0.74, 0.12, 0.74)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jt34p"]
+resource_name = "Poly Haven Brown Planks 05 2K PBR"
+albedo_color = Color(0.78, 0.69, 0.61, 1)
+albedo_texture = ExtResource("13_risjm")
+roughness = 0.68
+roughness_texture = ExtResource("15_0tfhg")
+normal_enabled = true
+normal_scale = 0.58
+normal_texture = ExtResource("14_eabh4")
+texture_filter = 5
+
+[sub_resource type="BoxMesh" id="BoxMesh_b8ohn"]
+size = Vector3(0.89, 0.31, 0.89)
+
+[sub_resource type="CapsuleShape3D" id="PlayerCapsule"]
+radius = 0.34
+height = 1.87
+
+[node name="TutorialRoom" type="Node3D"]
+script = ExtResource("1")
+
+[node name="Decoration" parent="." instance=ExtResource("16_decor")]
+
+[node name="RightDadoRail" parent="Decoration/ArchitecturalJoinery" index="2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.43, 1.3841833, 0)
+
+[node name="RightBayDivider1" parent="Decoration/ArchitecturalJoinery" index="5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.44, 2.637972, -3.67)
+material_override = ExtResource("3_risjm")
+
+[node name="RightBayDivider2" parent="Decoration/ArchitecturalJoinery" index="6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.44, 2.637972, -2.21)
+material_override = ExtResource("3_risjm")
+
+[node name="RightBayDivider3" parent="Decoration/ArchitecturalJoinery" index="7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.44, 2.637972, -0.75)
+material_override = ExtResource("3_risjm")
+
+[node name="RightBayDivider4" parent="Decoration/ArchitecturalJoinery" index="8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.44, 2.637972, 0.71)
+material_override = ExtResource("3_risjm")
+
+[node name="RightBayDivider5" parent="Decoration/ArchitecturalJoinery" index="9"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.44, 2.637972, 2.17)
+material_override = ExtResource("3_risjm")
+
+[node name="RightBayDivider6" parent="Decoration/ArchitecturalJoinery" index="10"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.44, 2.637972, 3.63)
+material_override = ExtResource("3_risjm")
+
+[node name="LeftDadoRail" parent="Decoration/ArchitecturalJoinery" index="13"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.43, 1.3841833, 0.018025875)
+
+[node name="LeftBayDivider1" parent="Decoration/ArchitecturalJoinery" index="16"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.44, 2.637972, -3.67)
+material_override = ExtResource("3_risjm")
+
+[node name="LeftBayDivider2" parent="Decoration/ArchitecturalJoinery" index="17"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.44, 2.637972, -2.21)
+material_override = ExtResource("3_risjm")
+
+[node name="LeftBayDivider3" parent="Decoration/ArchitecturalJoinery" index="18"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.44, 2.637972, -0.75)
+material_override = ExtResource("3_risjm")
+
+[node name="LeftBayDivider4" parent="Decoration/ArchitecturalJoinery" index="19"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.44, 2.637972, 0.71)
+material_override = ExtResource("3_risjm")
+
+[node name="LeftBayDivider5" parent="Decoration/ArchitecturalJoinery" index="20"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.44, 2.637972, 2.17)
+material_override = ExtResource("3_risjm")
+
+[node name="LeftBayDivider6" parent="Decoration/ArchitecturalJoinery" index="21"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.44, 2.637972, 3.63)
+material_override = ExtResource("3_risjm")
+
+[node name="RearDadoRail" parent="Decoration/ArchitecturalJoinery" index="24"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.042533755, 1.3846332, 4.44)
+
+[node name="ExitLeftDado" parent="Decoration/ArchitecturalJoinery" index="29"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4678042, 1.34, -4.54014)
+
+[node name="ExitRightDado" parent="Decoration/ArchitecturalJoinery" index="33"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.46737, 1.34, -4.542845)
+
+[node name="sofa_02_Base" parent="Decoration/WaitingLounge/UpholsteredSofa" index="0"]
+transform = Transform3D(-0.9999755, 0, -0.006998824, 0, 1, 0, 0.006998824, 0, -0.9999755, 0.00026726723, 0.00020578504, 0.13943148)
+
+[node name="sofa_02_Seat" parent="Decoration/WaitingLounge/UpholsteredSofa" index="1"]
+transform = Transform3D(-0.9999755, 0, -0.006998824, 0, 1, 0, 0.006998824, 0, -0.9999755, 0.00026726723, 0.00020578504, 0.13943148)
+
+[node name="round_wooden_table_01" parent="Decoration/WaitingLounge/TeaTable" index="0"]
+transform = Transform3D(1.0000001, 0, 0, 0, 1.0000001, 0, 0, 0, 1.0000001, -0.33710098, 0, 0.7276988)
+
+[node name="round_wooden_table_01_bolts" parent="Decoration/WaitingLounge/TeaTable" index="1"]
+transform = Transform3D(1.0000001, 0, 0, 0, 1.0000001, 0, 0, 0, 1.0000001, -0.33710098, 0, 0.7276988)
+
+[node name="TeaTray" parent="Decoration/WaitingLounge" index="2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2743685, 0.622, 2.6138964)
+
+[node name="TeaTrayGlass" parent="Decoration/WaitingLounge" index="3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2743685, 0.665, 2.6138964)
+
+[node name="PedestalFoot" parent="Decoration/EntranceDisplay" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.0220551, 0.055, -4.0617723)
+
+[node name="PedestalBody" parent="Decoration/EntranceDisplay" index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.0220551, 0.49, -4.0617723)
+
+[node name="PedestalCap" parent="Decoration/EntranceDisplay" index="2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.0220551, 0.908, -4.0617723)
+
+[node name="marble_bust_01" parent="Decoration/EntranceDisplay/MarblePortraitBust" index="0"]
+transform = Transform3D(0.8489164, 0, -0.52852726, 0, 1, 0, 0.52852726, 0, 0.8489164, 0.13470352, 0.028335571, -0.47451496)
+
+[node name="RightFrameMount" parent="Decoration/Gallery" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.464, 2.45, -1.4684457)
+
+[node name="fancy_picture_frame_01" parent="Decoration/Gallery/RightHistoricPainting" index="0"]
+transform = Transform3D(0.99999994, 0, 0, 0, 0.99999994, 0, 0, 0, 0.99999994, -0.13650858, 0, 5.9604645e-07)
+
+[node name="fancy_picture_frame_01_canvas" parent="Decoration/Gallery/RightHistoricPainting" index="1"]
+transform = Transform3D(0.99999994, 0, 0, 0, 0.99999994, 0, 0, 0, 0.99999994, -0.13650858, 0, 5.9604645e-07)
+
+[node name="LeftFrameMount" parent="Decoration/Gallery" index="2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.463, 2.4, -0.028272763)
+
+[node name="fancy_picture_frame_01" parent="Decoration/Gallery/LeftHistoricPainting" index="0"]
+transform = Transform3D(0.99999994, 0, 0, 0, 0.99999994, 0, 0, 0, 0.99999994, 0.1254246, 0, 3.5762787e-07)
+
+[node name="fancy_picture_frame_01_canvas" parent="Decoration/Gallery/LeftHistoricPainting" index="1"]
+transform = Transform3D(0.99999994, 0, 0, 0, 0.99999994, 0, 0, 0, 0.99999994, 0.1254246, 0, 3.5762787e-07)
+
+[node name="WarmLight" parent="Decoration/LightingAndCeiling/RightSconceA" index="3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.2969859, 2.5655646, -2.6582458)
+
+[node name="WarmLight" parent="Decoration/LightingAndCeiling/RightSconceB" index="3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.18, 2.49, 1.0332017)
+
+[node name="WarmLight" parent="Decoration/LightingAndCeiling/ExitSconceRight" index="3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5971296, 2.6448948, -4.264086)
+
+[node name="SofaCollision" parent="Decoration/SolidFurniture/CollisionBody" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.3, 0.357, 3.8941548)
+
+[node name="TeaTableCollision" parent="Decoration/SolidFurniture/CollisionBody" index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2743685, 0.305, 2.6138964)
+
+[node name="DisplayCollision" parent="Decoration/SolidFurniture/CollisionBody" index="2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.0220551, 0.465, -4.0617723)
+
+[node name="WallLight_lambert1_0" parent="Decoration/UserSelectedProps/WallLightRightSconceA/Sketchfab_model/4d1bde3a15564530a103d863b3ef5c4f_fbx/RootNode/WallLight" index="0"]
+transform = Transform3D(-1.9987547, -9.2498155e-17, 0.07056661, -9.2784214e-17, 2, -6.470232e-18, -0.07056661, -9.7399376e-18, -1.9987547, 0, 0, 0)
+
+[node name="WallLight_lambert1_0" parent="Decoration/UserSelectedProps/WallLightRightSconceB/Sketchfab_model/4d1bde3a15564530a103d863b3ef5c4f_fbx/RootNode/WallLight" index="0"]
+transform = Transform3D(-1.999403, 0, 0.048864573, -3.808084e-25, 2, 4.7427274e-25, -0.048864573, 8.485149e-31, -1.999403, -128.07819, 0, 0)
+
+[node name="WallLight_lambert1_0" parent="Decoration/UserSelectedProps/WallLightExitSconceLeft/Sketchfab_model/4d1bde3a15564530a103d863b3ef5c4f_fbx/RootNode/WallLight" index="0"]
+transform = Transform3D(-1.9994031, 0, 0.048864577, -8.271806e-25, 2, 0, -0.048864577, 0, -1.9994031, 49.85846, 0, 0)
+
+[node name="WallLight_lambert1_0" parent="Decoration/UserSelectedProps/WallLightExitSconceRight/Sketchfab_model/4d1bde3a15564530a103d863b3ef5c4f_fbx/RootNode/WallLight" index="0"]
+transform = Transform3D(-1.9994292, 6.66446e-17, 0.047782842, 6.6505414e-17, 2, -6.6199595e-18, -0.047782842, -5.0291522e-18, -1.9994292, -55.127563, 0, 14.545532)
+
+[node name="Object_2" parent="Decoration/UserSelectedProps/DeskBell/Sketchfab_model/Desk_Bell_obj_cleaner_materialmerger_gles" index="0"]
+transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 0, 1.5525179, 0)
+
+[node name="Object_3" parent="Decoration/UserSelectedProps/DeskBell/Sketchfab_model/Desk_Bell_obj_cleaner_materialmerger_gles" index="1"]
+transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 0, 1.5525179, 0)
+
+[node name="Magnifier_Magnifier_0" parent="Decoration/UserSelectedProps/BooksWithMagnifier/Sketchfab_model/c9d6e07887b84362ac62a44c44bd2b40_fbx/RootNode/Magnifier" index="0"]
+transform = Transform3D(1.4, 1.1920929e-07, 2.7939677e-09, 0, 1.3999999, -3.7252903e-09, 0, -3.7252903e-09, 1.4, -0.2652613, 0.43862653, 0.0044864416)
+
+[node name="Open_book_Open_book_Mat_0" parent="Decoration/UserSelectedProps/BooksWithMagnifier/Sketchfab_model/c9d6e07887b84362ac62a44c44bd2b40_fbx/RootNode/Open_book" index="0"]
+transform = Transform3D(1.4, 0, 6.7762636e-21, 0, 1.4, 2.842171e-14, 1.3552527e-20, -2.842171e-14, 1.4, -2.3841858e-07, -0.5215812, 2.3841858e-07)
+
+[node name="Book_3_Book_3_Mat_0" parent="Decoration/UserSelectedProps/BooksWithMagnifier/Sketchfab_model/c9d6e07887b84362ac62a44c44bd2b40_fbx/RootNode/Book_3" index="0"]
+transform = Transform3D(1.4, 2.1316282e-14, 0, 0, 1.4000006, 3.5527137e-15, 0, 3.907985e-14, 1.4, 0.30611253, -0.03209579, 0.13184261)
+
+[node name="Book_2_Book_2_Mat_0" parent="Decoration/UserSelectedProps/BooksWithMagnifier/Sketchfab_model/c9d6e07887b84362ac62a44c44bd2b40_fbx/RootNode/Book_2" index="0"]
+transform = Transform3D(1.4, 5.9604645e-08, -7.1054274e-15, -5.9604645e-08, 1.4, 6.039613e-14, -7.1054274e-15, -1.4210855e-14, 1.4000012, -0.2208333, -0.08240783, 0)
+
+[node name="Book_1_Book_1_Mat_0" parent="Decoration/UserSelectedProps/BooksWithMagnifier/Sketchfab_model/c9d6e07887b84362ac62a44c44bd2b40_fbx/RootNode/Book_1" index="0"]
+transform = Transform3D(1.4000002, 0, -1.4901161e-08, 0, 1.4, -1.0835777e-13, 1.4901161e-08, -8.437695e-15, 1.4000002, -0.40387917, 0, 0.058940172)
+
+[node name="Cube_Material_003_0" parent="Decoration/UserSelectedProps/VintageGramophone/Sketchfab_model/877aa72185fd4c4b8f768e3a013806b2_fbx/RootNode/Cube" index="0"]
+transform = Transform3D(-0.24461357, 0.96962065, 1.5797124e-07, -0.96962065, -0.24461357, -2.0277326e-07, -1.5797123e-07, -2.0277326e-07, 1, -0.00032615662, -0.18548927, 0)
+
+[node name="Cube_001_Material_003_0" parent="Decoration/UserSelectedProps/VintageGramophone/Sketchfab_model/877aa72185fd4c4b8f768e3a013806b2_fbx/RootNode/Cube_001" index="0"]
+transform = Transform3D(-0.24461357, 0.96962065, 1.5797124e-07, -0.96962065, -0.24461357, -2.0277326e-07, -1.5797123e-07, -2.0277326e-07, 1, -0.00032615662, -0.18548927, 0)
+
+[node name="Cube_002_Material_003_0" parent="Decoration/UserSelectedProps/VintageGramophone/Sketchfab_model/877aa72185fd4c4b8f768e3a013806b2_fbx/RootNode/Cube_002" index="0"]
+transform = Transform3D(-0.24461357, 0.96962065, 1.5797124e-07, -0.96962065, -0.24461357, -2.0277326e-07, -1.5797123e-07, -2.0277326e-07, 1, -0.00032615662, -0.18548927, 0)
+
+[node name="Cube_003_Material_003_0" parent="Decoration/UserSelectedProps/VintageGramophone/Sketchfab_model/877aa72185fd4c4b8f768e3a013806b2_fbx/RootNode/Cube_003" index="0"]
+transform = Transform3D(-0.24461357, 0.96962065, 1.5797124e-07, -0.96962065, -0.24461357, -2.0277326e-07, -1.5797123e-07, -2.0277326e-07, 1, -0.00032615662, -0.18548927, 0)
+
+[node name="Cylinder_Material_003_0" parent="Decoration/UserSelectedProps/VintageGramophone/Sketchfab_model/877aa72185fd4c4b8f768e3a013806b2_fbx/RootNode/Cylinder" index="0"]
+transform = Transform3D(-0.24461357, 0.96962065, 1.5797124e-07, -0.96962065, -0.24461357, -2.0277326e-07, -1.5797123e-07, -2.0277326e-07, 1, -0.00032615662, -0.18548927, 0)
+
+[node name="Plane_Material_003_0" parent="Decoration/UserSelectedProps/VintageGramophone/Sketchfab_model/877aa72185fd4c4b8f768e3a013806b2_fbx/RootNode/Plane" index="0"]
+transform = Transform3D(-0.24461357, 0.96962065, 1.5797124e-07, -0.96962065, -0.24461357, -2.0277326e-07, -1.5797123e-07, -2.0277326e-07, 1, -0.0077109337, -0.17600988, 0)
+
+[node name="Cylinder_002_Material_003_0" parent="Decoration/UserSelectedProps/VintageGramophone/Sketchfab_model/877aa72185fd4c4b8f768e3a013806b2_fbx/RootNode/Cylinder_002" index="0"]
+transform = Transform3D(-0.24461357, 0.96962065, 1.5797124e-07, -0.96962065, -0.24461357, -2.0277326e-07, -1.5797123e-07, -2.0277326e-07, 1, -0.00032615662, -0.18548927, 0)
+
+[node name="Cylinder_004_Material_003_0" parent="Decoration/UserSelectedProps/VintageGramophone/Sketchfab_model/877aa72185fd4c4b8f768e3a013806b2_fbx/RootNode/Cylinder_002/Cylinder_004" index="0"]
+transform = Transform3D(-0.24461357, 0.96962065, 1.5797124e-07, -0.96962065, -0.24461357, -2.0277326e-07, -1.5797123e-07, -2.0277326e-07, 1, -0.00032615662, -0.18548927, 0)
+
+[node name="Cylinder_005_Material_003_0" parent="Decoration/UserSelectedProps/VintageGramophone/Sketchfab_model/877aa72185fd4c4b8f768e3a013806b2_fbx/RootNode/Cylinder_002/Cylinder_005" index="0"]
+transform = Transform3D(-0.24461357, 0.96962065, 1.5797124e-07, -0.96962065, -0.24461357, -2.0277326e-07, -1.5797123e-07, -2.0277326e-07, 1, -0.00032615662, -0.18548927, 0)
+
+[node name="Cylinder_006_Material_003_0" parent="Decoration/UserSelectedProps/VintageGramophone/Sketchfab_model/877aa72185fd4c4b8f768e3a013806b2_fbx/RootNode/Cylinder_002/Cylinder_006" index="0"]
+transform = Transform3D(-0.24461357, 0.96962065, 1.5797124e-07, -0.96962065, -0.24461357, -2.0277326e-07, -1.5797123e-07, -2.0277326e-07, 1, -0.00032615662, -0.18548927, 0)
+
+[node name="Cube_004_Material_003_0" parent="Decoration/UserSelectedProps/VintageGramophone/Sketchfab_model/877aa72185fd4c4b8f768e3a013806b2_fbx/RootNode/Cube_004" index="0"]
+transform = Transform3D(-0.24461357, 0.96962065, 1.5797124e-07, -0.96962065, -0.24461357, -2.0277326e-07, -1.5797123e-07, -2.0277326e-07, 1, -0.00032615662, -0.18548927, 0)
+
+[node name="Plane_002_Material_003_0" parent="Decoration/UserSelectedProps/VintageGramophone/Sketchfab_model/877aa72185fd4c4b8f768e3a013806b2_fbx/RootNode/Plane_002" index="0"]
+transform = Transform3D(-0.24461357, 0.96962065, 1.5797124e-07, -0.96962065, -0.24461357, -2.0277326e-07, -1.5797123e-07, -2.0277326e-07, 1, -0.00032615662, -0.18548927, 0)
+
+[node name="Cylinder_003_Material_003_0" parent="Decoration/UserSelectedProps/VintageGramophone/Sketchfab_model/877aa72185fd4c4b8f768e3a013806b2_fbx/RootNode/Cylinder_003" index="0"]
+transform = Transform3D(-0.24461357, 0.96962065, 1.5797124e-07, -0.96962065, -0.24461357, -2.0277326e-07, -1.5797123e-07, -2.0277326e-07, 1, -0.00032615662, -0.18548927, 0)
+
+[node name="Plane_001_Material_003_0" parent="Decoration/UserSelectedProps/VintageGramophone/Sketchfab_model/877aa72185fd4c4b8f768e3a013806b2_fbx/RootNode/Cylinder_003/Plane_001" index="0"]
+transform = Transform3D(-0.24461357, 0.9696205, -0.0004023687, -0.9696205, -0.24461335, 0.0005164837, 0.00040236866, 0.00051648385, 0.99999946, 0.0016832352, -0.18676364, 7.724762e-05)
+
+[node name="Plane_009_Material_003_0" parent="Decoration/UserSelectedProps/VintageGramophone/Sketchfab_model/877aa72185fd4c4b8f768e3a013806b2_fbx/RootNode/Cylinder_003/Plane_009" index="0"]
+transform = Transform3D(-0.24461357, 0.9696205, -0.0004023687, -0.9696205, -0.24461335, 0.0005164837, 0.00040236866, 0.00051648385, 0.99999946, -0.004786968, -0.17845747, 7.367134e-05)
+
+[node name="Cylinder_001_Material_003_0" parent="Decoration/UserSelectedProps/VintageGramophone/Sketchfab_model/877aa72185fd4c4b8f768e3a013806b2_fbx/RootNode/Cylinder_001" index="0"]
+transform = Transform3D(-0.24461357, 0.96962065, 1.5797124e-07, -0.96962065, -0.24461357, -2.0277326e-07, -1.5797123e-07, -2.0277326e-07, 1, -0.00032615662, -0.18548927, 0)
+
+[node name="Circle_Material_003_0" parent="Decoration/UserSelectedProps/VintageGramophone/Sketchfab_model/877aa72185fd4c4b8f768e3a013806b2_fbx/RootNode/Circle" index="0"]
+transform = Transform3D(-0.24461357, 0.96962065, 1.5797124e-07, -0.96962065, -0.24461357, -2.0277326e-07, -1.5797123e-07, -2.0277326e-07, 1, -0.00032615662, -0.18548927, 0)
+
+[node name="Plane_004_Material_003_0" parent="Decoration/UserSelectedProps/VintageGramophone/Sketchfab_model/877aa72185fd4c4b8f768e3a013806b2_fbx/RootNode/Plane_004" index="0"]
+transform = Transform3D(-0.24461357, 0.96962065, 1.5797124e-07, -0.96962065, -0.24461357, -2.0277326e-07, -1.5797123e-07, -2.0277326e-07, 1, -0.00032615662, -0.18548927, 0)
+
+[node name="Plane_003_Material_003_0" parent="Decoration/UserSelectedProps/VintageGramophone/Sketchfab_model/877aa72185fd4c4b8f768e3a013806b2_fbx/RootNode/Plane_003" index="0"]
+transform = Transform3D(-0.24461357, 0.96962065, 1.5797124e-07, -0.96962065, -0.24461357, -2.0277326e-07, -1.5797123e-07, -2.0277326e-07, 1, -0.00032615662, -0.18548927, 0)
+
+[node name="Plane_008_Material_003_0" parent="Decoration/UserSelectedProps/VintageGramophone/Sketchfab_model/877aa72185fd4c4b8f768e3a013806b2_fbx/RootNode/Plane_008" index="0"]
+transform = Transform3D(-0.24461357, 0.96962065, 1.5797124e-07, -0.96962065, -0.24461357, -2.0277326e-07, -1.5797123e-07, -2.0277326e-07, 1, -0.00032615662, -0.18548927, 0)
+
+[node name="Plane_007_Material_003_0" parent="Decoration/UserSelectedProps/VintageGramophone/Sketchfab_model/877aa72185fd4c4b8f768e3a013806b2_fbx/RootNode/Plane_007" index="0"]
+transform = Transform3D(-0.24461357, -4.2383466e-08, -0.96962065, 4.2383466e-08, 1, -5.4403785e-08, 0.96962065, -5.44038e-08, -0.24461357, -0.2150178, 0, -0.09009047)
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("IntroEnv")
+
+[node name="Light" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.8580267, -0.5465156)
+light_color = Color(1, 0.82, 0.59, 1)
+light_energy = 2.2
+omni_range = 9.0
+
+[node name="Floor" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.12, 0)
+material_override = ExtResource("17_floor")
+mesh = SubResource("Floor")
+
+[node name="Ceiling" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.12, 0)
+material_overlay = ExtResource("4")
+mesh = SubResource("Ceiling")
+
+[node name="LeftWall" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.7, 2.06, 0)
+mesh = SubResource("SideWall")
+
+[node name="RightWall" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.7, 2.06, 0)
+mesh = SubResource("SideWall")
+
+[node name="FrontWall" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.06, -4.72)
+material_override = ExtResource("8")
+mesh = SubResource("EndWall")
+
+[node name="BackWall" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.06, 4.72)
+material_override = ExtResource("8")
+mesh = SubResource("EndWall")
+
+[node name="RoomCollision" type="StaticBody3D" parent="."]
+
+[node name="Floor" type="CollisionShape3D" parent="RoomCollision"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.12, 0)
+shape = SubResource("FloorShape")
+
+[node name="LeftWall" type="CollisionShape3D" parent="RoomCollision"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.7, 2.06, 0)
+shape = SubResource("SideShape")
+
+[node name="RightWall" type="CollisionShape3D" parent="RoomCollision"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.7, 2.06, 0)
+shape = SubResource("SideShape")
+
+[node name="FrontWall" type="CollisionShape3D" parent="RoomCollision"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.06, -4.72)
+shape = SubResource("EndShape")
+
+[node name="BackWall" type="CollisionShape3D" parent="RoomCollision"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.06, 4.72)
+shape = SubResource("EndShape")
+
+[node name="ExitDoor" type="Node3D" parent="."]
+transform = Transform3D(0.8, 0, 0, 0, 0.8, 0, 0, 0, 0.8, 0, 0.02535379, -4.48)
+
+[node name="Door" type="MeshInstance3D" parent="ExitDoor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.575, -0.061990738)
+material_override = ExtResource("3")
+mesh = SubResource("Door")
+
+[node name="FrameLeft" type="MeshInstance3D" parent="ExitDoor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 1.69, 0.008009434)
+material_override = ExtResource("4")
+mesh = SubResource("DoorPost")
+
+[node name="FrameRight" type="MeshInstance3D" parent="ExitDoor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1.69, 0.008009434)
+material_override = ExtResource("4")
+mesh = SubResource("DoorPost")
+
+[node name="DoorStileLeft" type="MeshInstance3D" parent="ExitDoor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.84, 1.575, 0.058009148)
+material_override = ExtResource("4")
+mesh = SubResource("DoorStile")
+
+[node name="DoorStileRight" type="MeshInstance3D" parent="ExitDoor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.84, 1.575, 0.058009148)
+material_override = ExtResource("4")
+mesh = SubResource("DoorStile")
+
+[node name="BottomRail" type="MeshInstance3D" parent="ExitDoor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, 0.06800938)
+material_override = ExtResource("4")
+mesh = SubResource("DoorRail")
+
+[node name="MidRail" type="MeshInstance3D" parent="ExitDoor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.57, 0.06800938)
+material_override = ExtResource("4")
+mesh = SubResource("DoorRail")
+
+[node name="UpperRail" type="MeshInstance3D" parent="ExitDoor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.07, 0.06800938)
+material_override = ExtResource("4")
+mesh = SubResource("DoorRail")
+
+[node name="PanelBottomLeft" type="MeshInstance3D" parent="ExitDoor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.43, 0.83, 0.045009136)
+material_override = ExtResource("4")
+mesh = SubResource("DoorPanel")
+
+[node name="PanelBottomRight" type="MeshInstance3D" parent="ExitDoor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.43, 0.83, 0.045009136)
+material_override = ExtResource("4")
+mesh = SubResource("DoorPanel")
+
+[node name="PanelTopLeft" type="MeshInstance3D" parent="ExitDoor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.43, 2.32, 0.045009136)
+material_override = ExtResource("4")
+mesh = SubResource("DoorPanel")
+
+[node name="PanelTopRight" type="MeshInstance3D" parent="ExitDoor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.43, 2.32, 0.045009136)
+material_override = ExtResource("4")
+mesh = SubResource("DoorPanel")
+
+[node name="HandlePlate" type="MeshInstance3D" parent="ExitDoor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.77, 1.57, 0.15800905)
+material_override = SubResource("GoldMat")
+mesh = SubResource("DoorPlate")
+
+[node name="Handle" type="MeshInstance3D" parent="ExitDoor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.77, 1.55, 0.25800943)
+mesh = SubResource("DoorHandle")
+
+[node name="TopTrim" type="MeshInstance3D" parent="ExitDoor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.19, -0.0019907951)
+material_override = SubResource("GoldMat")
+mesh = SubResource("Trim")
+
+[node name="ReceptionMainBody" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.64, 0, 0, 0, 1.04, 0, 0, 0, 3.16, -2.15, 0.52, 0.08248192)
+material_override = ExtResource("6")
+mesh = SubResource("ReceptionCube")
+
+[node name="ReceptionMainTop" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.84, 0, 0, 0, 0.13, 0, 0, 0, 4, -2.15, 1.079, 0.08248192)
+material_override = ExtResource("7")
+mesh = SubResource("ReceptionCube")
+
+[node name="ReceptionMainPanelFront" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.035, 0, 0, 0, 0.67, 0, 0, 0, 0.83, -1.813, 0.55, -0.92751807)
+material_override = ExtResource("8")
+mesh = SubResource("ReceptionCube")
+
+[node name="ReceptionMainPanelCenter" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.035, 0, 0, 0, 0.67, 0, 0, 0, 0.83, -1.813, 0.55, 0.08248192)
+material_override = ExtResource("8")
+mesh = SubResource("ReceptionCube")
+
+[node name="ReceptionMainPanelBack" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.035, 0, 0, 0, 0.67, 0, 0, 0, 0.83, -1.813, 0.55, 1.0924819)
+material_override = ExtResource("8")
+mesh = SubResource("ReceptionCube")
+
+[node name="ReceptionMainGoldTop" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.04, 0, 0, 0, 0.03, 0, 0, 0, 3.17, -1.818, 1.006, 0.08248192)
+material_override = SubResource("GoldMat")
+mesh = SubResource("ReceptionCube")
+
+[node name="ReceptionMainGoldBottom" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.04, 0, 0, 0, 0.028, 0, 0, 0, 3.17, -1.818, 0.126, 0.08248192)
+material_override = SubResource("GoldMat")
+mesh = SubResource("ReceptionCube")
+
+[node name="ReceptionMainToeKick" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.047, 0, 0, 0, 0.15, 0, 0, 0, 3.1, -1.82, 0.076, 0.08248192)
+material_override = ExtResource("6")
+mesh = SubResource("ReceptionCube")
+
+[node name="ReceptionFrontReturnBody" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.9, 0, 0, 0, 1.04, 0, 0, 0, 0.64, -2.725833, 0.52, -1.4975181)
+material_override = ExtResource("6")
+mesh = SubResource("ReceptionCube")
+
+[node name="ReceptionFrontReturnTop" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.2, 0, 0, 0, 0.13, 0, 0, 0, 0.8, -3.16, 1.079, -1.517575)
+material_override = ExtResource("7")
+mesh = SubResource("ReceptionCube")
+
+[node name="ReceptionFrontReturnPanel" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.91, 0, 0, 0, 0.68, 0, 0, 0, 0.035, -2.92, 0.55, -1.824518)
+material_override = ExtResource("8")
+mesh = SubResource("ReceptionCube")
+
+[node name="ReceptionFrontReturnGold" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.58, 0, 0, 0, 0.03, 0, 0, 0, 0.038, -2.91, 1.006, -1.823518)
+material_override = SubResource("GoldMat")
+mesh = SubResource("ReceptionCube")
+
+[node name="ReceptionRearReturnBody" type="MeshInstance3D" parent="."]
+transform = Transform3D(2, 0, 0, 0, 1, 0, 0, 0, 0.6, -2.8067832, 0.52, 1.662482)
+material_override = ExtResource("6")
+mesh = SubResource("ReceptionCube")
+
+[node name="ReceptionRearReturnTop" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.2, 0, 0, 0, 0.13, 0, 0, 0, 0.8, -3.16, 1.079, 1.682478)
+material_override = ExtResource("7")
+mesh = SubResource("ReceptionCube")
+
+[node name="ReceptionRearReturnPanel" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.91, 0, 0, 0, 0.68, 0, 0, 0, 0.035, -2.92, 0.55, 1.9904819)
+material_override = ExtResource("8")
+mesh = SubResource("ReceptionCube")
+
+[node name="ReceptionRearReturnGold" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.58, 0, 0, 0, 0.03, 0, 0, 0, 0.038, -2.91, 1.006, 1.9894819)
+material_override = SubResource("GoldMat")
+mesh = SubResource("ReceptionCube")
+
+[node name="ReceptionCounterCollision" type="StaticBody3D" parent="."]
+
+[node name="ReceptionLongCollider" type="CollisionShape3D" parent="ReceptionCounterCollision"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.15, 0.52, 0.08248192)
+shape = SubResource("ReceptionLongShape")
+
+[node name="ReceptionFrontReturnCollider" type="CollisionShape3D" parent="ReceptionCounterCollision"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.91, 0.52, -1.4975181)
+shape = SubResource("ReceptionEndShape")
+
+[node name="ReceptionRearReturnCollider" type="CollisionShape3D" parent="ReceptionCounterCollision"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.91, 0.52, 1.662482)
+shape = SubResource("ReceptionEndShape")
+
+[node name="CroupierStation" parent="." instance=ExtResource("5")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -2.587789, 0, 0.13443589)
+imported_model_proportions = Vector3(1.8, 1.1, 1.8)
+
+[node name="CroupierCollision" parent="CroupierStation" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.86, -0.52)
+
+[node name="BodyShape" parent="CroupierStation/CroupierCollision" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.16751808, 0, 0.051136494)
+
+[node name="CharacterPivot" parent="CroupierStation" index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.52)
+
+[node name="ModelAnchor" parent="CroupierStation/CharacterPivot" index="0"]
+transform = Transform3D(0.6, 0, 0, 0, 1, 0, 0, 0, 0.8, 0.16751808, 0, 0.12980103)
+
+[node name="LeftLeg" parent="CroupierStation/CharacterPivot" index="1"]
+transform = Transform3D(0.24, 0, 0, 0, 0.96, 0, 0, 0, 0.27, -0.17, 0.48, 0)
+visible = false
+
+[node name="RightLeg" parent="CroupierStation/CharacterPivot" index="2"]
+transform = Transform3D(0.24, 0, 0, 0, 0.96, 0, 0, 0, 0.27, 0.17, 0.48, 0)
+visible = false
+
+[node name="Torso" parent="CroupierStation/CharacterPivot" index="3"]
+transform = Transform3D(0.65, 0, 0, 0, 0.72, 0, 0, 0, 0.3, 0, 1.28, 0)
+visible = false
+
+[node name="ShirtFront" parent="CroupierStation/CharacterPivot" index="4"]
+transform = Transform3D(0.17, 0, 0, 0, 0.49, 0, 0, 0, 0.025, 0, 1.35, 0.16)
+visible = false
+
+[node name="LeftArm" parent="CroupierStation/CharacterPivot" index="5"]
+transform = Transform3D(0.19856173, 0.08379854, 0, -0.023198128, 0.67336124, 0.05937695, 0.005923455, -0.17193736, 0.23253898, -0.41, 1.25, 0.055)
+visible = false
+
+[node name="RightArm" parent="CroupierStation/CharacterPivot" index="6"]
+transform = Transform3D(0.19856173, -0.08379854, 0, 0.023198128, 0.67336124, 0.05937695, -0.005923455, -0.17193736, 0.23253898, 0.41, 1.25, 0.055)
+visible = false
+
+[node name="LeftHand" parent="CroupierStation/CharacterPivot" index="7"]
+transform = Transform3D(0.18, 0, 0, 0, 0.19, 0, 0, 0, 0.18, -0.42, 0.92, 0.2)
+visible = false
+
+[node name="RightHand" parent="CroupierStation/CharacterPivot" index="8"]
+transform = Transform3D(0.18, 0, 0, 0, 0.19, 0, 0, 0, 0.18, 0.42, 0.92, 0.2)
+visible = false
+
+[node name="Neck" parent="CroupierStation/CharacterPivot" index="9"]
+transform = Transform3D(0.2, 0, 0, 0, 0.17, 0, 0, 0, 0.2, 0, 1.68, 0)
+visible = false
+
+[node name="Face" parent="CroupierStation/CharacterPivot" index="10"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.91, 0)
+visible = false
+
+[node name="HairCap" parent="CroupierStation/CharacterPivot" index="11"]
+transform = Transform3D(1.005, 0, 0, 0, 0.32, 0, 0, 0, 1, 0, 2.09, -0.025)
+visible = false
+
+[node name="InteractionHint" parent="CroupierStation" index="2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.15, -0.45)
+
+[node name="CounterLight" parent="CroupierStation" index="3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2, 2.65, 0.05)
+
+[node name="_MeshInstance3D_49" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.6, 0, 0, 0, 1, -3.4192195, 2.028106, 4.488874)
+material_override = SubResource("StandardMaterial3D_4u6uu")
+mesh = SubResource("BoxMesh_puorx")
+metadata/decor_type = "pillar"
+
+[node name="PillarBase_0104" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4192195, 0.145, 4.488874)
+material_override = SubResource("StandardMaterial3D_jyla6")
+mesh = SubResource("BoxMesh_4ku7o")
+
+[node name="PillarBaseCollar_0104" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4192195, 0.315, 4.488874)
+material_override = SubResource("StandardMaterial3D_t050v")
+mesh = SubResource("BoxMesh_hvc7q")
+
+[node name="PillarCapitalCollar_0104" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4192195, 3.749374, 4.488874)
+material_override = SubResource("StandardMaterial3D_tbf0a")
+mesh = SubResource("BoxMesh_di2mn")
+
+[node name="PillarCapital_0104" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4192195, 3.9343739, 4.488874)
+material_override = SubResource("StandardMaterial3D_jt34p")
+mesh = SubResource("BoxMesh_b8ohn")
+
+[node name="_MeshInstance3D_49" type="MeshInstance3D" parent="PillarCapital_0104"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.024019718, -0.9818928, -8.941496)
+material_override = SubResource("StandardMaterial3D_4u6uu")
+mesh = SubResource("BoxMesh_puorx")
+metadata/decor_type = "pillar"
+
+[node name="PillarCapitalCollar_0104" type="MeshInstance3D" parent="PillarCapital_0104"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.02214241, -0.0927372, -8.945086)
+material_override = SubResource("StandardMaterial3D_tbf0a")
+mesh = SubResource("BoxMesh_di2mn")
+
+[node name="PillarCapital_0104" type="MeshInstance3D" parent="PillarCapital_0104"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.02214241, 0.09226227, -8.945086)
+material_override = SubResource("StandardMaterial3D_jt34p")
+mesh = SubResource("BoxMesh_b8ohn")
+
+[node name="Player" type="CharacterBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.02, 2.7)
+script = ExtResource("2")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
+shape = SubResource("PlayerCapsule")
+
+[node name="Camera3D" type="Camera3D" parent="Player"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
+current = true
+
+[editable path="Decoration"]
+[editable path="Decoration/WaitingLounge/UpholsteredSofa"]
+[editable path="Decoration/WaitingLounge/TeaTable"]
+[editable path="Decoration/EntranceDisplay/MarblePortraitBust"]
+[editable path="Decoration/Gallery/RightHistoricPainting"]
+[editable path="Decoration/Gallery/LeftHistoricPainting"]
+[editable path="Decoration/LightingAndCeiling/CentralChandelier"]
+[editable path="Decoration/UserSelectedProps/WallLightRightSconceA"]
+[editable path="Decoration/UserSelectedProps/WallLightRightSconceB"]
+[editable path="Decoration/UserSelectedProps/WallLightExitSconceLeft"]
+[editable path="Decoration/UserSelectedProps/WallLightExitSconceRight"]
+[editable path="Decoration/UserSelectedProps/DeskBell"]
+[editable path="Decoration/UserSelectedProps/BooksWithMagnifier"]
+[editable path="Decoration/UserSelectedProps/VintageGramophone"]
+[editable path="CroupierStation"]

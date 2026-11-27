@@ -1,0 +1,23 @@
+{
+  "asset": "book_pattern",
+  "sourcePage": "https://polyhaven.com/a/book_pattern",
+  "creator": "Rob Tuytel",
+  "license": "CC0-1.0",
+  "maps": {
+    "book_pattern_col1_2k.jpg": {
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/book_pattern/book_pattern_col1_2k.jpg",
+      "sha256": "ce8254ae9e8543c98fec02dd0bf93df59561342a4d99681a45c2730b55c3d577",
+      "bytes": 1382402
+    },
+    "book_pattern_rough_2k.jpg": {
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/book_pattern/book_pattern_rough_2k.jpg",
+      "sha256": "6b5ced527f8a961c7b491b8ccb962bcf2eeb21db5d505fb66c3925047e24b7c1",
+      "bytes": 2134733
+    },
+    "book_pattern_nor_gl_2k.jpg": {
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/book_pattern/book_pattern_nor_gl_2k.jpg",
+      "sha256": "140c3719f3201130f562bf7927d3c276dfb2e1c1003deac2c77bd361cdebeb49",
+      "bytes": 787647
+    }
+  }
+}

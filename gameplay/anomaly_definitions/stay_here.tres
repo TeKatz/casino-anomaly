@@ -1,0 +1,18 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://gameplay/anomaly_definition.gd" id="1_definition"]
+[ext_resource type="Script" path="res://gameplay/anomalies/batch_02_horror.gd" id="2_handler"]
+
+[resource]
+script = ExtResource("1_definition")
+handler = ExtResource("2_handler")
+id = "stay_here"
+category_en = "Uncanny"
+category_de = "Unheimlich"
+title_en = "Stay here"
+title_de = "Bleib hier"
+description_en = "The three signs say STAY HERE and pulse slowly in red."
+description_de = "Die drei Schilder zeigen STAY HERE und pulsieren langsam in Rot."
+target_path = "Architecture/Sign_CASINO_ANOMALY"
+rarity = "uncommon"
+difficulty = 1

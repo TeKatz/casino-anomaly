@@ -1,0 +1,18 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://gameplay/anomaly_definition.gd" id="1_definition"]
+[ext_resource type="Script" path="res://gameplay/anomalies/batch_03_reality.gd" id="2_handler"]
+
+[resource]
+script = ExtResource("1_definition")
+handler = ExtResource("2_handler")
+id = "they_are_listening"
+category_en = "Broken Reality"
+category_de = "Verzerrte Realität"
+title_en = "They Are Listening"
+title_de = "Sie hören zu"
+description_en = "In several areas along the casino, ambient sound and light fade and your vision becomes softly blurred."
+description_de = "In mehreren Bereichen des Casinos verblassen Geräusche und Licht, während deine Sicht leicht verschwimmt."
+target_path = "SlotMachines"
+rarity = "rare"
+difficulty = 1

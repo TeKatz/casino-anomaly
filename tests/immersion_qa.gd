@@ -1,0 +1,130 @@
+extends SceneTree
+## Headless-friendly checks: acoustic gates, procedural audio and floor logic.
+const PlayerScript = preload("res://player.gd")
+const Soundscape = preload("res://gameplay/room_soundscape.gd")
+
+func _initialize() -> void:
+    call_deferred("_run")
+
+func _fail(message: String) -> void:
+    push_error("Casino immersion QA: " + message)
+    quit(1)
+
+func _run() -> void:
+    var director := root.get_node_or_null("AudioDirector")
+    if director == null or AudioServer.get_bus_index("WORLD") < 0:
+        _fail("World audio bus or director is missing")
+        return
+    if director.get_node_or_null("FootstepCue") == null             or director.get_node_or_null("PressureBed") == null:
+        _fail("Step/pressure players missing")
+        return
+    for kind in ["cabinet", "bar", "vent", "pressure"]:
+        var loop := director.get_immersion_loop(kind) as AudioStreamWAV
+        if loop == null or loop.loop_mode != AudioStreamWAV.LOOP_FORWARD:
+            _fail("Non-looping positional bed: " + kind)
+            return
+    for surface in ["wood", "carpet", "corridor", "water"]:
+        var wave := director.get_footstep_stream(surface, 0) as AudioStreamWAV
+        if wave == null or wave.loop_mode != AudioStreamWAV.LOOP_DISABLED:
+            _fail("Missing footstep: " + surface)
+            return
+    for variant in range(4):
+        if director.get_footstep_stream("water",variant) == null:
+            _fail("Missing water footstep variant")
+            return
+    # A checkout without the asset commit can still run synthetic QA.
+    # Once the recordings directory exists, every real clip must be imported
+    # and selected; partial packs and silently substituted samples fail.
+    var recordings_present := DirAccess.dir_exists_absolute("res://audio/footsteps")
+    for spec in [["wood", false, 6], ["wood", true, 6], ["carpet", false, 6], ["carpet", true, 6], ["wet_carpet", false, 12]]:
+        var surface := str(spec[0])
+        var sprinting := bool(spec[1])
+        var count := int(spec[2])
+        var group: String = director.footstep_group(surface, sprinting)
+        if director.step_sounds[group].size() != count:
+            _fail("Incorrect footstep bank size: " + group)
+            return
+        if recordings_present:
+            for variant in range(count):
+                var path := "res://audio/footsteps/%s/%s_%02d.wav" % [group, group, variant + 1]
+                var recorded := director.get_footstep_stream(surface, variant, sprinting) as AudioStreamWAV
+                if not ResourceLoader.exists(path, "AudioStreamWAV") or recorded == null or recorded.resource_path != path or recorded.mix_rate != 48000 or recorded.stereo:
+                    _fail("Missing or invalid recorded footstep: " + path)
+                    return
+        var previous := -1
+        for i in range(count * 4):
+            var index: int = director._next_step_index(group, count)
+            var sample := director.get_footstep_stream(surface, index, sprinting) as AudioStreamWAV
+            if index < 0 or index >= count or index == previous or sample == null or sample.loop_mode != AudioStreamWAV.LOOP_DISABLED:
+                _fail("Invalid or repeated footstep: " + group)
+                return
+            previous = index
+    if director.footstep_group("wet_carpet", true) != "wet_carpet_walk" or director.get_footstep_stream("wood", 0) == director.get_footstep_stream("wood", 0, true):
+        _fail("Gait isolation failed")
+        return
+    var player = PlayerScript.new()
+    player.set_backrooms_mode(true)
+    if player._surface_underfoot() != "wet_carpet":
+        _fail("Backrooms must use damp carpet")
+        return
+    player.set_backrooms_mode(false)
+    if player._surface_underfoot() != "wood":
+        _fail("Casino footstep surface did not restore")
+        return
+    for spec in [
+        {"pos": Vector3(0.0, 0.0, 2.0), "surface": "carpet"},
+        {"pos": Vector3(-22.0, 0.0, -5.0), "surface": "carpet"},
+        {"pos": Vector3(4.0, 0.0, 2.0), "surface": "wood"},
+        {"pos": Vector3(-49.0, 0.0, -3.7), "surface": "corridor"},
+        {"pos": Vector3(0.0, 0.0, 15.0), "surface": "corridor"}
+    ]:
+        if player.classify_casino_surface(spec["pos"]) != spec["surface"]:
+            _fail("Surface classification mismatch")
+            return
+    player.free()
+
+    var hall := Node3D.new()
+    hall.set_meta("_streaming_standby", true)
+    var slots := Node3D.new()
+    slots.name = "SlotMachines"
+    hall.add_child(slots)
+    for i in range(7):
+        var slot := Node3D.new()
+        slot.name = "Slot_%02d" % (i + 1)
+        slots.add_child(slot)
+    var zone := Soundscape.new()
+    zone.name = "RoomSoundscape"
+    hall.add_child(zone)
+    root.add_child(hall)
+    await process_frame
+    await process_frame
+    if zone.get_child_count() != 5 or bool(zone.get("_active")):
+        _fail("Standby spatial sources must remain silent")
+        return
+    zone.activate()
+    if not bool(zone.get("_active")):
+        _fail("Spatial sound did not activate")
+        return
+    director.set_world_ambience_enabled(true)
+    if not (director.get_node("PressureBed") as AudioStreamPlayer).playing:
+        _fail("World pressure bed did not start")
+        return
+    if director.pressure_db_for_visits(10) <= director.pressure_db_for_visits(0):
+        _fail("No progression in low-frequency ambience")
+        return
+    director.set_world_ambience_enabled(false)
+    if (director.get_node("PressureBed") as AudioStreamPlayer).playing:
+        _fail("World sound leaks into menu")
+        return
+    hall.queue_free()
+    await process_frame
+    director.queue_free()
+    await process_frame
+    await process_frame
+    # The audio mixer can retain a decoding reference until its next tick.
+    await create_timer(0.20).timeout
+    if AudioServer.get_bus_index("WORLD") >= 0:
+        _fail("WORLD reverb effect remains allocated after shutdown")
+        return
+    print("Casino Anomaly immersion QA PASS")
+    quit(0)

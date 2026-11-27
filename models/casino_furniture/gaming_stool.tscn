@@ -1,0 +1,151 @@
+[gd_scene load_steps=19 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/fabric037/Fabric037_2K-JPG_Color.jpg" id="1_fabric"]
+[ext_resource type="Texture2D" path="res://assets/fabric037/Fabric037_2K-JPG_NormalGL.jpg" id="2_normal"]
+[ext_resource type="Texture2D" path="res://assets/wood_table_worn/wood_table_worn_diff_2k.jpg" id="3_wood"]
+[ext_resource type="Texture2D" path="res://assets/wood_table_worn/wood_table_worn_nor_gl_2k.jpg" id="4_woodnormal"]
+
+[sub_resource type="StandardMaterial3D" id="MatVelvet"]
+albedo_texture = ExtResource("1_fabric")
+albedo_color = Color(0.52, 0.27, 0.31, 1)
+normal_enabled = true
+normal_texture = ExtResource("2_normal")
+roughness = 0.88
+uv1_scale = Vector3(1.7, 1.7, 1)
+
+[sub_resource type="StandardMaterial3D" id="MatWalnut"]
+albedo_texture = ExtResource("3_wood")
+albedo_color = Color(0.58, 0.43, 0.35, 1)
+normal_enabled = true
+normal_texture = ExtResource("4_woodnormal")
+roughness = 0.45
+
+[sub_resource type="StandardMaterial3D" id="MatBrass"]
+albedo_color = Color(0.74, 0.56, 0.31, 1)
+metallic = 0.80
+roughness = 0.30
+
+[sub_resource type="StandardMaterial3D" id="MatDarkBrass"]
+albedo_color = Color(0.27, 0.22, 0.19, 1)
+metallic = 0.73
+roughness = 0.39
+
+[sub_resource type="CylinderMesh" id="FootDiscMesh"]
+top_radius = 0.23
+bottom_radius = 0.27
+height = 0.072
+radial_segments = 32
+
+[sub_resource type="TorusMesh" id="FootBevelMesh"]
+inner_radius = 0.243
+outer_radius = 0.267
+ring_segments = 8
+rings = 40
+
+[sub_resource type="CylinderMesh" id="PedestalStemMesh"]
+top_radius = 0.061
+bottom_radius = 0.078
+height = 0.40
+radial_segments = 24
+
+[sub_resource type="TorusMesh" id="FootrestMesh"]
+inner_radius = 0.172
+outer_radius = 0.196
+ring_segments = 8
+rings = 32
+
+[sub_resource type="CylinderMesh" id="SeatSupportMesh"]
+top_radius = 0.212
+bottom_radius = 0.10
+height = 0.09
+radial_segments = 32
+
+[sub_resource type="CylinderMesh" id="SeatShellMesh"]
+top_radius = 0.296
+bottom_radius = 0.273
+height = 0.065
+radial_segments = 40
+
+[sub_resource type="TorusMesh" id="SeatPipingMesh"]
+inner_radius = 0.288
+outer_radius = 0.308
+ring_segments = 8
+rings = 40
+
+[sub_resource type="CylinderMesh" id="SeatCushionMesh"]
+top_radius = 0.266
+bottom_radius = 0.289
+height = 0.075
+radial_segments = 40
+
+[sub_resource type="SphereMesh" id="CushionCrownMesh"]
+radius = 0.264
+height = 0.046
+radial_segments = 40
+rings = 10
+
+[sub_resource type="CylinderShape3D" id="SolidStoolShape"]
+height = 0.65
+radius = 0.30
+
+[node name="GamingStool" type="Node3D"]
+
+[node name="WeightedFoot" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.052, 0)
+mesh = SubResource("FootDiscMesh")
+material_override = SubResource("MatDarkBrass")
+
+
+[node name="FootBrassBevel" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.083, 0)
+mesh = SubResource("FootBevelMesh")
+material_override = SubResource("MatBrass")
+
+
+[node name="TaperedPedestal" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.23, 0)
+mesh = SubResource("PedestalStemMesh")
+material_override = SubResource("MatDarkBrass")
+
+
+[node name="FootrestRing" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.18, 0)
+mesh = SubResource("FootrestMesh")
+material_override = SubResource("MatBrass")
+
+
+[node name="CarvedSeatSupport" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.472, 0)
+mesh = SubResource("SeatSupportMesh")
+material_override = SubResource("MatWalnut")
+
+
+[node name="WalnutSeatShell" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.535, 0)
+mesh = SubResource("SeatShellMesh")
+material_override = SubResource("MatWalnut")
+
+
+[node name="BrassSeatPiping" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.566, 0)
+mesh = SubResource("SeatPipingMesh")
+material_override = SubResource("MatBrass")
+
+
+[node name="UpholsteredSeat" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.573, 0)
+mesh = SubResource("SeatCushionMesh")
+material_override = SubResource("MatVelvet")
+
+
+[node name="SoftSeatCrown" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.615, 0)
+mesh = SubResource("CushionCrownMesh")
+material_override = SubResource("MatVelvet")
+
+
+[node name="StoolBody" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.325, 0)
+
+[node name="StoolCollision" type="CollisionShape3D" parent="StoolBody"]
+shape = SubResource("SolidStoolShape")

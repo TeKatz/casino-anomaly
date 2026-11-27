@@ -1,0 +1,144 @@
+[gd_scene load_steps=18 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/wood_table_worn/wood_table_worn_diff_2k.jpg" id="1_wood"]
+[ext_resource type="Texture2D" path="res://assets/wood_table_worn/wood_table_worn_nor_gl_2k.jpg" id="2_woodnormal"]
+[ext_resource type="Texture2D" path="res://assets/wood_table_worn/wood_table_worn_rough_2k.jpg" id="3_woodrough"]
+[ext_resource type="Texture2D" path="res://assets/quatrefoil_jacquard_fabric/quatrefoil_jacquard_fabric_diff_2k.jpg" id="4_fabric"]
+[ext_resource type="Texture2D" path="res://assets/quatrefoil_jacquard_fabric/quatrefoil_jacquard_fabric_nor_gl_2k.jpg" id="5_fabricnormal"]
+
+[sub_resource type="StandardMaterial3D" id="TableWalnut"]
+albedo_texture = ExtResource("1_wood")
+albedo_color = Color(0.68, 0.53, 0.45, 1)
+normal_enabled = true
+normal_texture = ExtResource("2_woodnormal")
+roughness_texture = ExtResource("3_woodrough")
+roughness = 0.54
+uv1_scale = Vector3(2, 2, 1)
+
+[sub_resource type="StandardMaterial3D" id="TableBrass"]
+albedo_color = Color(0.74, 0.56, 0.32, 1)
+metallic = 0.82
+roughness = 0.31
+
+[sub_resource type="StandardMaterial3D" id="TableDarkGold"]
+albedo_color = Color(0.43, 0.30, 0.17, 1)
+metallic = 0.73
+roughness = 0.43
+
+[sub_resource type="StandardMaterial3D" id="TableFelt"]
+albedo_texture = ExtResource("4_fabric")
+albedo_color = Color(0.15, 0.38, 0.31, 1)
+normal_enabled = true
+normal_texture = ExtResource("5_fabricnormal")
+roughness = 0.96
+uv1_scale = Vector3(2.5, 2.5, 1)
+
+[sub_resource type="StandardMaterial3D" id="TablePaddedRail"]
+albedo_color = Color(0.19, 0.10, 0.09, 1)
+roughness = 0.68
+
+[sub_resource type="CylinderMesh" id="SolidWalnutTopMesh"]
+top_radius = 1.242
+bottom_radius = 1.195
+height = 0.15
+radial_segments = 64
+
+[sub_resource type="CylinderMesh" id="RecessedFeltMesh"]
+top_radius = 1.105
+bottom_radius = 1.105
+height = 0.025
+radial_segments = 64
+
+[sub_resource type="TorusMesh" id="OuterBrassLipMesh"]
+inner_radius = 1.237
+outer_radius = 1.262
+ring_segments = 8
+rings = 64
+
+[sub_resource type="TorusMesh" id="PaddedArmRailMesh"]
+inner_radius = 1.12
+outer_radius = 1.225
+ring_segments = 12
+rings = 64
+
+[sub_resource type="TorusMesh" id="InnerBrassPipingMesh"]
+inner_radius = 1.109
+outer_radius = 1.127
+ring_segments = 8
+rings = 64
+
+[sub_resource type="TorusMesh" id="RecessInlayMesh"]
+inner_radius = 1.023
+outer_radius = 1.032
+ring_segments = 6
+rings = 64
+
+[sub_resource type="TorusMesh" id="DealerMarkerMesh"]
+inner_radius = 0.067
+outer_radius = 0.079
+ring_segments = 8
+rings = 24
+
+[node name="DetailedTableSurface" type="Node3D"]
+
+[node name="TurnedWalnutTabletop" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.97, 0)
+mesh = SubResource("SolidWalnutTopMesh")
+material_override = SubResource("TableWalnut")
+
+
+[node name="RecessedWovenFelt" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.05, 0)
+mesh = SubResource("RecessedFeltMesh")
+material_override = SubResource("TableFelt")
+
+
+[node name="OuterGildedEdge" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.059, 0)
+mesh = SubResource("OuterBrassLipMesh")
+material_override = SubResource("TableBrass")
+
+
+[node name="PaddedArmrest" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.078, 0)
+mesh = SubResource("PaddedArmRailMesh")
+material_override = SubResource("TablePaddedRail")
+
+
+[node name="InsetBrassPiping" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.083, 0)
+mesh = SubResource("InnerBrassPipingMesh")
+material_override = SubResource("TableBrass")
+
+
+[node name="FeltEmbossedInlay" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.063, 0)
+mesh = SubResource("RecessInlayMesh")
+material_override = SubResource("TableDarkGold")
+
+
+[node name="PlayerMark_1" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.167393, 1.066, 0.919894)
+mesh = SubResource("DealerMarkerMesh")
+material_override = SubResource("TableDarkGold")
+
+[node name="PlayerMark_2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.926598, 1.066, 0.125063)
+mesh = SubResource("DealerMarkerMesh")
+material_override = SubResource("TableDarkGold")
+
+[node name="PlayerMark_3" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.405277, 1.066, -0.842601)
+mesh = SubResource("DealerMarkerMesh")
+material_override = SubResource("TableDarkGold")
+
+[node name="PlayerMark_4" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.676124, 1.066, -0.645819)
+mesh = SubResource("DealerMarkerMesh")
+material_override = SubResource("TableDarkGold")
+
+[node name="PlayerMark_5" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.823144, 1.066, 0.443463)
+mesh = SubResource("DealerMarkerMesh")
+material_override = SubResource("TableDarkGold")
+

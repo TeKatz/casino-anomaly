@@ -1,0 +1,22 @@
+{
+  "asset": "smoke_speckled_veneer",
+  "sourcePage": "https://polyhaven.com/a/smoke_speckled_veneer",
+  "license": "CC0-1.0",
+  "maps": {
+    "smoke_speckled_veneer_diff_2k.jpg": {
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/smoke_speckled_veneer/smoke_speckled_veneer_diff_2k.jpg",
+      "sha256": "2d01f221f202958a3015558d4c408ffba1fb718940238977b3f6cd45fee6116b",
+      "bytes": 2218751
+    },
+    "smoke_speckled_veneer_rough_2k.jpg": {
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/smoke_speckled_veneer/smoke_speckled_veneer_rough_2k.jpg",
+      "sha256": "16f9c6788f394894a24e101c9e4735165d45b3ddc036e71970c0e9496b931274",
+      "bytes": 2943249
+    },
+    "smoke_speckled_veneer_nor_gl_2k.jpg": {
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/smoke_speckled_veneer/smoke_speckled_veneer_nor_gl_2k.jpg",
+      "sha256": "4393bf26ed88c2f10b685c06a5301365d503b8e2342d789a7e7eac2aceefbfa8",
+      "bytes": 1914006
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "asset": "wood_table_worn",
+  "sourcePage": "https://polyhaven.com/a/wood_table_worn",
+  "license": "CC0-1.0",
+  "maps": {
+    "wood_table_worn_diff_2k.jpg": {
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/wood_table_worn/wood_table_worn_diff_2k.jpg",
+      "sha256": "165cdba449d56ea8e9675116622b95d7af372b7d7c47b8a98a03fcc630f1d51c",
+      "bytes": 3108339
+    },
+    "wood_table_worn_rough_2k.jpg": {
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/wood_table_worn/wood_table_worn_rough_2k.jpg",
+      "sha256": "4263780c4b7737b8714eefcbda1b43c28f8e1e0ee2b797c125521cbe6e3889dd",
+      "bytes": 2890891
+    },
+    "wood_table_worn_nor_gl_2k.jpg": {
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/wood_table_worn/wood_table_worn_nor_gl_2k.jpg",
+      "sha256": "a90aaa321194fb41d6e44776c6ee88134e4be416051357a3c9e323cc447c4cf0",
+      "bytes": 3142587
+    }
+  }
+}

@@ -1,0 +1,60 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://ui/menu_showcase_3d.gd" id="1"]
+[ext_resource type="Shader" path="res://ui/menu_panorama_grade.gdshader" id="2"]
+
+[sub_resource type="ShaderMaterial" id="Grade"]
+shader = ExtResource("2")
+
+[node name="CasinoPanorama" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+modulate = Color(1, 1, 1, 0)
+script = ExtResource("1")
+
+[node name="RenderSurface" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 0
+texture_filter = 2
+
+[node name="World" type="SubViewport" parent="RenderSurface"]
+own_world_3d = true
+handle_input_locally = false
+gui_disable_input = true
+size = Vector2i(1280, 720)
+use_taa = true
+anisotropic_filtering_level = 3
+render_target_update_mode = 0
+
+[node name="Showcase" type="Node3D" parent="RenderSurface/World"]
+
+[node name="CameraRig" type="Node3D" parent="RenderSurface/World/Showcase"]
+position = Vector3(0, 2.15, 9.9)
+
+[node name="PanoramaCamera" type="Camera3D" parent="RenderSurface/World/Showcase/CameraRig"]
+current = true
+fov = 79.0
+near = 0.08
+far = 64.0
+
+[node name="ReadabilityGrade" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+material = SubResource("Grade")

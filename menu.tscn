@@ -1,0 +1,289 @@
+[gd_scene load_steps=13 format=3]
+
+[ext_resource type="Script" path="res://menu.gd" id="1"]
+[ext_resource type="Script" path="res://ui/luminous_button.gd" id="2"]
+[ext_resource type="Shader" path="res://ui/abstract_menu.gdshader" id="3"]
+[ext_resource type="PackedScene" path="res://ui/menu_showcase_3d.tscn" id="4_showcase"]
+[ext_resource type="PackedScene" path="res://ui/menu_startup_intro.tscn" id="5_intro"]
+[ext_resource type="Texture2D" path="res://branding/casino_anomaly_logo.png" id="6_brand"]
+
+[sub_resource type="ShaderMaterial" id="Atmosphere"]
+shader = ExtResource("3")
+
+[sub_resource type="StyleBoxFlat" id="GlassPanel"]
+bg_color = Color(0.067, 0.071, 0.086, 0.92)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.75, 0.60, 0.41, 0.82)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.65)
+shadow_size = 18
+
+[sub_resource type="SystemFont" id="BrandSerif"]
+font_names = PackedStringArray("Georgia", "Liberation Serif", "DejaVu Serif", "Times New Roman")
+font_weight = 400
+
+[sub_resource type="FontVariation" id="BrandEyebrowFont"]
+base_font = SubResource("BrandSerif")
+spacing_glyph = 2
+
+[sub_resource type="FontVariation" id="BrandTaglineFont"]
+base_font = SubResource("BrandSerif")
+spacing_glyph = 1
+
+[sub_resource type="Gradient" id="BrandRuleGradient"]
+offsets = PackedFloat32Array(0, 0.22, 0.5, 0.78, 1)
+colors = PackedColorArray(0.65, 0.42, 0.19, 0, 0.72, 0.48, 0.22, 0.68, 0.95, 0.77, 0.42, 0.95, 0.72, 0.48, 0.22, 0.68, 0.65, 0.42, 0.19, 0)
+
+[sub_resource type="GradientTexture2D" id="BrandRuleTexture"]
+gradient = SubResource("BrandRuleGradient")
+width = 256
+height = 2
+fill_from = Vector2(0, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+material = SubResource("Atmosphere")
+color = Color(1, 1, 1, 1)
+
+[node name="CasinoPanorama" parent="." instance=ExtResource("4_showcase")]
+layout_mode = 1
+
+[node name="TopRail" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 2.0
+grow_horizontal = 2
+mouse_filter = 2
+color = Color(0.85, 0.66, 0.45, 0.69)
+
+[node name="Brand" type="Control" parent="."]
+layout_mode = 1
+anchor_left = 0.075
+anchor_top = 0.16
+anchor_right = 0.075
+anchor_bottom = 0.16
+offset_right = 550.0
+offset_bottom = 310.0
+mouse_filter = 2
+
+[node name="Eyebrow" type="Label" parent="Brand"]
+layout_mode = 0
+offset_right = 410.0
+offset_bottom = 29.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.85, 0.72, 0.48, 1)
+theme_override_colors/font_outline_color = Color(0.12, 0.075, 0.035, 0.88)
+theme_override_colors/font_shadow_color = Color(0.035, 0.02, 0.01, 0.85)
+theme_override_constants/outline_size = 2
+theme_override_constants/shadow_offset_x = 0
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = SubResource("BrandEyebrowFont")
+theme_override_font_sizes/font_size = 14
+text = "AN EXERCISE IN PERCEPTION"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Logo" type="TextureRect" parent="Brand"]
+layout_mode = 0
+offset_top = 31.0
+offset_right = 410.0
+offset_bottom = 233.0
+mouse_filter = 2
+texture_filter = 4
+texture = ExtResource("6_brand")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Rule" type="TextureRect" parent="Brand"]
+layout_mode = 0
+offset_left = 115.0
+offset_top = 245.0
+offset_right = 295.0
+offset_bottom = 247.0
+mouse_filter = 2
+texture_filter = 2
+texture = SubResource("BrandRuleTexture")
+expand_mode = 1
+
+[node name="RuleDiamond" type="Polygon2D" parent="Brand"]
+position = Vector2(205, 246)
+color = Color(0.94, 0.76, 0.42, 1)
+polygon = PackedVector2Array(0, -4, 4, 0, 0, 4, -4, 0)
+
+[node name="Tagline" type="Label" parent="Brand"]
+layout_mode = 0
+offset_top = 257.0
+offset_right = 410.0
+offset_bottom = 291.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.97, 0.86, 0.65, 1)
+theme_override_colors/font_outline_color = Color(0.12, 0.075, 0.035, 0.92)
+theme_override_colors/font_shadow_color = Color(0.035, 0.02, 0.01, 0.85)
+theme_override_constants/outline_size = 2
+theme_override_constants/shadow_offset_x = 0
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = SubResource("BrandTaglineFont")
+theme_override_font_sizes/font_size = 17
+text = "EVERY DETAIL IS A DECISION."
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CenterPanel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchor_left = 0.96
+anchor_top = 0.5
+anchor_right = 0.96
+anchor_bottom = 0.5
+offset_left = -360.0
+offset_top = -220.0
+offset_bottom = 220.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("GlassPanel")
+
+[node name="Content" type="MarginContainer" parent="CenterPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 22
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 22
+theme_override_constants/margin_bottom = 18
+
+[node name="Stack" type="VBoxContainer" parent="CenterPanel/Content"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Kicker" type="Label" parent="CenterPanel/Content/Stack"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.65, 0.76, 0.8, 1)
+theme_override_font_sizes/font_size = 13
+text = "CASINO ANOMALY  /  INTERFACE"
+
+[node name="Title" type="Label" parent="CenterPanel/Content/Stack"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.96, 0.84, 0.71, 1)
+theme_override_font_sizes/font_size = 22
+text = "CHOOSE YOUR PATH"
+
+[node name="Subtitle" type="Label" parent="CenterPanel/Content/Stack"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.59, 0.69, 0.75, 1)
+theme_override_font_sizes/font_size = 12
+text = "DEVELOPMENT EDITION"
+
+[node name="Spacer" type="Control" parent="CenterPanel/Content/Stack"]
+custom_minimum_size = Vector2(0, 9)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="PlayButton" type="Button" parent="CenterPanel/Content/Stack"]
+custom_minimum_size = Vector2(0, 53)
+layout_mode = 2
+text = "NEW GAME"
+script = ExtResource("2")
+symbol = "play"
+accent = "green"
+featured = true
+
+[node name="ContinueButton" type="Button" parent="CenterPanel/Content/Stack"]
+custom_minimum_size = Vector2(0, 46)
+layout_mode = 2
+text = "CONTINUE"
+script = ExtResource("2")
+symbol = "resume"
+disabled = true
+
+[node name="SettingsButton" type="Button" parent="CenterPanel/Content/Stack"]
+custom_minimum_size = Vector2(0, 46)
+layout_mode = 2
+text = "SETTINGS"
+script = ExtResource("2")
+symbol = "settings"
+
+[node name="CreditsButton" type="Button" parent="CenterPanel/Content/Stack"]
+custom_minimum_size = Vector2(0, 46)
+layout_mode = 2
+text = "CREDITS"
+script = ExtResource("2")
+symbol = "credits"
+
+[node name="QuitButton" type="Button" parent="CenterPanel/Content/Stack"]
+custom_minimum_size = Vector2(0, 46)
+layout_mode = 2
+text = "QUIT"
+script = ExtResource("2")
+symbol = "quit"
+accent = "red"
+
+[node name="Separator" type="HSeparator" parent="CenterPanel/Content/Stack"]
+layout_mode = 2
+
+[node name="UpdateButton" type="Button" parent="CenterPanel/Content/Stack"]
+custom_minimum_size = Vector2(0, 38)
+layout_mode = 2
+text = "Check for updates"
+script = ExtResource("2")
+symbol = "update"
+
+[node name="InstallButton" type="Button" parent="CenterPanel/Content/Stack"]
+visible = false
+custom_minimum_size = Vector2(0, 38)
+layout_mode = 2
+disabled = true
+text = "Install update"
+script = ExtResource("2")
+symbol = "install"
+
+[node name="StatusLabel" type="Label" parent="CenterPanel/Content/Stack"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.66, 0.76, 0.8, 1)
+theme_override_font_sizes/font_size = 12
+text = "Playable offline"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="VersionLabel" type="Label" parent="CenterPanel/Content/Stack"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.56, 0.63, 1)
+theme_override_font_sizes/font_size = 12
+text = "Version 0.1.0-dev"
+horizontal_alignment = 1
+
+[node name="Transition" type="ColorRect" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+color = Color(0.015, 0.023, 0.037, 1)
+
+[node name="UpdateRequest" type="HTTPRequest" parent="."]
+
+[node name="StartupIntro" parent="." instance=ExtResource("5_intro")]
+layout_mode = 1

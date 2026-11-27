@@ -1,0 +1,18 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://gameplay/anomaly_definition.gd" id="1_definition"]
+[ext_resource type="Script" path="res://gameplay/anomalies/batch_02_horror.gd" id="2_handler"]
+
+[resource]
+script = ExtResource("1_definition")
+handler = ExtResource("2_handler")
+id = "inverted_cat"
+category_en = "Uncanny"
+category_de = "Unheimlich"
+title_en = "Vanished guardians"
+title_de = "Verschwundene Wächter"
+description_en = "Both animal statues have vanished, along with the horse's pedestal."
+description_de = "Beide Tierstatuen und der Sockel des Pferdes sind verschwunden."
+target_path = "ModelInteriors"
+rarity = "common"
+difficulty = 2

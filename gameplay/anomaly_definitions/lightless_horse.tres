@@ -1,0 +1,18 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://gameplay/anomaly_definition.gd" id="1_definition"]
+[ext_resource type="Script" path="res://gameplay/anomalies/batch_02_horror.gd" id="2_handler"]
+
+[resource]
+script = ExtResource("1_definition")
+handler = ExtResource("2_handler")
+id = "lightless_horse"
+category_en = "Uncanny"
+category_de = "Unheimlich"
+title_en = "Lightless horse"
+title_de = "Lichtloses Pferd"
+description_en = "The horse statue absorbs light and appears as a solid black silhouette."
+description_de = "Die Pferdestatue verschluckt das Licht und erscheint als tiefschwarze Silhouette."
+target_path = "ModelInteriors"
+rarity = "uncommon"
+difficulty = 1

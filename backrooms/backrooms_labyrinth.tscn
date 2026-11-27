@@ -1,0 +1,1407 @@
+[gd_scene load_steps=102 format=3 uid="uid://4ssdxevgilx5"]
+
+[ext_resource type="Material" path="res://backrooms/materials/wall.tres" id="1_wall"]
+[ext_resource type="Material" path="res://backrooms/materials/floor.tres" id="2_floor"]
+[ext_resource type="Material" path="res://backrooms/materials/ceiling.tres" id="3_ceiling"]
+[ext_resource type="Script" uid="uid://dbfuddbolkg27" path="res://backrooms/editable_box.gd" id="4_box"]
+[ext_resource type="Script" path="res://backrooms/voxel_gi.gd" id="5_voxel"]
+
+[sub_resource type="BoxMesh" id="Mesh_Outer_N"]
+resource_local_to_scene = true
+size = Vector3(33.4625, 3, 0.4)
+
+[sub_resource type="BoxShape3D" id="Shape_Outer_N"]
+resource_local_to_scene = true
+size = Vector3(33.4625, 3, 0.4)
+
+[sub_resource type="BoxMesh" id="Mesh_Outer_W_N"]
+resource_local_to_scene = true
+size = Vector3(0.4, 3, 13.15)
+
+[sub_resource type="BoxShape3D" id="Shape_Outer_W_N"]
+resource_local_to_scene = true
+size = Vector3(0.4, 3, 13.15)
+
+[sub_resource type="BoxMesh" id="Mesh_Outer_W_S"]
+resource_local_to_scene = true
+size = Vector3(0.4, 3, 12.4)
+
+[sub_resource type="BoxShape3D" id="Shape_Outer_W_S"]
+resource_local_to_scene = true
+size = Vector3(0.4, 3, 12.4)
+
+[sub_resource type="BoxMesh" id="Mesh_Outer_E_N"]
+resource_local_to_scene = true
+size = Vector3(0.4, 3, 16.025)
+
+[sub_resource type="BoxShape3D" id="Shape_Outer_E_N"]
+resource_local_to_scene = true
+size = Vector3(0.4, 3, 16.025)
+
+[sub_resource type="BoxMesh" id="Mesh_Outer_E_S"]
+resource_local_to_scene = true
+size = Vector3(0.4, 3, 9.5875)
+
+[sub_resource type="BoxShape3D" id="Shape_Outer_E_S"]
+resource_local_to_scene = true
+size = Vector3(0.4, 3, 9.5875)
+
+[sub_resource type="BoxMesh" id="Mesh_Outer_S"]
+resource_local_to_scene = true
+size = Vector3(33.4625, 3, 0.4)
+
+[sub_resource type="BoxShape3D" id="Shape_Outer_S"]
+resource_local_to_scene = true
+size = Vector3(33.4625, 3, 0.4)
+
+[sub_resource type="BoxMesh" id="Mesh_Entry_Rooms_E"]
+resource_local_to_scene = true
+size = Vector3(0.4, 3, 12.61875)
+
+[sub_resource type="BoxShape3D" id="Shape_Entry_Rooms_E"]
+resource_local_to_scene = true
+size = Vector3(0.4, 3, 12.61875)
+
+[sub_resource type="BoxMesh" id="Mesh_Entry_Room_1_W"]
+resource_local_to_scene = true
+size = Vector3(2.80625, 3, 0.4)
+
+[sub_resource type="BoxShape3D" id="Shape_Entry_Room_1_W"]
+resource_local_to_scene = true
+size = Vector3(2.80625, 3, 0.4)
+
+[sub_resource type="BoxMesh" id="Mesh_Entry_Room_2_Partition"]
+resource_local_to_scene = true
+size = Vector3(0.4, 3, 4.49375)
+
+[sub_resource type="BoxShape3D" id="Shape_Entry_Room_2_Partition"]
+resource_local_to_scene = true
+size = Vector3(0.4, 3, 4.49375)
+
+[sub_resource type="BoxMesh" id="Mesh_Entry_Room_1_E"]
+resource_local_to_scene = true
+size = Vector3(4.525, 3, 0.4)
+
+[sub_resource type="BoxShape3D" id="Shape_Entry_Room_1_E"]
+resource_local_to_scene = true
+size = Vector3(4.525, 3, 0.4)
+
+[sub_resource type="BoxMesh" id="Mesh_Entry_Room_2_Door_W"]
+resource_local_to_scene = true
+size = Vector3(2.65, 3, 0.4)
+
+[sub_resource type="BoxShape3D" id="Shape_Entry_Room_2_Door_W"]
+resource_local_to_scene = true
+size = Vector3(2.65, 3, 0.4)
+
+[sub_resource type="BoxMesh" id="Mesh_Entry_Room_2_Door_E"]
+resource_local_to_scene = true
+size = Vector3(4.7125, 3, 0.4)
+
+[sub_resource type="BoxShape3D" id="Shape_Entry_Room_2_Door_E"]
+resource_local_to_scene = true
+size = Vector3(4.7125, 3, 0.4)
+
+[sub_resource type="BoxMesh" id="Mesh_North_Gallery_W"]
+resource_local_to_scene = true
+size = Vector3(10.86875, 3, 0.4)
+
+[sub_resource type="BoxShape3D" id="Shape_North_Gallery_W"]
+resource_local_to_scene = true
+size = Vector3(10.86875, 3, 0.4)
+
+[sub_resource type="BoxMesh" id="Mesh_North_Gallery_E"]
+resource_local_to_scene = true
+size = Vector3(1.4625, 3, 0.4)
+
+[sub_resource type="BoxShape3D" id="Shape_North_Gallery_E"]
+resource_local_to_scene = true
+size = Vector3(1.4625, 3, 0.4)
+
+[sub_resource type="BoxMesh" id="Mesh_North_East_Room_W"]
+resource_local_to_scene = true
+size = Vector3(0.4, 3, 7.275)
+
+[sub_resource type="BoxShape3D" id="Shape_North_East_Room_W"]
+resource_local_to_scene = true
+size = Vector3(0.4, 3, 7.275)
+
+[sub_resource type="BoxMesh" id="Mesh_North_East_Room_S_W"]
+resource_local_to_scene = true
+size = Vector3(8.025, 3, 0.4)
+
+[sub_resource type="BoxShape3D" id="Shape_North_East_Room_S_W"]
+resource_local_to_scene = true
+size = Vector3(8.025, 3, 0.4)
+
+[sub_resource type="BoxMesh" id="Mesh_North_East_Room_S_E"]
+resource_local_to_scene = true
+size = Vector3(2.2125, 3, 0.4)
+
+[sub_resource type="BoxShape3D" id="Shape_North_East_Room_S_E"]
+resource_local_to_scene = true
+size = Vector3(2.2125, 3, 0.4)
+
+[sub_resource type="BoxMesh" id="Mesh_Central_Room_N"]
+resource_local_to_scene = true
+size = Vector3(7.7125, 3, 0.4)
+
+[sub_resource type="BoxShape3D" id="Shape_Central_Room_N"]
+resource_local_to_scene = true
+size = Vector3(7.7125, 3, 0.4)
+
+[sub_resource type="BoxMesh" id="Mesh_Central_Room_W"]
+resource_local_to_scene = true
+size = Vector3(0.4, 3, 9.99375)
+
+[sub_resource type="BoxShape3D" id="Shape_Central_Room_W"]
+resource_local_to_scene = true
+size = Vector3(0.4, 3, 9.99375)
+
+[sub_resource type="BoxMesh" id="Mesh_Central_Room_E"]
+resource_local_to_scene = true
+size = Vector3(0.4, 3, 9.99375)
+
+[sub_resource type="BoxShape3D" id="Shape_Central_Room_E"]
+resource_local_to_scene = true
+size = Vector3(0.4, 3, 9.99375)
+
+[sub_resource type="BoxMesh" id="Mesh_Central_Room_S_W"]
+resource_local_to_scene = true
+size = Vector3(3.30625, 3, 0.4)
+
+[sub_resource type="BoxShape3D" id="Shape_Central_Room_S_W"]
+resource_local_to_scene = true
+size = Vector3(3.30625, 3, 0.4)
+
+[sub_resource type="BoxMesh" id="Mesh_Central_Room_S_E"]
+resource_local_to_scene = true
+size = Vector3(5.93125, 3, 0.4)
+
+[sub_resource type="BoxShape3D" id="Shape_Central_Room_S_E"]
+resource_local_to_scene = true
+size = Vector3(5.93125, 3, 0.4)
+
+[sub_resource type="BoxMesh" id="Mesh_East_Spiral_W"]
+resource_local_to_scene = true
+size = Vector3(0.4, 3, 7.8375)
+
+[sub_resource type="BoxShape3D" id="Shape_East_Spiral_W"]
+resource_local_to_scene = true
+size = Vector3(0.4, 3, 7.8375)
+
+[sub_resource type="BoxMesh" id="Mesh_East_Spiral_N"]
+resource_local_to_scene = true
+size = Vector3(8.49375, 3, 0.4)
+
+[sub_resource type="BoxShape3D" id="Shape_East_Spiral_N"]
+resource_local_to_scene = true
+size = Vector3(8.49375, 3, 0.4)
+
+[sub_resource type="BoxMesh" id="Mesh_East_Spiral_E"]
+resource_local_to_scene = true
+size = Vector3(0.4, 3, 5.18125)
+
+[sub_resource type="BoxShape3D" id="Shape_East_Spiral_E"]
+resource_local_to_scene = true
+size = Vector3(0.4, 3, 5.18125)
+
+[sub_resource type="BoxMesh" id="Mesh_East_Spiral_S"]
+resource_local_to_scene = true
+size = Vector3(4.9625, 3, 0.4)
+
+[sub_resource type="BoxShape3D" id="Shape_East_Spiral_S"]
+resource_local_to_scene = true
+size = Vector3(4.9625, 3, 0.4)
+
+[sub_resource type="BoxMesh" id="Mesh_East_Spiral_Tip"]
+resource_local_to_scene = true
+size = Vector3(0.4, 3, 2.5875)
+
+[sub_resource type="BoxShape3D" id="Shape_East_Spiral_Tip"]
+resource_local_to_scene = true
+size = Vector3(0.4, 3, 2.5875)
+
+[sub_resource type="BoxMesh" id="Mesh_Sealed_Void_N"]
+resource_local_to_scene = true
+size = Vector3(5.24375, 3, 0.4)
+
+[sub_resource type="BoxShape3D" id="Shape_Sealed_Void_N"]
+resource_local_to_scene = true
+size = Vector3(5.24375, 3, 0.4)
+
+[sub_resource type="BoxMesh" id="Mesh_Sealed_Void_E"]
+resource_local_to_scene = true
+size = Vector3(0.4, 3, 5.3375)
+
+[sub_resource type="BoxShape3D" id="Shape_Sealed_Void_E"]
+resource_local_to_scene = true
+size = Vector3(0.4, 3, 5.3375)
+
+[sub_resource type="BoxMesh" id="Mesh_Sealed_Void_S"]
+resource_local_to_scene = true
+size = Vector3(5.24375, 3, 0.4)
+
+[sub_resource type="BoxShape3D" id="Shape_Sealed_Void_S"]
+resource_local_to_scene = true
+size = Vector3(5.24375, 3, 0.4)
+
+[sub_resource type="BoxMesh" id="Mesh_South_West_Alcove_N"]
+resource_local_to_scene = true
+size = Vector3(4.11875, 3, 0.4)
+
+[sub_resource type="BoxShape3D" id="Shape_South_West_Alcove_N"]
+resource_local_to_scene = true
+size = Vector3(4.11875, 3, 0.4)
+
+[sub_resource type="BoxMesh" id="Mesh_South_West_Alcove_W"]
+resource_local_to_scene = true
+size = Vector3(0.4, 3, 5.36875)
+
+[sub_resource type="BoxShape3D" id="Shape_South_West_Alcove_W"]
+resource_local_to_scene = true
+size = Vector3(0.4, 3, 5.36875)
+
+[sub_resource type="BoxMesh" id="Mesh_South_West_Alcove_Door_W"]
+resource_local_to_scene = true
+size = Vector3(1.65, 3, 0.4)
+
+[sub_resource type="BoxShape3D" id="Shape_South_West_Alcove_Door_W"]
+resource_local_to_scene = true
+size = Vector3(1.65, 3, 0.4)
+
+[sub_resource type="BoxMesh" id="Mesh_South_West_Alcove_Door_E"]
+resource_local_to_scene = true
+size = Vector3(6.43125, 3, 0.4)
+
+[sub_resource type="BoxShape3D" id="Shape_South_West_Alcove_Door_E"]
+resource_local_to_scene = true
+size = Vector3(6.43125, 3, 0.4)
+
+[sub_resource type="BoxMesh" id="Mesh_South_Room_W"]
+resource_local_to_scene = true
+size = Vector3(0.4, 3, 6.7125)
+
+[sub_resource type="BoxShape3D" id="Shape_South_Room_W"]
+resource_local_to_scene = true
+size = Vector3(0.4, 3, 6.7125)
+
+[sub_resource type="BoxMesh" id="Mesh_South_Room_E"]
+resource_local_to_scene = true
+size = Vector3(0.4, 3, 3.99375)
+
+[sub_resource type="BoxShape3D" id="Shape_South_Room_E"]
+resource_local_to_scene = true
+size = Vector3(0.4, 3, 3.99375)
+
+[sub_resource type="BoxMesh" id="Mesh_South_Room_Tip"]
+resource_local_to_scene = true
+size = Vector3(2.8375, 3, 0.4)
+
+[sub_resource type="BoxShape3D" id="Shape_South_Room_Tip"]
+resource_local_to_scene = true
+size = Vector3(2.8375, 3, 0.4)
+
+[sub_resource type="BoxMesh" id="Mesh_South_East_Room_W"]
+resource_local_to_scene = true
+size = Vector3(0.4, 3, 6.7125)
+
+[sub_resource type="BoxShape3D" id="Shape_South_East_Room_W"]
+resource_local_to_scene = true
+size = Vector3(0.4, 3, 6.7125)
+
+[sub_resource type="BoxMesh" id="Mesh_South_East_Room_N"]
+resource_local_to_scene = true
+size = Vector3(5.7125, 3, 0.4)
+
+[sub_resource type="BoxShape3D" id="Shape_South_East_Room_N"]
+resource_local_to_scene = true
+size = Vector3(5.7125, 3, 0.4)
+
+[sub_resource type="BoxMesh" id="Mesh_South_East_Recess_W"]
+resource_local_to_scene = true
+size = Vector3(0.4, 3, 2.9)
+
+[sub_resource type="BoxShape3D" id="Shape_South_East_Recess_W"]
+resource_local_to_scene = true
+size = Vector3(0.4, 3, 2.9)
+
+[sub_resource type="BoxMesh" id="Mesh_South_East_Recess_N"]
+resource_local_to_scene = true
+size = Vector3(3.525, 3, 0.4)
+
+[sub_resource type="BoxShape3D" id="Shape_South_East_Recess_N"]
+resource_local_to_scene = true
+size = Vector3(3.525, 3, 0.4)
+
+[sub_resource type="BoxMesh" id="Mesh_South_East_Recess_E"]
+resource_local_to_scene = true
+size = Vector3(0.4, 3, 5.05625)
+
+[sub_resource type="BoxShape3D" id="Shape_South_East_Recess_E"]
+resource_local_to_scene = true
+size = Vector3(0.4, 3, 5.05625)
+
+[sub_resource type="BoxMesh" id="Mesh_Exit_Alcove_N"]
+resource_local_to_scene = true
+size = Vector3(3.2125, 3, 0.4)
+
+[sub_resource type="BoxShape3D" id="Shape_Exit_Alcove_N"]
+resource_local_to_scene = true
+size = Vector3(3.2125, 3, 0.4)
+
+[sub_resource type="BoxMesh" id="Mesh_Floor"]
+resource_local_to_scene = true
+size = Vector3(33.4625, 0.25, 26.9)
+
+[sub_resource type="BoxShape3D" id="Shape_Floor"]
+resource_local_to_scene = true
+size = Vector3(33.4625, 0.25, 26.9)
+
+[sub_resource type="BoxMesh" id="Mesh_Ceiling"]
+resource_local_to_scene = true
+size = Vector3(33.4625, 0.25, 26.9)
+
+[sub_resource type="BoxShape3D" id="Shape_Ceiling"]
+resource_local_to_scene = true
+size = Vector3(33.4625, 0.25, 26.9)
+
+[sub_resource type="Environment" id="Environment_Backrooms"]
+background_mode = 1
+background_color = Color(0.018, 0.017, 0.013, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.48, 0.45, 0.37, 1)
+ambient_light_sky_contribution = 0.0
+ambient_light_energy = 0.035
+reflected_light_source = 1
+
+[sub_resource type="StandardMaterial3D" id="Material_FixtureHousing"]
+albedo_color = Color(0.31, 0.3, 0.26, 1)
+roughness = 0.85
+
+[sub_resource type="BoxMesh" id="Mesh_FixtureHousing"]
+size = Vector3(0.84, 0.07, 1.5)
+
+[sub_resource type="StandardMaterial3D" id="Material_FixtureOn"]
+albedo_color = Color(0.85, 0.83, 0.71, 1)
+roughness = 0.82
+emission_enabled = true
+emission = Color(0.9, 0.85, 0.7, 1)
+emission_energy_multiplier = 0.27
+
+[sub_resource type="BoxMesh" id="Mesh_FixturePanel"]
+size = Vector3(0.76, 0.018, 1.42)
+
+[sub_resource type="StandardMaterial3D" id="Material_FixtureOff"]
+albedo_color = Color(0.34, 0.33, 0.28, 1)
+roughness = 0.9
+
+[node name="BackroomsLabyrinth" type="Node3D"]
+
+[node name="Architecture" type="Node3D" parent="."]
+
+[node name="Walls" type="Node3D" parent="Architecture"]
+
+[node name="Outer_N" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -13.25)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(33.4625, 3, 0.4)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/Outer_N"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_Outer_N")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/Outer_N"]
+shape = SubResource("Shape_Outer_N")
+
+[node name="Outer_W_N" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.53125, 1.5, -6.875)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(0.4, 3, 13.15)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/Outer_W_N"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_Outer_W_N")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/Outer_W_N"]
+shape = SubResource("Shape_Outer_W_N")
+
+[node name="Outer_W_S" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.53125, 1.5, 7.25)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(0.4, 3, 12.4)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/Outer_W_S"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_Outer_W_S")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/Outer_W_S"]
+shape = SubResource("Shape_Outer_W_S")
+
+[node name="Outer_E_N" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.53125, 1.5, -5.4375)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(0.4, 3, 16.025)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/Outer_E_N"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_Outer_E_N")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/Outer_E_N"]
+shape = SubResource("Shape_Outer_E_N")
+
+[node name="Outer_E_S" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.53125, 1.5, 8.65625)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(0.4, 3, 9.5875)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/Outer_E_S"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_Outer_E_S")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/Outer_E_S"]
+shape = SubResource("Shape_Outer_E_S")
+
+[node name="Outer_S" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 13.25)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(33.4625, 3, 0.4)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/Outer_S"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_Outer_S")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/Outer_S"]
+shape = SubResource("Shape_Outer_S")
+
+[node name="Entry_Rooms_E" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1.5, -7.140625)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(0.4, 3, 12.61875)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/Entry_Rooms_E"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_Entry_Rooms_E")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/Entry_Rooms_E"]
+shape = SubResource("Shape_Entry_Rooms_E")
+
+[node name="Entry_Room_1_W" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.328125, 1.5, -6.0625)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(2.80625, 3, 0.4)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/Entry_Room_1_W"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_Entry_Room_1_W")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/Entry_Room_1_W"]
+shape = SubResource("Shape_Entry_Room_1_W")
+
+[node name="Entry_Room_2_Partition" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.125, 1.5, -8.109375)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(0.4, 3, 4.49375)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/Entry_Room_2_Partition"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_Entry_Room_2_Partition")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/Entry_Room_2_Partition"]
+shape = SubResource("Shape_Entry_Room_2_Partition")
+
+[node name="Entry_Room_1_E" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.0625, 1.5, -6.0625)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(4.525, 3, 0.4)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/Entry_Room_1_E"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_Entry_Room_1_E")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/Entry_Room_1_E"]
+shape = SubResource("Shape_Entry_Room_1_E")
+
+[node name="Entry_Room_2_Door_W" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.40625, 1.5, -1.03125)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(2.65, 3, 0.4)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/Entry_Room_2_Door_W"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_Entry_Room_2_Door_W")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/Entry_Room_2_Door_W"]
+shape = SubResource("Shape_Entry_Room_2_Door_W")
+
+[node name="Entry_Room_2_Door_E" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.15625, 1.5, -1.03125)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(4.7125, 3, 0.4)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/Entry_Room_2_Door_E"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_Entry_Room_2_Door_E")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/Entry_Room_2_Door_E"]
+shape = SubResource("Shape_Entry_Room_2_Door_E")
+
+[node name="North_Gallery_W" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.765625, 1.5, -8.5)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(10.86875, 3, 0.4)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/North_Gallery_W"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_North_Gallery_W")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/North_Gallery_W"]
+shape = SubResource("Shape_North_Gallery_W")
+
+[node name="North_Gallery_E" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.78125, 1.5, -8.5)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(1.4625, 3, 0.4)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/North_Gallery_E"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_North_Gallery_E")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/North_Gallery_E"]
+shape = SubResource("Shape_North_Gallery_E")
+
+[node name="North_East_Room_W" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.3125, 1.5, -9.8125)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(0.4, 3, 7.275)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/North_East_Room_W"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_North_East_Room_W")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/North_East_Room_W"]
+shape = SubResource("Shape_North_East_Room_W")
+
+[node name="North_East_Room_S_W" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.125, 1.5, -6.375)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(8.025, 3, 0.4)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/North_East_Room_S_W"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_North_East_Room_S_W")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/North_East_Room_S_W"]
+shape = SubResource("Shape_North_East_Room_S_W")
+
+[node name="North_East_Room_S_E" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.625, 1.5, -6.375)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(2.2125, 3, 0.4)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/North_East_Room_S_E"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_North_East_Room_S_E")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/North_East_Room_S_E"]
+shape = SubResource("Shape_North_East_Room_S_E")
+
+[node name="Central_Room_N" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.53125, 1.5, -5.71875)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(7.7125, 3, 0.4)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/Central_Room_N"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_Central_Room_N")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/Central_Room_N"]
+shape = SubResource("Shape_Central_Room_N")
+
+[node name="Central_Room_W" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.1875, 1.5, -0.921875)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(0.4, 3, 9.99375)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/Central_Room_W"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_Central_Room_W")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/Central_Room_W"]
+shape = SubResource("Shape_Central_Room_W")
+
+[node name="Central_Room_E" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.125, 1.5, -0.921875)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(0.4, 3, 9.99375)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/Central_Room_E"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_Central_Room_E")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/Central_Room_E"]
+shape = SubResource("Shape_Central_Room_E")
+
+[node name="Central_Room_S_W" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.734375, 1.5, 3.875)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(3.30625, 3, 0.4)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/Central_Room_S_W"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_Central_Room_S_W")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/Central_Room_S_W"]
+shape = SubResource("Shape_Central_Room_S_W")
+
+[node name="Central_Room_S_E" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.265625, 1.5, 3.875)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(5.93125, 3, 0.4)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/Central_Room_S_E"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_Central_Room_S_E")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/Central_Room_S_E"]
+shape = SubResource("Shape_Central_Room_S_E")
+
+[node name="East_Spiral_W" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.03125, 1.5, 0.15625)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(0.4, 3, 7.8375)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/East_Spiral_W"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_East_Spiral_W")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/East_Spiral_W"]
+shape = SubResource("Shape_East_Spiral_W")
+
+[node name="East_Spiral_N" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.078125, 1.5, -3.5625)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(8.49375, 3, 0.4)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/East_Spiral_N"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_East_Spiral_N")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/East_Spiral_N"]
+shape = SubResource("Shape_East_Spiral_N")
+
+[node name="East_Spiral_E" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.125, 1.5, -1.171875)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(0.4, 3, 5.18125)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/East_Spiral_E"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_East_Spiral_E")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/East_Spiral_E"]
+shape = SubResource("Shape_East_Spiral_E")
+
+[node name="East_Spiral_S" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.84375, 1.5, 1.21875)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(4.9625, 3, 0.4)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/East_Spiral_S"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_East_Spiral_S")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/East_Spiral_S"]
+shape = SubResource("Shape_East_Spiral_S")
+
+[node name="East_Spiral_Tip" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.5625, 1.5, 0.125)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(0.4, 3, 2.5875)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/East_Spiral_Tip"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_East_Spiral_Tip")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/East_Spiral_Tip"]
+shape = SubResource("Shape_East_Spiral_Tip")
+
+[node name="Sealed_Void_N" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.109375, 1.5, 1.9375)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(5.24375, 3, 0.4)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/Sealed_Void_N"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_Sealed_Void_N")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/Sealed_Void_N"]
+shape = SubResource("Shape_Sealed_Void_N")
+
+[node name="Sealed_Void_E" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.6875, 1.5, 4.40625)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(0.4, 3, 5.3375)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/Sealed_Void_E"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_Sealed_Void_E")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/Sealed_Void_E"]
+shape = SubResource("Shape_Sealed_Void_E")
+
+[node name="Sealed_Void_S" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.109375, 1.5, 6.875)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(5.24375, 3, 0.4)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/Sealed_Void_S"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_Sealed_Void_S")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/Sealed_Void_S"]
+shape = SubResource("Shape_Sealed_Void_S")
+
+[node name="South_West_Alcove_N" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.046875, 1.5, 1.96875)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(4.11875, 3, 0.4)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/South_West_Alcove_N"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_South_West_Alcove_N")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/South_West_Alcove_N"]
+shape = SubResource("Shape_South_West_Alcove_N")
+
+[node name="South_West_Alcove_W" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.90625, 1.5, 4.453125)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(0.4, 3, 5.36875)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/South_West_Alcove_W"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_South_West_Alcove_W")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/South_West_Alcove_W"]
+shape = SubResource("Shape_South_West_Alcove_W")
+
+[node name="South_West_Alcove_Door_W" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.28125, 1.5, 6.9375)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(1.65, 3, 0.4)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/South_West_Alcove_Door_W"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_South_West_Alcove_Door_W")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/South_West_Alcove_Door_W"]
+shape = SubResource("Shape_South_West_Alcove_Door_W")
+
+[node name="South_West_Alcove_Door_E" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.796875, 1.5, 6.9375)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(6.43125, 3, 0.4)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/South_West_Alcove_Door_E"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_South_West_Alcove_Door_E")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/South_West_Alcove_Door_E"]
+shape = SubResource("Shape_South_West_Alcove_Door_E")
+
+[node name="South_Room_W" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.71875, 1.5, 10.09375)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(0.4, 3, 6.7125)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/South_Room_W"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_South_Room_W")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/South_Room_W"]
+shape = SubResource("Shape_South_Room_W")
+
+[node name="South_Room_E" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.21875, 1.5, 8.734375)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(0.4, 3, 3.99375)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/South_Room_E"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_South_Room_E")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/South_Room_E"]
+shape = SubResource("Shape_South_Room_E")
+
+[node name="South_Room_Tip" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 1.5, 10.53125)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(2.8375, 3, 0.4)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/South_Room_Tip"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_South_Room_Tip")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/South_Room_Tip"]
+shape = SubResource("Shape_South_Room_Tip")
+
+[node name="South_East_Room_W" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.96875, 1.5, 10.09375)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(0.4, 3, 6.7125)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/South_East_Room_W"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_South_East_Room_W")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/South_East_Room_W"]
+shape = SubResource("Shape_South_East_Room_W")
+
+[node name="South_East_Room_N" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.625, 1.5, 6.9375)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(5.7125, 3, 0.4)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/South_East_Room_N"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_South_East_Room_N")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/South_East_Room_N"]
+shape = SubResource("Shape_South_East_Room_N")
+
+[node name="South_East_Recess_W" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.28125, 1.5, 5.6875)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(0.4, 3, 2.9)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/South_East_Recess_W"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_South_East_Recess_W")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/South_East_Recess_W"]
+shape = SubResource("Shape_South_East_Recess_W")
+
+[node name="South_East_Recess_N" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.84375, 1.5, 4.4375)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(3.525, 3, 0.4)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/South_East_Recess_N"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_South_East_Recess_N")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/South_East_Recess_N"]
+shape = SubResource("Shape_South_East_Recess_N")
+
+[node name="South_East_Recess_E" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.40625, 1.5, 6.765625)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(0.4, 3, 5.05625)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/South_East_Recess_E"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_South_East_Recess_E")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/South_East_Recess_E"]
+shape = SubResource("Shape_South_East_Recess_E")
+
+[node name="Exit_Alcove_N" type="StaticBody3D" parent="Architecture/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.125, 1.5, 4.4375)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(3.2125, 3, 0.4)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Walls/Exit_Alcove_N"]
+material_override = ExtResource("1_wall")
+mesh = SubResource("Mesh_Exit_Alcove_N")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Walls/Exit_Alcove_N"]
+shape = SubResource("Shape_Exit_Alcove_N")
+
+[node name="Floor" type="StaticBody3D" parent="Architecture"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.125, 0)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(33.4625, 0.25, 26.9)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Floor"]
+material_override = ExtResource("2_floor")
+mesh = SubResource("Mesh_Floor")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Floor"]
+shape = SubResource("Shape_Floor")
+
+[node name="Ceiling" type="StaticBody3D" parent="Architecture"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.125, 0)
+collision_mask = 0
+script = ExtResource("4_box")
+dimensions = Vector3(33.4625, 0.25, 26.9)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Ceiling"]
+material_override = ExtResource("3_ceiling")
+mesh = SubResource("Mesh_Ceiling")
+
+[node name="Collision" type="CollisionShape3D" parent="Architecture/Ceiling"]
+shape = SubResource("Shape_Ceiling")
+
+[node name="Lighting" type="Node3D" parent="."]
+
+[node name="Environment" type="WorldEnvironment" parent="Lighting"]
+environment = SubResource("Environment_Backrooms")
+
+[node name="BackroomsVoxelGI" type="VoxelGI" parent="Lighting"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+size = Vector3(35.5, 5, 29)
+script = ExtResource("5_voxel")
+
+[node name="CeilingFixtures" type="Node3D" parent="Lighting"]
+
+[node name="Entry" type="Node3D" parent="Lighting/CeilingFixtures"]
+transform = Transform3D(3.1391647e-07, 0, 1, 0, 1, 0, -1, 0, 3.1391647e-07, -10.78125, 2.96, 0.4375)
+
+[node name="Housing" type="MeshInstance3D" parent="Lighting/CeilingFixtures/Entry"]
+material_override = SubResource("Material_FixtureHousing")
+mesh = SubResource("Mesh_FixtureHousing")
+
+[node name="Panel" type="MeshInstance3D" parent="Lighting/CeilingFixtures/Entry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.041, 0)
+material_override = SubResource("Material_FixtureOn")
+gi_mode = 0
+mesh = SubResource("Mesh_FixturePanel")
+
+[node name="Downlight" type="SpotLight3D" parent="Lighting/CeilingFixtures/Entry"]
+transform = Transform3D(1, 0, 0, 0, 3.1391647e-07, 1, 0, -1, 3.1391647e-07, 0, -0.09, 0)
+light_color = Color(1, 0.92, 0.75, 1)
+light_energy = 0.216
+light_bake_mode = 1
+shadow_enabled = true
+spot_range = 5.5
+spot_angle = 63.0
+spot_angle_attenuation = 1.4
+
+[node name="Entry_Room_N" type="Node3D" parent="Lighting/CeilingFixtures"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.75, 2.96, -10.71875)
+
+[node name="Housing" type="MeshInstance3D" parent="Lighting/CeilingFixtures/Entry_Room_N"]
+material_override = SubResource("Material_FixtureHousing")
+mesh = SubResource("Mesh_FixtureHousing")
+
+[node name="Panel" type="MeshInstance3D" parent="Lighting/CeilingFixtures/Entry_Room_N"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.041, 0)
+material_override = SubResource("Material_FixtureOn")
+gi_mode = 0
+mesh = SubResource("Mesh_FixturePanel")
+
+[node name="Downlight" type="SpotLight3D" parent="Lighting/CeilingFixtures/Entry_Room_N"]
+transform = Transform3D(1, 0, 0, 0, 3.1391647e-07, 1, 0, -1, 3.1391647e-07, 0, -0.09, 0)
+light_color = Color(1, 0.92, 0.75, 1)
+light_energy = 0.158
+light_bake_mode = 1
+shadow_enabled = true
+spot_range = 5.5
+spot_angle = 63.0
+spot_angle_attenuation = 1.4
+
+[node name="Entry_Room_S" type="Node3D" parent="Lighting/CeilingFixtures"]
+transform = Transform3D(3.1391647e-07, 0, 1, 0, 1, 0, -1, 0, 3.1391647e-07, -12.5, 2.96, -3.6875)
+
+[node name="Housing" type="MeshInstance3D" parent="Lighting/CeilingFixtures/Entry_Room_S"]
+material_override = SubResource("Material_FixtureHousing")
+mesh = SubResource("Mesh_FixtureHousing")
+
+[node name="Panel" type="MeshInstance3D" parent="Lighting/CeilingFixtures/Entry_Room_S"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.041, 0)
+material_override = SubResource("Material_FixtureOn")
+gi_mode = 0
+mesh = SubResource("Mesh_FixturePanel")
+
+[node name="Downlight" type="SpotLight3D" parent="Lighting/CeilingFixtures/Entry_Room_S"]
+transform = Transform3D(1, 0, 0, 0, 3.1391647e-07, 1, 0, -1, 3.1391647e-07, 0, -0.09, 0)
+light_color = Color(1, 0.92, 0.75, 1)
+light_energy = 0.154
+light_bake_mode = 1
+shadow_enabled = true
+spot_range = 5.5
+spot_angle = 63.0
+spot_angle_attenuation = 1.4
+
+[node name="North_Gallery" type="Node3D" parent="Lighting/CeilingFixtures"]
+transform = Transform3D(3.1391647e-07, 0, 1, 0, 1, 0, -1, 0, 3.1391647e-07, -2.03125, 2.96, -11.03125)
+
+[node name="Housing" type="MeshInstance3D" parent="Lighting/CeilingFixtures/North_Gallery"]
+material_override = SubResource("Material_FixtureHousing")
+mesh = SubResource("Mesh_FixtureHousing")
+
+[node name="Panel" type="MeshInstance3D" parent="Lighting/CeilingFixtures/North_Gallery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.041, 0)
+material_override = SubResource("Material_FixtureOn")
+gi_mode = 0
+mesh = SubResource("Mesh_FixturePanel")
+
+[node name="Downlight" type="SpotLight3D" parent="Lighting/CeilingFixtures/North_Gallery"]
+transform = Transform3D(1, 0, 0, 0, 3.1391647e-07, 1, 0, -1, 3.1391647e-07, 0, -0.09, 0)
+light_color = Color(1, 0.92, 0.75, 1)
+light_energy = 0.134
+light_bake_mode = 1
+shadow_enabled = true
+spot_range = 5.5
+spot_angle = 63.0
+spot_angle_attenuation = 1.4
+
+[node name="Central_Room_N" type="Node3D" parent="Lighting/CeilingFixtures"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5625, 2.96, -3.53125)
+
+[node name="Housing" type="MeshInstance3D" parent="Lighting/CeilingFixtures/Central_Room_N"]
+material_override = SubResource("Material_FixtureHousing")
+mesh = SubResource("Mesh_FixtureHousing")
+
+[node name="Panel" type="MeshInstance3D" parent="Lighting/CeilingFixtures/Central_Room_N"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.041, 0)
+material_override = SubResource("Material_FixtureOff")
+gi_mode = 0
+mesh = SubResource("Mesh_FixturePanel")
+
+[node name="Downlight" type="SpotLight3D" parent="Lighting/CeilingFixtures/Central_Room_N"]
+transform = Transform3D(1, 0, 0, 0, 3.1391647e-07, 1, 0, -1, 3.1391647e-07, 0, -0.09, 0)
+visible = false
+light_color = Color(1, 0.92, 0.75, 1)
+light_energy = 0.144
+light_bake_mode = 1
+shadow_enabled = true
+spot_range = 5.5
+spot_angle = 63.0
+spot_angle_attenuation = 1.4
+
+[node name="Central_Room_S" type="Node3D" parent="Lighting/CeilingFixtures"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5625, 2.96, 0.53125)
+
+[node name="Housing" type="MeshInstance3D" parent="Lighting/CeilingFixtures/Central_Room_S"]
+material_override = SubResource("Material_FixtureHousing")
+mesh = SubResource("Mesh_FixtureHousing")
+
+[node name="Panel" type="MeshInstance3D" parent="Lighting/CeilingFixtures/Central_Room_S"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.041, 0)
+material_override = SubResource("Material_FixtureOn")
+gi_mode = 0
+mesh = SubResource("Mesh_FixturePanel")
+
+[node name="Downlight" type="SpotLight3D" parent="Lighting/CeilingFixtures/Central_Room_S"]
+transform = Transform3D(1, 0, 0, 0, 3.1391647e-07, 1, 0, -1, 3.1391647e-07, 0, -0.09, 0)
+light_color = Color(1, 0.92, 0.75, 1)
+light_energy = 0.168
+light_bake_mode = 1
+shadow_enabled = true
+spot_range = 5.5
+spot_angle = 63.0
+spot_angle_attenuation = 1.4
+
+[node name="North_East_Room" type="Node3D" parent="Lighting/CeilingFixtures"]
+transform = Transform3D(3.1391647e-07, 0, 1, 0, 1, 0, -1, 0, 3.1391647e-07, 11.09375, 2.96, -9.9375)
+
+[node name="Housing" type="MeshInstance3D" parent="Lighting/CeilingFixtures/North_East_Room"]
+material_override = SubResource("Material_FixtureHousing")
+mesh = SubResource("Mesh_FixtureHousing")
+
+[node name="Panel" type="MeshInstance3D" parent="Lighting/CeilingFixtures/North_East_Room"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.041, 0)
+material_override = SubResource("Material_FixtureOn")
+gi_mode = 0
+mesh = SubResource("Mesh_FixturePanel")
+
+[node name="Downlight" type="SpotLight3D" parent="Lighting/CeilingFixtures/North_East_Room"]
+transform = Transform3D(1, 0, 0, 0, 3.1391647e-07, 1, 0, -1, 3.1391647e-07, 0, -0.09, 0)
+light_color = Color(1, 0.92, 0.75, 1)
+light_energy = 0.168
+light_bake_mode = 1
+shadow_enabled = true
+spot_range = 5.5
+spot_angle = 63.0
+spot_angle_attenuation = 1.4
+
+[node name="East_Passage" type="Node3D" parent="Lighting/CeilingFixtures"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.59375, 2.96, -5.09375)
+
+[node name="Housing" type="MeshInstance3D" parent="Lighting/CeilingFixtures/East_Passage"]
+material_override = SubResource("Material_FixtureHousing")
+mesh = SubResource("Mesh_FixtureHousing")
+
+[node name="Panel" type="MeshInstance3D" parent="Lighting/CeilingFixtures/East_Passage"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.041, 0)
+material_override = SubResource("Material_FixtureOn")
+gi_mode = 0
+mesh = SubResource("Mesh_FixturePanel")
+
+[node name="Downlight" type="SpotLight3D" parent="Lighting/CeilingFixtures/East_Passage"]
+transform = Transform3D(1, 0, 0, 0, 3.1391647e-07, 1, 0, -1, 3.1391647e-07, 0, -0.09, 0)
+light_color = Color(1, 0.92, 0.75, 1)
+light_energy = 0.134
+light_bake_mode = 1
+shadow_enabled = true
+spot_range = 5.5
+spot_angle = 63.0
+spot_angle_attenuation = 1.4
+
+[node name="East_Spiral" type="Node3D" parent="Lighting/CeilingFixtures"]
+transform = Transform3D(3.1391647e-07, 0, 1, 0, 1, 0, -1, 0, 3.1391647e-07, 9.53125, 2.96, -1.96875)
+
+[node name="Housing" type="MeshInstance3D" parent="Lighting/CeilingFixtures/East_Spiral"]
+material_override = SubResource("Material_FixtureHousing")
+mesh = SubResource("Mesh_FixtureHousing")
+
+[node name="Panel" type="MeshInstance3D" parent="Lighting/CeilingFixtures/East_Spiral"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.041, 0)
+material_override = SubResource("Material_FixtureOn")
+gi_mode = 0
+mesh = SubResource("Mesh_FixturePanel")
+
+[node name="Downlight" type="SpotLight3D" parent="Lighting/CeilingFixtures/East_Spiral"]
+transform = Transform3D(1, 0, 0, 0, 3.1391647e-07, 1, 0, -1, 3.1391647e-07, 0, -0.09, 0)
+light_color = Color(1, 0.92, 0.75, 1)
+light_energy = 0.125
+light_bake_mode = 1
+shadow_enabled = true
+spot_range = 5.5
+spot_angle = 63.0
+spot_angle_attenuation = 1.4
+
+[node name="Far_East_Passage" type="Node3D" parent="Lighting/CeilingFixtures"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.84375, 2.96, -2.65625)
+
+[node name="Housing" type="MeshInstance3D" parent="Lighting/CeilingFixtures/Far_East_Passage"]
+material_override = SubResource("Material_FixtureHousing")
+mesh = SubResource("Mesh_FixtureHousing")
+
+[node name="Panel" type="MeshInstance3D" parent="Lighting/CeilingFixtures/Far_East_Passage"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.041, 0)
+material_override = SubResource("Material_FixtureOff")
+gi_mode = 0
+mesh = SubResource("Mesh_FixturePanel")
+
+[node name="Downlight" type="SpotLight3D" parent="Lighting/CeilingFixtures/Far_East_Passage"]
+transform = Transform3D(1, 0, 0, 0, 3.1391647e-07, 1, 0, -1, 3.1391647e-07, 0, -0.09, 0)
+visible = false
+light_color = Color(1, 0.92, 0.75, 1)
+light_energy = 0.144
+light_bake_mode = 1
+shadow_enabled = true
+spot_range = 5.5
+spot_angle = 63.0
+spot_angle_attenuation = 1.4
+
+[node name="South_Passage" type="Node3D" parent="Lighting/CeilingFixtures"]
+transform = Transform3D(3.1391647e-07, 0, 1, 0, 1, 0, -1, 0, 3.1391647e-07, 1.40625, 2.96, 5.375)
+
+[node name="Housing" type="MeshInstance3D" parent="Lighting/CeilingFixtures/South_Passage"]
+material_override = SubResource("Material_FixtureHousing")
+mesh = SubResource("Mesh_FixtureHousing")
+
+[node name="Panel" type="MeshInstance3D" parent="Lighting/CeilingFixtures/South_Passage"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.041, 0)
+material_override = SubResource("Material_FixtureOn")
+gi_mode = 0
+mesh = SubResource("Mesh_FixturePanel")
+
+[node name="Downlight" type="SpotLight3D" parent="Lighting/CeilingFixtures/South_Passage"]
+transform = Transform3D(1, 0, 0, 0, 3.1391647e-07, 1, 0, -1, 3.1391647e-07, 0, -0.09, 0)
+light_color = Color(1, 0.92, 0.75, 1)
+light_energy = 0.163
+light_bake_mode = 1
+shadow_enabled = true
+spot_range = 5.5
+spot_angle = 63.0
+spot_angle_attenuation = 1.4
+
+[node name="South_West_Room" type="Node3D" parent="Lighting/CeilingFixtures"]
+transform = Transform3D(3.1391647e-07, 0, 1, 0, 1, 0, -1, 0, 3.1391647e-07, -14.0625, 2.96, 9.84375)
+
+[node name="Housing" type="MeshInstance3D" parent="Lighting/CeilingFixtures/South_West_Room"]
+material_override = SubResource("Material_FixtureHousing")
+mesh = SubResource("Mesh_FixtureHousing")
+
+[node name="Panel" type="MeshInstance3D" parent="Lighting/CeilingFixtures/South_West_Room"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.041, 0)
+material_override = SubResource("Material_FixtureOn")
+gi_mode = 0
+mesh = SubResource("Mesh_FixturePanel")
+
+[node name="Downlight" type="SpotLight3D" parent="Lighting/CeilingFixtures/South_West_Room"]
+transform = Transform3D(1, 0, 0, 0, 3.1391647e-07, 1, 0, -1, 3.1391647e-07, 0, -0.09, 0)
+light_color = Color(1, 0.92, 0.75, 1)
+light_energy = 0.106
+light_bake_mode = 1
+shadow_enabled = true
+spot_range = 5.5
+spot_angle = 63.0
+spot_angle_attenuation = 1.4
+
+[node name="South_West_Alcove" type="Node3D" parent="Lighting/CeilingFixtures"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.96875, 2.96, 4.125)
+
+[node name="Housing" type="MeshInstance3D" parent="Lighting/CeilingFixtures/South_West_Alcove"]
+material_override = SubResource("Material_FixtureHousing")
+mesh = SubResource("Mesh_FixtureHousing")
+
+[node name="Panel" type="MeshInstance3D" parent="Lighting/CeilingFixtures/South_West_Alcove"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.041, 0)
+material_override = SubResource("Material_FixtureOff")
+gi_mode = 0
+mesh = SubResource("Mesh_FixturePanel")
+
+[node name="Downlight" type="SpotLight3D" parent="Lighting/CeilingFixtures/South_West_Alcove"]
+transform = Transform3D(1, 0, 0, 0, 3.1391647e-07, 1, 0, -1, 3.1391647e-07, 0, -0.09, 0)
+visible = false
+light_color = Color(1, 0.92, 0.75, 1)
+light_energy = 0.144
+light_bake_mode = 1
+shadow_enabled = true
+spot_range = 5.5
+spot_angle = 63.0
+spot_angle_attenuation = 1.4
+
+[node name="South_Room" type="Node3D" parent="Lighting/CeilingFixtures"]
+transform = Transform3D(3.1391647e-07, 0, 1, 0, 1, 0, -1, 0, 3.1391647e-07, -2.1875, 2.96, 8.8125)
+
+[node name="Housing" type="MeshInstance3D" parent="Lighting/CeilingFixtures/South_Room"]
+material_override = SubResource("Material_FixtureHousing")
+mesh = SubResource("Mesh_FixtureHousing")
+
+[node name="Panel" type="MeshInstance3D" parent="Lighting/CeilingFixtures/South_Room"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.041, 0)
+material_override = SubResource("Material_FixtureOn")
+gi_mode = 0
+mesh = SubResource("Mesh_FixturePanel")
+
+[node name="Downlight" type="SpotLight3D" parent="Lighting/CeilingFixtures/South_Room"]
+transform = Transform3D(1, 0, 0, 0, 3.1391647e-07, 1, 0, -1, 3.1391647e-07, 0, -0.09, 0)
+light_color = Color(1, 0.92, 0.75, 1)
+light_energy = 0.12
+light_bake_mode = 1
+shadow_enabled = true
+spot_range = 5.5
+spot_angle = 63.0
+spot_angle_attenuation = 1.4
+
+[node name="South_Corridor" type="Node3D" parent="Lighting/CeilingFixtures"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.59375, 2.96, 11.625)
+
+[node name="Housing" type="MeshInstance3D" parent="Lighting/CeilingFixtures/South_Corridor"]
+material_override = SubResource("Material_FixtureHousing")
+mesh = SubResource("Mesh_FixtureHousing")
+
+[node name="Panel" type="MeshInstance3D" parent="Lighting/CeilingFixtures/South_Corridor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.041, 0)
+material_override = SubResource("Material_FixtureOn")
+gi_mode = 0
+mesh = SubResource("Mesh_FixturePanel")
+
+[node name="Downlight" type="SpotLight3D" parent="Lighting/CeilingFixtures/South_Corridor"]
+transform = Transform3D(1, 0, 0, 0, 3.1391647e-07, 1, 0, -1, 3.1391647e-07, 0, -0.09, 0)
+light_color = Color(1, 0.92, 0.75, 1)
+light_energy = 0.12
+light_bake_mode = 1
+shadow_enabled = true
+spot_range = 5.5
+spot_angle = 63.0
+spot_angle_attenuation = 1.4
+
+[node name="South_East_Room" type="Node3D" parent="Lighting/CeilingFixtures"]
+transform = Transform3D(3.1391647e-07, 0, 1, 0, 1, 0, -1, 0, 3.1391647e-07, 9.0625, 2.96, 11.46875)
+
+[node name="Housing" type="MeshInstance3D" parent="Lighting/CeilingFixtures/South_East_Room"]
+material_override = SubResource("Material_FixtureHousing")
+mesh = SubResource("Mesh_FixtureHousing")
+
+[node name="Panel" type="MeshInstance3D" parent="Lighting/CeilingFixtures/South_East_Room"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.041, 0)
+material_override = SubResource("Material_FixtureOn")
+gi_mode = 0
+mesh = SubResource("Mesh_FixturePanel")
+
+[node name="Downlight" type="SpotLight3D" parent="Lighting/CeilingFixtures/South_East_Room"]
+transform = Transform3D(1, 0, 0, 0, 3.1391647e-07, 1, 0, -1, 3.1391647e-07, 0, -0.09, 0)
+light_color = Color(1, 0.92, 0.75, 1)
+light_energy = 0.154
+light_bake_mode = 1
+shadow_enabled = true
+spot_range = 5.5
+spot_angle = 63.0
+spot_angle_attenuation = 1.4
+
+[node name="Exit_Passage" type="Node3D" parent="Lighting/CeilingFixtures"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 2.96, 6.78125)
+
+[node name="Housing" type="MeshInstance3D" parent="Lighting/CeilingFixtures/Exit_Passage"]
+material_override = SubResource("Material_FixtureHousing")
+mesh = SubResource("Mesh_FixtureHousing")
+
+[node name="Panel" type="MeshInstance3D" parent="Lighting/CeilingFixtures/Exit_Passage"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.041, 0)
+material_override = SubResource("Material_FixtureOn")
+gi_mode = 0
+mesh = SubResource("Mesh_FixturePanel")
+
+[node name="Downlight" type="SpotLight3D" parent="Lighting/CeilingFixtures/Exit_Passage"]
+transform = Transform3D(1, 0, 0, 0, 3.1391647e-07, 1, 0, -1, 3.1391647e-07, 0, -0.09, 0)
+light_color = Color(1, 0.92, 0.75, 1)
+light_energy = 0.182
+light_bake_mode = 1
+shadow_enabled = true
+spot_range = 5.5
+spot_angle = 63.0
+spot_angle_attenuation = 1.4
+
+[node name="Markers" type="Node3D" parent="."]
+
+[node name="Entrance" type="Marker3D" parent="Markers"]
+transform = Transform3D(3.1391647e-07, 0, -1, 0, 1, 0, 1, 0, 3.1391647e-07, -15.96875, 0, 0.375)
+
+[node name="Exit" type="Marker3D" parent="Markers"]
+transform = Transform3D(3.1391647e-07, 0, -1, 0, 1, 0, 1, 0, 3.1391647e-07, 15.96875, 0, 3.21875)
+
+[node name="PreviewCamera" type="Camera3D" parent="."]
+transform = Transform3D(3.1391647e-07, 0, -1, 0, 1, 0, 1, 0, 3.1391647e-07, -15.40625, 1.65, 0.375)
+current = true
+far = 80.0

@@ -1,0 +1,18 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://gameplay/anomaly_definition.gd" id="1_definition"]
+[ext_resource type="Script" path="res://gameplay/anomalies/flood.gd" id="2_handler"]
+
+[resource]
+script = ExtResource("1_definition")
+handler = ExtResource("2_handler")
+id = "the_flood"
+category_en = "Major Events"
+category_de = "Großereignisse"
+title_en = "The Flood"
+title_de = "Die Flut"
+description_en = "A small puddle spreads through the casino and rises to ankle height. Cards drift in the water, with no visible source for the flood."
+description_de = "Eine kleine Pfütze breitet sich durch das Casino aus und steigt bis auf Knöchelhöhe. Spielkarten treiben im Wasser, ohne erkennbare Quelle der Flut."
+target_path = "Architecture/OakMainWing"
+rarity = "singularity"
+difficulty = 1

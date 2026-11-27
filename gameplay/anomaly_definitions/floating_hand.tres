@@ -1,0 +1,18 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://gameplay/anomaly_definition.gd" id="1_definition"]
+[ext_resource type="Script" path="res://gameplay/anomalies/batch_01_visual.gd" id="2_handler"]
+
+[resource]
+script = ExtResource("1_definition")
+handler = ExtResource("2_handler")
+id = "floating_hand"
+category_en = "Casino"
+category_de = "Casino"
+title_en = "Floating hand"
+title_de = "Schwebendes Blatt"
+description_en = "Four playing cards float gently above one card table."
+description_de = "Vier Spielkarten schweben mit sanften Bewegungen über einem Kartentisch."
+target_path = "GamingTables/Cards5"
+rarity = "uncommon"
+difficulty = 2

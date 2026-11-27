@@ -1,0 +1,18 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://gameplay/anomaly_definition.gd" id="1_definition"]
+[ext_resource type="Script" path="res://gameplay/anomalies/batch_03_reality.gd" id="2_handler"]
+
+[resource]
+script = ExtResource("1_definition")
+handler = ExtResource("2_handler")
+id = "black_bloom"
+category_en = "Broken Reality"
+category_de = "Verzerrte Realität"
+title_en = "The Black Bloom"
+title_de = "Die schwarze Blüte"
+description_en = "Thin, dark organic strands slowly spread from a dense core across the wall and withdraw."
+description_de = "Dünne, dunkle organische Stränge breiten sich von einem dichten Kern langsam über die Wand aus und ziehen sich wieder zurück."
+target_path = "Architecture/SouthWestWall"
+rarity = "rare"
+difficulty = 1

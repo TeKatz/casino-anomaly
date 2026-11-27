@@ -1,0 +1,18 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://gameplay/anomaly_definition.gd" id="1_definition"]
+[ext_resource type="Script" path="res://gameplay/anomalies/batch_02_horror.gd" id="2_handler"]
+
+[resource]
+script = ExtResource("1_definition")
+handler = ExtResource("2_handler")
+id = "ownerless_shadow"
+category_en = "Uncanny"
+category_de = "Unheimlich"
+title_en = "Ownerless shadow"
+title_de = "Schatten ohne Ursprung"
+description_en = "A softly fading, elongated human shadow lies on the entrance carpet with no visible source."
+description_de = "Ein langgezogener menschlicher Schatten mit weichen Konturen liegt ohne erkennbare Quelle auf dem Eingangsteppich."
+target_path = "RedCarpet/ApproachRunner"
+rarity = "rare"
+difficulty = 2

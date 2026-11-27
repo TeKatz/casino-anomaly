@@ -1,0 +1,21 @@
+{
+  "asset": "Fabric037",
+  "sourcePage": "https://ambientcg.com/view?id=Fabric037",
+  "download": "https://ambientcg.com/get?file=Fabric037_2K-JPG.zip",
+  "license": "CC0-1.0",
+  "uploadedZipSha256": "156feaf51ea56993f952f931e2f8a607d93f5019ed205b6d39b2c31fdcbc1bbd",
+  "maps": {
+    "Fabric037_2K-JPG_Color.jpg": {
+      "bytes": 5168036,
+      "sha256": "f6734ee8052fe1ce7064e3111c268df71832c4e6e8a14a451537f991ffed43bc"
+    },
+    "Fabric037_2K-JPG_NormalGL.jpg": {
+      "bytes": 9339507,
+      "sha256": "fef0de1be862f781f525d3650fb6a95dbe0ecd3db25b7841107acc35d7dff834"
+    },
+    "Fabric037_2K-JPG_Roughness.jpg": {
+      "bytes": 2343061,
+      "sha256": "ae2c54f3f050f495194953f463fc8cc98f0034886fdd6e640b17a20cd89d0570"
+    }
+  }
+}

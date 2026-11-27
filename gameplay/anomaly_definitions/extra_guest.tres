@@ -1,0 +1,18 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://gameplay/anomaly_definition.gd" id="1_definition"]
+[ext_resource type="Script" path="res://gameplay/anomalies/batch_03_reality.gd" id="2_handler"]
+
+[resource]
+script = ExtResource("1_definition")
+handler = ExtResource("2_handler")
+id = "extra_guest"
+category_en = "Broken Reality"
+category_de = "Verzerrte Realität"
+title_en = "The Extra Guest"
+title_de = "Der zusätzliche Gast"
+description_en = "A motionless person sits in the lounge, their face obscured by darkness."
+description_de = "Eine regungslose Person sitzt in der Lounge, ihr Gesicht liegt im Dunkeln."
+target_path = "ModelInteriors/LoungeSofa_04"
+rarity = "exceptional"
+difficulty = 1

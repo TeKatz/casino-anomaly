@@ -1,0 +1,22 @@
+{
+  "asset": "brown_planks_05",
+  "sourcePage": "https://polyhaven.com/a/brown_planks_05",
+  "license": "CC0-1.0",
+  "maps": {
+    "brown_planks_05_diff_2k.jpg": {
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/brown_planks_05/brown_planks_05_diff_2k.jpg",
+      "sha256": "1d6c8a69eec94d89a071f533dc71f99744c8091eb4c6097eb80c04769d964aca",
+      "bytes": 1286160
+    },
+    "brown_planks_05_rough_2k.jpg": {
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/brown_planks_05/brown_planks_05_rough_2k.jpg",
+      "sha256": "8724db75d6b17aae1825ca5a2ebd7f8c170e7a2ed2d0f057c887ba25ab641a40",
+      "bytes": 382455
+    },
+    "brown_planks_05_nor_gl_2k.jpg": {
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/brown_planks_05/brown_planks_05_nor_gl_2k.jpg",
+      "sha256": "dbf17e1e0ae9086330295813280e3bee580063c836811acbbac0a289aae1808d",
+      "bytes": 2849343
+    }
+  }
+}

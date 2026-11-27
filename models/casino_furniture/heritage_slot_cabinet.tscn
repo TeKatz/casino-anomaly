@@ -1,0 +1,498 @@
+[gd_scene load_steps=48 format=3]
+
+[ext_resource type="Script" path="res://models/casino_furniture/heritage_slot_cabinet.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://models/casino_furniture/gaming_stool.tscn" id="2_stool"]
+[ext_resource type="Texture2D" path="res://assets/dark_wood/dark_wood_diff_2k.jpg" id="3_wood"]
+[ext_resource type="Texture2D" path="res://assets/dark_wood/dark_wood_nor_gl_2k.jpg" id="4_woodnormal"]
+[ext_resource type="Texture2D" path="res://assets/wood_table_worn/wood_table_worn_diff_2k.jpg" id="5_mahogany"]
+[ext_resource type="Texture2D" path="res://assets/wood_table_worn/wood_table_worn_nor_gl_2k.jpg" id="6_mahogonynormal"]
+
+[sub_resource type="BoxMesh" id="BodyMesh"]
+size = Vector3(0.86, 1.96, 0.74)
+
+[sub_resource type="BoxMesh" id="BackMesh"]
+size = Vector3(0.81, 1.75, 0.05)
+
+[sub_resource type="BoxMesh" id="BaseMesh"]
+size = Vector3(0.91, 0.18, 0.795)
+
+[sub_resource type="BoxMesh" id="BaseTrimMesh"]
+size = Vector3(0.915, 0.07, 0.8)
+
+[sub_resource type="BoxMesh" id="VeneerMesh"]
+size = Vector3(0.034, 1.69, 0.64)
+
+[sub_resource type="BoxMesh" id="SideRailMesh"]
+size = Vector3(0.023, 1.68, 0.049)
+
+[sub_resource type="BoxMesh" id="HeaderMesh"]
+size = Vector3(0.84, 0.375, 0.76)
+
+[sub_resource type="CapsuleMesh" id="HeaderCapMesh"]
+radius = 0.11
+height = 0.83
+radial_segments = 24
+rings = 8
+
+[sub_resource type="BoxMesh" id="HeaderFrameMesh"]
+size = Vector3(0.758, 0.261, 0.055)
+
+[sub_resource type="BoxMesh" id="HeaderInsetMesh"]
+size = Vector3(0.69, 0.207, 0.031)
+
+[sub_resource type="BoxMesh" id="TopGlowMesh"]
+size = Vector3(0.665, 0.034, 0.028)
+
+[sub_resource type="CylinderMesh" id="MedallionMesh"]
+top_radius = 0.072
+bottom_radius = 0.072
+height = 0.016
+radial_segments = 32
+
+[sub_resource type="TorusMesh" id="MedallionRingMesh"]
+inner_radius = 0.073
+outer_radius = 0.097
+ring_segments = 8
+rings = 32
+
+[sub_resource type="CylinderMesh" id="SideBevelMesh"]
+top_radius = 0.041
+bottom_radius = 0.041
+height = 1.77
+radial_segments = 32
+
+[sub_resource type="BoxMesh" id="ReelFrameMesh"]
+size = Vector3(0.767, 0.75, 0.1)
+
+[sub_resource type="BoxMesh" id="ReelBackMesh"]
+size = Vector3(0.708, 0.675, 0.033)
+
+[sub_resource type="BoxMesh" id="ReelWellMesh"]
+size = Vector3(0.206, 0.554, 0.037)
+
+[sub_resource type="BoxMesh" id="ReelMaskMesh"]
+size = Vector3(0.214, 0.027, 0.032)
+
+[sub_resource type="BoxMesh" id="ReelDividerMesh"]
+size = Vector3(0.018, 0.57, 0.03)
+
+[sub_resource type="BoxMesh" id="ReelGlassMesh"]
+size = Vector3(0.675, 0.584, 0.006)
+
+[sub_resource type="BoxMesh" id="ConsoleMesh"]
+size = Vector3(0.8, 0.21, 0.322)
+
+[sub_resource type="BoxMesh" id="ConsoleTopMesh"]
+size = Vector3(0.761, 0.036, 0.304)
+
+[sub_resource type="BoxMesh" id="ButtonSocketMesh"]
+size = Vector3(0.099, 0.015, 0.093)
+
+[sub_resource type="CylinderMesh" id="ButtonMesh"]
+top_radius = 0.049
+bottom_radius = 0.046
+height = 0.038
+radial_segments = 32
+
+[sub_resource type="TorusMesh" id="ButtonRingMesh"]
+inner_radius = 0.047
+outer_radius = 0.06
+ring_segments = 8
+rings = 32
+
+[sub_resource type="BoxMesh" id="LowerFrontMesh"]
+size = Vector3(0.71, 0.21, 0.045)
+
+[sub_resource type="BoxMesh" id="StatusMesh"]
+size = Vector3(0.62, 0.054, 0.023)
+
+[sub_resource type="BoxMesh" id="CoinPlateMesh"]
+size = Vector3(0.221, 0.136, 0.02)
+
+[sub_resource type="BoxMesh" id="CoinSlotMesh"]
+size = Vector3(0.144, 0.014, 0.022)
+
+[sub_resource type="BoxMesh" id="SpeakerMesh"]
+size = Vector3(0.026, 0.073, 0.015)
+
+[sub_resource type="BoxMesh" id="ToeMesh"]
+size = Vector3(0.68, 0.054, 0.028)
+
+[sub_resource type="BoxShape3D" id="BodyShape"]
+size = Vector3(0.87, 2.16, 0.76)
+
+[sub_resource type="BoxShape3D" id="ConsoleShape"]
+size = Vector3(0.8, 0.21, 0.32)
+
+[sub_resource type="StandardMaterial3D" id="MatWalnut"]
+albedo_texture = ExtResource("3_wood")
+albedo_color = Color(0.38, 0.29, 0.30, 1)
+normal_enabled = true
+normal_texture = ExtResource("4_woodnormal")
+metallic = 0.21
+roughness = 0.46
+
+[sub_resource type="StandardMaterial3D" id="MatMahogany"]
+albedo_texture = ExtResource("5_mahogany")
+albedo_color = Color(0.58, 0.41, 0.32, 1)
+normal_enabled = true
+normal_texture = ExtResource("6_mahogonynormal")
+roughness = 0.56
+
+[sub_resource type="StandardMaterial3D" id="MatGold"]
+albedo_color = Color(0.72, 0.55, 0.31, 1)
+metallic = 0.82
+roughness = 0.30
+
+[sub_resource type="StandardMaterial3D" id="MatIron"]
+albedo_color = Color(0.17, 0.19, 0.21, 1)
+metallic = 0.76
+roughness = 0.38
+
+[sub_resource type="StandardMaterial3D" id="MatBlack"]
+albedo_color = Color(0.06, 0.085, 0.12, 1)
+metallic = 0.21
+roughness = 0.17
+
+[sub_resource type="StandardMaterial3D" id="MatIvory"]
+albedo_color = Color(0.84, 0.78, 0.68, 1)
+roughness = 0.71
+
+[sub_resource type="StandardMaterial3D" id="MatGlass"]
+albedo_color = Color(0.58, 0.73, 0.80, 0.15)
+metallic = 0.22
+roughness = 0.11
+transparency = 1
+
+[sub_resource type="StandardMaterial3D" id="MatAccent"]
+albedo_color = Color(0.93, 0.62, 0.31, 1)
+emission_enabled = true
+emission = Color(0.93, 0.62, 0.31, 1)
+emission_energy_multiplier = 1.6
+roughness = 0.38
+
+[node name="HeritageSlotCabinet" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="Body" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.05, 0)
+mesh = SubResource("BodyMesh")
+material_override = SubResource("MatWalnut")
+
+[node name="BackCover" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.05, -0.386)
+mesh = SubResource("BackMesh")
+material_override = SubResource("MatIron")
+
+[node name="FootSocle" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.1, 0)
+mesh = SubResource("BaseMesh")
+material_override = SubResource("MatIron")
+
+[node name="SocleBrassMoulding" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.211, 0)
+mesh = SubResource("BaseTrimMesh")
+material_override = SubResource("MatGold")
+
+[node name="ToeKick" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.11, 0.406)
+mesh = SubResource("ToeMesh")
+material_override = SubResource("MatBlack")
+
+[node name="WoodInlay_L" type="MeshInstance3D" parent="."]
+position = Vector3(-0.409, 1.09, 0.015)
+mesh = SubResource("VeneerMesh")
+material_override = SubResource("MatMahogany")
+
+[node name="CabinetContour_L" type="MeshInstance3D" parent="."]
+position = Vector3(-0.408, 1.11, 0.353)
+mesh = SubResource("SideBevelMesh")
+material_override = SubResource("MatGold")
+
+[node name="FrontSeam_L" type="MeshInstance3D" parent="."]
+position = Vector3(-0.383, 1.1, 0.38)
+mesh = SubResource("SideRailMesh")
+material_override = SubResource("MatIron")
+
+[node name="WoodInlay_R" type="MeshInstance3D" parent="."]
+position = Vector3(0.409, 1.09, 0.015)
+mesh = SubResource("VeneerMesh")
+material_override = SubResource("MatMahogany")
+
+[node name="CabinetContour_R" type="MeshInstance3D" parent="."]
+position = Vector3(0.408, 1.11, 0.353)
+mesh = SubResource("SideBevelMesh")
+material_override = SubResource("MatGold")
+
+[node name="FrontSeam_R" type="MeshInstance3D" parent="."]
+position = Vector3(0.383, 1.1, 0.38)
+mesh = SubResource("SideRailMesh")
+material_override = SubResource("MatIron")
+
+[node name="MarqueeBody" type="MeshInstance3D" parent="."]
+position = Vector3(0, 2.032, 0.012)
+mesh = SubResource("HeaderMesh")
+material_override = SubResource("MatMahogany")
+
+[node name="RoundedMarqueeTop" type="MeshInstance3D" parent="."]
+position = Vector3(0, 2.224, 0.012)
+mesh = SubResource("HeaderCapMesh")
+material_override = SubResource("MatMahogany")
+rotation = Vector3(0, 0, 1.5707963267948966)
+
+[node name="MarqueeBrassFrame" type="MeshInstance3D" parent="."]
+position = Vector3(0, 2.045, 0.402)
+mesh = SubResource("HeaderFrameMesh")
+material_override = SubResource("MatGold")
+
+[node name="MarqueeInlay" type="MeshInstance3D" parent="."]
+position = Vector3(0, 2.045, 0.439)
+mesh = SubResource("HeaderInsetMesh")
+material_override = SubResource("MatBlack")
+
+[node name="TopGlow" type="MeshInstance3D" parent="."]
+position = Vector3(0, 2.218, 0.413)
+mesh = SubResource("TopGlowMesh")
+material_override = SubResource("MatAccent")
+
+[node name="TopperMedallion" type="MeshInstance3D" parent="."]
+position = Vector3(0, 2.26, 0.332)
+mesh = SubResource("MedallionMesh")
+material_override = SubResource("MatAccent")
+rotation = Vector3(1.5707963267948966, 0, 0)
+
+[node name="TopperMedallionRing" type="MeshInstance3D" parent="."]
+position = Vector3(0, 2.26, 0.349)
+mesh = SubResource("MedallionRingMesh")
+material_override = SubResource("MatGold")
+rotation = Vector3(1.5707963267948966, 0, 0)
+
+[node name="MachineTitle" type="Label3D" parent="."]
+position = Vector3(0, 2.04, 0.465)
+text = "MIDNIGHT"
+font_size = 26
+pixel_size = 0.0028
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(1, 0.77, 0.51, 1)
+double_sided = false
+
+[node name="ReelOuterFrame" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.394, 0.398)
+mesh = SubResource("ReelFrameMesh")
+material_override = SubResource("MatGold")
+
+[node name="ReelInset" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.394, 0.464)
+mesh = SubResource("ReelBackMesh")
+material_override = SubResource("MatBlack")
+
+[node name="ReelWell_0" type="MeshInstance3D" parent="."]
+position = Vector3(-0.228, 1.392, 0.487)
+mesh = SubResource("ReelWellMesh")
+material_override = SubResource("MatIvory")
+
+[node name="ReelTopMask_0" type="MeshInstance3D" parent="."]
+position = Vector3(-0.228, 1.672, 0.515)
+mesh = SubResource("ReelMaskMesh")
+material_override = SubResource("MatIron")
+
+[node name="ReelBottomMask_0" type="MeshInstance3D" parent="."]
+position = Vector3(-0.228, 1.11, 0.515)
+mesh = SubResource("ReelMaskMesh")
+material_override = SubResource("MatIron")
+
+[node name="ReelGlyph_0" type="Label3D" parent="."]
+position = Vector3(-0.228, 1.391, 0.521)
+text = "7"
+font_size = 35
+pixel_size = 0.0026
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.16, 0.13, 0.16, 1)
+double_sided = false
+
+[node name="ReelWell_1" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.392, 0.487)
+mesh = SubResource("ReelWellMesh")
+material_override = SubResource("MatIvory")
+
+[node name="ReelTopMask_1" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.672, 0.515)
+mesh = SubResource("ReelMaskMesh")
+material_override = SubResource("MatIron")
+
+[node name="ReelBottomMask_1" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.11, 0.515)
+mesh = SubResource("ReelMaskMesh")
+material_override = SubResource("MatIron")
+
+[node name="ReelGlyph_1" type="Label3D" parent="."]
+position = Vector3(0, 1.391, 0.521)
+text = "BAR"
+font_size = 35
+pixel_size = 0.0026
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.16, 0.13, 0.16, 1)
+double_sided = false
+
+[node name="ReelWell_2" type="MeshInstance3D" parent="."]
+position = Vector3(0.228, 1.392, 0.487)
+mesh = SubResource("ReelWellMesh")
+material_override = SubResource("MatIvory")
+
+[node name="ReelTopMask_2" type="MeshInstance3D" parent="."]
+position = Vector3(0.228, 1.672, 0.515)
+mesh = SubResource("ReelMaskMesh")
+material_override = SubResource("MatIron")
+
+[node name="ReelBottomMask_2" type="MeshInstance3D" parent="."]
+position = Vector3(0.228, 1.11, 0.515)
+mesh = SubResource("ReelMaskMesh")
+material_override = SubResource("MatIron")
+
+[node name="ReelGlyph_2" type="Label3D" parent="."]
+position = Vector3(0.228, 1.391, 0.521)
+text = "★"
+font_size = 35
+pixel_size = 0.0026
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(0.16, 0.13, 0.16, 1)
+double_sided = false
+
+[node name="ReelDivider_L" type="MeshInstance3D" parent="."]
+position = Vector3(-0.114, 1.396, 0.519)
+mesh = SubResource("ReelDividerMesh")
+material_override = SubResource("MatGold")
+
+[node name="ReelDivider_R" type="MeshInstance3D" parent="."]
+position = Vector3(0.114, 1.396, 0.519)
+mesh = SubResource("ReelDividerMesh")
+material_override = SubResource("MatGold")
+
+[node name="ReelGlass" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.394, 0.55)
+mesh = SubResource("ReelGlassMesh")
+material_override = SubResource("MatGlass")
+
+[node name="ButtonDesk" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.842, 0.434)
+mesh = SubResource("ConsoleMesh")
+material_override = SubResource("MatMahogany")
+
+[node name="ButtonDeskTop" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.958, 0.46)
+mesh = SubResource("ConsoleTopMesh")
+material_override = SubResource("MatGold")
+rotation = Vector3(-0.11, 0, 0)
+
+[node name="ButtonSocket_0" type="MeshInstance3D" parent="."]
+position = Vector3(-0.226, 0.98, 0.504)
+mesh = SubResource("ButtonSocketMesh")
+material_override = SubResource("MatBlack")
+
+[node name="ControlLamp_0" type="MeshInstance3D" parent="."]
+position = Vector3(-0.226, 1.007, 0.504)
+mesh = SubResource("ButtonMesh")
+material_override = SubResource("MatAccent")
+
+[node name="ButtonRing_0" type="MeshInstance3D" parent="."]
+position = Vector3(-0.226, 0.999, 0.504)
+mesh = SubResource("ButtonRingMesh")
+material_override = SubResource("MatGold")
+
+[node name="ButtonSocket_1" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.98, 0.504)
+mesh = SubResource("ButtonSocketMesh")
+material_override = SubResource("MatBlack")
+
+[node name="ControlLamp_1" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.007, 0.504)
+mesh = SubResource("ButtonMesh")
+material_override = SubResource("MatAccent")
+
+[node name="ButtonRing_1" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.999, 0.504)
+mesh = SubResource("ButtonRingMesh")
+material_override = SubResource("MatGold")
+
+[node name="ButtonSocket_2" type="MeshInstance3D" parent="."]
+position = Vector3(0.226, 0.98, 0.504)
+mesh = SubResource("ButtonSocketMesh")
+material_override = SubResource("MatBlack")
+
+[node name="ControlLamp_2" type="MeshInstance3D" parent="."]
+position = Vector3(0.226, 1.007, 0.504)
+mesh = SubResource("ButtonMesh")
+material_override = SubResource("MatAccent")
+
+[node name="ButtonRing_2" type="MeshInstance3D" parent="."]
+position = Vector3(0.226, 0.999, 0.504)
+mesh = SubResource("ButtonRingMesh")
+material_override = SubResource("MatGold")
+
+[node name="FrontLowerFascia" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.628, 0.376)
+mesh = SubResource("LowerFrontMesh")
+material_override = SubResource("MatMahogany")
+
+[node name="FrontStatus" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.671, 0.406)
+mesh = SubResource("StatusMesh")
+material_override = SubResource("MatAccent")
+
+[node name="CoinPlate" type="MeshInstance3D" parent="."]
+position = Vector3(0.18, 0.486, 0.407)
+mesh = SubResource("CoinPlateMesh")
+material_override = SubResource("MatGold")
+
+[node name="CoinSlot" type="MeshInstance3D" parent="."]
+position = Vector3(0.18, 0.508, 0.426)
+mesh = SubResource("CoinSlotMesh")
+material_override = SubResource("MatBlack")
+
+[node name="SpeakerSlot_0" type="MeshInstance3D" parent="."]
+position = Vector3(-0.255, 0.49, 0.406)
+mesh = SubResource("SpeakerMesh")
+material_override = SubResource("MatIron")
+
+[node name="SpeakerSlot_1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.196, 0.49, 0.406)
+mesh = SubResource("SpeakerMesh")
+material_override = SubResource("MatIron")
+
+[node name="SpeakerSlot_2" type="MeshInstance3D" parent="."]
+position = Vector3(-0.137, 0.49, 0.406)
+mesh = SubResource("SpeakerMesh")
+material_override = SubResource("MatIron")
+
+[node name="SpeakerSlot_3" type="MeshInstance3D" parent="."]
+position = Vector3(-0.07800000000000001, 0.49, 0.406)
+mesh = SubResource("SpeakerMesh")
+material_override = SubResource("MatIron")
+
+[node name="SpeakerSlot_4" type="MeshInstance3D" parent="."]
+position = Vector3(-0.019000000000000017, 0.49, 0.406)
+mesh = SubResource("SpeakerMesh")
+material_override = SubResource("MatIron")
+
+[node name="Body_Collision" type="StaticBody3D" parent="."]
+position = Vector3(0, 1.08, 0)
+metadata/collision_for = "Body"
+
+[node name="BodyShape" type="CollisionShape3D" parent="Body_Collision"]
+shape = SubResource("BodyShape")
+
+[node name="Console_Collision" type="StaticBody3D" parent="."]
+position = Vector3(0, 0.839, 0.434)
+
+[node name="ConsoleShape" type="CollisionShape3D" parent="Console_Collision"]
+shape = SubResource("ConsoleShape")
+
+[node name="PlayerStool" type="Node3D" parent="."]
+position = Vector3(0, 0, 1.24)
+
+[node name="GamingStool" parent="PlayerStool" instance=ExtResource("2_stool")]
+

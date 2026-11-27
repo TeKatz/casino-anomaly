@@ -1,0 +1,643 @@
+extends SceneTree
+## Integration regression: 2 genuine blind L-bends, both locked departures,
+## retained arrival-connector after unloading and two consecutive no-teleport
+## room swaps. Detects the reported ability to walk into the exterior void.
+
+const ROOM = preload("res://main.tscn")
+const Portals = preload("res://gameplay/stream_portals.gd")
+const Backrooms = preload("res://gameplay/backrooms_traversal.gd")
+
+
+func _initialize() -> void:
+    call_deferred("_run")
+
+
+func _fail(message: String) -> void:
+    push_error("Casino seamless streaming QA: " + message)
+    quit(1)
+
+
+func _run() -> void:
+    var state = root.get_node_or_null("LoopState")
+    if state == null:
+        _fail("Run save autoload is missing")
+        return
+    var settings = root.get_node("GameSettings")
+    var saved: Dictionary = settings.options.duplicate(true)
+    settings.set_option("language", "en")
+    settings.set_option("door_symbols", true)
+    state.save_path = "user://casino_streaming_qa.cfg"
+    state.start_new_run()
+    state.complete_tutorial()
+
+    var shape = Portals.new()
+    var first := ROOM.instantiate() as Node3D
+    root.add_child(first)
+    current_scene = first
+    await process_frame
+    await process_frame
+    await physics_frame
+
+    var controller := first.get_node_or_null("LoopController")
+    var player := first.get_node_or_null("Player") as CharacterBody3D
+    if controller == null or player == null:
+        _fail("Streaming hall lost its active controller or player")
+        return
+    var portal := first.get_node_or_null("StreamingPortals") as Node3D
+    if portal == null:
+        _fail("The casino did not create runtime streaming portals")
+        return
+    var architecture := first.get_node("Architecture") as Node3D
+    var original_gold := architecture.get_node_or_null("ExitFrameTop") as MeshInstance3D
+    if original_gold == null or original_gold.visible:
+        _fail("Old placeholder gold side/top trim was not removed")
+        return
+    var wood := architecture.get_node("WoodWainscoting") as MeshInstance3D
+    for label in ["Left", "Right"]:
+        var frame := portal.get_node_or_null("WoodExitFrame_" + label) as Node3D
+        if frame == null or not frame.has_node("Jamb_North") \
+                or not frame.has_node("Jamb_South") or not frame.has_node("Header"):
+            _fail("A proper two-post wooden %s door frame was not constructed" % label)
+            return
+        if (frame.get_node("Header") as MeshInstance3D).material_override != wood.material_override:
+            _fail("Wooden EXIT frame must reuse the existing wainscoting PBR material")
+            return
+    var entry := portal.get_node_or_null("EntrySleeve") as Node3D
+    if entry == null or not entry.has_node("SideReturn_North_Collision") \
+            or not entry.has_node("SideReturn_South_Collision") \
+            or not entry.has_node("RoofSoffit_Collision"):
+        _fail("The old corridor's entrance still leaks into the exterior void")
+        return
+    if portal.get_node_or_null("InitialEntryCap/SolidDoor_Collision") == null:
+        _fail("Initial casino is missing a closed entry behind the player")
+        return
+    var signs := {}
+    for child in architecture.get_children():
+        if child is Label3D and (child.text == "! ANOMALY" or child.text == "= NORMAL"):
+            signs[child.text] = child.position.z
+    if signs.size() != 2 or absf(float(signs["! ANOMALY"]) - shape.EXIT_Z_LEFT) > 0.5 \
+            or absf(float(signs["= NORMAL"]) - shape.EXIT_Z_RIGHT) > 0.5:
+        _fail("The physical left/right door labels disagree with the game's choices")
+        return
+    for lane in ["left", "right"]:
+        var corridor := shape.get_connector(first, lane)
+        if corridor == null:
+            _fail("Missing the separate L-shaped %s corridor" % lane)
+            return
+        for name in [
+            "DoorwayFloor", "StraightFloor", "StraightCeiling", "TurnFloor", "TurnCeiling",
+            "StraightOuterWall", "StraightInnerWall", "TurnOuterWall", "TurnInnerWall"
+        ]:
+            if corridor.get_node_or_null(name) == null                     or (name != "DoorwayFloor" and corridor.get_node_or_null(name + "_Collision") == null):
+                _fail("%s corridor does not contain collidable %s" % [lane, name])
+                return
+        var side_wall := corridor.get_node("TurnOuterWall") as MeshInstance3D
+        var wall_box := side_wall.mesh as BoxMesh
+        var wall_end: float = side_wall.position.z + shape.lane_sign(lane) * wall_box.size.z * 0.5
+        if absf(wall_end - (shape.end_z(lane) - shape.lane_sign(lane) * 0.63)) > 0.02:
+            _fail("Corridor wall crosses the next room's sleeve: " + lane)
+            return
+        if corridor.has_node("OneWayGate"):
+            _fail("Departure was locked before the player made a decision")
+            return
+
+    if not _verify_floor_resource_isolation(first,shape):
+        return
+
+    if (first.get_node("Architecture/FarExitWall") as MeshInstance3D).visible:
+        _fail("Original solid wall still blocks the exits")
+        return
+    var far_collision := first.get_node("Architecture/FarExitWall_Collision") as StaticBody3D
+    if far_collision == null:
+        _fail("Original far-wall body disappeared")
+        return
+    for part in far_collision.get_children():
+        if part is CollisionShape3D and not (part as CollisionShape3D).disabled:
+            _fail("Original full wall's collision is still active")
+            return
+
+    # Looking straight through the original door must meet a *solid wall*
+    # before the next hall comes into view, for BOTH left and right exits.
+    for lane in ["left", "right"]:
+        var from_pos := first.to_global(Vector3(-47.15, 1.65, shape.lane_z(lane)))
+        var end_pos := first.to_global(Vector3(shape.BEND_X - 3.0, 1.65, shape.lane_z(lane)))
+        var ray := PhysicsRayQueryParameters3D.create(from_pos, end_pos)
+        ray.exclude = [player.get_rid()]
+        var hit: Dictionary = first.get_world_3d().direct_space_state.intersect_ray(ray)
+        if hit.is_empty() or not str((hit["collider"] as Node).name).begins_with("TurnOuterWall_Collision"):
+            _fail("Direct sightline into the %s next room was not blocked by an opaque corner" % lane)
+            return
+
+    controller.call("_stage_next", "left")
+    var second := controller.get("staged") as Node3D
+    if second == null or second == first or second.get_parent() != root:
+        _fail("The next independent hall was not preloaded")
+        return
+    if second.get_node("Architecture/OakMainWing").owner != second:
+        _fail("Chunked attachment lost authored ownership")
+        return
+    if not bool(second.get_node("ModelInteriors").get("_population_done")):
+        _fail("Published standby hall before model population finished")
+        return
+    if second.has_node("StreamingPortals/InitialEntryCap"):
+        _fail("Staged rooms must NOT seal their arrival doors")
+        return
+    var staged_gi := second.get_node_or_null("VoxelGIRig") as Node3D
+    if staged_gi == null:
+        _fail("Staged hall lost its room-local VoxelGI rig")
+        return
+    if bool(staged_gi.get("streaming_active")):
+        _fail("The preloaded room must defer expensive GI activation until approach")
+        return
+    for child in staged_gi.get_children():
+        if child is VoxelGI and child.visible:
+            _fail("Standby hall is rendering VoxelGI before the GI prewarm point")
+            return
+    var stage_fx := second.get_node_or_null("CasinoAtmosphere") as Node3D
+    if stage_fx == null:
+        _fail("Staged hall lost its reflection rig")
+        return
+    for child in stage_fx.get_children():
+        if child is ReflectionProbe and child.visible:
+            _fail("Standby rooms must not capture reflection probes")
+            return
+    for child in stage_fx.get_children():
+        if child is OmniLight3D and child.name.begins_with("FurnitureFill_") \
+                and child.visible:
+            _fail("Uncommitted standby furniture fills must remain dark")
+            return
+    if second.has_node("Player") or second.has_node("LoopController"):
+        _fail("Standby hall generated a second player or controller")
+        return
+    var entry_left := first.to_global(Vector3(shape.BEND_X, 0, shape.end_z("left")))
+    if entry_left.distance_to(second.to_global(Vector3(0, 0, shape.ENTRY_Z))) > 0.02:
+        _fail("The left bend does not meet the next room entrance")
+        return
+    var second_transform := second.global_transform
+    if not await _exercise_settings(controller, player, first, second, state, settings):
+        _fail("Settings sweep broke the live/staged room contract")
+        return
+
+    # The next room remains beyond the L-shaped sightline, but its baked
+    # GPU lighting must be prepared BEFORE the player can see its entrance.
+    player.global_position = first.to_global(Vector3(-44.0, 1.02, shape.EXIT_Z_LEFT))
+    controller.call("_process", 0.016)
+    if not bool(staged_gi.get("streaming_active"))             or not bool(controller.get("staged_gi_warmed"))             or bool(controller.get("choice_taken")):
+        _fail("Approach did not prewarm next-room VoxelGI before the exit choice")
+        return
+    await process_frame
+    var next_baked: bool = bool(staged_gi.call("has_complete_bake"))
+    var gi_setting: bool = bool(root.get_node("GameSettings").get_option("voxel_gi"))
+    for probe in staged_gi.get_children():
+        if probe is VoxelGI and (probe as VoxelGI).visible != (next_baked and gi_setting):
+            _fail("A hidden staged room did not activate available baked GI on approach")
+            return
+    if not second.has_meta("_streaming_lighting_prepared"):
+        _fail("The next hall's furniture and bar lights were not prewarmed")
+        return
+    for child in stage_fx.get_children():
+        if child is OmniLight3D and child.name.begins_with("FurnitureFill_") \
+                and not child.visible:
+            _fail("A standby furniture light remained dark until room entry")
+            return
+
+    controller.call("_commit_choice", "left")
+    if state.visited_loops != 1 or not state.round_ready:
+        _fail("Crossing the left passage did not prepare the next round")
+        return
+    if not bool(controller.get("choice_taken")):
+        _fail("The left choice was not permanently committed")
+        return
+    var plaque := shape.get_connector(first, "left").get_node_or_null("VerdictPlaque")
+    if plaque == null or not (plaque is Node3D) \
+            or plaque.get_node_or_null("NeutralFinding") == null:
+        _fail("The chosen connector is missing its physical, neutral verdict plaque")
+        return
+    if shape.get_connector(first, "right").has_node("VerdictPlaque"):
+        _fail("Unchosen corridor unexpectedly contains a verdict plaque")
+        return
+    if (first.get_node("Architecture") as Node3D).visible or (first.get_node("CasinoAtmosphere") as Node3D).visible or not shape.get_connector(first, "left").visible:
+        _fail("Sealed casino still rendering or chosen corridor disappeared")
+        return
+    if not first.has_node("Architecture/NorthWestWall/StreamingOccluder"):
+        _fail("Opaque structural wall is missing its occluder")
+        return
+    var old_rig := first.get_node("VoxelGIRig") as Node3D
+    if bool(old_rig.get("streaming_active")) or not bool(staged_gi.get("streaming_active")):
+        _fail("Committed departure must transfer the GI budget to the next room")
+        return
+    # Captures run across frames while we are still behind the opaque turn.
+    await process_frame
+    await process_frame
+    await process_frame
+    var staged_probe_count := 0
+    for child in stage_fx.get_children():
+        if child is ReflectionProbe:
+            staged_probe_count += 1
+            if not child.visible:
+                _fail("A reflection probe still waits until room entry to switch on")
+                return
+    if staged_probe_count != 2:
+        _fail("Expected both prewarmed casino reflection probes")
+        return
+    for lane in ["left", "right"]:
+        var corridor := shape.get_connector(first, lane)
+        var physical_gate := corridor.get_node_or_null("OneWayGate_Collision") as StaticBody3D
+        if physical_gate == null or not corridor.has_node("OneWayGate"):
+            _fail("Backtracking through the %s exit is still possible" % lane)
+            return
+        if physical_gate.collision_layer == 0:
+            _fail("%s gate has no physical collision" % lane)
+            return
+        var shape_node := physical_gate.get_node_or_null("Shape") as CollisionShape3D
+        if shape_node == null or shape_node.disabled:
+            _fail("%s gate has no enabled blocking shape" % lane)
+            return
+    var score: int = int(state.visited_loops)
+    controller.call("_stage_next", "right")
+    if state.visited_loops != score or str(controller.get("staged_lane")) != "left"             or not second.global_transform.is_equal_approx(second_transform):
+        _fail("A committed player can switch the already selected EXIT")
+        return
+
+    var next_anomaly := str(state.anomaly_id)
+    player.global_position = first.to_global(
+        Vector3(shape.BEND_X, 1.02, shape.end_z("left") + 4.4)
+    )
+    var old_pose := player.global_transform
+    var lit_before_handoff: Array[bool] = []
+    for probe in staged_gi.get_children():
+        if probe is VoxelGI:
+            lit_before_handoff.append((probe as VoxelGI).visible)
+    var fills_before: Dictionary = {}
+    var reflections_before: Dictionary = {}
+    for child in stage_fx.get_children():
+        if child is OmniLight3D and child.name.begins_with("FurnitureFill_"):
+            fills_before[child.name] = child.visible
+        if child is ReflectionProbe:
+            reflections_before[child.name] = child.visible
+    if fills_before.size() != 23 or reflections_before.size() != 2:
+        _fail("Missing prewarmed atmosphere effects")
+        return
+    controller.call("_handoff")
+    if current_scene != second or player.get_parent() != second             or controller.get_parent() != second:
+        _fail("The staged room did not take over the original player/controller")
+        return
+    if player.global_position.distance_to(old_pose.origin) > 0.001:
+        _fail("Room handoff teleported the first-person camera")
+        return
+    if second.get_node_or_null("ArrivalConnector/OneWayGate_Collision") == null:
+        _fail("The passage behind the player vanished and exposed the void")
+        return
+    if second.get_node_or_null("ArrivalConnector/VerdictPlaque") == null:
+        _fail("The corridor result was lost during the seamless handoff")
+        return
+    if second.get_node("WorldEnvironment").environment == null:
+        _fail("The new room did not activate its original lighting")
+        return
+    if not bool(staged_gi.get("streaming_active")):
+        _fail("Handoff switched off the prewarmed GI")
+        return
+    if second.has_meta("_streaming_lighting_prepared"):
+        _fail("Temporary streaming light metadata leaked into the active room")
+        return
+    for child in stage_fx.get_children():
+        if child is OmniLight3D and child.name.begins_with("FurnitureFill_") \
+                and child.visible != bool(fills_before[child.name]):
+            _fail("Bar or furniture light switched on during visible-room handoff")
+            return
+        if child is ReflectionProbe and child.visible != bool(reflections_before[child.name]):
+            _fail("Reflected bar lighting switched on during visible-room handoff")
+            return
+    var index := 0
+    for probe in staged_gi.get_children():
+        if probe is VoxelGI:
+            if (probe as VoxelGI).visible != lit_before_handoff[index]:
+                _fail("VoxelGI visibility jumped exactly when the room was revealed")
+                return
+            index += 1
+    for frame in range(240):
+        if not is_instance_valid(first):
+            break
+        await process_frame
+    for child in (second.get_node("CasinoAtmosphere") as Node3D).get_children():
+        if child is ReflectionProbe and not child.visible:
+            _fail("Active hall should restore its reflections after handoff")
+            return
+    if is_instance_valid(first):
+        _fail("The previous full casino room was not freed")
+        return
+    if str(state.anomaly_id) != next_anomaly:
+        _fail("The preselected anomaly was lost during room handoff")
+        return
+
+    # Relabel the active room after handoff, then verify marker identities.
+    settings.set_option("language", "de")
+    settings.set_option("door_symbols", false)
+    if not bool(controller.call("_place_markers")):
+        _fail("Language/toggle invalidated physical portals")
+        return
+    settings.set_option("door_symbols", true)
+    for child in second.get_node("Architecture").get_children():
+        if child is Label3D and not Portals.exit_lane(child).is_empty():
+            child.text = "QA arbitrary presentation"
+    if not bool(controller.call("_place_markers")):
+        _fail("Arbitrary visual text invalidated markers")
+        return
+    settings.set_option("door_symbols", false)
+    settings.set_option("door_symbols", true)
+    for child in second.get_node("Architecture").get_children():
+        if child is Label3D and Portals.exit_lane(child) == "left" and child.text != "! ANOMALIE":
+            _fail("Localized door decoration was not applied")
+            return
+    # Keep this ordinary-hall regression deterministic even when the new
+    # traversal anomaly is present in the random catalog.
+    state.anomaly_id = ""
+    # The new room may have rotated 180 degrees relative to the last one.
+    # Test the opposite turn from that new local coordinate system.
+    controller.call("_schedule_stage_next", "right")
+    if controller.get("staged") != null or controller.get("_pending_stage") == null             or int(controller.get("_pending_stage_phase")) != 1:
+        _fail("Incremental staging did not defer portal and SceneTree work")
+        return
+    await process_frame
+    controller.call("_schedule_stage_next", "right")
+    if int(controller.get("_pending_stage_phase")) != 2             or controller.get("staged") != null:
+        _fail("Incremental staging did not isolate portal preparation")
+        return
+    var observed_partial := false
+    for frame in range(240):
+        if is_instance_valid(controller.get("staged")):
+            break
+        await process_frame
+        controller.call("_schedule_stage_next", "right")
+        var pending := controller.get("_pending_stage") as Node3D
+        if is_instance_valid(pending) and pending.is_inside_tree():
+            observed_partial = true
+    if not observed_partial:
+        _fail("Normal streaming did not expose an incremental attachment phase")
+        return
+    var third := controller.get("staged") as Node3D
+    if third == null or controller.get("_pending_stage") != null:
+        _fail("Incremental staging did not attach the third continuous loop")
+        return
+    var third_entry := second.to_global(
+        Vector3(shape.BEND_X, 0, shape.end_z("right"))
+    )
+    if third_entry.distance_to(third.to_global(Vector3(0, 0, shape.ENTRY_Z))) > 0.02:
+        _fail("Right turn is spatially misaligned after a rotated hall")
+        return
+    controller.call("_commit_choice", "right")
+    var third_rig := third.get_node_or_null("VoxelGIRig") as Node3D
+    if third_rig == null or not bool(third_rig.get("streaming_active")):
+        _fail("A rapid second loop missed its mandatory GI prewarm")
+        return
+    if state.visited_loops != 2:
+        _fail("The second left/right choice was not counted")
+        return
+    for lane in ["left", "right"]:
+        if not shape.get_connector(second, lane).has_node("OneWayGate_Collision"):
+            _fail("Second loop did not close both reverse paths")
+            return
+
+    # A player can move sideways immediately after the entrance sleeve.
+    # Exercise the actual frame-driven handoff rather than forcing it.
+    player.global_position = second.to_global(
+        Vector3(shape.BEND_X + 2.1, 1.02, shape.end_z("right") - 1.4)
+    )
+    var another_pose := player.global_transform
+    controller.call("_process", 0.016)
+    if current_scene != third or player.global_position.distance_to(another_pose.origin) > 0.001:
+        _fail("Second handoff moved the player")
+        return
+    for frame in range(240):
+        if not is_instance_valid(second):
+            break
+        await process_frame
+    if is_instance_valid(second):
+        _fail("Second old hall survived after the next handoff")
+        return
+    if third.get_node_or_null("ArrivalConnector/OneWayGate_Collision") == null:
+        _fail("Third hall still allows looking out through its unloaded predecessor")
+        return
+    if third.find_children("LoopController", "Node3D", false, false).size() != 1:
+        _fail("Multiple loop controllers survived a handoff")
+        return
+
+    third.queue_free()
+    await process_frame
+    settings._change(saved, true)
+    settings.save_options()
+    DirAccess.remove_absolute(ProjectSettings.globalize_path(state.save_path))
+    print("Casino Anomaly seamless two-room streaming QA PASS")
+    quit(0)
+
+func _exercise_settings(controller: Node, player: CharacterBody3D, first: Node3D, second: Node3D, state: Node, settings: Node) -> bool:
+    var baseline: Dictionary = settings.get("options").duplicate(true)
+    var samples: Dictionary = {
+        "language": "de",
+        "window_mode": "borderless",
+        "resolution": "1600x900",
+        "monitor": 0,
+        "vsync": false,
+        "vsync_mode": "off",
+        "fps_limit": 90,
+        "render_scale": 0.67,
+        "image_contrast": 0.75,
+        "taa": false,
+        "aa_mode": "msaa2",
+        "voxel_gi": false,
+        "graphics_preset": "low",
+        "upscaling": "fsr2",
+        "anisotropy": 2,
+        "texture_filter": "bilinear",
+        "dynamic_resolution": true,
+        "dynamic_target_fps": 90,
+        "shadow_quality": "off",
+        "shadow_distance": "low",
+        "fog_quality": "off",
+        "reflection_quality": "off",
+        "ssao_quality": "off",
+        "ssil": false,
+        "bloom": false,
+        "bloom_strength": 0.25,
+        "brightness": 0.7,
+        "saturation": 0.5,
+        "particle_quality": "off",
+        "fps_display": true,
+        "performance_overlay": true,
+        "menu_background": "abstract",
+        "menu_render_scale": 0.5,
+        "menu_fps_limit": 30,
+        "menu_camera_motion": false,
+        "menu_camera_speed": 0.25,
+        "menu_darkness": 1.5,
+        "master_volume": 0,
+        "music_volume": 0,
+        "sfx_volume": 0,
+        "ui_volume": 0,
+        "mouse_sensitivity": 0.25,
+        "invert_y": true,
+        "fov": 105,
+        "camera_motion": false,
+        "sprint_mode": "toggle",
+        "hud_visible": false,
+        "mouse_vertical_multiplier": 3,
+        "invert_x": true,
+        "mouse_smoothing": 1,
+        "controller_enabled": false,
+        "controller_sensitivity": 3,
+        "controller_deadzone": 0.45,
+        "controller_vibration": 1,
+        "ambience_volume": 0,
+        "footstep_volume": 0,
+        "cabinet_volume": 0,
+        "horror_volume": 0,
+        "pressure_volume": 0,
+        "reverb_mode": "off",
+        "audio_dynamic_range": "night",
+        "audio_device": "QA missing output",
+        "mute_unfocused": true,
+        "mono_audio": true,
+        "audio_balance": -1,
+        "head_bob": 0,
+        "breathing_motion": 0,
+        "camera_sway": 0,
+        "crosshair": "cross",
+        "crosshair_size": 2,
+        "crosshair_color": "cyan",
+        "interaction_hints": false,
+        "tutorial_hints": false,
+        "skip_tutorial": true,
+        "skip_creator_intro": true,
+        "pause_unfocused": true,
+        "confirm_quit": true,
+        "confirm_new_run": false,
+        "loading_motion": false,
+        "reduce_light_motion": true,
+        "soft_light_transitions": true,
+        "reduced_motion": true,
+        "reduced_menu_motion": true,
+        "ui_scale": 1.5,
+        "ui_text_size": "very_large",
+        "high_contrast_ui": true,
+        "sound_captions": true,
+        "caption_size": "very_large",
+        "caption_background": 0,
+        "color_assistance": "deutan",
+        "door_symbols": false,
+        "reduced_horror_audio": true,
+        "auto_updates": false
+    }
+    var rebound: Dictionary = baseline["key_bindings"].duplicate(true)
+    rebound["interact"] = [KEY_F, 0]
+    samples["key_bindings"] = rebound
+    var saved_run := FileAccess.get_file_as_string(str(state.get("save_path")))
+    var before := [state.get("correct_streak"), state.get("visited_loops"), state.get("mistakes"), state.get("anomaly_id"), state.get("round_ready"), state.get("tutorial_done"), state.get("active"), state.get("finished")]
+    var camera := player.get_node("Camera3D") as Camera3D
+    var speed: float = player.call("movement_speed", false)
+    var sprint: float = player.call("movement_speed", true)
+    var first_pose := first.global_transform
+    var second_pose := second.global_transform
+    var portals := Portals.new()
+    var base_count := baseline.size()
+    if samples.size() != base_count:
+        push_error("Settings sweep must cover every persisted key: %d/%d" % [samples.size(), base_count])
+        return false
+    for key in samples:
+        var value = samples[key]
+        if key == "door_symbols":
+            value = not bool(baseline[key])
+        if value == baseline[key]:
+            # Even when equal, exercise the dispatch and sanitization.
+            settings.call("_apply_keys", [key])
+        else:
+            settings.call("set_option", key, value)
+        # Deferred settings handlers are also part of the contract.
+        await process_frame
+        var after := [state.get("correct_streak"), state.get("visited_loops"), state.get("mistakes"), state.get("anomaly_id"), state.get("round_ready"), state.get("tutorial_done"), state.get("active"), state.get("finished")]
+        if before != after or FileAccess.get_file_as_string(str(state.get("save_path"))) != saved_run:
+            push_error("Option altered live progress/save: " + key)
+            return false
+        if not is_instance_valid(controller) or not is_instance_valid(player) or current_scene != first or controller.get("staged") != second or controller.get("room") != first or controller.get("choice_taken") or paused:
+            push_error("Option invalidated streaming or unexpectedly paused: " + key)
+            return false
+        if not first.global_transform.is_equal_approx(first_pose) or not second.global_transform.is_equal_approx(second_pose) or player.get_parent() != first or not camera.is_current():
+            push_error("Option altered room/player ownership or transform: " + key)
+            return false
+        if not is_equal_approx(float(player.call("movement_speed", false)), speed) or not is_equal_approx(float(player.call("movement_speed", true)), sprint):
+            push_error("Option changed walking/sprint speed: " + key)
+            return false
+        for hall in [first, second]:
+            for lane in ["left", "right"]:
+                var connector := portals.get_connector(hall, lane)
+                if connector == null or connector.has_node("OneWayGate") or not connector.has_node("StraightOuterWall_Collision"):
+                    push_error("Option invalidated physical route: " + key)
+                    return false
+        if not bool(controller.call("_place_markers")):
+            push_error("Option invalidated exit markers: " + key)
+            return false
+        settings.call("_change", baseline, true)
+        await process_frame
+    print("All %d persisted settings exercised with live and staged rooms" % base_count)
+    return true
+
+
+# Real portal builder and fitting function, repeated in both orientations.
+func _verify_floor_resource_isolation(room: Node3D, portals: RefCounted) -> bool:
+    for lane in ["left","right"]:
+        var actual: Node3D = portals.get_connector(room,lane)
+        var original := actual.get_node("TurnFloor") as MeshInstance3D
+        var original_shape := actual.get_node("TurnFloor_Collision/Shape") as CollisionShape3D
+        var dimensions := (original.mesh as BoxMesh).size
+        var shared_mesh := original.mesh
+        var shared_shape := original_shape.shape
+        var direction: float = portals.lane_sign(lane)
+        var sandbox := Node3D.new()
+        sandbox.position = Vector3(500,0,500)
+        sandbox.rotation.y = PI if lane=="left" else 0.0
+        root.add_child(sandbox)
+        for pass_index in range(3):
+            var connector := Node3D.new()
+            sandbox.add_child(connector)
+            portals.call("_box",connector,"TurnFloor",original.position,dimensions,null)
+            var timber := connector.get_node("TurnFloor") as MeshInstance3D
+            var shape := connector.get_node("TurnFloor_Collision/Shape") as CollisionShape3D
+            if timber.mesh!=shared_mesh or shape.shape!=shared_shape:
+                sandbox.free()
+                _fail("Ordinary corridor no longer shares cached resources")
+                return false
+            var maze := Node3D.new()
+            sandbox.add_child(maze)
+            var architecture := Node3D.new()
+            architecture.name = "Architecture"
+            maze.add_child(architecture)
+            var floor := Node3D.new()
+            floor.name = "Floor"
+            architecture.add_child(floor)
+            var carpet := MeshInstance3D.new()
+            carpet.name = "Mesh"
+            var carpet_mesh := BoxMesh.new()
+            carpet_mesh.size = Vector3(2.0,0.25,2.0)
+            carpet.mesh = carpet_mesh
+            floor.add_child(carpet)
+            var end := timber.position.z+direction*(dimensions.z*0.5-0.18-float(pass_index)*0.07)
+            carpet.position = Vector3(1.0,0.0,end-Backrooms.ENTRY_Z)
+            Backrooms.fit_entrance_floor(connector,maze,direction)
+            var fitted := (timber.mesh as BoxMesh).size
+            if timber.mesh==shared_mesh or shape.shape==shared_shape or absf(fitted.z-dimensions.z)<0.10 or not fitted.is_equal_approx((shape.shape as BoxShape3D).size) or not dimensions.is_equal_approx((original.mesh as BoxMesh).size) or not dimensions.is_equal_approx((original_shape.shape as BoxShape3D).size):
+                sandbox.free()
+                _fail("Backrooms mutated shared TurnFloor or mismatched local collision")
+                return false
+            var fresh := Node3D.new()
+            sandbox.add_child(fresh)
+            portals.call("_box",fresh,"TurnFloor",original.position,dimensions,null)
+            var fresh_mesh := (fresh.get_node("TurnFloor") as MeshInstance3D).mesh as BoxMesh
+            var fresh_shape := (fresh.get_node("TurnFloor_Collision/Shape") as CollisionShape3D).shape as BoxShape3D
+            if fresh_mesh!=shared_mesh or fresh_shape!=shared_shape or not fresh_mesh.size.is_equal_approx(dimensions) or not fresh_shape.size.is_equal_approx(dimensions):
+                sandbox.free()
+                _fail("Later corridor retrieved corrupted cached dimensions")
+                return false
+            connector.free()
+            maze.free()
+            fresh.free()
+        sandbox.free()
+    return true

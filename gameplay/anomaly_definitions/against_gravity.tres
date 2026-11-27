@@ -1,0 +1,18 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://gameplay/anomaly_definition.gd" id="1_definition"]
+[ext_resource type="Script" path="res://gameplay/anomalies/batch_03_reality.gd" id="2_handler"]
+
+[resource]
+script = ExtResource("1_definition")
+handler = ExtResource("2_handler")
+id = "against_gravity"
+category_en = "Broken Reality"
+category_de = "Verzerrte Realität"
+title_en = "Against Gravity"
+title_de = "Gegen die Schwerkraft"
+description_en = "Individual droplets fall upward from the entire upper bottle row and fade near the ceiling."
+description_de = "Einzelne Tropfen fallen aus der gesamten oberen Flaschenreihe nach oben und verblassen an der Decke."
+target_path = "CornerBar"
+rarity = "rare"
+difficulty = 2

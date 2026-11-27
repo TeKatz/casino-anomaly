@@ -1,0 +1,18 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://gameplay/anomaly_definition.gd" id="1_definition"]
+[ext_resource type="Script" path="res://gameplay/anomalies/batch_02_horror.gd" id="2_handler"]
+
+[resource]
+script = ExtResource("1_definition")
+handler = ExtResource("2_handler")
+id = "empty_footsteps"
+category_en = "Uncanny"
+category_de = "Unheimlich"
+title_en = "Footprints into nowhere"
+title_de = "Spuren ins Nichts"
+description_en = "Barefoot impressions fade in and out in sequence along the carpet, matching your walking pace."
+description_de = "Nackte Fußabdrücke erscheinen und verblassen nacheinander auf dem Teppich, angepasst an dein Lauftempo."
+target_path = "RedCarpet/WestRunner"
+rarity = "uncommon"
+difficulty = 3

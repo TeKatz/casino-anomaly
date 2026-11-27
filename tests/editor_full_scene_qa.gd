@@ -1,0 +1,116 @@
+extends SceneTree
+
+func _initialize() -> void:
+    call_deferred("_run")
+
+
+func _fail(message: String) -> void:
+    push_error("Casino editor full-scene QA: " + message)
+    quit(1)
+
+
+func _run() -> void:
+    var loaded := load("res://main.tscn") as PackedScene
+    if loaded == null:
+        _fail("main.tscn missing")
+        return
+    var world := loaded.instantiate() as Node3D
+    var architecture := world.get_node_or_null("Architecture") as Node3D
+    var slots := world.get_node_or_null("SlotMachines") as Node3D
+    var decor := world.get_node_or_null("Decor") as Node3D
+    var models := world.get_node_or_null("ModelInteriors") as Node3D
+    var fx := world.get_node_or_null("CasinoAtmosphere") as Node3D
+    if architecture == null or slots == null or decor == null or models == null or fx == null:
+        _fail("Missing scene sections")
+        return
+    if architecture.get_child_count() < 20:
+        _fail("Architecture is still only an editor-generated preview")
+        return
+    if not fx.has_node("EntrySignTop") or not fx.has_node("BarSignTop")             or not fx.has_node("EastCove") or not fx.has_node("SouthCove"):
+        _fail("Ceiling and signage neon is missing from saved scene")
+        return
+    # Designers may remove/move spotlights as part of the room layout.
+    if fx.find_children("*", "SpotLight3D", true, false).size() > 16:
+        _fail("More than sixteen saved display spotlights")
+        return
+    var bust := models.get_node_or_null("BustPedestal_01") as StaticBody3D
+    if bust == null:
+        _fail("Saved BustPedestal_01 is absent")
+        return
+    if bust.get_node_or_null("PolishedStonePedestal") == null:
+        var child_names := []
+        for part in bust.get_children():
+            child_names.append(str(part.name))
+        _fail("Bust pedestal lacks PolishedStonePedestal; children=" + str(child_names))
+        return
+    if bust.get_node_or_null("BustPedestalCollision") == null:
+        var child_names := []
+        for part in bust.get_children():
+            child_names.append(str(part.name))
+        _fail("Bust pedestal lacks collision; children=" + str(child_names))
+        return
+    var plant := decor.get_node_or_null("Plant_00") as Node3D
+    if plant == null or plant.get_node_or_null("PlantPot_00") == null             or plant.get_node_or_null("PlantPot_00_Collision") == null             or plant.get_node_or_null("PlantFoliage_00") == null:
+        _fail("Plant meshes and collider are not under one saved editor node")
+        return
+    var slot := slots.get_node_or_null("Slot_02") as Node3D
+    var stool := slot.get_node_or_null("PlayerStool") as Node3D if slot != null else null
+    if stool == null or stool.get_node_or_null("StoolSeat") == null             or stool.get_node_or_null("StoolSeat_Collision") == null:
+        _fail("Independent slot stool was not serialized")
+        return
+    var original_plant := plant.position
+    var original_stool := stool.position
+    var original_neon := (fx.get_node("EntrySignTop") as Node3D).position
+    plant.position += Vector3(0.25, 0, 0)
+    stool.position += Vector3(-0.25, 0, 0)
+    (fx.get_node("EntrySignTop") as Node3D).position += Vector3(0, 0.10, 0)
+    var models_before := models.get_child_count()
+    var fx_static_before := fx.find_children("*Highlight", "SpotLight3D", true, false).size()
+    root.add_child(world)
+    await process_frame
+    await process_frame
+    await process_frame
+    # Even when opening main.tscn directly with no saved gameplay run,
+    # the artist must see the physical neon sign in the scene.
+    var sign := world.get_node_or_null("NeonLevelSign") as Node3D
+    if sign == null or sign.get_node_or_null("EnamelBackplate") == null \
+            or sign.get_node_or_null("Number") == null \
+            or not sign.visible:
+        _fail("The neon level sign is missing when viewing the casino scene directly")
+        return
+    if not plant.position.is_equal_approx(original_plant + Vector3(0.25, 0, 0))             or not stool.position.is_equal_approx(original_stool + Vector3(-0.25, 0, 0))             or not (fx.get_node("EntrySignTop") as Node3D).position.is_equal_approx(original_neon + Vector3(0, 0.10, 0)):
+        _fail("Runtime generator overwrote designer edits")
+        return
+    # Gameplay may add new practical spots for table shadows and neon; the
+    # previously-authored display highlights must never be duplicated.
+    if fx.find_children("*Highlight", "SpotLight3D", true, false).size() != fx_static_before:
+        _fail("Designer-authored display spotlights were duplicated")
+        return
+    if models.get_child_count() != models_before:
+        _fail("Duplicate saved model support/placement nodes were spawned")
+        return
+    # Check actual hero replacement and invisible-collider cleanup, rather
+    # than assuming the artist kept all ten original slot placements.
+    var authored_slots := world.get_node("SlotMachines") as Node3D
+    var imported_furniture := world.get_node("SketchfabFurniture") as Node3D
+    if imported_furniture == null:
+        _fail("Runtime Sketchfab furniture layer missing")
+        return
+    var saved_models := imported_furniture.get_node_or_null("EditableImportedModels") as Node3D
+    var saved_hero_count := 0
+    if saved_models != null:
+        for item in saved_models.get_children():
+            if str(item.get_meta("source_asset", "")) == "retro_slot_machine":
+                saved_hero_count += 1
+    # The invisible source Slot_01 MUST be removed at runtime even when
+    # the designer deleted the imported hero and its original plinth.
+    if int(imported_furniture.get("replaced_slots")) != saved_hero_count \
+            or authored_slots.has_node("Slot_01"):
+        _fail("An authored retro hero or its hidden source was not synchronized")
+        return
+    for cabinet in authored_slots.get_children():
+        if cabinet.name.begins_with("Slot_") and not cabinet.has_node("Body"):
+            _fail("An artist-deleted slot left behind an invisible collision cabinet")
+            return
+    print("Casino Anomaly complete Godot editor scene QA PASS")
+    quit(0)

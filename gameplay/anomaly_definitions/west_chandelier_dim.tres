@@ -1,0 +1,17 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://gameplay/anomaly_definition.gd" id="1_definition"]
+[ext_resource type="Script" path="res://gameplay/anomalies/chandelier_blackout.gd" id="2_handler"]
+
+[resource]
+script = ExtResource("1_definition")
+handler = ExtResource("2_handler")
+id = "west_chandelier_dim"
+category_en = "Lighting"
+category_de = "Beleuchtung"
+title_en = "Chandeliers switched off"
+title_de = "Alle Kronleuchter ausgeschaltet"
+description_en = "Every chandelier light in the casino is extinguished."
+description_de = "Sämtliche Kronleuchter im Casino sind unbeleuchtet."
+target_path = "Lighting/WarmCasinoLamp_05"
+rarity = "exceptional"
