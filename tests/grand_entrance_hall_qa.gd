@@ -48,6 +48,8 @@ func _run() -> void:
     if static_count < 40 or architecture.get_child_count() < 5:
         _fail("Missing authored architecture")
         return
+    if not _verify_finishes(hall):
+        return
     var space := hall.get_world_3d().direct_space_state
     var exclude: Array[RID] = [player.get_rid()]
     var shape := CapsuleShape3D.new()
@@ -126,3 +128,50 @@ func _run() -> void:
     await process_frame
     print("Casino Anomaly Grand Entrance Hall blockout QA PASS")
     quit(0)
+
+
+# Same-facing coplanar rectangles with positive projected overlap flicker.
+# Test the reported joints against the actual transformed meshes.
+func _has_coplanar_overlap(a: MeshInstance3D, b: MeshInstance3D) -> bool:
+    var aa: AABB = a.global_transform * a.get_aabb()
+    var bb: AABB = b.global_transform * b.get_aabb()
+    for axis in range(3):
+        var overlap := true
+        for other in range(3):
+            if other != axis and minf(aa.end[other],bb.end[other])-maxf(aa.position[other],bb.position[other]) <= 0.002:
+                overlap = false
+        if overlap and (absf(aa.position[axis]-bb.position[axis])<0.001 or absf(aa.end[axis]-bb.end[axis])<0.001):
+            return true
+    return false
+
+
+func _verify_finishes(hall: Node3D) -> bool:
+    for item in hall.find_children("*","MeshInstance3D",true,false):
+        var mesh := item as MeshInstance3D
+        var mat := mesh.material_override as StandardMaterial3D
+        if mat == null or mat.albedo_texture == null or not mat.normal_enabled or mat.normal_texture == null:
+            _fail("Unfinished architectural material: "+str(mesh.get_path()))
+            return false
+    for side in ["West","East"]:
+        var wall := hall.get_node("Architecture/MainWalls/"+side)
+        var shell := hall.get_node("SideGalleries/"+side+"Gallery/Shell")
+        var ceiling := shell.get_node("Ceiling/Mesh") as MeshInstance3D
+        for name_value in ["ClerestoryAboveArcade","ArrivalFlank","ReceptionFlank"]:
+            if _has_coplanar_overlap(ceiling,wall.get_node(name_value+"/Mesh") as MeshInstance3D):
+                _fail("Gallery ceiling overlaps main wall surface: "+side+"/"+name_value)
+                return false
+        for pair in [["ArrivalEnd","ArrivalFlank","SolidBay3"],["RearEnd","ReceptionFlank","SolidBay1"]]:
+            var end := shell.get_node(pair[0]+"/Mesh") as MeshInstance3D
+            if _has_coplanar_overlap(end,wall.get_node(pair[1]+"/Mesh") as MeshInstance3D) or _has_coplanar_overlap(end,shell.get_node("OuterWall/"+pair[2]+"/Mesh") as MeshInstance3D):
+                _fail("Gallery end-wall joint has overlapping faces")
+                return false
+        var counter := hall.get_node("Reception/Counter")
+        if _has_coplanar_overlap(counter.get_node("Countertop/Mesh") as MeshInstance3D,counter.get_node(side+"ReturnTop/Mesh") as MeshInstance3D):
+            _fail("Reception countertop has overlapping top surfaces")
+            return false
+    var runner := hall.get_node("Architecture/CentralAxis/BurgundyRunner") as MeshInstance3D
+    var bounds: AABB = runner.global_transform * runner.get_aabb()
+    if bounds.position.y<=0.0 or bounds.end.y>0.02 or bounds.position.x<=-2.46 or bounds.end.x>=2.46:
+        _fail("Runner clips the floor or inlays")
+        return false
+    return true

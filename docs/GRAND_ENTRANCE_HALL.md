@@ -17,8 +17,8 @@ to stay in the blockout.
 - Spawn at (0, 1.02, 12), looking along -Z. Camera offset 0.55 m,
   same capsule and controller as the original tutorial (settled eye 1.485 m).
 - Main colonnade at x ±5.25; four pairs of piers create a broad central
-  nave and lateral furnishing zones. The two thin floor inlays reserve
-  a 5 m wide runner without installing a carpet.
+  nave and lateral furnishing zones. The two thin floor inlays frame
+  the 4.88 m wide burgundy runner.
 - Reception centered at z -6.45; 6.4 m front, 1.09 m countertop,
   returns and open staff access behind. NPC marker at (0,0,-7.60);
   customer marker at (0,0,-5.10). The real tutorial NPC and its behavior
@@ -43,9 +43,14 @@ StaticBody3D nodes with matching BoxMesh and BoxShape3D children.
 Repeated dimension resources are shared but are never modified at runtime;
 make a resource unique before resizing an individual mesh/shape, or scale
 the whole owning body uniformly. No procedural architecture runs in game.
-The plain stone, green panels, bronze accents and basic ambient/omni
-lighting are provisional. Existing roulette wood and bar top materials
-are reused as read-only resources. No external asset downloads. NPC
+The material pass uses hall-specific PBR materials, existing herringbone,
+woven fabric, walnut veneer and jacquard textures, and seamless procedural
+mineral color/normal maps for stone, plaster and metal. Triplanar mapping
+prevents stretching on large architectural surfaces. No shared casino
+material is modified and no external assets are downloaded. The gallery
+ceiling and end walls meet adjoining geometry without overlapping visible
+planes; the countertop returns meet the front slab edge-to-edge. The
+runner, upper wall insets and reception panel trim are authored nodes. NPC
 placeholder is an editor marker, not a second tutorial implementation.
 
 ## QA
@@ -56,6 +61,7 @@ include the new test: authored collision matching, capsule clearance
 on main/side/staff routes, floor continuity, closed door collision,
 central NPC sightline, player gravity and 49-entry catalog/main scene
 contract. All old tutorial and gameplay tests remain enabled.
-Visual proportion, lighting, and real Forward+ performance need manual
-F6 review before Phase 7B. This scene does not add a gameplay route,
+Material coverage and the reported coplanar joints are checked as well.
+Visual surface quality, lighting and real Forward+ performance still need
+manual F6 review before furnishing and tutorial integration. This scene does not add a gameplay route,
 change a profile, implement dialogue, or affect main branch.

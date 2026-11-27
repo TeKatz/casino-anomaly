@@ -1,65 +1,206 @@
-[gd_scene load_steps=98 format=3]
+[gd_scene load_steps=125 format=3]
 
 [ext_resource type="Script" path="res://player.gd" id="1_player"]
-[ext_resource type="Material" path="res://roulette_wood_material.tres" id="2_wood"]
-[ext_resource type="Material" path="res://bar_top_material.tres" id="3_counter"]
+
+[ext_resource type="Texture2D" path="res://assets/herringbone_parquet/herringbone_parquet_diff_2k.jpg" id="Parquet0"]
+
+[ext_resource type="Texture2D" path="res://assets/herringbone_parquet/herringbone_parquet_nor_gl_2k.jpg" id="Parquet1"]
+
+[ext_resource type="Texture2D" path="res://assets/herringbone_parquet/herringbone_parquet_rough_2k.jpg" id="Parquet2"]
+
+[ext_resource type="Texture2D" path="res://assets/fabric037/Fabric037_2K-JPG_Color.jpg" id="Fabric0"]
+
+[ext_resource type="Texture2D" path="res://assets/fabric037/Fabric037_2K-JPG_NormalGL.jpg" id="Fabric1"]
+
+[ext_resource type="Texture2D" path="res://assets/fabric037/Fabric037_2K-JPG_Roughness.jpg" id="Fabric2"]
+
+[ext_resource type="Texture2D" path="res://assets/smoke_speckled_veneer/smoke_speckled_veneer_diff_2k.jpg" id="Veneer0"]
+
+[ext_resource type="Texture2D" path="res://assets/smoke_speckled_veneer/smoke_speckled_veneer_nor_gl_2k.jpg" id="Veneer1"]
+
+[ext_resource type="Texture2D" path="res://assets/smoke_speckled_veneer/smoke_speckled_veneer_rough_2k.jpg" id="Veneer2"]
+
+[ext_resource type="Texture2D" path="res://assets/quatrefoil_jacquard_fabric/quatrefoil_jacquard_fabric_diff_2k.jpg" id="Runner0"]
+
+[ext_resource type="Texture2D" path="res://assets/quatrefoil_jacquard_fabric/quatrefoil_jacquard_fabric_nor_gl_2k.jpg" id="Runner1"]
+
+[ext_resource type="Texture2D" path="res://assets/quatrefoil_jacquard_fabric/quatrefoil_jacquard_fabric_rough_2k.jpg" id="Runner2"]
+
+[sub_resource type="FastNoiseLite" id="FineMineralNoise"]
+seed = 137
+frequency = 0.042
+fractal_octaves = 4
+fractal_gain = 0.48
+
+[sub_resource type="Gradient" id="MineralPalette"]
+offsets = PackedFloat32Array(0, 0.35, 0.68, 1)
+colors = PackedColorArray(0.52, 0.49, 0.45, 1, 0.70, 0.67, 0.62, 1, 0.87, 0.84, 0.78, 1, 0.96, 0.94, 0.89, 1)
+
+[sub_resource type="NoiseTexture2D" id="MineralColor"]
+width = 512
+height = 512
+seamless = true
+color_ramp = SubResource("MineralPalette")
+noise = SubResource("FineMineralNoise")
+
+[sub_resource type="NoiseTexture2D" id="MineralNormal"]
+width = 512
+height = 512
+seamless = true
+as_normal_map = true
+bump_strength = 2.0
+noise = SubResource("FineMineralNoise")
 
 [sub_resource type="StandardMaterial3D" id="Limestone"]
-albedo_color = Color(0.43, 0.39, 0.33, 1)
-roughness = 0.8
+resource_name = "Hall | honed warm limestone"
+albedo_color = Color(0.8, 0.76, 0.68, 1)
+albedo_texture = SubResource("MineralColor")
+roughness = 0.48
 metallic = 0
+normal_enabled = true
+normal_scale = 0.32
+normal_texture = SubResource("MineralNormal")
+uv1_scale = Vector3(1.15, 1.15, 1.15)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 5
 
 [sub_resource type="StandardMaterial3D" id="Plaster"]
-albedo_color = Color(0.51, 0.46, 0.36, 1)
-roughness = 0.94
+resource_name = "Hall | fine ivory plaster"
+albedo_color = Color(0.79, 0.75, 0.66, 1)
+albedo_texture = SubResource("MineralColor")
+roughness = 0.86
 metallic = 0
+normal_enabled = true
+normal_scale = 0.13
+normal_texture = SubResource("MineralNormal")
+uv1_scale = Vector3(1.9, 1.9, 1.9)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 5
 
 [sub_resource type="StandardMaterial3D" id="DeepGreen"]
-albedo_color = Color(0.073, 0.135, 0.109, 1)
-roughness = 0.88
+resource_name = "Hall | dark green woven wallcovering"
+albedo_color = Color(0.24, 0.39, 0.29, 1)
+albedo_texture = ExtResource("Fabric0")
+roughness = 0.86
 metallic = 0
+roughness_texture = ExtResource("Fabric2")
+normal_enabled = true
+normal_scale = 0.3
+normal_texture = ExtResource("Fabric1")
+uv1_scale = Vector3(1.25, 1.25, 1.25)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 5
 
 [sub_resource type="StandardMaterial3D" id="DarkBronze"]
-albedo_color = Color(0.13, 0.09, 0.055, 1)
-roughness = 0.65
-metallic = 0.3
+resource_name = "Hall | aged bronze"
+albedo_color = Color(0.18, 0.12, 0.075, 1)
+albedo_texture = SubResource("MineralColor")
+roughness = 0.46
+metallic = 0.65
+normal_enabled = true
+normal_scale = 0.11
+normal_texture = SubResource("MineralNormal")
+uv1_scale = Vector3(2, 2, 2)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 5
 
 [sub_resource type="StandardMaterial3D" id="Brass"]
-albedo_color = Color(0.61, 0.39, 0.15, 1)
-roughness = 0.49
-metallic = 0.53
+resource_name = "Hall | satin champagne brass"
+albedo_color = Color(0.84, 0.58, 0.28, 1)
+albedo_texture = SubResource("MineralColor")
+roughness = 0.31
+metallic = 0.72
+normal_enabled = true
+normal_scale = 0.08
+normal_texture = SubResource("MineralNormal")
+uv1_scale = Vector3(2, 2, 2)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 5
 
 [sub_resource type="StandardMaterial3D" id="CeilingIvory"]
-albedo_color = Color(0.61, 0.55, 0.44, 1)
-roughness = 0.92
+resource_name = "Hall | ivory ceiling finish"
+albedo_color = Color(0.89, 0.84, 0.73, 1)
+albedo_texture = SubResource("MineralColor")
+roughness = 0.78
 metallic = 0
+normal_enabled = true
+normal_scale = 0.16
+normal_texture = SubResource("MineralNormal")
+uv1_scale = Vector3(1.6, 1.6, 1.6)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 5
 
 [sub_resource type="StandardMaterial3D" id="WarmStoneFloor"]
-albedo_color = Color(0.32, 0.29, 0.24, 1)
-roughness = 0.75
+resource_name = "Hall | satin herringbone parquet"
+albedo_color = Color(0.72, 0.61, 0.49, 1)
+albedo_texture = ExtResource("Parquet0")
+roughness = 0.53
 metallic = 0
+roughness_texture = ExtResource("Parquet2")
+normal_enabled = true
+normal_scale = 0.52
+normal_texture = ExtResource("Parquet1")
+uv1_scale = Vector3(0.6, 0.6, 0.6)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 5
 
 [sub_resource type="StandardMaterial3D" id="FloorInlay"]
-albedo_color = Color(0.39, 0.3, 0.15, 1)
-roughness = 0.69
-metallic = 0.2
+resource_name = "Hall | brushed floor brass"
+albedo_color = Color(0.68, 0.46, 0.23, 1)
+albedo_texture = SubResource("MineralColor")
+roughness = 0.44
+metallic = 0.65
+normal_enabled = true
+normal_scale = 0.07
+normal_texture = SubResource("MineralNormal")
+uv1_scale = Vector3(2, 2, 2)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 5
 
 [sub_resource type="StandardMaterial3D" id="ReservedDoor"]
-albedo_color = Color(0.14, 0.12, 0.105, 1)
-roughness = 0.82
+resource_name = "Hall | dark walnut reserved doors"
+albedo_color = Color(0.43, 0.34, 0.25, 1)
+albedo_texture = ExtResource("Veneer0")
+roughness = 0.55
 metallic = 0
+roughness_texture = ExtResource("Veneer2")
+normal_enabled = true
+normal_scale = 0.32
+normal_texture = ExtResource("Veneer1")
+uv1_scale = Vector3(0.72, 0.72, 0.72)
+uv1_triplanar = true
+uv1_world_triplanar = false
+texture_filter = 5
 
 [sub_resource type="StandardMaterial3D" id="MainDoor"]
-albedo_color = Color(0.105, 0.18, 0.13, 1)
-roughness = 0.72
+resource_name = "Hall | dark green stained wood"
+albedo_color = Color(0.27, 0.39, 0.3, 1)
+albedo_texture = ExtResource("Veneer0")
+roughness = 0.52
 metallic = 0
+roughness_texture = ExtResource("Veneer2")
+normal_enabled = true
+normal_scale = 0.32
+normal_texture = ExtResource("Veneer1")
+uv1_scale = Vector3(0.72, 0.72, 0.72)
+uv1_triplanar = true
+uv1_world_triplanar = false
+texture_filter = 5
 
 [sub_resource type="Environment" id="HallEnvironment"]
 background_mode = 1
 background_color = Color(0.055, 0.046, 0.036, 1)
 ambient_light_source = 2
-ambient_light_color = Color(0.83, 0.78, 0.70, 1)
-ambient_light_energy = 0.55
+ambient_light_color = Color(0.90, 0.87, 0.81, 1)
+ambient_light_energy = 0.46
 tonemap_mode = 2
 
 [sub_resource type="CapsuleShape3D" id="PlayerCapsule"]
@@ -124,10 +265,10 @@ size = Vector3(0.07, 3.85, 2.5)
 size = Vector3(0.12, 0.11, 2.65)
 
 [sub_resource type="BoxMesh" id="Box_20"]
-size = Vector3(0.42, 0.24, 28)
+size = Vector3(0.42, 0.24, 27.94)
 
 [sub_resource type="BoxMesh" id="Box_21"]
-size = Vector3(0.22, 0.13, 28)
+size = Vector3(0.32, 0.13, 27.94)
 
 [sub_resource type="BoxMesh" id="Box_22"]
 size = Vector3(3.6, 3.6, 0.14)
@@ -145,7 +286,7 @@ size = Vector3(0.28, 3.8, 0.34)
 size = Vector3(0.08, 0.42, 0.08)
 
 [sub_resource type="BoxMesh" id="Box_27"]
-size = Vector3(4.18, 0.34, 0.34)
+size = Vector3(4.2, 0.34, 0.38)
 
 [sub_resource type="BoxMesh" id="Box_28"]
 size = Vector3(0.035, 3.5, 0.024)
@@ -202,16 +343,16 @@ size = Vector3(0.22, 0.03, 28)
 size = Vector3(0.13, 0.11, 27.7)
 
 [sub_resource type="BoxMesh" id="Box_46"]
-size = Vector3(4.3, 0.3, 12.6)
+size = Vector3(3.9, 0.3, 12.6)
 
 [sub_resource type="BoxShape3D" id="Shape_47"]
-size = Vector3(4.3, 0.3, 12.6)
+size = Vector3(3.9, 0.3, 12.6)
 
 [sub_resource type="BoxMesh" id="Box_48"]
-size = Vector3(4.3, 4.6, 0.3)
+size = Vector3(3.7, 4.6, 0.3)
 
 [sub_resource type="BoxShape3D" id="Shape_49"]
-size = Vector3(4.3, 4.6, 0.3)
+size = Vector3(3.7, 4.6, 0.3)
 
 [sub_resource type="BoxMesh" id="Box_50"]
 size = Vector3(0.3, 4.6, 2.1)
@@ -253,7 +394,7 @@ size = Vector3(0.075, 0.38, 0.1)
 size = Vector3(0.027, 3, 0.025)
 
 [sub_resource type="BoxMesh" id="Box_63"]
-size = Vector3(2.84, 0.3, 0.42)
+size = Vector3(2.88, 0.3, 0.46)
 
 [sub_resource type="BoxMesh" id="Box_64"]
 size = Vector3(2.84, 0.07, 0.45)
@@ -292,10 +433,10 @@ size = Vector3(0.8, 1, 1.06)
 size = Vector3(0.8, 1, 1.06)
 
 [sub_resource type="BoxMesh" id="Box_76"]
-size = Vector3(0.95, 0.09, 1.08)
+size = Vector3(0.95, 0.09, 0.98)
 
 [sub_resource type="BoxShape3D" id="Shape_77"]
-size = Vector3(0.95, 0.09, 1.08)
+size = Vector3(0.95, 0.09, 0.98)
 
 [sub_resource type="BoxMesh" id="Box_78"]
 size = Vector3(7.2, 6.1, 0.14)
@@ -311,6 +452,80 @@ size = Vector3(0.6, 7.4, 0.34)
 
 [sub_resource type="BoxMesh" id="Box_82"]
 size = Vector3(7.5, 0.16, 0.13)
+
+[sub_resource type="StandardMaterial3D" id="HallWood"]
+resource_name = "Hall | satin smoked walnut"
+albedo_color = Color(0.76, 0.64, 0.51, 1)
+albedo_texture = ExtResource("Veneer0")
+roughness = 0.52
+metallic = 0
+roughness_texture = ExtResource("Veneer2")
+normal_enabled = true
+normal_scale = 0.43
+normal_texture = ExtResource("Veneer1")
+uv1_scale = Vector3(0.7, 0.7, 0.7)
+uv1_triplanar = true
+uv1_world_triplanar = false
+texture_filter = 5
+
+[sub_resource type="StandardMaterial3D" id="HallCounter"]
+resource_name = "Hall | polished dark stone counter"
+albedo_color = Color(0.24, 0.22, 0.19, 1)
+albedo_texture = SubResource("MineralColor")
+roughness = 0.3
+metallic = 0
+normal_enabled = true
+normal_scale = 0.14
+normal_texture = SubResource("MineralNormal")
+uv1_scale = Vector3(1.35, 1.35, 1.35)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 5
+
+[sub_resource type="StandardMaterial3D" id="HallRunner"]
+resource_name = "Hall | burgundy woven runner"
+albedo_color = Color(0.68, 0.37, 0.36, 1)
+albedo_texture = ExtResource("Runner0")
+roughness = 0.95
+metallic = 0
+roughness_texture = ExtResource("Runner2")
+normal_enabled = true
+normal_scale = 0.42
+normal_texture = ExtResource("Runner1")
+uv1_scale = Vector3(1, 1, 1)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 5
+
+[sub_resource type="BoxMesh" id="RunnerSlab"]
+size = Vector3(4.88, 0.008, 18.1)
+
+[sub_resource type="BoxMesh" id="ClerestoryInset"]
+size = Vector3(0.055, 2.5, 4.4)
+
+[sub_resource type="BoxMesh" id="ClerestoryTrimHorizontal"]
+size = Vector3(0.09, 0.052, 4.5)
+
+[sub_resource type="BoxMesh" id="ClerestoryTrimVertical"]
+size = Vector3(0.09, 2.5, 0.052)
+
+[sub_resource type="BoxMesh" id="WallBaseTrim"]
+size = Vector3(0.14, 0.2, 8.94)
+
+[sub_resource type="BoxMesh" id="RearWallBaseTrim"]
+size = Vector3(0.14, 0.2, 6.94)
+
+[sub_resource type="BoxMesh" id="HeaderStoneBand"]
+size = Vector3(0.22, 0.13, 27.9)
+
+[sub_resource type="BoxMesh" id="CounterPanel"]
+size = Vector3(0.87, 0.57, 0.045)
+
+[sub_resource type="BoxMesh" id="CounterPanelTop"]
+size = Vector3(0.91, 0.042, 0.032)
+
+[sub_resource type="BoxMesh" id="CounterPanelSide"]
+size = Vector3(0.042, 0.57, 0.032)
 
 [node name="GrandEntranceHall" type="Node3D"]
 
@@ -440,7 +655,7 @@ shape = SubResource("Shape_17")
 [node name="Panel_7_6" type="MeshInstance3D" parent="Architecture/MainWalls/West"]
 position = Vector3(-7.965, 2.4, 7.6)
 mesh = SubResource("Box_18")
-material_override = ExtResource("2_wood")
+material_override = SubResource("HallWood")
 
 [node name="PanelCrown_7_6" type="MeshInstance3D" parent="Architecture/MainWalls/West"]
 position = Vector3(-7.9, 4.38, 7.6)
@@ -450,7 +665,7 @@ material_override = SubResource("Brass")
 [node name="Panel_11_3" type="MeshInstance3D" parent="Architecture/MainWalls/West"]
 position = Vector3(-7.965, 2.4, 11.3)
 mesh = SubResource("Box_18")
-material_override = ExtResource("2_wood")
+material_override = SubResource("HallWood")
 
 [node name="PanelCrown_11_3" type="MeshInstance3D" parent="Architecture/MainWalls/West"]
 position = Vector3(-7.9, 4.38, 11.3)
@@ -460,7 +675,7 @@ material_override = SubResource("Brass")
 [node name="Panel_N9_2" type="MeshInstance3D" parent="Architecture/MainWalls/West"]
 position = Vector3(-7.965, 2.4, -9.2)
 mesh = SubResource("Box_18")
-material_override = ExtResource("2_wood")
+material_override = SubResource("HallWood")
 
 [node name="PanelCrown_N9_2" type="MeshInstance3D" parent="Architecture/MainWalls/West"]
 position = Vector3(-7.9, 4.38, -9.2)
@@ -470,7 +685,7 @@ material_override = SubResource("Brass")
 [node name="Panel_N12_1" type="MeshInstance3D" parent="Architecture/MainWalls/West"]
 position = Vector3(-7.965, 2.4, -12.1)
 mesh = SubResource("Box_18")
-material_override = ExtResource("2_wood")
+material_override = SubResource("HallWood")
 
 [node name="PanelCrown_N12_1" type="MeshInstance3D" parent="Architecture/MainWalls/West"]
 position = Vector3(-7.9, 4.38, -12.1)
@@ -483,7 +698,7 @@ mesh = SubResource("Box_20")
 material_override = SubResource("Limestone")
 
 [node name="LowerCornice" type="MeshInstance3D" parent="Architecture/MainWalls/West"]
-position = Vector3(-7.96, 4.62, 0)
+position = Vector3(-7.88, 4.62, 0)
 mesh = SubResource("Box_21")
 material_override = SubResource("Brass")
 
@@ -542,7 +757,7 @@ shape = SubResource("Shape_17")
 [node name="Panel_7_6" type="MeshInstance3D" parent="Architecture/MainWalls/East"]
 position = Vector3(7.965, 2.4, 7.6)
 mesh = SubResource("Box_18")
-material_override = ExtResource("2_wood")
+material_override = SubResource("HallWood")
 
 [node name="PanelCrown_7_6" type="MeshInstance3D" parent="Architecture/MainWalls/East"]
 position = Vector3(7.9, 4.38, 7.6)
@@ -552,7 +767,7 @@ material_override = SubResource("Brass")
 [node name="Panel_11_3" type="MeshInstance3D" parent="Architecture/MainWalls/East"]
 position = Vector3(7.965, 2.4, 11.3)
 mesh = SubResource("Box_18")
-material_override = ExtResource("2_wood")
+material_override = SubResource("HallWood")
 
 [node name="PanelCrown_11_3" type="MeshInstance3D" parent="Architecture/MainWalls/East"]
 position = Vector3(7.9, 4.38, 11.3)
@@ -562,7 +777,7 @@ material_override = SubResource("Brass")
 [node name="Panel_N9_2" type="MeshInstance3D" parent="Architecture/MainWalls/East"]
 position = Vector3(7.965, 2.4, -9.2)
 mesh = SubResource("Box_18")
-material_override = ExtResource("2_wood")
+material_override = SubResource("HallWood")
 
 [node name="PanelCrown_N9_2" type="MeshInstance3D" parent="Architecture/MainWalls/East"]
 position = Vector3(7.9, 4.38, -9.2)
@@ -572,7 +787,7 @@ material_override = SubResource("Brass")
 [node name="Panel_N12_1" type="MeshInstance3D" parent="Architecture/MainWalls/East"]
 position = Vector3(7.965, 2.4, -12.1)
 mesh = SubResource("Box_18")
-material_override = ExtResource("2_wood")
+material_override = SubResource("HallWood")
 
 [node name="PanelCrown_N12_1" type="MeshInstance3D" parent="Architecture/MainWalls/East"]
 position = Vector3(7.9, 4.38, -12.1)
@@ -585,7 +800,7 @@ mesh = SubResource("Box_20")
 material_override = SubResource("Limestone")
 
 [node name="LowerCornice" type="MeshInstance3D" parent="Architecture/MainWalls/East"]
-position = Vector3(7.96, 4.62, 0)
+position = Vector3(7.88, 4.62, 0)
 mesh = SubResource("Box_21")
 material_override = SubResource("Brass")
 
@@ -596,7 +811,7 @@ position = Vector3(0, 1.8, 13.93)
 
 [node name="Mesh" type="MeshInstance3D" parent="Architecture/Arrival/EntranceDoubleDoor"]
 mesh = SubResource("Box_22")
-material_override = ExtResource("2_wood")
+material_override = SubResource("HallWood")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/Arrival/EntranceDoubleDoor"]
 shape = SubResource("Shape_23")
@@ -632,7 +847,7 @@ mesh = SubResource("Box_26")
 material_override = SubResource("Brass")
 
 [node name="EntranceLintel" type="MeshInstance3D" parent="Architecture/Arrival"]
-position = Vector3(0, 3.85, 13.82)
+position = Vector3(0, 3.85, 13.8)
 mesh = SubResource("Box_27")
 material_override = SubResource("Limestone")
 
@@ -1256,7 +1471,7 @@ material_override = SubResource("DarkBronze")
 [node name="Shell" type="Node3D" parent="SideGalleries/WestGallery"]
 
 [node name="Ceiling" type="StaticBody3D" parent="SideGalleries/WestGallery/Shell"]
-position = Vector3(-10.15, 4.75, -1)
+position = Vector3(-10.35, 4.75, -1)
 
 [node name="Mesh" type="MeshInstance3D" parent="SideGalleries/WestGallery/Shell/Ceiling"]
 mesh = SubResource("Box_46")
@@ -1356,7 +1571,7 @@ shape = SubResource("Shape_59")
 [node name="LeftPanel" type="MeshInstance3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_1"]
 position = Vector3(-0.59, 1.55, 0.164)
 mesh = SubResource("Box_60")
-material_override = ExtResource("2_wood")
+material_override = SubResource("HallWood")
 
 [node name="LeftHandle" type="MeshInstance3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_1"]
 position = Vector3(-0.14, 1.12, 0.23)
@@ -1376,7 +1591,7 @@ shape = SubResource("Shape_59")
 [node name="RightPanel" type="MeshInstance3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_1"]
 position = Vector3(0.59, 1.55, 0.164)
 mesh = SubResource("Box_60")
-material_override = ExtResource("2_wood")
+material_override = SubResource("HallWood")
 
 [node name="RightHandle" type="MeshInstance3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_1"]
 position = Vector3(0.14, 1.12, 0.23)
@@ -1457,7 +1672,7 @@ shape = SubResource("Shape_59")
 [node name="LeftPanel" type="MeshInstance3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_2"]
 position = Vector3(-0.59, 1.55, 0.164)
 mesh = SubResource("Box_60")
-material_override = ExtResource("2_wood")
+material_override = SubResource("HallWood")
 
 [node name="LeftHandle" type="MeshInstance3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_2"]
 position = Vector3(-0.14, 1.12, 0.23)
@@ -1477,7 +1692,7 @@ shape = SubResource("Shape_59")
 [node name="RightPanel" type="MeshInstance3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_2"]
 position = Vector3(0.59, 1.55, 0.164)
 mesh = SubResource("Box_60")
-material_override = ExtResource("2_wood")
+material_override = SubResource("HallWood")
 
 [node name="RightHandle" type="MeshInstance3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_2"]
 position = Vector3(0.14, 1.12, 0.23)
@@ -1541,7 +1756,7 @@ material_override = SubResource("Limestone")
 [node name="Shell" type="Node3D" parent="SideGalleries/EastGallery"]
 
 [node name="Ceiling" type="StaticBody3D" parent="SideGalleries/EastGallery/Shell"]
-position = Vector3(10.15, 4.75, -1)
+position = Vector3(10.35, 4.75, -1)
 
 [node name="Mesh" type="MeshInstance3D" parent="SideGalleries/EastGallery/Shell/Ceiling"]
 mesh = SubResource("Box_46")
@@ -1641,7 +1856,7 @@ shape = SubResource("Shape_59")
 [node name="LeftPanel" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection"]
 position = Vector3(-0.59, 1.55, 0.164)
 mesh = SubResource("Box_60")
-material_override = ExtResource("2_wood")
+material_override = SubResource("HallWood")
 
 [node name="LeftHandle" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection"]
 position = Vector3(-0.14, 1.12, 0.23)
@@ -1661,7 +1876,7 @@ shape = SubResource("Shape_59")
 [node name="RightPanel" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection"]
 position = Vector3(0.59, 1.55, 0.164)
 mesh = SubResource("Box_60")
-material_override = ExtResource("2_wood")
+material_override = SubResource("HallWood")
 
 [node name="RightHandle" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection"]
 position = Vector3(0.14, 1.12, 0.23)
@@ -1742,7 +1957,7 @@ shape = SubResource("Shape_59")
 [node name="LeftPanel" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/ReservedAccess_3"]
 position = Vector3(-0.59, 1.55, 0.164)
 mesh = SubResource("Box_60")
-material_override = ExtResource("2_wood")
+material_override = SubResource("HallWood")
 
 [node name="LeftHandle" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/ReservedAccess_3"]
 position = Vector3(-0.14, 1.12, 0.23)
@@ -1762,7 +1977,7 @@ shape = SubResource("Shape_59")
 [node name="RightPanel" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/ReservedAccess_3"]
 position = Vector3(0.59, 1.55, 0.164)
 mesh = SubResource("Box_60")
-material_override = ExtResource("2_wood")
+material_override = SubResource("HallWood")
 
 [node name="RightHandle" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/ReservedAccess_3"]
 position = Vector3(0.14, 1.12, 0.23)
@@ -1831,7 +2046,7 @@ position = Vector3(0, 0.5, 0)
 
 [node name="Mesh" type="MeshInstance3D" parent="Reception/Counter/Front"]
 mesh = SubResource("Box_68")
-material_override = ExtResource("2_wood")
+material_override = SubResource("HallWood")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Reception/Counter/Front"]
 shape = SubResource("Shape_69")
@@ -1841,7 +2056,7 @@ position = Vector3(0, 1.045, 0)
 
 [node name="Mesh" type="MeshInstance3D" parent="Reception/Counter/Countertop"]
 mesh = SubResource("Box_70")
-material_override = ExtResource("3_counter")
+material_override = SubResource("HallCounter")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Reception/Counter/Countertop"]
 shape = SubResource("Shape_71")
@@ -1861,17 +2076,17 @@ position = Vector3(-2.8, 0.5, -0.93)
 
 [node name="Mesh" type="MeshInstance3D" parent="Reception/Counter/WestReturn"]
 mesh = SubResource("Box_74")
-material_override = ExtResource("2_wood")
+material_override = SubResource("HallWood")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Reception/Counter/WestReturn"]
 shape = SubResource("Shape_75")
 
 [node name="WestReturnTop" type="StaticBody3D" parent="Reception/Counter"]
-position = Vector3(-2.8, 1.045, -0.93)
+position = Vector3(-2.8, 1.045, -0.98)
 
 [node name="Mesh" type="MeshInstance3D" parent="Reception/Counter/WestReturnTop"]
 mesh = SubResource("Box_76")
-material_override = ExtResource("3_counter")
+material_override = SubResource("HallCounter")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Reception/Counter/WestReturnTop"]
 shape = SubResource("Shape_77")
@@ -1881,17 +2096,17 @@ position = Vector3(2.8, 0.5, -0.93)
 
 [node name="Mesh" type="MeshInstance3D" parent="Reception/Counter/EastReturn"]
 mesh = SubResource("Box_74")
-material_override = ExtResource("2_wood")
+material_override = SubResource("HallWood")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Reception/Counter/EastReturn"]
 shape = SubResource("Shape_75")
 
 [node name="EastReturnTop" type="StaticBody3D" parent="Reception/Counter"]
-position = Vector3(2.8, 1.045, -0.93)
+position = Vector3(2.8, 1.045, -0.98)
 
 [node name="Mesh" type="MeshInstance3D" parent="Reception/Counter/EastReturnTop"]
 mesh = SubResource("Box_76")
-material_override = ExtResource("3_counter")
+material_override = SubResource("HallCounter")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Reception/Counter/EastReturnTop"]
 shape = SubResource("Shape_77")
@@ -1965,47 +2180,47 @@ material_override = SubResource("Brass")
 
 [node name="NaveFill1" type="OmniLight3D" parent="Lighting"]
 position = Vector3(0, 6.45, 10.5)
-light_color = Color(1, 0.89, 0.73, 1)
-light_energy = 3.2
+light_color = Color(1, 0.94, 0.84, 1)
+light_energy = 2.65
 omni_range = 12
 omni_attenuation = 0.9
 shadow_enabled = false
 
 [node name="NaveFill2" type="OmniLight3D" parent="Lighting"]
 position = Vector3(0, 6.45, 4.8)
-light_color = Color(1, 0.89, 0.73, 1)
-light_energy = 3.2
+light_color = Color(1, 0.94, 0.84, 1)
+light_energy = 2.65
 omni_range = 12
 omni_attenuation = 0.9
 shadow_enabled = false
 
 [node name="NaveFill3" type="OmniLight3D" parent="Lighting"]
 position = Vector3(0, 6.45, -0.4)
-light_color = Color(1, 0.89, 0.73, 1)
-light_energy = 3.2
+light_color = Color(1, 0.94, 0.84, 1)
+light_energy = 2.65
 omni_range = 12
 omni_attenuation = 0.9
 shadow_enabled = true
 
 [node name="NaveFill4" type="OmniLight3D" parent="Lighting"]
 position = Vector3(0, 6.45, -6)
-light_color = Color(1, 0.89, 0.73, 1)
-light_energy = 3.2
+light_color = Color(1, 0.94, 0.84, 1)
+light_energy = 2.65
 omni_range = 12
 omni_attenuation = 0.9
 shadow_enabled = false
 
 [node name="NaveFill5" type="OmniLight3D" parent="Lighting"]
 position = Vector3(0, 6.45, -11.1)
-light_color = Color(1, 0.89, 0.73, 1)
-light_energy = 3.2
+light_color = Color(1, 0.94, 0.84, 1)
+light_energy = 2.65
 omni_range = 12
 omni_attenuation = 0.9
 shadow_enabled = false
 
 [node name="WestGalleryFill1" type="OmniLight3D" parent="Lighting"]
 position = Vector3(-10, 3.6, -4)
-light_color = Color(1, 0.89, 0.73, 1)
+light_color = Color(1, 0.94, 0.84, 1)
 light_energy = 1.6
 omni_range = 7
 omni_attenuation = 0.9
@@ -2013,7 +2228,7 @@ shadow_enabled = false
 
 [node name="WestGalleryFill2" type="OmniLight3D" parent="Lighting"]
 position = Vector3(-10, 3.6, 2)
-light_color = Color(1, 0.89, 0.73, 1)
+light_color = Color(1, 0.94, 0.84, 1)
 light_energy = 1.6
 omni_range = 7
 omni_attenuation = 0.9
@@ -2021,7 +2236,7 @@ shadow_enabled = false
 
 [node name="EastGalleryFill1" type="OmniLight3D" parent="Lighting"]
 position = Vector3(10, 3.6, -4)
-light_color = Color(1, 0.89, 0.73, 1)
+light_color = Color(1, 0.94, 0.84, 1)
 light_energy = 1.6
 omni_range = 7
 omni_attenuation = 0.9
@@ -2029,7 +2244,7 @@ shadow_enabled = false
 
 [node name="EastGalleryFill2" type="OmniLight3D" parent="Lighting"]
 position = Vector3(10, 3.6, 2)
-light_color = Color(1, 0.89, 0.73, 1)
+light_color = Color(1, 0.94, 0.84, 1)
 light_energy = 1.6
 omni_range = 7
 omni_attenuation = 0.9
@@ -2037,7 +2252,7 @@ shadow_enabled = false
 
 [node name="ReceptionKey" type="OmniLight3D" parent="Lighting"]
 position = Vector3(0, 3.55, -5.3)
-light_color = Color(1, 0.89, 0.73, 1)
+light_color = Color(1, 0.94, 0.84, 1)
 light_energy = 1.5
 omni_range = 8
 omni_attenuation = 0.9
@@ -2064,3 +2279,288 @@ shape = SubResource("PlayerCapsule")
 [node name="Camera3D" type="Camera3D" parent="Player"]
 position = Vector3(0, 0.55, 0)
 current = true
+
+[node name="BurgundyRunner" type="MeshInstance3D" parent="Architecture/CentralAxis"]
+position = Vector3(0, 0.008, 3.1)
+mesh = SubResource("RunnerSlab")
+material_override = SubResource("HallRunner")
+
+[node name="ArrivalBaseTrim" type="MeshInstance3D" parent="Architecture/MainWalls/West"]
+position = Vector3(-7.965, 0.11, 9.5)
+mesh = SubResource("WallBaseTrim")
+material_override = SubResource("DarkBronze")
+
+[node name="ReceptionBaseTrim" type="MeshInstance3D" parent="Architecture/MainWalls/West"]
+position = Vector3(-7.965, 0.11, -10.5)
+mesh = SubResource("RearWallBaseTrim")
+material_override = SubResource("DarkBronze")
+
+[node name="StoneFrieze" type="MeshInstance3D" parent="Architecture/MainWalls/West"]
+position = Vector3(-7.92, 4.81, 0)
+mesh = SubResource("HeaderStoneBand")
+material_override = SubResource("Limestone")
+
+[node name="ClerestoryPanel1" type="MeshInstance3D" parent="Architecture/MainWalls/West"]
+position = Vector3(-7.968, 6.46, -4)
+mesh = SubResource("ClerestoryInset")
+material_override = SubResource("DeepGreen")
+
+[node name="ClerestoryPanel1Top" type="MeshInstance3D" parent="Architecture/MainWalls/West"]
+position = Vector3(-7.93, 7.735, -4)
+mesh = SubResource("ClerestoryTrimHorizontal")
+material_override = SubResource("Brass")
+
+[node name="ClerestoryPanel1Bottom" type="MeshInstance3D" parent="Architecture/MainWalls/West"]
+position = Vector3(-7.93, 5.185, -4)
+mesh = SubResource("ClerestoryTrimHorizontal")
+material_override = SubResource("Brass")
+
+[node name="ClerestoryPanel1Left" type="MeshInstance3D" parent="Architecture/MainWalls/West"]
+position = Vector3(-7.93, 6.46, -6.224)
+mesh = SubResource("ClerestoryTrimVertical")
+material_override = SubResource("Brass")
+
+[node name="ClerestoryPanel1Right" type="MeshInstance3D" parent="Architecture/MainWalls/West"]
+position = Vector3(-7.93, 6.46, -1.7759999999999998)
+mesh = SubResource("ClerestoryTrimVertical")
+material_override = SubResource("Brass")
+
+[node name="ClerestoryPanel2" type="MeshInstance3D" parent="Architecture/MainWalls/West"]
+position = Vector3(-7.968, 6.46, 2)
+mesh = SubResource("ClerestoryInset")
+material_override = SubResource("DeepGreen")
+
+[node name="ClerestoryPanel2Top" type="MeshInstance3D" parent="Architecture/MainWalls/West"]
+position = Vector3(-7.93, 7.735, 2)
+mesh = SubResource("ClerestoryTrimHorizontal")
+material_override = SubResource("Brass")
+
+[node name="ClerestoryPanel2Bottom" type="MeshInstance3D" parent="Architecture/MainWalls/West"]
+position = Vector3(-7.93, 5.185, 2)
+mesh = SubResource("ClerestoryTrimHorizontal")
+material_override = SubResource("Brass")
+
+[node name="ClerestoryPanel2Left" type="MeshInstance3D" parent="Architecture/MainWalls/West"]
+position = Vector3(-7.93, 6.46, -0.2240000000000002)
+mesh = SubResource("ClerestoryTrimVertical")
+material_override = SubResource("Brass")
+
+[node name="ClerestoryPanel2Right" type="MeshInstance3D" parent="Architecture/MainWalls/West"]
+position = Vector3(-7.93, 6.46, 4.224)
+mesh = SubResource("ClerestoryTrimVertical")
+material_override = SubResource("Brass")
+
+[node name="ArrivalBaseTrim" type="MeshInstance3D" parent="Architecture/MainWalls/East"]
+position = Vector3(7.965, 0.11, 9.5)
+mesh = SubResource("WallBaseTrim")
+material_override = SubResource("DarkBronze")
+
+[node name="ReceptionBaseTrim" type="MeshInstance3D" parent="Architecture/MainWalls/East"]
+position = Vector3(7.965, 0.11, -10.5)
+mesh = SubResource("RearWallBaseTrim")
+material_override = SubResource("DarkBronze")
+
+[node name="StoneFrieze" type="MeshInstance3D" parent="Architecture/MainWalls/East"]
+position = Vector3(7.92, 4.81, 0)
+mesh = SubResource("HeaderStoneBand")
+material_override = SubResource("Limestone")
+
+[node name="ClerestoryPanel1" type="MeshInstance3D" parent="Architecture/MainWalls/East"]
+position = Vector3(7.968, 6.46, -4)
+mesh = SubResource("ClerestoryInset")
+material_override = SubResource("DeepGreen")
+
+[node name="ClerestoryPanel1Top" type="MeshInstance3D" parent="Architecture/MainWalls/East"]
+position = Vector3(7.93, 7.735, -4)
+mesh = SubResource("ClerestoryTrimHorizontal")
+material_override = SubResource("Brass")
+
+[node name="ClerestoryPanel1Bottom" type="MeshInstance3D" parent="Architecture/MainWalls/East"]
+position = Vector3(7.93, 5.185, -4)
+mesh = SubResource("ClerestoryTrimHorizontal")
+material_override = SubResource("Brass")
+
+[node name="ClerestoryPanel1Left" type="MeshInstance3D" parent="Architecture/MainWalls/East"]
+position = Vector3(7.93, 6.46, -6.224)
+mesh = SubResource("ClerestoryTrimVertical")
+material_override = SubResource("Brass")
+
+[node name="ClerestoryPanel1Right" type="MeshInstance3D" parent="Architecture/MainWalls/East"]
+position = Vector3(7.93, 6.46, -1.7759999999999998)
+mesh = SubResource("ClerestoryTrimVertical")
+material_override = SubResource("Brass")
+
+[node name="ClerestoryPanel2" type="MeshInstance3D" parent="Architecture/MainWalls/East"]
+position = Vector3(7.968, 6.46, 2)
+mesh = SubResource("ClerestoryInset")
+material_override = SubResource("DeepGreen")
+
+[node name="ClerestoryPanel2Top" type="MeshInstance3D" parent="Architecture/MainWalls/East"]
+position = Vector3(7.93, 7.735, 2)
+mesh = SubResource("ClerestoryTrimHorizontal")
+material_override = SubResource("Brass")
+
+[node name="ClerestoryPanel2Bottom" type="MeshInstance3D" parent="Architecture/MainWalls/East"]
+position = Vector3(7.93, 5.185, 2)
+mesh = SubResource("ClerestoryTrimHorizontal")
+material_override = SubResource("Brass")
+
+[node name="ClerestoryPanel2Left" type="MeshInstance3D" parent="Architecture/MainWalls/East"]
+position = Vector3(7.93, 6.46, -0.2240000000000002)
+mesh = SubResource("ClerestoryTrimVertical")
+material_override = SubResource("Brass")
+
+[node name="ClerestoryPanel2Right" type="MeshInstance3D" parent="Architecture/MainWalls/East"]
+position = Vector3(7.93, 6.46, 4.224)
+mesh = SubResource("ClerestoryTrimVertical")
+material_override = SubResource("Brass")
+
+[node name="WalnutPanel1" type="MeshInstance3D" parent="Reception/Counter"]
+position = Vector3(-2.5, 0.48, 0.423)
+mesh = SubResource("CounterPanel")
+material_override = SubResource("HallWood")
+
+[node name="Panel1Top" type="MeshInstance3D" parent="Reception/Counter"]
+position = Vector3(-2.5, 0.787, 0.45)
+mesh = SubResource("CounterPanelTop")
+material_override = SubResource("Brass")
+
+[node name="Panel1Bottom" type="MeshInstance3D" parent="Reception/Counter"]
+position = Vector3(-2.5, 0.173, 0.45)
+mesh = SubResource("CounterPanelTop")
+material_override = SubResource("Brass")
+
+[node name="Panel1Left" type="MeshInstance3D" parent="Reception/Counter"]
+position = Vector3(-2.955, 0.48, 0.45)
+mesh = SubResource("CounterPanelSide")
+material_override = SubResource("DarkBronze")
+
+[node name="Panel1Right" type="MeshInstance3D" parent="Reception/Counter"]
+position = Vector3(-2.045, 0.48, 0.45)
+mesh = SubResource("CounterPanelSide")
+material_override = SubResource("DarkBronze")
+
+[node name="WalnutPanel2" type="MeshInstance3D" parent="Reception/Counter"]
+position = Vector3(-1.5, 0.48, 0.423)
+mesh = SubResource("CounterPanel")
+material_override = SubResource("HallWood")
+
+[node name="Panel2Top" type="MeshInstance3D" parent="Reception/Counter"]
+position = Vector3(-1.5, 0.787, 0.45)
+mesh = SubResource("CounterPanelTop")
+material_override = SubResource("Brass")
+
+[node name="Panel2Bottom" type="MeshInstance3D" parent="Reception/Counter"]
+position = Vector3(-1.5, 0.173, 0.45)
+mesh = SubResource("CounterPanelTop")
+material_override = SubResource("Brass")
+
+[node name="Panel2Left" type="MeshInstance3D" parent="Reception/Counter"]
+position = Vector3(-1.955, 0.48, 0.45)
+mesh = SubResource("CounterPanelSide")
+material_override = SubResource("DarkBronze")
+
+[node name="Panel2Right" type="MeshInstance3D" parent="Reception/Counter"]
+position = Vector3(-1.045, 0.48, 0.45)
+mesh = SubResource("CounterPanelSide")
+material_override = SubResource("DarkBronze")
+
+[node name="WalnutPanel3" type="MeshInstance3D" parent="Reception/Counter"]
+position = Vector3(-0.5, 0.48, 0.423)
+mesh = SubResource("CounterPanel")
+material_override = SubResource("HallWood")
+
+[node name="Panel3Top" type="MeshInstance3D" parent="Reception/Counter"]
+position = Vector3(-0.5, 0.787, 0.45)
+mesh = SubResource("CounterPanelTop")
+material_override = SubResource("Brass")
+
+[node name="Panel3Bottom" type="MeshInstance3D" parent="Reception/Counter"]
+position = Vector3(-0.5, 0.173, 0.45)
+mesh = SubResource("CounterPanelTop")
+material_override = SubResource("Brass")
+
+[node name="Panel3Left" type="MeshInstance3D" parent="Reception/Counter"]
+position = Vector3(-0.9550000000000001, 0.48, 0.45)
+mesh = SubResource("CounterPanelSide")
+material_override = SubResource("DarkBronze")
+
+[node name="Panel3Right" type="MeshInstance3D" parent="Reception/Counter"]
+position = Vector3(-0.044999999999999984, 0.48, 0.45)
+mesh = SubResource("CounterPanelSide")
+material_override = SubResource("DarkBronze")
+
+[node name="WalnutPanel4" type="MeshInstance3D" parent="Reception/Counter"]
+position = Vector3(0.5, 0.48, 0.423)
+mesh = SubResource("CounterPanel")
+material_override = SubResource("HallWood")
+
+[node name="Panel4Top" type="MeshInstance3D" parent="Reception/Counter"]
+position = Vector3(0.5, 0.787, 0.45)
+mesh = SubResource("CounterPanelTop")
+material_override = SubResource("Brass")
+
+[node name="Panel4Bottom" type="MeshInstance3D" parent="Reception/Counter"]
+position = Vector3(0.5, 0.173, 0.45)
+mesh = SubResource("CounterPanelTop")
+material_override = SubResource("Brass")
+
+[node name="Panel4Left" type="MeshInstance3D" parent="Reception/Counter"]
+position = Vector3(0.044999999999999984, 0.48, 0.45)
+mesh = SubResource("CounterPanelSide")
+material_override = SubResource("DarkBronze")
+
+[node name="Panel4Right" type="MeshInstance3D" parent="Reception/Counter"]
+position = Vector3(0.9550000000000001, 0.48, 0.45)
+mesh = SubResource("CounterPanelSide")
+material_override = SubResource("DarkBronze")
+
+[node name="WalnutPanel5" type="MeshInstance3D" parent="Reception/Counter"]
+position = Vector3(1.5, 0.48, 0.423)
+mesh = SubResource("CounterPanel")
+material_override = SubResource("HallWood")
+
+[node name="Panel5Top" type="MeshInstance3D" parent="Reception/Counter"]
+position = Vector3(1.5, 0.787, 0.45)
+mesh = SubResource("CounterPanelTop")
+material_override = SubResource("Brass")
+
+[node name="Panel5Bottom" type="MeshInstance3D" parent="Reception/Counter"]
+position = Vector3(1.5, 0.173, 0.45)
+mesh = SubResource("CounterPanelTop")
+material_override = SubResource("Brass")
+
+[node name="Panel5Left" type="MeshInstance3D" parent="Reception/Counter"]
+position = Vector3(1.045, 0.48, 0.45)
+mesh = SubResource("CounterPanelSide")
+material_override = SubResource("DarkBronze")
+
+[node name="Panel5Right" type="MeshInstance3D" parent="Reception/Counter"]
+position = Vector3(1.955, 0.48, 0.45)
+mesh = SubResource("CounterPanelSide")
+material_override = SubResource("DarkBronze")
+
+[node name="WalnutPanel6" type="MeshInstance3D" parent="Reception/Counter"]
+position = Vector3(2.5, 0.48, 0.423)
+mesh = SubResource("CounterPanel")
+material_override = SubResource("HallWood")
+
+[node name="Panel6Top" type="MeshInstance3D" parent="Reception/Counter"]
+position = Vector3(2.5, 0.787, 0.45)
+mesh = SubResource("CounterPanelTop")
+material_override = SubResource("Brass")
+
+[node name="Panel6Bottom" type="MeshInstance3D" parent="Reception/Counter"]
+position = Vector3(2.5, 0.173, 0.45)
+mesh = SubResource("CounterPanelTop")
+material_override = SubResource("Brass")
+
+[node name="Panel6Left" type="MeshInstance3D" parent="Reception/Counter"]
+position = Vector3(2.045, 0.48, 0.45)
+mesh = SubResource("CounterPanelSide")
+material_override = SubResource("DarkBronze")
+
+[node name="Panel6Right" type="MeshInstance3D" parent="Reception/Counter"]
+position = Vector3(2.955, 0.48, 0.45)
+mesh = SubResource("CounterPanelSide")
+material_override = SubResource("DarkBronze")
