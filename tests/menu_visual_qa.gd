@@ -51,6 +51,38 @@ func _run() -> void:
     if logo.get_global_rect().end.x >= bounds.position.x and (menu.get_node("Brand") as Control).visible:
         _fail("Brand artwork overlaps the menu panel")
         return
+    # The two original slogans are live Labels so accessibility can still
+    # scale them and apply high contrast. Keep their baseline and divider
+    # aligned to the approved logo, without affecting the menu stack.
+    var eyebrow := menu.get_node("Brand/Eyebrow") as Label
+    var tagline := menu.get_node("Brand/Tagline") as Label
+    var rule := menu.get_node("Brand/Rule") as TextureRect
+    var diamond := menu.get_node("Brand/RuleDiamond") as Polygon2D
+    if eyebrow.text != "AN EXERCISE IN PERCEPTION" or tagline.text != "EVERY DETAIL IS A DECISION.":
+        _fail("Original branding copy changed")
+        return
+    for line in [eyebrow, tagline]:
+        var font := line.get_theme_font("font") as FontVariation
+        if font == null or font.spacing_glyph < 1 or not font.base_font is SystemFont or line.horizontal_alignment != HORIZONTAL_ALIGNMENT_CENTER or line.mouse_filter != Control.MOUSE_FILTER_IGNORE:
+            _fail("Premium brand typography or alignment missing")
+            return
+        if absf(line.get_rect().get_center().x - logo.get_rect().get_center().x) > 0.5:
+            _fail("Brand slogan is not centered on the approved logo")
+            return
+    if not rule.texture is GradientTexture2D or absf(rule.get_rect().get_center().x - logo.get_rect().get_center().x) > 0.5 or diamond.position.distance_to(rule.get_rect().get_center()) > 0.5:
+        _fail("Gold brand divider is not centered")
+        return
+    var brand_options = root.get_node("GameSettings")
+    var old_text_size = brand_options.get_option("ui_text_size")
+    var old_contrast = brand_options.get_option("high_contrast_ui")
+    brand_options.set_option("ui_text_size", "very_large")
+    brand_options.set_option("high_contrast_ui", true)
+    var accessible := eyebrow.get_theme_font_size("font_size") == 18 and tagline.get_theme_font_size("font_size") == 22 and eyebrow.get_theme_color("font_color") == Color.WHITE and tagline.get_theme_color("font_color") == Color.WHITE
+    brand_options.set_option("ui_text_size", old_text_size)
+    brand_options.set_option("high_contrast_ui", old_contrast)
+    if not accessible:
+        _fail("Brand typography ignores accessibility text size or contrast")
+        return
     var intro := menu.get_node("StartupIntro") as ColorRect
     var emblem := intro.get_node("Center/Content/Logo") as TextureRect
     var wordmark := intro.get_node("Center/Content/Title") as TextureRect

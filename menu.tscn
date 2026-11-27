@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://menu.gd" id="1"]
 [ext_resource type="Script" path="res://ui/luminous_button.gd" id="2"]
@@ -23,6 +23,29 @@ corner_radius_bottom_right = 16
 corner_radius_bottom_left = 16
 shadow_color = Color(0, 0, 0, 0.65)
 shadow_size = 18
+
+[sub_resource type="SystemFont" id="BrandSerif"]
+font_names = PackedStringArray("Georgia", "Liberation Serif", "DejaVu Serif", "Times New Roman")
+font_weight = 400
+
+[sub_resource type="FontVariation" id="BrandEyebrowFont"]
+base_font = SubResource("BrandSerif")
+spacing_glyph = 2
+
+[sub_resource type="FontVariation" id="BrandTaglineFont"]
+base_font = SubResource("BrandSerif")
+spacing_glyph = 1
+
+[sub_resource type="Gradient" id="BrandRuleGradient"]
+offsets = PackedFloat32Array(0, 0.22, 0.5, 0.78, 1)
+colors = PackedColorArray(0.65, 0.42, 0.19, 0, 0.72, 0.48, 0.22, 0.68, 0.95, 0.77, 0.42, 0.95, 0.72, 0.48, 0.22, 0.68, 0.65, 0.42, 0.19, 0)
+
+[sub_resource type="GradientTexture2D" id="BrandRuleTexture"]
+gradient = SubResource("BrandRuleGradient")
+width = 256
+height = 2
+fill_from = Vector2(0, 0.5)
+fill_to = Vector2(1, 0.5)
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -68,11 +91,20 @@ mouse_filter = 2
 
 [node name="Eyebrow" type="Label" parent="Brand"]
 layout_mode = 0
-offset_right = 520.0
-offset_bottom = 27.0
-theme_override_colors/font_color = Color(0.66, 0.77, 0.8, 1)
-theme_override_font_sizes/font_size = 15
+offset_right = 410.0
+offset_bottom = 29.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.85, 0.72, 0.48, 1)
+theme_override_colors/font_outline_color = Color(0.12, 0.075, 0.035, 0.88)
+theme_override_colors/font_shadow_color = Color(0.035, 0.02, 0.01, 0.85)
+theme_override_constants/outline_size = 2
+theme_override_constants/shadow_offset_x = 0
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = SubResource("BrandEyebrowFont")
+theme_override_font_sizes/font_size = 14
 text = "AN EXERCISE IN PERCEPTION"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="Logo" type="TextureRect" parent="Brand"]
 layout_mode = 0
@@ -85,21 +117,39 @@ texture = ExtResource("6_brand")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Rule" type="ColorRect" parent="Brand"]
+[node name="Rule" type="TextureRect" parent="Brand"]
 layout_mode = 0
-offset_top = 243.0
-offset_right = 92.0
-offset_bottom = 245.0
-color = Color(0.9, 0.64, 0.5, 1)
+offset_left = 115.0
+offset_top = 245.0
+offset_right = 295.0
+offset_bottom = 247.0
+mouse_filter = 2
+texture_filter = 2
+texture = SubResource("BrandRuleTexture")
+expand_mode = 1
+
+[node name="RuleDiamond" type="Polygon2D" parent="Brand"]
+position = Vector2(205, 246)
+color = Color(0.94, 0.76, 0.42, 1)
+polygon = PackedVector2Array(0, -4, 4, 0, 0, 4, -4, 0)
 
 [node name="Tagline" type="Label" parent="Brand"]
 layout_mode = 0
-offset_top = 261.0
-offset_right = 530.0
-offset_bottom = 292.0
-theme_override_colors/font_color = Color(0.65, 0.72, 0.76, 1)
-theme_override_font_sizes/font_size = 15
+offset_top = 257.0
+offset_right = 410.0
+offset_bottom = 291.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.97, 0.86, 0.65, 1)
+theme_override_colors/font_outline_color = Color(0.12, 0.075, 0.035, 0.92)
+theme_override_colors/font_shadow_color = Color(0.035, 0.02, 0.01, 0.85)
+theme_override_constants/outline_size = 2
+theme_override_constants/shadow_offset_x = 0
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = SubResource("BrandTaglineFont")
+theme_override_font_sizes/font_size = 17
 text = "EVERY DETAIL IS A DECISION."
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="CenterPanel" type="PanelContainer" parent="."]
 layout_mode = 1
