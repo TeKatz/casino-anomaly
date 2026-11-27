@@ -249,34 +249,40 @@ func _roulette(room: Node3D, wheel: Node3D) -> bool:
 
 
 func _roulette_track_height(wheel: Node3D, bounds: AABB, radius: float) -> float:
+    var radii: Array[float] = [radius]
+    return _roulette_track_profile(wheel,bounds,radii)[0]
+
+
+func _roulette_track_profile(wheel: Node3D, bounds: AABB, radii: Array[float]) -> Array[float]:
+    # The same 16 angular samples as the original accepted track-height
+    # test, grouped spatially so each source triangle is visited only once.
     const SAMPLES := 16
     var center := bounds.get_center()
+    var cell := maxf(minf(bounds.size.x,bounds.size.z)/24.0,0.01)
     var sample_points: Array[Vector2] = []
     var heights: Array[float] = []
-    for index in range(SAMPLES):
-        var angle := TAU * float(index) / float(SAMPLES)
-        sample_points.append(Vector2(center.x + cos(angle)*radius, center.z + sin(angle)*radius))
-        heights.append(-INF)
+    var buckets := {}
+    for radius in radii:
+        for index in range(SAMPLES):
+            var angle := TAU*float(index)/float(SAMPLES)
+            var point := Vector2(center.x+cos(angle)*radius,center.z+sin(angle)*radius)
+            var key := Vector2i(floori(point.x/cell),floori(point.y/cell))
+            if not buckets.has(key):
+                buckets[key] = []
+            buckets[key].append(sample_points.size())
+            sample_points.append(point)
+            heights.append(-INF)
     var inverse := wheel.global_transform.affine_inverse()
+    var effect := wheel.get_node_or_null("AnomalyPack03")
     for part in _meshes(wheel):
-        # The anomaly's own ball is not part of the source wheel geometry.
-        var effect := wheel.get_node_or_null("AnomalyPack03")
         if effect != null and effect.is_ancestor_of(part):
             continue
-        var transform_to_wheel := inverse * part.global_transform
-        var part_bounds: AABB = transform_to_wheel * part.get_aabb()
-        var candidates: Array[int] = []
-        for index in range(SAMPLES):
-            var point := sample_points[index]
-            if point.x >= part_bounds.position.x and point.x <= part_bounds.end.x and point.y >= part_bounds.position.z and point.y <= part_bounds.end.z:
-                candidates.append(index)
-        if candidates.is_empty():
-            continue
+        var transform_to_wheel := inverse*part.global_transform
         var faces := part.mesh.get_faces()
-        for i in range(0, faces.size()-2, 3):
-            var a: Vector3 = transform_to_wheel * faces[i]
-            var b: Vector3 = transform_to_wheel * faces[i+1]
-            var c: Vector3 = transform_to_wheel * faces[i+2]
+        for i in range(0,faces.size()-2,3):
+            var a: Vector3 = transform_to_wheel*faces[i]
+            var b: Vector3 = transform_to_wheel*faces[i+1]
+            var c: Vector3 = transform_to_wheel*faces[i+2]
             var low_x := minf(a.x,minf(b.x,c.x))
             var high_x := maxf(a.x,maxf(b.x,c.x))
             var low_z := minf(a.z,minf(b.z,c.z))
@@ -284,29 +290,34 @@ func _roulette_track_height(wheel: Node3D, bounds: AABB, radius: float) -> float
             var ab := Vector2(b.x-a.x,b.z-a.z)
             var ac := Vector2(c.x-a.x,c.z-a.z)
             var denominator := ab.cross(ac)
-            if absf(denominator) < 0.00000001:
+            if absf(denominator)<0.00000001:
                 continue
-            for index in candidates:
-                var point := sample_points[index]
-                if point.x < low_x or point.x > high_x or point.y < low_z or point.y > high_z:
-                    continue
-                var ap := point - Vector2(a.x,a.z)
-                var u := ap.cross(ac)/denominator
-                var v := ab.cross(ap)/denominator
-                if u >= -0.0001 and v >= -0.0001 and u+v <= 1.0001:
-                    var y := a.y + u*(b.y-a.y) + v*(c.y-a.y)
-                    heights[index] = maxf(heights[index], y)
-    var valid: Array[float] = []
-    for height in heights:
-        if is_finite(height):
-            valid.append(height)
-    if valid.size() >= SAMPLES / 2:
-        # Median removes isolated decorative ridges and keeps a smooth
-        # horizontal orbit across the rotationally symmetric track.
-        valid.sort()
-        return valid[int(valid.size()/2.0)]
-    # Conservative lower-bowl fallback for imported meshes without CPU faces.
-    return bounds.position.y + bounds.size.y * 0.25
+            for x in range(floori(low_x/cell),floori(high_x/cell)+1):
+                for z in range(floori(low_z/cell),floori(high_z/cell)+1):
+                    var key := Vector2i(x,z)
+                    if not buckets.has(key):
+                        continue
+                    for index in buckets[key]:
+                        var point := sample_points[int(index)]
+                        if point.x<low_x or point.x>high_x or point.y<low_z or point.y>high_z:
+                            continue
+                        var ap := point-Vector2(a.x,a.z)
+                        var u := ap.cross(ac)/denominator
+                        var v := ab.cross(ap)/denominator
+                        if u>=-0.0001 and v>=-0.0001 and u+v<=1.0001:
+                            heights[int(index)] = maxf(heights[int(index)],a.y+u*(b.y-a.y)+v*(c.y-a.y))
+    var result: Array[float] = []
+    for r in range(radii.size()):
+        var valid: Array[float] = []
+        for index in range(r*SAMPLES,(r+1)*SAMPLES):
+            if is_finite(heights[index]):
+                valid.append(heights[index])
+        if valid.size()>=SAMPLES/2:
+            valid.sort()
+            result.append(valid[int(valid.size()/2.0)])
+        else:
+            result.append(bounds.position.y+bounds.size.y*0.25)
+    return result
 
 
 func _dealer(room: Node3D, nodes: Array[Node3D]) -> void:

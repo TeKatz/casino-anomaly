@@ -44,10 +44,10 @@ func configure(room: Node3D, source: Node3D, bounds: AABB, probe: RefCounted) ->
         return false
     var cached: Dictionary = _mesh_cache.get(key, {})
     if cached.is_empty():
-        var heights: Array[float] = []
+        var radii: Array[float] = []
         for i in range(PROFILE_STEPS + 1):
-            var r := lerpf(inner_radius, outer_radius, float(i) / float(PROFILE_STEPS))
-            heights.append(float(probe.call("_roulette_track_height", wheel, bounds, r)))
+            radii.append(lerpf(inner_radius, outer_radius, float(i) / float(PROFILE_STEPS)))
+        var heights: Array[float] = probe.call("_roulette_track_profile", wheel, bounds, radii)
         var partition: Array[Dictionary] = []
         for mesh in parts:
             var local := wheel.global_transform.affine_inverse() * mesh.global_transform
@@ -106,6 +106,9 @@ func _partition(mesh: ArrayMesh, local: Transform3D, limit: float, bottom: float
         if mesh.surface_get_primitive_type(surface) != Mesh.PRIMITIVE_TRIANGLES:
             continue
         var arrays := mesh.surface_get_arrays(surface)
+        # Imported custom attributes carry their packing format in the source
+        # flags. Dropping those flags makes Godot interpret float arrays as bytes.
+        var flags := mesh.surface_get_format(surface)
         var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
         var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX] if arrays[Mesh.ARRAY_INDEX] != null else PackedInt32Array()
         if indices.is_empty():
@@ -135,13 +138,13 @@ func _partition(mesh: ArrayMesh, local: Transform3D, limit: float, bottom: float
         if not still.is_empty():
             var data := arrays.duplicate()
             data[Mesh.ARRAY_INDEX] = still
-            static_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, data)
+            static_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, data, [], {}, flags)
             static_mesh.surface_set_material(static_mesh.get_surface_count()-1, mesh.surface_get_material(surface))
             static_surfaces.append(surface)
         if not spin.is_empty():
             var data := arrays.duplicate()
             data[Mesh.ARRAY_INDEX] = spin
-            moving_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, data)
+            moving_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, data, [], {}, flags)
             moving_mesh.surface_set_material(moving_mesh.get_surface_count()-1, mesh.surface_get_material(surface))
             moving_surfaces.append(surface)
     return {"stationary": static_mesh if static_mesh.get_surface_count() > 0 else null,
