@@ -1,6 +1,7 @@
 extends RefCounted
 ## Pack 02: quiet, reversible environmental horror. No camera overrides,
-## collision changes or sudden reveals. Countdown has one quiet local tick.
+## sudden reveals. Vanished guardians also removes the hidden pedestal collision.
+## Countdown has one quiet local tick.
 var saved: Array[Dictionary] = []
 var spawned: Array[Node3D] = []
 var motion: Tween
@@ -48,8 +49,13 @@ func targets(room: Node3D, entry: Dictionary) -> Array[Node3D]:
         "inverted_cat":
             result = _group(base, "ConcreteCatDisplay")
             result.append_array(_group(base, "HorseStatueDisplay"))
-            if result.size() != 2:
+            # The placement layer authors the cat pedestal first and the
+            # horse pedestal second. Do not hide the cat's pedestal.
+            var horse_plinth := base.get_node_or_null("DecorativeStatuePlinth_02") as Node3D
+            if result.size() != 2 or horse_plinth == null or not horse_plinth.visible:
                 result.clear()
+            else:
+                result.append(horse_plinth)
         "lightless_horse":
             for statue in _group(base, "HorseStatueDisplay"):
                 for piece in _meshes(statue):
@@ -101,6 +107,18 @@ func can_apply(room: Node3D, entry: Dictionary) -> bool:
     return not targets(room, entry).is_empty()
 
 
+func _collision_state(node: Node3D) -> Array[Dictionary]:
+    var bodies: Array[CollisionObject3D] = []
+    if node is CollisionObject3D:
+        bodies.append(node as CollisionObject3D)
+    for child in node.find_children("*", "CollisionObject3D", true, false):
+        bodies.append(child as CollisionObject3D)
+    var result: Array[Dictionary] = []
+    for body in bodies:
+        result.append({"body": body, "layer": body.collision_layer, "mask": body.collision_mask})
+    return result
+
+
 func snapshot(nodes: Array[Node3D], id: String) -> Array[Dictionary]:
     var result: Array[Dictionary] = []
     for node in nodes:
@@ -110,6 +128,7 @@ func snapshot(nodes: Array[Node3D], id: String) -> Array[Dictionary]:
                 state["transform"] = node.transform
             "inverted_cat":
                 state["visible"] = node.visible
+                state["collisions"] = _collision_state(node)
             "lightless_horse", "watching_canvases":
                 state["material"] = (node as MeshInstance3D).material_override
             "stay_here", "silent_countdown":
@@ -208,6 +227,10 @@ func apply(room: Node3D, entry: Dictionary) -> bool:
                 _rotate_bust(node, node.transform, _bust_pivot(node), 65.0)
             "inverted_cat":
                 node.visible = false
+                for collision in _collision_state(node):
+                    var body := collision["body"] as CollisionObject3D
+                    body.collision_layer = 0
+                    body.collision_mask = 0
             "lightless_horse":
                 (node as MeshInstance3D).material_override = _surface_material(Color("#09090b"))
             "watching_canvases":
@@ -425,6 +448,11 @@ func clear() -> void:
             (node as Label3D).modulate = state["modulate"]
         elif state.has("visible"):
             node.visible = state["visible"]
+            for collision in state.get("collisions", []):
+                var body := collision["body"] as CollisionObject3D
+                if is_instance_valid(body):
+                    body.collision_layer = int(collision["layer"])
+                    body.collision_mask = int(collision["mask"])
         elif state.has("color"):
             (node as Light3D).light_color = state["color"]
             (node as Light3D).light_energy = state["energy"]

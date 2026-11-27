@@ -26,7 +26,7 @@ func targets(room: Node3D, entry: Dictionary) -> Array[Node3D]:
                     parts = ["ReelGlyph_0", "ReelGlyph_1", "ReelGlyph_2"]
                 "false_jackpot":
                     indices = [1]
-                    parts = ["MachineTitle", "TopGlow"]
+                    parts = ["MachineTitle", "TopGlow", "ReelGlyph_0", "ReelGlyph_1", "ReelGlyph_2"]
                 "dark_marquee":
                     indices = [2, 3, 4]
                     parts = ["TopGlow", "MachineTitle"]
@@ -40,7 +40,7 @@ func targets(room: Node3D, entry: Dictionary) -> Array[Node3D]:
                         result.clear()
                         return result
                     if entry["id"] == "false_jackpot":
-                        if part == "MachineTitle" and not piece is Label3D:
+                        if (part == "MachineTitle" or part.begins_with("ReelGlyph_")) and not piece is Label3D:
                             result.clear()
                             return result
                         if part == "TopGlow" and not _is_surface(piece):
@@ -133,6 +133,7 @@ func snapshot(nodes: Array[Node3D], id: String) -> Array[Dictionary]:
                 if node is Label3D:
                     state["text"] = node.text
                     state["modulate"] = node.modulate
+                    state["font_size"] = node.font_size
                 else:
                     state["material"] = (node as MeshInstance3D).material_override
             "watchful_camera":
@@ -208,15 +209,20 @@ func apply(room: Node3D, entry: Dictionary) -> bool:
         match id:
             "false_jackpot":
                 if node is Label3D:
-                    node.text = "JACKPOT"
-                    node.modulate = Color("#ffdf70")
+                    if node.name == "MachineTitle":
+                        node.text = "JACKPOT"
+                        node.modulate = Color("#ffdf70")
+                    else:
+                        # Reuse the cabinet's existing seven glyph and normal
+                        # single-symbol font size. Leave reel color unchanged.
+                        node.text = "7"
+                        node.font_size = 35
                 else:
                     _recolor(node as MeshInstance3D, Color("#ffad28"), 4.0)
             "watchful_camera":
                 _recording_led(node)
             "floating_hand":
-                var parent := node.get_parent() as Node3D
-                node.position += parent.global_basis.inverse() * Vector3(0.0, 0.10, 0.0)
+                pass # Position the entire hand together below, using actual mesh bounds.
             "burgundy_felt":
                 _recolor(node as MeshInstance3D, Color("#b13c56"), 0.35)
             "blue_runner":
@@ -226,6 +232,9 @@ func apply(room: Node3D, entry: Dictionary) -> bool:
     if id == "false_jackpot":
         _animate_jackpot(room, nodes)
     elif id == "floating_hand":
+        if not _space_floating_cards(nodes):
+            clear()
+            return false
         _animate_cards(room, nodes)
     return true
 
@@ -243,6 +252,50 @@ func _animate_jackpot(room: Node3D, nodes: Array[Node3D]) -> void:
         glow.emission_energy_multiplier = lerpf(0.8, 5.5, pulse)
         label.modulate = Color("#e88c32").lerp(Color("#fff1aa"), pulse)
     , 0.0, 1.0, 1.6)
+
+
+# Bounds in the table's local coordinates include all three imported card
+# meshes and their authored rotation/scale. The row separates the complete
+# horizontal envelopes, so independent vertical bobbing cannot cause clipping.
+func _card_bounds_in_table(card: Node3D) -> AABB:
+    var table := card.get_parent() as Node3D
+    var inverse := table.global_transform.affine_inverse()
+    var bounds := AABB()
+    var first := true
+    for part in card.find_children("*", "MeshInstance3D", true, false):
+        var mesh := part as MeshInstance3D
+        if mesh.mesh == null:
+            continue
+        var piece: AABB = (inverse * mesh.global_transform) * mesh.get_aabb()
+        bounds = piece if first else bounds.merge(piece)
+        first = false
+    return bounds
+
+
+func _space_floating_cards(nodes: Array[Node3D]) -> bool:
+    var table := nodes[0].get_parent() as Node3D
+    var boxes: Array[AABB] = []
+    var center := Vector3.ZERO
+    var total_width := 0.0
+    var gap := 0.018 / maxf(table.global_basis.x.length(), 0.001)
+    for card in nodes:
+        var bounds := _card_bounds_in_table(card)
+        if bounds.size.x <= 0.0 or bounds.size.z <= 0.0:
+            return false
+        boxes.append(bounds)
+        center += bounds.get_center()
+        total_width += bounds.size.x
+    center /= float(nodes.size())
+    total_width += gap * float(nodes.size() - 1)
+    var cursor := center.x - total_width * 0.5
+    for i in range(nodes.size()):
+        var card := nodes[i]
+        var bounds := boxes[i]
+        var middle := bounds.get_center()
+        card.position += Vector3(cursor + bounds.size.x * 0.5 - middle.x, 0.0, center.z - middle.z)
+        card.position += table.global_basis.inverse() * Vector3(0.0, 0.10, 0.0)
+        cursor += bounds.size.x + gap
+    return true
 
 
 func _animate_cards(room: Node3D, nodes: Array[Node3D]) -> void:
@@ -277,6 +330,8 @@ func clear() -> void:
         if state.has("text"):
             (node as Label3D).text = state["text"]
             (node as Label3D).modulate = state["modulate"]
+            if state.has("font_size"):
+                (node as Label3D).font_size = int(state["font_size"])
         elif state.has("transform"):
             node.transform = state["transform"]
         elif state.has("material"):

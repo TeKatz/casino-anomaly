@@ -9,6 +9,7 @@ const StreamPortals = preload("res://gameplay/stream_portals.gd")
 const NEW_IDS := [
     "stool_out_of_line",
     "plant_forward",
+    "plant_forward__other",
     "crooked_painting",
     "candleholder_shifted",
     "bust_turned__reverse",
@@ -235,7 +236,7 @@ func _run() -> void:
     if definitions.size() != 50:
         _fail("Catalog must contain exactly 50 active definitions after Phase 3 retirement")
         return
-    var expected_difficulty := {"amber_ceiling_light__soft":3,"bar_label":1,"bust_turned__reverse":2,"candleholder_shifted":4,"empty_reserve":1,"watchful_camera":2,"blank_reels":3,"empty_footsteps":3,"last_kings":4,"lightless_horse":1,"silent_countdown":1,"watching_canvases":1,"the_escort":1,"black_bloom":1,"they_are_listening":1,"wrong_reflection":1,"bar_label__reverse":5,"bar_label__subtle":3,"plant_forward__other":3}
+    var expected_difficulty := {"amber_ceiling_light__soft":3,"bar_label":1,"bust_turned__reverse":2,"candleholder_shifted":4,"empty_reserve":1,"watchful_camera":2,"blank_reels":3,"empty_footsteps":3,"last_kings":4,"lightless_horse":1,"silent_countdown":1,"watching_canvases":1,"the_escort":1,"black_bloom":1,"they_are_listening":1,"wrong_reflection":1,"bar_label__reverse":5,"bar_label__subtle":3,"plant_forward__other":1,"false_jackpot":2,"floating_hand":2,"inverted_cat":2}
     for id in expected_difficulty:
         if int(Catalog.get_entry(id).get("difficulty", 0)) != int(expected_difficulty[id]):
             _fail("Unexpected effective difficulty: " + id)
@@ -312,6 +313,49 @@ func _run() -> void:
         _fail("Anomaly leaked to another independent room")
         return
     adapter.clear()
+    # The moved plant crosses the long runner while keeping its entire
+    # imported plant and collider attached to the original root.
+    var plant_entry := Catalog.get_entry("plant_forward__other")
+    var plant := room.get_node(str(plant_entry["target_path"])) as Node3D
+    var plant_model := plant.get_node_or_null("GioraMonsteraOriginal") as Node3D
+    var plant_collision := plant.get_node_or_null("PlantPot_04_Collision") as Node3D
+    var runner := room.get_node("RedCarpet/WestRunner") as MeshInstance3D
+    if plant_model == null or plant_collision == null or runner == null:
+        _fail("Plant variant lost its movable model, collider or runner reference")
+        return
+    var plant_start := plant.transform
+    var collision_start := plant_collision.transform
+    var model_start := plant_model.transform
+    var runner_box: AABB = (room.global_transform.affine_inverse() * runner.global_transform) * runner.get_aabb()
+    var plant_before := room.to_local(plant.global_position)
+    if not adapter.apply(room, "plant_forward__other"):
+        _fail("Cross-carpet plant variant unavailable")
+        return
+    var plant_after := room.to_local(plant.global_position)
+    if plant_before.z <= runner_box.end.z or plant_after.z >= runner_box.position.z or plant_collision.transform != collision_start or plant_model.transform != model_start:
+        _fail("Plant did not cross the carpet intact")
+        return
+    # Compare the actual pot collider with the authored table and stool
+    # colliders. Both test rooms overlap in world space, so use room-local
+    # shape bounds instead of a world physics query that sees both rooms.
+    var inverse := room.global_transform.affine_inverse()
+    for pot_part in plant_collision.find_children("*", "CollisionShape3D", true, false):
+        var pot_shape := pot_part as CollisionShape3D
+        if pot_shape.disabled or pot_shape.shape == null:
+            continue
+        var pot_bounds: AABB = (inverse * pot_shape.global_transform) * pot_shape.shape.get_debug_mesh().get_aabb()
+        for obstacle_part in room.get_node("GamingTables").find_children("*", "CollisionShape3D", true, false):
+            var obstacle := obstacle_part as CollisionShape3D
+            if obstacle.disabled or obstacle.shape == null:
+                continue
+            var obstacle_bounds: AABB = (inverse * obstacle.global_transform) * obstacle.shape.get_debug_mesh().get_aabb()
+            if pot_bounds.intersects(obstacle_bounds):
+                _fail("Moved plant collider intersects a table or stool: " + str(obstacle.get_path()))
+                return
+    adapter.clear()
+    if not plant.transform.is_equal_approx(plant_start):
+        _fail("Cross-carpet plant failed to reset")
+        return
     # Batch 01: ten independent family IDs, each available on the real
     # room and isolated from the next streamed instance.
     var batch_ids := ["blank_reels","false_jackpot","dark_marquee","watchful_camera","floating_hand","missing_hand","burgundy_felt","blue_runner","empty_reserve","bare_monstera"]
@@ -324,7 +368,7 @@ func _run() -> void:
         var handler: RefCounted = entry["handler"].new()
         var nodes: Array[Node3D] = handler.call("targets", room, entry)
         var other_nodes: Array[Node3D] = handler.call("targets", next_room, entry)
-        var expected_counts := {"blank_reels": 3, "false_jackpot": 2, "dark_marquee": 6, "watchful_camera": 2, "floating_hand": 4, "missing_hand": 8, "burgundy_felt": 1, "blue_runner": 3}
+        var expected_counts := {"blank_reels": 3, "false_jackpot": 5, "dark_marquee": 6, "watchful_camera": 2, "floating_hand": 4, "missing_hand": 8, "burgundy_felt": 1, "blue_runner": 3}
         if nodes.is_empty() or other_nodes.size() != nodes.size() or (expected_counts.has(id) and nodes.size() != int(expected_counts[id])):
             _fail("Batch 01 target mismatch: " + id)
             return
@@ -351,6 +395,27 @@ func _run() -> void:
         if not adapter.apply(room, id):
             _fail("Batch 01 adapter refused " + id)
             return
+        if id == "false_jackpot":
+            var title := nodes[0] as Label3D
+            var glow := (nodes[1] as MeshInstance3D).material_override as StandardMaterial3D
+            if title.text != "JACKPOT" or glow == null or not glow.emission_enabled:
+                _fail("Jackpot title or glow changed")
+                return
+            for reel_index in range(2, 5):
+                var glyph := nodes[reel_index] as Label3D
+                if glyph.text != "7" or glyph.font_size != 35 or glyph.modulate != baseline[reel_index]["modulate"]:
+                    _fail("Jackpot reels must show three matching sevens without changing glyph color")
+                    return
+        if id == "floating_hand":
+            # The complete horizontal mesh envelopes never overlap. The
+            # unchanged bob animation only changes vertical position.
+            for i in range(nodes.size()):
+                var card_bounds: AABB = handler.call("_card_bounds_in_table", nodes[i])
+                for j in range(i + 1, nodes.size()):
+                    var other_bounds: AABB = handler.call("_card_bounds_in_table", nodes[j])
+                    if card_bounds.end.x + 0.0001 >= other_bounds.position.x:
+                        _fail("Floating card horizontal envelopes intersect")
+                        return
         if id == "burgundy_felt" or id == "blue_runner":
             for node in nodes:
                 var mesh := node as MeshInstance3D
@@ -410,7 +475,7 @@ func _run() -> void:
 func _verify_horror_batch(hall: Node3D, other_hall: Node3D) -> bool:
     var horror_ids := ["synchronized_busts","inverted_cat","lightless_horse","watching_canvases","stay_here","last_kings","ownerless_shadow","empty_footsteps","crimson_hall","silent_countdown"]
     var horror_adapter := Adapter.new()
-    var horror_counts := {"synchronized_busts": 2, "inverted_cat": 2, "watching_canvases": 3, "stay_here": 3, "ownerless_shadow": 1, "empty_footsteps": 1}
+    var horror_counts := {"synchronized_busts": 2, "inverted_cat": 3, "watching_canvases": 3, "stay_here": 3, "ownerless_shadow": 1, "empty_footsteps": 1}
     var available_horror := Catalog.available_ids(hall)
     for horror_id in horror_ids:
         print("QA anomaly: ", horror_id)
@@ -432,6 +497,16 @@ func _verify_horror_batch(hall: Node3D, other_hall: Node3D) -> bool:
         if inspector.call("snapshot", affected, horror_id) == initial or inspector.call("snapshot", unaffected, horror_id) != isolated:
             _fail("Pack 02 ineffective or leaked between rooms: " + horror_id)
             return false
+        if horror_id == "inverted_cat":
+            var horse_plinth := hall.get_node("ModelInteriors/DecorativeStatuePlinth_02") as CollisionObject3D
+            var cat_plinth := hall.get_node("ModelInteriors/DecorativeStatuePlinth_01") as Node3D
+            if not affected.has(horse_plinth) or affected.has(cat_plinth) or horse_plinth.collision_layer != 0 or horse_plinth.collision_mask != 0 or not cat_plinth.visible:
+                _fail("Vanished guardians hid the wrong pedestal or left invisible collision")
+                return false
+            for hidden in affected:
+                if hidden.visible:
+                    _fail("Vanished guardians left one target visible")
+                    return false
         if horror_id == "ownerless_shadow":
             var shadow_group := affected[0].get_node_or_null("AnomalyHorrorMark")
             if shadow_group == null:
