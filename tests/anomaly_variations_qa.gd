@@ -236,7 +236,7 @@ func _run() -> void:
     if definitions.size() != 50:
         _fail("Catalog must contain exactly 50 active definitions after Phase 3 retirement")
         return
-    var expected_difficulty := {"amber_ceiling_light__soft":3,"bar_label":1,"bust_turned__reverse":2,"candleholder_shifted":4,"empty_reserve":1,"watchful_camera":2,"blank_reels":3,"empty_footsteps":3,"last_kings":4,"lightless_horse":1,"silent_countdown":1,"watching_canvases":1,"the_escort":1,"black_bloom":1,"they_are_listening":1,"wrong_reflection":1,"bar_label__reverse":5,"bar_label__subtle":3,"plant_forward__other":1,"false_jackpot":2,"floating_hand":2,"inverted_cat":2,"ownerless_shadow":2,"against_gravity":2,"extra_guest":1,"forgotten_door":1,"unfinished_game":3}
+    var expected_difficulty := {"amber_ceiling_light__soft":3,"bar_label":1,"bust_turned__reverse":2,"candleholder_shifted":4,"empty_reserve":1,"watchful_camera":2,"blank_reels":3,"empty_footsteps":3,"last_kings":4,"lightless_horse":1,"silent_countdown":1,"watching_canvases":1,"the_escort":1,"black_bloom":1,"they_are_listening":1,"wrong_reflection":1,"bar_label__reverse":5,"bar_label__subtle":3,"plant_forward__other":1,"false_jackpot":2,"floating_hand":2,"inverted_cat":2,"ownerless_shadow":2,"against_gravity":2,"extra_guest":1,"forgotten_door":1,"unfinished_game":3,"the_other_side":2}
     for id in expected_difficulty:
         if int(Catalog.get_entry(id).get("difficulty", 0)) != int(expected_difficulty[id]):
             _fail("Unexpected effective difficulty: " + id)
@@ -880,17 +880,36 @@ func _verify_reality_batch(hall: Node3D, other_hall: Node3D) -> bool:
                     return false
         if reality_id == "wrong_reflection":
             var reality_mirror := reality_nodes[0].get_node_or_null("AnomalyPack03")
-            if reality_mirror == null or not reality_mirror.has_node("ReflectionViewport/ReflectedCamera") or not reality_mirror.has_node("ReflectionOnlyCroupier") or not reality_mirror.has_node("MirrorSurface"):
+            if reality_mirror == null or not reality_mirror.has_node("ReflectionViewport/ReflectedCamera") or not reality_mirror.has_node("ReflectionOnlyGuest") or not reality_mirror.has_node("MirrorSurface"):
                 _fail("Pack 03 reflection setup incomplete")
                 return false
             var viewport := reality_mirror.get_node("ReflectionViewport") as SubViewport
-            var reflection_actor := reality_mirror.get_node("ReflectionOnlyCroupier") as Node3D
-            if viewport.size.x < 1400 or not reality_mirror.has_node("MirrorCollision/Shape") or reflection_actor.scene_file_path != "res://models/croupier/scene.gltf":
-                _fail("Pack 03 mirror quality, collision or croupier regression")
+            var reflection_actor := reality_mirror.get_node("ReflectionOnlyGuest") as Node3D
+            if viewport.size.x < 1008 or not reality_mirror.has_node("MirrorCollision/Shape") or reflection_actor.scene_file_path != "res://models/silent_audience/security_guard/scene.gltf" or not reflection_actor.has_meta("native_idle_pose"):
+                _fail("Pack 03 mirror quality, collision or native actor regression")
+                return false
+            if not is_equal_approx(reflection_actor.scale.x,reflection_actor.scale.y) or not is_equal_approx(reflection_actor.scale.y,reflection_actor.scale.z) or not reflection_actor.find_children("*","CollisionObject3D",true,false).is_empty():
+                _fail("Mirror actor has distorted proportions or real-world collision")
                 return false
             for reflected_mesh in reflection_actor.find_children("*", "MeshInstance3D", true, false):
-                if reflected_mesh.layers != (1 << 19):
-                    _fail("Pack 03 reflected croupier visible outside mirror layer")
+                if reflected_mesh.layers != (1 << 19) or reflected_mesh.cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_OFF:
+                    _fail("Pack 03 reflected guest visible or casting shadows outside mirror layer")
+                    return false
+            var mirror_node := reality_mirror as Node3D
+            var mirror_center := mirror_node.global_position
+            var mirror_normal := mirror_node.global_basis.z.normalized()
+            var reflected := viewport.get_node("ReflectedCamera") as Camera3D
+            # Close and oblique eye positions must retain the quad corner rays.
+            for eye_offset in [Vector3(0,0,2.0),Vector3(0.70,-0.35,0.10),Vector3(-1.3,0.25,1.0)]:
+                var eye: Vector3 = mirror_center+mirror_node.global_basis*eye_offset
+                if not bool(reality_mirror.call("_sync_reflected_camera",eye,100.0)):
+                    _fail("Mirror rejected a valid close or off-axis eye")
+                    return false
+                var reflected_eye := eye-2.0*(eye-mirror_center).dot(mirror_normal)*mirror_normal
+                var top_left := mirror_center-reflected.global_basis.x*0.825+reflected.global_basis.y*0.925
+                var bottom_right := mirror_center+reflected.global_basis.x*0.825-reflected.global_basis.y*0.925
+                if not reflected.global_position.is_equal_approx(reflected_eye) or reflected.unproject_position(top_left).distance_to(Vector2.ZERO)>3.0 or reflected.unproject_position(bottom_right).distance_to(Vector2(viewport.size))>3.0:
+                    _fail("Mirror perspective does not remain attached to its physical corners")
                     return false
         if reality_probe.call("snapshot", reality_other, reality_id) != reality_isolated:
             _fail("Pack 03 leaked to another room: " + reality_id)
@@ -1016,6 +1035,30 @@ func _verify_other_side(hall: Node3D, other: Node3D) -> bool:
         _fail("Other Side did not clone runtime exit piers and both corridors")
         return false
     var aperture := event.get_node("OtherSideAperture") as MeshInstance3D
+    var source_wall: AABB = event.get("wall_bounds")
+    var anchor := Vector3(aperture.position.x+0.65,source_wall.get_center().y,source_wall.position.z)
+    var destination: Vector3 = inverted.transform*anchor
+    var inward: Vector3 = inverted.basis*Vector3.FORWARD
+    if absf(destination.z-aperture.position.z)>0.001 or absf(destination.x-anchor.x)>0.001 or inward.dot(Vector3.BACK)<0.999 or inverted.basis.x.dot(Vector3.RIGHT)<0.999:
+        _fail("Other Side still uses the former opposite-wall orientation")
+        return false
+    var opposite := hall.get_node("Architecture/NorthWestWall") as MeshInstance3D
+    var opposite_local := hall.to_local(opposite.global_position)
+    if (inverted.transform*opposite_local).z <= aperture.position.z+10.0:
+        _fail("Other Side opposite wall is not behind the aperture")
+        return false
+    var debris: Array = event.get("debris")
+    event.set("reduced",false)
+    event.set("debris_clock",0.0)
+    var first_debris: Dictionary = debris[0]
+    var particle := first_debris["node"] as Node3D
+    first_debris["delay"] = 0.0
+    event.call("_update_debris",0.15)
+    var high := particle.position.y
+    event.call("_update_debris",0.8)
+    if particle.position.y>=high or high<source_wall.get_center().y:
+        _fail("Other Side debris does not fall from inverted floor toward ceiling")
+        return false
     if absf(aperture.position.x+27.05)>0.01:
         _fail("Other Side aperture not at the clear lounge approach")
         return false

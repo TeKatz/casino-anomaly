@@ -13,7 +13,6 @@ const HOLD_TIME := 26.0
 const CLOSE_TIME := 6.0
 const REST_TIME := 8.0
 const ACTIVATION_RADIUS := 14.0
-const SOURCE_CENTER_X := -31.0
 const SECTIONS := ["Architecture","RedCarpet","SlotMachines","GamingTables","CornerBar","Lounge","Decor","ModelInteriors","SketchfabFurniture","Lighting","StreamingPortals"]
 const CARD_PATH := "res://models/playing_cards/individual/card_%02d.gltf"
 const CARD_IDS := [12,1,14,6,19,32,40,51]
@@ -165,9 +164,14 @@ func _build_world() -> void:
     inverted = Node3D.new()
     inverted.name = "InvertedCasino"
     capture.add_child(inverted)
-    # Rotate around the viewing axis: the floor is now at the ceiling,
-    # furniture hangs downward and the chandeliers point upward.
-    inverted.transform = Transform3D(Basis(Vector3.BACK,PI),Vector3(CENTER_X+SOURCE_CENTER_X,6.0,portal_z+13.20))
+    # The current aperture is on the south wall (interior at -Z).
+    # Invert about its horizontal tangent, not the former north-wall
+    # viewing axis. Source inward -Z maps to portal inward +Z; X stays
+    # registered to the same bay. Y flips about the actual wall midpoint.
+    var source_anchor := Vector3(CENTER_X,wall_bounds.get_center().y,wall_bounds.position.z)
+    var destination_anchor := Vector3(CENTER_X,wall_bounds.get_center().y,portal_z)
+    var turn := Basis(Vector3.RIGHT,PI)
+    inverted.transform = Transform3D(turn,destination_anchor-turn*source_anchor)
     var inverse := hall.global_transform.affine_inverse()
     for section_name in SECTIONS:
         var section := hall.get_node_or_null(str(section_name)) as Node3D
@@ -181,12 +185,10 @@ func _build_world() -> void:
             if source.mesh == null or not _source_visible(source,section):
                 continue
             var bounds := _local_bounds(source)
-            # The near (north) wall of the other room is the aperture.
-            # Remove its flat cladding only; keep its interior columns.
-            # Streaming replaces the authored exit/entry walls with piers,
-            # frames and bent corridors. Keep those meshes even beyond the
-            # north edge; only the authored near-wall cladding is removed.
-            if section_name!="StreamingPortals" and bounds.end.z<=-12.72 and bounds.size.x>2.0:
+            # The near wall is the actual source aperture's south wall.
+            # Clip only its flat cladding, not the original room or its
+            # columns, opposite wall, signs, or streamed exit corridors.
+            if section_name!="StreamingPortals" and bounds.position.z>=wall_bounds.position.z-0.30 and bounds.size.z<=0.65 and bounds.size.x>2.0:
                 continue
             var copy := MeshInstance3D.new()
             copy.name = "Mesh_%04d_%s" % [cloned_meshes,str(source.name).replace("@","_")]
@@ -217,14 +219,6 @@ func _build_world() -> void:
             label.double_sided = source.double_sided
             group.add_child(label)
             label.transform = inverse*source.global_transform
-            if source.text.strip_edges().to_upper()=="TABLE GAMES":
-                # The original sign is attached to the removed near wall.
-                # Keep it as a smaller inverted detail on the far wall,
-                # rather than letting it float across the opening.
-                label.position.z = -0.13
-                label.rotation.y = PI
-                label.pixel_size *= 0.72
-                label.modulate = Color("#bba889")
         for item in section.find_children("*","Light3D",true,false):
             var source := item as Light3D
             if not _source_visible(source,section) or source.light_energy<=0.0:
@@ -282,7 +276,7 @@ func _copy_light(source: Light3D, group: Node3D, inverse: Transform3D) -> void:
     light.light_specular = source.light_specular
     var local_position := (inverse*source.global_transform).origin
     # Limit extra shadow maps to a small number of relevant interior lights.
-    light.shadow_enabled = source.shadow_enabled and shadow_lights<8 and absf(local_position.x-SOURCE_CENTER_X)<14.0 and local_position.z<0.0
+    light.shadow_enabled = source.shadow_enabled and shadow_lights<8 and absf(local_position.x-CENTER_X)<14.0 and local_position.z<wall_bounds.position.z
     if light.shadow_enabled:
         shadow_lights += 1
     light.light_volumetric_fog_energy = minf(source.light_volumetric_fog_energy,0.42)
@@ -390,7 +384,7 @@ func _build_debris() -> void:
     rng.seed = 320412
     for i in range(CARD_IDS.size()+6):
         var body := Node3D.new()
-        body.name = "UpwardDebris_%02d" % i
+        body.name = "FallingDebris_%02d" % i
         objects.add_child(body)
         if i<CARD_IDS.size():
             var packed := ResourceLoader.load(CARD_PATH % int(CARD_IDS[i]),"PackedScene") as PackedScene
@@ -427,10 +421,10 @@ func _update_debris(delta: float) -> void:
             continue
         var age := fposmod(debris_clock+float(data["delay"]),float(data["period"]))
         var progress := clampf(age/(float(data["period"])*0.78),0.0,1.0)
-        var lift := progress*progress
+        var fall := progress*progress
         var fade := smoothstep(0.0,0.12,progress)*(1.0-smoothstep(0.94,1.0,progress))
         body.scale = Vector3.ONE*maxf(0.001,fade)
-        body.position = Vector3(float(data["x"])+sin(age*1.7+float(data["delay"]))*0.16,0.25+lift*5.45,float(data["z"])+cos(age*0.9)*0.19)
+        body.position = Vector3(float(data["x"])+sin(age*1.7+float(data["delay"]))*0.16,wall_bounds.end.y-0.30-fall*(wall_bounds.size.y-0.55),float(data["z"])+cos(age*0.9)*0.19)
         body.rotation = Vector3(age*float(data["spin"]),age*0.78,age*0.63)
 
 

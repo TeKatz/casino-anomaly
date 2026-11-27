@@ -113,6 +113,10 @@ func _exercise(lane: String, streak: int, rotated: bool) -> bool:
     var expected_entry := casino.to_global(Vector3(portals.BEND_X, 0, portals.end_z(lane) + portals.lane_sign(lane) * 0.55))
     if not require(entry_seam.distance_to(expected_entry) < 0.01, "Maze entrance does not meet chosen bend"):
         return false
+    var original_connector := portals.get_connector(casino,lane)
+    var original_mesh := (original_connector.get_node("TurnFloor") as MeshInstance3D).mesh as BoxMesh
+    var original_shape := (original_connector.get_node("TurnFloor_Collision/Shape") as CollisionShape3D).shape as BoxShape3D
+    var original_size := original_mesh.size
     # The ordinary corridor stays exactly as authored until the blind turn.
     player.global_position = casino.to_global(Vector3(-50.0, 1.02, portals.lane_z(lane)))
     loop.call("_process", 0.016)
@@ -153,6 +157,8 @@ func _exercise(lane: String, streak: int, rotated: bool) -> bool:
     var connector := maze.get_node("BackroomsArrivalConnector") as Node3D
     var oak := connector.get_node("TurnFloor") as MeshInstance3D
     var oak_shape := connector.get_node("TurnFloor_Collision/Shape") as CollisionShape3D
+    if not require(oak.mesh != original_mesh and oak_shape.shape != original_shape and original_mesh.size.is_equal_approx(original_size) and original_shape.size.is_equal_approx(original_size), "Backrooms fitted shared connector resources in place"):
+        return false
     var carpet := maze.get_node("Architecture/Floor/Mesh") as MeshInstance3D
     var edge := carpet.to_global(Vector3(carpet.get_aabb().position.x, 0, Backrooms.ENTRY_Z))
     var oak_end := connector.to_global(Vector3(oak.position.x, 0, oak.position.z + portals.lane_sign(lane) * (oak.mesh as BoxMesh).size.z * 0.5))
@@ -325,6 +331,19 @@ func _exercise(lane: String, streak: int, rotated: bool) -> bool:
     if not require(not is_instance_valid(maze) and not is_instance_valid(casino) and is_instance_valid(next), "Old maze/host leaked or return casino freed"):
         return false
     if not require(root.get_camera_3d() == camera and camera.is_current() and player.can_process() and not paused, "Camera or input lost during return handoff"):
+        return false
+    # Ordinary return rooms must still have the original floor dimensions.
+    if not rotated:
+        for next_lane in ["left","right"]:
+            var next_connector := portals.get_connector(next,next_lane)
+            if not require(next_connector != null, "Return casino missing connector"):
+                return false
+            var next_mesh := (next_connector.get_node("TurnFloor") as MeshInstance3D).mesh as BoxMesh
+            var next_shape := (next_connector.get_node("TurnFloor_Collision/Shape") as CollisionShape3D).shape as BoxShape3D
+            var expected := Vector3(Portals.HALF_WIDTH*2.0+0.18,0.23,Portals.TURN_LENGTH+Portals.HALF_WIDTH+0.55)
+            if not require(next_mesh.size.is_equal_approx(expected) and next_shape.size.is_equal_approx(expected), "Return casino corridor dimensions corrupted"):
+                return false
+    if not require(original_mesh.size.is_equal_approx(original_size) and original_shape.size.is_equal_approx(original_size), "Retired maze corrupted cached geometry"):
         return false
     # Confirm normal movement survives the old host's deferred destruction,
     # not only the synchronous handoff callback.

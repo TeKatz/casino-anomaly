@@ -114,10 +114,16 @@ static func fit_entrance_floor(connector: Node3D, maze: Node3D, direction: float
         push_error("Invalid Backrooms entrance floor span")
         return
     var size := Vector3(mesh.size.x, mesh.size.y, length)
+    # The portal cache keys describe the original immutable resources.
+    # Fit only the departing connector, never the shared cached geometry.
+    var fitted_mesh := mesh.duplicate() as BoxMesh
+    var fitted_shape := collision.shape.duplicate() as BoxShape3D
+    fitted_mesh.size = size
+    fitted_shape.size = size
+    timber.mesh = fitted_mesh
+    collision.shape = fitted_shape
     timber.position.z = (start_z + end_z) * 0.5
-    mesh.size = size
     body.position = timber.position
-    (collision.shape as BoxShape3D).size = size
 
 static func add_pickup_light(maze: Node3D, at: Vector3) -> void:
     # A weak local pool, not a player light. The first few steps must stay

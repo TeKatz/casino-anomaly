@@ -5,6 +5,7 @@ extends SceneTree
 
 const ROOM = preload("res://main.tscn")
 const Portals = preload("res://gameplay/stream_portals.gd")
+const Backrooms = preload("res://gameplay/backrooms_traversal.gd")
 
 
 func _initialize() -> void:
@@ -99,6 +100,9 @@ func _run() -> void:
         if corridor.has_node("OneWayGate"):
             _fail("Departure was locked before the player made a decision")
             return
+
+    if not _verify_floor_resource_isolation(first,shape):
+        return
 
     if (first.get_node("Architecture/FarExitWall") as MeshInstance3D).visible:
         _fail("Original solid wall still blocks the exits")
@@ -574,4 +578,66 @@ func _exercise_settings(controller: Node, player: CharacterBody3D, first: Node3D
         settings.call("_change", baseline, true)
         await process_frame
     print("All %d persisted settings exercised with live and staged rooms" % base_count)
+    return true
+
+
+# Real portal builder and fitting function, repeated in both orientations.
+func _verify_floor_resource_isolation(room: Node3D, portals: RefCounted) -> bool:
+    for lane in ["left","right"]:
+        var actual: Node3D = portals.get_connector(room,lane)
+        var original := actual.get_node("TurnFloor") as MeshInstance3D
+        var original_shape := actual.get_node("TurnFloor_Collision/Shape") as CollisionShape3D
+        var dimensions := (original.mesh as BoxMesh).size
+        var shared_mesh := original.mesh
+        var shared_shape := original_shape.shape
+        var direction: float = portals.lane_sign(lane)
+        var sandbox := Node3D.new()
+        sandbox.position = Vector3(500,0,500)
+        sandbox.rotation.y = PI if lane=="left" else 0.0
+        root.add_child(sandbox)
+        for pass_index in range(3):
+            var connector := Node3D.new()
+            sandbox.add_child(connector)
+            portals.call("_box",connector,"TurnFloor",original.position,dimensions,null)
+            var timber := connector.get_node("TurnFloor") as MeshInstance3D
+            var shape := connector.get_node("TurnFloor_Collision/Shape") as CollisionShape3D
+            if timber.mesh!=shared_mesh or shape.shape!=shared_shape:
+                sandbox.free()
+                _fail("Ordinary corridor no longer shares cached resources")
+                return false
+            var maze := Node3D.new()
+            sandbox.add_child(maze)
+            var architecture := Node3D.new()
+            architecture.name = "Architecture"
+            maze.add_child(architecture)
+            var floor := Node3D.new()
+            floor.name = "Floor"
+            architecture.add_child(floor)
+            var carpet := MeshInstance3D.new()
+            carpet.name = "Mesh"
+            var carpet_mesh := BoxMesh.new()
+            carpet_mesh.size = Vector3(2.0,0.25,2.0)
+            carpet.mesh = carpet_mesh
+            floor.add_child(carpet)
+            var end := timber.position.z+direction*(dimensions.z*0.5-0.18-float(pass_index)*0.07)
+            carpet.position = Vector3(1.0,0.0,end-Backrooms.ENTRY_Z)
+            Backrooms.fit_entrance_floor(connector,maze,direction)
+            var fitted := (timber.mesh as BoxMesh).size
+            if timber.mesh==shared_mesh or shape.shape==shared_shape or absf(fitted.z-dimensions.z)<0.10 or not fitted.is_equal_approx((shape.shape as BoxShape3D).size) or not dimensions.is_equal_approx((original.mesh as BoxMesh).size) or not dimensions.is_equal_approx((original_shape.shape as BoxShape3D).size):
+                sandbox.free()
+                _fail("Backrooms mutated shared TurnFloor or mismatched local collision")
+                return false
+            var fresh := Node3D.new()
+            sandbox.add_child(fresh)
+            portals.call("_box",fresh,"TurnFloor",original.position,dimensions,null)
+            var fresh_mesh := (fresh.get_node("TurnFloor") as MeshInstance3D).mesh as BoxMesh
+            var fresh_shape := (fresh.get_node("TurnFloor_Collision/Shape") as CollisionShape3D).shape as BoxShape3D
+            if fresh_mesh!=shared_mesh or fresh_shape!=shared_shape or not fresh_mesh.size.is_equal_approx(dimensions) or not fresh_shape.size.is_equal_approx(dimensions):
+                sandbox.free()
+                _fail("Later corridor retrieved corrupted cached dimensions")
+                return false
+            connector.free()
+            maze.free()
+            fresh.free()
+        sandbox.free()
     return true
