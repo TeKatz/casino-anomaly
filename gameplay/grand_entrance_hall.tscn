@@ -1,0 +1,2066 @@
+[gd_scene load_steps=98 format=3]
+
+[ext_resource type="Script" path="res://player.gd" id="1_player"]
+[ext_resource type="Material" path="res://roulette_wood_material.tres" id="2_wood"]
+[ext_resource type="Material" path="res://bar_top_material.tres" id="3_counter"]
+
+[sub_resource type="StandardMaterial3D" id="Limestone"]
+albedo_color = Color(0.43, 0.39, 0.33, 1)
+roughness = 0.8
+metallic = 0
+
+[sub_resource type="StandardMaterial3D" id="Plaster"]
+albedo_color = Color(0.51, 0.46, 0.36, 1)
+roughness = 0.94
+metallic = 0
+
+[sub_resource type="StandardMaterial3D" id="DeepGreen"]
+albedo_color = Color(0.073, 0.135, 0.109, 1)
+roughness = 0.88
+metallic = 0
+
+[sub_resource type="StandardMaterial3D" id="DarkBronze"]
+albedo_color = Color(0.13, 0.09, 0.055, 1)
+roughness = 0.65
+metallic = 0.3
+
+[sub_resource type="StandardMaterial3D" id="Brass"]
+albedo_color = Color(0.61, 0.39, 0.15, 1)
+roughness = 0.49
+metallic = 0.53
+
+[sub_resource type="StandardMaterial3D" id="CeilingIvory"]
+albedo_color = Color(0.61, 0.55, 0.44, 1)
+roughness = 0.92
+metallic = 0
+
+[sub_resource type="StandardMaterial3D" id="WarmStoneFloor"]
+albedo_color = Color(0.32, 0.29, 0.24, 1)
+roughness = 0.75
+metallic = 0
+
+[sub_resource type="StandardMaterial3D" id="FloorInlay"]
+albedo_color = Color(0.39, 0.3, 0.15, 1)
+roughness = 0.69
+metallic = 0.2
+
+[sub_resource type="StandardMaterial3D" id="ReservedDoor"]
+albedo_color = Color(0.14, 0.12, 0.105, 1)
+roughness = 0.82
+metallic = 0
+
+[sub_resource type="StandardMaterial3D" id="MainDoor"]
+albedo_color = Color(0.105, 0.18, 0.13, 1)
+roughness = 0.72
+metallic = 0
+
+[sub_resource type="Environment" id="HallEnvironment"]
+background_mode = 1
+background_color = Color(0.055, 0.046, 0.036, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.83, 0.78, 0.70, 1)
+ambient_light_energy = 0.55
+tonemap_mode = 2
+
+[sub_resource type="CapsuleShape3D" id="PlayerCapsule"]
+radius = 0.34
+height = 1.87
+
+[sub_resource type="BoxMesh" id="Box_1"]
+size = Vector3(16.4, 0.32, 28.6)
+
+[sub_resource type="BoxShape3D" id="Shape_2"]
+size = Vector3(16.4, 0.32, 28.6)
+
+[sub_resource type="BoxMesh" id="Box_3"]
+size = Vector3(4.1, 0.32, 12.6)
+
+[sub_resource type="BoxShape3D" id="Shape_4"]
+size = Vector3(4.1, 0.32, 12.6)
+
+[sub_resource type="BoxMesh" id="Box_5"]
+size = Vector3(0.055, 0.008, 18.3)
+
+[sub_resource type="BoxMesh" id="Box_6"]
+size = Vector3(16.6, 8.6, 0.3)
+
+[sub_resource type="BoxShape3D" id="Shape_7"]
+size = Vector3(16.6, 8.6, 0.3)
+
+[sub_resource type="BoxMesh" id="Box_8"]
+size = Vector3(0.3, 8.6, 9)
+
+[sub_resource type="BoxShape3D" id="Shape_9"]
+size = Vector3(0.3, 8.6, 9)
+
+[sub_resource type="BoxMesh" id="Box_10"]
+size = Vector3(0.3, 8.6, 7)
+
+[sub_resource type="BoxShape3D" id="Shape_11"]
+size = Vector3(0.3, 8.6, 7)
+
+[sub_resource type="BoxMesh" id="Box_12"]
+size = Vector3(0.3, 4, 12)
+
+[sub_resource type="BoxShape3D" id="Shape_13"]
+size = Vector3(0.3, 4, 12)
+
+[sub_resource type="BoxMesh" id="Box_14"]
+size = Vector3(0.5, 0.9, 12)
+
+[sub_resource type="BoxShape3D" id="Shape_15"]
+size = Vector3(0.5, 0.9, 12)
+
+[sub_resource type="BoxMesh" id="Box_16"]
+size = Vector3(0.95, 3.7, 1)
+
+[sub_resource type="BoxShape3D" id="Shape_17"]
+size = Vector3(0.95, 3.7, 1)
+
+[sub_resource type="BoxMesh" id="Box_18"]
+size = Vector3(0.07, 3.85, 2.5)
+
+[sub_resource type="BoxMesh" id="Box_19"]
+size = Vector3(0.12, 0.11, 2.65)
+
+[sub_resource type="BoxMesh" id="Box_20"]
+size = Vector3(0.42, 0.24, 28)
+
+[sub_resource type="BoxMesh" id="Box_21"]
+size = Vector3(0.22, 0.13, 28)
+
+[sub_resource type="BoxMesh" id="Box_22"]
+size = Vector3(3.6, 3.6, 0.14)
+
+[sub_resource type="BoxShape3D" id="Shape_23"]
+size = Vector3(3.6, 3.6, 0.14)
+
+[sub_resource type="BoxMesh" id="Box_24"]
+size = Vector3(0.28, 3.8, 0.34)
+
+[sub_resource type="BoxShape3D" id="Shape_25"]
+size = Vector3(0.28, 3.8, 0.34)
+
+[sub_resource type="BoxMesh" id="Box_26"]
+size = Vector3(0.08, 0.42, 0.08)
+
+[sub_resource type="BoxMesh" id="Box_27"]
+size = Vector3(4.18, 0.34, 0.34)
+
+[sub_resource type="BoxMesh" id="Box_28"]
+size = Vector3(0.035, 3.5, 0.024)
+
+[sub_resource type="BoxMesh" id="Box_29"]
+size = Vector3(1.12, 0.3, 1.12)
+
+[sub_resource type="BoxShape3D" id="Shape_30"]
+size = Vector3(1.12, 0.3, 1.12)
+
+[sub_resource type="BoxMesh" id="Box_31"]
+size = Vector3(0.98, 0.14, 0.98)
+
+[sub_resource type="BoxShape3D" id="Shape_32"]
+size = Vector3(0.98, 0.14, 0.98)
+
+[sub_resource type="BoxMesh" id="Box_33"]
+size = Vector3(0.76, 7.48, 0.76)
+
+[sub_resource type="BoxShape3D" id="Shape_34"]
+size = Vector3(0.76, 7.48, 0.76)
+
+[sub_resource type="BoxMesh" id="Box_35"]
+size = Vector3(0.035, 7.1, 0.28)
+
+[sub_resource type="BoxMesh" id="Box_36"]
+size = Vector3(0.28, 7.1, 0.035)
+
+[sub_resource type="BoxMesh" id="Box_37"]
+size = Vector3(0.91, 0.12, 0.91)
+
+[sub_resource type="BoxMesh" id="Box_38"]
+size = Vector3(1.13, 0.26, 1.13)
+
+[sub_resource type="BoxMesh" id="Box_39"]
+size = Vector3(16.6, 0.3, 28.6)
+
+[sub_resource type="BoxShape3D" id="Shape_40"]
+size = Vector3(16.6, 0.3, 28.6)
+
+[sub_resource type="BoxMesh" id="Box_41"]
+size = Vector3(16, 0.38, 0.53)
+
+[sub_resource type="BoxMesh" id="Box_42"]
+size = Vector3(15.85, 0.024, 0.2)
+
+[sub_resource type="BoxMesh" id="Box_43"]
+size = Vector3(0.65, 0.4, 28)
+
+[sub_resource type="BoxMesh" id="Box_44"]
+size = Vector3(0.22, 0.03, 28)
+
+[sub_resource type="BoxMesh" id="Box_45"]
+size = Vector3(0.13, 0.11, 27.7)
+
+[sub_resource type="BoxMesh" id="Box_46"]
+size = Vector3(4.3, 0.3, 12.6)
+
+[sub_resource type="BoxShape3D" id="Shape_47"]
+size = Vector3(4.3, 0.3, 12.6)
+
+[sub_resource type="BoxMesh" id="Box_48"]
+size = Vector3(4.3, 4.6, 0.3)
+
+[sub_resource type="BoxShape3D" id="Shape_49"]
+size = Vector3(4.3, 4.6, 0.3)
+
+[sub_resource type="BoxMesh" id="Box_50"]
+size = Vector3(0.3, 4.6, 2.1)
+
+[sub_resource type="BoxShape3D" id="Shape_51"]
+size = Vector3(0.3, 4.6, 2.1)
+
+[sub_resource type="BoxMesh" id="Box_52"]
+size = Vector3(0.3, 4.6, 3.6)
+
+[sub_resource type="BoxShape3D" id="Shape_53"]
+size = Vector3(0.3, 4.6, 3.6)
+
+[sub_resource type="BoxMesh" id="Box_54"]
+size = Vector3(2.4, 3.1, 0.3)
+
+[sub_resource type="BoxShape3D" id="Shape_55"]
+size = Vector3(2.4, 3.1, 0.3)
+
+[sub_resource type="BoxMesh" id="Box_56"]
+size = Vector3(2.4, 1.5, 0.3)
+
+[sub_resource type="BoxShape3D" id="Shape_57"]
+size = Vector3(2.4, 1.5, 0.3)
+
+[sub_resource type="BoxMesh" id="Box_58"]
+size = Vector3(0.22, 3.3, 0.42)
+
+[sub_resource type="BoxShape3D" id="Shape_59"]
+size = Vector3(0.22, 3.3, 0.42)
+
+[sub_resource type="BoxMesh" id="Box_60"]
+size = Vector3(1.05, 2.64, 0.025)
+
+[sub_resource type="BoxMesh" id="Box_61"]
+size = Vector3(0.075, 0.38, 0.1)
+
+[sub_resource type="BoxMesh" id="Box_62"]
+size = Vector3(0.027, 3, 0.025)
+
+[sub_resource type="BoxMesh" id="Box_63"]
+size = Vector3(2.84, 0.3, 0.42)
+
+[sub_resource type="BoxMesh" id="Box_64"]
+size = Vector3(2.84, 0.07, 0.45)
+
+[sub_resource type="BoxMesh" id="Box_65"]
+size = Vector3(2.1, 0.48, 0.035)
+
+[sub_resource type="BoxMesh" id="Box_66"]
+size = Vector3(0.24, 0.16, 12)
+
+[sub_resource type="BoxMesh" id="Box_67"]
+size = Vector3(4.1, 0.27, 0.25)
+
+[sub_resource type="BoxMesh" id="Box_68"]
+size = Vector3(6.4, 1, 0.8)
+
+[sub_resource type="BoxShape3D" id="Shape_69"]
+size = Vector3(6.4, 1, 0.8)
+
+[sub_resource type="BoxMesh" id="Box_70"]
+size = Vector3(6.62, 0.09, 0.98)
+
+[sub_resource type="BoxShape3D" id="Shape_71"]
+size = Vector3(6.62, 0.09, 0.98)
+
+[sub_resource type="BoxMesh" id="Box_72"]
+size = Vector3(6.2, 0.15, 0.025)
+
+[sub_resource type="BoxMesh" id="Box_73"]
+size = Vector3(6.15, 0.045, 0.025)
+
+[sub_resource type="BoxMesh" id="Box_74"]
+size = Vector3(0.8, 1, 1.06)
+
+[sub_resource type="BoxShape3D" id="Shape_75"]
+size = Vector3(0.8, 1, 1.06)
+
+[sub_resource type="BoxMesh" id="Box_76"]
+size = Vector3(0.95, 0.09, 1.08)
+
+[sub_resource type="BoxShape3D" id="Shape_77"]
+size = Vector3(0.95, 0.09, 1.08)
+
+[sub_resource type="BoxMesh" id="Box_78"]
+size = Vector3(7.2, 6.1, 0.14)
+
+[sub_resource type="BoxMesh" id="Box_79"]
+size = Vector3(0.14, 6.1, 0.13)
+
+[sub_resource type="BoxMesh" id="Box_80"]
+size = Vector3(0.6, 7.4, 0.34)
+
+[sub_resource type="BoxShape3D" id="Shape_81"]
+size = Vector3(0.6, 7.4, 0.34)
+
+[sub_resource type="BoxMesh" id="Box_82"]
+size = Vector3(7.5, 0.16, 0.13)
+
+[node name="GrandEntranceHall" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("HallEnvironment")
+
+[node name="Architecture" type="Node3D" parent="."]
+
+[node name="Floors" type="Node3D" parent="Architecture"]
+
+[node name="MainFloor" type="StaticBody3D" parent="Architecture/Floors"]
+position = Vector3(0, -0.16, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Floors/MainFloor"]
+mesh = SubResource("Box_1")
+material_override = SubResource("WarmStoneFloor")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/Floors/MainFloor"]
+shape = SubResource("Shape_2")
+
+[node name="WestGalleryFloor" type="StaticBody3D" parent="Architecture/Floors"]
+position = Vector3(-10.25, -0.16, -1)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Floors/WestGalleryFloor"]
+mesh = SubResource("Box_3")
+material_override = SubResource("WarmStoneFloor")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/Floors/WestGalleryFloor"]
+shape = SubResource("Shape_4")
+
+[node name="EastGalleryFloor" type="StaticBody3D" parent="Architecture/Floors"]
+position = Vector3(10.25, -0.16, -1)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Floors/EastGalleryFloor"]
+mesh = SubResource("Box_3")
+material_override = SubResource("WarmStoneFloor")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/Floors/EastGalleryFloor"]
+shape = SubResource("Shape_4")
+
+[node name="CentralAxis" type="Node3D" parent="Architecture"]
+
+[node name="WestInlay" type="MeshInstance3D" parent="Architecture/CentralAxis"]
+position = Vector3(-2.5, 0.004, 3)
+mesh = SubResource("Box_5")
+material_override = SubResource("FloorInlay")
+
+[node name="EastInlay" type="MeshInstance3D" parent="Architecture/CentralAxis"]
+position = Vector3(2.5, 0.004, 3)
+mesh = SubResource("Box_5")
+material_override = SubResource("FloorInlay")
+
+[node name="MainWalls" type="Node3D" parent="Architecture"]
+
+[node name="ArrivalWall" type="StaticBody3D" parent="Architecture/MainWalls"]
+position = Vector3(0, 4.3, 14.15)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/MainWalls/ArrivalWall"]
+mesh = SubResource("Box_6")
+material_override = SubResource("Plaster")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/MainWalls/ArrivalWall"]
+shape = SubResource("Shape_7")
+
+[node name="ReceptionWall" type="StaticBody3D" parent="Architecture/MainWalls"]
+position = Vector3(0, 4.3, -14.15)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/MainWalls/ReceptionWall"]
+mesh = SubResource("Box_6")
+material_override = SubResource("Plaster")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/MainWalls/ReceptionWall"]
+shape = SubResource("Shape_7")
+
+[node name="West" type="Node3D" parent="Architecture/MainWalls"]
+
+[node name="ArrivalFlank" type="StaticBody3D" parent="Architecture/MainWalls/West"]
+position = Vector3(-8.15, 4.3, 9.5)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/MainWalls/West/ArrivalFlank"]
+mesh = SubResource("Box_8")
+material_override = SubResource("DeepGreen")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/MainWalls/West/ArrivalFlank"]
+shape = SubResource("Shape_9")
+
+[node name="ReceptionFlank" type="StaticBody3D" parent="Architecture/MainWalls/West"]
+position = Vector3(-8.15, 4.3, -10.5)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/MainWalls/West/ReceptionFlank"]
+mesh = SubResource("Box_10")
+material_override = SubResource("DeepGreen")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/MainWalls/West/ReceptionFlank"]
+shape = SubResource("Shape_11")
+
+[node name="ClerestoryAboveArcade" type="StaticBody3D" parent="Architecture/MainWalls/West"]
+position = Vector3(-8.15, 6.6, -1)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/MainWalls/West/ClerestoryAboveArcade"]
+mesh = SubResource("Box_12")
+material_override = SubResource("Plaster")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/MainWalls/West/ClerestoryAboveArcade"]
+shape = SubResource("Shape_13")
+
+[node name="ArcadeHeader" type="StaticBody3D" parent="Architecture/MainWalls/West"]
+position = Vector3(-8.15, 4.15, -1)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/MainWalls/West/ArcadeHeader"]
+mesh = SubResource("Box_14")
+material_override = SubResource("Limestone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/MainWalls/West/ArcadeHeader"]
+shape = SubResource("Shape_15")
+
+[node name="ArcadeCenterPier" type="StaticBody3D" parent="Architecture/MainWalls/West"]
+position = Vector3(-8.15, 1.85, -1)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/MainWalls/West/ArcadeCenterPier"]
+mesh = SubResource("Box_16")
+material_override = SubResource("Limestone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/MainWalls/West/ArcadeCenterPier"]
+shape = SubResource("Shape_17")
+
+[node name="Panel_7_6" type="MeshInstance3D" parent="Architecture/MainWalls/West"]
+position = Vector3(-7.965, 2.4, 7.6)
+mesh = SubResource("Box_18")
+material_override = ExtResource("2_wood")
+
+[node name="PanelCrown_7_6" type="MeshInstance3D" parent="Architecture/MainWalls/West"]
+position = Vector3(-7.9, 4.38, 7.6)
+mesh = SubResource("Box_19")
+material_override = SubResource("Brass")
+
+[node name="Panel_11_3" type="MeshInstance3D" parent="Architecture/MainWalls/West"]
+position = Vector3(-7.965, 2.4, 11.3)
+mesh = SubResource("Box_18")
+material_override = ExtResource("2_wood")
+
+[node name="PanelCrown_11_3" type="MeshInstance3D" parent="Architecture/MainWalls/West"]
+position = Vector3(-7.9, 4.38, 11.3)
+mesh = SubResource("Box_19")
+material_override = SubResource("Brass")
+
+[node name="Panel_N9_2" type="MeshInstance3D" parent="Architecture/MainWalls/West"]
+position = Vector3(-7.965, 2.4, -9.2)
+mesh = SubResource("Box_18")
+material_override = ExtResource("2_wood")
+
+[node name="PanelCrown_N9_2" type="MeshInstance3D" parent="Architecture/MainWalls/West"]
+position = Vector3(-7.9, 4.38, -9.2)
+mesh = SubResource("Box_19")
+material_override = SubResource("Brass")
+
+[node name="Panel_N12_1" type="MeshInstance3D" parent="Architecture/MainWalls/West"]
+position = Vector3(-7.965, 2.4, -12.1)
+mesh = SubResource("Box_18")
+material_override = ExtResource("2_wood")
+
+[node name="PanelCrown_N12_1" type="MeshInstance3D" parent="Architecture/MainWalls/West"]
+position = Vector3(-7.9, 4.38, -12.1)
+mesh = SubResource("Box_19")
+material_override = SubResource("Brass")
+
+[node name="UpperCornice" type="MeshInstance3D" parent="Architecture/MainWalls/West"]
+position = Vector3(-7.92, 8.17, 0)
+mesh = SubResource("Box_20")
+material_override = SubResource("Limestone")
+
+[node name="LowerCornice" type="MeshInstance3D" parent="Architecture/MainWalls/West"]
+position = Vector3(-7.96, 4.62, 0)
+mesh = SubResource("Box_21")
+material_override = SubResource("Brass")
+
+[node name="East" type="Node3D" parent="Architecture/MainWalls"]
+
+[node name="ArrivalFlank" type="StaticBody3D" parent="Architecture/MainWalls/East"]
+position = Vector3(8.15, 4.3, 9.5)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/MainWalls/East/ArrivalFlank"]
+mesh = SubResource("Box_8")
+material_override = SubResource("DeepGreen")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/MainWalls/East/ArrivalFlank"]
+shape = SubResource("Shape_9")
+
+[node name="ReceptionFlank" type="StaticBody3D" parent="Architecture/MainWalls/East"]
+position = Vector3(8.15, 4.3, -10.5)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/MainWalls/East/ReceptionFlank"]
+mesh = SubResource("Box_10")
+material_override = SubResource("DeepGreen")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/MainWalls/East/ReceptionFlank"]
+shape = SubResource("Shape_11")
+
+[node name="ClerestoryAboveArcade" type="StaticBody3D" parent="Architecture/MainWalls/East"]
+position = Vector3(8.15, 6.6, -1)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/MainWalls/East/ClerestoryAboveArcade"]
+mesh = SubResource("Box_12")
+material_override = SubResource("Plaster")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/MainWalls/East/ClerestoryAboveArcade"]
+shape = SubResource("Shape_13")
+
+[node name="ArcadeHeader" type="StaticBody3D" parent="Architecture/MainWalls/East"]
+position = Vector3(8.15, 4.15, -1)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/MainWalls/East/ArcadeHeader"]
+mesh = SubResource("Box_14")
+material_override = SubResource("Limestone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/MainWalls/East/ArcadeHeader"]
+shape = SubResource("Shape_15")
+
+[node name="ArcadeCenterPier" type="StaticBody3D" parent="Architecture/MainWalls/East"]
+position = Vector3(8.15, 1.85, -1)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/MainWalls/East/ArcadeCenterPier"]
+mesh = SubResource("Box_16")
+material_override = SubResource("Limestone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/MainWalls/East/ArcadeCenterPier"]
+shape = SubResource("Shape_17")
+
+[node name="Panel_7_6" type="MeshInstance3D" parent="Architecture/MainWalls/East"]
+position = Vector3(7.965, 2.4, 7.6)
+mesh = SubResource("Box_18")
+material_override = ExtResource("2_wood")
+
+[node name="PanelCrown_7_6" type="MeshInstance3D" parent="Architecture/MainWalls/East"]
+position = Vector3(7.9, 4.38, 7.6)
+mesh = SubResource("Box_19")
+material_override = SubResource("Brass")
+
+[node name="Panel_11_3" type="MeshInstance3D" parent="Architecture/MainWalls/East"]
+position = Vector3(7.965, 2.4, 11.3)
+mesh = SubResource("Box_18")
+material_override = ExtResource("2_wood")
+
+[node name="PanelCrown_11_3" type="MeshInstance3D" parent="Architecture/MainWalls/East"]
+position = Vector3(7.9, 4.38, 11.3)
+mesh = SubResource("Box_19")
+material_override = SubResource("Brass")
+
+[node name="Panel_N9_2" type="MeshInstance3D" parent="Architecture/MainWalls/East"]
+position = Vector3(7.965, 2.4, -9.2)
+mesh = SubResource("Box_18")
+material_override = ExtResource("2_wood")
+
+[node name="PanelCrown_N9_2" type="MeshInstance3D" parent="Architecture/MainWalls/East"]
+position = Vector3(7.9, 4.38, -9.2)
+mesh = SubResource("Box_19")
+material_override = SubResource("Brass")
+
+[node name="Panel_N12_1" type="MeshInstance3D" parent="Architecture/MainWalls/East"]
+position = Vector3(7.965, 2.4, -12.1)
+mesh = SubResource("Box_18")
+material_override = ExtResource("2_wood")
+
+[node name="PanelCrown_N12_1" type="MeshInstance3D" parent="Architecture/MainWalls/East"]
+position = Vector3(7.9, 4.38, -12.1)
+mesh = SubResource("Box_19")
+material_override = SubResource("Brass")
+
+[node name="UpperCornice" type="MeshInstance3D" parent="Architecture/MainWalls/East"]
+position = Vector3(7.92, 8.17, 0)
+mesh = SubResource("Box_20")
+material_override = SubResource("Limestone")
+
+[node name="LowerCornice" type="MeshInstance3D" parent="Architecture/MainWalls/East"]
+position = Vector3(7.96, 4.62, 0)
+mesh = SubResource("Box_21")
+material_override = SubResource("Brass")
+
+[node name="Arrival" type="Node3D" parent="Architecture"]
+
+[node name="EntranceDoubleDoor" type="StaticBody3D" parent="Architecture/Arrival"]
+position = Vector3(0, 1.8, 13.93)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Arrival/EntranceDoubleDoor"]
+mesh = SubResource("Box_22")
+material_override = ExtResource("2_wood")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/Arrival/EntranceDoubleDoor"]
+shape = SubResource("Shape_23")
+
+[node name="WestJamb" type="StaticBody3D" parent="Architecture/Arrival"]
+position = Vector3(-1.95, 1.9, 13.82)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Arrival/WestJamb"]
+mesh = SubResource("Box_24")
+material_override = SubResource("Limestone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/Arrival/WestJamb"]
+shape = SubResource("Shape_25")
+
+[node name="WestHandle" type="MeshInstance3D" parent="Architecture/Arrival"]
+position = Vector3(-0.18, 1.12, 13.81)
+mesh = SubResource("Box_26")
+material_override = SubResource("Brass")
+
+[node name="EastJamb" type="StaticBody3D" parent="Architecture/Arrival"]
+position = Vector3(1.95, 1.9, 13.82)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Arrival/EastJamb"]
+mesh = SubResource("Box_24")
+material_override = SubResource("Limestone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/Arrival/EastJamb"]
+shape = SubResource("Shape_25")
+
+[node name="EastHandle" type="MeshInstance3D" parent="Architecture/Arrival"]
+position = Vector3(0.18, 1.12, 13.81)
+mesh = SubResource("Box_26")
+material_override = SubResource("Brass")
+
+[node name="EntranceLintel" type="MeshInstance3D" parent="Architecture/Arrival"]
+position = Vector3(0, 3.85, 13.82)
+mesh = SubResource("Box_27")
+material_override = SubResource("Limestone")
+
+[node name="DoorSeam" type="MeshInstance3D" parent="Architecture/Arrival"]
+position = Vector3(0, 1.8, 13.849)
+mesh = SubResource("Box_28")
+material_override = SubResource("DarkBronze")
+
+[node name="Colonnade" type="Node3D" parent="Architecture"]
+
+[node name="WestPier1" type="Node3D" parent="Architecture/Colonnade"]
+position = Vector3(-5.25, 0, 8.6)
+
+[node name="Plinth" type="StaticBody3D" parent="Architecture/Colonnade/WestPier1"]
+position = Vector3(0, 0.15, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Colonnade/WestPier1/Plinth"]
+mesh = SubResource("Box_29")
+material_override = SubResource("DarkBronze")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/Colonnade/WestPier1/Plinth"]
+shape = SubResource("Shape_30")
+
+[node name="Base" type="StaticBody3D" parent="Architecture/Colonnade/WestPier1"]
+position = Vector3(0, 0.37, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Colonnade/WestPier1/Base"]
+mesh = SubResource("Box_31")
+material_override = SubResource("Limestone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/Colonnade/WestPier1/Base"]
+shape = SubResource("Shape_32")
+
+[node name="Shaft" type="StaticBody3D" parent="Architecture/Colonnade/WestPier1"]
+position = Vector3(0, 4.18, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Colonnade/WestPier1/Shaft"]
+mesh = SubResource("Box_33")
+material_override = SubResource("Limestone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/Colonnade/WestPier1/Shaft"]
+shape = SubResource("Shape_34")
+
+[node name="WestFlute" type="MeshInstance3D" parent="Architecture/Colonnade/WestPier1"]
+position = Vector3(-0.394, 4.1, 0)
+mesh = SubResource("Box_35")
+material_override = SubResource("DeepGreen")
+
+[node name="NorthFlute" type="MeshInstance3D" parent="Architecture/Colonnade/WestPier1"]
+position = Vector3(0, 4.1, -0.394)
+mesh = SubResource("Box_36")
+material_override = SubResource("DeepGreen")
+
+[node name="EastFlute" type="MeshInstance3D" parent="Architecture/Colonnade/WestPier1"]
+position = Vector3(0.394, 4.1, 0)
+mesh = SubResource("Box_35")
+material_override = SubResource("DeepGreen")
+
+[node name="SouthFlute" type="MeshInstance3D" parent="Architecture/Colonnade/WestPier1"]
+position = Vector3(0, 4.1, 0.394)
+mesh = SubResource("Box_36")
+material_override = SubResource("DeepGreen")
+
+[node name="CapitalGold" type="MeshInstance3D" parent="Architecture/Colonnade/WestPier1"]
+position = Vector3(0, 7.93, 0)
+mesh = SubResource("Box_37")
+material_override = SubResource("Brass")
+
+[node name="Capital" type="MeshInstance3D" parent="Architecture/Colonnade/WestPier1"]
+position = Vector3(0, 8.12, 0)
+mesh = SubResource("Box_38")
+material_override = SubResource("Limestone")
+
+[node name="WestPier2" type="Node3D" parent="Architecture/Colonnade"]
+position = Vector3(-5.25, 0, 3.8)
+
+[node name="Plinth" type="StaticBody3D" parent="Architecture/Colonnade/WestPier2"]
+position = Vector3(0, 0.15, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Colonnade/WestPier2/Plinth"]
+mesh = SubResource("Box_29")
+material_override = SubResource("DarkBronze")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/Colonnade/WestPier2/Plinth"]
+shape = SubResource("Shape_30")
+
+[node name="Base" type="StaticBody3D" parent="Architecture/Colonnade/WestPier2"]
+position = Vector3(0, 0.37, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Colonnade/WestPier2/Base"]
+mesh = SubResource("Box_31")
+material_override = SubResource("Limestone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/Colonnade/WestPier2/Base"]
+shape = SubResource("Shape_32")
+
+[node name="Shaft" type="StaticBody3D" parent="Architecture/Colonnade/WestPier2"]
+position = Vector3(0, 4.18, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Colonnade/WestPier2/Shaft"]
+mesh = SubResource("Box_33")
+material_override = SubResource("Limestone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/Colonnade/WestPier2/Shaft"]
+shape = SubResource("Shape_34")
+
+[node name="WestFlute" type="MeshInstance3D" parent="Architecture/Colonnade/WestPier2"]
+position = Vector3(-0.394, 4.1, 0)
+mesh = SubResource("Box_35")
+material_override = SubResource("DeepGreen")
+
+[node name="NorthFlute" type="MeshInstance3D" parent="Architecture/Colonnade/WestPier2"]
+position = Vector3(0, 4.1, -0.394)
+mesh = SubResource("Box_36")
+material_override = SubResource("DeepGreen")
+
+[node name="EastFlute" type="MeshInstance3D" parent="Architecture/Colonnade/WestPier2"]
+position = Vector3(0.394, 4.1, 0)
+mesh = SubResource("Box_35")
+material_override = SubResource("DeepGreen")
+
+[node name="SouthFlute" type="MeshInstance3D" parent="Architecture/Colonnade/WestPier2"]
+position = Vector3(0, 4.1, 0.394)
+mesh = SubResource("Box_36")
+material_override = SubResource("DeepGreen")
+
+[node name="CapitalGold" type="MeshInstance3D" parent="Architecture/Colonnade/WestPier2"]
+position = Vector3(0, 7.93, 0)
+mesh = SubResource("Box_37")
+material_override = SubResource("Brass")
+
+[node name="Capital" type="MeshInstance3D" parent="Architecture/Colonnade/WestPier2"]
+position = Vector3(0, 8.12, 0)
+mesh = SubResource("Box_38")
+material_override = SubResource("Limestone")
+
+[node name="WestPier3" type="Node3D" parent="Architecture/Colonnade"]
+position = Vector3(-5.25, 0, -2.5)
+
+[node name="Plinth" type="StaticBody3D" parent="Architecture/Colonnade/WestPier3"]
+position = Vector3(0, 0.15, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Colonnade/WestPier3/Plinth"]
+mesh = SubResource("Box_29")
+material_override = SubResource("DarkBronze")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/Colonnade/WestPier3/Plinth"]
+shape = SubResource("Shape_30")
+
+[node name="Base" type="StaticBody3D" parent="Architecture/Colonnade/WestPier3"]
+position = Vector3(0, 0.37, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Colonnade/WestPier3/Base"]
+mesh = SubResource("Box_31")
+material_override = SubResource("Limestone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/Colonnade/WestPier3/Base"]
+shape = SubResource("Shape_32")
+
+[node name="Shaft" type="StaticBody3D" parent="Architecture/Colonnade/WestPier3"]
+position = Vector3(0, 4.18, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Colonnade/WestPier3/Shaft"]
+mesh = SubResource("Box_33")
+material_override = SubResource("Limestone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/Colonnade/WestPier3/Shaft"]
+shape = SubResource("Shape_34")
+
+[node name="WestFlute" type="MeshInstance3D" parent="Architecture/Colonnade/WestPier3"]
+position = Vector3(-0.394, 4.1, 0)
+mesh = SubResource("Box_35")
+material_override = SubResource("DeepGreen")
+
+[node name="NorthFlute" type="MeshInstance3D" parent="Architecture/Colonnade/WestPier3"]
+position = Vector3(0, 4.1, -0.394)
+mesh = SubResource("Box_36")
+material_override = SubResource("DeepGreen")
+
+[node name="EastFlute" type="MeshInstance3D" parent="Architecture/Colonnade/WestPier3"]
+position = Vector3(0.394, 4.1, 0)
+mesh = SubResource("Box_35")
+material_override = SubResource("DeepGreen")
+
+[node name="SouthFlute" type="MeshInstance3D" parent="Architecture/Colonnade/WestPier3"]
+position = Vector3(0, 4.1, 0.394)
+mesh = SubResource("Box_36")
+material_override = SubResource("DeepGreen")
+
+[node name="CapitalGold" type="MeshInstance3D" parent="Architecture/Colonnade/WestPier3"]
+position = Vector3(0, 7.93, 0)
+mesh = SubResource("Box_37")
+material_override = SubResource("Brass")
+
+[node name="Capital" type="MeshInstance3D" parent="Architecture/Colonnade/WestPier3"]
+position = Vector3(0, 8.12, 0)
+mesh = SubResource("Box_38")
+material_override = SubResource("Limestone")
+
+[node name="WestPier4" type="Node3D" parent="Architecture/Colonnade"]
+position = Vector3(-5.25, 0, -8.4)
+
+[node name="Plinth" type="StaticBody3D" parent="Architecture/Colonnade/WestPier4"]
+position = Vector3(0, 0.15, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Colonnade/WestPier4/Plinth"]
+mesh = SubResource("Box_29")
+material_override = SubResource("DarkBronze")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/Colonnade/WestPier4/Plinth"]
+shape = SubResource("Shape_30")
+
+[node name="Base" type="StaticBody3D" parent="Architecture/Colonnade/WestPier4"]
+position = Vector3(0, 0.37, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Colonnade/WestPier4/Base"]
+mesh = SubResource("Box_31")
+material_override = SubResource("Limestone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/Colonnade/WestPier4/Base"]
+shape = SubResource("Shape_32")
+
+[node name="Shaft" type="StaticBody3D" parent="Architecture/Colonnade/WestPier4"]
+position = Vector3(0, 4.18, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Colonnade/WestPier4/Shaft"]
+mesh = SubResource("Box_33")
+material_override = SubResource("Limestone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/Colonnade/WestPier4/Shaft"]
+shape = SubResource("Shape_34")
+
+[node name="WestFlute" type="MeshInstance3D" parent="Architecture/Colonnade/WestPier4"]
+position = Vector3(-0.394, 4.1, 0)
+mesh = SubResource("Box_35")
+material_override = SubResource("DeepGreen")
+
+[node name="NorthFlute" type="MeshInstance3D" parent="Architecture/Colonnade/WestPier4"]
+position = Vector3(0, 4.1, -0.394)
+mesh = SubResource("Box_36")
+material_override = SubResource("DeepGreen")
+
+[node name="EastFlute" type="MeshInstance3D" parent="Architecture/Colonnade/WestPier4"]
+position = Vector3(0.394, 4.1, 0)
+mesh = SubResource("Box_35")
+material_override = SubResource("DeepGreen")
+
+[node name="SouthFlute" type="MeshInstance3D" parent="Architecture/Colonnade/WestPier4"]
+position = Vector3(0, 4.1, 0.394)
+mesh = SubResource("Box_36")
+material_override = SubResource("DeepGreen")
+
+[node name="CapitalGold" type="MeshInstance3D" parent="Architecture/Colonnade/WestPier4"]
+position = Vector3(0, 7.93, 0)
+mesh = SubResource("Box_37")
+material_override = SubResource("Brass")
+
+[node name="Capital" type="MeshInstance3D" parent="Architecture/Colonnade/WestPier4"]
+position = Vector3(0, 8.12, 0)
+mesh = SubResource("Box_38")
+material_override = SubResource("Limestone")
+
+[node name="EastPier1" type="Node3D" parent="Architecture/Colonnade"]
+position = Vector3(5.25, 0, 8.6)
+
+[node name="Plinth" type="StaticBody3D" parent="Architecture/Colonnade/EastPier1"]
+position = Vector3(0, 0.15, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Colonnade/EastPier1/Plinth"]
+mesh = SubResource("Box_29")
+material_override = SubResource("DarkBronze")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/Colonnade/EastPier1/Plinth"]
+shape = SubResource("Shape_30")
+
+[node name="Base" type="StaticBody3D" parent="Architecture/Colonnade/EastPier1"]
+position = Vector3(0, 0.37, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Colonnade/EastPier1/Base"]
+mesh = SubResource("Box_31")
+material_override = SubResource("Limestone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/Colonnade/EastPier1/Base"]
+shape = SubResource("Shape_32")
+
+[node name="Shaft" type="StaticBody3D" parent="Architecture/Colonnade/EastPier1"]
+position = Vector3(0, 4.18, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Colonnade/EastPier1/Shaft"]
+mesh = SubResource("Box_33")
+material_override = SubResource("Limestone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/Colonnade/EastPier1/Shaft"]
+shape = SubResource("Shape_34")
+
+[node name="WestFlute" type="MeshInstance3D" parent="Architecture/Colonnade/EastPier1"]
+position = Vector3(-0.394, 4.1, 0)
+mesh = SubResource("Box_35")
+material_override = SubResource("DeepGreen")
+
+[node name="NorthFlute" type="MeshInstance3D" parent="Architecture/Colonnade/EastPier1"]
+position = Vector3(0, 4.1, -0.394)
+mesh = SubResource("Box_36")
+material_override = SubResource("DeepGreen")
+
+[node name="EastFlute" type="MeshInstance3D" parent="Architecture/Colonnade/EastPier1"]
+position = Vector3(0.394, 4.1, 0)
+mesh = SubResource("Box_35")
+material_override = SubResource("DeepGreen")
+
+[node name="SouthFlute" type="MeshInstance3D" parent="Architecture/Colonnade/EastPier1"]
+position = Vector3(0, 4.1, 0.394)
+mesh = SubResource("Box_36")
+material_override = SubResource("DeepGreen")
+
+[node name="CapitalGold" type="MeshInstance3D" parent="Architecture/Colonnade/EastPier1"]
+position = Vector3(0, 7.93, 0)
+mesh = SubResource("Box_37")
+material_override = SubResource("Brass")
+
+[node name="Capital" type="MeshInstance3D" parent="Architecture/Colonnade/EastPier1"]
+position = Vector3(0, 8.12, 0)
+mesh = SubResource("Box_38")
+material_override = SubResource("Limestone")
+
+[node name="EastPier2" type="Node3D" parent="Architecture/Colonnade"]
+position = Vector3(5.25, 0, 3.8)
+
+[node name="Plinth" type="StaticBody3D" parent="Architecture/Colonnade/EastPier2"]
+position = Vector3(0, 0.15, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Colonnade/EastPier2/Plinth"]
+mesh = SubResource("Box_29")
+material_override = SubResource("DarkBronze")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/Colonnade/EastPier2/Plinth"]
+shape = SubResource("Shape_30")
+
+[node name="Base" type="StaticBody3D" parent="Architecture/Colonnade/EastPier2"]
+position = Vector3(0, 0.37, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Colonnade/EastPier2/Base"]
+mesh = SubResource("Box_31")
+material_override = SubResource("Limestone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/Colonnade/EastPier2/Base"]
+shape = SubResource("Shape_32")
+
+[node name="Shaft" type="StaticBody3D" parent="Architecture/Colonnade/EastPier2"]
+position = Vector3(0, 4.18, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Colonnade/EastPier2/Shaft"]
+mesh = SubResource("Box_33")
+material_override = SubResource("Limestone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/Colonnade/EastPier2/Shaft"]
+shape = SubResource("Shape_34")
+
+[node name="WestFlute" type="MeshInstance3D" parent="Architecture/Colonnade/EastPier2"]
+position = Vector3(-0.394, 4.1, 0)
+mesh = SubResource("Box_35")
+material_override = SubResource("DeepGreen")
+
+[node name="NorthFlute" type="MeshInstance3D" parent="Architecture/Colonnade/EastPier2"]
+position = Vector3(0, 4.1, -0.394)
+mesh = SubResource("Box_36")
+material_override = SubResource("DeepGreen")
+
+[node name="EastFlute" type="MeshInstance3D" parent="Architecture/Colonnade/EastPier2"]
+position = Vector3(0.394, 4.1, 0)
+mesh = SubResource("Box_35")
+material_override = SubResource("DeepGreen")
+
+[node name="SouthFlute" type="MeshInstance3D" parent="Architecture/Colonnade/EastPier2"]
+position = Vector3(0, 4.1, 0.394)
+mesh = SubResource("Box_36")
+material_override = SubResource("DeepGreen")
+
+[node name="CapitalGold" type="MeshInstance3D" parent="Architecture/Colonnade/EastPier2"]
+position = Vector3(0, 7.93, 0)
+mesh = SubResource("Box_37")
+material_override = SubResource("Brass")
+
+[node name="Capital" type="MeshInstance3D" parent="Architecture/Colonnade/EastPier2"]
+position = Vector3(0, 8.12, 0)
+mesh = SubResource("Box_38")
+material_override = SubResource("Limestone")
+
+[node name="EastPier3" type="Node3D" parent="Architecture/Colonnade"]
+position = Vector3(5.25, 0, -2.5)
+
+[node name="Plinth" type="StaticBody3D" parent="Architecture/Colonnade/EastPier3"]
+position = Vector3(0, 0.15, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Colonnade/EastPier3/Plinth"]
+mesh = SubResource("Box_29")
+material_override = SubResource("DarkBronze")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/Colonnade/EastPier3/Plinth"]
+shape = SubResource("Shape_30")
+
+[node name="Base" type="StaticBody3D" parent="Architecture/Colonnade/EastPier3"]
+position = Vector3(0, 0.37, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Colonnade/EastPier3/Base"]
+mesh = SubResource("Box_31")
+material_override = SubResource("Limestone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/Colonnade/EastPier3/Base"]
+shape = SubResource("Shape_32")
+
+[node name="Shaft" type="StaticBody3D" parent="Architecture/Colonnade/EastPier3"]
+position = Vector3(0, 4.18, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Colonnade/EastPier3/Shaft"]
+mesh = SubResource("Box_33")
+material_override = SubResource("Limestone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/Colonnade/EastPier3/Shaft"]
+shape = SubResource("Shape_34")
+
+[node name="WestFlute" type="MeshInstance3D" parent="Architecture/Colonnade/EastPier3"]
+position = Vector3(-0.394, 4.1, 0)
+mesh = SubResource("Box_35")
+material_override = SubResource("DeepGreen")
+
+[node name="NorthFlute" type="MeshInstance3D" parent="Architecture/Colonnade/EastPier3"]
+position = Vector3(0, 4.1, -0.394)
+mesh = SubResource("Box_36")
+material_override = SubResource("DeepGreen")
+
+[node name="EastFlute" type="MeshInstance3D" parent="Architecture/Colonnade/EastPier3"]
+position = Vector3(0.394, 4.1, 0)
+mesh = SubResource("Box_35")
+material_override = SubResource("DeepGreen")
+
+[node name="SouthFlute" type="MeshInstance3D" parent="Architecture/Colonnade/EastPier3"]
+position = Vector3(0, 4.1, 0.394)
+mesh = SubResource("Box_36")
+material_override = SubResource("DeepGreen")
+
+[node name="CapitalGold" type="MeshInstance3D" parent="Architecture/Colonnade/EastPier3"]
+position = Vector3(0, 7.93, 0)
+mesh = SubResource("Box_37")
+material_override = SubResource("Brass")
+
+[node name="Capital" type="MeshInstance3D" parent="Architecture/Colonnade/EastPier3"]
+position = Vector3(0, 8.12, 0)
+mesh = SubResource("Box_38")
+material_override = SubResource("Limestone")
+
+[node name="EastPier4" type="Node3D" parent="Architecture/Colonnade"]
+position = Vector3(5.25, 0, -8.4)
+
+[node name="Plinth" type="StaticBody3D" parent="Architecture/Colonnade/EastPier4"]
+position = Vector3(0, 0.15, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Colonnade/EastPier4/Plinth"]
+mesh = SubResource("Box_29")
+material_override = SubResource("DarkBronze")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/Colonnade/EastPier4/Plinth"]
+shape = SubResource("Shape_30")
+
+[node name="Base" type="StaticBody3D" parent="Architecture/Colonnade/EastPier4"]
+position = Vector3(0, 0.37, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Colonnade/EastPier4/Base"]
+mesh = SubResource("Box_31")
+material_override = SubResource("Limestone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/Colonnade/EastPier4/Base"]
+shape = SubResource("Shape_32")
+
+[node name="Shaft" type="StaticBody3D" parent="Architecture/Colonnade/EastPier4"]
+position = Vector3(0, 4.18, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Colonnade/EastPier4/Shaft"]
+mesh = SubResource("Box_33")
+material_override = SubResource("Limestone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/Colonnade/EastPier4/Shaft"]
+shape = SubResource("Shape_34")
+
+[node name="WestFlute" type="MeshInstance3D" parent="Architecture/Colonnade/EastPier4"]
+position = Vector3(-0.394, 4.1, 0)
+mesh = SubResource("Box_35")
+material_override = SubResource("DeepGreen")
+
+[node name="NorthFlute" type="MeshInstance3D" parent="Architecture/Colonnade/EastPier4"]
+position = Vector3(0, 4.1, -0.394)
+mesh = SubResource("Box_36")
+material_override = SubResource("DeepGreen")
+
+[node name="EastFlute" type="MeshInstance3D" parent="Architecture/Colonnade/EastPier4"]
+position = Vector3(0.394, 4.1, 0)
+mesh = SubResource("Box_35")
+material_override = SubResource("DeepGreen")
+
+[node name="SouthFlute" type="MeshInstance3D" parent="Architecture/Colonnade/EastPier4"]
+position = Vector3(0, 4.1, 0.394)
+mesh = SubResource("Box_36")
+material_override = SubResource("DeepGreen")
+
+[node name="CapitalGold" type="MeshInstance3D" parent="Architecture/Colonnade/EastPier4"]
+position = Vector3(0, 7.93, 0)
+mesh = SubResource("Box_37")
+material_override = SubResource("Brass")
+
+[node name="Capital" type="MeshInstance3D" parent="Architecture/Colonnade/EastPier4"]
+position = Vector3(0, 8.12, 0)
+mesh = SubResource("Box_38")
+material_override = SubResource("Limestone")
+
+[node name="Ceiling" type="Node3D" parent="Architecture"]
+
+[node name="MainCeiling" type="StaticBody3D" parent="Architecture/Ceiling"]
+position = Vector3(0, 8.75, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/Ceiling/MainCeiling"]
+mesh = SubResource("Box_39")
+material_override = SubResource("CeilingIvory")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/Ceiling/MainCeiling"]
+shape = SubResource("Shape_40")
+
+[node name="TransverseBeam1" type="MeshInstance3D" parent="Architecture/Ceiling"]
+position = Vector3(0, 8.26, 12)
+mesh = SubResource("Box_41")
+material_override = SubResource("Limestone")
+
+[node name="BeamInlay1" type="MeshInstance3D" parent="Architecture/Ceiling"]
+position = Vector3(0, 8.058, 12)
+mesh = SubResource("Box_42")
+material_override = SubResource("Brass")
+
+[node name="TransverseBeam2" type="MeshInstance3D" parent="Architecture/Ceiling"]
+position = Vector3(0, 8.26, 8.6)
+mesh = SubResource("Box_41")
+material_override = SubResource("Limestone")
+
+[node name="BeamInlay2" type="MeshInstance3D" parent="Architecture/Ceiling"]
+position = Vector3(0, 8.058, 8.6)
+mesh = SubResource("Box_42")
+material_override = SubResource("Brass")
+
+[node name="TransverseBeam3" type="MeshInstance3D" parent="Architecture/Ceiling"]
+position = Vector3(0, 8.26, 3.8)
+mesh = SubResource("Box_41")
+material_override = SubResource("Limestone")
+
+[node name="BeamInlay3" type="MeshInstance3D" parent="Architecture/Ceiling"]
+position = Vector3(0, 8.058, 3.8)
+mesh = SubResource("Box_42")
+material_override = SubResource("Brass")
+
+[node name="TransverseBeam4" type="MeshInstance3D" parent="Architecture/Ceiling"]
+position = Vector3(0, 8.26, -2.5)
+mesh = SubResource("Box_41")
+material_override = SubResource("Limestone")
+
+[node name="BeamInlay4" type="MeshInstance3D" parent="Architecture/Ceiling"]
+position = Vector3(0, 8.058, -2.5)
+mesh = SubResource("Box_42")
+material_override = SubResource("Brass")
+
+[node name="TransverseBeam5" type="MeshInstance3D" parent="Architecture/Ceiling"]
+position = Vector3(0, 8.26, -8.4)
+mesh = SubResource("Box_41")
+material_override = SubResource("Limestone")
+
+[node name="BeamInlay5" type="MeshInstance3D" parent="Architecture/Ceiling"]
+position = Vector3(0, 8.058, -8.4)
+mesh = SubResource("Box_42")
+material_override = SubResource("Brass")
+
+[node name="TransverseBeam6" type="MeshInstance3D" parent="Architecture/Ceiling"]
+position = Vector3(0, 8.26, -12.4)
+mesh = SubResource("Box_41")
+material_override = SubResource("Limestone")
+
+[node name="BeamInlay6" type="MeshInstance3D" parent="Architecture/Ceiling"]
+position = Vector3(0, 8.058, -12.4)
+mesh = SubResource("Box_42")
+material_override = SubResource("Brass")
+
+[node name="WestLongitudinalBeam" type="MeshInstance3D" parent="Architecture/Ceiling"]
+position = Vector3(-5.25, 8.25, 0)
+mesh = SubResource("Box_43")
+material_override = SubResource("Limestone")
+
+[node name="WestBeamInlay" type="MeshInstance3D" parent="Architecture/Ceiling"]
+position = Vector3(-5.25, 8.035, 0)
+mesh = SubResource("Box_44")
+material_override = SubResource("Brass")
+
+[node name="WestCofferBorder" type="MeshInstance3D" parent="Architecture/Ceiling"]
+position = Vector3(-2.9, 8.54, 0)
+mesh = SubResource("Box_45")
+material_override = SubResource("DarkBronze")
+
+[node name="EastLongitudinalBeam" type="MeshInstance3D" parent="Architecture/Ceiling"]
+position = Vector3(5.25, 8.25, 0)
+mesh = SubResource("Box_43")
+material_override = SubResource("Limestone")
+
+[node name="EastBeamInlay" type="MeshInstance3D" parent="Architecture/Ceiling"]
+position = Vector3(5.25, 8.035, 0)
+mesh = SubResource("Box_44")
+material_override = SubResource("Brass")
+
+[node name="EastCofferBorder" type="MeshInstance3D" parent="Architecture/Ceiling"]
+position = Vector3(2.9, 8.54, 0)
+mesh = SubResource("Box_45")
+material_override = SubResource("DarkBronze")
+
+[node name="SideGalleries" type="Node3D" parent="."]
+
+[node name="WestGallery" type="Node3D" parent="SideGalleries"]
+
+[node name="Shell" type="Node3D" parent="SideGalleries/WestGallery"]
+
+[node name="Ceiling" type="StaticBody3D" parent="SideGalleries/WestGallery/Shell"]
+position = Vector3(-10.15, 4.75, -1)
+
+[node name="Mesh" type="MeshInstance3D" parent="SideGalleries/WestGallery/Shell/Ceiling"]
+mesh = SubResource("Box_46")
+material_override = SubResource("CeilingIvory")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SideGalleries/WestGallery/Shell/Ceiling"]
+shape = SubResource("Shape_47")
+
+[node name="ArrivalEnd" type="StaticBody3D" parent="SideGalleries/WestGallery/Shell"]
+position = Vector3(-10.15, 2.3, 5.15)
+
+[node name="Mesh" type="MeshInstance3D" parent="SideGalleries/WestGallery/Shell/ArrivalEnd"]
+mesh = SubResource("Box_48")
+material_override = SubResource("DeepGreen")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SideGalleries/WestGallery/Shell/ArrivalEnd"]
+shape = SubResource("Shape_49")
+
+[node name="RearEnd" type="StaticBody3D" parent="SideGalleries/WestGallery/Shell"]
+position = Vector3(-10.15, 2.3, -7.15)
+
+[node name="Mesh" type="MeshInstance3D" parent="SideGalleries/WestGallery/Shell/RearEnd"]
+mesh = SubResource("Box_48")
+material_override = SubResource("DeepGreen")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SideGalleries/WestGallery/Shell/RearEnd"]
+shape = SubResource("Shape_49")
+
+[node name="OuterWall" type="Node3D" parent="SideGalleries/WestGallery/Shell"]
+
+[node name="SolidBay1" type="StaticBody3D" parent="SideGalleries/WestGallery/Shell/OuterWall"]
+position = Vector3(-12.15, 2.3, -6.25)
+
+[node name="Mesh" type="MeshInstance3D" parent="SideGalleries/WestGallery/Shell/OuterWall/SolidBay1"]
+mesh = SubResource("Box_50")
+material_override = SubResource("DeepGreen")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SideGalleries/WestGallery/Shell/OuterWall/SolidBay1"]
+shape = SubResource("Shape_51")
+
+[node name="SolidBay2" type="StaticBody3D" parent="SideGalleries/WestGallery/Shell/OuterWall"]
+position = Vector3(-12.15, 2.3, -1)
+
+[node name="Mesh" type="MeshInstance3D" parent="SideGalleries/WestGallery/Shell/OuterWall/SolidBay2"]
+mesh = SubResource("Box_52")
+material_override = SubResource("DeepGreen")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SideGalleries/WestGallery/Shell/OuterWall/SolidBay2"]
+shape = SubResource("Shape_53")
+
+[node name="SolidBay3" type="StaticBody3D" parent="SideGalleries/WestGallery/Shell/OuterWall"]
+position = Vector3(-12.15, 2.3, 4.25)
+
+[node name="Mesh" type="MeshInstance3D" parent="SideGalleries/WestGallery/Shell/OuterWall/SolidBay3"]
+mesh = SubResource("Box_50")
+material_override = SubResource("DeepGreen")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SideGalleries/WestGallery/Shell/OuterWall/SolidBay3"]
+shape = SubResource("Shape_51")
+
+[node name="AccessBays" type="Node3D" parent="SideGalleries/WestGallery"]
+
+[node name="ReservedAccess_1" type="Node3D" parent="SideGalleries/WestGallery/AccessBays"]
+position = Vector3(-12.15, 0, -4)
+rotation = Vector3(0, 1.5708, 0)
+
+[node name="ClosedLeaf" type="StaticBody3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_1"]
+position = Vector3(0, 1.55, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_1/ClosedLeaf"]
+mesh = SubResource("Box_54")
+material_override = SubResource("ReservedDoor")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_1/ClosedLeaf"]
+shape = SubResource("Shape_55")
+
+[node name="WallAboveOpening" type="StaticBody3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_1"]
+position = Vector3(0, 3.85, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_1/WallAboveOpening"]
+mesh = SubResource("Box_56")
+material_override = SubResource("DeepGreen")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_1/WallAboveOpening"]
+shape = SubResource("Shape_57")
+
+[node name="LeftJamb" type="StaticBody3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_1"]
+position = Vector3(-1.31, 1.65, 0.22)
+
+[node name="Mesh" type="MeshInstance3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_1/LeftJamb"]
+mesh = SubResource("Box_58")
+material_override = SubResource("Limestone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_1/LeftJamb"]
+shape = SubResource("Shape_59")
+
+[node name="LeftPanel" type="MeshInstance3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_1"]
+position = Vector3(-0.59, 1.55, 0.164)
+mesh = SubResource("Box_60")
+material_override = ExtResource("2_wood")
+
+[node name="LeftHandle" type="MeshInstance3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_1"]
+position = Vector3(-0.14, 1.12, 0.23)
+mesh = SubResource("Box_61")
+material_override = SubResource("DarkBronze")
+
+[node name="RightJamb" type="StaticBody3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_1"]
+position = Vector3(1.31, 1.65, 0.22)
+
+[node name="Mesh" type="MeshInstance3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_1/RightJamb"]
+mesh = SubResource("Box_58")
+material_override = SubResource("Limestone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_1/RightJamb"]
+shape = SubResource("Shape_59")
+
+[node name="RightPanel" type="MeshInstance3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_1"]
+position = Vector3(0.59, 1.55, 0.164)
+mesh = SubResource("Box_60")
+material_override = ExtResource("2_wood")
+
+[node name="RightHandle" type="MeshInstance3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_1"]
+position = Vector3(0.14, 1.12, 0.23)
+mesh = SubResource("Box_61")
+material_override = SubResource("DarkBronze")
+
+[node name="CenterSeam" type="MeshInstance3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_1"]
+position = Vector3(0, 1.55, 0.167)
+mesh = SubResource("Box_62")
+material_override = SubResource("DarkBronze")
+
+[node name="Crown" type="MeshInstance3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_1"]
+position = Vector3(0, 3.37, 0.22)
+mesh = SubResource("Box_63")
+material_override = SubResource("Limestone")
+
+[node name="CrownInlay" type="MeshInstance3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_1"]
+position = Vector3(0, 3.57, 0.22)
+mesh = SubResource("Box_64")
+material_override = SubResource("Brass")
+
+[node name="HeaderPlaque" type="MeshInstance3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_1"]
+position = Vector3(0, 3.96, 0.171)
+mesh = SubResource("Box_65")
+material_override = SubResource("DarkBronze")
+
+[node name="TemporarySign" type="Label3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_1"]
+position = Vector3(0, 3.96, 0.195)
+text = "RESERVED 01"
+font_size = 48
+pixel_size = 0.006
+modulate = Color(0.94, 0.77, 0.46, 1)
+outline_size = 4
+outline_modulate = Color(0.10, 0.07, 0.04, 1)
+no_depth_test = false
+double_sided = false
+
+[node name="FutureConnectionAnchor" type="Marker3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_1"]
+position = Vector3(0, 0, -0.55)
+
+[node name="Approach" type="Marker3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_1"]
+position = Vector3(0, 0, 1.35)
+
+[node name="ReservedAccess_2" type="Node3D" parent="SideGalleries/WestGallery/AccessBays"]
+position = Vector3(-12.15, 0, 2)
+rotation = Vector3(0, 1.5708, 0)
+
+[node name="ClosedLeaf" type="StaticBody3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_2"]
+position = Vector3(0, 1.55, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_2/ClosedLeaf"]
+mesh = SubResource("Box_54")
+material_override = SubResource("ReservedDoor")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_2/ClosedLeaf"]
+shape = SubResource("Shape_55")
+
+[node name="WallAboveOpening" type="StaticBody3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_2"]
+position = Vector3(0, 3.85, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_2/WallAboveOpening"]
+mesh = SubResource("Box_56")
+material_override = SubResource("DeepGreen")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_2/WallAboveOpening"]
+shape = SubResource("Shape_57")
+
+[node name="LeftJamb" type="StaticBody3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_2"]
+position = Vector3(-1.31, 1.65, 0.22)
+
+[node name="Mesh" type="MeshInstance3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_2/LeftJamb"]
+mesh = SubResource("Box_58")
+material_override = SubResource("Limestone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_2/LeftJamb"]
+shape = SubResource("Shape_59")
+
+[node name="LeftPanel" type="MeshInstance3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_2"]
+position = Vector3(-0.59, 1.55, 0.164)
+mesh = SubResource("Box_60")
+material_override = ExtResource("2_wood")
+
+[node name="LeftHandle" type="MeshInstance3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_2"]
+position = Vector3(-0.14, 1.12, 0.23)
+mesh = SubResource("Box_61")
+material_override = SubResource("DarkBronze")
+
+[node name="RightJamb" type="StaticBody3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_2"]
+position = Vector3(1.31, 1.65, 0.22)
+
+[node name="Mesh" type="MeshInstance3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_2/RightJamb"]
+mesh = SubResource("Box_58")
+material_override = SubResource("Limestone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_2/RightJamb"]
+shape = SubResource("Shape_59")
+
+[node name="RightPanel" type="MeshInstance3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_2"]
+position = Vector3(0.59, 1.55, 0.164)
+mesh = SubResource("Box_60")
+material_override = ExtResource("2_wood")
+
+[node name="RightHandle" type="MeshInstance3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_2"]
+position = Vector3(0.14, 1.12, 0.23)
+mesh = SubResource("Box_61")
+material_override = SubResource("DarkBronze")
+
+[node name="CenterSeam" type="MeshInstance3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_2"]
+position = Vector3(0, 1.55, 0.167)
+mesh = SubResource("Box_62")
+material_override = SubResource("DarkBronze")
+
+[node name="Crown" type="MeshInstance3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_2"]
+position = Vector3(0, 3.37, 0.22)
+mesh = SubResource("Box_63")
+material_override = SubResource("Limestone")
+
+[node name="CrownInlay" type="MeshInstance3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_2"]
+position = Vector3(0, 3.57, 0.22)
+mesh = SubResource("Box_64")
+material_override = SubResource("Brass")
+
+[node name="HeaderPlaque" type="MeshInstance3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_2"]
+position = Vector3(0, 3.96, 0.171)
+mesh = SubResource("Box_65")
+material_override = SubResource("DarkBronze")
+
+[node name="TemporarySign" type="Label3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_2"]
+position = Vector3(0, 3.96, 0.195)
+text = "RESERVED 02"
+font_size = 48
+pixel_size = 0.006
+modulate = Color(0.94, 0.77, 0.46, 1)
+outline_size = 4
+outline_modulate = Color(0.10, 0.07, 0.04, 1)
+no_depth_test = false
+double_sided = false
+
+[node name="FutureConnectionAnchor" type="Marker3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_2"]
+position = Vector3(0, 0, -0.55)
+
+[node name="Approach" type="Marker3D" parent="SideGalleries/WestGallery/AccessBays/ReservedAccess_2"]
+position = Vector3(0, 0, 1.35)
+
+[node name="GalleryCornice" type="MeshInstance3D" parent="SideGalleries/WestGallery/Shell"]
+position = Vector3(-11.88, 4.32, -1)
+mesh = SubResource("Box_66")
+material_override = SubResource("Limestone")
+
+[node name="CeilingCrossbeam1" type="MeshInstance3D" parent="SideGalleries/WestGallery/Shell"]
+position = Vector3(-10.1, 4.45, -4)
+mesh = SubResource("Box_67")
+material_override = SubResource("Limestone")
+
+[node name="CeilingCrossbeam2" type="MeshInstance3D" parent="SideGalleries/WestGallery/Shell"]
+position = Vector3(-10.1, 4.45, 2)
+mesh = SubResource("Box_67")
+material_override = SubResource("Limestone")
+
+[node name="EastGallery" type="Node3D" parent="SideGalleries"]
+
+[node name="Shell" type="Node3D" parent="SideGalleries/EastGallery"]
+
+[node name="Ceiling" type="StaticBody3D" parent="SideGalleries/EastGallery/Shell"]
+position = Vector3(10.15, 4.75, -1)
+
+[node name="Mesh" type="MeshInstance3D" parent="SideGalleries/EastGallery/Shell/Ceiling"]
+mesh = SubResource("Box_46")
+material_override = SubResource("CeilingIvory")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SideGalleries/EastGallery/Shell/Ceiling"]
+shape = SubResource("Shape_47")
+
+[node name="ArrivalEnd" type="StaticBody3D" parent="SideGalleries/EastGallery/Shell"]
+position = Vector3(10.15, 2.3, 5.15)
+
+[node name="Mesh" type="MeshInstance3D" parent="SideGalleries/EastGallery/Shell/ArrivalEnd"]
+mesh = SubResource("Box_48")
+material_override = SubResource("DeepGreen")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SideGalleries/EastGallery/Shell/ArrivalEnd"]
+shape = SubResource("Shape_49")
+
+[node name="RearEnd" type="StaticBody3D" parent="SideGalleries/EastGallery/Shell"]
+position = Vector3(10.15, 2.3, -7.15)
+
+[node name="Mesh" type="MeshInstance3D" parent="SideGalleries/EastGallery/Shell/RearEnd"]
+mesh = SubResource("Box_48")
+material_override = SubResource("DeepGreen")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SideGalleries/EastGallery/Shell/RearEnd"]
+shape = SubResource("Shape_49")
+
+[node name="OuterWall" type="Node3D" parent="SideGalleries/EastGallery/Shell"]
+
+[node name="SolidBay1" type="StaticBody3D" parent="SideGalleries/EastGallery/Shell/OuterWall"]
+position = Vector3(12.15, 2.3, -6.25)
+
+[node name="Mesh" type="MeshInstance3D" parent="SideGalleries/EastGallery/Shell/OuterWall/SolidBay1"]
+mesh = SubResource("Box_50")
+material_override = SubResource("DeepGreen")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SideGalleries/EastGallery/Shell/OuterWall/SolidBay1"]
+shape = SubResource("Shape_51")
+
+[node name="SolidBay2" type="StaticBody3D" parent="SideGalleries/EastGallery/Shell/OuterWall"]
+position = Vector3(12.15, 2.3, -1)
+
+[node name="Mesh" type="MeshInstance3D" parent="SideGalleries/EastGallery/Shell/OuterWall/SolidBay2"]
+mesh = SubResource("Box_52")
+material_override = SubResource("DeepGreen")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SideGalleries/EastGallery/Shell/OuterWall/SolidBay2"]
+shape = SubResource("Shape_53")
+
+[node name="SolidBay3" type="StaticBody3D" parent="SideGalleries/EastGallery/Shell/OuterWall"]
+position = Vector3(12.15, 2.3, 4.25)
+
+[node name="Mesh" type="MeshInstance3D" parent="SideGalleries/EastGallery/Shell/OuterWall/SolidBay3"]
+mesh = SubResource("Box_50")
+material_override = SubResource("DeepGreen")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SideGalleries/EastGallery/Shell/OuterWall/SolidBay3"]
+shape = SubResource("Shape_51")
+
+[node name="AccessBays" type="Node3D" parent="SideGalleries/EastGallery"]
+
+[node name="MainCasino_FutureConnection" type="Node3D" parent="SideGalleries/EastGallery/AccessBays"]
+position = Vector3(12.15, 0, -4)
+rotation = Vector3(0, -1.5708, 0)
+
+[node name="ClosedLeaf" type="StaticBody3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection"]
+position = Vector3(0, 1.55, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection/ClosedLeaf"]
+mesh = SubResource("Box_54")
+material_override = SubResource("MainDoor")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection/ClosedLeaf"]
+shape = SubResource("Shape_55")
+
+[node name="WallAboveOpening" type="StaticBody3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection"]
+position = Vector3(0, 3.85, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection/WallAboveOpening"]
+mesh = SubResource("Box_56")
+material_override = SubResource("DeepGreen")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection/WallAboveOpening"]
+shape = SubResource("Shape_57")
+
+[node name="LeftJamb" type="StaticBody3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection"]
+position = Vector3(-1.31, 1.65, 0.22)
+
+[node name="Mesh" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection/LeftJamb"]
+mesh = SubResource("Box_58")
+material_override = SubResource("Limestone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection/LeftJamb"]
+shape = SubResource("Shape_59")
+
+[node name="LeftPanel" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection"]
+position = Vector3(-0.59, 1.55, 0.164)
+mesh = SubResource("Box_60")
+material_override = ExtResource("2_wood")
+
+[node name="LeftHandle" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection"]
+position = Vector3(-0.14, 1.12, 0.23)
+mesh = SubResource("Box_61")
+material_override = SubResource("Brass")
+
+[node name="RightJamb" type="StaticBody3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection"]
+position = Vector3(1.31, 1.65, 0.22)
+
+[node name="Mesh" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection/RightJamb"]
+mesh = SubResource("Box_58")
+material_override = SubResource("Limestone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection/RightJamb"]
+shape = SubResource("Shape_59")
+
+[node name="RightPanel" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection"]
+position = Vector3(0.59, 1.55, 0.164)
+mesh = SubResource("Box_60")
+material_override = ExtResource("2_wood")
+
+[node name="RightHandle" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection"]
+position = Vector3(0.14, 1.12, 0.23)
+mesh = SubResource("Box_61")
+material_override = SubResource("Brass")
+
+[node name="CenterSeam" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection"]
+position = Vector3(0, 1.55, 0.167)
+mesh = SubResource("Box_62")
+material_override = SubResource("DarkBronze")
+
+[node name="Crown" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection"]
+position = Vector3(0, 3.37, 0.22)
+mesh = SubResource("Box_63")
+material_override = SubResource("Limestone")
+
+[node name="CrownInlay" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection"]
+position = Vector3(0, 3.57, 0.22)
+mesh = SubResource("Box_64")
+material_override = SubResource("Brass")
+
+[node name="HeaderPlaque" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection"]
+position = Vector3(0, 3.96, 0.171)
+mesh = SubResource("Box_65")
+material_override = SubResource("DarkBronze")
+
+[node name="TemporarySign" type="Label3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection"]
+position = Vector3(0, 3.96, 0.195)
+text = "MAIN CASINO"
+font_size = 48
+pixel_size = 0.006
+modulate = Color(0.94, 0.77, 0.46, 1)
+outline_size = 4
+outline_modulate = Color(0.10, 0.07, 0.04, 1)
+no_depth_test = false
+double_sided = false
+
+[node name="FutureConnectionAnchor" type="Marker3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection"]
+position = Vector3(0, 0, -0.55)
+
+[node name="Approach" type="Marker3D" parent="SideGalleries/EastGallery/AccessBays/MainCasino_FutureConnection"]
+position = Vector3(0, 0, 1.35)
+
+[node name="ReservedAccess_3" type="Node3D" parent="SideGalleries/EastGallery/AccessBays"]
+position = Vector3(12.15, 0, 2)
+rotation = Vector3(0, -1.5708, 0)
+
+[node name="ClosedLeaf" type="StaticBody3D" parent="SideGalleries/EastGallery/AccessBays/ReservedAccess_3"]
+position = Vector3(0, 1.55, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/ReservedAccess_3/ClosedLeaf"]
+mesh = SubResource("Box_54")
+material_override = SubResource("ReservedDoor")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SideGalleries/EastGallery/AccessBays/ReservedAccess_3/ClosedLeaf"]
+shape = SubResource("Shape_55")
+
+[node name="WallAboveOpening" type="StaticBody3D" parent="SideGalleries/EastGallery/AccessBays/ReservedAccess_3"]
+position = Vector3(0, 3.85, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/ReservedAccess_3/WallAboveOpening"]
+mesh = SubResource("Box_56")
+material_override = SubResource("DeepGreen")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SideGalleries/EastGallery/AccessBays/ReservedAccess_3/WallAboveOpening"]
+shape = SubResource("Shape_57")
+
+[node name="LeftJamb" type="StaticBody3D" parent="SideGalleries/EastGallery/AccessBays/ReservedAccess_3"]
+position = Vector3(-1.31, 1.65, 0.22)
+
+[node name="Mesh" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/ReservedAccess_3/LeftJamb"]
+mesh = SubResource("Box_58")
+material_override = SubResource("Limestone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SideGalleries/EastGallery/AccessBays/ReservedAccess_3/LeftJamb"]
+shape = SubResource("Shape_59")
+
+[node name="LeftPanel" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/ReservedAccess_3"]
+position = Vector3(-0.59, 1.55, 0.164)
+mesh = SubResource("Box_60")
+material_override = ExtResource("2_wood")
+
+[node name="LeftHandle" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/ReservedAccess_3"]
+position = Vector3(-0.14, 1.12, 0.23)
+mesh = SubResource("Box_61")
+material_override = SubResource("DarkBronze")
+
+[node name="RightJamb" type="StaticBody3D" parent="SideGalleries/EastGallery/AccessBays/ReservedAccess_3"]
+position = Vector3(1.31, 1.65, 0.22)
+
+[node name="Mesh" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/ReservedAccess_3/RightJamb"]
+mesh = SubResource("Box_58")
+material_override = SubResource("Limestone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SideGalleries/EastGallery/AccessBays/ReservedAccess_3/RightJamb"]
+shape = SubResource("Shape_59")
+
+[node name="RightPanel" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/ReservedAccess_3"]
+position = Vector3(0.59, 1.55, 0.164)
+mesh = SubResource("Box_60")
+material_override = ExtResource("2_wood")
+
+[node name="RightHandle" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/ReservedAccess_3"]
+position = Vector3(0.14, 1.12, 0.23)
+mesh = SubResource("Box_61")
+material_override = SubResource("DarkBronze")
+
+[node name="CenterSeam" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/ReservedAccess_3"]
+position = Vector3(0, 1.55, 0.167)
+mesh = SubResource("Box_62")
+material_override = SubResource("DarkBronze")
+
+[node name="Crown" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/ReservedAccess_3"]
+position = Vector3(0, 3.37, 0.22)
+mesh = SubResource("Box_63")
+material_override = SubResource("Limestone")
+
+[node name="CrownInlay" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/ReservedAccess_3"]
+position = Vector3(0, 3.57, 0.22)
+mesh = SubResource("Box_64")
+material_override = SubResource("Brass")
+
+[node name="HeaderPlaque" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/ReservedAccess_3"]
+position = Vector3(0, 3.96, 0.171)
+mesh = SubResource("Box_65")
+material_override = SubResource("DarkBronze")
+
+[node name="TemporarySign" type="Label3D" parent="SideGalleries/EastGallery/AccessBays/ReservedAccess_3"]
+position = Vector3(0, 3.96, 0.195)
+text = "RESERVED 03"
+font_size = 48
+pixel_size = 0.006
+modulate = Color(0.94, 0.77, 0.46, 1)
+outline_size = 4
+outline_modulate = Color(0.10, 0.07, 0.04, 1)
+no_depth_test = false
+double_sided = false
+
+[node name="FutureConnectionAnchor" type="Marker3D" parent="SideGalleries/EastGallery/AccessBays/ReservedAccess_3"]
+position = Vector3(0, 0, -0.55)
+
+[node name="Approach" type="Marker3D" parent="SideGalleries/EastGallery/AccessBays/ReservedAccess_3"]
+position = Vector3(0, 0, 1.35)
+
+[node name="GalleryCornice" type="MeshInstance3D" parent="SideGalleries/EastGallery/Shell"]
+position = Vector3(11.88, 4.32, -1)
+mesh = SubResource("Box_66")
+material_override = SubResource("Limestone")
+
+[node name="CeilingCrossbeam1" type="MeshInstance3D" parent="SideGalleries/EastGallery/Shell"]
+position = Vector3(10.1, 4.45, -4)
+mesh = SubResource("Box_67")
+material_override = SubResource("Limestone")
+
+[node name="CeilingCrossbeam2" type="MeshInstance3D" parent="SideGalleries/EastGallery/Shell"]
+position = Vector3(10.1, 4.45, 2)
+mesh = SubResource("Box_67")
+material_override = SubResource("Limestone")
+
+[node name="Reception" type="Node3D" parent="."]
+
+[node name="Counter" type="Node3D" parent="Reception"]
+position = Vector3(0, 0, -6.45)
+
+[node name="Front" type="StaticBody3D" parent="Reception/Counter"]
+position = Vector3(0, 0.5, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Reception/Counter/Front"]
+mesh = SubResource("Box_68")
+material_override = ExtResource("2_wood")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Reception/Counter/Front"]
+shape = SubResource("Shape_69")
+
+[node name="Countertop" type="StaticBody3D" parent="Reception/Counter"]
+position = Vector3(0, 1.045, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Reception/Counter/Countertop"]
+mesh = SubResource("Box_70")
+material_override = ExtResource("3_counter")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Reception/Counter/Countertop"]
+shape = SubResource("Shape_71")
+
+[node name="FrontAccent" type="MeshInstance3D" parent="Reception/Counter"]
+position = Vector3(0, 0.15, 0.414)
+mesh = SubResource("Box_72")
+material_override = SubResource("DarkBronze")
+
+[node name="GoldLine" type="MeshInstance3D" parent="Reception/Counter"]
+position = Vector3(0, 0.81, 0.414)
+mesh = SubResource("Box_73")
+material_override = SubResource("Brass")
+
+[node name="WestReturn" type="StaticBody3D" parent="Reception/Counter"]
+position = Vector3(-2.8, 0.5, -0.93)
+
+[node name="Mesh" type="MeshInstance3D" parent="Reception/Counter/WestReturn"]
+mesh = SubResource("Box_74")
+material_override = ExtResource("2_wood")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Reception/Counter/WestReturn"]
+shape = SubResource("Shape_75")
+
+[node name="WestReturnTop" type="StaticBody3D" parent="Reception/Counter"]
+position = Vector3(-2.8, 1.045, -0.93)
+
+[node name="Mesh" type="MeshInstance3D" parent="Reception/Counter/WestReturnTop"]
+mesh = SubResource("Box_76")
+material_override = ExtResource("3_counter")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Reception/Counter/WestReturnTop"]
+shape = SubResource("Shape_77")
+
+[node name="EastReturn" type="StaticBody3D" parent="Reception/Counter"]
+position = Vector3(2.8, 0.5, -0.93)
+
+[node name="Mesh" type="MeshInstance3D" parent="Reception/Counter/EastReturn"]
+mesh = SubResource("Box_74")
+material_override = ExtResource("2_wood")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Reception/Counter/EastReturn"]
+shape = SubResource("Shape_75")
+
+[node name="EastReturnTop" type="StaticBody3D" parent="Reception/Counter"]
+position = Vector3(2.8, 1.045, -0.93)
+
+[node name="Mesh" type="MeshInstance3D" parent="Reception/Counter/EastReturnTop"]
+mesh = SubResource("Box_76")
+material_override = ExtResource("3_counter")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Reception/Counter/EastReturnTop"]
+shape = SubResource("Shape_77")
+
+[node name="NPCAnchor" type="Marker3D" parent="Reception"]
+position = Vector3(0, 0, -7.6)
+
+[node name="CustomerAnchor" type="Marker3D" parent="Reception"]
+position = Vector3(0, 0, -5.1)
+
+[node name="StaffAccess" type="Marker3D" parent="Reception"]
+position = Vector3(0, 0, -8.2)
+
+[node name="FutureExpansion" type="Node3D" parent="."]
+
+[node name="ReservedStairFootprint" type="Node3D" parent="FutureExpansion"]
+position = Vector3(0, 0, -11.15)
+
+[node name="WestFutureStair" type="Marker3D" parent="FutureExpansion/ReservedStairFootprint"]
+position = Vector3(-4, 0, 0)
+
+[node name="EastFutureStair" type="Marker3D" parent="FutureExpansion/ReservedStairFootprint"]
+position = Vector3(4, 0, 0)
+
+[node name="FutureUpperLanding" type="Marker3D" parent="FutureExpansion/ReservedStairFootprint"]
+position = Vector3(0, 4.5, -1.4)
+
+[node name="ReceptionBackdrop" type="Node3D" parent="Architecture"]
+
+[node name="CentralField" type="MeshInstance3D" parent="Architecture/ReceptionBackdrop"]
+position = Vector3(0, 3.3, -13.93)
+mesh = SubResource("Box_78")
+material_override = SubResource("DeepGreen")
+
+[node name="WestBorder" type="MeshInstance3D" parent="Architecture/ReceptionBackdrop"]
+position = Vector3(-3.65, 3.3, -13.8)
+mesh = SubResource("Box_79")
+material_override = SubResource("Brass")
+
+[node name="WestPilaster" type="StaticBody3D" parent="Architecture/ReceptionBackdrop"]
+position = Vector3(-4.05, 3.7, -13.82)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/ReceptionBackdrop/WestPilaster"]
+mesh = SubResource("Box_80")
+material_override = SubResource("Limestone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/ReceptionBackdrop/WestPilaster"]
+shape = SubResource("Shape_81")
+
+[node name="EastBorder" type="MeshInstance3D" parent="Architecture/ReceptionBackdrop"]
+position = Vector3(3.65, 3.3, -13.8)
+mesh = SubResource("Box_79")
+material_override = SubResource("Brass")
+
+[node name="EastPilaster" type="StaticBody3D" parent="Architecture/ReceptionBackdrop"]
+position = Vector3(4.05, 3.7, -13.82)
+
+[node name="Mesh" type="MeshInstance3D" parent="Architecture/ReceptionBackdrop/EastPilaster"]
+mesh = SubResource("Box_80")
+material_override = SubResource("Limestone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/ReceptionBackdrop/EastPilaster"]
+shape = SubResource("Shape_81")
+
+[node name="UpperBorder" type="MeshInstance3D" parent="Architecture/ReceptionBackdrop"]
+position = Vector3(0, 6.43, -13.8)
+mesh = SubResource("Box_82")
+material_override = SubResource("Brass")
+
+[node name="Lighting" type="Node3D" parent="."]
+
+[node name="NaveFill1" type="OmniLight3D" parent="Lighting"]
+position = Vector3(0, 6.45, 10.5)
+light_color = Color(1, 0.89, 0.73, 1)
+light_energy = 3.2
+omni_range = 12
+omni_attenuation = 0.9
+shadow_enabled = false
+
+[node name="NaveFill2" type="OmniLight3D" parent="Lighting"]
+position = Vector3(0, 6.45, 4.8)
+light_color = Color(1, 0.89, 0.73, 1)
+light_energy = 3.2
+omni_range = 12
+omni_attenuation = 0.9
+shadow_enabled = false
+
+[node name="NaveFill3" type="OmniLight3D" parent="Lighting"]
+position = Vector3(0, 6.45, -0.4)
+light_color = Color(1, 0.89, 0.73, 1)
+light_energy = 3.2
+omni_range = 12
+omni_attenuation = 0.9
+shadow_enabled = true
+
+[node name="NaveFill4" type="OmniLight3D" parent="Lighting"]
+position = Vector3(0, 6.45, -6)
+light_color = Color(1, 0.89, 0.73, 1)
+light_energy = 3.2
+omni_range = 12
+omni_attenuation = 0.9
+shadow_enabled = false
+
+[node name="NaveFill5" type="OmniLight3D" parent="Lighting"]
+position = Vector3(0, 6.45, -11.1)
+light_color = Color(1, 0.89, 0.73, 1)
+light_energy = 3.2
+omni_range = 12
+omni_attenuation = 0.9
+shadow_enabled = false
+
+[node name="WestGalleryFill1" type="OmniLight3D" parent="Lighting"]
+position = Vector3(-10, 3.6, -4)
+light_color = Color(1, 0.89, 0.73, 1)
+light_energy = 1.6
+omni_range = 7
+omni_attenuation = 0.9
+shadow_enabled = false
+
+[node name="WestGalleryFill2" type="OmniLight3D" parent="Lighting"]
+position = Vector3(-10, 3.6, 2)
+light_color = Color(1, 0.89, 0.73, 1)
+light_energy = 1.6
+omni_range = 7
+omni_attenuation = 0.9
+shadow_enabled = false
+
+[node name="EastGalleryFill1" type="OmniLight3D" parent="Lighting"]
+position = Vector3(10, 3.6, -4)
+light_color = Color(1, 0.89, 0.73, 1)
+light_energy = 1.6
+omni_range = 7
+omni_attenuation = 0.9
+shadow_enabled = false
+
+[node name="EastGalleryFill2" type="OmniLight3D" parent="Lighting"]
+position = Vector3(10, 3.6, 2)
+light_color = Color(1, 0.89, 0.73, 1)
+light_energy = 1.6
+omni_range = 7
+omni_attenuation = 0.9
+shadow_enabled = false
+
+[node name="ReceptionKey" type="OmniLight3D" parent="Lighting"]
+position = Vector3(0, 3.55, -5.3)
+light_color = Color(1, 0.89, 0.73, 1)
+light_energy = 1.5
+omni_range = 8
+omni_attenuation = 0.9
+shadow_enabled = true
+
+[node name="DesignMarkers" type="Node3D" parent="."]
+
+[node name="EntrySpawn" type="Marker3D" parent="DesignMarkers"]
+position = Vector3(0, 1.02, 12)
+
+[node name="WestGalleryJunction" type="Marker3D" parent="DesignMarkers"]
+position = Vector3(-8, 0, 1)
+
+[node name="EastGalleryJunction" type="Marker3D" parent="DesignMarkers"]
+position = Vector3(8, 0, 1)
+
+[node name="Player" type="CharacterBody3D" parent="."]
+position = Vector3(0, 1.02, 12)
+script = ExtResource("1_player")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
+shape = SubResource("PlayerCapsule")
+
+[node name="Camera3D" type="Camera3D" parent="Player"]
+position = Vector3(0, 0.55, 0)
+current = true
