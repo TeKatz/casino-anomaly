@@ -19,6 +19,8 @@ func _run() -> void:
         _fail("Tutorial room missing")
         return
     root.add_child(room)
+    await physics_frame
+    await physics_frame
     await process_frame
     var door := room.get_node("SideGalleries/EastGallery/AccessBays/MainCasinoEntrance") as Node3D
     var camera := room.get_node("Player/Camera3D") as Camera3D

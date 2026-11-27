@@ -34,6 +34,8 @@ func _run() -> void:
 
     var intro := INTRO.instantiate() as Node3D
     root.add_child(intro)
+    await physics_frame
+    await physics_frame
     await process_frame
     var door := intro.get_node_or_null("SideGalleries/EastGallery/AccessBays/MainCasinoEntrance") as Node3D
     var camera := intro.get_node_or_null("Player/Camera3D") as Camera3D

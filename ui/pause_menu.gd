@@ -185,6 +185,11 @@ func _refresh_localization() -> void:
 
 
 func _input(event: InputEvent) -> void:
+    # The threaded loading overlay owns input until its fade or error
+    # dismissal. Opening pause here could stall the scene handoff.
+    var loader := get_node_or_null("/root/SceneLoader")
+    if loader != null and bool(loader.get("active")):
+        return
     # The introduction owns Escape while a dialogue is open.
     var owning_scene := get_parent().get_parent()
     if owning_scene != null and owning_scene.has_method("is_dialogue_open") \

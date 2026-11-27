@@ -81,6 +81,13 @@ func _run() -> void:
         _fail("Start-door interaction did not lock input and start loading before completing tutorial")
         return
     intro.call("_unhandled_input",event)
+    var escape := InputEventKey.new()
+    escape.keycode = KEY_ESCAPE
+    escape.pressed = true
+    player.get_node("InGameMenu").call("_input",escape)
+    if paused or bool(player.get_node("InGameMenu").get("open")):
+        _fail("Pause menu intercepted the active loading transition")
+        return
     if str(loader.get("target_path")) != "res://main.tscn":
         _fail("Repeated door interaction changed the transition")
         return

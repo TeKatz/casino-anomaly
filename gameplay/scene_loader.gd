@@ -253,14 +253,16 @@ func _commit_scene() -> void:
     if packed == null:
         _fail("Target is not a PackedScene: " + target_path)
         return
-    if finish_tutorial:
-        var run_state = get_node_or_null("/root/LoopState")
-        if run_state != null:
-            run_state.complete_tutorial()
     var error := get_tree().change_scene_to_packed(packed)
     if error != OK:
         _fail("Scene activation error: %s" % error)
         return
+    # The scene change is deferred; commit the flag only after activation
+    # was accepted, but before the casino controller prepares round one.
+    if finish_tutorial:
+        var run_state = get_node_or_null("/root/LoopState")
+        if run_state != null:
+            run_state.complete_tutorial()
     await get_tree().process_frame
     await get_tree().process_frame
     progress_bar.value = 100.0

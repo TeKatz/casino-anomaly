@@ -193,7 +193,10 @@ func _run() -> void:
         return
 
     var idle_hands := _hand_positions(anchor, character) if model_installed else PackedVector3Array()
-    room.call("_open_conversation")
+    var talk := InputEventAction.new()
+    talk.action = "casino_interact"
+    talk.pressed = true
+    room.call("_unhandled_input",talk)
     await process_frame
     await process_frame
     if model_installed:
