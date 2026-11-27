@@ -19,4 +19,5 @@ color = Color(0.44705882352941179, 0.74901960784313726, 1.0000000000000000, 1)
 has_energy_scale = true
 energy_scale = 1.90
 energy_reference_path = "Lighting/WarmCasinoLamp_06"
+light_anchor_path = "ModelInteriors/CeilingChandelier_01"
 rarity = "uncommon"

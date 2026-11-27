@@ -81,6 +81,7 @@ func _verify_adjusted_definitions() -> bool:
         "cool_ceiling_light": {
             "target_path": "ModelInteriors/ChandelierWarmLight_02",
             "energy_reference_path": "Lighting/WarmCasinoLamp_06",
+            "light_anchor_path": "ModelInteriors/CeilingChandelier_01",
             "color": Color("#72bfff"),
             "energy_scale": 1.90,
             "difficulty": 2
@@ -88,6 +89,7 @@ func _verify_adjusted_definitions() -> bool:
         "cool_ceiling_light__other": {
             "target_path": "ModelInteriors/ChandelierWarmLight_01/ChandelierWarmLight_01",
             "energy_reference_path": "Lighting/WarmCasinoLamp_03",
+            "light_anchor_path": "ModelInteriors/MainChandelier_01",
             "color": Color(0.55, 0.72, 1, 1),
             "energy_scale": 1.65,
             "difficulty": 3
@@ -131,10 +133,6 @@ func _verify_cool_fixture_lights(room: Node3D) -> bool:
     var before: Array[Dictionary] = []
     var reference_before: Array[Dictionary] = []
     for i in range(2):
-        var offset := targets[i].global_position - fixtures[i].global_position
-        if Vector2(offset.x, offset.z).length() > 1.5 or absf(offset.y) > 2.0:
-            _fail("Cool light is detached from its physical chandelier: " + str(targets[i].get_path()))
-            return false
         before.append(_snapshot(targets[i]))
         reference_before.append(_snapshot(references[i]))
     var adapter := Adapter.new()
@@ -143,8 +141,13 @@ func _verify_cool_fixture_lights(room: Node3D) -> bool:
         if not adapter.apply(room, str(entry["id"])):
             _fail("Cool fixture variant unavailable")
             return false
-        if not targets[i].light_color.is_equal_approx(entry["color"]) or not is_equal_approx(targets[i].light_energy, float(reference_before[i]["energy"]) * float(entry["energy_scale"])) or targets[i].transform != before[i]["transform"]:
-            _fail("Cool fixture color, absolute energy or position regressed")
+        var offset := targets[i].global_position - fixtures[i].global_position
+        if not offset.is_equal_approx(Vector3.UP * 0.12):
+            _fail("Cool light is detached from its physical chandelier: " + str(targets[i].get_path()) + " offset " + str(offset))
+            return false
+        var original_transform: Transform3D = before[i]["transform"]
+        if not targets[i].light_color.is_equal_approx(entry["color"]) or not is_equal_approx(targets[i].light_energy, float(reference_before[i]["energy"]) * float(entry["energy_scale"])) or not targets[i].transform.basis.is_equal_approx(original_transform.basis) or targets[i].visible != before[i]["visible"]:
+            _fail("Cool fixture color, absolute energy, orientation or visibility regressed")
             return false
         if not _same(before[1-i], _snapshot(targets[1-i])) or not _same(reference_before[0], _snapshot(references[0])) or not _same(reference_before[1], _snapshot(references[1])):
             _fail("Cool fixture altered an unrelated room light")

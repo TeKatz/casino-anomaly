@@ -30,6 +30,8 @@ extends Resource
 @export var energy_scale := 1.0
 # Optional original light whose authored energy defines this effect strength.
 @export var energy_reference_path := ""
+# Optional physical fixture anchor for light position during the effect.
+@export var light_anchor_path := ""
 @export var has_visible := false
 @export var visible := true
 
@@ -59,6 +61,8 @@ func to_entry() -> Dictionary:
         entry["energy_scale"] = energy_scale
     if not energy_reference_path.is_empty():
         entry["energy_reference_path"] = energy_reference_path
+    if not light_anchor_path.is_empty():
+        entry["light_anchor_path"] = light_anchor_path
     if has_visible:
         entry["visible"] = visible
     return entry

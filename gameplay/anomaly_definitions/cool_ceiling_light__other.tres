@@ -19,6 +19,7 @@ color = Color(0.55, 0.72, 1, 1)
 has_energy_scale = true
 energy_scale = 1.65
 energy_reference_path = "Lighting/WarmCasinoLamp_03"
+light_anchor_path = "ModelInteriors/MainChandelier_01"
 rarity = "uncommon"
 family_id = "cool_ceiling_light"
 variant_name_de = "Andere Lichtquelle"

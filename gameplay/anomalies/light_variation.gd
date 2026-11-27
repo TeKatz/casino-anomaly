@@ -1,11 +1,13 @@
 extends RefCounted
 ## Reversible changes to existing authored lights. The original color,
-## intensity and visibility are restored exactly after the room decision.
+## intensity, visibility and any temporary fixture alignment are restored exactly.
 ## No extra lights, geometry, editor changes or GI bake required.
 var target: Light3D
 var old_color := Color.WHITE
 var old_energy := 1.0
 var old_visible := true
+var old_position := Vector3.ZERO
+var moved_to_anchor := false
 
 
 func can_apply(room: Node3D, definition: Dictionary) -> bool:
@@ -14,16 +16,30 @@ func can_apply(room: Node3D, definition: Dictionary) -> bool:
     if not (room.get_node_or_null(str(definition.get("target_path", ""))) is Light3D):
         return false
     var reference_path := str(definition.get("energy_reference_path", ""))
-    return reference_path.is_empty() or room.get_node_or_null(reference_path) is Light3D
+    if not reference_path.is_empty() and not (room.get_node_or_null(reference_path) is Light3D):
+        return false
+    var anchor_path := str(definition.get("light_anchor_path", ""))
+    return anchor_path.is_empty() or room.get_node_or_null(anchor_path) is Node3D
 
 
 func apply(room: Node3D, definition: Dictionary) -> bool:
     if not can_apply(room, definition):
         return false
+    clear()
     target = room.get_node(str(definition["target_path"])) as Light3D
     old_color = target.light_color
     old_energy = target.light_energy
     old_visible = target.visible
+    old_position = target.position
+
+    var anchor_path := str(definition.get("light_anchor_path", ""))
+    if not anchor_path.is_empty():
+        var anchor := room.get_node(anchor_path) as Node3D
+        # The model wrapper is authored at the lower end of the fixture.
+        # Align in world space so nested light transforms and streamed room
+        # rotations cannot displace the blue light from the actual fixture.
+        target.global_position = anchor.global_position + Vector3.UP * 0.12
+        moved_to_anchor = true
 
     if definition.has("color"):
         target.light_color = definition["color"]
@@ -46,4 +62,7 @@ func clear() -> void:
         target.light_color = old_color
         target.light_energy = old_energy
         target.visible = old_visible
+        if moved_to_anchor:
+            target.position = old_position
     target = null
+    moved_to_anchor = false
