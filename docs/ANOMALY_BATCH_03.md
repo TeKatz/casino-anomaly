@@ -19,3 +19,13 @@ Implementation details: existing roulette model bounds drive a room-local ivory 
 ## Visual review 1
 
 26 accepted unchanged. 21 ball lowered 8cm; 22 both tables with offset cycles; 23 stronger wider deformation; 24 moved off streaming-hidden entrance wall; 25 upper Signature_3 row, isolated rigid bodies with negative gravity, ceiling rebound, five-second lifetime and capped count; 27 enlarged 11.5m stain; 28 narrower guest, matte suit, black head mask; 29 new eye-height mirror with off-axis viewport frustum and explicit clipping, no wall layer mutation; 30 stronger light attenuation and screen blur/vignette below HUD, reduced motion disables blur. Visual/audio confirmation still required. No new families.
+
+## Phase 4C: animation extensions
+
+- Extra Guest: the retained suited character uses anatomical direction transfer from the original Croupier sitting-idle clip. Only selected head/eye material surfaces receive a bone-aligned face mask. Pose-local capsule shapes are removed with the effect.
+- Forgotten Door: proximity-driven hinge and moving leaf collider, opaque black recess behind the leaf, unchanged solid original wall. The optional knock is intentionally silent until a reviewed asset is supplied.
+- Unfinished Game: original render geometry is partitioned locally; ball slows, moves toward the pockets and climbs back outward without teleporting. Original source visibility is restored on clear. Rotor partition and visual fit require in-game inspection.
+
+### Audio integration pending
+
+Provide a licensed, non-looping, quiet mono knock as `audio/anomalies/forgotten_door_knock.ogg`; the door script loads it only when available and uses the existing HORROR bus, irregular 13–29 s intervals and positional attenuation. Add its source/license to asset credits before shipping. No replacement sound is included. No suitable verified roulette rolling/contact clip was found; leave those cues disabled until reviewed assets are supplied.

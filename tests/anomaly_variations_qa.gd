@@ -236,7 +236,7 @@ func _run() -> void:
     if definitions.size() != 50:
         _fail("Catalog must contain exactly 50 active definitions after Phase 3 retirement")
         return
-    var expected_difficulty := {"amber_ceiling_light__soft":3,"bar_label":1,"bust_turned__reverse":2,"candleholder_shifted":4,"empty_reserve":1,"watchful_camera":2,"blank_reels":3,"empty_footsteps":3,"last_kings":4,"lightless_horse":1,"silent_countdown":1,"watching_canvases":1,"the_escort":1,"black_bloom":1,"they_are_listening":1,"wrong_reflection":1,"bar_label__reverse":5,"bar_label__subtle":3,"plant_forward__other":1,"false_jackpot":2,"floating_hand":2,"inverted_cat":2,"ownerless_shadow":2,"against_gravity":2}
+    var expected_difficulty := {"amber_ceiling_light__soft":3,"bar_label":1,"bust_turned__reverse":2,"candleholder_shifted":4,"empty_reserve":1,"watchful_camera":2,"blank_reels":3,"empty_footsteps":3,"last_kings":4,"lightless_horse":1,"silent_countdown":1,"watching_canvases":1,"the_escort":1,"black_bloom":1,"they_are_listening":1,"wrong_reflection":1,"bar_label__reverse":5,"bar_label__subtle":3,"plant_forward__other":1,"false_jackpot":2,"floating_hand":2,"inverted_cat":2,"ownerless_shadow":2,"against_gravity":2,"extra_guest":1,"forgotten_door":1,"unfinished_game":3}
     for id in expected_difficulty:
         if int(Catalog.get_entry(id).get("difficulty", 0)) != int(expected_difficulty[id]):
             _fail("Unexpected effective difficulty: " + id)
@@ -606,29 +606,56 @@ func _verify_reality_batch(hall: Node3D, other_hall: Node3D) -> bool:
             _fail("Pack 03 effect unchanged: " + reality_id)
             return false
         if reality_id == "unfinished_game":
-            var reality_ball := reality_nodes[0].get_node_or_null("AnomalyPack03/OrbitingIvoryBall") as Node3D
-            if reality_ball == null:
-                _fail("Pack 03 missing roulette ball")
+            var wheel := reality_nodes[0]
+            var effect := wheel.get_node_or_null("AnomalyPack03")
+            var reality_ball := wheel.get_node_or_null("AnomalyPack03/OrbitingIvoryBall") as Node3D
+            var rotor := wheel.get_node_or_null("AnomalyPack03/InnerRotor") as Node3D
+            if reality_ball == null or rotor == null or rotor.get_child_count() == 0:
+                _fail("Unfinished game has no ball or inner rotor")
                 return false
-            # Compare the orbit with the actual source mesh track, excluding
-            # the generated ball. The high spindle is not a valid reference.
-            var wheel_bounds: AABB = AABB()
-            var first_part := true
-            for wheel_part in reality_nodes[0].find_children("*", "MeshInstance3D", true, false):
-                if wheel_part.mesh != null and wheel_part.visible and not reality_nodes[0].get_node("AnomalyPack03").is_ancestor_of(wheel_part):
-                    var part_bounds: AABB = (reality_nodes[0].global_transform.affine_inverse() * wheel_part.global_transform) * wheel_part.get_aabb()
-                    wheel_bounds = part_bounds if first_part else wheel_bounds.merge(part_bounds)
-                    first_part = false
+            # The second real room retains all original render geometry.
+            # Sample that wheel, not the first room's partitioned copies.
+            var source_wheel := reality_other[0]
+            var wheel_bounds: AABB = reality_probe.call("_bounds",source_wheel)
             var orbit_radius := minf(wheel_bounds.size.x,wheel_bounds.size.z)*0.40
-            var track_height: float = reality_probe.call("_roulette_track_height",reality_nodes[0],wheel_bounds,orbit_radius)
-            if first_part or absf(reality_ball.position.y-track_height-0.022) > 0.002 or reality_ball.position.y >= wheel_bounds.end.y:
+            var track_height: float = reality_probe.call("_roulette_track_height",source_wheel,wheel_bounds,orbit_radius)
+            if absf(reality_ball.position.y-track_height-0.022) > 0.002 or reality_ball.position.y >= wheel_bounds.end.y:
                 _fail("Pack 03 roulette ball not seated on wheel track")
                 return false
+            var original_meshes: Array = effect.get("originals").duplicate()
+            if original_meshes.is_empty():
+                _fail("Rotor did not preserve original source geometry")
+                return false
+            var start: Vector2 = effect.call("cycle_targets",0.0,0)
+            var near_result: Vector2 = effect.call("cycle_targets",0.78,0)
+            var end: Vector2 = effect.call("cycle_targets",1.0,0)
+            if not start.is_equal_approx(end) or near_result.x >= start.x*0.8 or near_result.y >= start.y*0.2:
+                _fail("Roulette cannot approach a result and smoothly climb out again")
+                return false
+            var previous := start
+            for i in range(1,201):
+                var targets: Vector2 = effect.call("cycle_targets",float(i)/200.0,0)
+                if absf(targets.x-previous.x)>0.02 or absf(targets.y-previous.y)>0.16:
+                    _fail("Roulette phase has an abrupt discontinuity")
+                    return false
+                previous = targets
             var reality_ball_start := reality_ball.position
-            await create_timer(0.25).timeout
-            var reality_settings := hall.get_node_or_null("/root/GameSettings")
-            if reality_settings != null and not bool(reality_settings.call("get_option", "reduced_motion")) and reality_ball.position.is_equal_approx(reality_ball_start):
-                _fail("Pack 03 roulette ball not moving")
+            var rotor_start := rotor.rotation.y
+            effect.call("advance",0.25)
+            if reality_ball.position.is_equal_approx(reality_ball_start) or is_equal_approx(rotor.rotation.y,rotor_start):
+                _fail("Ball and rotor must both move")
+                return false
+            reality_adapter.clear()
+            for source in original_meshes:
+                if not is_instance_valid(source["node"]) or source["node"].visible != source["visible"]:
+                    _fail("Roulette original render geometry not restored")
+                    return false
+            if wheel.has_node("AnomalyPack03"):
+                _fail("Roulette rotor or ball survived reset")
+                return false
+            # Reapply and run the shared room isolation/reset checks too.
+            if not reality_adapter.apply(hall,reality_id):
+                _fail("Roulette cannot be reapplied after clear")
                 return false
         if reality_id == "invisible_dealer" and reality_nodes.size() != 16:
             _fail("Both card tables must be animated")
@@ -643,6 +670,36 @@ func _verify_reality_batch(hall: Node3D, other_hall: Node3D) -> bool:
                 return false
             if absf(door_root.position.x-(reality_wall.get_aabb().end.x-7.9)) > 0.01:
                 _fail("Pack 03 door not in the reviewed free wall bay")
+                return false
+            var hinge := door_root.get_node_or_null("DoorHinge") as Node3D
+            var recess := door_root.get_node_or_null("DarkRecess") as MeshInstance3D
+            if hinge == null or recess == null or not hinge.has_node("WeatheredDoor") or not hinge.has_node("DoorKnob") or not hinge.has_node("MovingLeafCollision"):
+                _fail("Door hinge, moving details, solid leaf or recess missing")
+                return false
+            var black := recess.material_override as StandardMaterial3D
+            if black == null or black.albedo_color != Color.BLACK or black.shading_mode != BaseMaterial3D.SHADING_MODE_UNSHADED:
+                _fail("Door recess must remain opaque and unlit")
+                return false
+            var frame_transform := (door_root.get_node("Lintel") as Node3D).transform
+            var initial_angle := hinge.rotation.y
+            door_root.call("advance",0.10,1.0,false)
+            if hinge.rotation.y <= initial_angle or hinge.rotation.y >= deg_to_rad(16.0):
+                _fail("Door opening did not ease toward target")
+                return false
+            for step in range(50):
+                door_root.call("advance",0.1,1.0,false)
+            var opened := hinge.rotation.y
+            if opened < deg_to_rad(15.0) or (door_root.get_node("Lintel") as Node3D).transform != frame_transform:
+                _fail("Door opening or fixed frame regressed")
+                return false
+            door_root.call("advance",0.1,6.0,false)
+            if hinge.rotation.y >= opened or hinge.rotation.y <= 0.0:
+                _fail("Door closing snapped or failed to start")
+                return false
+            for step in range(60):
+                door_root.call("advance",0.1,6.0,false)
+            if absf(hinge.rotation.y) > 0.001:
+                _fail("Door did not close on departure")
                 return false
         if reality_id == "black_bloom":
             var bloom_root := reality_nodes[0].get_node_or_null("AnomalyPack03") as Node3D
@@ -719,9 +776,43 @@ func _verify_reality_batch(hall: Node3D, other_hall: Node3D) -> bool:
                     _fail("Listening has an abrupt trigger boundary")
                     return false
                 previous = weight
-        if reality_id == "extra_guest" and not reality_nodes[0].has_node("AnomalyPack03/SeatedGuest"):
-            _fail("Pack 03 seated guest missing")
-            return false
+        if reality_id == "extra_guest":
+            var guest_root := reality_nodes[0].get_node_or_null("AnomalyPack03") as Node3D
+            var guest := reality_nodes[0].get_node_or_null("AnomalyPack03/SeatedGuest") as Node3D
+            if guest_root == null or guest == null or guest.scene_file_path != "res://models/silent_audience/suit_man/scene.gltf":
+                _fail("Silent guest must use the newer suited character")
+                return false
+            if not str(guest.get_meta("seated_source_clip","")).to_lower().contains("sitting_idle") or int(guest.get_meta("face_mask_surfaces",0)) < 1:
+                _fail("Silent guest is missing the actual sitting clip or face-only mask")
+                return false
+            if not is_equal_approx(guest.scale.x,guest.scale.y) or not is_equal_approx(guest.scale.y,guest.scale.z):
+                _fail("Silent guest has distorted character proportions")
+                return false
+            var collision := guest_root.get_node_or_null("GuestCollision") as StaticBody3D
+            if collision == null or collision.collision_layer != 1 or collision.get_child_count() < 6:
+                _fail("Silent guest lacks pose-shaped physical collision")
+                return false
+            var masks := 0
+            for part in guest.find_children("*","MeshInstance3D",true,false):
+                var mesh := part as MeshInstance3D
+                if mesh.mesh == null:
+                    continue
+                for surface in range(mesh.mesh.get_surface_count()):
+                    var material := mesh.get_active_material(surface) as StandardMaterial3D
+                    if material == null or not material.next_pass is ShaderMaterial:
+                        continue
+                    var label := str(material.resource_name).to_lower()
+                    if not ("avatarhead" in label or "eyeball" in label or "cornea" in label or "eyelash" in label or "teeth" in label):
+                        _fail("Face mask modified a body or clothing surface")
+                        return false
+                    masks += 1
+            if masks < 1:
+                _fail("Face mask not installed on facial surfaces")
+                return false
+            for animator in guest.find_children("*","AnimationPlayer",true,false):
+                if (animator as AnimationPlayer).is_playing():
+                    _fail("Silent guest is not motionless")
+                    return false
         if reality_id == "wrong_reflection":
             var reality_mirror := reality_nodes[0].get_node_or_null("AnomalyPack03")
             if reality_mirror == null or not reality_mirror.has_node("ReflectionViewport/ReflectedCamera") or not reality_mirror.has_node("ReflectionOnlyCroupier") or not reality_mirror.has_node("MirrorSurface"):

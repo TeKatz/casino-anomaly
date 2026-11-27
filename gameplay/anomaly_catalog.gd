@@ -27,7 +27,7 @@ const REVIEW_HINTS := {
     "extra_guest": ["The quiet areas held more than expected.", "In den ruhigen Bereichen war mehr als erwartet."],
     "false_jackpot": ["A display was demanding unusual attention.", "Eine Anzeige zog ungewöhnlich viel Aufmerksamkeit auf sich."],
     "floating_hand": ["Something was not resting where it should.", "Etwas ruhte nicht dort, wo es sollte."],
-    "forgotten_door": ["A familiar wall had an unfamiliar detail.", "Eine vertraute Wand hatte ein fremdes Detail."],
+    "forgotten_door": ["Something unfamiliar reacted to your approach.", "Etwas Unvertrautes reagierte auf deine Annäherung."],
     "horse_spotlight_off": ["A decorative area was lit unusually.", "Ein dekorativer Bereich war ungewöhnlich beleuchtet."],
     "inverted_cat": ["Some decorative spaces were unexpectedly empty.", "Einige dekorative Plätze waren unerwartet leer."],
     "invisible_dealer": ["Watch what happens at unattended games.", "Beobachte, was an unbeaufsichtigten Spielen passiert."],

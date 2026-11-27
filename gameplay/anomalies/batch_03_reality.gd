@@ -6,6 +6,8 @@ const Guest = preload("res://gameplay/anomalies/seated_guest.gd")
 const Mirror = preload("res://gameplay/anomalies/wrong_reflection.gd")
 const RisingDrops = preload("res://gameplay/anomalies/rising_drops.gd")
 const ListeningView = preload("res://gameplay/anomalies/listening_view.gd")
+const DoorMotion = preload("res://gameplay/anomalies/forgotten_door_motion.gd")
+const EndlessRoulette = preload("res://gameplay/anomalies/endless_roulette.gd")
 var saved: Array[Dictionary] = []
 var roots: Array[Node3D] = []
 var motion: Tween
@@ -209,9 +211,12 @@ func apply(room: Node3D, entry: Dictionary) -> bool:
     var id := str(entry["id"])
     saved = snapshot(nodes, id)
     match id:
-        "unfinished_game": _roulette(room, nodes[0])
+        "unfinished_game":
+            if not _roulette(room, nodes[0]):
+                clear()
+                return false
         "invisible_dealer": _dealer(room, nodes)
-        "forgotten_door": _door(nodes[0] as MeshInstance3D)
+        "forgotten_door": _door(room, nodes[0] as MeshInstance3D)
         "against_gravity": _liquid(room, nodes)
         "pendulum": _pendulum(room, nodes[0], nodes[1] as Light3D)
         "black_bloom": _bloom(room, nodes[0] as MeshInstance3D)
@@ -234,20 +239,13 @@ func apply(room: Node3D, entry: Dictionary) -> bool:
     return true
 
 
-func _roulette(room: Node3D, wheel: Node3D) -> void:
+func _roulette(room: Node3D, wheel: Node3D) -> bool:
     var bounds := _bounds(wheel)
-    var center := bounds.get_center()
-    var radius := minf(bounds.size.x, bounds.size.z) * 0.40
-    const BALL_RADIUS := 0.022
-    # The spindle is much taller than the wooden ball track. Sample the
-    # imported wheel's triangles at the accepted orbit, not its top AABB.
-    var track := _roulette_track_height(wheel, bounds, radius)
-    var level := track + BALL_RADIUS
-    var ball := _sphere(_root(wheel), "OrbitingIvoryBall", BALL_RADIUS, _material(Color("#e9e0c9"), 0.0, 0.26), Vector3(center.x + radius, level, center.z))
-    _animate(room, 4.5, func(phase: float) -> void:
-        var angle := TAU * (0.15 if _reduced(room) else phase)
-        ball.position = Vector3(center.x + cos(angle) * radius, level, center.z + sin(angle) * radius)
-    )
+    var effect := EndlessRoulette.new()
+    effect.name = "AnomalyPack03"
+    wheel.add_child(effect)
+    roots.append(effect)
+    return effect.configure(room,wheel,bounds,self)
 
 
 func _roulette_track_height(wheel: Node3D, bounds: AABB, radius: float) -> float:
@@ -335,8 +333,11 @@ func _dealer(room: Node3D, nodes: Array[Node3D]) -> void:
     )
 
 
-func _door(wall: MeshInstance3D) -> void:
-    var root := _root(wall)
+func _door(room: Node3D, wall: MeshInstance3D) -> void:
+    var root := DoorMotion.new()
+    root.name = "AnomalyPack03"
+    wall.add_child(root)
+    roots.append(root)
     # The entrance wall is intentionally hidden by streaming portals.
     # Use the intact south-west wall, in the open stretch before the lounge.
     var bounds := wall.get_aabb()
@@ -356,14 +357,25 @@ func _door(wall: MeshInstance3D) -> void:
     var metal := _material(Color("#716c5d"), 0.72, 0.64)
     # Fill the small depth difference between the wood trim and upper wall.
     _box(root, "DoorBacking", Vector3(1.17, 2.50, 0.12), Vector3(0, 0, 0.052), frame)
-    _box(root, "WeatheredDoor", Vector3(0.96, 2.35, 0.075), Vector3.ZERO, wood)
+    # Opaque unlit black recess sits just behind the closed leaf. The real
+    # wall remains intact and no camera can see out of the level.
+    var darkness := StandardMaterial3D.new()
+    darkness.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+    darkness.albedo_color = Color.BLACK
+    darkness.disable_fog = true
+    _box(root, "DarkRecess", Vector3(0.97, 2.36, 0.016), Vector3(0,0,-0.002), darkness)
+    var hinge := Node3D.new()
+    hinge.name = "DoorHinge"
+    root.add_child(hinge)
+    hinge.position = Vector3(-0.48,0,0)
+    _box(hinge, "WeatheredDoor", Vector3(0.96, 2.35, 0.075), Vector3(0.48,0,0), wood)
     for side in [-1.0, 1.0]:
         _box(root, "Jamb", Vector3(0.095, 2.50, 0.13), Vector3(side * 0.53, 0, -0.025), frame)
     _box(root, "Lintel", Vector3(1.17, 0.11, 0.13), Vector3(0, 1.25, -0.025), frame)
     for index in range(2):
-        _box(root, "RecessedPanel", Vector3(0.70, 0.86, 0.026), Vector3(0, -0.54 + float(index)*1.08, -0.047), inset)
-    _box(root, "LockPlate", Vector3(0.095, 0.21, 0.018), Vector3(0.34, -0.05, -0.054), metal)
-    _sphere(root, "DoorKnob", 0.047, metal, Vector3(0.34, -0.02, -0.098))
+        _box(hinge, "RecessedPanel", Vector3(0.70, 0.86, 0.026), Vector3(0.48, -0.54 + float(index)*1.08, -0.047), inset)
+    _box(hinge, "LockPlate", Vector3(0.095, 0.21, 0.018), Vector3(0.82, -0.05, -0.054), metal)
+    _sphere(hinge, "DoorKnob", 0.047, metal, Vector3(0.82, -0.02, -0.098))
     var body := StaticBody3D.new()
     body.name = "DoorCollision"
     root.add_child(body)
@@ -373,7 +385,18 @@ func _door(wall: MeshInstance3D) -> void:
     collision_box.size = Vector3(1.17, 2.55, 0.25)
     collider.shape = collision_box
     body.add_child(collider)
-    collider.position = Vector3(0, 0.025, -0.025)
+    collider.position = Vector3(0, 0.025, 0.06)
+    var leaf_body := AnimatableBody3D.new()
+    leaf_body.name = "MovingLeafCollision"
+    leaf_body.sync_to_physics = false
+    hinge.add_child(leaf_body)
+    var leaf_shape := CollisionShape3D.new()
+    var leaf_box := BoxShape3D.new()
+    leaf_box.size = Vector3(0.96,2.35,0.075)
+    leaf_shape.shape = leaf_box
+    leaf_body.add_child(leaf_shape)
+    leaf_shape.position.x = 0.48
+    root.configure(room,hinge)
 
 
 func _liquid(room: Node3D, nodes: Array[Node3D]) -> void:
