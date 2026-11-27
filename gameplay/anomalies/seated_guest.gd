@@ -18,8 +18,8 @@ uniform vec3 center_local;
 uniform vec3 right_local;
 uniform vec3 up_local;
 uniform vec3 front_local;
-uniform float chin_height = -0.085;
-uniform float forehead_height = 0.13;
+uniform float chin_height = -0.10;
+uniform float neck_height = -0.15;
 varying vec3 face_coordinates;
 void vertex() {
     vec3 p = (MODEL_MATRIX * vec4(VERTEX,1.0)).xyz;
@@ -31,19 +31,19 @@ void vertex() {
     face_coordinates = vec3(dot(offset,right),dot(offset,up),dot(offset,front));
 }
 void fragment() {
-    // Anatomical fade from cheeks/temples to ears and from jaw to neck.
-    // No alpha, discard, flat overlay, or extra geometry. The darkness
-    // follows the actual curved skin and remains shaded by the room.
-    float front = smoothstep(-0.045,0.035,face_coordinates.z);
-    float lower = smoothstep(chin_height-0.045,chin_height+0.025,face_coordinates.y);
-    float upper = 1.0-smoothstep(forehead_height-0.015,forehead_height+0.045,face_coordinates.y);
-    float mask = front*lower*upper;
+    // Full black throughout the facial region, including the chin and
+    // sides of the cheeks. Only the transition to the neck and rear
+    // of the head blends into the original lit skin. Never sample a
+    // fraction of facial texture or retain its highlights at full mask.
+    float front = smoothstep(-0.105,-0.035,face_coordinates.z);
+    float lower = smoothstep(neck_height,chin_height,face_coordinates.y);
+    float mask = front*lower;
     vec3 skin = texture(skin_albedo,UV).rgb * skin_color.rgb;
-    ALBEDO = mix(skin,skin*0.022+vec3(0.002,0.002,0.0025),mask);
-    ROUGHNESS = mix(skin_roughness,0.96,mask);
-    SPECULAR = mix(skin_specular,0.06,mask);
+    ALBEDO = skin*(1.0-mask);
+    ROUGHNESS = mix(skin_roughness,1.0,mask);
+    SPECULAR = skin_specular*(1.0-mask);
     NORMAL_MAP = texture(skin_normal,UV).rgb;
-    NORMAL_MAP_DEPTH = normal_strength;
+    NORMAL_MAP_DEPTH = normal_strength*(1.0-mask);
 }
 """
 
@@ -195,6 +195,44 @@ static func _fit_chain(rig: Skeleton3D, anchor: Node3D, first: int, middle: int,
     _aim(rig,anchor,middle,last,origin+axis*distance-_point(rig,anchor,middle))
 
 
+# The previous direction-only wrist solve left roll unconstrained, so the
+# hands stood on their edges. Align two anatomical axes (middle finger and
+# index-to-pinky span), then relax each finger using its own bone chain.
+static func _rest_hand(rig: Skeleton3D, anchor: Node3D, hand: int, side: String, forward: Vector3) -> void:
+    var prefix := "LeftHand" if side=="left" else "RightHand"
+    var middle := _bone(rig,prefix+"Middle1_")
+    var index := _bone(rig,prefix+"Index1_")
+    var pinky := _bone(rig,prefix+"Pinky1_")
+    if mini(middle,mini(index,pinky))<0:
+        return
+    var along := forward.normalized()
+    _aim(rig,anchor,hand,middle,along)
+    var across := _point(rig,anchor,pinky)-_point(rig,anchor,index)
+    var target := Vector3.RIGHT if side=="left" else Vector3.LEFT
+    across = (across-along*across.dot(along)).normalized()
+    target = (target-along*target.dot(along)).normalized()
+    if across.length_squared()>0.001 and target.length_squared()>0.001:
+        var angle := across.signed_angle_to(target,along)
+        var basis := (anchor.global_transform.affine_inverse().basis*rig.global_transform.basis*rig.get_bone_global_pose(hand).basis).orthonormalized()
+        var twist := Quaternion((basis.inverse()*along).normalized(),angle)
+        rig.set_bone_pose_rotation(hand,(rig.get_bone_pose_rotation(hand)*twist).normalized())
+        rig.force_update_all_bone_transforms()
+    for finger in ["Index","Middle","Ring","Pinky"]:
+        for joint in range(1,4):
+            var from := _bone(rig,prefix+finger+str(joint)+"_")
+            var to := _bone(rig,prefix+finger+str(joint+1)+"_")
+            if from<0 or to<0:
+                continue
+            var lateral := clampf(_direction(rig,anchor,from,to).x,-0.12,0.12)
+            var curl := float([0.20,0.35,0.48][joint-1])
+            _aim(rig,anchor,from,to,along+Vector3(lateral,-curl,0.0))
+    # Keep thumb naturally beside the index finger, not spread outward.
+    var thumb := _bone(rig,prefix+"Thumb1_")
+    var thumb_next := _bone(rig,prefix+"Thumb2_")
+    if thumb>=0 and thumb_next>=0:
+        _aim(rig,anchor,thumb,thumb_next,along+Vector3(-0.27 if side=="left" else 0.27,-0.22,0.0))
+
+
 static func _mask_face(figure: Node3D, rig: Skeleton3D, anchor: Node3D, roles: Dictionary) -> int:
     var left := _point(rig,anchor,int(roles["left_eye"]))
     var right := _point(rig,anchor,int(roles["right_eye"]))
@@ -210,8 +248,10 @@ static func _mask_face(figure: Node3D, rig: Skeleton3D, anchor: Node3D, roles: D
     # Eye level defines the vertical transition; the head axis defines
     # front/back. Unlike the old ellipse this wraps around the cheekbones.
     var center := head+up*(eyes-head).dot(up)
-    var chin := clampf(-(eyes-head).dot(up)-0.025,-0.13,-0.075)
-    var forehead := clampf((top-eyes).dot(up)*0.78,0.065,0.15)
+    var chin := -(eyes-head).dot(up)-0.026
+    var neck_index := _bone(rig,"Neck2_")
+    var neck := _point(rig,anchor,neck_index) if neck_index>=0 else head-up*0.045
+    var neck_limit := minf(chin-0.024,(neck-center).dot(up)-0.022)
     var shader := Shader.new()
     shader.code = FACE_SHADER
     var count := 0
@@ -242,18 +282,27 @@ static func _mask_face(figure: Node3D, rig: Skeleton3D, anchor: Node3D, roles: D
                 skin.set_shader_parameter("up_local",inverse*up)
                 skin.set_shader_parameter("front_local",inverse*forward)
                 skin.set_shader_parameter("chin_height",chin)
-                skin.set_shader_parameter("forehead_height",forehead)
+                skin.set_shader_parameter("neck_height",neck_limit)
                 mesh.set_surface_override_material(surface,skin)
                 count += 1
+            elif label == "glasses":
+                # Verified glTF: glasses occupy their own single-surface mesh.
+                # Remove the accessory for this instance only; reflected
+                # lenses must not reveal a pair of eyes in the void.
+                if mesh.mesh.get_surface_count()==1:
+                    mesh.hide()
+                    mesh.set_meta("guest_hidden_glasses",true)
             elif "eyeball" in label or "cornea" in label or "eyelash" in label or "teeth" in label:
-                # These are face-only materials; preserve their original
-                # textures and render modes without a second shader pass.
-                var dark := original.duplicate() as StandardMaterial3D
+                # Face-only surfaces contribute no texture, specular or
+                # lighting at all. The original resource remains untouched.
+                var dark := StandardMaterial3D.new()
+                dark.resource_name = original.resource_name
                 dark.set_meta("guest_face_mask",true)
-                dark.albedo_color *= Color(0.025,0.025,0.028,1.0)
-                dark.metallic_specular = 0.06
-                dark.roughness = 0.96
-                dark.emission_enabled = false
+                dark.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+                dark.albedo_color = Color.BLACK
+                dark.cull_mode = BaseMaterial3D.CULL_DISABLED
+                dark.metallic_specular = 0.0
+                dark.roughness = 1.0
                 mesh.set_surface_override_material(surface,dark)
                 count += 1
     return count
@@ -328,6 +377,11 @@ static func install(sofa: Node3D, parent: Node3D) -> Node3D:
         _aim(rig,parent,arm,forearm,pose[side+"_upper_arm"])
         _aim(rig,parent,forearm,hand,pose[side+"_lower_arm"])
     figure.position -= _point(rig,parent,int(roles["hip"]))
+    # Add a small asymmetric relaxed recline to the transferred torso,
+    # leaving the pelvis and leg placement unchanged.
+    var spine := _bone(rig,"Spine1_")
+    if spine>=0:
+        _aim(rig,parent,spine,int(roles["head"]),Vector3(0.035,1.0,-0.15))
     # Adapt the transferred seated pose to this particular sofa. Preserve
     # the donor's torso and initial limb directions, then constrain ankles
     # to the floor, knees in front of the cushion and wrists above the lap.
@@ -351,13 +405,12 @@ static func install(sofa: Node3D, parent: Node3D) -> Node3D:
         var forearm := int(roles[side+"_forearm"])
         var hand := int(roles[side+"_hand"])
         var knee := _point(rig,parent,calf)
-        var lap := thigh_at.lerp(knee,0.68)
-        lap.y = maxf(lap.y+0.13,seat_y+0.16)
-        lap.z = maxf(lap.z,front_z-0.12)
-        _fit_chain(rig,parent,arm,forearm,hand,lap,Vector3(sign_side*0.25,-0.9,-0.38))
-        var middle_finger := _bone(rig,"LeftHandMiddle1_" if side=="left" else "RightHandMiddle1_")
-        if middle_finger>=0:
-            _aim(rig,parent,hand,middle_finger,Vector3(0,-0.13,1.0))
+        var lap := thigh_at.lerp(knee,0.49 if side=="left" else 0.57)
+        lap.x += sign_side*0.055
+        lap.y = maxf(lap.y+0.085,seat_y+0.125)
+        lap.z = maxf(lap.z,front_z-0.19)
+        _fit_chain(rig,parent,arm,forearm,hand,lap,Vector3(sign_side*0.60,-0.85,-0.38))
+        _rest_hand(rig,parent,hand,side,Vector3(-sign_side*0.10,-0.10,1.0))
     figure.set_meta("seat_front_z",front_z)
     figure.set_meta("seat_surface_y",seat_y)
     figure.set_meta("floor_y",floor_y)

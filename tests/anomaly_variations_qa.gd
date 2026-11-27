@@ -794,10 +794,13 @@ func _verify_reality_batch(hall: Node3D, other_hall: Node3D) -> bool:
                 return false
             var masks := 0
             var single_pass_head := false
+            var hidden_glasses := false
             for part in guest.find_children("*","MeshInstance3D",true,false):
                 var mesh := part as MeshInstance3D
                 if mesh.mesh == null:
                     continue
+                if mesh.has_meta("guest_hidden_glasses"):
+                    hidden_glasses = not mesh.visible
                 for surface in range(mesh.mesh.get_surface_count()):
                     var material := mesh.get_active_material(surface)
                     if material == null or not material.has_meta("guest_face_mask"):
@@ -811,8 +814,13 @@ func _verify_reality_batch(hall: Node3D, other_hall: Node3D) -> bool:
                     if not ("avatarhead" in label or "eyeball" in label or "cornea" in label or "eyelash" in label or "teeth" in label):
                         _fail("Face mask modified a body or clothing surface")
                         return false
+                    if not "avatarhead" in label:
+                        var dark := material as StandardMaterial3D
+                        if dark == null or dark.albedo_color != Color.BLACK or dark.shading_mode != BaseMaterial3D.SHADING_MODE_UNSHADED or dark.albedo_texture != null:
+                            _fail("Guest face accessory can reveal facial detail")
+                            return false
                     masks += 1
-            if masks < 1 or not single_pass_head:
+            if masks < 1 or not single_pass_head or not hidden_glasses:
                 _fail("Face mask not installed on facial surfaces")
                 return false
             if float(guest.get_meta("standing_height",0.0)) < 1.75:
@@ -840,6 +848,31 @@ func _verify_reality_batch(hall: Node3D, other_hall: Node3D) -> bool:
                     return false
                 if arm_shape.position.y < seat_y+0.09:
                     _fail("Guest forearm intersects seat")
+                    return false
+            # Check the real wrist landmarks, not a stored target. Across
+            # the knuckles should be nearly horizontal, with fingers pointing
+            # towards the knees rather than palms facing each other.
+            var guest_rig: Skeleton3D
+            for item in guest.find_children("*","Skeleton3D",true,false):
+                if (item as Skeleton3D).get_bone_count()>25:
+                    guest_rig = item as Skeleton3D
+                    break
+            if guest_rig == null:
+                _fail("Guest skeleton missing")
+                return false
+            for prefix in ["LeftHand","RightHand"]:
+                var landmarks := {}
+                for bone_index in range(guest_rig.get_bone_count()):
+                    for part_name in ["_","Index1_","Middle1_","Pinky1_"]:
+                        if str(guest_rig.get_bone_name(bone_index)).begins_with(prefix+part_name):
+                            landmarks[part_name] = guest_root.to_local(guest_rig.to_global(guest_rig.get_bone_global_pose(bone_index).origin))
+                if landmarks.size()!=4:
+                    _fail("Guest wrist landmarks missing")
+                    return false
+                var across: Vector3 = (landmarks["Pinky1_"]-landmarks["Index1_"]).normalized()
+                var along: Vector3 = (landmarks["Middle1_"]-landmarks["_"]).normalized()
+                if absf(across.y)>0.20 or along.z<0.90:
+                    _fail("Guest palms are not resting flat towards knees")
                     return false
             for animator in guest.find_children("*","AnimationPlayer",true,false):
                 if (animator as AnimationPlayer).is_playing():
