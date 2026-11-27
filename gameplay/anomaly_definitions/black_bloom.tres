@@ -15,4 +15,4 @@ description_en = "Thin, dark organic strands slowly spread across the wall and w
 description_de = "Dünne, dunkle organische Stränge breiten sich langsam über die Wand aus und ziehen sich wieder zurück."
 target_path = "Architecture/SouthWestWall"
 rarity = "rare"
-difficulty = 2
+difficulty = 1

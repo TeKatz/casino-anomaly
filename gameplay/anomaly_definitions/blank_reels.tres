@@ -15,4 +15,4 @@ description_en = "All three reel symbols on one entrance cabinet have disappeare
 description_de = "Alle drei Walzensymbole eines Spielautomaten am Eingang fehlen."
 target_path = "SlotMachines"
 rarity = "uncommon"
-difficulty = 2
+difficulty = 3

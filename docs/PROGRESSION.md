@@ -21,9 +21,11 @@ of the Backrooms. Alternative modes skip the introduction. Local records
 only, no network or Steam requirement. Developer-forced decisions award
 nothing; assisted runs cannot earn competitive run records/bonuses.
 
-The catalog has 14 stable family IDs, 16 authored variants and five
+The catalog derives its active forms and family counts from definitions and uses five
 rarities. Families are weighted independently of variant count; variant
-IDs persist with the run, and collection records aggregate by family.
+IDs persist with the run, and collection records aggregate by stable family key.
+A surviving variant can represent its family even after the base form is retired.
+Retired forms and families remain in historical saves but do not count as active forms or families.
 After eight anomaly encounters without a first discovery, the next
 anomalous draw favors an unidentified available family exclusively.
 The ordinary clear-room probability is unchanged outside Research.

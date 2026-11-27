@@ -20,4 +20,4 @@ rarity = "common"
 family_id = "bust_turned"
 variant_name_de = "Entgegengesetzte Drehung"
 variant_name_en = "Opposite turn"
-difficulty = 3
+difficulty = 2

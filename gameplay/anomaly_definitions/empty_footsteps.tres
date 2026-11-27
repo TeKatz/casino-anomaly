@@ -15,4 +15,4 @@ description_en = "Barefoot impressions fade in and out in sequence along the car
 description_de = "Nackte Fußabdrücke erscheinen und verblassen nacheinander auf dem Teppich, angepasst an dein Lauftempo."
 target_path = "RedCarpet/WestRunner"
 rarity = "uncommon"
-difficulty = 2
+difficulty = 3

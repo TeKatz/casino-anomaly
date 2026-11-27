@@ -15,4 +15,4 @@ description_en = "A silent security guard approaches, watches you from a fixed d
 description_de = "Ein stummer Wachmann nähert sich, beobachtet dich aus einem festen Abstand und weicht zurück, sobald du ihm zu nahe kommst. Entfernst du dich, folgt er dir."
 target_path = "Architecture/OakWestWing"
 rarity = "exceptional"
-difficulty = 2
+difficulty = 1

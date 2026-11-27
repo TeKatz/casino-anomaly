@@ -16,3 +16,4 @@ description_de = "Ein Buchstabe im Barschild verändert sich."
 target_path = "CornerBar/Sign_MIDNIGHT_BAR"
 replacement_text = "MIDNIGHT B4R"
 rarity = "common"
+difficulty = 1

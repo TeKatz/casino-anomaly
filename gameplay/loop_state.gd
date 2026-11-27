@@ -199,7 +199,7 @@ func _roll_random_anomaly(available_anomalies: Array[String]) -> String:
     var weights := PackedFloat32Array()
     var families := groups.keys()
     for family in families:
-        var entry := Catalog.get_entry(str(family))
+        var entry := Catalog.family_entry(str(family))
         var weight := Catalog.rarity_weight(str(entry.get("rarity", "common")))
         if not bool(records.get(family, {}).get("recognized", false)):
             weight *= 8.0 if mode == "research" else 2.5

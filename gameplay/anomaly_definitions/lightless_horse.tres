@@ -15,4 +15,4 @@ description_en = "The horse statue absorbs light and appears as a solid black si
 description_de = "Die Pferdestatue verschluckt das Licht und erscheint als tiefschwarze Silhouette."
 target_path = "ModelInteriors"
 rarity = "uncommon"
-difficulty = 2
+difficulty = 1

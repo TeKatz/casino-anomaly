@@ -15,4 +15,4 @@ description_en = "An eye-level mirror reflects a croupier absent from the actual
 description_de = "Ein Spiegel auf Augenhöhe zeigt einen Croupier, der im tatsächlichen Raum fehlt."
 target_path = "Architecture/SouthWestWall"
 rarity = "exceptional"
-difficulty = 4
+difficulty = 1

@@ -15,4 +15,4 @@ description_en = "All chess pieces except the two kings are gone."
 description_de = "Alle Schachfiguren außer den beiden Königen sind verschwunden."
 target_path = "ModelInteriors"
 rarity = "common"
-difficulty = 3
+difficulty = 4

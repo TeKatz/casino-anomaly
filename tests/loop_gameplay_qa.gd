@@ -96,6 +96,12 @@ func _run() -> void:
     if not Catalog.get_entry(retired_id).is_empty() or Catalog.discoverable_ids().has(retired_id) or available.has(retired_id) or demo.apply(scene, retired_id):
         _fail("Retired anomaly is still available")
         return
+    for removed_id in ["entrance_label__reverse","table_label__reverse","bust_turned","bust_turned__subtle","candleholder_shifted__other","crooked_painting__reverse","crooked_painting__subtle","plant_misplaced","plant_misplaced__subtle","stool_out_of_line__other","stool_out_of_line__subtle","breathing_wall"]:
+        if not Catalog.get_entry(removed_id).is_empty() or available.has(removed_id):
+            _fail("Audit-retired definition is still available: " + removed_id)
+            return
+    # In particular the retired base is not a selectable alias for its family.
+    retired_id = "bust_turned"
     restored.anomaly_id = retired_id
     restored.last_anomaly_id = retired_id
     restored.correct_streak = 7

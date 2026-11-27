@@ -261,8 +261,9 @@ func _fill(slot: int) -> void:
     # Only names already unlocked through CORRECT identification are shown.
     var records: Dictionary = profiles.get_records()
     var unlocked: Array[String] = []
-    for entry in Catalog.entries():
-        var record: Dictionary = records.get(str(entry.get("id", "")), {})
+    for family_id in Catalog.discoverable_ids():
+        var entry := Catalog.family_entry(family_id)
+        var record: Dictionary = records.get(family_id, {})
         if bool(record.get("recognized", false)):
             var key := "title_de" if _de() else "title_en"
             unlocked.append(str(entry.get(key, "")))

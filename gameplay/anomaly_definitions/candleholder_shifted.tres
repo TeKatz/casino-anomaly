@@ -17,3 +17,4 @@ target_path = "ModelInteriors/SingleBrassCandleholder_02"
 has_position_offset = true
 position_offset = Vector3(0.26, 0.0, 0.12)
 rarity = "rare"
+difficulty = 4

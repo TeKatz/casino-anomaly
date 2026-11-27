@@ -15,4 +15,4 @@ description_en = "All signature bottles on the bar have lost their paper labels.
 description_de = "Alle Signature-Flaschen an der Bar haben ihre Papieretiketten verloren. Ihr Inhalt bleibt unverändert."
 target_path = "CornerBar"
 rarity = "uncommon"
-difficulty = 2
+difficulty = 1

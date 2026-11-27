@@ -14,7 +14,6 @@ const REVIEW_HINTS := {
     "black_bloom": ["Watch for subtle changes on large surfaces.", "Achte auf kleine Veränderungen großer Flächen."],
     "blank_reels": ["A familiar display was missing visual detail.", "Einer vertrauten Anzeige fehlten visuelle Details."],
     "blue_runner": ["A familiar surface had an unfamiliar color.", "Eine vertraute Fläche hatte eine fremde Farbe."],
-    "breathing_wall": ["Not every solid surface stayed still.", "Nicht jede feste Oberfläche blieb regungslos."],
     "burgundy_felt": ["Compare the colors around the gaming area.", "Vergleiche die Farben im Spielbereich."],
     "bust_turned": ["Pay attention to which way objects face.", "Achte darauf, wohin Gegenstände ausgerichtet sind."],
     "candleholder_shifted": ["Small objects were not quite centered.", "Kleine Gegenstände standen nicht ganz mittig."],
@@ -38,7 +37,6 @@ const REVIEW_HINTS := {
     "ownerless_shadow": ["Light and its traces did not quite agree.", "Licht und seine Spuren passten nicht ganz zusammen."],
     "pendulum": ["Look above eye level for subtle movement.", "Achte oberhalb der Augenhöhe auf kleine Bewegungen."],
     "plant_forward": ["Compare objects along the walking route.", "Vergleiche Gegenstände entlang des Laufwegs."],
-    "plant_misplaced": ["The usual arrangement of decor was disturbed.", "Die gewohnte Anordnung der Dekoration war gestört."],
     "silent_countdown": ["Notice displays and sounds that share a rhythm.", "Achte auf Anzeigen und Geräusche mit gleichem Rhythmus."],
     "stay_here": ["Familiar messages conveyed an unusual intent.", "Vertraute Hinweise vermittelten eine fremde Absicht."],
     "stool_out_of_line": ["Repeated objects did not line up as usual.", "Ähnliche Gegenstände standen nicht wie gewohnt in Reihe."],
@@ -109,13 +107,31 @@ static func get_entry(id: String) -> Dictionary:
     return {}
 
 
+# These are stable collection keys, not necessarily selectable definition IDs.
+# A family survives the retirement of its original form.
 static func discoverable_ids() -> Array[String]:
     _ensure_loaded()
     var result: Array[String] = []
     for entry in _entries:
-        if bool(entry.get("discoverable", true)) and str(entry.get("family_id", entry["id"])) == str(entry["id"]):
-            result.append(str(entry["id"]))
+        var key := str(entry.get("family_id", entry["id"]))
+        if bool(entry.get("discoverable", true)) and not result.has(key):
+            result.append(key)
     return result
+
+
+# Prefer the original active form; otherwise use a deterministic active
+# representative. Never make a retired ID resolve through get_entry().
+static func family_entry(id: String) -> Dictionary:
+    _ensure_loaded()
+    var fallback: Dictionary = {}
+    for entry in _entries:
+        if str(entry.get("family_id", entry["id"])) != id:
+            continue
+        if fallback.is_empty() or (not bool(fallback.get("discoverable", true)) and bool(entry.get("discoverable", true))):
+            fallback = entry
+        if str(entry["id"]) == id and bool(entry.get("discoverable", true)):
+            return entry.duplicate()
+    return fallback.duplicate()
 
 
 static func available_ids(room: Node3D) -> Array[String]:

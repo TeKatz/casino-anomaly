@@ -9,10 +9,9 @@ const StreamPortals = preload("res://gameplay/stream_portals.gd")
 const NEW_IDS := [
     "stool_out_of_line",
     "plant_forward",
-    "plant_misplaced",
     "crooked_painting",
     "candleholder_shifted",
-    "bust_turned",
+    "bust_turned__reverse",
     "west_chandelier_dim",
     "cool_ceiling_light",
     "amber_ceiling_light",
@@ -66,10 +65,6 @@ func _verify_adjusted_definitions() -> bool:
     # These are explicit tuning requirements from visual review. Protect
     # against slipping back to clipped furniture or barely visible lighting.
     var expect := {
-        "plant_misplaced": {
-            "target_path": "Decor/Plant_04",
-            "position_offset": Vector3(0.45, 0.0, -0.80)
-        },
         "crooked_painting": {
             "target_path": "ModelInteriors/FramedPainting_02",
             "position_offset": Vector3(0.0, 0.22, 0.0),
@@ -144,17 +139,6 @@ func _run() -> void:
         quit(0)
         return
 
-    # Real room geometry: pot 04 must stay between both sofas and away
-    # from the green wall. Its authored Z was -0.78 and the earlier +0.60
-    # moved it through the wall; keep it well within the walkable lounge.
-    var plant := room.get_node("Decor/Plant_04") as Node3D
-    var left_sofa := room.get_node("ModelInteriors/LoungeSofa_04") as Node3D
-    var right_sofa := room.get_node("ModelInteriors/LoungeSofa_03") as Node3D
-    var moved_pos: Vector3 = plant.position + Catalog.get_entry("plant_misplaced")["position_offset"]
-    if moved_pos.z > -1.35 or moved_pos.z < -2.25             or moved_pos.x <= left_sofa.position.x + 1.7             or moved_pos.x >= right_sofa.position.x - 1.7:
-        _fail("Plant 04 must move into the clear aisle-side gap, not into wall or sofas")
-        return
-
     # The new group blackout must affect EVERY fixture light, including
     # nested imported-model lights, and restore each individual intensity.
     var blackout_entry := Catalog.get_entry("west_chandelier_dim")
@@ -192,6 +176,23 @@ func _run() -> void:
     var available: Array[String] = Catalog.available_ids(room)
     if definitions.size() < 13 or available.size() < 13:
         _fail("The 13 baseline effects must remain registered and available; additional effects are allowed")
+        return
+
+    var retired := ["entrance_label__reverse","table_label__reverse","bust_turned","bust_turned__subtle","candleholder_shifted__other","crooked_painting__reverse","crooked_painting__subtle","plant_misplaced","plant_misplaced__subtle","stool_out_of_line__other","stool_out_of_line__subtle","breathing_wall"]
+    for id in retired:
+        if not Catalog.get_entry(id).is_empty() or available.has(id) or Adapter.new().apply(room, id):
+            _fail("Retired anomaly still selectable: " + id)
+            return
+    if definitions.size() != 51:
+        _fail("Phase 1 catalog must contain exactly 51 active definitions")
+        return
+    var expected_difficulty := {"amber_ceiling_light__soft":3,"bar_label":1,"bust_turned__reverse":2,"candleholder_shifted":4,"empty_reserve":1,"watchful_camera":2,"blank_reels":3,"empty_footsteps":3,"last_kings":4,"lightless_horse":1,"silent_countdown":1,"watching_canvases":1,"the_escort":1,"black_bloom":1,"they_are_listening":1,"wrong_reflection":1,"bar_label__reverse":4,"plant_forward__other":3}
+    for id in expected_difficulty:
+        if int(Catalog.get_entry(id).get("difficulty", 0)) != int(expected_difficulty[id]):
+            _fail("Unexpected effective difficulty: " + id)
+            return
+    if Catalog.family("bust_turned__reverse") != "bust_turned" or not Catalog.discoverable_ids().has("bust_turned") or Catalog.family_entry("bust_turned").get("id") != "bust_turned__reverse" or Catalog.family_entries("bust_turned").size() != 1:
+        _fail("Surviving bust variant lost its stable family")
         return
 
     var seen := {}
@@ -446,7 +447,7 @@ func _verify_horror_batch(hall: Node3D, other_hall: Node3D) -> bool:
 
 
 func _verify_reality_batch(hall: Node3D, other_hall: Node3D) -> bool:
-    var reality_ids := ["unfinished_game","invisible_dealer","breathing_wall","forgotten_door","against_gravity","pendulum","black_bloom","extra_guest","wrong_reflection","they_are_listening"]
+    var reality_ids := ["unfinished_game","invisible_dealer","forgotten_door","against_gravity","pendulum","black_bloom","extra_guest","wrong_reflection","they_are_listening"]
     var reality_adapter := Adapter.new()
     var reality_available := Catalog.available_ids(hall)
     for reality_id in reality_ids:

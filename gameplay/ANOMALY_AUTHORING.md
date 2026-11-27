@@ -29,6 +29,10 @@ registration or hard-coded anomaly counts need to be updated.
 categories, tuning or handlers, but do not rename an existing ID without
 an explicit migration. Disabled/deleted entries remain in player saves
 but are not counted against the current active catalog denominator.
+A family key may outlive its original definition: `family_entry()` resolves
+an active representative for family-level presentation and weighting, while
+`get_entry()` accepts only active form IDs. Retain the existing family key
+on surviving variants to preserve recognition, mastery and first-discovery XP.
 The archive deliberately hides **names, descriptions and categories** until
 the player correctly identifies the effect. A wrong choice records a
 non-identifying encounter only; correct identification unlocks the full

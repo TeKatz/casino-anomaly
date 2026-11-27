@@ -38,6 +38,19 @@ func _run() -> void:
     var ids := Catalog.discoverable_ids()
     if not require(ids.size() >= 14 and Catalog.entries().size() >= 30 and Catalog.family("bust_turned__reverse") == "bust_turned", "Family or variant registry incorrect"):
         return
+    # Historical records retain the original family and retired form IDs.
+    var old_records := {
+        "bust_turned": {"recognized": true, "correct": 5, "variants": {"bust_turned": true, "bust_turned__subtle": true}},
+        "plant_misplaced": {"recognized": true, "correct": 5, "variants": {"plant_misplaced": true}},
+        "breathing_wall": {"recognized": true, "correct": 5, "variants": {"breathing_wall": true}}
+    }
+    var old_stats := {"progression_version": Progress.VERSION, "xp": 4321, "classic_completions": 1, "achievements": {"archive_complete": true}}
+    var old_snapshot := old_records.duplicate(true)
+    Progress.migrate(old_stats, old_records)
+    Progress.evaluate(old_stats, old_records)
+    var counts := Progress.counts(old_records)
+    if not require(counts["discovered"] == 1 and counts["mastered"] == 1 and counts["variants"] == 0 and old_records == old_snapshot and old_stats["xp"] == 4321 and old_stats["achievements"]["archive_complete"] and Modes.unlock("nightmare", old_stats, old_records), "Retirement altered legacy records, XP, unlocks or active counts"):
+        return
     var definitions := Progress.achievement_definitions()
     var seen := {}
     for entry in definitions:
@@ -46,6 +59,12 @@ func _run() -> void:
         seen[entry["id"]] = true
     if not require(definitions.size() >= 40, "Achievement list incomplete"):
         return
+    for entry in definitions:
+        var metric := str(entry["metric"])
+        if metric in ["discovered", "mastered", "variants"]:
+            var maximum := int(counts["variant_total"]) if metric == "variants" else ids.size()
+            if not require(int(entry["goal"]) <= maximum, "Unreachable collection achievement: " + str(entry["id"])):
+                return
     var state := State.new()
     state.save_path = "user://progression_rules_qa.cfg"
     _start(state, "endless")
@@ -95,8 +114,8 @@ func _run() -> void:
     var before: Dictionary = profiles.get_stats()
     if not require(int(before["xp"]) == 225 and bool(profiles.get_records()["bust_turned"]["variants"]["bust_turned__reverse"]), "Variant discovery did not award family XP"):
         return
-    _answer(live, "bust_turned", true)
-    if not require(int(profiles.get_stats()["xp"]) == 275, "Base form awarded duplicate family discovery"):
+    _answer(live, "bust_turned__reverse", true)
+    if not require(int(profiles.get_stats()["xp"]) == 275, "Repeat of surviving form awarded duplicate family discovery"):
         return
     live.round_debugged = true
     _answer(live, "bar_label", true)
@@ -113,6 +132,24 @@ func _run() -> void:
         return
     _answer(live, "", true)
     if not require(int(profiles.get_stats()["mode_records"]["endless"]["best"]) == 13, "Endless record missing"):
+        return
+    # Load a real old profile file, not just an in-memory metric fixture.
+    var legacy := ConfigFile.new()
+    if not require(legacy.load(profiles.progress_path(5)) == OK, "Could not read profile save"):
+        return
+    var saved_records: Dictionary = legacy.get_value("progress", "records", {})
+    saved_records["plant_misplaced"] = old_records["plant_misplaced"]
+    saved_records["breathing_wall"] = old_records["breathing_wall"]
+    var saved_bust: Dictionary = saved_records["bust_turned"]
+    saved_bust["variants"]["bust_turned"] = true
+    saved_records["bust_turned"] = saved_bust
+    legacy.set_value("progress", "records", saved_records)
+    var saved_stats: Dictionary = legacy.get_value("progress", "stats", {})
+    saved_stats["achievements"]["archive_complete"] = true
+    legacy.set_value("progress", "stats", saved_stats)
+    if not require(legacy.save(profiles.progress_path(5)) == OK and profiles.select_profile(5), "Could not reload historical profile"):
+        return
+    if not require(profiles.get_records() == saved_records and profiles.get_stats()["xp"] == saved_stats["xp"] and profiles.get_stats()["achievements"]["archive_complete"] and Progress.counts(profiles.get_records())["variants"] == 1, "Historical profile was rewritten or retired forms counted"):
         return
     var picker := Picker.new()
     var archive := Archive.new()

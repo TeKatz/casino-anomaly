@@ -169,7 +169,9 @@ func _render_archive(profiles: Node) -> void:
         count["discovered"], total, count["mastered"]], 18, GOLD)
     _progress_bar(body, float(count["discovered"]), float(total))
     _label(body, _word("Erscheinungsformen: %d / %d", "Forms identified: %d / %d") % [count["variants"], count["variant_total"]], 14, MUTED)
-    var entries: Array[Dictionary] = Catalog.entries()
+    var entries: Array[Dictionary] = []
+    for family_id in Catalog.discoverable_ids():
+        entries.append(Catalog.family_entry(family_id))
     entries.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
         return (_field(a, "category") + _field(a, "title")) < (_field(b, "category") + _field(b, "title")))
     var current_category := ""
@@ -178,9 +180,8 @@ func _render_archive(profiles: Node) -> void:
     var grid: GridContainer
     for entry in entries:
         var id := str(entry["id"])
-        if not bool(entry.get("discoverable", true)) or Catalog.family(id) != id:
-            continue
-        var record: Dictionary = saved.get(id, {})
+        var family_id := Catalog.family(id)
+        var record: Dictionary = saved.get(family_id, {})
         if not bool(record.get("recognized", false)):
             if record.is_empty(): unseen += 1
             else: encountered += 1
@@ -210,7 +211,7 @@ func _render_archive(profiles: Node) -> void:
         _label(card, Progress.mastery(correct, _de()) + " · " + str(correct) + " / 5", 14, GOLD)
         _progress_bar(card, float(mini(correct, 5)), 5)
         _label(card, _word("Richtig: %d · Übersehen: %d", "Correct: %d · Missed: %d") % [correct, int(record.get("missed", 0))], 13, MUTED)
-        var variants := Catalog.family_entries(id)
+        var variants := Catalog.family_entries(family_id)
         if variants.size() > 1:
             var known := 0
             for variant in variants:

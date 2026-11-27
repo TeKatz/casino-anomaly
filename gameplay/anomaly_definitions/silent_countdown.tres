@@ -15,4 +15,4 @@ description_en = "The cabinet titles count down together, accompanied by a quiet
 description_de = "Die Automaten zählen gemeinsam herunter, begleitet von leisem Ticken. Bei Null geschieht nichts."
 target_path = "SlotMachines"
 rarity = "rare"
-difficulty = 2
+difficulty = 1

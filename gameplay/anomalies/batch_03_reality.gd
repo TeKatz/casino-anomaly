@@ -12,32 +12,6 @@ var motion: Tween
 var audio_original: Dictionary = {}
 var glow_original: Array[Dictionary] = []
 
-const BREATH_SHADER := """
-shader_type spatial;
-render_mode cull_back;
-uniform sampler2D fabric : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
-uniform sampler2D bumps : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
-uniform bool has_bumps = false;
-uniform vec4 tint : source_color = vec4(1.0);
-uniform vec3 uv_scale = vec3(1.0);
-uniform float amplitude = 0.45;
-uniform float rough = 0.9;
-void vertex() {
-    // Only the inner (-X) wall face. Local patch tapers smoothly into
-    // the untouched wall and stops before the ceiling/collision boundary.
-    float weight = exp(-pow(VERTEX.z / 6.2, 2.0) - pow((VERTEX.y - 0.85) / 1.6, 2.0));
-    if (NORMAL.x < -0.5) {
-        VERTEX.x -= amplitude * weight;
-        NORMAL = normalize(vec3(-1.0, -2.0 * amplitude * weight * (VERTEX.y - 0.85) / 2.56, -2.0 * amplitude * weight * VERTEX.z / 38.44));
-    }
-}
-void fragment() {
-    vec2 uv = UV * uv_scale.xy;
-    ALBEDO = texture(fabric, uv).rgb * tint.rgb;
-    ROUGHNESS = rough;
-    if (has_bumps) { NORMAL_MAP = texture(bumps, uv).rgb; }
-}
-"""
 const BLOOM_SHADER := """
 shader_type spatial;
 render_mode cull_disabled;
@@ -117,9 +91,6 @@ func targets(room: Node3D, entry: Dictionary) -> Array[Node3D]:
                         result.append(child as Node3D)
             if result.size() != 16:
                 result.clear()
-        "breathing_wall":
-            if base is MeshInstance3D and base.mesh is BoxMesh and base.get_active_material(0) is StandardMaterial3D:
-                result.append(base)
         "forgotten_door", "black_bloom":
             if base is MeshInstance3D and base.mesh != null:
                 result.append(base)
@@ -238,7 +209,6 @@ func apply(room: Node3D, entry: Dictionary) -> bool:
     match id:
         "unfinished_game": _roulette(room, nodes[0])
         "invisible_dealer": _dealer(room, nodes)
-        "breathing_wall": _breath(room, nodes[0] as MeshInstance3D)
         "forgotten_door": _door(nodes[0] as MeshInstance3D)
         "against_gravity": _liquid(room, nodes)
         "pendulum": _pendulum(room, nodes[0], nodes[1] as Light3D)
@@ -360,29 +330,6 @@ func _dealer(room: Node3D, nodes: Array[Node3D]) -> void:
                 weight = 0.0
             nodes[i].position = piles[i].lerp(original[i], weight)
             nodes[i].position.y += sin(weight * PI) * 0.025
-    )
-
-
-func _breath(room: Node3D, wall: MeshInstance3D) -> void:
-    var original := wall.get_active_material(0) as StandardMaterial3D
-    var subdivided := wall.mesh.duplicate() as BoxMesh
-    subdivided.subdivide_width = 8
-    subdivided.subdivide_height = 36
-    subdivided.subdivide_depth = 96
-    wall.mesh = subdivided
-    var shader := Shader.new()
-    shader.code = BREATH_SHADER
-    var mat := ShaderMaterial.new()
-    mat.shader = shader
-    mat.set_shader_parameter("fabric", original.albedo_texture)
-    mat.set_shader_parameter("bumps", original.normal_texture)
-    mat.set_shader_parameter("has_bumps", original.normal_enabled and original.normal_texture != null)
-    mat.set_shader_parameter("tint", original.albedo_color)
-    mat.set_shader_parameter("uv_scale", original.uv1_scale)
-    mat.set_shader_parameter("rough", original.roughness)
-    wall.material_override = mat
-    _animate(room, 6.0, func(phase: float) -> void:
-        mat.set_shader_parameter("amplitude", 0.55 if _reduced(room) else 0.16 + 0.68 * pow(0.5 - 0.5 * cos(phase * TAU), 1.35))
     )
 
 

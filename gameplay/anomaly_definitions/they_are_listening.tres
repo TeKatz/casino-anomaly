@@ -15,4 +15,4 @@ description_en = "Near the entrance cabinets, ambient sound and light fade and y
 description_de = "Bei den Eingangsautomaten verblassen Geräusche und Licht, während deine Sicht leicht verschwimmt."
 target_path = "SlotMachines"
 rarity = "rare"
-difficulty = 3
+difficulty = 1
