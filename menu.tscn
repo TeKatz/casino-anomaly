@@ -1,10 +1,11 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://menu.gd" id="1"]
 [ext_resource type="Script" path="res://ui/luminous_button.gd" id="2"]
 [ext_resource type="Shader" path="res://ui/abstract_menu.gdshader" id="3"]
 [ext_resource type="PackedScene" path="res://ui/menu_showcase_3d.tscn" id="4_showcase"]
 [ext_resource type="PackedScene" path="res://ui/menu_startup_intro.tscn" id="5_intro"]
+[ext_resource type="Texture2D" path="res://branding/casino_anomaly_logo.png" id="6_brand"]
 
 [sub_resource type="ShaderMaterial" id="Atmosphere"]
 shader = ExtResource("3")
@@ -73,36 +74,29 @@ theme_override_colors/font_color = Color(0.66, 0.77, 0.8, 1)
 theme_override_font_sizes/font_size = 15
 text = "AN EXERCISE IN PERCEPTION"
 
-[node name="Casino" type="Label" parent="Brand"]
+[node name="Logo" type="TextureRect" parent="Brand"]
 layout_mode = 0
-offset_top = 36.0
-offset_right = 490.0
-offset_bottom = 99.0
-theme_override_colors/font_color = Color(0.98, 0.92, 0.86, 1)
-theme_override_font_sizes/font_size = 54
-text = "CASINO"
-
-[node name="Anomaly" type="Label" parent="Brand"]
-layout_mode = 0
-offset_top = 97.0
-offset_right = 490.0
-offset_bottom = 160.0
-theme_override_colors/font_color = Color(0.93, 0.68, 0.59, 1)
-theme_override_font_sizes/font_size = 54
-text = "ANOMALY"
+offset_top = 31.0
+offset_right = 410.0
+offset_bottom = 233.0
+mouse_filter = 2
+texture_filter = 4
+texture = ExtResource("6_brand")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Rule" type="ColorRect" parent="Brand"]
 layout_mode = 0
-offset_top = 181.0
+offset_top = 243.0
 offset_right = 92.0
-offset_bottom = 183.0
+offset_bottom = 245.0
 color = Color(0.9, 0.64, 0.5, 1)
 
 [node name="Tagline" type="Label" parent="Brand"]
 layout_mode = 0
-offset_top = 199.0
+offset_top = 261.0
 offset_right = 530.0
-offset_bottom = 230.0
+offset_bottom = 292.0
 theme_override_colors/font_color = Color(0.65, 0.72, 0.76, 1)
 theme_override_font_sizes/font_size = 15
 text = "EVERY DETAIL IS A DECISION."

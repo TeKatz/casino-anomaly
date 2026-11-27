@@ -101,14 +101,19 @@ func _build_screen() -> void:
     mark.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
     mark.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
     mark.mouse_filter = Control.MOUSE_FILTER_IGNORE
-    mark.texture = load("res://branding/casino_anomaly.svg") as Texture2D
+    mark.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+    mark.texture = load("res://branding/casino_anomaly_emblem.png") as Texture2D
     stack.add_child(mark)
 
-    var heading := Label.new()
-    heading.text = "CASINO ANOMALY"
-    heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-    heading.add_theme_font_size_override("font_size", 30)
-    heading.add_theme_color_override("font_color", Color("#f4e8df"))
+    var heading := TextureRect.new()
+    heading.name = "BrandWordmark"
+    heading.custom_minimum_size = Vector2(300, 39)
+    heading.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+    heading.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+    heading.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+    heading.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+    heading.mouse_filter = Control.MOUSE_FILTER_IGNORE
+    heading.texture = load("res://branding/casino_anomaly_wordmark.png") as Texture2D
     stack.add_child(heading)
 
     var separator := Control.new()

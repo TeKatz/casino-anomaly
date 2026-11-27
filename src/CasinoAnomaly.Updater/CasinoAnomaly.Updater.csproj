@@ -11,5 +11,6 @@
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <DebugType>none</DebugType>
     <AssemblyName>CasinoAnomaly.Updater</AssemblyName>
+    <ApplicationIcon>../../branding/casino_anomaly.ico</ApplicationIcon>
   </PropertyGroup>
 </Project>

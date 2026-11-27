@@ -139,7 +139,7 @@ The main screen uses a lightweight 2D canvas shader instead of loading a second 
 
 ## Custom Windows icon and loading transitions
 
-The application and Windows export preset reference `branding/casino_anomaly.svg`, a bespoke portal emblem that Godot 4.5 converts to the native Windows executable icon during export. The same artwork appears on the in-game loading screen. If Explorer initially retains a previous icon after updating, its Windows icon cache may need refreshing.
+The application uses the approved Corrupted Luxury artwork in the branding directory. The supplied multi-resolution ICO is used for the Windows executable, taskbar and updater; the menu, intro and loader use the original transparent PNGs. If Explorer retains a previous icon after updating, refresh its icon cache.
 
 A persistent `SceneLoader` autoload presents a rendered full-screen transition before requesting target scenes through `ResourceLoader.load_threaded_request`. The bar reflects actual resource progress; a separate final phase covers the main-thread scene activation, which cannot be accurately expressed as a percentage. This applies to New Game, Continue and the tutorial's E-door transition. The controller's seamless in-world casino-room streaming remains unchanged. The first clean casino room rule and persistent audio split remain intact. A separate regression test exercises both entry points in CI.
 

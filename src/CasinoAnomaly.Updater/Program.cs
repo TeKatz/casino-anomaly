@@ -73,6 +73,9 @@ internal static class Program
             Height = 18,
             MarqueeAnimationSpeed = 28
         };
+        using var brandIcon = System.Drawing.Icon.ExtractAssociatedIcon(Environment.ProcessPath!);
+        if (brandIcon is not null)
+            window.Icon = brandIcon;
         window.Controls.Add(status);
         window.Controls.Add(progress);
         var exit = 0;

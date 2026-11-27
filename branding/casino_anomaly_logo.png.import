@@ -2,16 +2,15 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://j1182da8y2qq"
-path="res://.godot/imported/casino_anomaly.svg-a6dec3671012bbb617d2cccbe2e796a6.ctex"
+path="res://.godot/imported/casino_anomaly_logo.png-9907465b653bacc0ab753dae13277f9f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://branding/casino_anomaly.svg"
-dest_files=["res://.godot/imported/casino_anomaly.svg-a6dec3671012bbb617d2cccbe2e796a6.ctex"]
+source_file="res://branding/casino_anomaly_logo.png"
+dest_files=["res://.godot/imported/casino_anomaly_logo.png-9907465b653bacc0ab753dae13277f9f.ctex"]
 
 [params]
 
@@ -23,7 +22,7 @@ compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=false
+mipmaps/generate=true
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""
@@ -37,7 +36,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
-svg/scale=1.0
-editor/scale_with_editor_scale=false
-editor/convert_colors_with_editor_theme=false
+detect_3d/compress_to=0

@@ -34,8 +34,13 @@ func _run() -> void:
     if loader.travel_to("res://not_a_scene.tscn"):
         _fail("SceneLoader must reject unsupported destinations")
         return
-    if not ResourceLoader.exists("res://branding/casino_anomaly.svg"):
-        _fail("Custom game icon is missing")
+    if str(ProjectSettings.get_setting("application/config/icon")) != "res://branding/casino_anomaly_icon.png" or str(ProjectSettings.get_setting("application/config/windows_native_icon")) != "res://branding/casino_anomaly.ico":
+        _fail("Approved application or Windows native icon missing")
+        return
+    var mark := loader.get("mark") as TextureRect
+    var wordmark := loader.find_child("BrandWordmark",true,false) as TextureRect
+    if mark == null or mark.texture == null or mark.texture.resource_path != "res://branding/casino_anomaly_emblem.png" or wordmark == null or wordmark.texture == null or wordmark.texture.resource_path != "res://branding/casino_anomaly_wordmark.png" or mark.stretch_mode != TextureRect.STRETCH_KEEP_ASPECT_CENTERED or wordmark.stretch_mode != TextureRect.STRETCH_KEEP_ASPECT_CENTERED:
+        _fail("Loading screen lost the approved branding or aspect ratio")
         return
 
     var previous_save: String = state.save_path

@@ -44,7 +44,19 @@ func _run() -> void:
     if screen.x >= 980.0 and (bounds.position.x < screen.x * 0.57 or bounds.end.x > screen.x * 0.98 or bounds.size.y > screen.y * 0.85 or (menu.get_node("Brand") as Control).anchor_top > 0.161):
         _fail("Panorama menu positioning regressed")
         return
+    var logo := menu.get_node_or_null("Brand/Logo") as TextureRect
+    if logo == null or logo.texture == null or logo.texture.resource_path != "res://branding/casino_anomaly_logo.png" or logo.texture.get_size() != Vector2(1739,856) or logo.expand_mode != TextureRect.EXPAND_IGNORE_SIZE or logo.stretch_mode != TextureRect.STRETCH_KEEP_ASPECT_CENTERED:
+        _fail("Approved main-menu logo missing or distorted")
+        return
+    if logo.get_global_rect().end.x >= bounds.position.x and (menu.get_node("Brand") as Control).visible:
+        _fail("Brand artwork overlaps the menu panel")
+        return
     var intro := menu.get_node("StartupIntro") as ColorRect
+    var emblem := intro.get_node("Center/Content/Logo") as TextureRect
+    var wordmark := intro.get_node("Center/Content/Title") as TextureRect
+    if emblem.texture == null or emblem.texture.resource_path != "res://branding/casino_anomaly_emblem.png" or wordmark.texture == null or wordmark.texture.resource_path != "res://branding/casino_anomaly_wordmark.png" or emblem.stretch_mode != TextureRect.STRETCH_KEEP_ASPECT_CENTERED or wordmark.stretch_mode != TextureRect.STRETCH_KEEP_ASPECT_CENTERED:
+        _fail("Intro must use the approved aspect-preserving emblem and wordmark")
+        return
     intro.call("begin", true)
     if not intro.visible or intro.modulate.a != 1.0 or not bool(intro.get("active")) or intro.get_node("Center/Content/Logo").texture == null or not str(intro.get_node("Center/Content/Creator").text).contains("TeKatz"):
         _fail("Opaque branded startup cover missing")

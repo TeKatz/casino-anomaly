@@ -5,6 +5,7 @@
 *.jpg -text
 *.jpeg -text
 *.png -text
+*.ico -text
 *.webp -text
 *.ogg -text
 *.zip -text
