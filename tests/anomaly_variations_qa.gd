@@ -793,22 +793,54 @@ func _verify_reality_batch(hall: Node3D, other_hall: Node3D) -> bool:
                 _fail("Silent guest lacks pose-shaped physical collision")
                 return false
             var masks := 0
+            var single_pass_head := false
             for part in guest.find_children("*","MeshInstance3D",true,false):
                 var mesh := part as MeshInstance3D
                 if mesh.mesh == null:
                     continue
                 for surface in range(mesh.mesh.get_surface_count()):
-                    var material := mesh.get_active_material(surface) as StandardMaterial3D
-                    if material == null or not material.next_pass is ShaderMaterial:
+                    var material := mesh.get_active_material(surface)
+                    if material == null or not material.has_meta("guest_face_mask"):
                         continue
                     var label := str(material.resource_name).to_lower()
+                    if "avatarhead" in label:
+                        single_pass_head = material is ShaderMaterial and material.next_pass == null
+                        if not single_pass_head:
+                            _fail("Guest face must be shaded in its original surface, not an overlay")
+                            return false
                     if not ("avatarhead" in label or "eyeball" in label or "cornea" in label or "eyelash" in label or "teeth" in label):
                         _fail("Face mask modified a body or clothing surface")
                         return false
                     masks += 1
-            if masks < 1:
+            if masks < 1 or not single_pass_head:
                 _fail("Face mask not installed on facial surfaces")
                 return false
+            if float(guest.get_meta("standing_height",0.0)) < 1.75:
+                _fail("Guest human proportions too small")
+                return false
+            var front := float(guest.get_meta("seat_front_z",0.0))
+            var seat_y := float(guest.get_meta("seat_surface_y",0.0))
+            var floor_y := float(guest.get_meta("floor_y",0.0))
+            for side in ["left","right"]:
+                var thigh_shape := collision.get_node_or_null(side+"_thigh") as CollisionShape3D
+                var shin_shape := collision.get_node_or_null(side+"_shin") as CollisionShape3D
+                var arm_shape := collision.get_node_or_null(side+"_forearm") as CollisionShape3D
+                if thigh_shape == null or shin_shape == null or arm_shape == null:
+                    _fail("Guest pose collision missing")
+                    return false
+                var shin := shin_shape.shape as CapsuleShape3D
+                var axis := shin_shape.basis.y.normalized()
+                var half := (shin.height-2.0*shin.radius)*0.5
+                var p0 := shin_shape.position-axis*half
+                var p1 := shin_shape.position+axis*half
+                var knee := p0 if p0.y>p1.y else p1
+                var ankle := p1 if p0.y>p1.y else p0
+                if knee.z < front-0.025 or ankle.z < front or ankle.y < floor_y-0.025:
+                    _fail("Guest leg intersects front of sofa or floor")
+                    return false
+                if arm_shape.position.y < seat_y+0.09:
+                    _fail("Guest forearm intersects seat")
+                    return false
             for animator in guest.find_children("*","AnimationPlayer",true,false):
                 if (animator as AnimationPlayer).is_playing():
                     _fail("Silent guest is not motionless")

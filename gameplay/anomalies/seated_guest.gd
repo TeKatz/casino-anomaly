@@ -7,12 +7,19 @@ const SITTING_SOURCE := "res://models/croupier/scene.gltf"
 const Cache = preload("res://gameplay/runtime_asset_cache.gd")
 const FACE_SHADER := """
 shader_type spatial;
-render_mode unshaded, cull_back, depth_draw_never, shadows_disabled;
+render_mode cull_disabled;
+uniform sampler2D skin_albedo : source_color, filter_linear_mipmap_anisotropic;
+uniform sampler2D skin_normal : hint_normal, filter_linear_mipmap_anisotropic;
+uniform vec4 skin_color : source_color = vec4(1.0);
+uniform float skin_roughness = 1.0;
+uniform float skin_specular = 0.5;
+uniform float normal_strength = 1.0;
 uniform vec3 center_local;
 uniform vec3 right_local;
 uniform vec3 up_local;
 uniform vec3 front_local;
-uniform vec2 extent = vec2(0.10,0.12);
+uniform float chin_height = -0.085;
+uniform float forehead_height = 0.13;
 varying vec3 face_coordinates;
 void vertex() {
     vec3 p = (MODEL_MATRIX * vec4(VERTEX,1.0)).xyz;
@@ -24,9 +31,19 @@ void vertex() {
     face_coordinates = vec3(dot(offset,right),dot(offset,up),dot(offset,front));
 }
 void fragment() {
-    float edge = length(face_coordinates.xy / extent);
-    if (edge > 1.0 || face_coordinates.z < -0.045) { discard; }
-    ALBEDO = vec3(0.0015,0.0015,0.0020);
+    // Anatomical fade from cheeks/temples to ears and from jaw to neck.
+    // No alpha, discard, flat overlay, or extra geometry. The darkness
+    // follows the actual curved skin and remains shaded by the room.
+    float front = smoothstep(-0.045,0.035,face_coordinates.z);
+    float lower = smoothstep(chin_height-0.045,chin_height+0.025,face_coordinates.y);
+    float upper = 1.0-smoothstep(forehead_height-0.015,forehead_height+0.045,face_coordinates.y);
+    float mask = front*lower*upper;
+    vec3 skin = texture(skin_albedo,UV).rgb * skin_color.rgb;
+    ALBEDO = mix(skin,skin*0.022+vec3(0.002,0.002,0.0025),mask);
+    ROUGHNESS = mix(skin_roughness,0.96,mask);
+    SPECULAR = mix(skin_specular,0.06,mask);
+    NORMAL_MAP = texture(skin_normal,UV).rgb;
+    NORMAL_MAP_DEPTH = normal_strength;
 }
 """
 
@@ -157,6 +174,27 @@ static func _capsule(body: StaticBody3D, name_value: String, a: Vector3, b: Vect
     collision.basis = Basis(Quaternion(Vector3.UP,segment.normalized()))
 
 
+# Fit a two-bone chain to an anatomical target without stretching bones.
+# The bend hint is in the sofa's metric coordinate system.
+static func _fit_chain(rig: Skeleton3D, anchor: Node3D, first: int, middle: int, last: int, target: Vector3, bend_hint: Vector3) -> void:
+    var origin := _point(rig,anchor,first)
+    var upper := origin.distance_to(_point(rig,anchor,middle))
+    var lower := _point(rig,anchor,middle).distance_to(_point(rig,anchor,last))
+    var offset := target-origin
+    if upper<0.001 or lower<0.001 or offset.length()<0.001:
+        return
+    var distance := clampf(offset.length(),absf(upper-lower)+0.002,upper+lower-0.002)
+    var axis := offset.normalized()
+    var bend := (bend_hint-axis*bend_hint.dot(axis)).normalized()
+    if bend.length_squared()<0.001:
+        bend = (Vector3.RIGHT-axis*axis.x).normalized()
+    var along := (upper*upper-lower*lower+distance*distance)/(2.0*distance)
+    var side := sqrt(maxf(0.0,upper*upper-along*along))
+    var joint := origin+axis*along+bend*side
+    _aim(rig,anchor,first,middle,joint-origin)
+    _aim(rig,anchor,middle,last,origin+axis*distance-_point(rig,anchor,middle))
+
+
 static func _mask_face(figure: Node3D, rig: Skeleton3D, anchor: Node3D, roles: Dictionary) -> int:
     var left := _point(rig,anchor,int(roles["left_eye"]))
     var right := _point(rig,anchor,int(roles["right_eye"]))
@@ -167,11 +205,13 @@ static func _mask_face(figure: Node3D, rig: Skeleton3D, anchor: Node3D, roles: D
     var eyes := (left+right)*0.5
     var forward := eyes-head
     forward = (forward-up*forward.dot(up)-horizontal*forward.dot(horizontal)).normalized()
-    if forward.length_squared() < 0.01:
+    if forward.length_squared()<0.01:
         forward = Vector3.BACK
-    var center := eyes-up*0.025
-    var half_width := clampf(left.distance_to(right)*1.75,0.078,0.115)
-    var half_height := clampf((top-head).length()*0.61,0.085,0.125)
+    # Eye level defines the vertical transition; the head axis defines
+    # front/back. Unlike the old ellipse this wraps around the cheekbones.
+    var center := head+up*(eyes-head).dot(up)
+    var chin := clampf(-(eyes-head).dot(up)-0.025,-0.13,-0.075)
+    var forehead := clampf((top-eyes).dot(up)*0.78,0.065,0.15)
     var shader := Shader.new()
     shader.code = FACE_SHADER
     var count := 0
@@ -185,23 +225,37 @@ static func _mask_face(figure: Node3D, rig: Skeleton3D, anchor: Node3D, roles: D
             if original == null:
                 continue
             var label := str(original.resource_name).to_lower()
-            # This glTF has separately authored AvatarHead, eyes, corneas,
-            # lashes and teeth. Body/outfit/glasses retain original materials.
-            if not ("avatarhead" in label or "eyeball" in label or "cornea" in label or "eyelash" in label or "teeth" in label):
-                continue
-            var mask := ShaderMaterial.new()
-            mask.shader = shader
-            mask.render_priority = 2
-            mask.set_shader_parameter("center_local",mesh.to_local(anchor.to_global(center)))
-            var inverse := mesh.global_basis.inverse()*anchor.global_basis
-            mask.set_shader_parameter("right_local",inverse*horizontal)
-            mask.set_shader_parameter("up_local",inverse*up)
-            mask.set_shader_parameter("front_local",inverse*forward)
-            mask.set_shader_parameter("extent",Vector2(half_width,half_height))
-            var material := original.duplicate() as StandardMaterial3D
-            material.next_pass = mask
-            mesh.set_surface_override_material(surface,material)
-            count += 1
+            if "avatarhead" in label:
+                var skin := ShaderMaterial.new()
+                skin.shader = shader
+                skin.resource_name = original.resource_name
+                skin.set_meta("guest_face_mask",true)
+                skin.set_shader_parameter("skin_albedo",original.albedo_texture)
+                skin.set_shader_parameter("skin_normal",original.normal_texture)
+                skin.set_shader_parameter("skin_color",original.albedo_color)
+                skin.set_shader_parameter("skin_roughness",original.roughness)
+                skin.set_shader_parameter("skin_specular",original.metallic_specular)
+                skin.set_shader_parameter("normal_strength",original.normal_scale)
+                skin.set_shader_parameter("center_local",mesh.to_local(anchor.to_global(center)))
+                var inverse := mesh.global_basis.inverse()*anchor.global_basis
+                skin.set_shader_parameter("right_local",inverse*horizontal)
+                skin.set_shader_parameter("up_local",inverse*up)
+                skin.set_shader_parameter("front_local",inverse*forward)
+                skin.set_shader_parameter("chin_height",chin)
+                skin.set_shader_parameter("forehead_height",forehead)
+                mesh.set_surface_override_material(surface,skin)
+                count += 1
+            elif "eyeball" in label or "cornea" in label or "eyelash" in label or "teeth" in label:
+                # These are face-only materials; preserve their original
+                # textures and render modes without a second shader pass.
+                var dark := original.duplicate() as StandardMaterial3D
+                dark.set_meta("guest_face_mask",true)
+                dark.albedo_color *= Color(0.025,0.025,0.028,1.0)
+                dark.metallic_specular = 0.06
+                dark.roughness = 0.96
+                dark.emission_enabled = false
+                mesh.set_surface_override_material(surface,dark)
+                count += 1
     return count
 
 
@@ -217,10 +271,13 @@ static func install(sofa: Node3D, parent: Node3D) -> Node3D:
     if seat == null:
         return null
     var seat_box: AABB = (sofa.global_transform.affine_inverse()*seat.global_transform)*seat.get_aabb()
-    var seat_anchor := sofa.to_global(Vector3(seat_box.get_center().x+0.08,seat_box.end.y,seat_box.get_center().z-0.10))
+    # The source sofa faces +Z. Position the pelvis a measured distance
+    # behind the actual front edge, not at the middle/back of the cushion.
+    var forward_scale := maxf(sofa.global_basis.z.length(),0.001)
+    var seat_anchor := sofa.to_global(Vector3(seat_box.get_center().x+0.08,seat_box.end.y,seat_box.end.z-0.29/forward_scale))
     # Cancel any authored nonuniform furniture scale. Guest and collision
     # are measured in metres and the same orientation as the sofa.
-    parent.global_transform = Transform3D(sofa.global_basis.orthonormalized(),seat_anchor+Vector3.UP*0.10)
+    parent.global_transform = Transform3D(sofa.global_basis.orthonormalized(),seat_anchor+Vector3.UP*0.135)
     var pose := _source_pose(parent)
     if pose.is_empty():
         return null
@@ -248,7 +305,7 @@ static func install(sofa: Node3D, parent: Node3D) -> Node3D:
     if standing_height < 0.001:
         figure.free()
         return null
-    figure.scale *= 1.65/standing_height
+    figure.scale *= 1.79/standing_height
     # Preserve the new rig's foot orientation before changing the leg
     # chains; the seated source's limb directions carry the actual pose.
     var feet: Dictionary = {}
@@ -271,15 +328,40 @@ static func install(sofa: Node3D, parent: Node3D) -> Node3D:
         _aim(rig,parent,arm,forearm,pose[side+"_upper_arm"])
         _aim(rig,parent,forearm,hand,pose[side+"_lower_arm"])
     figure.position -= _point(rig,parent,int(roles["hip"]))
-    # The seated animation is retained; fit ankle height to the actual floor
-    # using only a uniform scale adjustment if the proportionate model needs it.
+    # Adapt the transferred seated pose to this particular sofa. Preserve
+    # the donor's torso and initial limb directions, then constrain ankles
+    # to the floor, knees in front of the cushion and wrists above the lap.
     var room := sofa.get_parent().get_parent() as Node3D
     var floor_y := parent.to_local(room.to_global(Vector3(0,0.035,0))).y
-    var foot_y := minf(_point(rig,parent,int(roles["left_foot"])).y,_point(rig,parent,int(roles["right_foot"])).y)
-    if foot_y < -0.10:
-        var fit := clampf((floor_y+0.075)/foot_y,0.88,1.12)
-        figure.scale *= fit
-        figure.position -= _point(rig,parent,int(roles["hip"]))
+    var front_z := parent.to_local(sofa.to_global(Vector3(seat_box.get_center().x,seat_box.end.y,seat_box.end.z))).z
+    var seat_y := parent.to_local(seat_anchor).y
+    for side in ["left","right"]:
+        var thigh := int(roles[side+"_thigh"])
+        var calf := int(roles[side+"_calf"])
+        var foot := int(roles[side+"_foot"])
+        var sign_side := 1.0 if side=="left" else -1.0
+        # The ankle is outside the furniture footprint and below the knee.
+        var thigh_at := _point(rig,parent,thigh)
+        var ankle_target := Vector3(thigh_at.x+sign_side*0.035,floor_y+0.075,front_z+0.17)
+        _fit_chain(rig,parent,thigh,calf,foot,ankle_target,Vector3.BACK+Vector3.UP*0.15)
+        var calf_rotation := rig.get_bone_global_pose(calf).basis.orthonormalized().get_rotation_quaternion()
+        rig.set_bone_pose_rotation(foot,(calf_rotation.inverse()*(feet[side] as Quaternion)).normalized())
+        rig.force_update_all_bone_transforms()
+        var arm := int(roles[side+"_arm"])
+        var forearm := int(roles[side+"_forearm"])
+        var hand := int(roles[side+"_hand"])
+        var knee := _point(rig,parent,calf)
+        var lap := thigh_at.lerp(knee,0.68)
+        lap.y = maxf(lap.y+0.13,seat_y+0.16)
+        lap.z = maxf(lap.z,front_z-0.12)
+        _fit_chain(rig,parent,arm,forearm,hand,lap,Vector3(sign_side*0.25,-0.9,-0.38))
+        var middle_finger := _bone(rig,"LeftHandMiddle1_" if side=="left" else "RightHandMiddle1_")
+        if middle_finger>=0:
+            _aim(rig,parent,hand,middle_finger,Vector3(0,-0.13,1.0))
+    figure.set_meta("seat_front_z",front_z)
+    figure.set_meta("seat_surface_y",seat_y)
+    figure.set_meta("floor_y",floor_y)
+    figure.set_meta("standing_height",1.79)
     var masks := _mask_face(figure,rig,parent,roles)
     if masks == 0:
         figure.free()
@@ -302,4 +384,6 @@ static func install(sofa: Node3D, parent: Node3D) -> Node3D:
         var ankle := _point(rig,parent,int(roles[side+"_foot"]))
         _capsule(body,side+"_thigh",_point(rig,parent,int(roles[side+"_thigh"])),knee,0.10)
         _capsule(body,side+"_shin",knee,ankle,0.075)
+        # Forearm collision follows the resting arms, not a standing capsule.
+        _capsule(body,side+"_forearm",_point(rig,parent,int(roles[side+"_forearm"])),_point(rig,parent,int(roles[side+"_hand"])),0.055)
     return figure
