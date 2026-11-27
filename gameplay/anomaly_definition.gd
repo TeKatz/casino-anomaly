@@ -11,6 +11,7 @@ extends Resource
 @export var handler: Script
 @export var target_path := ""
 @export var replacement_text := ""
+@export var preserve_label_color := false
 @export var enabled := true
 @export var discoverable := true
 @export_enum("common", "uncommon", "rare", "exceptional", "singularity") var rarity := "common"
@@ -27,6 +28,8 @@ extends Resource
 @export var color := Color.WHITE
 @export var has_energy_scale := false
 @export var energy_scale := 1.0
+# Optional original light whose authored energy defines this effect strength.
+@export var energy_reference_path := ""
 @export var has_visible := false
 @export var visible := true
 
@@ -44,6 +47,8 @@ func to_entry() -> Dictionary:
     }
     if not replacement_text.is_empty():
         entry["replacement_text"] = replacement_text
+    if preserve_label_color:
+        entry["preserve_label_color"] = true
     if has_position_offset:
         entry["position_offset"] = position_offset
     if has_rotation_degrees:
@@ -52,6 +57,8 @@ func to_entry() -> Dictionary:
         entry["color"] = color
     if has_energy_scale:
         entry["energy_scale"] = energy_scale
+    if not energy_reference_path.is_empty():
+        entry["energy_reference_path"] = energy_reference_path
     if has_visible:
         entry["visible"] = visible
     return entry

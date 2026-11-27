@@ -50,15 +50,36 @@ func _run() -> void:
     if available.size() < 2:
         _fail("Demo registry cannot find the casino's existing labels")
         return
-    var sign := scene.get_node("CornerBar/Sign_MIDNIGHT_BAR") as Label3D
-    var original := sign.text
-    if not demo.apply(scene, "bar_label") or sign.text == original:
-        _fail("Demo anomaly is not visible on the existing bar sign")
-        return
-    demo.clear()
-    if sign.text != original:
-        _fail("Resetting an anomaly must restore the artist's text")
-        return
+    # Use the actual authored labels and a non-default original color.
+    # This catches a forced white tint as well as the old forced pink tint.
+    var bar_sign := scene.get_node("CornerBar/Sign_MIDNIGHT_BAR") as Label3D
+    var authored_bar_color := bar_sign.modulate
+    bar_sign.modulate = Color(0.76, 0.62, 0.45, 0.85)
+    var label_cases := {
+        "bar_label": ["MIDNIGHT B4R", false, 1],
+        "bar_label__reverse": ["MIDNIGTH BAR", true, 5],
+        "bar_label__subtle": ["MIDNIGHT BARR", true, 3],
+        "entrance_label": ["CASINO AN0MALY", false, 2],
+        "table_label": ["TABLE G4MES", false, 2]
+    }
+    for id in label_cases:
+        var entry := Catalog.get_entry(id)
+        var sign := scene.get_node_or_null(str(entry.get("target_path", ""))) as Label3D
+        if sign == null:
+            _fail("Authored label missing: " + id)
+            return
+        var original := sign.text
+        var original_color := sign.modulate
+        var expected: Array = label_cases[id]
+        var expected_color := original_color if bool(expected[1]) else Color("#f5a2a2")
+        if int(entry.get("difficulty", 0)) != int(expected[2]) or not demo.apply(scene, id) or sign.text != str(expected[0]) or not sign.modulate.is_equal_approx(expected_color):
+            _fail("Label replacement, variant-specific color or difficulty regressed: " + id)
+            return
+        demo.clear()
+        if sign.text != original or not sign.modulate.is_equal_approx(original_color):
+            _fail("Label reset failed to restore the artist's text and color: " + id)
+            return
+    bar_sign.modulate = authored_bar_color
 
     local.prepare_round(available)
     if not local.round_ready or not local.anomaly_id.is_empty():

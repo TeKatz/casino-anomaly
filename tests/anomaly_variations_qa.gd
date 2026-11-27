@@ -14,6 +14,7 @@ const NEW_IDS := [
     "bust_turned__reverse",
     "west_chandelier_dim",
     "cool_ceiling_light",
+    "cool_ceiling_light__other",
     "amber_ceiling_light",
     "horse_spotlight_off"
 ]
@@ -78,8 +79,18 @@ func _verify_adjusted_definitions() -> bool:
             "target_path": "Lighting/WarmCasinoLamp_05"
         },
         "cool_ceiling_light": {
+            "target_path": "ModelInteriors/ChandelierWarmLight_02",
+            "energy_reference_path": "Lighting/WarmCasinoLamp_06",
             "color": Color("#72bfff"),
-            "energy_scale": 1.90
+            "energy_scale": 1.90,
+            "difficulty": 2
+        },
+        "cool_ceiling_light__other": {
+            "target_path": "ModelInteriors/ChandelierWarmLight_01/ChandelierWarmLight_01",
+            "energy_reference_path": "Lighting/WarmCasinoLamp_03",
+            "color": Color(0.55, 0.72, 1, 1),
+            "energy_scale": 1.65,
+            "difficulty": 3
         },
         "amber_ceiling_light": {
             "target_path": "Lighting/WarmCasinoLamp_03",
@@ -98,6 +109,50 @@ func _verify_adjusted_definitions() -> bool:
             if not entry.has(key) or entry[key] != expect[id][key]:
                 _fail("Visual-review tuning regressed: %s / %s" % [id, key])
                 return false
+    return true
+
+
+func _verify_cool_fixture_lights(room: Node3D) -> bool:
+    # Each variant uses a separate authored chandelier light; the original
+    # room-fill lamps supply only the reference energy and remain unchanged.
+    var primary := Catalog.get_entry("cool_ceiling_light")
+    var other := Catalog.get_entry("cool_ceiling_light__other")
+    var targets: Array[Light3D] = []
+    var references: Array[Light3D] = []
+    var fixtures: Array[Node3D] = []
+    for entry in [primary, other]:
+        targets.append(room.get_node_or_null(str(entry["target_path"])) as Light3D)
+        references.append(room.get_node_or_null(str(entry["energy_reference_path"])) as Light3D)
+    fixtures.append(room.get_node_or_null("ModelInteriors/CeilingChandelier_01") as Node3D)
+    fixtures.append(room.get_node_or_null("ModelInteriors/MainChandelier_01") as Node3D)
+    if targets.has(null) or references.has(null) or fixtures.has(null) or targets[0] == targets[1]:
+        _fail("Cool variants must have two distinct authored fixture lights and their energy references")
+        return false
+    var before: Array[Dictionary] = []
+    var reference_before: Array[Dictionary] = []
+    for i in range(2):
+        var offset := targets[i].global_position - fixtures[i].global_position
+        if Vector2(offset.x, offset.z).length() > 1.5 or absf(offset.y) > 2.0:
+            _fail("Cool light is detached from its physical chandelier: " + str(targets[i].get_path()))
+            return false
+        before.append(_snapshot(targets[i]))
+        reference_before.append(_snapshot(references[i]))
+    var adapter := Adapter.new()
+    for i in range(2):
+        var entry: Dictionary = [primary, other][i]
+        if not adapter.apply(room, str(entry["id"])):
+            _fail("Cool fixture variant unavailable")
+            return false
+        if not targets[i].light_color.is_equal_approx(entry["color"]) or not is_equal_approx(targets[i].light_energy, float(reference_before[i]["energy"]) * float(entry["energy_scale"])) or targets[i].transform != before[i]["transform"]:
+            _fail("Cool fixture color, absolute energy or position regressed")
+            return false
+        if not _same(before[1-i], _snapshot(targets[1-i])) or not _same(reference_before[0], _snapshot(references[0])) or not _same(reference_before[1], _snapshot(references[1])):
+            _fail("Cool fixture altered an unrelated room light")
+            return false
+        adapter.clear()
+        if not _same(before[i], _snapshot(targets[i])):
+            _fail("Cool fixture light failed to restore its original state")
+            return false
     return true
 
 
@@ -137,6 +192,9 @@ func _run() -> void:
         await process_frame
         print("Casino Anomaly major event QA PASS: ", suite)
         quit(0)
+        return
+
+    if not _verify_cool_fixture_lights(room):
         return
 
     # The new group blackout must affect EVERY fixture light, including
@@ -186,7 +244,7 @@ func _run() -> void:
     if definitions.size() != 51:
         _fail("Phase 1 catalog must contain exactly 51 active definitions")
         return
-    var expected_difficulty := {"amber_ceiling_light__soft":3,"bar_label":1,"bust_turned__reverse":2,"candleholder_shifted":4,"empty_reserve":1,"watchful_camera":2,"blank_reels":3,"empty_footsteps":3,"last_kings":4,"lightless_horse":1,"silent_countdown":1,"watching_canvases":1,"the_escort":1,"black_bloom":1,"they_are_listening":1,"wrong_reflection":1,"bar_label__reverse":4,"plant_forward__other":3}
+    var expected_difficulty := {"amber_ceiling_light__soft":3,"bar_label":1,"bust_turned__reverse":2,"candleholder_shifted":4,"empty_reserve":1,"watchful_camera":2,"blank_reels":3,"empty_footsteps":3,"last_kings":4,"lightless_horse":1,"silent_countdown":1,"watching_canvases":1,"the_escort":1,"black_bloom":1,"they_are_listening":1,"wrong_reflection":1,"bar_label__reverse":5,"bar_label__subtle":3,"plant_forward__other":3}
     for id in expected_difficulty:
         if int(Catalog.get_entry(id).get("difficulty", 0)) != int(expected_difficulty[id]):
             _fail("Unexpected effective difficulty: " + id)

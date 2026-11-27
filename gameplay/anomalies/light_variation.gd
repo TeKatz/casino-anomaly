@@ -11,7 +11,10 @@ var old_visible := true
 func can_apply(room: Node3D, definition: Dictionary) -> bool:
     if room == null:
         return false
-    return room.get_node_or_null(str(definition.get("target_path", ""))) is Light3D
+    if not (room.get_node_or_null(str(definition.get("target_path", ""))) is Light3D):
+        return false
+    var reference_path := str(definition.get("energy_reference_path", ""))
+    return reference_path.is_empty() or room.get_node_or_null(reference_path) is Light3D
 
 
 func apply(room: Node3D, definition: Dictionary) -> bool:
@@ -25,7 +28,14 @@ func apply(room: Node3D, definition: Dictionary) -> bool:
     if definition.has("color"):
         target.light_color = definition["color"]
     if definition.has("energy_scale"):
-        target.light_energy = old_energy * float(definition["energy_scale"])
+        # Retargeting an effect to a physical fixture must not change its
+        # authored anomalous energy just because that fixture has a weaker normal glow.
+        var baseline_energy := old_energy
+        var reference_path := str(definition.get("energy_reference_path", ""))
+        if not reference_path.is_empty():
+            var reference := room.get_node(reference_path) as Light3D
+            baseline_energy = reference.light_energy
+        target.light_energy = baseline_energy * float(definition["energy_scale"])
     if definition.has("visible"):
         target.visible = bool(definition["visible"])
     return true

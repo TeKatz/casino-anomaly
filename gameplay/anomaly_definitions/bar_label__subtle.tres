@@ -15,6 +15,7 @@ description_en = "One letter of the bar name is replaced."
 description_de = "Ein Buchstabe im Barschild verändert sich."
 target_path = "CornerBar/Sign_MIDNIGHT_BAR"
 replacement_text = "MIDNIGHT BARR"
+preserve_label_color = true
 rarity = "common"
 family_id = "bar_label"
 variant_name_de = "Doppelter Buchstabe"

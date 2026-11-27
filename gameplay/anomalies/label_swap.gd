@@ -16,7 +16,9 @@ func apply(room: Node3D, definition: Dictionary) -> bool:
     previous_text = target.text
     previous_color = target.modulate
     target.text = str(definition["replacement_text"])
-    target.modulate = Color("#f5a2a2")
+    # The legacy tint remains the default. Letter-only variants explicitly opt out.
+    if not bool(definition.get("preserve_label_color", false)):
+        target.modulate = Color("#f5a2a2")
     return true
 
 func clear() -> void:
