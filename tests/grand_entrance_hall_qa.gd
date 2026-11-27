@@ -149,10 +149,17 @@ func _has_coplanar_overlap(a: MeshInstance3D, b: MeshInstance3D) -> bool:
 
 
 func _verify_finishes(hall: Node3D) -> bool:
+    var marker := hall.get_node("SideGalleries/EastGallery/AccessBays/MainCasinoEntrance/DestinationMarker") as Node3D
     for item in hall.find_children("*","MeshInstance3D",true,false):
         var mesh := item as MeshInstance3D
         if hall.get_node("CroupierStation").is_ancestor_of(mesh):
             continue # Imported character materials are not architecture.
+        if marker.is_ancestor_of(mesh):
+            # Wayfinding geometry is not an architectural PBR surface.
+            if mesh.material_override == null or mesh.cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_OFF:
+                _fail("Invalid destination marker material or shadow")
+                return false
+            continue
         var mat := mesh.material_override as StandardMaterial3D
         if mat == null or mat.albedo_texture == null or not mat.normal_enabled or mat.normal_texture == null:
             _fail("Unfinished architectural material: "+str(mesh.get_path()))
@@ -174,6 +181,19 @@ func _verify_finishes(hall: Node3D) -> bool:
         if _has_coplanar_overlap(counter.get_node("Countertop/Mesh") as MeshInstance3D,counter.get_node(side+"ReturnTop/Mesh") as MeshInstance3D):
             _fail("Reception countertop has overlapping top surfaces")
             return false
+    var logo := hall.get_node_or_null("Architecture/ReceptionBackdrop/BrandLogo") as Sprite3D
+    var field := hall.get_node("Architecture/ReceptionBackdrop/CentralField") as MeshInstance3D
+    if logo == null or logo.texture == null or logo.texture.resource_path != "res://branding/casino_anomaly_logo.png" or logo.texture.get_size() != Vector2(1739,856) or not logo.scale.is_equal_approx(Vector3.ONE) or logo.texture_filter != BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC:
+        _fail("Reception must display the original undistorted high-resolution logo")
+        return false
+    var field_bounds: AABB = field.global_transform * field.get_aabb()
+    var half_logo := logo.texture.get_size() * logo.pixel_size * 0.5
+    if absf(logo.global_position.x-field_bounds.get_center().x)>0.01 or logo.global_position.x-half_logo.x<=field_bounds.position.x or logo.global_position.x+half_logo.x>=field_bounds.end.x or logo.global_position.y-half_logo.y<=2.1 or logo.global_position.y+half_logo.y>=field_bounds.end.y or logo.global_position.z<=field_bounds.end.z+0.005:
+        _fail("Reception logo is out of bounds, behind NPC, or coplanar with the wall")
+        return false
+    if marker.visible or not marker.find_children("*","CollisionObject3D",true,false).is_empty() or marker.position.z<0.7 or marker.position.y<2.6:
+        _fail("Destination marker must initially be hidden and not obstruct the door")
+        return false
     var runner := hall.get_node("Architecture/CentralAxis/BurgundyRunner") as MeshInstance3D
     var bounds: AABB = runner.global_transform * runner.get_aabb()
     if bounds.position.y<=0.0 or bounds.end.y>0.02 or bounds.position.x<=-2.46 or bounds.end.x>=2.46:

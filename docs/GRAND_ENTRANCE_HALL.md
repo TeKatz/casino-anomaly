@@ -56,6 +56,21 @@ runner, upper wall insets and reception panel trim are authored nodes. The NPC i
 room is retained only as an archived asset/geometry reference in
 `gameplay/legacy_tutorial.tscn`; no live gameplay route loads it.
 
+## Reception branding and destination guidance
+
+The original 1739 × 856 transparent branding PNG is displayed on the green
+reception backdrop as an editable Sprite3D, about 5.22 × 2.57 m, with its
+original aspect ratio, existing mipmaps and anisotropic texture filtering.
+No new artwork or shared resource changes are needed.
+
+The bilingual reception dialogue explains the new layout and the Main Casino
+entrance. After the conversation closes, a small gold 3D downward arrow
+appears in front of that door only, with a 0.12 m amplitude / 2.8 s hover
+cycle. Guidance respects HUD, interaction and tutorial hints; reduced motion
+holds the marker still. The marker is hidden during conversation and loading,
+and resets on a new visit. The conversation remains optional and no profile
+schema or progression change is introduced.
+
 ## QA
 
 Run `godot --headless --path . --script tests/grand_entrance_hall_qa.gd`

@@ -16,6 +16,10 @@ func _fail(message: String) -> void:
 func _run() -> void:
     var settings = root.get_node_or_null("GameSettings")
     var prior = settings.get_option("language")
+    var guidance_options := {}
+    for key in ["hud_visible","interaction_hints","tutorial_hints","reduced_motion"]:
+        guidance_options[key] = settings.get_option(key)
+        settings.set_option(key, key != "reduced_motion")
     settings.set_option("language", "de")
     var room := INTRO.instantiate() as Node3D
     root.add_child(room)
@@ -192,6 +196,11 @@ func _run() -> void:
         _fail("Returning to the customer side must restore the talking trigger")
         return
 
+    var marker := room.get_node("SideGalleries/EastGallery/AccessBays/MainCasinoEntrance/DestinationMarker") as Node3D
+    var marker_home := marker.position
+    if marker.visible or bool(room.get("has_spoken")):
+        _fail("Destination marker appeared before the conversation")
+        return
     var idle_hands := _hand_positions(anchor, character) if model_installed else PackedVector3Array()
     var talk := InputEventAction.new()
     talk.action = "casino_interact"
@@ -216,7 +225,7 @@ func _run() -> void:
         _fail("Dialogue must release the mouse for its buttons")
         return
     var response := dialogue.get("response_label") as Label
-    if response == null or not response.text.contains("Willkommen"):
+    if response == null or not response.text.contains("Willkommen") or not response.text.contains("hintere Tür") or marker.visible:
         _fail("German welcome must be concise and visible")
         return
     var choices: Dictionary = dialogue.get("buttons")
@@ -236,6 +245,35 @@ func _run() -> void:
         _fail("Bilingual text did not update live")
         return
     dialogue.call("close_conversation")
+    if not marker.visible or not bool(room.get("has_spoken")):
+        _fail("Closing the conversation did not reveal the main casino marker")
+        return
+    room.call("_update_destination_marker",0.7)
+    if absf(marker.position.y-marker_home.y)<0.05 or absf(marker.position.y-marker_home.y)>0.121 or not is_equal_approx(marker.position.z,marker_home.z):
+        _fail("Destination marker hover is not bounded and vertical")
+        return
+    settings.set_option("reduced_motion",true)
+    room.call("_update_destination_marker",0.7)
+    if not marker.visible or not marker.position.is_equal_approx(marker_home):
+        _fail("Reduced motion must keep a stationary destination marker")
+        return
+    for key in ["hud_visible","interaction_hints","tutorial_hints"]:
+        settings.set_option(key,false)
+        if marker.visible:
+            _fail("Destination marker ignored "+key)
+            return
+        settings.set_option(key,true)
+        if not marker.visible:
+            _fail("Destination marker did not restore after "+key)
+            return
+    room.call("_open_conversation")
+    if marker.visible:
+        _fail("Destination marker remained visible during repeated dialogue")
+        return
+    dialogue.call("close_conversation")
+    if not marker.visible:
+        _fail("Repeated dialogue lost destination guidance")
+        return
     if model_installed:
         var idle_tree := desk.get("_animation_tree") as AnimationTree
         if not is_equal_approx(float(idle_tree.get("parameters/Speech/blend_amount")), 0.0):
@@ -253,6 +291,8 @@ func _run() -> void:
 
     room.queue_free()
     await process_frame
+    for key in guidance_options:
+        settings.set_option(key,guidance_options[key])
     settings.set_option("language", prior)
     print("Casino Anomaly croupier welcome desk and dialogue QA PASS")
     quit(0)

@@ -68,6 +68,12 @@ func _run() -> void:
     if door == null or player == null or camera == null or intro.get_node_or_null("CroupierStation")==null:
         _fail("Canonical tutorial path did not load the new hall")
         return
+    var marker := door.get_node("DestinationMarker") as Node3D
+    if marker.visible or bool(intro.get("has_spoken")):
+        _fail("Fresh tutorial has premature destination guidance")
+        return
+    # The existing optional tutorial remains skippable by using the door
+    # directly, even with no conversation or marker.
     player.global_position = door.to_global(Vector3(0,1.02,2.0))
     camera.look_at(door.to_global(Vector3(0,1.55,0)),Vector3.UP)
     if not bool(intro.call("_is_looking_at_door")):
@@ -77,7 +83,7 @@ func _run() -> void:
     event.action = "casino_interact"
     event.pressed = true
     intro.call("_unhandled_input",event)
-    if not bool(loader.get("active")) or not bool(intro.get("changing")) or not bool(player.get("interaction_locked")) or state.tutorial_done:
+    if marker.visible or not bool(loader.get("active")) or not bool(intro.get("changing")) or not bool(player.get("interaction_locked")) or state.tutorial_done:
         _fail("Start-door interaction did not lock input and start loading before completing tutorial")
         return
     intro.call("_unhandled_input",event)

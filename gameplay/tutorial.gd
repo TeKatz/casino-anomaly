@@ -13,10 +13,15 @@ const DoorPrompt = preload("res://ui/door_prompt.gd")
 @onready var door_shape: CollisionShape3D = door_leaf.get_node("CollisionShape3D")
 @onready var npc_body: StaticBody3D = croupier.get_node("CroupierCollision")
 @onready var model_anchor: Node3D = croupier.get_node("CharacterPivot/ModelAnchor")
+@onready var destination_marker: Node3D = door.get_node("DestinationMarker")
+@onready var marker_home: Vector3 = destination_marker.position
 
 var door_prompt: CanvasLayer
 var conversation: CanvasLayer
 var changing := false
+# Guidance is local to this entrance visit, not a progression requirement.
+var has_spoken := false
+var marker_phase := 0.0
 
 func _ready() -> void:
     Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -42,12 +47,14 @@ func _refresh_hint() -> void:
 func _on_settings_changed(key: String) -> void:
     if key == "language":
         _refresh_hint()
+    if key in ["hud_visible", "interaction_hints", "tutorial_hints", "reduced_motion"]:
+        _update_destination_marker(0.0)
 
 func _loader_active() -> bool:
     var loader := get_node_or_null("/root/SceneLoader")
     return loader != null and bool(loader.get("active"))
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
     # A failed load keeps the retry/cancel overlay open; do not unlock
     # until it is dismissed. A successful handoff frees this scene.
     if changing and not _loader_active():
@@ -56,6 +63,17 @@ func _process(_delta: float) -> void:
     var can_interact := not changing and not _loader_active() and not is_dialogue_open() and not get_tree().paused and bool(Controls.pref(self, "hud_visible", true)) and bool(Controls.pref(self, "interaction_hints", true)) and bool(Controls.pref(self, "tutorial_hints", true))
     croupier.call("set_hint_visible", can_interact and _is_looking_at_croupier())
     door_prompt.call("set_prompt_visible", can_interact and _is_looking_at_door())
+    _update_destination_marker(delta)
+
+func _update_destination_marker(delta: float) -> void:
+    var show_marker := has_spoken and not changing and not _loader_active() and not is_dialogue_open() and not get_tree().paused and bool(Controls.pref(self, "hud_visible", true)) and bool(Controls.pref(self, "interaction_hints", true)) and bool(Controls.pref(self, "tutorial_hints", true))
+    destination_marker.visible = show_marker
+    if not show_marker or bool(Controls.pref(self, "reduced_motion", false)):
+        marker_phase = 0.0
+        destination_marker.position = marker_home
+        return
+    marker_phase = fposmod(marker_phase + delta * TAU / 2.8, TAU)
+    destination_marker.position = marker_home + Vector3.UP * (sin(marker_phase) * 0.12)
 
 func _ray_to(target: Vector3) -> Dictionary:
     var exclude: Array[RID] = [player.get_rid()]
@@ -103,6 +121,7 @@ func _open_conversation() -> void:
     door_prompt.call("set_prompt_visible", false)
     croupier.call("set_talking", true)
     conversation.call("show_conversation")
+    _update_destination_marker(0.0)
 
 func _on_conversation_closed() -> void:
     if changing:
@@ -110,6 +129,8 @@ func _on_conversation_closed() -> void:
     croupier.call("set_talking", false)
     player.call("set_interaction_locked", false)
     Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+    has_spoken = true
+    _update_destination_marker(0.0)
 
 func _unhandled_input(event: InputEvent) -> void:
     if changing or _loader_active() or is_dialogue_open() or get_tree().paused:
@@ -129,6 +150,7 @@ func _unhandled_input(event: InputEvent) -> void:
         return
     player.call("interaction_vibration")
     changing = true
+    _update_destination_marker(0.0)
     player.call("set_interaction_locked", true)
     door_prompt.call("set_prompt_visible", false)
     croupier.call("set_hint_visible", false)

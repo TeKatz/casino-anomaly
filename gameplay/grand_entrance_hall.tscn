@@ -1,8 +1,9 @@
-[gd_scene load_steps=127 format=3]
+[gd_scene load_steps=131 format=3]
 
 [ext_resource type="Script" path="res://player.gd" id="1_player"]
 [ext_resource type="Script" path="res://gameplay/tutorial.gd" id="HallTutorial"]
 [ext_resource type="PackedScene" path="res://gameplay/croupier_station.tscn" id="HallCroupier"]
+[ext_resource type="Texture2D" path="res://branding/casino_anomaly_logo.png" id="HallLogo"]
 
 [ext_resource type="Texture2D" path="res://assets/herringbone_parquet/herringbone_parquet_diff_2k.jpg" id="Parquet0"]
 
@@ -528,6 +529,29 @@ size = Vector3(0.91, 0.042, 0.032)
 
 [sub_resource type="BoxMesh" id="CounterPanelSide"]
 size = Vector3(0.042, 0.57, 0.032)
+
+[sub_resource type="StandardMaterial3D" id="DestinationGold"]
+resource_name = "Tutorial | warm gold waypoint"
+albedo_color = Color(0.94, 0.72, 0.36, 1)
+metallic = 0.2
+roughness = 0.55
+emission_enabled = true
+emission = Color(0.74, 0.49, 0.19, 1)
+emission_energy_multiplier = 0.55
+
+[sub_resource type="CylinderMesh" id="DestinationStem"]
+top_radius = 0.075
+bottom_radius = 0.075
+height = 0.26
+radial_segments = 8
+rings = 1
+
+[sub_resource type="CylinderMesh" id="DestinationTip"]
+top_radius = 0.22
+bottom_radius = 0.0
+height = 0.30
+radial_segments = 8
+rings = 1
 
 [node name="GrandEntranceHall" type="Node3D"]
 script = ExtResource("HallTutorial")
@@ -1923,6 +1947,22 @@ position = Vector3(0, 0, -0.55)
 [node name="Approach" type="Marker3D" parent="SideGalleries/EastGallery/AccessBays/MainCasinoEntrance"]
 position = Vector3(0, 0, 1.35)
 
+[node name="DestinationMarker" type="Node3D" parent="SideGalleries/EastGallery/AccessBays/MainCasinoEntrance"]
+visible = false
+position = Vector3(0, 3.0, 1.15)
+
+[node name="Stem" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasinoEntrance/DestinationMarker"]
+position = Vector3(0, 0.13, 0)
+cast_shadow = 0
+mesh = SubResource("DestinationStem")
+material_override = SubResource("DestinationGold")
+
+[node name="Tip" type="MeshInstance3D" parent="SideGalleries/EastGallery/AccessBays/MainCasinoEntrance/DestinationMarker"]
+position = Vector3(0, -0.15, 0)
+cast_shadow = 0
+mesh = SubResource("DestinationTip")
+material_override = SubResource("DestinationGold")
+
 [node name="ReservedAccess_3" type="Node3D" parent="SideGalleries/EastGallery/AccessBays"]
 position = Vector3(12.15, 0, 2)
 rotation = Vector3(0, -1.5708, 0)
@@ -2143,6 +2183,14 @@ position = Vector3(0, 4.5, -1.4)
 position = Vector3(0, 3.3, -13.93)
 mesh = SubResource("Box_78")
 material_override = SubResource("DeepGreen")
+
+[node name="BrandLogo" type="Sprite3D" parent="Architecture/ReceptionBackdrop"]
+position = Vector3(0, 4.15, -13.83)
+pixel_size = 0.003
+texture_filter = 5
+double_sided = false
+shaded = true
+texture = ExtResource("HallLogo")
 
 [node name="WestBorder" type="MeshInstance3D" parent="Architecture/ReceptionBackdrop"]
 position = Vector3(-3.65, 3.3, -13.8)
