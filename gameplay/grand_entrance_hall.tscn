@@ -1,4 +1,4 @@
-[gd_scene load_steps=171 format=3]
+[gd_scene load_steps=172 format=3]
 
 [ext_resource type="Script" path="res://player.gd" id="1_player"]
 [ext_resource type="Script" path="res://gameplay/tutorial.gd" id="HallTutorial"]
@@ -67,7 +67,7 @@
 
 [sub_resource type="FastNoiseLite" id="FineMineralNoise"]
 seed = 137
-frequency = 0.016
+frequency = 0.0075
 fractal_octaves = 3
 fractal_gain = 0.38
 
@@ -76,15 +76,15 @@ offsets = PackedFloat32Array(0, 0.35, 0.68, 1)
 colors = PackedColorArray(0.78, 0.76, 0.72, 1, 0.83, 0.81, 0.77, 1, 0.89, 0.87, 0.83, 1, 0.94, 0.92, 0.88, 1)
 
 [sub_resource type="NoiseTexture2D" id="MineralColor"]
-width = 512
-height = 512
+width = 2048
+height = 2048
 seamless = true
 color_ramp = SubResource("MineralPalette")
 noise = SubResource("FineMineralNoise")
 
 [sub_resource type="NoiseTexture2D" id="MineralNormal"]
-width = 512
-height = 512
+width = 2048
+height = 2048
 seamless = true
 as_normal_map = true
 bump_strength = 0.55
@@ -520,7 +520,7 @@ metallic = 0
 normal_enabled = true
 normal_scale = 0.055
 normal_texture = SubResource("MineralNormal")
-uv1_scale = Vector3(1.35, 1.35, 1.35)
+uv1_scale = Vector3(2.4, 2.4, 2.4)
 uv1_triplanar = true
 uv1_world_triplanar = true
 texture_filter = 5
@@ -562,10 +562,10 @@ size = Vector3(0.14, 0.2, 6.94)
 size = Vector3(0.22, 0.13, 27.9)
 
 [sub_resource type="BoxMesh" id="CounterPanel"]
-size = Vector3(0.87, 0.57, 0.045)
+size = Vector3(0.896, 0.57, 0.045)
 
 [sub_resource type="BoxMesh" id="CounterPanelTop"]
-size = Vector3(0.91, 0.042, 0.032)
+size = Vector3(0.98, 0.042, 0.032)
 
 [sub_resource type="BoxMesh" id="CounterPanelSide"]
 size = Vector3(0.042, 0.57, 0.032)
@@ -637,7 +637,13 @@ height = 0.65
 size = Vector3(0.52, 0.62, 0.52)
 
 [sub_resource type="BoxShape3D" id="CabinetBody"]
-size = Vector3(1.95, 0.544, 0.416)
+size = Vector3(3.66, 1.02, 0.78)
+
+[sub_resource type="BoxMesh" id="CabinetPlinthMesh"]
+size = Vector3(3.78, 0.24, 0.93)
+
+[sub_resource type="BoxShape3D" id="CabinetPlinthShape"]
+size = Vector3(3.78, 0.24, 0.93)
 
 [sub_resource type="BoxMesh" id="PedestalBase"]
 size = Vector3(0.58, 0.12, 0.58)
@@ -676,10 +682,6 @@ bottom_radius = 0.17
 height = 0.075
 radial_segments = 24
 rings = 1
-
-[sub_resource type="CylinderShape3D" id="GalleryVaseCollision"]
-radius = 0.13071
-height = 0.796343
 
 [node name="GrandEntranceHall" type="Node3D"]
 script = ExtResource("HallTutorial")
@@ -976,7 +978,7 @@ position = Vector3(-1.95, 1.9, 13.82)
 
 [node name="Mesh" type="MeshInstance3D" parent="Architecture/Arrival/WestJamb"]
 mesh = SubResource("Box_24")
-material_override = SubResource("Limestone")
+material_override = SubResource("DarkBronze")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/Arrival/WestJamb"]
 shape = SubResource("Shape_25")
@@ -991,7 +993,7 @@ position = Vector3(1.95, 1.9, 13.82)
 
 [node name="Mesh" type="MeshInstance3D" parent="Architecture/Arrival/EastJamb"]
 mesh = SubResource("Box_24")
-material_override = SubResource("Limestone")
+material_override = SubResource("DarkBronze")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Architecture/Arrival/EastJamb"]
 shape = SubResource("Shape_25")
@@ -1004,7 +1006,7 @@ material_override = SubResource("Brass")
 [node name="EntranceLintel" type="MeshInstance3D" parent="Architecture/Arrival"]
 position = Vector3(0, 3.85, 13.8)
 mesh = SubResource("Box_27")
-material_override = SubResource("Limestone")
+material_override = SubResource("DarkBronze")
 
 [node name="DoorSeam" type="MeshInstance3D" parent="Architecture/Arrival"]
 position = Vector3(0, 1.8, 13.849)
@@ -2666,22 +2668,22 @@ mesh = SubResource("CounterPanel")
 material_override = SubResource("HallWood")
 
 [node name="Panel1Top" type="MeshInstance3D" parent="Reception/Counter"]
-position = Vector3(-2.5, 0.787, 0.45)
+position = Vector3(-2.5, 0.786, 0.45)
 mesh = SubResource("CounterPanelTop")
 material_override = SubResource("Brass")
 
 [node name="Panel1Bottom" type="MeshInstance3D" parent="Reception/Counter"]
-position = Vector3(-2.5, 0.173, 0.45)
+position = Vector3(-2.5, 0.174, 0.45)
 mesh = SubResource("CounterPanelTop")
 material_override = SubResource("Brass")
 
 [node name="Panel1Left" type="MeshInstance3D" parent="Reception/Counter"]
-position = Vector3(-2.955, 0.48, 0.45)
+position = Vector3(-2.969, 0.48, 0.45)
 mesh = SubResource("CounterPanelSide")
 material_override = SubResource("Brass")
 
 [node name="Panel1Right" type="MeshInstance3D" parent="Reception/Counter"]
-position = Vector3(-2.045, 0.48, 0.45)
+position = Vector3(-2.031, 0.48, 0.45)
 mesh = SubResource("CounterPanelSide")
 material_override = SubResource("Brass")
 
@@ -2691,22 +2693,22 @@ mesh = SubResource("CounterPanel")
 material_override = SubResource("HallWood")
 
 [node name="Panel2Top" type="MeshInstance3D" parent="Reception/Counter"]
-position = Vector3(-1.5, 0.787, 0.45)
+position = Vector3(-1.5, 0.786, 0.45)
 mesh = SubResource("CounterPanelTop")
 material_override = SubResource("Brass")
 
 [node name="Panel2Bottom" type="MeshInstance3D" parent="Reception/Counter"]
-position = Vector3(-1.5, 0.173, 0.45)
+position = Vector3(-1.5, 0.174, 0.45)
 mesh = SubResource("CounterPanelTop")
 material_override = SubResource("Brass")
 
 [node name="Panel2Left" type="MeshInstance3D" parent="Reception/Counter"]
-position = Vector3(-1.955, 0.48, 0.45)
+position = Vector3(-1.969, 0.48, 0.45)
 mesh = SubResource("CounterPanelSide")
 material_override = SubResource("Brass")
 
 [node name="Panel2Right" type="MeshInstance3D" parent="Reception/Counter"]
-position = Vector3(-1.045, 0.48, 0.45)
+position = Vector3(-1.031, 0.48, 0.45)
 mesh = SubResource("CounterPanelSide")
 material_override = SubResource("Brass")
 
@@ -2716,22 +2718,22 @@ mesh = SubResource("CounterPanel")
 material_override = SubResource("HallWood")
 
 [node name="Panel3Top" type="MeshInstance3D" parent="Reception/Counter"]
-position = Vector3(-0.5, 0.787, 0.45)
+position = Vector3(-0.5, 0.786, 0.45)
 mesh = SubResource("CounterPanelTop")
 material_override = SubResource("Brass")
 
 [node name="Panel3Bottom" type="MeshInstance3D" parent="Reception/Counter"]
-position = Vector3(-0.5, 0.173, 0.45)
+position = Vector3(-0.5, 0.174, 0.45)
 mesh = SubResource("CounterPanelTop")
 material_override = SubResource("Brass")
 
 [node name="Panel3Left" type="MeshInstance3D" parent="Reception/Counter"]
-position = Vector3(-0.9550000000000001, 0.48, 0.45)
+position = Vector3(-0.969, 0.48, 0.45)
 mesh = SubResource("CounterPanelSide")
 material_override = SubResource("Brass")
 
 [node name="Panel3Right" type="MeshInstance3D" parent="Reception/Counter"]
-position = Vector3(-0.044999999999999984, 0.48, 0.45)
+position = Vector3(-0.031, 0.48, 0.45)
 mesh = SubResource("CounterPanelSide")
 material_override = SubResource("Brass")
 
@@ -2741,22 +2743,22 @@ mesh = SubResource("CounterPanel")
 material_override = SubResource("HallWood")
 
 [node name="Panel4Top" type="MeshInstance3D" parent="Reception/Counter"]
-position = Vector3(0.5, 0.787, 0.45)
+position = Vector3(0.5, 0.786, 0.45)
 mesh = SubResource("CounterPanelTop")
 material_override = SubResource("Brass")
 
 [node name="Panel4Bottom" type="MeshInstance3D" parent="Reception/Counter"]
-position = Vector3(0.5, 0.173, 0.45)
+position = Vector3(0.5, 0.174, 0.45)
 mesh = SubResource("CounterPanelTop")
 material_override = SubResource("Brass")
 
 [node name="Panel4Left" type="MeshInstance3D" parent="Reception/Counter"]
-position = Vector3(0.044999999999999984, 0.48, 0.45)
+position = Vector3(0.031, 0.48, 0.45)
 mesh = SubResource("CounterPanelSide")
 material_override = SubResource("Brass")
 
 [node name="Panel4Right" type="MeshInstance3D" parent="Reception/Counter"]
-position = Vector3(0.9550000000000001, 0.48, 0.45)
+position = Vector3(0.969, 0.48, 0.45)
 mesh = SubResource("CounterPanelSide")
 material_override = SubResource("Brass")
 
@@ -2766,22 +2768,22 @@ mesh = SubResource("CounterPanel")
 material_override = SubResource("HallWood")
 
 [node name="Panel5Top" type="MeshInstance3D" parent="Reception/Counter"]
-position = Vector3(1.5, 0.787, 0.45)
+position = Vector3(1.5, 0.786, 0.45)
 mesh = SubResource("CounterPanelTop")
 material_override = SubResource("Brass")
 
 [node name="Panel5Bottom" type="MeshInstance3D" parent="Reception/Counter"]
-position = Vector3(1.5, 0.173, 0.45)
+position = Vector3(1.5, 0.174, 0.45)
 mesh = SubResource("CounterPanelTop")
 material_override = SubResource("Brass")
 
 [node name="Panel5Left" type="MeshInstance3D" parent="Reception/Counter"]
-position = Vector3(1.045, 0.48, 0.45)
+position = Vector3(1.031, 0.48, 0.45)
 mesh = SubResource("CounterPanelSide")
 material_override = SubResource("Brass")
 
 [node name="Panel5Right" type="MeshInstance3D" parent="Reception/Counter"]
-position = Vector3(1.955, 0.48, 0.45)
+position = Vector3(1.969, 0.48, 0.45)
 mesh = SubResource("CounterPanelSide")
 material_override = SubResource("Brass")
 
@@ -2791,22 +2793,22 @@ mesh = SubResource("CounterPanel")
 material_override = SubResource("HallWood")
 
 [node name="Panel6Top" type="MeshInstance3D" parent="Reception/Counter"]
-position = Vector3(2.5, 0.787, 0.45)
+position = Vector3(2.5, 0.786, 0.45)
 mesh = SubResource("CounterPanelTop")
 material_override = SubResource("Brass")
 
 [node name="Panel6Bottom" type="MeshInstance3D" parent="Reception/Counter"]
-position = Vector3(2.5, 0.173, 0.45)
+position = Vector3(2.5, 0.174, 0.45)
 mesh = SubResource("CounterPanelTop")
 material_override = SubResource("Brass")
 
 [node name="Panel6Left" type="MeshInstance3D" parent="Reception/Counter"]
-position = Vector3(2.045, 0.48, 0.45)
+position = Vector3(2.031, 0.48, 0.45)
 mesh = SubResource("CounterPanelSide")
 material_override = SubResource("Brass")
 
 [node name="Panel6Right" type="MeshInstance3D" parent="Reception/Counter"]
-position = Vector3(2.955, 0.48, 0.45)
+position = Vector3(2.969, 0.48, 0.45)
 mesh = SubResource("CounterPanelSide")
 material_override = SubResource("Brass")
 
@@ -3138,7 +3140,7 @@ material_override = SubResource("DarkBronze")
 [node name="Column" type="MeshInstance3D" parent="Interior/EntranceDisplays/WestPortraitDisplay"]
 position = Vector3(0, 0.51, 0)
 mesh = SubResource("PedestalColumn")
-material_override = SubResource("Limestone")
+material_override = SubResource("HallWood")
 
 [node name="Cap" type="MeshInstance3D" parent="Interior/EntranceDisplays/WestPortraitDisplay"]
 position = Vector3(0, 0.95, 0)
@@ -3466,7 +3468,7 @@ material_override = SubResource("DarkBronze")
 [node name="Column" type="MeshInstance3D" parent="Interior/EntranceDisplays/EastPortraitDisplay"]
 position = Vector3(0, 0.51, 0)
 mesh = SubResource("PedestalColumn")
-material_override = SubResource("Limestone")
+material_override = SubResource("HallWood")
 
 [node name="Cap" type="MeshInstance3D" parent="Interior/EntranceDisplays/EastPortraitDisplay"]
 position = Vector3(0, 0.95, 0)
@@ -3497,30 +3499,50 @@ rotation = Vector3(0, 0.14, 0)
 
 [node name="OriginalAsset" parent="Interior/ReceptionDressing/OpenGuestBook" instance=ExtResource("InteriorBooks")]
 
+[node name="WestCabinetPlinth" type="StaticBody3D" parent="Interior/ReceptionDressing"]
+position = Vector3(-6, 0.12, -13)
+
+[node name="Mesh" type="MeshInstance3D" parent="Interior/ReceptionDressing/WestCabinetPlinth"]
+mesh = SubResource("CabinetPlinthMesh")
+material_override = SubResource("HallWood")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Interior/ReceptionDressing/WestCabinetPlinth"]
+shape = SubResource("CabinetPlinthShape")
+
 [node name="WestStaffSideboard" type="StaticBody3D" parent="Interior/ReceptionDressing"]
-position = Vector3(-6.38, 0, -13.26)
+position = Vector3(-6, 0.24, -13)
 
 [node name="Model" type="Node3D" parent="Interior/ReceptionDressing/WestStaffSideboard"]
-position = Vector3(0, 0, 0.008)
-scale = Vector3(0.8, 0.8, 0.8)
+position = Vector3(0, -0.000025, 0.015)
+scale = Vector3(1.5, 1.5, 1.5)
 
 [node name="OriginalAsset" parent="Interior/ReceptionDressing/WestStaffSideboard/Model" instance=ExtResource("InteriorCabinet")]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Interior/ReceptionDressing/WestStaffSideboard"]
-position = Vector3(0, 0.272, 0)
+position = Vector3(0, 0.51, 0)
 shape = SubResource("CabinetBody")
 
+[node name="EastCabinetPlinth" type="StaticBody3D" parent="Interior/ReceptionDressing"]
+position = Vector3(6, 0.12, -13)
+
+[node name="Mesh" type="MeshInstance3D" parent="Interior/ReceptionDressing/EastCabinetPlinth"]
+mesh = SubResource("CabinetPlinthMesh")
+material_override = SubResource("HallWood")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Interior/ReceptionDressing/EastCabinetPlinth"]
+shape = SubResource("CabinetPlinthShape")
+
 [node name="EastStaffSideboard" type="StaticBody3D" parent="Interior/ReceptionDressing"]
-position = Vector3(6.38, 0, -13.26)
+position = Vector3(6, 0.24, -13)
 
 [node name="Model" type="Node3D" parent="Interior/ReceptionDressing/EastStaffSideboard"]
-position = Vector3(0, 0, 0.008)
-scale = Vector3(0.8, 0.8, 0.8)
+position = Vector3(0, -0.000025, 0.015)
+scale = Vector3(1.5, 1.5, 1.5)
 
 [node name="OriginalAsset" parent="Interior/ReceptionDressing/EastStaffSideboard/Model" instance=ExtResource("InteriorCabinet")]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Interior/ReceptionDressing/EastStaffSideboard"]
-position = Vector3(0, 0.272, 0)
+position = Vector3(0, 0.51, 0)
 shape = SubResource("CabinetBody")
 
 [node name="LogoInnerLeft" type="MeshInstance3D" parent="Interior/WallArtAndTrim"]
@@ -3643,75 +3665,62 @@ rotation = Vector3(0, -1.5707963, 0)
 
 [node name="GalleryDetails" type="Node3D" parent="Interior"]
 
-[node name="WestFloorVase" type="StaticBody3D" parent="Interior/GalleryDetails"]
-position = Vector3(-11.6, 0, -1)
-
-[node name="Model" type="Node3D" parent="Interior/GalleryDetails/WestFloorVase"]
-position = Vector3(0, -0.001671, 0)
-scale = Vector3(1.15, 1.15, 1.15)
-
-[node name="OriginalAsset" parent="Interior/GalleryDetails/WestFloorVase/Model" instance=ExtResource("Detail_brass_vase_01")]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Interior/GalleryDetails/WestFloorVase"]
-position = Vector3(0, 0.3981715, 0)
-shape = SubResource("GalleryVaseCollision")
-
 [node name="WestFireAlarm" type="Node3D" parent="Interior/GalleryDetails"]
-position = Vector3(-11.995, 1.48, 4.24)
+position = Vector3(-11.99, 1.48, 4.24)
+scale = Vector3(2, 2, 2)
 rotation = Vector3(0, 1.5707963, 0)
 
 [node name="OriginalAsset" parent="Interior/GalleryDetails/WestFireAlarm" instance=ExtResource("Detail_fire_alarm")]
 
-[node name="EastFloorVase" type="StaticBody3D" parent="Interior/GalleryDetails"]
-position = Vector3(11.6, 0, -1)
-
-[node name="Model" type="Node3D" parent="Interior/GalleryDetails/EastFloorVase"]
-position = Vector3(0, -0.001671, 0)
-scale = Vector3(1.15, 1.15, 1.15)
-
-[node name="OriginalAsset" parent="Interior/GalleryDetails/EastFloorVase/Model" instance=ExtResource("Detail_brass_vase_01")]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Interior/GalleryDetails/EastFloorVase"]
-position = Vector3(0, 0.3981715, 0)
-shape = SubResource("GalleryVaseCollision")
-
 [node name="EastFireAlarm" type="Node3D" parent="Interior/GalleryDetails"]
-position = Vector3(11.995, 1.48, 4.24)
+position = Vector3(11.99, 1.48, 4.24)
+scale = Vector3(2, 2, 2)
 rotation = Vector3(0, -1.5707963, 0)
 
 [node name="OriginalAsset" parent="Interior/GalleryDetails/EastFireAlarm" instance=ExtResource("Detail_fire_alarm")]
 
 [node name="EntryFireAlarm" type="Node3D" parent="Interior/WallArtAndTrim"]
-position = Vector3(2.63, 1.48, 13.994)
+position = Vector3(2.63, 1.48, 13.988)
+scale = Vector3(2, 2, 2)
 rotation = Vector3(0, 3.1415927, 0)
 
 [node name="OriginalAsset" parent="Interior/WallArtAndTrim/EntryFireAlarm" instance=ExtResource("Detail_fire_alarm")]
 
-[node name="CounterBrassVase" type="Node3D" parent="Interior/ReceptionDressing"]
-position = Vector3(-2.65, 1.089156, -6.42)
-
-[node name="OriginalAsset" parent="Interior/ReceptionDressing/CounterBrassVase" instance=ExtResource("Detail_brass_vase_03")]
-
-[node name="SideboardBrassVase" type="Node3D" parent="Interior/ReceptionDressing/WestStaffSideboard"]
-position = Vector3(-0.55, 0.543156, 0)
-
-[node name="OriginalAsset" parent="Interior/ReceptionDressing/WestStaffSideboard/SideboardBrassVase" instance=ExtResource("Detail_brass_vase_03")]
-
 [node name="CroupierPocketWatch" type="Node3D" parent="Interior/ReceptionDressing"]
-position = Vector3(1.18, 1.097824, -6.25)
+position = Vector3(1.18, 1.105649, -6.25)
+scale = Vector3(2, 2, 2)
 rotation = Vector3(-1.5707963, 0.35, 0)
 
 [node name="OriginalAsset" parent="Interior/ReceptionDressing/CroupierPocketWatch" instance=ExtResource("Detail_pocket_watch")]
-
-[node name="SmallBrassVase" type="Node3D" parent="Interior/Lounges/WestWaitingNook/OccasionalTable"]
-position = Vector3(0.12, 0.652913, 0.02)
-
-[node name="OriginalAsset" parent="Interior/Lounges/WestWaitingNook/OccasionalTable/SmallBrassVase" instance=ExtResource("Detail_brass_vase_04")]
 
 [node name="CigarettePack" type="Node3D" parent="Interior/Lounges/EastWaitingNook/OccasionalTable"]
 position = Vector3(-0.1, 0.6533, 0.065)
 rotation = Vector3(0, 0.4, 0)
 
 [node name="OriginalAsset" parent="Interior/Lounges/EastWaitingNook/OccasionalTable/CigarettePack" instance=ExtResource("Detail_cigarette_pack")]
+
+[node name="TallBrassVase" type="Node3D" parent="Interior/ReceptionDressing/WestStaffSideboard"]
+position = Vector3(-0.86, 1.01927, 0)
+scale = Vector3(0.65, 0.65, 0.65)
+
+[node name="OriginalAsset" parent="Interior/ReceptionDressing/WestStaffSideboard/TallBrassVase" instance=ExtResource("Detail_brass_vase_01")]
+
+[node name="SmallBrassVase" type="Node3D" parent="Interior/ReceptionDressing/WestStaffSideboard"]
+position = Vector3(0.65, 1.019075, 0.04)
+scale = Vector3(1.35, 1.35, 1.35)
+
+[node name="OriginalAsset" parent="Interior/ReceptionDressing/WestStaffSideboard/SmallBrassVase" instance=ExtResource("Detail_brass_vase_03")]
+
+[node name="TallBrassVase" type="Node3D" parent="Interior/ReceptionDressing/EastStaffSideboard"]
+position = Vector3(0.86, 1.01927, 0)
+scale = Vector3(0.65, 0.65, 0.65)
+
+[node name="OriginalAsset" parent="Interior/ReceptionDressing/EastStaffSideboard/TallBrassVase" instance=ExtResource("Detail_brass_vase_01")]
+
+[node name="SmallBrassVase" type="Node3D" parent="Interior/ReceptionDressing/EastStaffSideboard"]
+position = Vector3(-0.65, 1.020083, 0.04)
+scale = Vector3(1.5, 1.5, 1.5)
+
+[node name="OriginalAsset" parent="Interior/ReceptionDressing/EastStaffSideboard/SmallBrassVase" instance=ExtResource("Detail_brass_vase_04")]
 
 [editable path="CroupierStation"]

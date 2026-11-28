@@ -200,6 +200,20 @@ func _verify_finishes(hall: Node3D) -> bool:
     if marker.visible or not marker.find_children("*","CollisionObject3D",true,false).is_empty() or marker.position.z<0.7 or marker.position.y<2.6:
         _fail("Destination marker must initially be hidden and not obstruct the door")
         return false
+    # Four frame pieces must meet at butt joints, without open corners or
+    # positive-area coplanar overlap. The gap between separate panels is intentional.
+    for i in range(1,7):
+        var prefix := "Reception/Counter/Panel"+str(i)
+        var top := _model_bounds(hall.get_node(prefix+"Top") as Node3D)
+        var bottom := _model_bounds(hall.get_node(prefix+"Bottom") as Node3D)
+        for side in ["Left","Right"]:
+            var upright := _model_bounds(hall.get_node(prefix+side) as Node3D)
+            var outer := upright.position.x if side=="Left" else upright.end.x
+            var edge := top.position.x if side=="Left" else top.end.x
+            var lower_edge := bottom.position.x if side=="Left" else bottom.end.x
+            if absf(upright.end.y-top.position.y)>0.001 or absf(upright.position.y-bottom.end.y)>0.001 or absf(outer-edge)>0.001 or absf(outer-lower_edge)>0.001:
+                _fail("Reception brass frame has an open or overlapping corner: "+prefix+side)
+                return false
     var runner := hall.get_node("Architecture/CentralAxis/BurgundyRunner") as MeshInstance3D
     var bounds: AABB = runner.global_transform * runner.get_aabb()
     if bounds.position.y<=0.0 or bounds.end.y>0.02 or bounds.position.x<=-2.46 or bounds.end.x>=2.46:
@@ -315,15 +329,14 @@ func _verify_detail_assets(hall: Node3D) -> bool:
     var expected := [
         ["Interior/WallArtAndTrim/WestPanel1/AlternatePainting", "res://models/fancy_picture_frame_02/fancy_picture_frame_02_2k.gltf"],
         ["Interior/WallArtAndTrim/EastPanel4/AlternatePainting", "res://models/fancy_picture_frame_02/fancy_picture_frame_02_2k.gltf"],
-        ["Interior/GalleryDetails/WestFloorVase/Model", "res://models/brass_vase_01/brass_vase_01_2k.gltf"],
+        ["Interior/ReceptionDressing/WestStaffSideboard/TallBrassVase", "res://models/brass_vase_01/brass_vase_01_2k.gltf"],
         ["Interior/GalleryDetails/WestFireAlarm", "res://models/fire_alarm/fire_alarm_1k.gltf"],
-        ["Interior/GalleryDetails/EastFloorVase/Model", "res://models/brass_vase_01/brass_vase_01_2k.gltf"],
+        ["Interior/ReceptionDressing/EastStaffSideboard/TallBrassVase", "res://models/brass_vase_01/brass_vase_01_2k.gltf"],
         ["Interior/GalleryDetails/EastFireAlarm", "res://models/fire_alarm/fire_alarm_1k.gltf"],
         ["Interior/WallArtAndTrim/EntryFireAlarm", "res://models/fire_alarm/fire_alarm_1k.gltf"],
-        ["Interior/ReceptionDressing/CounterBrassVase", "res://models/brass_vase_03/brass_vase_03_2k.gltf"],
-        ["Interior/ReceptionDressing/WestStaffSideboard/SideboardBrassVase", "res://models/brass_vase_03/brass_vase_03_2k.gltf"],
+        ["Interior/ReceptionDressing/WestStaffSideboard/SmallBrassVase", "res://models/brass_vase_03/brass_vase_03_2k.gltf"],
         ["Interior/ReceptionDressing/CroupierPocketWatch", "res://models/pocket_watch/pocket_watch_1k.gltf"],
-        ["Interior/Lounges/WestWaitingNook/OccasionalTable/SmallBrassVase", "res://models/brass_vase_04/brass_vase_04_2k.gltf"],
+        ["Interior/ReceptionDressing/EastStaffSideboard/SmallBrassVase", "res://models/brass_vase_04/brass_vase_04_2k.gltf"],
         ["Interior/Lounges/EastWaitingNook/OccasionalTable/CigarettePack", "res://models/cigarette_pack/cigarette_pack_1k.gltf"]
     ]
     for record in expected:
@@ -338,29 +351,49 @@ func _verify_detail_assets(hall: Node3D) -> bool:
         if _model_bounds(model).size.length()<0.01:
             _fail("Detail asset has no visible model: "+str(record[0]))
             return false
+    # Enlarged original cabinets sit on independently editable, solid plinths.
     for side in ["West","East"]:
-        var vase := hall.get_node("Interior/GalleryDetails/"+side+"FloorVase") as StaticBody3D
-        var model := vase.get_node("Model") as Node3D
+        var cabinet := hall.get_node("Interior/ReceptionDressing/"+side+"StaffSideboard") as StaticBody3D
+        var model := cabinet.get_node("Model") as Node3D
         var bounds := _model_bounds(model)
-        var collision := vase.get_node("CollisionShape3D") as CollisionShape3D
-        var shape := collision.shape as CylinderShape3D
-        if shape==null or collision.disabled or vase.collision_layer==0 or absf(bounds.position.y)>0.015 or absf(bounds.size.y-shape.height)>0.025 or absf(bounds.size.x-shape.radius*2.0)>0.025 or absf(bounds.size.z-shape.radius*2.0)>0.025:
-            _fail("Floor vase is ungrounded or has mismatched collision")
+        var plinth := hall.get_node("Interior/ReceptionDressing/"+side+"CabinetPlinth") as StaticBody3D
+        var support := _model_bounds(plinth)
+        if cabinet.owner!=hall or model.owner!=hall or plinth.owner!=hall or absf(support.position.y)>0.015 or absf(support.size.y-0.24)>0.015 or absf(bounds.position.y-support.end.y)>0.025 or bounds.size.y<1.0 or bounds.size.y>1.05 or bounds.position.x<support.position.x or bounds.end.x>support.end.x or bounds.position.z<support.position.z or bounds.end.z>support.end.z:
+            _fail("Cabinet or plinth is incorrectly sized or grounded: "+side+" "+str(bounds)+" support="+str(support))
             return false
-        if absf(bounds.get_center().x)<11.4 or absf(bounds.get_center().x)>11.8 or absf(bounds.get_center().z+1.0)>0.02:
-            _fail("Floor vase moved into the gallery walking lane")
+        if absf(support.get_center().x)-support.size.x*0.5<4.0 or absf(support.get_center().x)+support.size.x*0.5>7.93 or support.position.z< -14.0:
+            _fail("Cabinet intrudes into the central reserve or walls: "+side)
+            return false
+        for body in [cabinet,plinth]:
+            var collider := body.get_node("CollisionShape3D") as CollisionShape3D
+            var shape := collider.shape as BoxShape3D
+            if shape==null or collider.disabled or body.collision_layer==0 or collider.owner!=hall:
+                _fail("Cabinet display is not solid and editable: "+side)
+                return false
+            var collision_bounds := collider.global_transform * AABB(-shape.size*0.5,shape.size)
+            var visual := bounds if body==cabinet else support
+            if collision_bounds.position.distance_to(visual.position)>0.025 or collision_bounds.end.distance_to(visual.end)>0.025:
+                _fail("Cabinet display collision mismatch: "+side)
+                return false
+    for old_path in ["Interior/GalleryDetails/WestFloorVase","Interior/GalleryDetails/EastFloorVase","Interior/ReceptionDressing/CounterBrassVase","Interior/Lounges/WestWaitingNook/OccasionalTable/SmallBrassVase"]:
+        if hall.has_node(old_path):
+            _fail("Obsolete vase remains outside cabinet displays: "+old_path)
             return false
     for record in [
-        ["Interior/ReceptionDressing/CounterBrassVase","Reception/Counter/Countertop/Mesh"],
         ["Interior/ReceptionDressing/CroupierPocketWatch","Reception/Counter/Countertop/Mesh"],
-        ["Interior/ReceptionDressing/WestStaffSideboard/SideboardBrassVase","Interior/ReceptionDressing/WestStaffSideboard/Model"],
-        ["Interior/Lounges/WestWaitingNook/OccasionalTable/SmallBrassVase","Interior/Lounges/WestWaitingNook/OccasionalTable/Model"],
+        ["Interior/ReceptionDressing/WestStaffSideboard/SmallBrassVase","Interior/ReceptionDressing/WestStaffSideboard/Model"],
+        ["Interior/ReceptionDressing/EastStaffSideboard/SmallBrassVase","Interior/ReceptionDressing/EastStaffSideboard/Model"],
+        ["Interior/ReceptionDressing/WestStaffSideboard/TallBrassVase","Interior/ReceptionDressing/WestStaffSideboard/Model"],
+        ["Interior/ReceptionDressing/EastStaffSideboard/TallBrassVase","Interior/ReceptionDressing/EastStaffSideboard/Model"],
         ["Interior/Lounges/EastWaitingNook/OccasionalTable/CigarettePack","Interior/Lounges/EastWaitingNook/OccasionalTable/Model"]
     ]:
         var prop_node := hall.get_node(record[0]) as Node3D
         var support := hall.get_node(record[1]) as Node3D
         var bounds := _model_bounds(prop_node)
         var top := _model_bounds(support)
+        if str(record[0]).ends_with("CroupierPocketWatch") and (bounds.size.x<0.10 or bounds.size.x>0.20):
+            _fail("Pocket watch has incorrect display scale")
+            return false
         if top.size.x<=0.0 or top.size.z<=0.0:
             _fail("Lobby detail has no valid support geometry: "+str(record[1])+" "+str(top))
             return false
@@ -379,6 +412,9 @@ func _verify_detail_assets(hall: Node3D) -> bool:
         var axis := int(record[2])
         var wall_face := float(record[1])
         var back := bounds.end[axis] if wall_face>0.0 else bounds.position[axis]
+        if str(record[0]).ends_with("FireAlarm") and (bounds.size.y<0.27 or bounds.size.y>0.31):
+            _fail("Fire alarm is not at the approved enlarged scale: "+str(record[0]))
+            return false
         if absf(back-wall_face)>0.025:
             _fail("Wall detail is not attached to its supporting surface: "+str(record[0]))
             return false

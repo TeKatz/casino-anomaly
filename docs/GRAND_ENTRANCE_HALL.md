@@ -128,6 +128,20 @@ interaction, trigger or new gameplay mechanic is introduced. Existing
 path/collision tests remain enabled, with original-source, surface-contact
 and gallery clearance regressions for the added details.
 
+## Phase 7B — Visual feedback pass
+
+The entrance jambs and lintel now use aged bronze; bust pedestal columns use
+the existing smoked walnut. The six brass counter frames close at butt joints.
+All three fire alarms and the reception pocket watch are doubled in scale,
+with support/wall contact preserved. The counter vase is removed; the four
+remaining vase instances are distributed on the two rear cabinets. Each
+cabinet is now approximately 1.02 m tall, as in the main casino, on a separate
+3.78 × 0.24 × 0.93 m solid walnut plinth. Their original model and authored
+collisions remain individually editable. The procedural mineral textures are
+generated at 2048 × 2048 rather than 512 × 512 with finer grain and tighter
+countertop tiling; they are not a photographic marble or stone PBR set.
+Manual Forward+ visual and performance checks remain necessary.
+
 ## QA
 
 Run `godot --headless --path . --script tests/grand_entrance_hall_qa.gd`
