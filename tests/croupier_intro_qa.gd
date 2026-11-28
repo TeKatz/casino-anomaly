@@ -369,11 +369,23 @@ func _run() -> void:
     await process_frame
     var returning_dialogue := returning_room.get_node("CroupierDialogue")
     returning_room.call("_open_conversation")
+    await process_frame
+    await process_frame
     var returning_response := returning_dialogue.get("response_label") as Label
     var returning_buttons: Dictionary = returning_dialogue.get("buttons")
     if not returning_response.text.contains("Du schon wieder") or not returning_buttons.has("recognition"):
         _fail("Returning profile did not receive the alternate dialogue")
         return
+    var returning_panel := returning_dialogue.get("panel") as PanelContainer
+    var returning_stack := returning_dialogue.get("choices_stack") as VBoxContainer
+    var returning_area := returning_dialogue.get("choices_area") as Control
+    if returning_panel.find_children("*","ScrollContainer",true,false).size()!=0 or int(returning_dialogue.get("topic_page_count"))!=1 or returning_stack.get_combined_minimum_size().y>returning_area.size.y+1.0:
+        _fail("Returning dialogue must fit all four questions without scrolling")
+        return
+    for id in ["rules","anomalies","casino","recognition","leave"]:
+        if not (returning_buttons[id] as Button).is_visible_in_tree():
+            _fail("Returning question was hidden: "+id)
+            return
     settings.set_option("language","en")
     if not returning_response.text.contains("You again"):
         _fail("Returning greeting failed to localize")
@@ -397,6 +409,32 @@ func _run() -> void:
     if not bool(returning_room.get("has_spoken")) or str(returning_objective.get("objective_id"))!="enter_main_casino":
         _fail("Returning guest could not unlock the ordinary objective")
         return
+    # Exercise longer future conversations through the same reusable view,
+    # without creating another test scene or changing the shipped catalog.
+    var extended: Dictionary = preload("res://gameplay/dialogue_catalog.gd").entrance(true)
+    for i in range(5):
+        extended["topics"].append({"id":"extra_"+str(i),"label":"croupier.option.casino","pages":[{"text":"croupier.casino"}]})
+    if not bool(returning_dialogue.call("configure",extended)):
+        _fail("Reusable dialogue rejected a longer catalog")
+        return
+    returning_room.call("_open_conversation")
+    await process_frame
+    await process_frame
+    var pager := returning_dialogue.get("topics_pager") as HBoxContainer
+    var extended_buttons: Dictionary = returning_dialogue.get("buttons")
+    if not pager.visible or int(returning_dialogue.get("topic_page_count"))<2 or returning_stack.get_combined_minimum_size().y>returning_area.size.y+1.0:
+        _fail("Longer dialogues must paginate within the topic budget")
+        return
+    while int(returning_dialogue.get("topic_page"))+1<int(returning_dialogue.get("topic_page_count")):
+        returning_dialogue.call("_change_topic_page",1)
+    if not (extended_buttons["extra_4"] as Button).is_visible_in_tree() or not (extended_buttons["leave"] as Button).is_visible_in_tree():
+        _fail("Last topic page or permanent leave action is inaccessible")
+        return
+    returning_dialogue.call("_on_choice","extra_4")
+    if str(returning_dialogue.get("current_topic"))!="extra_4" or not (extended_buttons["extra_4"] as Button).get("featured"):
+        _fail("Paginated question lost its selection or response")
+        return
+    returning_dialogue.call("close_conversation")
     returning_room.queue_free()
     await process_frame
     state.set("returning_guest",previous_returning)

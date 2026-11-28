@@ -10,6 +10,14 @@ const MenuStyle = preload("res://ui/menu_style.gd")
 const LuminousButton = preload("res://ui/luminous_button.gd")
 const Catalog = preload("res://gameplay/dialogue_catalog.gd")
 
+# The speech column determines the window height. Keep a bounded topic
+# budget inside that composition, independent of the number of questions.
+const TOPIC_AREA_HEIGHT := 180.0
+const TOPIC_HEIGHT := 46.0
+const COMPACT_TOPIC_HEIGHT := 40.0
+const TOPIC_GAP := 7
+const COMPACT_TOPIC_GAP := 4
+
 var active := false
 var current_topic := "welcome"
 var page_index := 0
@@ -23,7 +31,16 @@ var topic_label: Label
 var topic_markers: Dictionary = {}
 var page_label: Label
 var choices_stack: VBoxContainer
-var choices_scroll: ScrollContainer
+var choices_area: Control
+var topics_pager: HBoxContainer
+var topics_previous: Button
+var topics_next: Button
+var topics_page_label: Label
+var topic_page := 0
+var topic_capacity := 3
+var topic_page_count := 1
+var _compact_skins: Dictionary = {}
+var _topics_layout_queued := false
 var buttons: Dictionary = {}
 var next_button: Button
 var back_button: Button
@@ -116,22 +133,44 @@ func _ready() -> void:
     var choices := VBoxContainer.new()
     choices.name = "ChoiceColumn"
     choices.custom_minimum_size.x = 280
-    choices.add_theme_constant_override("separation", 8)
+    choices.add_theme_constant_override("separation", 6)
     columns.add_child(choices)
+    var topics_header := HBoxContainer.new()
+    topics_header.name = "TopicsHeader"
+    topics_header.custom_minimum_size.y = 28
+    topics_header.add_theme_constant_override("separation", 4)
+    choices.add_child(topics_header)
     var heading := _label("ChoiceHeading", 12, MenuStyle.GOLD)
     heading.text = Loc.t("dialogue.topics", self)
-    choices.add_child(heading)
-    choices_scroll = ScrollContainer.new()
-    choices_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-    choices_scroll.custom_minimum_size.y = 156
-    choices_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-    choices_scroll.follow_focus = true
-    choices.add_child(choices_scroll)
+    heading.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+    heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    topics_header.add_child(heading)
+    topics_pager = HBoxContainer.new()
+    topics_pager.name = "TopicsPager"
+    topics_pager.add_theme_constant_override("separation", 4)
+    topics_header.add_child(topics_pager)
+    topics_previous = _pager_button("PreviousTopics","‹",-1)
+    topics_pager.add_child(topics_previous)
+    topics_page_label = _label("TopicsPageIndicator",12,Color("#b3a797"))
+    topics_page_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+    topics_page_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+    topics_pager.add_child(topics_page_label)
+    topics_next = _pager_button("NextTopics","›",1)
+    topics_pager.add_child(topics_next)
+    topics_pager.hide()
+
+    # No ScrollContainer: overflow is handled by pages, not by clipping
+    # or letting the topic list grow the outer panel.
+    choices_area = Control.new()
+    choices_area.name = "TopicsArea"
+    choices_area.custom_minimum_size.y = TOPIC_AREA_HEIGHT
+    choices_area.size_flags_vertical = Control.SIZE_EXPAND_FILL
+    choices.add_child(choices_area)
     choices_stack = VBoxContainer.new()
     choices_stack.name = "TopicChoices"
-    choices_stack.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-    choices_stack.add_theme_constant_override("separation", 7)
-    choices_scroll.add_child(choices_stack)
+    choices_stack.add_theme_constant_override("separation", TOPIC_GAP)
+    choices_area.add_child(choices_stack)
+    choices_stack.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     var leave := _button("LeaveButton", false)
     leave.custom_minimum_size.y = 44
     leave.set("symbol", "quit")
@@ -168,6 +207,24 @@ func _button(node_name: String, featured: bool) -> Button:
     return button
 
 
+func _pager_button(node_name: String, glyph: String, direction: int) -> Button:
+    var button := _button(node_name,false)
+    button.custom_minimum_size = Vector2(30,28)
+    button.text = glyph
+    button.ready.connect(func() -> void:
+        for state in ["normal","hover","pressed","disabled"]:
+            var skin := MenuStyle.button_skin(state,false,"gold").duplicate() as StyleBoxTexture
+            skin.content_margin_left = 5
+            skin.content_margin_right = 5
+            skin.content_margin_top = 2
+            skin.content_margin_bottom = 2
+            button.add_theme_stylebox_override(state,skin)
+        button.add_theme_font_size_override("font_size",16)
+    )
+    button.pressed.connect(_change_topic_page.bind(direction))
+    return button
+
+
 func configure(conversation: Dictionary) -> bool:
     if active or not Catalog.valid(conversation):
         return false
@@ -188,12 +245,14 @@ func _build_topics() -> void:
     var leave: Button = buttons.get("leave")
     buttons = {"leave": leave}
     topic_markers.clear()
+    topic_page = 0
     for topic in _conversation.get("topics", []):
         var id := str(topic["id"])
         var button := _button(id.capitalize()+"Button", false)
         button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
         button.pressed.connect(_on_choice.bind(id))
         choices_stack.add_child(button)
+        button.minimum_size_changed.connect(_queue_topic_layout)
         button.alignment = HORIZONTAL_ALIGNMENT_LEFT
         button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
         buttons[id] = button
@@ -210,6 +269,97 @@ func _build_topics() -> void:
         marker.offset_bottom = -10.0
         marker.hide()
         topic_markers[id] = marker
+    _layout_topics()
+
+
+func _queue_topic_layout() -> void:
+    if _topics_layout_queued:
+        return
+    _topics_layout_queued = true
+    _layout_topics.call_deferred()
+
+
+func _apply_topic_skin(button: Button, selected: bool, compact: bool) -> void:
+    if bool(button.get_meta("_topic_compact",false)) == compact and bool(button.get("featured")) == selected and button.has_meta("_topic_compact"):
+        return
+    button.set_meta("_topic_compact",compact)
+    button.set("featured",selected)
+    button.custom_minimum_size.y = COMPACT_TOPIC_HEIGHT if compact else TOPIC_HEIGHT
+    for state in ["normal","hover","pressed","disabled"]:
+        var skin := MenuStyle.button_skin(state,selected,"gold")
+        if compact:
+            var key := "%s_%s" % [state,str(selected)]
+            if not _compact_skins.has(key):
+                var copy := skin.duplicate() as StyleBoxTexture
+                copy.content_margin_top = 4
+                copy.content_margin_bottom = 4
+                _compact_skins[key] = copy
+            skin = _compact_skins[key] as StyleBoxTexture
+        button.add_theme_stylebox_override(state,skin)
+
+
+func _layout_topics() -> void:
+    _topics_layout_queued = false
+    var topics: Array = _conversation.get("topics",[])
+    if topics.is_empty() or not is_instance_valid(choices_stack):
+        return
+    var normal_height := TOPIC_HEIGHT
+    for topic in topics:
+        var button := buttons.get(str(topic["id"])) as Button
+        if button != null:
+            var font := button.get_theme_font("font")
+            normal_height = maxf(normal_height,ceilf(font.get_height(button.get_theme_font_size("font_size"))+16.0))
+    var compact := normal_height*topics.size()+TOPIC_GAP*(topics.size()-1)>TOPIC_AREA_HEIGHT
+    var gap := COMPACT_TOPIC_GAP if compact else TOPIC_GAP
+    choices_stack.add_theme_constant_override("separation",gap)
+    var row_height := 1.0
+    for topic in topics:
+        var id := str(topic["id"])
+        var button := buttons.get(id) as Button
+        if button != null:
+            _apply_topic_skin(button,id==current_topic,compact)
+            row_height = maxf(row_height,button.get_combined_minimum_size().y)
+    var old_first := topic_page*topic_capacity
+    topic_capacity = maxi(1,floori((TOPIC_AREA_HEIGHT+gap)/(row_height+gap)))
+    topic_page_count = maxi(1,ceili(float(topics.size())/float(topic_capacity)))
+    topic_page = clampi(floori(float(old_first)/float(topic_capacity)),0,topic_page_count-1)
+    _show_topic_page()
+
+
+func _show_topic_page() -> void:
+    var topics: Array = _conversation.get("topics",[])
+    var first := topic_page*topic_capacity
+    var focus_lost := false
+    for i in range(topics.size()):
+        var button := buttons.get(str(topics[i]["id"])) as Button
+        if button == null:
+            continue
+        var shown := i>=first and i<first+topic_capacity
+        if not shown and button.has_focus():
+            focus_lost = true
+        button.visible = shown
+    var pager_visible := topic_page_count>1
+    if not pager_visible and (topics_previous.has_focus() or topics_next.has_focus()):
+        focus_lost = true
+    topics_pager.visible = pager_visible
+    topics_page_label.text = "%d / %d" % [topic_page+1,topic_page_count]
+    topics_previous.disabled = topic_page==0
+    topics_next.disabled = topic_page+1>=topic_page_count
+    if active and focus_lost:
+        _focus_topic()
+
+
+func _change_topic_page(direction: int) -> void:
+    if not active:
+        return
+    var destination := clampi(topic_page+direction,0,topic_page_count-1)
+    if destination==topic_page:
+        return
+    topic_page = destination
+    _show_topic_page()
+    # Never leave keyboard/controller focus on a now-disabled arrow.
+    if (topics_previous.has_focus() and topics_previous.disabled) or (topics_next.has_focus() and topics_next.disabled):
+        _focus_topic()
 
 
 func _fit_panel() -> void:
@@ -231,7 +381,9 @@ func show_conversation() -> void:
     page_index = 0
     active = true
     visible = true
+    topic_page = 0
     _show_page(false)
+    _layout_topics()
     _animate_open()
     _fit_panel()
     Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -244,7 +396,7 @@ func show_conversation() -> void:
 func _focus_topic() -> void:
     for topic in _conversation.get("topics", []):
         var button := buttons.get(str(topic["id"])) as Button
-        if button != null:
+        if button != null and button.is_visible_in_tree() and not button.disabled:
             button.grab_focus()
             return
     (buttons["leave"] as Button).grab_focus()
@@ -370,6 +522,7 @@ func _on_settings_changed(key: String) -> void:
         _reset_entrance()
         _reset_page_motion()
     if key in ["ui_text_size","ui_scale","caption_size","language"]:
+        _queue_topic_layout()
         _fit_panel.call_deferred()
 
 
@@ -406,18 +559,16 @@ func _refresh_language() -> void:
             button.tooltip_text = button.text
             var selected := id == current_topic
             # Reapply cached skins only when the actual selection changes.
-            if bool(button.get("featured")) != selected:
-                button.set("featured",selected)
-                # Change the skin only; do not reset accessibility colors,
-                # focus, icon tint or click behavior on every page.
-                for state in ["normal","hover","pressed","disabled"]:
-                    button.add_theme_stylebox_override(state,MenuStyle.button_skin(state,selected,"gold"))
+            _apply_topic_skin(button,selected,bool(button.get_meta("_topic_compact",false)))
             var marker := topic_markers.get(id) as ColorRect
             if marker != null:
                 marker.visible = selected
             if selected:
                 topic_label.text = button.text
     (buttons["leave"] as Button).text = Loc.t(str(_conversation.get("leave_label","croupier.option.leave")),self)
+    topics_previous.tooltip_text = Loc.t("dialogue.topics.previous",self)
+    topics_next.tooltip_text = Loc.t("dialogue.topics.next",self)
+    _queue_topic_layout()
     _fit_panel.call_deferred()
 
 
