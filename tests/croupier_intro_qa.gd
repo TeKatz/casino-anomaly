@@ -17,9 +17,9 @@ func _run() -> void:
     var settings = root.get_node_or_null("GameSettings")
     var prior = settings.get_option("language")
     var guidance_options := {}
-    for key in ["hud_visible","interaction_hints","tutorial_hints","reduced_motion"]:
+    for key in ["hud_visible","interaction_hints","tutorial_hints","reduced_motion","reduced_menu_motion"]:
         guidance_options[key] = settings.get_option(key)
-        settings.set_option(key, key != "reduced_motion")
+        settings.set_option(key, key not in ["reduced_motion","reduced_menu_motion"])
     settings.set_option("language", "de")
     var room := INTRO.instantiate() as Node3D
     root.add_child(room)
@@ -239,6 +239,12 @@ func _run() -> void:
                 or not choice.has_meta("_ui_click_attached"):
             _fail("Dialogue buttons must share the premium theme and UI click feedback")
             return
+    var dialog_panel := dialogue.get("panel") as PanelContainer
+    var dialog_overlay := dialogue.get("overlay") as Control
+    var leave_button := choices.get("leave") as Button
+    if leave_button.icon == null or absf(dialog_panel.position.x + dialog_panel.size.x * dialog_panel.scale.x * 0.5 - dialog_overlay.size.x * 0.5) > 2.0:
+        _fail("Dialogue must be centered with an imported leave icon")
+        return
     # Opening and closing without reading an informative topic must not
     # grant an objective. Preserve the NPC animation and input contracts.
     dialogue.call("close_conversation")
@@ -247,6 +253,11 @@ func _run() -> void:
         return
     room.call("_open_conversation")
     dialogue.call("_on_choice","rules")
+    var topic_markers: Dictionary = dialogue.get("topic_markers")
+    var active_topic := dialogue.get("topic_label") as Label
+    if not (topic_markers["rules"] as Control).visible or (topic_markers["anomalies"] as Control).visible or active_topic.text != (choices["rules"] as Button).text or not is_equal_approx(dialog_panel.modulate.a,1.0):
+        _fail("Topic selection must remain highlighted without dimming the panel")
+        return
     if not response.text.contains("Vergleich") or marker.visible or (objective.get("card") as Control).visible:
         _fail("Reference explanation or deferred objective incorrect")
         return
@@ -272,6 +283,10 @@ func _run() -> void:
     if not marker.visible or not bool(room.get("has_spoken")) or not (objective.get("card") as Control).visible or str(objective.get("objective_id"))!="enter_main_casino":
         _fail("Closing informative dialogue did not reveal the destination objective")
         return
+    var objective_shine := objective.get("shine") as ColorRect
+    if objective_shine == null or not objective_shine.visible or objective_shine.mouse_filter != Control.MOUSE_FILTER_IGNORE:
+        _fail("New objective must receive a passive one-shot reflection")
+        return
     var objective_text := objective.get("message") as Label
     if not objective_text.text.contains("Main Casino"):
         _fail("Objective was not localized in English")
@@ -287,7 +302,7 @@ func _run() -> void:
         return
     settings.set_option("reduced_motion",true)
     room.call("_update_destination_marker",0.7)
-    if not marker.visible or not marker.position.is_equal_approx(marker_home) or not is_equal_approx((objective.get("card") as Control).modulate.a,1.0):
+    if not marker.visible or not marker.position.is_equal_approx(marker_home) or not is_equal_approx((objective.get("card") as Control).modulate.a,1.0) or objective_shine.visible:
         _fail("Reduced motion must keep a stationary destination marker")
         return
     for key in ["hud_visible","interaction_hints","tutorial_hints"]:
