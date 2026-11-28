@@ -22,11 +22,17 @@ func begin(hall: Node3D) -> void:
     _root = hall
     _root.set_meta("_streaming_assembly", true)
 
-func _collect_owners(node: Node, owners: Dictionary) -> void:
-    if node.owner != null:
-        owners[node] = node.owner
+func _collect_owners(node: Node, subtree: Node, owners: Dictionary) -> void:
+    var original := node.owner
+    if original != null:
+        owners[node] = original
+        # The detached subtree must not retain an owner outside itself.
+        # Godot does not reliably clear these when splitting an off-tree
+        # PackedScene. Preserve internal scene-instance ownership.
+        if original != subtree and not subtree.is_ancestor_of(original):
+            node.owner = null
     for child in node.get_children(true):
-        _collect_owners(child, owners)
+        _collect_owners(child, subtree, owners)
 
 # Split individual subtrees rather than detaching a complete large
 # section in one pass. Keep the authored sibling order in the job list.
@@ -48,7 +54,7 @@ func _advance_split(immediate: bool) -> bool:
             continue
         var child := _split_children[_split_cursor]
         var owners: Dictionary = {}
-        _collect_owners(child, owners)
+        _collect_owners(child, child, owners)
         _split_parent.remove_child(child)
         _jobs.append({"parent": _split_parent, "node": child, "owners": owners})
         _split_cursor += 1
@@ -80,8 +86,9 @@ func advance(tree_root: Node, immediate: bool = false) -> bool:
         var parent: Node = job["parent"]
         var child: Node = job["node"]
         parent.add_child(child)
-        # remove_child clears owners pointing outside a detached subtree.
-        # Restore the authored ownership before any room-level population.
+        # External owners were cleared before detaching, not after add_child.
+        # Restore them only now that their ancestry is valid again, before
+        # any room-level population. Internal owners remain unchanged.
         var owners: Dictionary = job["owners"]
         for item in owners:
             var node: Node = item

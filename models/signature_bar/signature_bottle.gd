@@ -12,10 +12,10 @@ extends Node3D
             _rebuild()
 
 static var _runtime_design_templates: Dictionary = {}
-# The first instance of each design owns a detached set of immutable render
-# templates. Every subsequent bottle (including streamed halls) reuses its
-# generated Mesh, Material and MultiMesh resources without recomputing UVs or
-# rebuilding SurfaceTool meshes. Never mutate these shared resources per bottle.
+# Cache only reference-counted PackedScene resources, never detached Nodes.
+# Each part scene shares the original immutable Mesh, Material and MultiMesh
+# resources. Instantiation keeps the geometry cache without leaking an
+# orphan render instance per part. Never mutate shared resources per bottle.
 
 const PROFILES := [
     [Vector2(0.0, 0.88), Vector2(0.03, 1.02), Vector2(0.14, 1.0),
@@ -77,19 +77,24 @@ func _rebuild() -> void:
             child.free()
     if not Engine.is_editor_hint() and _runtime_design_templates.has(design):
         for prototype in _runtime_design_templates[design]:
-            # DUPLICATE_SCRIPTS is deliberately disabled: these parts are
-            # plain MeshInstance3D/MultiMeshInstance3D with shared resources.
-            add_child((prototype as Node).duplicate(0))
+            var part := (prototype as PackedScene).instantiate()
+            add_child(part)
         return
     _build()
     if Engine.is_editor_hint():
         _own_generated_parts()
         call_deferred("_own_generated_parts")
     else:
-        var prototypes: Array[Node] = []
+        var prototypes: Array[PackedScene] = []
         for part in get_children():
             if part is MeshInstance3D or part is MultiMeshInstance3D:
-                prototypes.append((part as Node).duplicate(0))
+                # The generated parts are leaf render nodes. Pack each as
+                # its own root directly: no temporary Node or extra RID.
+                var prototype := PackedScene.new()
+                if prototype.pack(part) != OK:
+                    push_warning("Could not cache signature bottle part: " + str(part.name))
+                    return
+                prototypes.append(prototype)
         _runtime_design_templates[design] = prototypes
 
 
