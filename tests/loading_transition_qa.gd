@@ -33,7 +33,7 @@ func _run() -> void:
     for record in [
         ["res://gameplay/casino/main.tscn",true,false,false],
         ["res://gameplay/casino/main.tscn",false,false,true],
-        ["res://gameplay/tutorial.tscn",false,false,true],
+        ["res://gameplay/tutorial.tscn",false,false,false],
         ["res://gameplay/casino/main.tscn",true,true,false],
         ["res://gameplay/casino/main.tscn",false,true,false],
         ["res://gameplay/tutorial.tscn",false,true,false]

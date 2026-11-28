@@ -210,8 +210,10 @@ func travel_to(path: String, complete_intro: bool = false) -> bool:
 
 
 func _use_parallel_dependencies(path: String, complete_intro: bool, headless: bool) -> bool:
-    # Preserve the existing headless workaround and other loading routes.
-    return not headless and not (path == "res://gameplay/casino/main.tscn" and complete_intro)
+    # The entrance activation has also hung after a successful threaded
+    # request. Serialize dependency workers on both affected routes, not
+    # the background request itself. Keep direct casino loads unchanged.
+    return not headless and path != "res://gameplay/tutorial.tscn" and not (path == "res://gameplay/casino/main.tscn" and complete_intro)
 
 
 func _begin_loading() -> void:
@@ -219,9 +221,9 @@ func _begin_loading() -> void:
     await get_tree().process_frame
     if not active or failed:
         return
-    # The confirmed native crash happened after the tutorial-to-casino
-    # threaded request succeeded. Serialize its dependency workers as a
-    # targeted mitigation; the request itself remains asynchronous.
+    # Both entrance and tutorial-to-casino activation have failed after
+    # parallel dependency loading. Restrict that policy on those routes;
+    # the request itself remains asynchronous.
     var use_sub_threads := _use_parallel_dependencies(target_path, finish_tutorial, DisplayServer.get_name() == "headless")
     _trace("load_threaded_request_begin", {"parallel_dependencies": use_sub_threads})
     var err := ResourceLoader.load_threaded_request(target_path, "PackedScene", use_sub_threads)
