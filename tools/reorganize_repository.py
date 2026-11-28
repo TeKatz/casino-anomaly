@@ -88,6 +88,14 @@ def main():
             continue
         raw = path.read_bytes()
         out = rewrite(raw)
+        if p == "tests/joinery_qa.gd":
+            # The material name is assembled at runtime, so the static path
+            # substitution above cannot match it. Preserve all QA assertions.
+            before = b'"res://" + source_name + "_material.tres"'
+            after = b'"res://assets/materials/" + source_name + "_material.tres"'
+            if out.count(before) != 1:
+                raise SystemExit("Unexpected joinery material lookup")
+            out = out.replace(before, after)
         if p == ".gitignore":
             for drop in DROPS:
                 out = out.replace(("\n/" + drop + "/").encode(),
@@ -147,6 +155,13 @@ def main():
             hit = stale.search(path.read_bytes())
             if hit:
                 raise SystemExit("Stale resource reference: " + p + ": " + repr(hit.group(0)))
+    # Resolve each concrete dynamic joinery lookup before expensive QA.
+    joinery = (ROOT / "tests/joinery_qa.gd").read_bytes()
+    if b'"res://assets/materials/" + source_name + "_material.tres"' not in joinery:
+        raise SystemExit("Joinery dynamic material lookup was not migrated")
+    for name in ("brown_planks_05", "herringbone_parquet", "bi_stretch"):
+        if not (ROOT / "assets/materials" / (name + "_material.tres")).is_file():
+            raise SystemExit("Missing dynamic joinery material: " + name)
     # Baked geometry and PBR model files were not moved or modified. Preserve
     # the exact scene body: only path strings may change, never transforms.
     print("Repository migration:", len(moves), "moved paths,", len(changed),
