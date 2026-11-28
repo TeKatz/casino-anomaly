@@ -1,6 +1,6 @@
 extends SceneTree
 ## Regression for both entry points and actual threaded resource loading.
-## Do not preload main.tscn here: the loader must perform that work itself.
+## Do not preload gameplay/casino/main.tscn here: the loader must perform that work itself.
 
 func _initialize() -> void:
     call_deferred("_run")
@@ -31,11 +31,11 @@ func _run() -> void:
     # Explicit policy regression: headless tests alone would otherwise
     # exercise only the existing serial-worker branch.
     for record in [
-        ["res://main.tscn",true,false,false],
-        ["res://main.tscn",false,false,true],
+        ["res://gameplay/casino/main.tscn",true,false,false],
+        ["res://gameplay/casino/main.tscn",false,false,true],
         ["res://gameplay/tutorial.tscn",false,false,true],
-        ["res://main.tscn",true,true,false],
-        ["res://main.tscn",false,true,false],
+        ["res://gameplay/casino/main.tscn",true,true,false],
+        ["res://gameplay/casino/main.tscn",false,true,false],
         ["res://gameplay/tutorial.tscn",false,true,false]
     ]:
         if loader.call("_use_parallel_dependencies",record[0],record[1],record[2])!=record[3]:
@@ -120,10 +120,10 @@ func _run() -> void:
     if paused or bool(player.get_node("InGameMenu").get("open")):
         _fail("Pause menu intercepted the active loading transition")
         return
-    if str(loader.get("target_path")) != "res://main.tscn":
+    if str(loader.get("target_path")) != "res://gameplay/casino/main.tscn":
         _fail("Repeated door interaction changed the transition")
         return
-    if not await _wait_for_scene("res://main.tscn", loader):
+    if not await _wait_for_scene("res://gameplay/casino/main.tscn", loader):
         _fail("Threaded casino transition did not finish")
         return
     if current_scene.get_node_or_null("Player/ObjectiveHUD")!=null or is_instance_valid(objective):
@@ -143,7 +143,7 @@ func _run() -> void:
         var entry: Variant = JSON.parse_string(line)
         if entry is Dictionary and entry.get("event")=="load_threaded_request_begin":
             var details: Dictionary = entry.get("details",{})
-            if details.get("target")=="res://main.tscn" and details.get("parallel_dependencies")==false:
+            if details.get("target")=="res://gameplay/casino/main.tscn" and details.get("parallel_dependencies")==false:
                 serial_request_seen = true
     if not serial_request_seen:
         _fail("Actual initial casino request did not use serial dependency workers")

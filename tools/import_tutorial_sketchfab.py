@@ -5,7 +5,7 @@ import shutil
 import zipfile
 from pathlib import Path, PurePosixPath
 ROOT=Path(__file__).resolve().parents[1]
-DROP=ROOT/"tutorial_assets_drop"
+DROP=ROOT/"source_assets/tutorial_assets_drop"
 OUT=ROOT/"models"/"tutorial_user"
 catalog=json.loads((DROP/"catalog.json").read_text("utf-8"))
 

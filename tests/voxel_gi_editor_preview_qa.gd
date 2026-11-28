@@ -3,7 +3,7 @@ extends SceneTree
 ## so its Dummy renderer cannot expose baked VoxelGI octree cells or light
 ## a probe. Verify the saved resources independently and assert the actual
 ## lit-preview state only on GPU renderers.
-const ROOM = preload("res://main.tscn")
+const ROOM = preload("res://gameplay/casino/main.tscn")
 const BAKES := {
     "MainWingGI": "res://lighting/main_wing.res",
     "WestWingGI": "res://lighting/west_wing.res"

@@ -1,6 +1,6 @@
 extends SceneTree
 ## Menu/credit regression including the isolated casino panorama.
-const MENU = preload("res://menu.tscn")
+const MENU = preload("res://ui/menu.tscn")
 const PAUSE = preload("res://ui/pause_menu.gd")
 
 
@@ -102,7 +102,7 @@ func _run() -> void:
     var previous_tutorial = run_state.tutorial_done
     run_state.active = true
     run_state.tutorial_done = true
-    var packed := load("res://main.tscn") as PackedScene
+    var packed := load("res://gameplay/casino/main.tscn") as PackedScene
     var installed := bool(panorama.call("install_room", packed))
     run_state.active = previous_active
     run_state.tutorial_done = previous_tutorial

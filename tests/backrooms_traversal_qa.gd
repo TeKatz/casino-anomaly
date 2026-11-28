@@ -1,7 +1,7 @@
 extends SceneTree
 ## Both doors, actual corner threshold, flashlight interaction, continuous
 ## player/controller, deferred exactly-once score, save and final victory.
-const ROOM = preload("res://main.tscn")
+const ROOM = preload("res://gameplay/casino/main.tscn")
 const Portals = preload("res://gameplay/stream_portals.gd")
 const Backrooms = preload("res://gameplay/backrooms_traversal.gd")
 const Catalog = preload("res://gameplay/anomaly_catalog.gd")

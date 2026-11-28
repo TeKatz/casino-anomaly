@@ -13,7 +13,7 @@ import zipfile
 from pathlib import Path, PurePosixPath
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "sketchfab_drop" / "business_man.zip"
+SOURCE = ROOT / "source_assets/sketchfab_drop" / "business_man.zip"
 DESTINATION = ROOT / "models" / "croupier"
 SHA256 = "6e5e214f579846d387fdcb6d20cd4448e4b518b0bb87b7cfb1f2e97ca676ef54"
 SIZE = 10215078

@@ -285,7 +285,7 @@ func _report_collision_contacts() -> void:
 
 
 func classify_casino_surface(local: Vector3) -> String:
-    # Carpet is a visual quad without a collision layer: match hall.gd.
+    # Carpet is a visual quad without a collision layer: match gameplay/casino/hall.gd.
     if local.x < -46.0 or local.z > 13.90:
         return "corridor"
     var approach := absf(local.x) < 1.49 and local.z >= -6.52 and local.z <= 12.65

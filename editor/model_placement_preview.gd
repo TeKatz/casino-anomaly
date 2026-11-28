@@ -1,6 +1,6 @@
 @tool
 extends Node3D
-## A stable placement marker in main.tscn. Move/rotate/scale this node in
+## A stable placement marker in gameplay/casino/main.tscn. Move/rotate/scale this node in
 ## Godot's regular 3D viewport. Before baking, glTF is preview-only;
 ## after baking, the selectable glTF child persists into gameplay.
 
@@ -87,7 +87,7 @@ func _create_preview() -> void:
 
 ## Promote the imported mesh to a normal scene instance. This preserves
 ## its current normalized placement while making the model itself selectable
-## and its transform persistent in main.tscn.
+## and its transform persistent in gameplay/casino/main.tscn.
 func bake_editable_model(scene_root: Node) -> bool:
     if not Engine.is_editor_hint() or not is_inside_tree():
         return false

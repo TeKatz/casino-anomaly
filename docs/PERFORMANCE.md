@@ -87,7 +87,7 @@ until its actual phase is known.
 
 ## Incremental casino attachment and retirement
 
-The runtime still instantiates the authoritative main.tscn once per hall.
+The runtime still instantiates the authoritative gameplay/casino/main.tscn once per hall.
 Its known authored sections are detached off-tree, then attached in small
 batches (2.5 ms soft CPU budget, at most 12 subtree attachments per tick).
 Owners are restored, room-level initialization is delayed until the complete

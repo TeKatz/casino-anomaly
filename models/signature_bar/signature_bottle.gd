@@ -62,7 +62,7 @@ const INK := ["#ead2a4", "#292a34", "#efcba3", "#403026",
 
 
 func _ready() -> void:
-    # main.tscn stores artist-editable meshes as real scene children. Do not
+    # gameplay/casino/main.tscn stores artist-editable meshes as real scene children. Do not
     # destroy or replace them when an authored bottle instance loads.
     if get_node_or_null("HandCutGlassShell") == null:
         _rebuild()
@@ -93,7 +93,7 @@ func _rebuild() -> void:
         _runtime_design_templates[design] = prototypes
 
 
-# New procedural pieces belong to the currently edited scene (main.tscn),
+# New procedural pieces belong to the currently edited scene (gameplay/casino/main.tscn),
 # never to the instanced template: Godot otherwise saves invalid overrides
 # of meshes that do not exist in the source bottle .tscn.
 func _own_generated_parts() -> void:

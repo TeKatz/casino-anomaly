@@ -19,7 +19,7 @@ const NeonLevelSign = preload("res://gameplay/neon_level_sign.gd")
 const AnomalyDevMenu = preload("res://ui/anomaly_dev_menu.gd")
 const StreamPortals = preload("res://gameplay/stream_portals.gd")
 const Loc = preload("res://gameplay/localization.gd")
-const ROOM = preload("res://main.tscn")
+const ROOM = preload("res://gameplay/casino/main.tscn")
 const Backrooms = preload("res://gameplay/backrooms_traversal.gd")
 const FlashlightPickup = preload("res://gameplay/backrooms_flashlight_pickup.gd")
 const BACKROOMS_ID := "backrooms"
@@ -1275,7 +1275,7 @@ func _leave_completed_run() -> void:
 	get_tree().root.set_meta("_casino_intro_seen",true)
 	get_tree().paused = false
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	var result: int = get_tree().change_scene_to_file("res://menu.tscn")
+	var result: int = get_tree().change_scene_to_file("res://ui/menu.tscn")
 	if result != OK:
 		completion_exit_started = false
 		layer.queue_free()

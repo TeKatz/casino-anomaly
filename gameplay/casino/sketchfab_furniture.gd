@@ -17,7 +17,7 @@ var replaced_blackjack := 0
 var poker_props_placed := 0
 
 # Temporary previews are ownerless; the optional authored group is saved in
-# main.tscn and reused at runtime rather than spawning duplicate furniture.
+# gameplay/casino/main.tscn and reused at runtime rather than spawning duplicate furniture.
 @export var show_imported_models_in_editor := true:
     set(value):
         show_imported_models_in_editor = value
@@ -396,7 +396,7 @@ func _populate() -> void:
     var hall: Node3D = get_parent() as Node3D
     if hall == null:
         return
-    # A level designer has authored the imported instances in main.tscn.
+    # A level designer has authored the imported instances in gameplay/casino/main.tscn.
     # They are the source of truth; don't create copies on game startup.
     if not _baking_editor_models and has_node(AUTHORED_GROUP):
         # The editor conversion persists the imported geometry, so no

@@ -2,7 +2,7 @@ extends SceneTree
 ## A safe, no-GPU validation of the offline GI contract. The scene must
 ## stay playable WITHOUT binary data on a headless CI runner, while a
 ## correctly baked local game can enable both room-local volumes.
-const ROOM = preload("res://main.tscn")
+const ROOM = preload("res://gameplay/casino/main.tscn")
 # Force compilation of the GPU-only bake script on headless CI, without
 # actually invoking bake() on its dummy rendering backend.
 const BAKE_SCRIPT = preload("res://tools/bake_voxel_gi.gd")

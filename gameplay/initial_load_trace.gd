@@ -5,7 +5,7 @@ static func record(context: Node, event: String, details: Dictionary = {}) -> vo
     if Engine.is_editor_hint() or not context.is_inside_tree():
         return
     var loader := context.get_node_or_null("/root/SceneLoader")
-    if loader == null or not bool(loader.get("active")) or not bool(loader.get("committing")) or str(loader.get("target_path")) != "res://main.tscn":
+    if loader == null or not bool(loader.get("active")) or not bool(loader.get("committing")) or str(loader.get("target_path")) != "res://gameplay/casino/main.tscn":
         return
     var cursor: Node = context
     while cursor != null:

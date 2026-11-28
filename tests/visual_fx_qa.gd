@@ -4,7 +4,7 @@ func _initialize() -> void:
     call_deferred("_run")
 
 func _run() -> void:
-    var packed: PackedScene = load("res://main.tscn")
+    var packed: PackedScene = load("res://gameplay/casino/main.tscn")
     if packed == null:
         push_error("Casino scene missing")
         quit(1)

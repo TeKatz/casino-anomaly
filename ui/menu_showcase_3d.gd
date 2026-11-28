@@ -3,7 +3,7 @@ extends Control
 signal panorama_ready
 signal panorama_failed
 
-const CASINO_PATH := "res://main.tscn"
+const CASINO_PATH := "res://gameplay/casino/main.tscn"
 const PERIOD := 42.0
 const SWEEP := 0.39
 const Occlusion = preload("res://gameplay/streaming_occlusion.gd")

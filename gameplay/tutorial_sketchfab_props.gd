@@ -97,9 +97,9 @@ func _console() -> void:
     var cabinet := StaticBody3D.new()
     cabinet.name = "GramophoneConsole"
     add_child(cabinet)
-    _box(cabinet, "Body", Vector3(2.93,.47,.14), Vector3(.74,.90,.54), "res://bar_side_material.tres")
-    _box(cabinet, "Top", Vector3(2.93,.945,.14), Vector3(.82,.05,.60), "res://bar_top_material.tres")
-    _box(cabinet, "Plinth", Vector3(2.93,.075,.14), Vector3(.80,.15,.58), "res://bar_top_material.tres")
+    _box(cabinet, "Body", Vector3(2.93,.47,.14), Vector3(.74,.90,.54), "res://assets/materials/bar_side_material.tres")
+    _box(cabinet, "Top", Vector3(2.93,.945,.14), Vector3(.82,.05,.60), "res://assets/materials/bar_top_material.tres")
+    _box(cabinet, "Plinth", Vector3(2.93,.075,.14), Vector3(.80,.15,.58), "res://assets/materials/bar_top_material.tres")
     var collision := CollisionShape3D.new()
     collision.position = Vector3(2.93,.48,.14)
     collision.name = "BodyCollision"

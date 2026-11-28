@@ -4,8 +4,8 @@ func _initialize() -> void:
     call_deferred("_run_smoke")
 
 func _run_smoke() -> void:
-    var menu: PackedScene = load("res://menu.tscn")
-    var scene: PackedScene = load("res://main.tscn")
+    var menu: PackedScene = load("res://ui/menu.tscn")
+    var scene: PackedScene = load("res://gameplay/casino/main.tscn")
     if menu == null or scene == null:
         push_error("Casino Anomaly scenes missing")
         quit(1)

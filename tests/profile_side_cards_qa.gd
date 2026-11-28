@@ -1,7 +1,7 @@
 extends SceneTree
 ## Regression: selecting the same profile twice or returning from another
 ## overlay must never grow either side card beyond its fixed preview height.
-const MENU = preload("res://menu.tscn")
+const MENU = preload("res://ui/menu.tscn")
 
 var temporary_slot := 0
 var original_slot := 0

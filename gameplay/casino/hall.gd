@@ -7,20 +7,20 @@ const InitialLoadTrace = preload("res://gameplay/initial_load_trace.gd")
 const SLOT_CABINET = preload("res://models/casino_furniture/heritage_slot_cabinet.tscn")
 const GAME_TABLE_STOOL = preload("res://models/casino_furniture/gaming_stool.tscn")
 const GAME_TABLE_SURFACE = preload("res://models/casino_furniture/detailed_table_surface.tscn")
-const OAK: StandardMaterial3D = preload("res://floor_material.tres")
+const OAK: StandardMaterial3D = preload("res://assets/materials/floor_material.tres")
 const VoxelRig = preload("res://lighting/voxel_gi_rig.gd")
 const RoomSoundscape = preload("res://gameplay/room_soundscape.gd")
 const NeonLevelSign = preload("res://gameplay/neon_level_sign.gd")
-const JACQUARD: StandardMaterial3D = preload("res://carpet_material.tres")
-const LOWER_WALL: StandardMaterial3D = preload("res://lower_wall_material.tres")
-const UPPER_WALL: StandardMaterial3D = preload("res://upper_wall_material.tres")
-const ROOF_PLANKS: StandardMaterial3D = preload("res://ceiling_material.tres")
-const BAR_COUNTER_WOOD: StandardMaterial3D = preload("res://bar_top_material.tres")
-const BAR_PANEL_WOOD: StandardMaterial3D = preload("res://bar_side_material.tres")
-const PILLAR_VENEER: StandardMaterial3D = preload("res://pillar_material.tres")
-const BEAM_TIMBER: StandardMaterial3D = preload("res://brown_planks_05_material.tres")
-const PARQUET_EDGE: StandardMaterial3D = preload("res://herringbone_parquet_material.tres")
-const GOLD_FABRIC: StandardMaterial3D = preload("res://bi_stretch_material.tres")
+const JACQUARD: StandardMaterial3D = preload("res://assets/materials/carpet_material.tres")
+const LOWER_WALL: StandardMaterial3D = preload("res://assets/materials/lower_wall_material.tres")
+const UPPER_WALL: StandardMaterial3D = preload("res://assets/materials/upper_wall_material.tres")
+const ROOF_PLANKS: StandardMaterial3D = preload("res://assets/materials/ceiling_material.tres")
+const BAR_COUNTER_WOOD: StandardMaterial3D = preload("res://assets/materials/bar_top_material.tres")
+const BAR_PANEL_WOOD: StandardMaterial3D = preload("res://assets/materials/bar_side_material.tres")
+const PILLAR_VENEER: StandardMaterial3D = preload("res://assets/materials/pillar_material.tres")
+const BEAM_TIMBER: StandardMaterial3D = preload("res://assets/materials/brown_planks_05_material.tres")
+const PARQUET_EDGE: StandardMaterial3D = preload("res://assets/materials/herringbone_parquet_material.tres")
+const GOLD_FABRIC: StandardMaterial3D = preload("res://assets/materials/bi_stretch_material.tres")
 const FLOOR_Y := 0.035
 const WALL_HEIGHT := 6.0
 
@@ -94,7 +94,7 @@ func initialize_streamed_hall() -> void:
     lounge = _section("Lounge")
     decor = _section("Decor")
     lights = _section("Lighting")
-    # Existing section nodes in main.tscn are stable editor objects.
+    # Existing section nodes in gameplay/casino/main.tscn are stable editor objects.
     # Generated detail nodes stay unowned: they are a visible editor preview,
     # never accidentally saved as duplicates over their runtime versions.
     if architecture.get_child_count() == 0:
@@ -117,7 +117,7 @@ func initialize_streamed_hall() -> void:
         _make_lights()
 
     # The number belongs to the casino itself, not to the run controller.
-    # Also show it when artists preview/play main.tscn directly in Godot.
+    # Also show it when artists preview/play gameplay/casino/main.tscn directly in Godot.
     # It remains a generated, ownerless node; the authored scene and the
     # carefully tuned baked lighting stay untouched.
     if not has_node("NeonLevelSign") and not has_meta("_baking_room") and not showcase:
@@ -137,7 +137,7 @@ func initialize_streamed_hall() -> void:
 
     # Share the exact same pre-baked VoxelGI rig between the game and Godot's
     # scene viewport. Editor previews are transient, internal, and ownerless:
-    # no duplicate probe nodes are serialized into main.tscn. Gameplay still
+    # no duplicate probe nodes are serialized into gameplay/casino/main.tscn. Gameplay still
     # receives one room-local rig per active/streamed room.
     if not has_node("VoxelGIRig") and not showcase:
         var gi_rig := VoxelRig.new() as Node3D
@@ -187,7 +187,7 @@ func _section(label: String) -> Node3D:
     var saved := get_node_or_null(label) as Node3D
     if saved != null:
         return saved
-    # Backwards compatible when hall.gd is used outside main.tscn.
+    # Backwards compatible when gameplay/casino/hall.gd is used outside gameplay/casino/main.tscn.
     var node := Node3D.new()
     node.name = label
     add_child(node)
@@ -739,7 +739,7 @@ func _make_bar() -> void:
     bar_title.modulate = Color("#e1c28e")
     bar_area.add_child(bar_title)
 
-    # All barstools are now supplied solely by model_interior.gd.
+    # All barstools are now supplied solely by gameplay/casino/model_interior.gd.
     # Do not spawn cylinder placeholders behind the imported stools.
 
     # The five primitive white bar pendant globes and rods are removed.
@@ -804,7 +804,7 @@ func _make_tables() -> void:
 
 func _make_lounge() -> void:
     # This section is reserved for imported Poly Haven furniture in
-    # model_interior.gd. Do not instantiate old cube sofas or coffee tables.
+    # gameplay/casino/model_interior.gd. Do not instantiate old cube sofas or coffee tables.
     lounge.set_meta("replaced_by_polyhaven", true)
 
 func _botanical_leaf_mesh() -> ArrayMesh:

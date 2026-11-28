@@ -2,7 +2,7 @@ extends SceneTree
 ## Three premium authored roulette tables, no flat placeholder betting tiles,
 ## fitted imported blackjack collision and editable signature bottles.
 
-const ROOM = preload("res://main.tscn")
+const ROOM = preload("res://gameplay/casino/main.tscn")
 
 
 func _initialize() -> void:

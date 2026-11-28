@@ -13,9 +13,9 @@ func _run() -> void:
     if not Engine.is_editor_hint():
         _fail("Run this test with --editor to cover @tool initialization")
         return
-    var packed := load("res://main.tscn") as PackedScene
+    var packed := load("res://gameplay/casino/main.tscn") as PackedScene
     if packed == null:
-        _fail("Cannot load main.tscn in editor mode")
+        _fail("Cannot load gameplay/casino/main.tscn in editor mode")
         return
     var world := packed.instantiate() as Node3D
     if world == null:

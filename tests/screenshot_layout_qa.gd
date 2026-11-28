@@ -10,7 +10,7 @@ func _bad(message: String) -> void:
     quit(1)
 
 func _run() -> void:
-    var packed: PackedScene = load("res://main.tscn")
+    var packed: PackedScene = load("res://gameplay/casino/main.tscn")
     if packed == null:
         _bad("Casino hall cannot be loaded")
         return

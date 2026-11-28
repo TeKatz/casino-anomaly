@@ -521,7 +521,7 @@ func _architecture() -> void:
     signs.append(front)
     signs.append(counter)
     _frame("EntrySign", Vector3(0, 4.15, 13.73), 5.6, 0.84, front)
-    # hall.gd shifts the bar's container left by 0.95 m.
+    # gameplay/casino/hall.gd shifts the bar's container left by 0.95 m.
     _frame("BarSign", Vector3(-2.33, 4.72, -12.30), 4.35, 1.04, counter)
 
 func _spot(label: String, pos: Vector3, target: Vector3, power: float) -> void:

@@ -1,7 +1,7 @@
 extends SceneTree
 ## Verify global ambience persists while only the main menu enables music.
 ## The audio ZIP is user-uploaded separately; until then this is a code test.
-const MENU = preload("res://menu.tscn")
+const MENU = preload("res://ui/menu.tscn")
 const TUTORIAL = preload("res://gameplay/tutorial.tscn")
 const MENU_AUDIO := "res://audio/hmm_menu_seamless.ogg"
 const ROOM_AUDIO := "res://audio/casino_room_tone_seamless.ogg"

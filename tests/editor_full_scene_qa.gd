@@ -10,9 +10,9 @@ func _fail(message: String) -> void:
 
 
 func _run() -> void:
-    var loaded := load("res://main.tscn") as PackedScene
+    var loaded := load("res://gameplay/casino/main.tscn") as PackedScene
     if loaded == null:
-        _fail("main.tscn missing")
+        _fail("gameplay/casino/main.tscn missing")
         return
     var world := loaded.instantiate() as Node3D
     var architecture := world.get_node_or_null("Architecture") as Node3D
@@ -70,7 +70,7 @@ func _run() -> void:
     await process_frame
     await process_frame
     await process_frame
-    # Even when opening main.tscn directly with no saved gameplay run,
+    # Even when opening gameplay/casino/main.tscn directly with no saved gameplay run,
     # the artist must see the physical neon sign in the scene.
     var sign := world.get_node_or_null("NeonLevelSign") as Node3D
     if sign == null or sign.get_node_or_null("EnamelBackplate") == null \

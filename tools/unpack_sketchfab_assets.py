@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Verify and safely extract user-supplied CC BY 4.0 Sketchfab glTF packages.
 
-The archives are prepared outside the repository and placed in sketchfab_drop/.
+The archives are prepared outside the repository and placed in source_assets/sketchfab_drop/.
 All four archives are SHA-256 pinned and keep the original license.txt.
 Extraction occurs during CI before the Godot import, never at runtime.
 """
@@ -14,7 +14,7 @@ import zipfile
 from pathlib import Path, PurePosixPath
 
 ROOT = Path(__file__).resolve().parents[1]
-DROP = ROOT / "sketchfab_drop"
+DROP = ROOT / "source_assets/sketchfab_drop"
 OUT = ROOT / "models" / "sketchfab"
 CATALOG = DROP / "catalog.json"
 MAX_MEMBER = 45 * 1024 * 1024

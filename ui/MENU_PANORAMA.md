@@ -7,7 +7,7 @@ casino viewport has actually rendered six warmup frames. On menu return the
 same gate is a short dark cover without repeating the creator splash. Missing
 assets or a 30-second loading timeout permit the fallback menu to be used.
 
-The background renders current main.tscn visual geometry in an isolated
+The background renders current gameplay/casino/main.tscn visual geometry in an isolated
 World3D/SubViewport. A TextureRect displays its native window-pixel texture,
 independent of the 1280x720 logical UI canvas. TAA follows the existing setting;
 the texture uses linear sampling and the viewport uses 8x anisotropy. The

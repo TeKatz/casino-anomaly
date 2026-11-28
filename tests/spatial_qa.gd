@@ -11,7 +11,7 @@ func _fail(reason: String) -> void:
     quit(1)
 
 func _run() -> void:
-    var packed: PackedScene = load("res://main.tscn")
+    var packed: PackedScene = load("res://gameplay/casino/main.tscn")
     if packed == null:
         _fail("Missing game scene")
         return

@@ -2,8 +2,8 @@ extends SceneTree
 ## Verify tab UI, actual pause/resume, saved options and movement invariance
 ## across rotated room parents, without mutating the authored casino scene.
 
-const ROOM = preload("res://main.tscn")
-const MENU = preload("res://menu.tscn")
+const ROOM = preload("res://gameplay/casino/main.tscn")
+const MENU = preload("res://ui/menu.tscn")
 
 
 func _initialize() -> void:

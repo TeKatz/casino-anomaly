@@ -30,7 +30,7 @@ LEGACY = (OLD, OLD + ".import")
 ICO_SIZES = {16, 24, 32, 48, 64, 128, 256}
 BRAND = "res://branding/"
 SOURCE_FILES = (
-    "menu.tscn", "ui/menu_startup_intro.tscn", "gameplay/scene_loader.gd",
+    "ui/menu.tscn", "ui/menu_startup_intro.tscn", "gameplay/scene_loader.gd",
     "project.godot", "export_presets.cfg", ".gitattributes",
     "src/CasinoAnomaly.Updater/CasinoAnomaly.Updater.csproj",
     "src/CasinoAnomaly.Updater/Program.cs", "README.md",
@@ -110,7 +110,7 @@ def plan(root: Path) -> dict[str, str]:
     # The existing Brand parent, its layout rule, animation and compact
     # behavior remain unchanged. Only its title artwork and nearby spacing
     # change; menu buttons and the panorama are byte-for-byte preserved.
-    p = "menu.tscn"
+    p = "ui/menu.tscn"
     s = source[p]
     s = once(s, "[gd_scene load_steps=7 format=3]", "[gd_scene load_steps=8 format=3]")
     s = once(s, '[ext_resource type="PackedScene" path="res://ui/menu_startup_intro.tscn" id="5_intro"]',
@@ -269,7 +269,7 @@ def verify(root: Path) -> None:
         if (root / path).exists():
             raise ValueError(f"Retired asset still present: {path}")
     expected = {
-        "menu.tscn": ("casino_anomaly_logo.png", 'name="Logo" type="TextureRect" parent="Brand"'),
+        "ui/menu.tscn": ("casino_anomaly_logo.png", 'name="Logo" type="TextureRect" parent="Brand"'),
         "ui/menu_startup_intro.tscn": ("casino_anomaly_emblem.png", "casino_anomaly_wordmark.png"),
         "gameplay/scene_loader.gd": ("casino_anomaly_emblem.png", "casino_anomaly_wordmark.png"),
         "project.godot": ('config/icon="res://branding/casino_anomaly_icon.png"',

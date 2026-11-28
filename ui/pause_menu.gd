@@ -344,13 +344,13 @@ func _run_action(action: String) -> void:
         state.start_new_run(mode_id)
         if mode_id != "classic" or bool(Controls.pref(self, "skip_tutorial", false)):
             state.complete_tutorial()
-            get_tree().change_scene_to_file("res://main.tscn")
+            get_tree().change_scene_to_file("res://gameplay/casino/main.tscn")
         else:
             get_tree().change_scene_to_file("res://gameplay/tutorial.tscn")
     else:
         state.load_run()
         get_tree().change_scene_to_file(
-            "res://main.tscn" if state.tutorial_done else "res://gameplay/tutorial.tscn"
+            "res://gameplay/casino/main.tscn" if state.tutorial_done else "res://gameplay/tutorial.tscn"
         )
 
 
@@ -375,4 +375,4 @@ func _go_to_main_menu() -> void:
         state.call("save_run")
     get_tree().paused = false
     Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-    get_tree().change_scene_to_file("res://menu.tscn")
+    get_tree().change_scene_to_file("res://ui/menu.tscn")

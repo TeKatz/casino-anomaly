@@ -2,7 +2,7 @@ extends RefCounted
 ## Explicit scene registry: future rooms get their own bake script and output.
 ## Do not infer a target from the currently selected node.
 
-const CASINO_SCENE := "res://main.tscn"
+const CASINO_SCENE := "res://gameplay/casino/main.tscn"
 const BACKROOMS_SCENE := "res://backrooms/backrooms_labyrinth.tscn"
 const BACKROOMS_OUTPUT := "res://backrooms/backrooms_voxel_gi.res"
 

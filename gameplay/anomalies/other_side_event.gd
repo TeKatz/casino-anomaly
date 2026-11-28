@@ -77,7 +77,7 @@ func configure(room: Node3D, wall: MeshInstance3D) -> bool:
 
 
 func _find_wainscoting(wall: MeshInstance3D, left: float, right: float) -> MeshInstance3D:
-    # In the saved main.tscn, repeated WoodWainscoting names become
+    # In the saved gameplay/casino/main.tscn, repeated WoodWainscoting names become
     # @MeshInstance3D@N. Match the lower cladding's actual geometry,
     # not an editor-generated name (or a particular generated number).
     var best: MeshInstance3D

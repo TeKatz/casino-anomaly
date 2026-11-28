@@ -2,7 +2,7 @@ extends SceneTree
 ## Editor preview must use the SAME Sketchfab replacements and exact
 ## authored positions as runtime, but never serialize/import collision
 ## bodies or permanently hide the placeholders in the saved scene.
-const ROOM = preload("res://main.tscn")
+const ROOM = preload("res://gameplay/casino/main.tscn")
 # Verify the editor save hook compiles in CI even though the editor GUI is
 # not running in the headless test process.
 const EDITOR_SAVE_GUARD = preload("res://addons/casino_model_preview/plugin.gd")
@@ -124,7 +124,7 @@ func _run() -> void:
         _fail("Editor preview still overlaps authored placeholders")
         return
     # Clear preview and confirm original authoring nodes are restored
-    # without reparenting or deleting anything from main.tscn.
+    # without reparenting or deleting anything from gameplay/casino/main.tscn.
     imported.call("clear_editor_preview_for_test")
     if not retro.visible or not tables.get_node("Roulette2").visible:
         _fail("Disabling preview did not restore saved placeholder visibility")

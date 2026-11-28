@@ -185,7 +185,7 @@ func _unhandled_input(event: InputEvent) -> void:
     if journal != null:
         journal.call("record", "casino_door_interacted", {"conversation_completed": has_spoken})
     var loader := get_node_or_null("/root/SceneLoader")
-    if loader == null or not loader.travel_to("res://main.tscn", true):
+    if loader == null or not loader.travel_to("res://gameplay/casino/main.tscn", true):
         push_warning("Could not show the casino loading screen.")
         return
     player.call("interaction_vibration")

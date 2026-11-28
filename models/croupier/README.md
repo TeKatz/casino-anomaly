@@ -8,7 +8,7 @@ by **manoeldarochadeoliveira**, licensed **CC BY 4.0**.
 - SHA-256 of original user-provided ZIP: 6e5e214f579846d387fdcb6d20cd4448e4b518b0bb87b7cfb1f2e97ca676ef54
 
 Place the **original, unchanged** Sketchfab ZIP at
-sketchfab_drop/business_man.zip. The development workflow runs
+source_assets/sketchfab_drop/business_man.zip. The development workflow runs
 python tools/import_croupier_asset.py before the Godot import; it checks
 the exact archive against its checksum, the animation names, and license.
 It extracts scene.gltf, scene.bin and the source textures into this directory.

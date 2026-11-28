@@ -112,7 +112,7 @@ func _run() -> void:
 	check(Targets.for_scene(Targets.CASINO_SCENE).get("script") == "res://tools/bake_voxel_gi.gd", "Casino bake route changed")
 	check(Targets.for_scene(Targets.BACKROOMS_SCENE).get("script") == "res://tools/bake_backrooms_voxel_gi.gd", "Backrooms bake route missing")
 	check(Targets.for_scene(Targets.BACKROOMS_SCENE).get("output") == "res://backrooms/backrooms_voxel_gi.res", "Backrooms bake output changed")
-	check(Targets.for_scene("res://menu.tscn").is_empty() and Targets.process_args("res://menu.tscn", ".").is_empty(), "Unsupported scene routes to baker")
+	check(Targets.for_scene("res://ui/menu.tscn").is_empty() and Targets.process_args("res://ui/menu.tscn", ".").is_empty(), "Unsupported scene routes to baker")
 	var args := Targets.process_args(Targets.BACKROOMS_SCENE, ".")
 	check(args.has("forward_plus") and not args.has("--headless"), "Offline process must use Forward+ GPU")
 	if not FileAccess.file_exists(Targets.BACKROOMS_OUTPUT):

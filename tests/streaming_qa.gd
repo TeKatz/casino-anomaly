@@ -3,7 +3,7 @@ extends SceneTree
 ## retained arrival-connector after unloading and two consecutive no-teleport
 ## room swaps. Detects the reported ability to walk into the exterior void.
 
-const ROOM = preload("res://main.tscn")
+const ROOM = preload("res://gameplay/casino/main.tscn")
 const Portals = preload("res://gameplay/stream_portals.gd")
 const Backrooms = preload("res://gameplay/backrooms_traversal.gd")
 

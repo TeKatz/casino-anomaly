@@ -1,7 +1,7 @@
 extends SceneTree
 ## Validate all new, understated anomalies against real casino nodes:
 ## registration, visibility, exact restoration, room isolation, and adapter.
-const ROOM = preload("res://main.tscn")
+const ROOM = preload("res://gameplay/casino/main.tscn")
 const Catalog = preload("res://gameplay/anomaly_catalog.gd")
 const Adapter = preload("res://gameplay/demo_anomalies.gd")
 const StreamPortals = preload("res://gameplay/stream_portals.gd")

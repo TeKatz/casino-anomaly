@@ -20,7 +20,7 @@ func _fail(reason: String) -> void:
 
 func _run() -> void:
     var prefab := load("res://models/casino_furniture/heritage_slot_cabinet.tscn") as PackedScene
-    var packed := load("res://main.tscn") as PackedScene
+    var packed := load("res://gameplay/casino/main.tscn") as PackedScene
     if prefab == null or packed == null:
         _fail("Cabinet source or authored casino room missing")
         return

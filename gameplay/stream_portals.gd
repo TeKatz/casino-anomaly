@@ -90,7 +90,7 @@ func prepare_room(room: Node3D) -> bool:
         floor_mat = floor.get_active_material(0)
 
     # Open the two end-wall portals and the following room's entrance only
-    # at runtime. The player's saved main.tscn is never modified.
+    # at runtime. The player's saved gameplay/casino/main.tscn is never modified.
     far_wall.visible = false
     _disable_collision(architecture.get_node_or_null("FarExitWall_Collision"))
     entry_wall.visible = false

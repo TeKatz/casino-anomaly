@@ -9,7 +9,7 @@ func _fail(message: String) -> void:
     quit(1)
 
 func _run() -> void:
-    var packed: PackedScene = load("res://main.tscn")
+    var packed: PackedScene = load("res://gameplay/casino/main.tscn")
     if packed == null:
         _fail("Main casino scene is missing")
         return

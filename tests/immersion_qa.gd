@@ -1,6 +1,6 @@
 extends SceneTree
 ## Headless-friendly checks: acoustic gates, procedural audio and floor logic.
-const PlayerScript = preload("res://player.gd")
+const PlayerScript = preload("res://gameplay/player.gd")
 const Soundscape = preload("res://gameplay/room_soundscape.gd")
 
 func _initialize() -> void:

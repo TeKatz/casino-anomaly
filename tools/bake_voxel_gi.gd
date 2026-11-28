@@ -1,11 +1,11 @@
 extends SceneTree
-## GPU-assisted offline bake of saved main.tscn. Run from a checked-out project using
+## GPU-assisted offline bake of saved gameplay/casino/main.tscn. Run from a checked-out project using
 ## Godot 4.5.1 with a Vulkan/D3D12-capable display (NOT --headless):
 ## Godot_v4.5.1-stable_win64_console.exe --path . --script res://tools/bake_voxel_gi.gd
 ##
 ## Creates two external binary .res resources. Commit those files before
 ## releasing VoxelGI-enabled builds. Never run inside the gameplay loop.
-const ROOM = preload("res://main.tscn")
+const ROOM = preload("res://gameplay/casino/main.tscn")
 const OUTPUTS := {
     "MainWingGI": "res://lighting/main_wing.res",
     "WestWingGI": "res://lighting/west_wing.res"
@@ -30,7 +30,7 @@ static func configure_baked_light(light: Light3D) -> void:
 
 # The editor-authored cove strips and neon sign frame segments are the
 # authoritative source for baked emission. Mesh movement, rotation, scaling,
-# size and emission color/intensity all follow the saved main.tscn.
+# size and emission color/intensity all follow the saved gameplay/casino/main.tscn.
 const MIN_VOXEL_EMITTER_THICKNESS := 0.28
 const EMITTER_SUFFIX := "BakeGI"
 
@@ -104,7 +104,7 @@ func _bake() -> void:
         return
     var hall := ROOM.instantiate() as Node3D
     if hall == null:
-        _fail("Cannot instantiate main.tscn")
+        _fail("Cannot instantiate gameplay/casino/main.tscn")
         return
     # Do not cut holes in the exit walls or create streaming connectors.
     # Those are temporary gameplay details, not bake-authoritative geometry.

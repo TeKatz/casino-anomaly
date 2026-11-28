@@ -3,7 +3,7 @@ extends SceneTree
 ## staged-room replacement and normal/auto choices. Runs in the release CI.
 const StateScript = preload("res://gameplay/loop_state.gd")
 const Catalog = preload("res://gameplay/anomaly_catalog.gd")
-const ROOM = preload("res://main.tscn")
+const ROOM = preload("res://gameplay/casino/main.tscn")
 
 func _initialize() -> void:
     call_deferred("_run")

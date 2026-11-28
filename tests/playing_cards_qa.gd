@@ -53,7 +53,7 @@ func _run() -> void:
         return
     source.queue_free()
 
-    var main := load("res://main.tscn") as PackedScene
+    var main := load("res://gameplay/casino/main.tscn") as PackedScene
     if main == null:
         _fail("Main room does not import with the new cards")
         return

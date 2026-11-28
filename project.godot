@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Casino Anomaly"
-run/main_scene="res://menu.tscn"
+run/main_scene="res://ui/menu.tscn"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://branding/casino_anomaly_icon.png"
 config/windows_native_icon="res://branding/casino_anomaly.ico"

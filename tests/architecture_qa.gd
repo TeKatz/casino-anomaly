@@ -11,7 +11,7 @@ func _bad(reason: String) -> void:
     quit(1)
 
 func _run() -> void:
-    var scene: PackedScene = load("res://main.tscn")
+    var scene: PackedScene = load("res://gameplay/casino/main.tscn")
     if scene == null:
         _bad("Main scene missing")
         return
@@ -25,9 +25,9 @@ func _run() -> void:
         _bad("Architectural section missing")
         return
     for item in [
-        ["lower_wall_material.tres", "wooden_panels"],
-        ["upper_wall_material.tres", "artist-authored upper wall"],
-        ["ceiling_material.tres", "roof_planks"]
+        ["assets/materials/lower_wall_material.tres", "wooden_panels"],
+        ["assets/materials/upper_wall_material.tres", "artist-authored upper wall"],
+        ["assets/materials/ceiling_material.tres", "roof_planks"]
     ]:
         var material: StandardMaterial3D = load("res://" + item[0]) as StandardMaterial3D
         # A texture may remain assigned while an artist intentionally

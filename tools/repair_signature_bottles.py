@@ -14,7 +14,7 @@ import argparse
 import re
 from pathlib import Path
 
-SCENE = Path(__file__).resolve().parents[1] / "main.tscn"
+SCENE = Path(__file__).resolve().parents[1] / "gameplay/casino/main.tscn"
 PATCH = re.compile(
     rb'(?m)^\[node name="(?P<name>[^"\r\n]+)" '
     rb'parent="(?P<parent>CornerBar/Signature_[^"\r\n]+)" '

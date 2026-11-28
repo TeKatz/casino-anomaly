@@ -19,7 +19,7 @@ Both original Freesound listings identify their sounds as CC0.
 ## One-time source import
 
 Download casino_anomaly_seamless_audio.zip from the ChatGPT response.
-Upload the single ZIP to audio_drop/casino_anomaly_seamless_audio.zip on dev.
+Upload the single ZIP to source_assets/audio_drop/casino_anomaly_seamless_audio.zip on dev.
 It contains both processed Ogg tracks, a hash manifest and source credits.
 
 The Development build runs: python tools/import_audio.py

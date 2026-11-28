@@ -27,11 +27,11 @@ class BrandingImportTests(unittest.TestCase):
         edits = MODULE.plan(ROOT)
         self.assertEqual(set(MODULE.SOURCE_FILES),
                          {p for p in edits if not p.endswith(".import")})
-        old_menu = (ROOT / "menu.tscn").read_text(encoding="utf-8")
+        old_menu = (ROOT / "ui/menu.tscn").read_text(encoding="utf-8")
         marker = '[node name="CenterPanel"'
         self.assertEqual(old_menu[old_menu.index(marker):],
-                         edits["menu.tscn"][edits["menu.tscn"].index(marker):])
-        self.assertIn("casino_anomaly_logo.png", edits["menu.tscn"])
+                         edits["ui/menu.tscn"][edits["ui/menu.tscn"].index(marker):])
+        self.assertIn("casino_anomaly_logo.png", edits["ui/menu.tscn"])
         self.assertIn("config/windows_native_icon", edits["project.godot"])
         self.assertIn("application/icon=\"res://branding/casino_anomaly.ico\"",
                       edits["export_presets.cfg"])

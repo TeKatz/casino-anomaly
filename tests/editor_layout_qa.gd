@@ -4,7 +4,7 @@ func _initialize() -> void:
     call_deferred("_check")
 
 func _check() -> void:
-    var packed := load("res://main.tscn") as PackedScene
+    var packed := load("res://gameplay/casino/main.tscn") as PackedScene
     if packed == null:
         push_error("Editable main scene cannot be loaded")
         quit(1)

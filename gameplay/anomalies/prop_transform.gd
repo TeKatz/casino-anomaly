@@ -1,7 +1,7 @@
 extends RefCounted
 ## A reversible, runtime-only movement/rotation of an existing scene node.
 ## Move the common parent so imported meshes, supporting subparts and any
-## child collision shapes keep their relative layout. Never edit main.tscn.
+## child collision shapes keep their relative layout. Never edit gameplay/casino/main.tscn.
 var target: Node3D
 var original_transform := Transform3D.IDENTITY
 

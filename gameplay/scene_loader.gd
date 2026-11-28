@@ -9,7 +9,7 @@ const Controls = preload("res://gameplay/input_bindings.gd")
 const FitCenter = preload("res://ui/fit_centered_panel.gd")
 const Loc = preload("res://gameplay/localization.gd")
 const ButtonSkin = preload("res://ui/luminous_button.gd")
-const SCENES := ["res://gameplay/tutorial.tscn", "res://main.tscn"]
+const SCENES := ["res://gameplay/tutorial.tscn", "res://gameplay/casino/main.tscn"]
 const BACKGROUND_SHADER = preload("res://ui/abstract_menu.gdshader")
 
 var overlay: Control
@@ -204,14 +204,14 @@ func travel_to(path: String, complete_intro: bool = false) -> bool:
     _refresh_locale()
     Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
     # A newly visible CanvasLayer needs a rendered frame before Godot begins
-    # loading the very large authored main.tscn and its dependencies.
+    # loading the very large authored gameplay/casino/main.tscn and its dependencies.
     call_deferred("_begin_loading")
     return true
 
 
 func _use_parallel_dependencies(path: String, complete_intro: bool, headless: bool) -> bool:
     # Preserve the existing headless workaround and other loading routes.
-    return not headless and not (path == "res://main.tscn" and complete_intro)
+    return not headless and not (path == "res://gameplay/casino/main.tscn" and complete_intro)
 
 
 func _begin_loading() -> void:

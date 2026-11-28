@@ -6,7 +6,7 @@ streamed room, including 180° rotations, and are disabled in standby halls.
 
 ## See baked VoxelGI in the Godot 3D editor
 
-Open `main.tscn` with Godot 4.5.1 and the Forward+ renderer.
+Open `gameplay/casino/main.tscn` with Godot 4.5.1 and the Forward+ renderer.
 The `@tool` scene script creates a **temporary, ownerless** `VoxelGIRig`
 in the editor. Both probes load the same already baked binary data used
 in the running game, and are enabled in the editor independently of the
@@ -15,11 +15,11 @@ player's saved graphics setting.
 You should see the indirect, warm bounced lighting even while using
 `Player/Camera3D` camera preview. Scene-specific editor lighting and
 environment must also remain enabled. There is **no editor rebake** and
-the transient probes are never saved into `main.tscn`.
+the transient probes are never saved into `gameplay/casino/main.tscn`.
 
 Godot editor rendering is still not an exact game screenshot: graphics
 settings and runtime effects such as image contrast, animated slot lights,
-and any dynamically generated objects may differ. Reopen `main.tscn`
+and any dynamically generated objects may differ. Reopen `gameplay/casino/main.tscn`
 after pulling code changes if its previous preview is still open.
 
 Regression: `tests/voxel_gi_editor_preview_qa.gd` executed under
@@ -34,16 +34,16 @@ VoxelGI once valid baked resources are included.
 
 ## Re-bake directly from the Godot editor (recommended)
 
-1. Open **main.tscn** in Godot **4.5.1**, using the Forward+ renderer.
+1. Open **gameplay/casino/main.tscn** in Godot **4.5.1**, using the Forward+ renderer.
    Move, rotate or resize the neon strips/sign frames and adjust their
    emissive material colors/strengths as needed.
 2. Choose **Project → Tools → Casino: VoxelGI neu backen...** (the existing
    Casino Model Preview editor plugin must be enabled).
 3. Confirm **Speichern und backen**. Godot saves all open scenes, then launches
    a **separate GPU-backed Godot process** to bake both room-local probes.
-   Do not edit main.tscn again until this process finishes.
+   Do not edit gameplay/casino/main.tscn again until this process finishes.
 4. Look for `Casino Anomaly VoxelGI OFFLINE BAKE PASS` in that process's
-   output. Reopen main.tscn after the bake to reload the updated editor GI
+   output. Reopen gameplay/casino/main.tscn after the bake to reload the updated editor GI
    preview. Visually inspect both casino wings.
 5. Commit `lighting/main_wing.res` and `lighting/west_wing.res` alongside
    any intended scene edits. Do **not** commit generated runtime caches.
@@ -55,7 +55,7 @@ the actual authored MeshInstance3D/BoxMesh. This replaces six fixed-coordinate
 bake placeholders. Each strip's minimum thickness is 0.28 m for reliable
 128-division voxelization. Original thin strips are excluded from the bake
 to avoid double contribution; neither the proxies nor any changes to
-the original strips are saved to main.tscn.
+the original strips are saved to gameplay/casino/main.tscn.
 
 ### Console fallback
 

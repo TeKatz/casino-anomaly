@@ -15,7 +15,7 @@ func _fail(reason: String) -> void:
 
 func _run() -> void:
     var intro_resource := load("res://gameplay/tutorial.tscn") as PackedScene
-    var room_resource := load("res://main.tscn") as PackedScene
+    var room_resource := load("res://gameplay/casino/main.tscn") as PackedScene
     if intro_resource == null or room_resource == null:
         _fail("Tutorial or original casino scene cannot load")
         return
@@ -164,7 +164,7 @@ func _run() -> void:
     DirAccess.remove_absolute(ProjectSettings.globalize_path(local.save_path))
 
     # Exercise the actual gameplay controller, which is attached at runtime
-    # while the designer-authored main.tscn stays byte-for-byte unchanged.
+    # while the designer-authored gameplay/casino/main.tscn stays byte-for-byte unchanged.
     var state = root.get_node_or_null("LoopState")
     if state == null:
         _fail("LoopState autoload is missing")

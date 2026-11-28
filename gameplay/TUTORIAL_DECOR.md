@@ -71,7 +71,7 @@ Once available:
 
 Objects are fit from their *actual imported 3D AABB*, so none rely on
 arbitrary default Sketchfab scale. The importer and verified sources are
-documented in `tutorial_assets_drop/README.md`. The exact models and their
+documented in `source_assets/tutorial_assets_drop/README.md`. The exact models and their
 PBR textures are not yet bundled in this commit.
 
 ## Editing models in Godot (persisted, not runtime-generated)

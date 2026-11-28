@@ -32,7 +32,7 @@ func _test() -> void:
         quit(1)
         return
     model.free()
-    var scene: PackedScene = load("res://main.tscn")
+    var scene: PackedScene = load("res://gameplay/casino/main.tscn")
     if scene == null:
         push_error("Main hall scene is missing")
         quit(1)
@@ -52,7 +52,7 @@ func _test() -> void:
     if placed_models == null:
         placed_models = layer
     # Unlike the three gameplay roulette wheels, the retro hero is optional:
-    # the level designer can remove that imported model in main.tscn.
+    # the level designer can remove that imported model in gameplay/casino/main.tscn.
     var authored_retro := 0
     for item in placed_models.get_children():
         if str(item.get_meta("source_asset", "")) == "retro_slot_machine":

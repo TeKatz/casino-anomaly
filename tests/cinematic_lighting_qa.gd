@@ -1,7 +1,7 @@
 extends SceneTree
 ## Lighting regression: authored lights and Forward+ effects must stay
 ## coherent in every instanced hall without affecting the room's geometry.
-const ROOM = preload("res://main.tscn")
+const ROOM = preload("res://gameplay/casino/main.tscn")
 
 func _initialize() -> void:
     call_deferred("_run")

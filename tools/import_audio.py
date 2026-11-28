@@ -13,7 +13,7 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_ARCHIVE = ROOT / "audio_drop" / "casino_anomaly_seamless_audio.zip"
+DEFAULT_ARCHIVE = ROOT / "source_assets/audio_drop" / "casino_anomaly_seamless_audio.zip"
 DEFAULT_OUTPUT = ROOT / "audio"
 ARCHIVE_SHA256 = "51fda271b62575657d86a11390879db8f7f6468f3ea7166298045ff70a9d6d44"
 TRACKS = {

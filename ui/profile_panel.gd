@@ -322,7 +322,7 @@ func _new_run() -> void:
     state.start_new_run(selected_mode)
     if selected_mode != "classic" or bool(Controls.pref(self, "skip_tutorial", false)):
         state.complete_tutorial()
-        launch_requested.emit("res://main.tscn")
+        launch_requested.emit("res://gameplay/casino/main.tscn")
     else:
         launch_requested.emit("res://gameplay/tutorial.tscn")
 
@@ -333,7 +333,7 @@ func _continue() -> void:
     if state == null or profiles == null or selected_slot == 0 \
             or profiles.active_slot != selected_slot or not state.has_continue():
         return
-    launch_requested.emit("res://main.tscn" if state.tutorial_done \
+    launch_requested.emit("res://gameplay/casino/main.tscn" if state.tutorial_done \
         else "res://gameplay/tutorial.tscn")
 
 

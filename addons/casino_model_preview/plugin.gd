@@ -12,7 +12,7 @@ var _voxel_confirm_scene := ""
 var _voxel_running_scene := ""
 var _waiting_for_model_import := false
 var _model_import_refresh_pending := false
-## Guard the authored main.tscn when the in-editor Sketchfab preview hides
+## Guard the authored gameplay/casino/main.tscn when the in-editor Sketchfab preview hides
 ## original placeholders. Undo these temporary visibility overrides BEFORE
 ## the editor serializes a scene; rebuild the preview AFTER the scene saved.
 
@@ -67,7 +67,7 @@ func _ask_voxel_bake() -> void:
     var scene_path := root.scene_file_path if root != null else ""
     var target := VoxelTargets.for_scene(scene_path)
     if target.is_empty():
-        _voxel_message("Öffne main.tscn oder backrooms/backrooms_labyrinth.tscn im Godot-Editor.")
+        _voxel_message("Öffne gameplay/casino/main.tscn oder backrooms/backrooms_labyrinth.tscn im Godot-Editor.")
         return
     _voxel_confirm_scene = scene_path
     _voxel_confirm.dialog_text = ("Alle offenen Szenen speichern und VoxelGI für " +
@@ -150,11 +150,11 @@ func _voxel_message(message: String) -> void:
 
 func _ensure_local_editor_models() -> void:
     # GitHub CI extracts the original ZIPs before importing the project,
-    # but a fresh local checkout only has sketchfab_drop/*.zip.
+    # but a fresh local checkout only has source_assets/sketchfab_drop/*.zip.
     if not SketchfabImport.has_all_extracted():
         print("Casino Editor Furniture: unpacking verified Sketchfab models for Godot editor...")
         if not SketchfabImport.ensure_local_models():
-            push_warning("Casino Editor Furniture: extraction failed. Run python tools/unpack_sketchfab_assets.py --require-all and reopen main.tscn.")
+            push_warning("Casino Editor Furniture: extraction failed. Run python tools/unpack_sketchfab_assets.py --require-all and reopen gameplay/casino/main.tscn.")
             return
         _waiting_for_model_import = true
         _model_import_refresh_pending = true
@@ -172,11 +172,11 @@ func _ensure_local_editor_models() -> void:
 
 
 ## One-time conversion: replaces ownerless, unselectable previews with true
-## instances owned by main.tscn. Future editor and runtime sessions reuse them.
+## instances owned by gameplay/casino/main.tscn. Future editor and runtime sessions reuse them.
 func _make_imported_models_editable() -> void:
     var root := EditorInterface.get_edited_scene_root()
-    if root == null or root.scene_file_path != "res://main.tscn":
-        push_warning("Casino: open main.tscn before converting imported models.")
+    if root == null or root.scene_file_path != "res://gameplay/casino/main.tscn":
+        push_warning("Casino: open gameplay/casino/main.tscn before converting imported models.")
         return
     if not _all_scenes_imported():
         push_warning("Casino: wait until the imported Sketchfab models are available, then retry.")
@@ -196,7 +196,7 @@ func _make_imported_models_editable() -> void:
     _prepare_saved_furniture(root)
     EditorInterface.mark_scene_as_unsaved()
     print("Casino: Sketchfab furniture and ", converted,
-        " Poly Haven instances are now editable. Save main.tscn (Ctrl+S).")
+        " Poly Haven instances are now editable. Save gameplay/casino/main.tscn (Ctrl+S).")
 
 
 func _request_editor_scan() -> void:
@@ -230,13 +230,13 @@ func _refresh_after_import() -> void:
 
 
 func _prepare_saved_furniture(root: Node) -> void:
-    if root == null or root.scene_file_path != "res://main.tscn":
+    if root == null or root.scene_file_path != "res://gameplay/casino/main.tscn":
         return
     var layer := root.get_node_or_null("SketchfabFurniture")
     if layer != null and layer.has_method("prepare_authored_furniture_for_editor"):
         if bool(layer.call("prepare_authored_furniture_for_editor", root)):
             EditorInterface.mark_scene_as_unsaved()
-            print("Casino: table collision/editability migration applied. Save main.tscn.")
+            print("Casino: table collision/editability migration applied. Save gameplay/casino/main.tscn.")
 
 
 func _refresh_edited_preview() -> void:
@@ -257,7 +257,7 @@ func _apply_changes() -> void:
     if layer == null or not layer.has_method("_clear_editor_preview"):
         return
     # The preview is transient, but temporarily hiding the original
-    # authored Node3Ds *can* otherwise be serialized into main.tscn.
+    # authored Node3Ds *can* otherwise be serialized into gameplay/casino/main.tscn.
     if layer.has_method("has_active_editor_preview") and \
             bool(layer.call("has_active_editor_preview")):
         layer.call("_clear_editor_preview")

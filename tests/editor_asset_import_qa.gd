@@ -13,7 +13,7 @@ func _fail(reason: String) -> void:
 
 func _run() -> void:
     var catalog: Variant = JSON.parse_string(
-        FileAccess.get_file_as_string("res://sketchfab_drop/catalog.json"))
+        FileAccess.get_file_as_string("res://source_assets/sketchfab_drop/catalog.json"))
     if not (catalog is Dictionary):
         _fail("Missing Sketchfab catalog")
         return

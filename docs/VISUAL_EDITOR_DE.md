@@ -6,9 +6,9 @@ Die **vorhandene Godot-3D-Ansicht** ist der Raumeditor. Kein eigenes Programm, k
 
 1. [Godot 4.5.1 Standard](https://godotengine.org/download/archive/4.5.1-stable/) installieren.
 2. Repository über GitHub Desktop klonen und den Branch `dev` auswählen.
-3. `project.godot` im Godot-Projektmanager importieren und `main.tscn` öffnen. Beim ersten Import können die GLTF-Modelle kurz brauchen.
+3. `project.godot` im Godot-Projektmanager importieren und `gameplay/casino/main.tscn` öffnen. Beim ersten Import können die GLTF-Modelle kurz brauchen.
 4. In der Szene `ModelInteriors`, `SlotMachines`, `GamingTables`, `CornerBar` oder `Lighting` aufklappen. In der 3D-Ansicht Objekte anklicken und W/E/R für Verschieben/Drehen/Skalieren benutzen.
-5. Mit Strg+S speichern. GitHub Desktop zeigt `main.tscn` als Änderung an. Commit + Push übertragen den Raumstand.
+5. Mit Strg+S speichern. GitHub Desktop zeigt `gameplay/casino/main.tscn` als Änderung an. Commit + Push übertragen den Raumstand.
 
 ## Was jetzt editierbar ist
 
@@ -21,11 +21,11 @@ Die **vorhandene Godot-3D-Ansicht** ist der Raumeditor. Kein eigenes Programm, k
 
 ## Vollständige Bearbeitung der bisher prozeduralen Elemente
 
-Die zweite Umstellung überführt den gebauten Raum in echte, speicherbare Knoten der Szene `main.tscn`. Unter `SlotMachines/Slot_XX/PlayerStool` kannst du einen Hocker unabhängig von der Slotmaschine versetzen. Unter `Decor/Plant_XX` verschiebst du Topf, Blätter und Kollision gemeinsam. `ModelInteriors/BustPedestal_01` und `BustPedestal_02` enthalten die Sockel, `CasinoAtmosphere` die Neonstreifen, beleuchteten Schilderrahmen und Spotlights.
+Die zweite Umstellung überführt den gebauten Raum in echte, speicherbare Knoten der Szene `gameplay/casino/main.tscn`. Unter `SlotMachines/Slot_XX/PlayerStool` kannst du einen Hocker unabhängig von der Slotmaschine versetzen. Unter `Decor/Plant_XX` verschiebst du Topf, Blätter und Kollision gemeinsam. `ModelInteriors/BustPedestal_01` und `BustPedestal_02` enthalten die Sockel, `CasinoAtmosphere` die Neonstreifen, beleuchteten Schilderrahmen und Spotlights.
 
 Wichtige Architekturteile und ihre Kollisionskörper sind als einzelne Knoten sichtbar und gespeichert; wenn ein Element mehrere Teile enthält, am besten den passenden übergeordneten Knoten auswählen. **Bei einzelnen separat gespeicherten Wand- und Säulenmeshes die zugehörigen Kollisionskörper nicht vergessen.** Beim Verschieben nur einer Meshfläche bewegt sich eine separat gespeicherte Kollision nicht automatisch mit. Neue Geometrie sollte künftig als gebündelte Szene aus Mesh und Kollision angelegt werden.
 
-Objekt- und Positionsänderungen speichert Godot in `main.tscn`. Zusätzliche dekorative Laufzeit-Partikeleffekte (Staub) werden weiterhin durch das Atmosphärenskript gesteuert.
+Objekt- und Positionsänderungen speichert Godot in `gameplay/casino/main.tscn`. Zusätzliche dekorative Laufzeit-Partikeleffekte (Staub) werden weiterhin durch das Atmosphärenskript gesteuert.
 
 ## Wichtig: Grenzen der ersten Editierfassung
 
@@ -35,4 +35,4 @@ Die Poly-Haven-Vorschau zeigt die echten GLTF-Meshes. Die Sketchfab-Pakete sind 
 
 Neue Objekte, Kollisionsregeln, Anomalien und Spiellogik bleiben Entwickleraufgaben. Für die Endfassung können wir die Architektur in eigene, ebenfalls gespeicherte Godot-Szenen aufteilen.
 
-**GitHub-Sicherheit:** Immer erst in GitHub Desktop `Fetch/Pull`, dann bearbeiten, dann `Commit/Push`. Während derselben Sitzung sollte niemand anderes `main.tscn` bearbeiten; sonst können Merge-Konflikte entstehen.
+**GitHub-Sicherheit:** Immer erst in GitHub Desktop `Fetch/Pull`, dann bearbeiten, dann `Commit/Push`. Während derselben Sitzung sollte niemand anderes `gameplay/casino/main.tscn` bearbeiten; sonst können Merge-Konflikte entstehen.

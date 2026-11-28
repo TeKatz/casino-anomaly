@@ -1,6 +1,6 @@
 [gd_scene load_steps=181 format=3]
 
-[ext_resource type="Script" path="res://player.gd" id="1_player"]
+[ext_resource type="Script" path="res://gameplay/player.gd" id="1_player"]
 [ext_resource type="Script" path="res://gameplay/tutorial.gd" id="HallTutorial"]
 [ext_resource type="PackedScene" path="res://gameplay/croupier_station.tscn" id="HallCroupier"]
 [ext_resource type="Texture2D" path="res://branding/casino_anomaly_logo.png" id="HallLogo"]

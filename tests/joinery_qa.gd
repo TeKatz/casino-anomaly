@@ -10,7 +10,7 @@ func _fail(message: String) -> void:
     quit(1)
 
 func _run() -> void:
-    var scene: PackedScene = load("res://main.tscn")
+    var scene: PackedScene = load("res://gameplay/casino/main.tscn")
     if scene == null:
         _fail("Main scene is missing")
         return
@@ -28,7 +28,7 @@ func _run() -> void:
         "brown_planks_05", "herringbone_parquet", "bi_stretch"
     ]:
         var mat: StandardMaterial3D = load(
-            "res://" + source_name + "_material.tres") as StandardMaterial3D
+            "res://assets/materials/" + source_name + "_material.tres") as StandardMaterial3D
         if mat == null or mat.albedo_texture == null                 or mat.normal_texture == null or mat.roughness_texture == null:
             _fail("Missing full Poly Haven PBR map set: " + source_name)
             return

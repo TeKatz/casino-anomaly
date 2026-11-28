@@ -1,7 +1,7 @@
 # Runtime-generated audio files
 
 The binary Ogg files are extracted from the user-supplied verified ZIP
-in audio_drop/ by running: python tools/import_audio.py
+in source_assets/audio_drop/ by running: python tools/import_audio.py
 
 Generated resource paths:
 - audio/hmm_menu_seamless.ogg - plays only on the main menu.

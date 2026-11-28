@@ -3,8 +3,8 @@ extends RefCounted
 ## Import only SHA-256-pinned user-supplied Sketchfab ZIPs into the ignored
 ## models/sketchfab/ folder. The editor does not require external Python.
 ## CI can still use tools/unpack_sketchfab_assets.py with its stricter checks.
-const CATALOG := "res://sketchfab_drop/catalog.json"
-const ZIP_DIR := "res://sketchfab_drop"
+const CATALOG := "res://source_assets/sketchfab_drop/catalog.json"
+const ZIP_DIR := "res://source_assets/sketchfab_drop"
 const MODEL_DIR := "res://models/sketchfab"
 const MAX_FILE_BYTES := 45 * 1024 * 1024
 const MAX_TOTAL_BYTES := 180 * 1024 * 1024

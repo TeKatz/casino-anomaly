@@ -1,7 +1,7 @@
 extends SceneTree
 ## Authored architecture, collision, finishes and live tutorial integration.
 const HALL = preload("res://gameplay/grand_entrance_hall.tscn")
-const PLAYER = preload("res://player.gd")
+const PLAYER = preload("res://gameplay/player.gd")
 const Catalog = preload("res://gameplay/anomaly_catalog.gd")
 
 func _initialize() -> void:
@@ -26,7 +26,7 @@ func _run() -> void:
     if player.get_script() != PLAYER or not camera.current or not is_equal_approx((player.get("_camera_home") as Vector3).y,0.55):
         _fail("Original player and camera contract lost")
         return
-    if Catalog.entries().size() != 49 or ProjectSettings.get_setting("application/run/main_scene") != "res://menu.tscn":
+    if Catalog.entries().size() != 49 or ProjectSettings.get_setting("application/run/main_scene") != "res://ui/menu.tscn":
         _fail("Main start or catalog changed")
         return
     var architecture := hall.get_node("Architecture")

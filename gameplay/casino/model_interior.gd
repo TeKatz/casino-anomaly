@@ -301,7 +301,7 @@ func _place(identifier: String, label: String, anchor: Vector3,
         target_height: float, yaw: float = 0.0, add_collision: bool = false,
         wall_mount: bool = false, mesh_variant: String = "",
         max_footprint: float = 0.0) -> Node3D:
-    # The numbered nodes in main.tscn are the designer's source of truth.
+    # The numbered nodes in gameplay/casino/main.tscn are the designer's source of truth.
     # Keep their saved transform (including scale); only the model geometry,
     # collision and decorative details are constructed during play.
     # The visual-only menu does not need runtime model colliders.
@@ -341,7 +341,7 @@ func _place(identifier: String, label: String, anchor: Vector3,
     # A saved, editable glTF instance still contains every source mesh.
     # Apply the same variant filtering to both authored and generated models.
     # This only removes unused meshes from the runtime instance; it does
-    # not rewrite main.tscn or the imported source scene.
+    # not rewrite gameplay/casino/main.tscn or the imported source scene.
     if not mesh_variant.is_empty():
         var variant_found := false
         for candidate in imported.find_children("*", "MeshInstance3D", true, false):

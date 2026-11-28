@@ -1,7 +1,7 @@
 extends SceneTree
 
 # One-time migration of the authoritative 3D level from procedural generators
-# to regular, editable children in main.tscn. Never run this over a hand-edited
+# to regular, editable children in gameplay/casino/main.tscn. Never run this over a hand-edited
 # populated scene: the guard preserves all later designer modifications.
 func _initialize() -> void:
     call_deferred("_bake")
@@ -16,9 +16,9 @@ func _own_recursive(node: Node, scene_root: Node) -> int:
 
 
 func _bake() -> void:
-    var loaded := load("res://main.tscn") as PackedScene
+    var loaded := load("res://gameplay/casino/main.tscn") as PackedScene
     if loaded == null:
-        push_error("Could not load main.tscn for authoring migration")
+        push_error("Could not load gameplay/casino/main.tscn for authoring migration")
         quit(1)
         return
     var world := loaded.instantiate() as Node3D
@@ -78,7 +78,7 @@ func _bake() -> void:
 
     # Bake only model-support structures. The 41 imported glTF previews
     # remain linked to their existing authoring anchors and are not copied
-    # into main.tscn as huge duplicate meshes.
+    # into gameplay/casino/main.tscn as huge duplicate meshes.
     var models := world.get_node("ModelInteriors") as Node3D
     for child in models.get_children():
         if child.owner != null:
@@ -107,7 +107,7 @@ func _bake() -> void:
         push_error("PackedScene failed: %s" % packed_error)
         quit(1)
         return
-    var saved_error := ResourceSaver.save(authored, "res://main.tscn")
+    var saved_error := ResourceSaver.save(authored, "res://gameplay/casino/main.tscn")
     if saved_error != OK:
         push_error("Could not save authored casino: %s" % saved_error)
         quit(1)

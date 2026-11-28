@@ -13,15 +13,15 @@ func _run() -> void:
         _fail("Forward+ is required for temporal antialiasing")
         return
     # Headless Godot can discard GPU-only project settings during import.
-    # The gameplay viewport is configured in hall.gd, while project.godot
+    # The gameplay viewport is configured in gameplay/casino/hall.gd, while project.godot
     # itself is checked by CI before the Godot editor begins importing.
 
     for path in [
-        "floor_material.tres", "carpet_material.tres", "upper_wall_material.tres",
-        "lower_wall_material.tres", "ceiling_material.tres", "pillar_material.tres",
-        "bar_top_material.tres", "bar_side_material.tres", "roulette_wood_material.tres",
-        "brown_planks_05_material.tres", "herringbone_parquet_material.tres",
-        "bi_stretch_material.tres"
+        "assets/materials/floor_material.tres", "assets/materials/carpet_material.tres", "assets/materials/upper_wall_material.tres",
+        "assets/materials/lower_wall_material.tres", "assets/materials/ceiling_material.tres", "assets/materials/pillar_material.tres",
+        "assets/materials/bar_top_material.tres", "assets/materials/bar_side_material.tres", "assets/materials/roulette_wood_material.tres",
+        "assets/materials/brown_planks_05_material.tres", "assets/materials/herringbone_parquet_material.tres",
+        "assets/materials/bi_stretch_material.tres"
     ]:
         var mat: StandardMaterial3D = load("res://" + path) as StandardMaterial3D
         if mat == null or mat.albedo_texture == null:
@@ -30,7 +30,7 @@ func _run() -> void:
         # The lower-wall material is artist-edited in Godot and can use the
         # engine's normal trilinear-mipmap filtering. Do not silently replace
         # the artist's chosen filter; still reject non-mipmapped materials.
-        if path == "lower_wall_material.tres":
+        if path == "assets/materials/lower_wall_material.tres":
             if mat.texture_filter != BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS \
                     and mat.texture_filter != BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC:
                 _fail("Lower wall material lost mipmaps: " + path)
@@ -39,7 +39,7 @@ func _run() -> void:
             _fail("Texture filtering lacks anisotropic mipmaps: " + path)
             return
 
-    var scene: PackedScene = load("res://main.tscn")
+    var scene: PackedScene = load("res://gameplay/casino/main.tscn")
     if scene == null:
         _fail("Casino main scene missing")
         return

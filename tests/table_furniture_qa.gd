@@ -22,7 +22,7 @@ func _fail(message: String) -> void:
 
 
 func _run() -> void:
-    var scene := load("res://main.tscn") as PackedScene
+    var scene := load("res://gameplay/casino/main.tscn") as PackedScene
     if scene == null:
         _fail("Authored main scene missing")
         return

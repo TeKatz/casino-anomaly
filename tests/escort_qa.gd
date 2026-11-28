@@ -16,7 +16,7 @@ func _run() -> void:
     if not Rig.available():
         _fail("Exact authored animation asset unavailable")
         return
-    var world: Node3D = (load("res://main.tscn") as PackedScene).instantiate() as Node3D
+    var world: Node3D = (load("res://gameplay/casino/main.tscn") as PackedScene).instantiate() as Node3D
     root.add_child(world)
     await process_frame
     await process_frame

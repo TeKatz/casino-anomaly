@@ -62,7 +62,7 @@ Casino Anomaly is in active development. The current Windows build is available 
 
 **[Download the latest Development Edition](https://github.com/TeKatz/casino-anomaly/releases/tag/development)**
 
-[Installation information](README_INSTALLATION.md) · [Asset credits](ASSET_CREDITS.md)
+[Installation information](docs/INSTALLATION.md) · [Asset credits](ASSET_CREDITS.md) · [Repository layout](docs/REPOSITORY_LAYOUT.md)
 
 ---
 
