@@ -287,6 +287,14 @@ func _run() -> void:
     if objective_shine == null or not objective_shine.visible or objective_shine.mouse_filter != Control.MOUSE_FILTER_IGNORE:
         _fail("New objective must receive a passive one-shot reflection")
         return
+    var objective_card := objective.get("card") as PanelContainer
+    # The reveal must never bake the temporary wrapped-text minimum height
+    # into the top-right anchor offsets.
+    await process_frame
+    await process_frame
+    if not is_equal_approx(objective_card.offset_bottom-objective_card.offset_top,88.0) or objective_card.size.y > maxf(88.0,objective_card.get_combined_minimum_size().y)+2.0 or objective_card.size.y > 240.0:
+        _fail("Objective reveal inflated the card instead of fitting its content")
+        return
     var objective_text := objective.get("message") as Label
     if not objective_text.text.contains("Main Casino"):
         _fail("Objective was not localized in English")

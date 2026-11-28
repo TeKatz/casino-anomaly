@@ -4,6 +4,9 @@ extends CanvasLayer
 const Controls = preload("res://gameplay/input_bindings.gd")
 const Loc = preload("res://gameplay/localization.gd")
 const MenuStyle = preload("res://ui/menu_style.gd")
+const CARD_MARGIN := 24.0
+const CARD_WIDTH := 352.0
+const CARD_BASE_HEIGHT := 88.0
 
 var objective_id := ""
 var text_key := ""
@@ -53,10 +56,11 @@ func _ready() -> void:
     card.mouse_filter = Control.MOUSE_FILTER_IGNORE
     root.add_child(card)
     card.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
-    card.offset_left = -376
-    card.offset_right = -24
-    card.offset_top = 24
-    card.offset_bottom = 112
+    card.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+    card.grow_vertical = Control.GROW_DIRECTION_END
+    card.offset_left = -CARD_MARGIN-CARD_WIDTH
+    card.offset_right = -CARD_MARGIN
+    _set_reveal_offset(0.0)
     var frame := MenuStyle.flat_surface(Color("#17181d",0.95),Color("#b79a65",0.85),10)
     frame.content_margin_left = 15
     frame.content_margin_right = 16
@@ -151,9 +155,9 @@ func _refresh_text() -> void:
 
 
 func _fit_card() -> void:
-    var width := minf(352.0,maxf(120.0,root.size.x-48.0))
-    card.offset_left = -24.0-width
-    card.offset_right = -24.0
+    var width := minf(CARD_WIDTH,maxf(120.0,root.size.x-2.0*CARD_MARGIN))
+    card.offset_left = -CARD_MARGIN-width
+    card.offset_right = -CARD_MARGIN
 
 
 func _reduced() -> bool:
@@ -198,7 +202,12 @@ func _sync(force_reveal: bool = false) -> void:
 
 func _set_reveal_offset(value: float) -> void:
     _reveal_offset = value
-    card.position.y = 24.0 + _reveal_offset
+    # Never assign position/size here: Control would persist its current
+    # (possibly inflated, pre-wrap) minimum height into the offsets.
+    # A fixed base rectangle lets PanelContainer grow AND shrink with
+    # the wrapped text as its actual minimum size changes.
+    card.offset_top = CARD_MARGIN + _reveal_offset
+    card.offset_bottom = CARD_MARGIN + _reveal_offset + CARD_BASE_HEIGHT
 
 
 func _set_shine_progress(value: float) -> void:
