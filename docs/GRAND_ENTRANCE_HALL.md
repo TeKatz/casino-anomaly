@@ -235,6 +235,20 @@ with the tutorial scene. The destination remains skippable. Classic-specific
 streak instructions are explicitly labeled Classic; other mode rules are
 unchanged.
 
+### Returning guests
+
+Before overwriting a run, the selected profile's existing valid run files
+(across modes) and historical progress determine whether the guest is
+returning. That result is saved as the optional `returning_guest` run
+field, so continuing a first run retains its initial greeting. Existing
+pre-feature profile saves default to returning; unbound editor/test runs
+default to fresh. Renaming or switching profiles does not transfer guest
+history, and deleting/recreating a profile removes it. Returning visitors
+receive a separate two-page welcome plus an optional recognition topic.
+Directions on the second greeting page discover the ordinary destination
+objective; the recognition-only topic does not. No actual player names,
+machine identity, or cross-profile tracking are used.
+
 ## QA
 
 Run `godot --headless --path . --script tests/grand_entrance_hall_qa.gd`

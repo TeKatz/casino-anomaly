@@ -30,8 +30,20 @@ const ENTRANCE := {
 }
 
 
-static func entrance() -> Dictionary:
-    return ENTRANCE.duplicate(true)
+static func entrance(returning_guest: bool = false) -> Dictionary:
+    var conversation := ENTRANCE.duplicate(true)
+    if returning_guest:
+        conversation["id"] = "entrance_returning"
+        conversation["welcome"] = [
+            {"text": "croupier.returning.welcome"},
+            {"text": "croupier.returning.destination", "objective": "enter_main_casino"}
+        ]
+        var topics: Array = conversation["topics"]
+        topics.append({"id": "recognition", "label": "croupier.option.recognition", "pages": [
+            {"text": "croupier.returning.recognition"},
+            {"text": "croupier.returning.memory"}
+        ]})
+    return conversation
 
 
 static func pages(conversation: Dictionary, topic: String) -> Array:

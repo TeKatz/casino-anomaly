@@ -44,7 +44,16 @@ func _run() -> void:
     if not profiles.select_profile(4) or state.save_path != profiles.run_path(4):
         _fail("Selecting slot 4 did not bind the run save")
         return
+    if profiles.has_prior_run(4) or profiles.has_prior_run(5):
+        _fail("A newly created profile must not have a prior run")
+        return
     state.start_new_run()
+    if bool(state.get("returning_guest")) or not profiles.has_prior_run(4):
+        _fail("First run was classified as a returning guest")
+        return
+    if not profiles.select_profile(4) or bool(state.get("returning_guest")):
+        _fail("Continuing the first run changed the guest identity")
+        return
     state.complete_tutorial()
     var ids: Array[String] = ["bar_label"]
     state.prepare_round(ids)
@@ -84,6 +93,9 @@ func _run() -> void:
         _fail("Retirement changed historical profile or active summary")
         return
     state.start_new_run()
+    if not bool(state.get("returning_guest")) or not profiles.select_profile(4) or not bool(state.get("returning_guest")):
+        _fail("Restarted profile failed to remember the returning guest")
+        return
     if int(profiles.get_summary(4).get("discovered", -1)) != 1:
         _fail("New run must preserve player collection")
         return
@@ -91,6 +103,9 @@ func _run() -> void:
         _fail("Profile 5 inherited another player's discoveries")
         return
     state.start_new_run()
+    if bool(state.get("returning_guest")):
+        _fail("A separate profile inherited returning-guest status")
+        return
     state.complete_tutorial()
     state.prepare_round(ids)
     state.decide(false)
@@ -118,12 +133,22 @@ func _run() -> void:
     if int(profiles.get_summary(5).get("discovered", -1)) != 0:
         _fail("Encountering an anomaly incorrectly unlocked its description")
         return
+    # A legacy profile save without the optional flag still represents an
+    # established guest. Renaming and selecting another mode retain history.
+    var old_run := ConfigFile.new()
+    if old_run.load(profiles.run_path(5)) != OK:
+        _fail("Could not read run for legacy recognition regression")
+        return
+    old_run.erase_section_key("run", "returning_guest")
+    if old_run.save(profiles.run_path(5)) != OK or not profiles.select_profile(5) or not bool(state.get("returning_guest")):
+        _fail("Legacy save lost returning-guest recognition")
+        return
     if not profiles.rename_profile(5, "QA Renamed") \
             or str(profiles.get_summary(5).get("name", "")) != "QA Renamed":
         _fail("Profile rename not saved")
         return
-    if not profiles.select_profile(4) or int(profiles.get_summary(4).get("discovered", -1)) != 1:
-        _fail("Profile 4 progress did not survive a profile switch")
+    if not profiles.select_profile(4) or int(profiles.get_summary(4).get("discovered", -1)) != 1 or not bool(state.get("returning_guest")):
+        _fail("Profile 4 progress or guest recognition did not survive a profile switch")
         return
 
     for entry in Catalog.entries():
@@ -208,6 +233,13 @@ func _run() -> void:
     plaque.queue_free()
     if not profiles.delete_profile(4) or not profiles.delete_profile(5):
         _fail("Could not safely delete test profiles")
+        return
+    if not profiles.create_profile(4, "QA Recreated") or profiles.has_prior_run(4):
+        _fail("Recreated profile inherited deleted guest history")
+        return
+    state.start_new_run()
+    if bool(state.get("returning_guest")) or not profiles.delete_profile(4):
+        _fail("Recreated profile did not start as a fresh guest")
         return
     await process_frame
     print("Casino Anomaly profile archive QA PASS")

@@ -3,6 +3,7 @@ extends Node3D
 const Controls = preload("res://gameplay/input_bindings.gd")
 const Loc = preload("res://gameplay/localization.gd")
 const Conversation = preload("res://gameplay/croupier_dialogue.gd")
+const DialogueCatalog = preload("res://gameplay/dialogue_catalog.gd")
 const DoorPrompt = preload("res://ui/door_prompt.gd")
 const ObjectiveHUD = preload("res://ui/objective_hud.gd")
 
@@ -33,6 +34,9 @@ func _ready() -> void:
     add_child(door_prompt)
     conversation = Conversation.new()
     conversation.name = "CroupierDialogue"
+    var state := get_node_or_null("/root/LoopState")
+    var returning := state != null and bool(state.get("returning_guest"))
+    conversation.call("configure", DialogueCatalog.entrance(returning))
     add_child(conversation)
     conversation.closed.connect(_on_conversation_closed)
     conversation.objective_discovered.connect(_on_objective_discovered)

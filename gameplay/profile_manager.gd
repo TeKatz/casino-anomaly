@@ -220,6 +220,20 @@ func get_summary(slot: int, mode: String = "classic") -> Dictionary:
     }
 
 
+## Inspect prior runs before a new run overwrites its save. Neither
+## mode selection nor profile renaming changes a guest's history.
+func has_prior_run(slot: int) -> bool:
+    if not profile_exists(slot):
+        return false
+    for mode_id in Modes.IDS:
+        var run := ConfigFile.new()
+        if run.load(run_path(slot, mode_id)) == OK and int(run.get_value("run", "version", 0)) > 0:
+            return true
+    var progress := _read_progress(slot)
+    var saved_stats: Dictionary = progress["stats"]
+    return int(saved_stats.get("rooms", 0)) > 0 or int(saved_stats.get("completions", 0)) > 0 or not progress["history"].is_empty()
+
+
 func active_summary() -> Dictionary:
     return get_summary(active_slot, active_mode)
 

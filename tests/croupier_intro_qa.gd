@@ -335,6 +335,48 @@ func _run() -> void:
 
     room.queue_free()
     await process_frame
+    # Test the actual live scene's alternate conversation configuration,
+    # including the extra recognition question and normal objective flow.
+    var state := root.get_node_or_null("LoopState")
+    var previous_returning := bool(state.get("returning_guest"))
+    state.set("returning_guest",true)
+    settings.set_option("language","de")
+    var returning_room := INTRO.instantiate() as Node3D
+    root.add_child(returning_room)
+    await process_frame
+    var returning_dialogue := returning_room.get_node("CroupierDialogue")
+    returning_room.call("_open_conversation")
+    var returning_response := returning_dialogue.get("response_label") as Label
+    var returning_buttons: Dictionary = returning_dialogue.get("buttons")
+    if not returning_response.text.contains("Du schon wieder") or not returning_buttons.has("recognition"):
+        _fail("Returning profile did not receive the alternate dialogue")
+        return
+    settings.set_option("language","en")
+    if not returning_response.text.contains("You again"):
+        _fail("Returning greeting failed to localize")
+        return
+    returning_dialogue.call("_on_choice","recognition")
+    if not returning_response.text.contains("start over"):
+        _fail("Returning guest recognition topic missing")
+        return
+    returning_dialogue.call("_next_page")
+    if not returning_response.text.contains("remember every visit"):
+        _fail("Returning guest recognition topic could not advance")
+        return
+    returning_dialogue.call("close_conversation")
+    if bool(returning_room.get("has_spoken")):
+        _fail("Recognition alone unlocked the destination without directions")
+        return
+    returning_room.call("_open_conversation")
+    returning_dialogue.call("_next_page")
+    returning_dialogue.call("close_conversation")
+    var returning_objective := returning_room.get_node("Player/ObjectiveHUD")
+    if not bool(returning_room.get("has_spoken")) or str(returning_objective.get("objective_id"))!="enter_main_casino":
+        _fail("Returning guest could not unlock the ordinary objective")
+        return
+    returning_room.queue_free()
+    await process_frame
+    state.set("returning_guest",previous_returning)
     for key in guidance_options:
         settings.set_option(key,guidance_options[key])
     settings.set_option("language", prior)

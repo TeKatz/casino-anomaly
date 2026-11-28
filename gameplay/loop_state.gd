@@ -24,6 +24,9 @@ var normal_chain := 0
 var classic_room_history: Array[bool] = []
 var active := false
 var tutorial_done := false
+# Snapshot of profile history taken BEFORE starting this run. Persisted
+# so continuing a brand-new player's first run cannot turn them into a returnee.
+var returning_guest := false
 var finished := false
 var round_ready := false
 var correct_streak := 0
@@ -55,6 +58,7 @@ func reset_runtime() -> void:
     classic_room_history.clear()
     active = false
     tutorial_done = false
+    returning_guest = false
     finished = false
     round_ready = false
     correct_streak = 0
@@ -73,8 +77,17 @@ func has_continue() -> bool:
     return active and not finished and FileAccess.file_exists(save_path)
 
 
+func _bound_profile() -> Node:
+    var profiles := get_node_or_null("/root/ProfileManager")
+    if profiles == null or profiles.active_slot <= 0 or save_path != profiles.run_path(profiles.active_slot, mode):
+        return null
+    return profiles if profiles.profile_exists(profiles.active_slot) else null
+
+
 func start_new_run(next_mode: String = "classic") -> void:
     mode = Modes.normalize(next_mode)
+    var profiles := _bound_profile()
+    returning_guest = profiles != null and bool(profiles.call("has_prior_run", profiles.get("active_slot")))
     elapsed_seconds = 0.0
     run_assisted = false
     normal_chain = 0
@@ -410,6 +423,7 @@ func save_run() -> void:
     config.set_value("run", "classic_room_history", classic_room_history)
     config.set_value("run", "active", active)
     config.set_value("run", "tutorial_done", tutorial_done)
+    config.set_value("run", "returning_guest", returning_guest)
     config.set_value("run", "finished", finished)
     config.set_value("run", "round_ready", round_ready)
     config.set_value("run", "correct_streak", correct_streak)
@@ -438,6 +452,9 @@ func load_run() -> bool:
     normal_chain = maxi(0, int(config.get_value("run", "normal_chain", 0)))
     active = bool(config.get_value("run", "active", false))
     tutorial_done = bool(config.get_value("run", "tutorial_done", false))
+    # Pre-feature profile saves already existed. They count as returning;
+    # first runs created by this version explicitly store false.
+    returning_guest = bool(config.get_value("run", "returning_guest", _bound_profile() != null))
     finished = bool(config.get_value("run", "finished", false))
     round_ready = bool(config.get_value("run", "round_ready", false))
     correct_streak = maxi(0, int(config.get_value("run", "correct_streak", 0)))
