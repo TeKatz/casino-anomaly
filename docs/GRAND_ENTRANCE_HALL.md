@@ -175,6 +175,18 @@ and shadow appearance require a Forward+ playtest. The entrance door,
 jambs and lintel now meet precisely with the supporting wall, with
 matching updated box collisions and the existing bronze finish.
 
+## Crash diagnostics
+
+The exported Windows game starts a local crash journal and an external monitor
+using a content-keyed copy of the bundled updater outside the installation.
+Loading and tutorial breadcrumbs are flushed immediately; a 15-second
+heartbeat records the scene and available Godot memory monitors. Release
+engine memory counters can be unavailable (zero). The monitor preserves the
+exit code and matching Windows Application Error metadata when available.
+Normal shutdown with code zero is not classified as a crash. Unexpected
+termination produces a local crash_report.zip under user://crash_reports.
+No automatic upload, memory dump, restart or loading-mode change is made.
+
 ## QA
 
 Run `godot --headless --path . --script tests/grand_entrance_hall_qa.gd`

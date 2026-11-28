@@ -35,6 +35,13 @@ internal static class Program
     [STAThread]
     private static int Main(string[] args)
     {
+        if (args.Length == 3 && args[0] == "--monitor-crash")
+            return CrashMonitor.Run(args[1], args[2]);
+        if (args.Length == 2 && args[0] == "--crash-test-exit" && int.TryParse(args[1], out var testExit))
+        {
+            Thread.Sleep(1500);
+            return testExit;
+        }
         if (args.Length == 1 && args[0] == "--self-test")
             return SelfTest();
         if (args.Length == 2 && args[0] == "--self-test-inherited-cwd")
@@ -576,6 +583,7 @@ internal static class Program
                 throw new InvalidOperationException("Temporary download error retry contract changed.");
             VerifyUpdaterDoesNotLockInstallDirectory();
             VerifyInPlaceUpdateWithLockedDirectory();
+            CrashMonitor.SelfTest();
             Console.WriteLine("Casino Anomaly updater contract PASS");
             return 0;
         }

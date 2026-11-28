@@ -120,6 +120,9 @@ func _open_conversation() -> void:
     croupier.call("set_hint_visible", false)
     door_prompt.call("set_prompt_visible", false)
     croupier.call("set_talking", true)
+    var journal := get_node_or_null("/root/CrashJournal")
+    if journal != null:
+        journal.call("record", "croupier_conversation_opened")
     conversation.call("show_conversation")
     _update_destination_marker(0.0)
 
@@ -130,6 +133,9 @@ func _on_conversation_closed() -> void:
     player.call("set_interaction_locked", false)
     Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
     has_spoken = true
+    var journal := get_node_or_null("/root/CrashJournal")
+    if journal != null:
+        journal.call("record", "croupier_conversation_closed")
     _update_destination_marker(0.0)
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -144,6 +150,9 @@ func _unhandled_input(event: InputEvent) -> void:
     if not _is_looking_at_door():
         return
     get_viewport().set_input_as_handled()
+    var journal := get_node_or_null("/root/CrashJournal")
+    if journal != null:
+        journal.call("record", "casino_door_interacted", {"conversation_completed": has_spoken})
     var loader := get_node_or_null("/root/SceneLoader")
     if loader == null or not loader.travel_to("res://main.tscn", true):
         push_warning("Could not show the casino loading screen.")

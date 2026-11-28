@@ -43,6 +43,15 @@ func _run() -> void:
         _fail("Loading screen lost the approved branding or aspect ratio")
         return
 
+    var journal := root.get_node_or_null("CrashJournal")
+    if journal == null:
+        _fail("CrashJournal autoload missing")
+        return
+    var journal_dir := "user://crash_journal_qa_"+str(OS.get_process_id())
+    journal.call("begin_session",journal_dir)
+    if not bool(journal.get("enabled")):
+        _fail("Crash journal could not start")
+        return
     var previous_save: String = state.save_path
     var test_save := "user://loading_transition_qa.cfg"
     state.save_path = test_save
@@ -103,6 +112,16 @@ func _run() -> void:
     if not state.tutorial_done or not state.round_ready or not str(state.anomaly_id).is_empty():
         _fail("Intro completion or first clean casino round was lost")
         return
+    var journal_path := journal_dir.path_join("events.jsonl")
+    var journal_text := FileAccess.get_file_as_string(journal_path)
+    for event_name in ["load_overlay_requested", "load_threaded_request_begin", "load_threaded_request_returned", "load_resources_ready", "load_get_packed_begin", "load_activate_scene_begin", "load_scene_ready", "casino_door_interacted"]:
+        if not journal_text.contains('"event":"'+event_name+'"'):
+            _fail("Missing persisted crash breadcrumb: "+event_name)
+            return
+    journal.set("enabled",false)
+    for file_name in DirAccess.get_files_at(journal_dir):
+        DirAccess.remove_absolute(ProjectSettings.globalize_path(journal_dir.path_join(file_name)))
+    DirAccess.remove_absolute(ProjectSettings.globalize_path(journal_dir))
     state.save_path = previous_save
     if FileAccess.file_exists(test_save):
         DirAccess.remove_absolute(ProjectSettings.globalize_path(test_save))

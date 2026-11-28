@@ -18,6 +18,7 @@ config/windows_native_icon="res://branding/casino_anomaly.ico"
 
 [autoload]
 
+CrashJournal="*res://gameplay/crash_journal.gd"
 ProfileManager="*res://gameplay/profile_manager.gd"
 LoopState="*res://gameplay/loop_state.gd"
 GameSettings="*res://gameplay/settings.gd"

@@ -29,6 +29,16 @@ var committing := false
 var failed := false
 var elapsed := 0.0
 var display_progress := 0.0
+var _last_journal_progress := -1
+
+
+func _trace(event: String, details: Dictionary = {}) -> void:
+    var journal := get_node_or_null("/root/CrashJournal")
+    if journal != null:
+        var payload := details.duplicate()
+        payload["target"] = target_path
+        payload["progress_percent"] = int(round(display_progress * 100.0))
+        journal.call("record", event, payload)
 
 
 func _ready() -> void:
@@ -184,6 +194,8 @@ func travel_to(path: String, complete_intro: bool = false) -> bool:
     finish_tutorial = complete_intro
     elapsed = 0.0
     display_progress = 0.0
+    _last_journal_progress = -1
+    _trace("load_overlay_requested", {"complete_intro": complete_intro})
     progress_bar.value = 0.0
     progress_label.text = "0%"
     overlay.modulate.a = 1.0
@@ -207,7 +219,9 @@ func _begin_loading() -> void:
     # Keep the asynchronous request and progress polling, but serialize
     # dependency loading there. The real GPU game retains parallel loading.
     var use_sub_threads := DisplayServer.get_name() != "headless"
+    _trace("load_threaded_request_begin", {"parallel_dependencies": use_sub_threads})
     var err := ResourceLoader.load_threaded_request(target_path, "PackedScene", use_sub_threads)
+    _trace("load_threaded_request_returned", {"error": err})
     if err != OK:
         _fail("ResourceLoader request error: %s" % err)
         return
@@ -230,10 +244,15 @@ func _process(delta: float) -> void:
                 display_progress = maxf(display_progress, clampf(float(progress[0]), 0.0, 1.0) * 0.90)
                 progress_bar.value = display_progress * 100.0
                 progress_label.text = "%d%%" % int(round(display_progress * 100.0))
+                var bucket := int(display_progress * 10.0)
+                if bucket > _last_journal_progress:
+                    _last_journal_progress = bucket
+                    _trace("load_progress")
         ResourceLoader.THREAD_LOAD_LOADED:
             requested = false
             committing = true
             display_progress = 0.94
+            _trace("load_resources_ready")
             progress_bar.value = 94.0
             progress_label.text = "94%"
             status_label.text = Loc.t("loading.initializing", self)
@@ -249,11 +268,15 @@ func _commit_scene() -> void:
     await get_tree().process_frame
     if not active or failed:
         return
+    _trace("load_get_packed_begin")
     var packed := ResourceLoader.load_threaded_get(target_path) as PackedScene
+    _trace("load_get_packed_returned", {"valid": packed != null})
     if packed == null:
         _fail("Target is not a PackedScene: " + target_path)
         return
+    _trace("load_activate_scene_begin")
     var error := get_tree().change_scene_to_packed(packed)
+    _trace("load_activate_scene_returned", {"error": error})
     if error != OK:
         _fail("Scene activation error: %s" % error)
         return
@@ -265,6 +288,8 @@ func _commit_scene() -> void:
             run_state.complete_tutorial()
     await get_tree().process_frame
     await get_tree().process_frame
+    display_progress = 1.0
+    _trace("load_scene_ready")
     progress_bar.value = 100.0
     progress_label.text = "100%"
     status_label.text = Loc.t("loading.ready", self)
@@ -274,6 +299,7 @@ func _commit_scene() -> void:
 
 
 func _finish() -> void:
+    _trace("load_overlay_closed", {"failed": failed})
     overlay.visible = false
     overlay.modulate.a = 1.0
     active = false
@@ -284,6 +310,7 @@ func _finish() -> void:
 
 
 func _fail(detail: String) -> void:
+    _trace("load_failed", {"error": detail})
     push_warning("Casino Anomaly scene loading failed: " + detail)
     requested = false
     committing = false
