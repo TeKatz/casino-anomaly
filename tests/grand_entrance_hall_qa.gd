@@ -54,6 +54,27 @@ func _run() -> void:
         return
     if not _verify_finishes(hall) or not _verify_interior(hall) or not _verify_detail_assets(hall):
         return
+    # The actual player surface routing must switch at the authored edges.
+    for record in [[Vector3(0,1.02,12),"carpet"],[Vector3(0,1.02,-5.9),"carpet"],[Vector3(2.46,1.02,3),"carpet"],[Vector3(2.5,1.02,3),"wood"],[Vector3(0,1.02,12.3),"wood"],[Vector3(-3.2,1.02,3),"wood"]]:
+        player.global_position = hall.to_global(record[0])
+        if player.call("_surface_underfoot")!=record[1]:
+            _fail("Incorrect actual footstep surface at "+str(record[0]))
+            return
+    var carpet_count := 0
+    for candidate in get_nodes_in_group("hall_carpet_surface"):
+        var carpet := candidate as MeshInstance3D
+        if carpet==null or not hall.is_ancestor_of(carpet):
+            continue
+        carpet_count+=1
+        var center := carpet.to_global(carpet.get_aabb().get_center())
+        player.global_position = Vector3(center.x,1.02,center.z)
+        if player.call("_surface_underfoot")!="carpet":
+            _fail("Authored lounge rug lacks carpet audio: "+str(carpet.get_path()))
+            return
+    if carpet_count!=5:
+        _fail("Expected the central runner and four lounge rug sound surfaces")
+        return
+    player.position = Vector3(0,1.02,12)
     var space := hall.get_world_3d().direct_space_state
     var exclude: Array[RID] = [player.get_rid()]
     var shape := CapsuleShape3D.new()
@@ -244,9 +265,33 @@ func _verify_finishes(hall: Node3D) -> bool:
                 return false
     var runner := hall.get_node("Architecture/CentralAxis/BurgundyRunner") as MeshInstance3D
     var bounds: AABB = runner.global_transform * runner.get_aabb()
-    if bounds.position.y<=0.0 or bounds.end.y>0.02 or bounds.position.x<=-2.46 or bounds.end.x>=2.46:
-        _fail("Runner clips the floor or inlays")
+    var axis := hall.get_node("Architecture/CentralAxis")
+    var west := _model_bounds(axis.get_node("WestInlay") as Node3D)
+    var east := _model_bounds(axis.get_node("EastInlay") as Node3D)
+    var counter_front := _model_bounds(hall.get_node("Reception/Counter/Front/Mesh") as Node3D)
+    var mat := runner.material_override as StandardMaterial3D
+    if not runner.mesh is PlaneMesh or mat==null or mat.uv1_triplanar or not runner.is_in_group("hall_carpet_surface") or bounds.position.y<=0.0 or bounds.end.y>0.02:
+        _fail("Runner is not a continuous UV-mapped, collision-free surface")
         return false
+    if absf(bounds.position.x-west.end.x)>0.001 or absf(bounds.end.x-east.position.x)>0.001 or absf(bounds.position.z-counter_front.end.z)>0.001 or absf(bounds.position.z-west.position.z)>0.001 or absf(bounds.position.z-east.position.z)>0.001 or absf(bounds.end.z-west.end.z)>0.001 or absf(bounds.end.z-east.end.z)>0.001:
+        _fail("Runner does not meet the counter and both full-length inlays")
+        return false
+    if absf(bounds.end.y-west.end.y)>0.001 or absf(bounds.end.y-east.end.y)>0.001:
+        _fail("Runner and brass trim have uneven top surfaces")
+        return false
+    var arrival := hall.get_node("Architecture/Arrival")
+    var leaf := _model_bounds(arrival.get_node("EntranceDoubleDoor/Mesh") as Node3D)
+    var lintel := _model_bounds(arrival.get_node("EntranceLintel") as Node3D)
+    var jamb_west := _model_bounds(arrival.get_node("WestJamb/Mesh") as Node3D)
+    var jamb_east := _model_bounds(arrival.get_node("EastJamb/Mesh") as Node3D)
+    var wall := _model_bounds(hall.get_node("Architecture/MainWalls/ArrivalWall/Mesh") as Node3D)
+    if absf(leaf.position.x-jamb_west.end.x)>0.001 or absf(leaf.end.x-jamb_east.position.x)>0.001 or absf(leaf.end.y-lintel.position.y)>0.001 or absf(jamb_west.end.y-lintel.position.y)>0.001 or absf(jamb_east.end.y-lintel.position.y)>0.001 or absf(jamb_west.position.x-lintel.position.x)>0.001 or absf(jamb_east.end.x-lintel.end.x)>0.001:
+        _fail("Entrance frame has an open or overlapping joint")
+        return false
+    for piece in [leaf,lintel,jamb_west,jamb_east]:
+        if absf(piece.end.z-wall.position.z)>0.001:
+            _fail("Entrance frame or leaf is not flush with the supporting wall")
+            return false
     return true
 
 
@@ -339,15 +384,30 @@ func _verify_interior(hall: Node3D) -> bool:
             return false
     var light_count := 0
     var shadow_count := 0
+    var shadow_views := 0
     for item in hall.find_children("*","Light3D",true,false):
         var light := item as Light3D
         light_count += 1
         if light.shadow_enabled:
             shadow_count += 1
-    if light_count>22 or shadow_count>2:
-        _fail("Lobby lighting exceeded its dynamic light/shadow budget")
+            if light is OmniLight3D:
+                shadow_views+=6 # conservative cubemap face estimate
+            elif light is SpotLight3D:
+                shadow_views+=1
+                var spot := light as SpotLight3D
+                var direction := -spot.global_transform.basis.z.normalized()
+                if direction.dot(Vector3.DOWN)<=0.0 or acos(clampf(direction.dot(Vector3.DOWN),-1.0,1.0))+deg_to_rad(spot.spot_angle)>=PI*0.5:
+                    _fail("Shadow spotlight cone points toward ceiling: "+str(spot.get_path()))
+                    return false
+            else:
+                _fail("Unexpected lobby shadow light type")
+                return false
+    # Five downward single-view spots replace two six-face omnis. This is
+    # a shadow projection budget, not a measured frame-time guarantee.
+    if light_count>22 or shadow_count!=5 or shadow_views>5:
+        _fail("Lobby lighting exceeded its downward shadow projection budget")
         return false
-    print("HALL_INTERIOR_BUDGET: meshes=",hall.find_children("*","MeshInstance3D",true,false).size()," lights=",light_count," shadow_lights=",shadow_count)
+    print("HALL_INTERIOR_BUDGET: meshes=",hall.find_children("*","MeshInstance3D",true,false).size()," lights=",light_count," shadow_lights=",shadow_count," shadow_views=",shadow_views)
     return true
 
 

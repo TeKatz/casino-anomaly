@@ -298,8 +298,21 @@ func _surface_underfoot() -> String:
     if backrooms_mode:
         return "wet_carpet"
     var room := get_parent() as Node3D
-    if room == null or not room.has_node("RedCarpet"):
-        return "wood" # Tutorial has no carpet.
+    if room == null:
+        return "wood"
+    # The entrance hall has decorative, non-colliding carpet meshes.
+    # Their authored local bounds are the surface contract, not hardcoded
+    # room coordinates, so moving a rug in the editor also moves its audio.
+    for candidate in get_tree().get_nodes_in_group("hall_carpet_surface"):
+        var carpet := candidate as MeshInstance3D
+        if carpet == null or carpet.mesh == null or not room.is_ancestor_of(carpet) or not carpet.is_visible_in_tree():
+            continue
+        var local := carpet.to_local(global_position)
+        var bounds := carpet.get_aabb()
+        if local.x >= bounds.position.x and local.x <= bounds.end.x and local.z >= bounds.position.z and local.z <= bounds.end.z:
+            return "carpet"
+    if not room.has_node("RedCarpet"):
+        return "wood"
     return classify_casino_surface(room.to_local(global_position))
 
 

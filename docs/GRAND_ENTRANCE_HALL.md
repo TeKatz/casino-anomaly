@@ -157,6 +157,24 @@ for the existing lighting. Run `python tools/ensure_assets.py` and
 are missing. Actual Forward+ appearance and GPU memory/frame time need
 manual verification.
 
+## Phase 7B — Runner, light and entrance refinements
+
+The main runner is a single UV-mapped plane with an 18.2 m continuous
+length, touching the reception front and both brass inlays. It retains
+the original woven material. The main runner and four lounge rugs are
+tagged as authored carpet surfaces; the player selects the existing
+carpet walk/run sounds from their actual local mesh extents. No carpet
+collider or new audio resources are added. The main casino and Backrooms
+surface rules are unchanged.
+
+The two original shadowed omni lights are replaced by five downward
+single-view spotlights across the nave and reception, with existing
+non-shadow ambient/fill lighting retained. QA verifies downward-only
+shadow cones and the light/projection budget; actual GPU performance
+and shadow appearance require a Forward+ playtest. The entrance door,
+jambs and lintel now meet precisely with the supporting wall, with
+matching updated box collisions and the existing bronze finish.
+
 ## QA
 
 Run `godot --headless --path . --script tests/grand_entrance_hall_qa.gd`

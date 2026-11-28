@@ -124,7 +124,6 @@ uv1_triplanar = true
 uv1_world_triplanar = true
 texture_filter = 5
 
-
 [sub_resource type="StandardMaterial3D" id="Plaster"]
 resource_name = "Hall | fine ivory plaster (Plaster002)"
 albedo_color = Color(0.92, 0.89, 0.83, 1)
@@ -140,7 +139,6 @@ uv1_scale = Vector3(0.8, 0.8, 0.8)
 uv1_triplanar = true
 uv1_world_triplanar = true
 texture_filter = 5
-
 
 [sub_resource type="StandardMaterial3D" id="DeepGreen"]
 resource_name = "Hall | dark green woven wallcovering"
@@ -287,7 +285,7 @@ size = Vector3(4.1, 0.32, 12.6)
 size = Vector3(4.1, 0.32, 12.6)
 
 [sub_resource type="BoxMesh" id="Box_5"]
-size = Vector3(0.055, 0.008, 18.3)
+size = Vector3(0.055, 0.008, 18.2)
 
 [sub_resource type="BoxMesh" id="Box_6"]
 size = Vector3(16.6, 8.6, 0.3)
@@ -338,25 +336,25 @@ size = Vector3(0.42, 0.24, 27.94)
 size = Vector3(0.32, 0.13, 27.94)
 
 [sub_resource type="BoxMesh" id="Box_22"]
-size = Vector3(3.6, 3.6, 0.14)
+size = Vector3(3.62, 3.68, 0.14)
 
 [sub_resource type="BoxShape3D" id="Shape_23"]
-size = Vector3(3.6, 3.6, 0.14)
+size = Vector3(3.62, 3.68, 0.14)
 
 [sub_resource type="BoxMesh" id="Box_24"]
-size = Vector3(0.28, 3.8, 0.34)
+size = Vector3(0.28, 3.68, 0.36)
 
 [sub_resource type="BoxShape3D" id="Shape_25"]
-size = Vector3(0.28, 3.8, 0.34)
+size = Vector3(0.28, 3.68, 0.36)
 
 [sub_resource type="BoxMesh" id="Box_26"]
 size = Vector3(0.08, 0.42, 0.08)
 
 [sub_resource type="BoxMesh" id="Box_27"]
-size = Vector3(4.2, 0.34, 0.38)
+size = Vector3(4.18, 0.34, 0.40)
 
 [sub_resource type="BoxMesh" id="Box_28"]
-size = Vector3(0.035, 3.5, 0.024)
+size = Vector3(0.035, 3.6, 0.024)
 
 [sub_resource type="BoxMesh" id="Box_29"]
 size = Vector3(1.12, 0.3, 1.12)
@@ -551,7 +549,6 @@ uv1_triplanar = true
 uv1_world_triplanar = true
 texture_filter = 5
 
-
 [sub_resource type="StandardMaterial3D" id="HallRunner"]
 resource_name = "Hall | burgundy woven runner"
 albedo_color = Color(0.68, 0.37, 0.36, 1)
@@ -562,13 +559,12 @@ roughness_texture = ExtResource("Runner2")
 normal_enabled = true
 normal_scale = 0.25
 normal_texture = ExtResource("Runner1")
-uv1_scale = Vector3(1, 1, 1)
-uv1_triplanar = true
-uv1_world_triplanar = true
+uv1_scale = Vector3(4.945, 18.2, 1)
+texture_repeat = true
 texture_filter = 5
 
-[sub_resource type="BoxMesh" id="RunnerSlab"]
-size = Vector3(4.88, 0.008, 18.1)
+[sub_resource type="PlaneMesh" id="RunnerSlab"]
+size = Vector2(4.945, 18.2)
 
 [sub_resource type="BoxMesh" id="ClerestoryInset"]
 size = Vector3(0.055, 2.5, 4.4)
@@ -753,12 +749,14 @@ shape = SubResource("Shape_4")
 [node name="CentralAxis" type="Node3D" parent="Architecture"]
 
 [node name="WestInlay" type="MeshInstance3D" parent="Architecture/CentralAxis"]
-position = Vector3(-2.5, 0.004, 3)
+position = Vector3(-2.5, 0.005, 3.05)
+cast_shadow = 0
 mesh = SubResource("Box_5")
 material_override = SubResource("FloorInlay")
 
 [node name="EastInlay" type="MeshInstance3D" parent="Architecture/CentralAxis"]
-position = Vector3(2.5, 0.004, 3)
+position = Vector3(2.5, 0.005, 3.05)
+cast_shadow = 0
 mesh = SubResource("Box_5")
 material_override = SubResource("FloorInlay")
 
@@ -991,7 +989,7 @@ material_override = SubResource("Brass")
 [node name="Arrival" type="Node3D" parent="Architecture"]
 
 [node name="EntranceDoubleDoor" type="StaticBody3D" parent="Architecture/Arrival"]
-position = Vector3(0, 1.8, 13.93)
+position = Vector3(0, 1.84, 13.93)
 
 [node name="Mesh" type="MeshInstance3D" parent="Architecture/Arrival/EntranceDoubleDoor"]
 mesh = SubResource("Box_22")
@@ -1001,7 +999,7 @@ material_override = SubResource("HallWood")
 shape = SubResource("Shape_23")
 
 [node name="WestJamb" type="StaticBody3D" parent="Architecture/Arrival"]
-position = Vector3(-1.95, 1.9, 13.82)
+position = Vector3(-1.95, 1.84, 13.82)
 
 [node name="Mesh" type="MeshInstance3D" parent="Architecture/Arrival/WestJamb"]
 mesh = SubResource("Box_24")
@@ -1016,7 +1014,7 @@ mesh = SubResource("Box_26")
 material_override = SubResource("Brass")
 
 [node name="EastJamb" type="StaticBody3D" parent="Architecture/Arrival"]
-position = Vector3(1.95, 1.9, 13.82)
+position = Vector3(1.95, 1.84, 13.82)
 
 [node name="Mesh" type="MeshInstance3D" parent="Architecture/Arrival/EastJamb"]
 mesh = SubResource("Box_24")
@@ -1036,7 +1034,7 @@ mesh = SubResource("Box_27")
 material_override = SubResource("DarkBronze")
 
 [node name="DoorSeam" type="MeshInstance3D" parent="Architecture/Arrival"]
-position = Vector3(0, 1.8, 13.849)
+position = Vector3(0, 1.84, 13.849)
 mesh = SubResource("Box_28")
 material_override = SubResource("DarkBronze")
 
@@ -2386,37 +2384,57 @@ material_override = SubResource("Brass")
 
 [node name="Lighting" type="Node3D" parent="."]
 
-[node name="NaveFill1" type="OmniLight3D" parent="Lighting"]
-position = Vector3(0, 7.02, 10.3)
+[node name="NaveFill1" type="SpotLight3D" parent="Lighting"]
+position = Vector3(0, 6.5, 10.3)
+rotation = Vector3(-1.5707963, 0, 0)
 light_color = Color(1, 0.88, 0.73, 1)
-light_energy = 2.75
-omni_range = 11.5
-omni_attenuation = 1.15
-shadow_enabled = false
+light_energy = 3.8
+spot_range = 11.5
+spot_angle = 55.0
+spot_attenuation = 0.85
+shadow_enabled = true
+shadow_blur = 1.5
 
 [node name="NaveFill2" type="OmniLight3D" parent="Lighting"]
 position = Vector3(0, 7.02, 6.2)
 light_color = Color(1, 0.88, 0.73, 1)
-light_energy = 2.75
+light_energy = 0.85
 omni_range = 11.5
 omni_attenuation = 1.15
 shadow_enabled = false
 
-[node name="NaveFill3" type="OmniLight3D" parent="Lighting"]
-position = Vector3(0, 7.02, 0.65)
+[node name="NaveShadow2" type="SpotLight3D" parent="Lighting"]
+position = Vector3(0, 6.5, 6.2)
+rotation = Vector3(-1.5707963, 0, 0)
 light_color = Color(1, 0.88, 0.73, 1)
-light_energy = 3.0
-omni_range = 11.5
-omni_attenuation = 1.15
+light_energy = 3.8
+spot_range = 11.5
+spot_angle = 55.0
+spot_attenuation = 0.85
 shadow_enabled = true
+shadow_blur = 1.5
 
-[node name="NaveFill4" type="OmniLight3D" parent="Lighting"]
-position = Vector3(0, 7.02, -5.45)
+[node name="NaveFill3" type="SpotLight3D" parent="Lighting"]
+position = Vector3(0, 6.5, 0.65)
+rotation = Vector3(-1.5707963, 0, 0)
 light_color = Color(1, 0.88, 0.73, 1)
-light_energy = 2.75
-omni_range = 11.5
-omni_attenuation = 1.15
-shadow_enabled = false
+light_energy = 4
+spot_range = 11.5
+spot_angle = 55.0
+spot_attenuation = 0.85
+shadow_enabled = true
+shadow_blur = 1.5
+
+[node name="NaveFill4" type="SpotLight3D" parent="Lighting"]
+position = Vector3(0, 6.5, -5.45)
+rotation = Vector3(-1.5707963, 0, 0)
+light_color = Color(1, 0.88, 0.73, 1)
+light_energy = 3.8
+spot_range = 11.5
+spot_angle = 55.0
+spot_attenuation = 0.85
+shadow_enabled = true
+shadow_blur = 1.5
 
 [node name="NaveFill5" type="OmniLight3D" parent="Lighting"]
 position = Vector3(0, 7.4, -11.1)
@@ -2458,13 +2476,16 @@ omni_range = 5.6
 omni_attenuation = 1.25
 shadow_enabled = false
 
-[node name="ReceptionKey" type="OmniLight3D" parent="Lighting"]
-position = Vector3(0, 3.55, -5.3)
+[node name="ReceptionKey" type="SpotLight3D" parent="Lighting"]
+position = Vector3(0, 4.3, -4.5)
+rotation = Vector3(-0.95, 0, 0)
 light_color = Color(1, 0.92, 0.81, 1)
-light_energy = 1.65
-omni_range = 6.5
-omni_attenuation = 1.2
+light_energy = 2.1
+spot_range = 8.0
+spot_angle = 48.0
+spot_attenuation = 0.9
 shadow_enabled = true
+shadow_blur = 1.5
 
 [node name="DesignMarkers" type="Node3D" parent="."]
 
@@ -2554,8 +2575,9 @@ shape = SubResource("PlayerCapsule")
 position = Vector3(0, 0.55, 0)
 current = true
 
-[node name="BurgundyRunner" type="MeshInstance3D" parent="Architecture/CentralAxis"]
-position = Vector3(0, 0.008, 3.1)
+[node name="BurgundyRunner" type="MeshInstance3D" parent="Architecture/CentralAxis" groups=["hall_carpet_surface"]]
+position = Vector3(0, 0.009, 3.05)
+cast_shadow = 0
 mesh = SubResource("RunnerSlab")
 material_override = SubResource("HallRunner")
 
@@ -2863,7 +2885,7 @@ position = Vector3(-6.49, 0, 11.21)
 [node name="AreaRug" type="Node3D" parent="Interior/Lounges/WestConversationLounge"]
 position = Vector3(0, 0, 0)
 
-[node name="WovenField" type="MeshInstance3D" parent="Interior/Lounges/WestConversationLounge/AreaRug"]
+[node name="WovenField" type="MeshInstance3D" parent="Interior/Lounges/WestConversationLounge/AreaRug" groups=["hall_carpet_surface"]]
 position = Vector3(0, 0.0065, 0)
 mesh = SubResource("LoungeRugLarge")
 material_override = SubResource("LoungeRug")
@@ -2941,7 +2963,7 @@ position = Vector3(-6.52, 0, 6.12)
 [node name="AreaRug" type="Node3D" parent="Interior/Lounges/WestWaitingNook"]
 position = Vector3(0, 0, 0)
 
-[node name="WovenField" type="MeshInstance3D" parent="Interior/Lounges/WestWaitingNook/AreaRug"]
+[node name="WovenField" type="MeshInstance3D" parent="Interior/Lounges/WestWaitingNook/AreaRug" groups=["hall_carpet_surface"]]
 position = Vector3(0, 0.0065, 0)
 mesh = SubResource("LoungeRugSmall")
 material_override = SubResource("LoungeRug")
@@ -3191,7 +3213,7 @@ position = Vector3(6.49, 0, 11.21)
 [node name="AreaRug" type="Node3D" parent="Interior/Lounges/EastConversationLounge"]
 position = Vector3(0, 0, 0)
 
-[node name="WovenField" type="MeshInstance3D" parent="Interior/Lounges/EastConversationLounge/AreaRug"]
+[node name="WovenField" type="MeshInstance3D" parent="Interior/Lounges/EastConversationLounge/AreaRug" groups=["hall_carpet_surface"]]
 position = Vector3(0, 0.0065, 0)
 mesh = SubResource("LoungeRugLarge")
 material_override = SubResource("LoungeRug")
@@ -3269,7 +3291,7 @@ position = Vector3(6.52, 0, 6.12)
 [node name="AreaRug" type="Node3D" parent="Interior/Lounges/EastWaitingNook"]
 position = Vector3(0, 0, 0)
 
-[node name="WovenField" type="MeshInstance3D" parent="Interior/Lounges/EastWaitingNook/AreaRug"]
+[node name="WovenField" type="MeshInstance3D" parent="Interior/Lounges/EastWaitingNook/AreaRug" groups=["hall_carpet_surface"]]
 position = Vector3(0, 0.0065, 0)
 mesh = SubResource("LoungeRugSmall")
 material_override = SubResource("LoungeRug")
