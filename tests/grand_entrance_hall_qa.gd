@@ -211,7 +211,12 @@ func _verify_finishes(hall: Node3D) -> bool:
 func _model_bounds(model: Node3D) -> AABB:
     var result := AABB()
     var found := false
-    for part in model.find_children("*","MeshInstance3D",true,false):
+    # find_children() excludes the receiver; a direct support mesh (e.g.
+    # the reception countertop) must contribute its own world-space bounds.
+    var parts := model.find_children("*","MeshInstance3D",true,false)
+    if model is MeshInstance3D:
+        parts.push_front(model)
+    for part in parts:
         var mesh := part as MeshInstance3D
         if mesh.mesh == null:
             continue
@@ -356,8 +361,11 @@ func _verify_detail_assets(hall: Node3D) -> bool:
         var support := hall.get_node(record[1]) as Node3D
         var bounds := _model_bounds(prop_node)
         var top := _model_bounds(support)
+        if top.size.x<=0.0 or top.size.z<=0.0:
+            _fail("Lobby detail has no valid support geometry: "+str(record[1])+" "+str(top))
+            return false
         if absf(bounds.position.y-top.end.y)>0.025 or bounds.position.x<top.position.x or bounds.end.x>top.end.x or bounds.position.z<top.position.z or bounds.end.z>top.end.z:
-            _fail("Lobby detail is floating or overhanging: "+str(record[0])+" "+str(bounds))
+            _fail("Lobby detail is floating or overhanging: "+str(record[0])+" "+str(bounds)+" support="+str(top))
             return false
     for record in [
         ["Interior/WallArtAndTrim/WestPanel1/AlternatePainting",-7.93,0],
