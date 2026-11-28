@@ -428,7 +428,7 @@ func _run() -> void:
     settings.save_options()
     DirAccess.remove_absolute(ProjectSettings.globalize_path(state.save_path))
     print("Casino Anomaly seamless two-room streaming QA PASS")
-    quit(0)
+    root.get_node("AudioDirector").call("request_quit")
 
 func _exercise_settings(controller: Node, player: CharacterBody3D, first: Node3D, second: Node3D, state: Node, settings: Node) -> bool:
     var baseline: Dictionary = settings.get("options").duplicate(true)

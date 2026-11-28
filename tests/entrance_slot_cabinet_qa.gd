@@ -107,4 +107,4 @@ func _run() -> void:
     world.queue_free()
     await process_frame
     print("Casino Anomaly entrance slot cabinet QA PASS")
-    quit(0)
+    root.get_node("AudioDirector").call("request_quit")

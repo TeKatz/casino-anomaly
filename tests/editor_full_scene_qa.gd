@@ -113,4 +113,4 @@ func _run() -> void:
             _fail("An artist-deleted slot left behind an invisible collision cabinet")
             return
     print("Casino Anomaly complete Godot editor scene QA PASS")
-    quit(0)
+    root.get_node("AudioDirector").call("request_quit")

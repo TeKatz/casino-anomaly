@@ -235,4 +235,4 @@ func _run() -> void:
     await process_frame
     DirAccess.remove_absolute(ProjectSettings.globalize_path(state.save_path))
     print("Casino Anomaly pause, persistent settings and world-camera input QA PASS")
-    quit(0)
+    root.get_node("AudioDirector").call("request_quit")

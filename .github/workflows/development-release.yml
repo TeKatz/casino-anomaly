@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Test Python tools and QA catalog
         run: python3 -m unittest discover -s tests -p 'test_*.py'
       - name: Verify approved branding assets
@@ -35,10 +35,10 @@ jobs:
       group: casino-qa-linux-${{ github.ref }}
       cancel-in-progress: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Restore pinned Godot download cache
         id: godot-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: /tmp/godot-package/godot.zip
           key: godot-linux-x86_64-4.5.1-stable-archive-v1
@@ -84,7 +84,7 @@ jobs:
           if grep -Eq 'SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:' qa-logs/import.log; then exit 1; fi
       - name: Run all Linux suites (no fail-fast)
         run: python3 tools/run_qa_group.py /tmp/godot-bin/Godot_v4.5.1-stable_linux.x86_64 baseline flood other_side gameplay intro-audio entrance-blockout --logs qa-logs
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: qa-logs-linux
@@ -99,10 +99,10 @@ jobs:
       group: casino-qa-win-${{ github.ref }}
       cancel-in-progress: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           persist-credentials: false
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
       - name: Import verified Poly Haven textures and 3D model dependencies
@@ -129,7 +129,7 @@ jobs:
 
       - name: Restore pinned Windows Godot archive
         id: godot-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ runner.temp }}/casino-anomaly-godot/godot.zip
           key: godot-windows-x86_64-4.5.1-stable-archive-v1
@@ -166,7 +166,7 @@ jobs:
         run: |
           python tools/run_qa_group.py "$env:GODOT_EDITOR" windows-profiles-settings windows-ui-tutorial windows-casino-geometry windows-render-editor entrance-blockout --logs qa-logs
           if ($LASTEXITCODE -ne 0) { throw 'One or more Windows tests failed; see complete QA summary' }
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: qa-logs-windows
@@ -186,11 +186,11 @@ jobs:
       version: ${{ steps.version.outputs.version }}
       source_commit: ${{ steps.version.outputs.source_commit }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -222,7 +222,7 @@ jobs:
         run: |
           python tools/audit_render_assets.py > render-asset-audit.json
           if ($LASTEXITCODE -ne 0) { throw 'Render asset audit failed' }
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: render-asset-audit
           path: render-asset-audit.json
@@ -244,7 +244,7 @@ jobs:
           "version=$version" >> $env:GITHUB_OUTPUT
           "source_commit=$env:PUBLISHED_COMMIT" >> $env:GITHUB_OUTPUT
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '10.0.x'
       - name: Compile updater and run contract tests
@@ -254,14 +254,14 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Updater compilation failed' }
           & ./artifacts/updater/CasinoAnomaly.Updater.exe --self-test
           if ($LASTEXITCODE -ne 0) { throw 'Updater contract failed' }
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: ~/AppData/Roaming/Godot/export_templates/4.5.1.stable
           key: anomaly-godot-4.5.1-win-x64-v1
 
       - name: Restore pinned Windows Godot archive
         id: godot-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ runner.temp }}/casino-anomaly-godot/godot.zip
           key: godot-windows-x86_64-4.5.1-stable-archive-v1
@@ -378,7 +378,7 @@ jobs:
       # Keep a downloadable standalone ZIP even when repository policy
       # prevents the GitHub Actions token from creating a Release.
       - name: Preserve downloadable Windows build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: casino-anomaly-win-x64
           path: |
@@ -388,7 +388,7 @@ jobs:
             artifacts/release-notes.md
           retention-days: 7
           if-no-files-found: error
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: windows-export-logs
@@ -426,7 +426,7 @@ jobs:
           } else {
             "current=true" >> $env:GITHUB_OUTPUT
           }
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         if: steps.freshness.outputs.current == 'true'
         with:
           name: casino-anomaly-win-x64

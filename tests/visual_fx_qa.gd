@@ -157,4 +157,4 @@ func _run() -> void:
         return
     print("Casino Anomaly visual FX QA PASS")
     hall.queue_free()
-    quit(0)
+    root.get_node("AudioDirector").call("request_quit")

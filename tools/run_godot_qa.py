@@ -30,14 +30,8 @@ def classify_line(line, expected, passed, platform, script="", editor=False):
     """Return (success marker seen, fatal error, shutdown diagnostic)."""
     clean = re.sub(r"\x1b\[[0-?]*[ -/]*[@-~]", "", line).strip()
     passed = passed or clean == expected
-    shutdown = (
-        passed and platform in ("win32", "linux") and re.fullmatch(
-            r"ERROR: \d+ resources? still in use at exit \(run with --verbose for details\)\.?",
-            clean,
-        ) is not None
-    )
-    shutdown = shutdown or (passed and platform == "win32" and
-                            known_renderer_shutdown(clean, script, editor))
+    shutdown = (passed and platform == "win32" and
+                known_renderer_shutdown(clean, script, editor))
     fatal = not shutdown and bool(re.search(
         r"SCRIPT ERROR:|Parse Error:|Failed to load|^ERROR:", clean
     ))
@@ -55,10 +49,6 @@ def main():
     parser.add_argument("--seconds", type=int, default=300)
     args = parser.parse_args()
     cmd = [args.godot, "--headless", "--path", ".", "--script", "res://" + args.script]
-    # Temporary investigation: identify the remaining shutdown objects
-    # in existing fixtures, without adding test runs or changing pass rules.
-    if args.script in ("tests/grand_entrance_hall_qa.gd", "tests/menu_visual_qa.gd"):
-        cmd.insert(1, "--verbose")
     if args.editor:
         cmd.insert(1, "--editor")
     if args.suite:
@@ -84,7 +74,7 @@ def main():
                 log.flush()
                 passed, fatal, shutdown = classify_line(line, args.expected, passed, sys.platform, args.script, args.editor)
                 if shutdown:
-                    print("::warning::Godot shutdown resource/RID diagnostic after successful QA; investigate cleanup separately.", flush=True)
+                    print("::warning::Known Godot headless-editor RID diagnostic after successful QA.", flush=True)
                 failed |= fatal
             code = proc.wait()
         finally:

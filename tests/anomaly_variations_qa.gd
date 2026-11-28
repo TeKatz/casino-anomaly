@@ -183,7 +183,7 @@ func _run() -> void:
         isolated_room.queue_free()
         await process_frame
         print("Casino Anomaly major event QA PASS: ", suite)
-        quit(0)
+        root.get_node("AudioDirector").call("request_quit")
         return
 
     if not _verify_cool_fixture_lights(room):
@@ -472,7 +472,7 @@ func _run() -> void:
     next_room.queue_free()
     await process_frame
     print("Casino Anomaly ten subtle anomalies QA PASS")
-    quit(0)
+    root.get_node("AudioDirector").call("request_quit")
 
 
 func _verify_horror_batch(hall: Node3D, other_hall: Node3D) -> bool:

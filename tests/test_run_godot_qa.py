@@ -11,19 +11,19 @@ class LogClassifierTests(unittest.TestCase):
         return classify_line(line, self.marker, passed, platform)
 
     def test_exact_windows_log(self):
-        self.assertEqual(self.classify(self.leak + "\r\n"), (True, False, True))
+        self.assertEqual(self.classify(self.leak + "\r\n"), (True, True, False))
 
     def test_ansi_windows_log(self):
-        self.assertEqual(self.classify("\x1b[31;1m" + self.leak + "\x1b[0m\n"), (True, False, True))
+        self.assertEqual(self.classify("\x1b[31;1m" + self.leak + "\x1b[0m\n"), (True, True, False))
 
     def test_other_resource_count(self):
-        self.assertEqual(self.classify(self.leak.replace("2 resources", "1 resource")), (True, False, True))
+        self.assertEqual(self.classify(self.leak.replace("2 resources", "1 resource")), (True, True, False))
 
     def test_no_marker_yet(self):
         self.assertEqual(self.classify(self.leak, passed=False), (False, True, False))
 
-    def test_linux_known_shutdown_diagnostic(self):
-        self.assertEqual(self.classify(self.leak, platform="linux"), (True, False, True))
+    def test_linux_resource_leak_is_fatal(self):
+        self.assertEqual(self.classify(self.leak, platform="linux"), (True, True, False))
         self.assertEqual(self.classify(self.leak, passed=False, platform="linux"), (False, True, False))
         self.assertEqual(self.classify("ERROR: unrelated error", platform="linux"), (True, True, False))
 

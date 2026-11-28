@@ -152,4 +152,4 @@ func _run() -> void:
         await process_frame
     _restore_profile()
     print("Casino Anomaly profile side-card layout QA PASS")
-    quit(0)
+    root.get_node("AudioDirector").call("request_quit")

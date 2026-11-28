@@ -58,4 +58,4 @@ func _check() -> void:
         quit(1)
         return
     print("Casino Anomaly editor layout QA PASS")
-    quit(0)
+    root.get_node("AudioDirector").call("request_quit")

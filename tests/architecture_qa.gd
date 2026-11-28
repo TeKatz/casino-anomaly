@@ -111,4 +111,4 @@ func _run() -> void:
         return
     world.queue_free()
     print("Casino Anomaly architectural PBR finishes PASS")
-    quit(0)
+    root.get_node("AudioDirector").call("request_quit")

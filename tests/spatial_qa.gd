@@ -172,4 +172,4 @@ func _run() -> void:
 
     world.queue_free()
     print("Casino Anomaly spatial QA PASS: illuminated floors, 22+ solid pillars, bar clearance, 10 separated chairs, safe coffee cart, no orbs or plant collisions")
-    quit(0)
+    root.get_node("AudioDirector").call("request_quit")

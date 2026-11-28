@@ -119,4 +119,4 @@ func _run() -> void:
     panel.queue_free()
     await process_frame
     print("Casino Anomaly shared UI design QA PASS")
-    quit(0)
+    root.get_node("AudioDirector").call("request_quit")
