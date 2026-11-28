@@ -90,7 +90,7 @@ func _run() -> void:
             return
         print("Casino Anomaly Sketchfab editor preview QA PASS")
         world.queue_free()
-        quit(0)
+        root.get_node("AudioDirector").call("request_quit")
         return
 
     var preview := imported.call("create_editor_preview_for_test") as Node3D
@@ -146,4 +146,4 @@ func _run() -> void:
         return
     print("Casino Anomaly Sketchfab editor preview QA PASS")
     world.queue_free()
-    quit(0)
+    root.get_node("AudioDirector").call("request_quit")

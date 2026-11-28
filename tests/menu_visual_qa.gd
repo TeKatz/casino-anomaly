@@ -378,4 +378,4 @@ func _run() -> void:
     pause_ui.queue_free()
     await process_frame
     print("Casino Anomaly abstract UI and credits QA PASS")
-    quit(0)
+    root.get_node("AudioDirector").call("request_quit")

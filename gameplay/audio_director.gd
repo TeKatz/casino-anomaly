@@ -36,10 +36,13 @@ var _fade: Tween
 var _ambience_fade: Tween
 var _settings: Node
 var _loop_state: Node
+var _shutting_down := false
 
 
 func _ready() -> void:
     process_mode = Node.PROCESS_MODE_ALWAYS
+    if not Engine.is_editor_hint():
+        get_tree().auto_accept_quit = false
     _settings = get_node_or_null("/root/GameSettings")
     _loop_state = get_node_or_null("/root/LoopState")
     set_process(world_ambience_enabled)
@@ -81,7 +84,7 @@ func _load_loop(path: String) -> AudioStreamOggVorbis:
 func set_world_ambience_enabled(enabled: bool) -> void:
     # Called from the first-person Player on entering the world, and from
     # the main menu on return. Never restart ambience during hall streaming.
-    if world_ambience_enabled == enabled:
+    if _shutting_down or world_ambience_enabled == enabled:
         return
     world_ambience_enabled = enabled
     set_process(enabled)
@@ -133,7 +136,7 @@ func set_backrooms_mode(enabled: bool) -> void:
 
 
 func set_menu_music_enabled(enabled: bool) -> void:
-    if enabled == menu_enabled:
+    if _shutting_down or enabled == menu_enabled:
         return
     menu_enabled = enabled
     if _fade != null and _fade.is_running():
@@ -153,6 +156,68 @@ func set_menu_music_enabled(enabled: bool) -> void:
         _fade.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
         _fade.tween_property(menu_player, "volume_db", -60.0, FADE_SECONDS)
         _fade.tween_callback(menu_player.stop)
+
+
+func _notification(what: int) -> void:
+    if what == NOTIFICATION_WM_CLOSE_REQUEST and is_inside_tree() and not Engine.is_editor_hint():
+        request_quit()
+
+
+func _stop_shutdown_playbacks() -> Array[WeakRef]:
+    # Stop every voice while the mixer and SceneTree are still running.
+    # Weak references let us observe release without retaining the decoder.
+    var playbacks: Array[WeakRef] = []
+    for kind in ["AudioStreamPlayer", "AudioStreamPlayer2D", "AudioStreamPlayer3D"]:
+        for voice in get_tree().root.find_children("*", kind, true, false):
+            if voice.call("has_stream_playback"):
+                var playback := voice.call("get_stream_playback") as AudioStreamPlayback
+                if playback != null:
+                    playbacks.append(weakref(playback))
+            voice.call("stop")
+            voice.set("stream", null)
+    return playbacks
+
+
+func _shutdown_playbacks_released(playbacks: Array[WeakRef]) -> bool:
+    for reference in playbacks:
+        if reference.get_ref() != null:
+            return false
+    return true
+
+
+func _last_mix_usec() -> int:
+    return Time.get_ticks_usec() - roundi(AudioServer.get_time_since_last_mix() * 1000000.0)
+
+
+func request_quit(exit_code: int = 0) -> void:
+    if _shutting_down:
+        return
+    _shutting_down = true
+    var tree := get_tree()
+    tree.paused = true
+    set_process(false)
+    if _fade != null:
+        _fade.kill()
+    if _ambience_fade != null:
+        _ambience_fade.kill()
+    _fade = null
+    _ambience_fade = null
+    var playbacks := _stop_shutdown_playbacks()
+    # AudioServer processes playback deletion asynchronously. Allow the
+    # actual mixer to advance before destroying the tree and its resources.
+    var last_mix := _last_mix_usec()
+    var mixes := 0
+    var deadline := Time.get_ticks_msec() + 2000
+    while mixes < 2 or not _shutdown_playbacks_released(playbacks):
+        if Time.get_ticks_msec() >= deadline:
+            push_warning("Audio shutdown: mixer did not drain before the deadline")
+            break
+        await tree.process_frame
+        var latest_mix := _last_mix_usec()
+        if latest_mix > last_mix + 1000:
+            last_mix = latest_mix
+            mixes += 1
+    tree.quit(exit_code)
 
 
 func _exit_tree() -> void:
@@ -257,7 +322,7 @@ func _prepare_immersion() -> void:
 
 
 func get_immersion_loop(kind: String) -> AudioStreamWAV:
-    return procedural_loops.get(kind) as AudioStreamWAV
+    return null if _shutting_down else procedural_loops.get(kind) as AudioStreamWAV
 
 
 func footstep_group(surface: String, sprinting: bool) -> String:
@@ -289,7 +354,7 @@ func _next_step_index(group: String, count: int) -> int:
 
 
 func play_footstep(surface: String, sprinting: bool) -> void:
-    if not world_ambience_enabled or footstep_player == null:
+    if _shutting_down or not world_ambience_enabled or footstep_player == null:
         return
     var group := footstep_group(surface, sprinting)
     var variants: Array = step_sounds.get(group, [])

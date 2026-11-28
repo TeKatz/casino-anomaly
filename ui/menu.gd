@@ -400,7 +400,7 @@ func _quit_confirmed() -> void:
     screen.modulate.a = 0.0
     var tween := create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
     tween.tween_property(screen, "modulate:a", 1.0, 0.30)
-    tween.tween_callback(get_tree().quit)
+    tween.tween_callback(Callable(get_node("/root/AudioDirector"), "request_quit"))
 
 func _check_update() -> void:
     if request.get_http_client_status() != HTTPClient.STATUS_DISCONNECTED:
@@ -474,7 +474,7 @@ func _install_update() -> void:
     if child_pid <= 0:
         _set_status("menu.launch_updater_failed")
         return
-    get_tree().quit()
+    get_node("/root/AudioDirector").call("request_quit")
 
 
 func _show_run_results(report: Dictionary) -> void:

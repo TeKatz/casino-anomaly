@@ -202,4 +202,4 @@ func _run() -> void:
 
     world.queue_free()
     print("Casino Anomaly joinery and PBR texture QA PASS")
-    quit(0)
+    root.get_node("AudioDirector").call("request_quit")

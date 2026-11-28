@@ -169,4 +169,4 @@ func _run() -> void:
     await process_frame
     await process_frame
     print("Casino Anomaly threaded scene loading QA PASS")
-    quit(0)
+    root.get_node("AudioDirector").call("request_quit")

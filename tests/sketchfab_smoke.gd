@@ -130,4 +130,4 @@ func _test() -> void:
         return
     world.queue_free()
     print("Casino Anomaly Sketchfab model smoke PASS")
-    quit(0)
+    root.get_node("AudioDirector").call("request_quit")

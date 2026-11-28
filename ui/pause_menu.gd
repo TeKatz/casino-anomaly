@@ -359,14 +359,14 @@ func _request_quit() -> void:
     if state != null and str(state.get("mode")) == "time_trial" and bool(state.get("active")):
         state.call("save_run")
     if not bool(Controls.pref(self, "confirm_quit", false)):
-        get_tree().quit()
+        get_node("/root/AudioDirector").call("request_quit")
         return
     confirmation_action = "quit"
     MenuStyle.attach_sound(confirmation.get_ok_button(), "navigation")
     confirmation.dialog_text = "Spiel beenden?" if Controls.pref(self, "language", "en") == "de" else "Quit the game?"
     for connection in confirmation.confirmed.get_connections():
         confirmation.confirmed.disconnect(connection["callable"])
-    confirmation.confirmed.connect(get_tree().quit, CONNECT_ONE_SHOT)
+    confirmation.confirmed.connect(Callable(get_node("/root/AudioDirector"), "request_quit"), CONNECT_ONE_SHOT)
     confirmation.popup_centered()
 
 func _go_to_main_menu() -> void:

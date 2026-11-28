@@ -381,7 +381,7 @@ func _run() -> void:
         settings.set_option(key,guidance_options[key])
     settings.set_option("language", prior)
     print("Casino Anomaly croupier welcome desk and dialogue QA PASS")
-    quit(0)
+    root.get_node("AudioDirector").call("request_quit")
 
 
 func _validate_model_pose(desk: Node3D, character: Node3D) -> String:

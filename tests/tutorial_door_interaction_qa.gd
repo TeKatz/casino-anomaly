@@ -78,4 +78,4 @@ func _run() -> void:
     room.queue_free()
     await process_frame
     print("Casino Anomaly tutorial door interaction QA PASS")
-    quit(0)
+    root.get_node("AudioDirector").call("request_quit")

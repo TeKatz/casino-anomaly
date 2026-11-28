@@ -71,4 +71,4 @@ func _run() -> void:
 
     hall.queue_free()
     print("Casino Anomaly texture stability QA PASS")
-    quit(0)
+    root.get_node("AudioDirector").call("request_quit")

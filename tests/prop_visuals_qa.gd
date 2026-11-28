@@ -251,4 +251,4 @@ func _run() -> void:
         _fail("QA casino fixture was not freed")
         return
     print("Casino Anomaly prop visuals and orientations QA PASS")
-    quit(0)
+    root.get_node("AudioDirector").call("request_quit")

@@ -115,4 +115,4 @@ func _run() -> void:
     world.queue_free()
     await process_frame
     print("Casino Anomaly premium tables and editable bottles QA PASS")
-    quit(0)
+    root.get_node("AudioDirector").call("request_quit")

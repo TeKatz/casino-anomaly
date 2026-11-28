@@ -155,7 +155,7 @@ func _run() -> void:
     hall.queue_free()
     await process_frame
     print("Casino Anomaly Grand Entrance Hall blockout QA PASS")
-    quit(0)
+    root.get_node("AudioDirector").call("request_quit")
 
 
 # Same-facing coplanar rectangles with positive projected overlap flicker.

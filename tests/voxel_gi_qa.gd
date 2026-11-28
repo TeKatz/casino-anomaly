@@ -170,4 +170,4 @@ func _run() -> void:
     await process_frame
     settings.set_option("voxel_gi", previous)
     print("Casino Anomaly VoxelGI bake and streaming contract QA PASS")
-    quit(0)
+    root.get_node("AudioDirector").call("request_quit")

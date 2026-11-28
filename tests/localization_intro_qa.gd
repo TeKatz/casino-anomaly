@@ -82,4 +82,4 @@ func _run() -> void:
     await process_frame
     settings.set_option("language", old_language)
     print("Casino Anomaly bilingual intro and door interaction QA PASS")
-    quit(0)
+    root.get_node("AudioDirector").call("request_quit")

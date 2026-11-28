@@ -185,4 +185,4 @@ func _run_smoke() -> void:
 
     world.queue_free()
     print("Casino Anomaly scenes and PBR floor smoke PASS")
-    quit(0)
+    root.get_node("AudioDirector").call("request_quit")

@@ -114,7 +114,7 @@ func _run() -> void:
     if not (await _corner_recovery()):
         return
     print("Casino Anomaly Escort native animation and behavior QA PASS")
-    quit(0)
+    root.get_node("AudioDirector").call("request_quit")
 
 # Real physics fixture with a floor and two perpendicular obstacles. It
 # reproduces a corner where every strictly-away heading is blocked.

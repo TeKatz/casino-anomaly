@@ -57,8 +57,7 @@ def main():
     cmd = [args.godot, "--headless", "--path", ".", "--script", "res://" + args.script]
     # Temporary investigation: identify the remaining shutdown objects
     # in existing fixtures, without adding test runs or changing pass rules.
-    if args.script in ("tests/grand_entrance_hall_qa.gd", "tests/menu_visual_qa.gd",
-                       "tests/sketchfab_true_editor_qa.gd"):
+    if args.script in ("tests/grand_entrance_hall_qa.gd", "tests/menu_visual_qa.gd"):
         cmd.insert(1, "--verbose")
     if args.editor:
         cmd.insert(1, "--editor")
