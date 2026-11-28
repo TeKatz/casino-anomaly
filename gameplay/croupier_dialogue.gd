@@ -127,7 +127,7 @@ func _ready() -> void:
     if settings != null:
         settings.options_changed.connect(_on_settings_changed)
     overlay.resized.connect(_fit_panel)
-    panel.minimum_size_changed.connect(_fit_panel.call_deferred)
+    panel.minimum_size_changed.connect(func() -> void: _fit_panel.call_deferred())
     _refresh_language()
     _apply_readability()
     visible = false
@@ -199,14 +199,13 @@ func show_conversation() -> void:
     page_index = 0
     active = true
     visible = true
-    _refresh_language()
+    _show_page()
     _fit_panel()
     Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
     if not next_button.disabled:
         next_button.grab_focus()
     else:
         _focus_topic()
-    _animate_panel()
 
 
 func _focus_topic() -> void:
@@ -323,7 +322,7 @@ func _refresh_language() -> void:
             button.text = Loc.t(str(topic["label"]),self)
             button.tooltip_text = button.text
             button.call("set_accent","gold",str(topic["id"])==current_topic)
-    (buttons["leave"] as Button).text = Loc.t("croupier.option.leave",self)
+    (buttons["leave"] as Button).text = Loc.t(str(_conversation.get("leave_label","croupier.option.leave")),self)
     _fit_panel.call_deferred()
 
 

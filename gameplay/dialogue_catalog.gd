@@ -52,7 +52,10 @@ static func valid(conversation: Dictionary) -> bool:
     if str(conversation.get("id", "")).is_empty() or str(conversation.get("speaker", "")).is_empty() or str(conversation.get("context", "")).is_empty():
         return false
     var entry := str(conversation.get("entry", "welcome"))
-    var ids: Dictionary = {entry: true, "leave": true, "next": true, "back": true}
+    if entry.is_empty() or entry in ["leave","next","back"]:
+        return false
+    var ids: Dictionary = {"leave": true, "next": true, "back": true}
+    ids[entry] = true
     var groups: Array = [conversation.get("welcome", [])]
     var topics: Array = conversation.get("topics", [])
     if topics.is_empty():

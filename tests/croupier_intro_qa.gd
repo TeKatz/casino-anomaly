@@ -299,6 +299,17 @@ func _run() -> void:
         if not marker.visible or not (objective.get("card") as Control).visible:
             _fail("Destination guidance did not restore after "+key)
             return
+    paused = true
+    objective.call("_process",0.0)
+    if (objective.get("card") as Control).visible:
+        paused = false
+        _fail("Objective HUD remained visible during pause")
+        return
+    paused = false
+    objective.call("_process",0.0)
+    if not (objective.get("card") as Control).visible:
+        _fail("Objective HUD did not restore after pause")
+        return
     room.call("_open_conversation")
     if marker.visible or (objective.get("card") as Control).visible:
         _fail("Destination guidance remained visible during repeated dialogue")

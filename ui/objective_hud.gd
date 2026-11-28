@@ -18,6 +18,8 @@ var _motion: Tween
 
 func _ready() -> void:
     layer = 46
+    process_mode = Node.PROCESS_MODE_ALWAYS
+    set_process(false)
     root = Control.new()
     root.name = "Root"
     root.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -80,12 +82,14 @@ func set_objective(id: String, localized_key: String) -> void:
     objective_id = id
     text_key = localized_key
     _refresh_text()
+    set_process(not objective_id.is_empty())
     _sync(true)
 
 
 func clear_objective() -> void:
     objective_id = ""
     text_key = ""
+    set_process(false)
     _sync()
 
 
@@ -111,8 +115,15 @@ func _reduced() -> bool:
     return bool(Controls.pref(self,"reduced_motion",false)) or bool(Controls.pref(self,"reduced_menu_motion",false))
 
 
+func _process(_delta: float) -> void:
+    # Paused world scripts cannot update contextual visibility themselves.
+    _sync()
+
+
 func _sync(force_reveal: bool = false) -> void:
-    var should_show := context_visible and not objective_id.is_empty() and not text_key.is_empty() and bool(Controls.pref(self,"hud_visible",true)) and bool(Controls.pref(self,"tutorial_hints",true)) and bool(Controls.pref(self,"interaction_hints",true))
+    var loader := get_node_or_null("/root/SceneLoader")
+    var loading := loader != null and bool(loader.get("active"))
+    var should_show := context_visible and not get_tree().paused and not loading and not objective_id.is_empty() and not text_key.is_empty() and bool(Controls.pref(self,"hud_visible",true)) and bool(Controls.pref(self,"tutorial_hints",true)) and bool(Controls.pref(self,"interaction_hints",true))
     if should_show==card.visible and not (should_show and force_reveal):
         return
     if _motion != null:
