@@ -1,0 +1,21 @@
+{
+  "asset": "Travertine005",
+  "sourcePage": "https://ambientcg.com/view?id=Travertine005",
+  "download": "https://ambientcg.com/get?file=Travertine005_4K-JPG.zip",
+  "license": "CC0-1.0",
+  "uploadedZipSha256": "d647bd811223a2b807413271feee8bc821504a886767d994f5c95f6349cd3727",
+  "maps": {
+    "Travertine005_4K-JPG_Color.jpg": {
+      "bytes": 15643779,
+      "sha256": "f89f87530f427c23047039205e2bb062bb686fa0e2b4ee4df7f7f0cf5f699f9f"
+    },
+    "Travertine005_4K-JPG_NormalGL.jpg": {
+      "bytes": 9990623,
+      "sha256": "41c329c14749ff36150d8d29b992e7e5233e1dc7067114252527b11e94f78f1c"
+    },
+    "Travertine005_4K-JPG_Roughness.jpg": {
+      "bytes": 8826502,
+      "sha256": "237c761f3856fb31b9f9d7c971c739c87b71da0cd264c5ba6f73c43985202175"
+    }
+  }
+}

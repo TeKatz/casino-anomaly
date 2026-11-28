@@ -176,3 +176,11 @@ Universal Animation Library (Standard), by Quaternius, CC0 1.0 Universal. Origin
 - patchytherat — [Squishy Footsteps to Walking in a Puddle](https://freesound.org/people/patchytherat/sounds/531571/), [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/), adapted and mixed with carpet.
 
 See audio/README.md for the resource layout. Original synthetic fallback sounds remain available if resources are missing.
+
+## Grand Entrance Hall — 4K PBR materials (CC0)
+
+- [Plaster002](https://ambientcg.com/view?id=Plaster002) — ambientCG, original 4K JPG Color/NormalGL/Roughness; ivory plaster walls.
+- [Travertine005](https://ambientcg.com/view?id=Travertine005) — ambientCG, original 4K JPG Color/NormalGL/Roughness; dark reception countertop.
+- [Stone Wall 03](https://polyhaven.com/a/stone_wall_03) — Poly Haven / eye-candy.xyz, original 4K JPG diffuse/normal GL/ARM; stone architectural surfaces. Roughness is the green ARM channel. No glTF geometry is distributed.
+
+All nine map hashes and sizes are pinned from the user-supplied source archives in their asset manifests.

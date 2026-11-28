@@ -153,6 +153,34 @@ func _has_coplanar_overlap(a: MeshInstance3D, b: MeshInstance3D) -> bool:
 
 
 func _verify_finishes(hall: Node3D) -> bool:
+    # All three replacement materials retain original 4K PBR textures.
+    var expected_maps := {
+        "Hall | warm textured stone": ["res://assets/stone_wall_03/stone_wall_03_diff_4k.jpg", "res://assets/stone_wall_03/stone_wall_03_nor_gl_4k.jpg", "res://assets/stone_wall_03/stone_wall_03_arm_4k.jpg", 1],
+        "Hall | fine ivory plaster (Plaster002)": ["res://assets/plaster002/Plaster002_4K-JPG_Color.jpg", "res://assets/plaster002/Plaster002_4K-JPG_NormalGL.jpg", "res://assets/plaster002/Plaster002_4K-JPG_Roughness.jpg", 0],
+        "Hall | dark travertine counter": ["res://assets/travertine005/Travertine005_4K-JPG_Color.jpg", "res://assets/travertine005/Travertine005_4K-JPG_NormalGL.jpg", "res://assets/travertine005/Travertine005_4K-JPG_Roughness.jpg", 0]
+    }
+    var seen := {}
+    for item in hall.find_children("*","MeshInstance3D",true,false):
+        var mesh := item as MeshInstance3D
+        var mat := mesh.material_override as StandardMaterial3D
+        if mat==null or not expected_maps.has(mat.resource_name):
+            continue
+        var expected: Array = expected_maps[mat.resource_name]
+        if mat.albedo_texture==null or mat.normal_texture==null or mat.roughness_texture==null:
+            _fail("Missing original lobby PBR maps: "+mat.resource_name)
+            return false
+        var maps: Array[Texture2D] = [mat.albedo_texture,mat.normal_texture,mat.roughness_texture]
+        for i in range(3):
+            if maps[i].resource_path!=expected[i] or maps[i].get_width()!=4096 or maps[i].get_height()!=4096:
+                _fail("Incorrect lobby material map: "+str(expected[i]))
+                return false
+        if int(mat.roughness_texture_channel)!=int(expected[3]) or not mat.normal_enabled or not mat.uv1_triplanar or not mat.uv1_world_triplanar:
+            _fail("Incorrect PBR channel or projection: "+mat.resource_name)
+            return false
+        seen[mat.resource_name]=true
+    if seen.size()!=expected_maps.size():
+        _fail("One or more replacement lobby materials are not assigned")
+        return false
     var marker := hall.get_node("SideGalleries/EastGallery/AccessBays/MainCasinoEntrance/DestinationMarker") as Node3D
     for item in hall.find_children("*","MeshInstance3D",true,false):
         var mesh := item as MeshInstance3D

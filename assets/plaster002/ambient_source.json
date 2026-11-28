@@ -1,0 +1,21 @@
+{
+  "asset": "Plaster002",
+  "sourcePage": "https://ambientcg.com/view?id=Plaster002",
+  "download": "https://ambientcg.com/get?file=Plaster002_4K-JPG.zip",
+  "license": "CC0-1.0",
+  "uploadedZipSha256": "8d4a083c9775352f1fec26e414daad5df38243260b75069d5a906a7a8a038696",
+  "maps": {
+    "Plaster002_4K-JPG_Color.jpg": {
+      "bytes": 13544789,
+      "sha256": "5908fb2b21c763a943a9a59784458b61b781b32b06726f971f28428e73d2a3a4"
+    },
+    "Plaster002_4K-JPG_NormalGL.jpg": {
+      "bytes": 36360276,
+      "sha256": "3c336d7d58772f9de71b32254a72d24b2e6e43c4c6d3f0dd7e555ee7b3975516"
+    },
+    "Plaster002_4K-JPG_Roughness.jpg": {
+      "bytes": 5828108,
+      "sha256": "123a495cf912ed40003c4395979ec4a8aa077d21b6fae5bc7759d10774fff85c"
+    }
+  }
+}

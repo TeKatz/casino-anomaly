@@ -1,0 +1,23 @@
+{
+  "asset": "stone_wall_03",
+  "sourcePage": "https://polyhaven.com/a/stone_wall_03",
+  "license": "CC0-1.0",
+  "uploadedZipSha256": "c4d4815e3b898889aba8c27c7774c7ac2187b3b26e09f848c7deb4936551fed2",
+  "maps": {
+    "stone_wall_03_diff_4k.jpg": {
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/4k/stone_wall_03/stone_wall_03_diff_4k.jpg",
+      "sha256": "3d203a17629f2250f91be3c505d4ba047cb1cd108fac8f1922aad49b1ba567bb",
+      "bytes": 14983988
+    },
+    "stone_wall_03_nor_gl_4k.jpg": {
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/4k/stone_wall_03/stone_wall_03_nor_gl_4k.jpg",
+      "sha256": "15b6ec9b10e7a8069c62df915d112f432896eaf63bb448ad81840ccd97c970da",
+      "bytes": 16047834
+    },
+    "stone_wall_03_arm_4k.jpg": {
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/4k/stone_wall_03/stone_wall_03_arm_4k.jpg",
+      "sha256": "2716e1a0b65732286841b82e5349d919bb021651c7fea26dfe790ba88d89e7ee",
+      "bytes": 9488428
+    }
+  }
+}

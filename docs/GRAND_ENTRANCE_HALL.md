@@ -142,6 +142,21 @@ generated at 2048 × 2048 rather than 512 × 512 with finer grain and tighter
 countertop tiling; they are not a photographic marble or stone PBR set.
 Manual Forward+ visual and performance checks remain necessary.
 
+## Phase 7B — Original 4K material replacement
+
+The user-provided CC0 Plaster002 (walls), Stone Wall 03 (previous limestone
+surfaces) and Travertine005 (reception countertop) replace the procedural
+color and normal maps in those three hall-local materials. Original 4K
+color, OpenGL normal and roughness images are pinned by SHA-256, with the
+Poly Haven ARM green channel providing roughness. No displacement, glTF
+geometry or duplicate copies are used. Existing bronze, brass and other
+unrelated finishes are unchanged. Shared world-triplanar projection and
+anisotropic filtering remain; material tints and normal strength are tuned
+for the existing lighting. Run `python tools/ensure_assets.py` and
+`python tools/ensure_hall_textures.py` before editor import if source maps
+are missing. Actual Forward+ appearance and GPU memory/frame time need
+manual verification.
+
 ## QA
 
 Run `godot --headless --path . --script tests/grand_entrance_hall_qa.gd`

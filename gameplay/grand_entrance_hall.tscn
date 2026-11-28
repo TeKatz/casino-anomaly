@@ -1,4 +1,4 @@
-[gd_scene load_steps=172 format=3]
+[gd_scene load_steps=181 format=3]
 
 [ext_resource type="Script" path="res://player.gd" id="1_player"]
 [ext_resource type="Script" path="res://gameplay/tutorial.gd" id="HallTutorial"]
@@ -65,6 +65,24 @@
 
 [ext_resource type="PackedScene" path="res://models/cigarette_pack/cigarette_pack_1k.gltf" id="Detail_cigarette_pack"]
 
+[ext_resource type="Texture2D" path="res://assets/stone_wall_03/stone_wall_03_diff_4k.jpg" id="HallStoneColor"]
+
+[ext_resource type="Texture2D" path="res://assets/stone_wall_03/stone_wall_03_nor_gl_4k.jpg" id="HallStoneNormal"]
+
+[ext_resource type="Texture2D" path="res://assets/stone_wall_03/stone_wall_03_arm_4k.jpg" id="HallStoneRough"]
+
+[ext_resource type="Texture2D" path="res://assets/plaster002/Plaster002_4K-JPG_Color.jpg" id="HallPlasterColor"]
+
+[ext_resource type="Texture2D" path="res://assets/plaster002/Plaster002_4K-JPG_NormalGL.jpg" id="HallPlasterNormal"]
+
+[ext_resource type="Texture2D" path="res://assets/plaster002/Plaster002_4K-JPG_Roughness.jpg" id="HallPlasterRough"]
+
+[ext_resource type="Texture2D" path="res://assets/travertine005/Travertine005_4K-JPG_Color.jpg" id="HallTravertineColor"]
+
+[ext_resource type="Texture2D" path="res://assets/travertine005/Travertine005_4K-JPG_NormalGL.jpg" id="HallTravertineNormal"]
+
+[ext_resource type="Texture2D" path="res://assets/travertine005/Travertine005_4K-JPG_Roughness.jpg" id="HallTravertineRough"]
+
 [sub_resource type="FastNoiseLite" id="FineMineralNoise"]
 seed = 137
 frequency = 0.0075
@@ -91,32 +109,38 @@ bump_strength = 0.55
 noise = SubResource("FineMineralNoise")
 
 [sub_resource type="StandardMaterial3D" id="Limestone"]
-resource_name = "Hall | honed warm limestone"
-albedo_color = Color(0.82, 0.79, 0.72, 1)
-albedo_texture = SubResource("MineralColor")
-roughness = 0.62
-metallic = 0
+resource_name = "Hall | warm textured stone"
+albedo_color = Color(0.96, 0.94, 0.90, 1)
+albedo_texture = ExtResource("HallStoneColor")
+roughness = 0.86
+metallic = 0.0
+roughness_texture = ExtResource("HallStoneRough")
+roughness_texture_channel = 1
 normal_enabled = true
-normal_scale = 0.055
-normal_texture = SubResource("MineralNormal")
-uv1_scale = Vector3(0.72, 0.72, 0.72)
+normal_scale = 0.22
+normal_texture = ExtResource("HallStoneNormal")
+uv1_scale = Vector3(0.65, 0.65, 0.65)
 uv1_triplanar = true
 uv1_world_triplanar = true
 texture_filter = 5
 
+
 [sub_resource type="StandardMaterial3D" id="Plaster"]
-resource_name = "Hall | fine ivory plaster"
-albedo_color = Color(0.80, 0.77, 0.70, 1)
-albedo_texture = SubResource("MineralColor")
-roughness = 0.86
-metallic = 0
+resource_name = "Hall | fine ivory plaster (Plaster002)"
+albedo_color = Color(0.92, 0.89, 0.83, 1)
+albedo_texture = ExtResource("HallPlasterColor")
+roughness = 1.00
+metallic = 0.0
+roughness_texture = ExtResource("HallPlasterRough")
+roughness_texture_channel = 0
 normal_enabled = true
-normal_scale = 0.025
-normal_texture = SubResource("MineralNormal")
-uv1_scale = Vector3(0.85, 0.85, 0.85)
+normal_scale = 0.32
+normal_texture = ExtResource("HallPlasterNormal")
+uv1_scale = Vector3(0.8, 0.8, 0.8)
 uv1_triplanar = true
 uv1_world_triplanar = true
 texture_filter = 5
+
 
 [sub_resource type="StandardMaterial3D" id="DeepGreen"]
 resource_name = "Hall | dark green woven wallcovering"
@@ -512,18 +536,21 @@ uv1_world_triplanar = false
 texture_filter = 5
 
 [sub_resource type="StandardMaterial3D" id="HallCounter"]
-resource_name = "Hall | polished dark stone counter"
-albedo_color = Color(0.24, 0.22, 0.19, 1)
-albedo_texture = SubResource("MineralColor")
-roughness = 0.39
-metallic = 0
+resource_name = "Hall | dark travertine counter"
+albedo_color = Color(0.85, 0.80, 0.75, 1)
+albedo_texture = ExtResource("HallTravertineColor")
+roughness = 0.62
+metallic = 0.0
+roughness_texture = ExtResource("HallTravertineRough")
+roughness_texture_channel = 0
 normal_enabled = true
-normal_scale = 0.055
-normal_texture = SubResource("MineralNormal")
-uv1_scale = Vector3(2.4, 2.4, 2.4)
+normal_scale = 0.18
+normal_texture = ExtResource("HallTravertineNormal")
+uv1_scale = Vector3(0.83, 0.83, 0.83)
 uv1_triplanar = true
 uv1_world_triplanar = true
 texture_filter = 5
+
 
 [sub_resource type="StandardMaterial3D" id="HallRunner"]
 resource_name = "Hall | burgundy woven runner"

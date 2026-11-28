@@ -65,6 +65,7 @@ jobs:
           set -euo pipefail
           python3 tools/ensure_assets.py
           python3 tools/ensure_fabric037.py
+          python3 tools/ensure_hall_textures.py
           python3 tools/import_model_assets.py
           python3 tools/unpack_sketchfab_assets.py --require-all
           python3 tools/import_croupier_asset.py
@@ -111,6 +112,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Source textures unavailable or invalid' }
           python tools/ensure_fabric037.py
           if ($LASTEXITCODE -ne 0) { throw 'ambientCG Fabric037 source unavailable or invalid' }
+          python tools/ensure_hall_textures.py
+          if ($LASTEXITCODE -ne 0) { throw 'Lobby 4K PBR sources unavailable or invalid' }
           python tools/import_model_assets.py
           if ($LASTEXITCODE -ne 0) { throw '3D model dependencies unavailable or invalid' }
           python tools/unpack_sketchfab_assets.py --require-all
@@ -198,6 +201,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Source textures unavailable or invalid' }
           python tools/ensure_fabric037.py
           if ($LASTEXITCODE -ne 0) { throw 'ambientCG Fabric037 source unavailable or invalid' }
+          python tools/ensure_hall_textures.py
+          if ($LASTEXITCODE -ne 0) { throw 'Lobby 4K PBR sources unavailable or invalid' }
           python tools/import_model_assets.py
           if ($LASTEXITCODE -ne 0) { throw '3D model dependencies unavailable or invalid' }
           python tools/unpack_sketchfab_assets.py --require-all
