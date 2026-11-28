@@ -1,4 +1,4 @@
-# Grand Entrance Hall — Phase 7A blockout
+# Grand Entrance Hall — Phase 7B interior
 
 This is the live authored tutorial scene. The stable entry point
 `gameplay/tutorial.tscn` instances this hall, so existing saved runs and
@@ -70,6 +70,50 @@ cycle. Guidance respects HUD, interaction and tutorial hints; reduced motion
 holds the marker still. The marker is hidden during conversation and loading,
 and resets on a new visit. The conversation remains optional and no profile
 schema or progression change is introduced.
+
+## Phase 7B — Furnishing and atmosphere
+
+Four waiting ensembles occupy entrance-side lateral bays only. The two
+larger conversation lounges use paired Poly Haven Sofa 02 and low Round
+Wooden Table 01 models with chess/reading details; the two smaller waiting
+nooks use a sofa and occasional table. Four claret rugs define these zones.
+Furniture collisions are authored box/cylinder shapes derived from model
+bounds; no seating interaction is added.
+
+The 6.4 m counter retains its existing clearances and NPC placement.
+Darker walnut, satin brass frames and a less reflective counter finish
+strengthen its presence. Original desk bell and books with magnifier
+rest on the counter; two Monstera plants and low wooden sideboards flank
+the rear zone outside the future staircase area. Two marble busts on
+removable pedestals greet visitors near the entrance. The original logo
+is unchanged, with a second fine brass inset frame and ceiling-mounted wash.
+
+The lower wall fields receive fine brass frames, four existing historic
+paintings and four original Sketchfab wall sconces. Four scaled original
+Poly Haven Chandelier 01 models hang from the centre of existing ceiling
+fields, with visible canopy mounts. Their corresponding main lights
+replace the former anonymous central fills; the rear fill is subdued.
+Local lounge/sconce lights, logo and casino accents are non-shadow lights.
+The original two shadow-casting lights remain the maximum budget. Ambient
+illumination is reduced and screen-space ambient occlusion enabled subject
+to existing graphics settings. Pale mineral surfaces have reduced noise
+contrast, bump strength and normal influence; parquet and walnut are
+darker and less shiny. No shared material is edited.
+
+All additions are authored under Interior, with movable groups and
+original PackedScene instances; no procedural furnishings, new assets,
+runtime fitting scripts or new gameplay code. No external models are
+required for this pass. A dedicated high-quality Art Deco armchair, floor
+lamp and velvet rope set would be optional future assets. Reused model
+credits already exist in ASSET_CREDITS.md (Poly Haven CC0 and the credited
+Sketchfab sources).
+
+Performance: prior hall had 525 authored nodes and 10 scene lights;
+this version has 727 authored nodes and 18 scene lights, with
+two dynamic shadow lights in both. Imported models share PackedScene
+resources; runtime mesh counts are logged by QA. GPU frame time, startup
+and visual quality require a real Forward+ comparison on the player's
+machine rather than estimates based on node counts.
 
 ## QA
 

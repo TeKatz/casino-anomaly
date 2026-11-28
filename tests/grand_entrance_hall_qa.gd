@@ -35,6 +35,8 @@ func _run() -> void:
         var body := item as StaticBody3D
         if hall.get_node("CroupierStation").is_ancestor_of(body):
             continue # NPC capsule is checked by the full croupier suite.
+        if hall.get_node("Interior").is_ancestor_of(body):
+            continue # Imported furniture is checked against its real bounds below.
         var mesh := body.get_node_or_null("Mesh") as MeshInstance3D
         var collider := body.get_node_or_null("CollisionShape3D") as CollisionShape3D
         if mesh == null or collider == null or not mesh.mesh is BoxMesh or not collider.shape is BoxShape3D:
@@ -50,7 +52,7 @@ func _run() -> void:
     if static_count < 40 or architecture.get_child_count() < 5:
         _fail("Missing authored architecture")
         return
-    if not _verify_finishes(hall):
+    if not _verify_finishes(hall) or not _verify_interior(hall):
         return
     var space := hall.get_world_3d().direct_space_state
     var exclude: Array[RID] = [player.get_rid()]
@@ -65,6 +67,8 @@ func _run() -> void:
     # approaches, plus the staff path and reserved future stair footprint.
     var segments: Array = [
         [Vector3(0,1.02,12),Vector3(0,1.02,-5.1)],
+        [Vector3(-3.2,1.02,12),Vector3(-3.2,1.02,4.5)],
+        [Vector3(3.2,1.02,12),Vector3(3.2,1.02,4.5)],
         [Vector3(0,1.02,1),Vector3(-10.2,1.02,1)],
         [Vector3(0,1.02,1),Vector3(10.2,1.02,1)],
         [Vector3(0,1.02,-4),Vector3(-10.2,1.02,-4)],
@@ -154,6 +158,8 @@ func _verify_finishes(hall: Node3D) -> bool:
         var mesh := item as MeshInstance3D
         if hall.get_node("CroupierStation").is_ancestor_of(mesh):
             continue # Imported character materials are not architecture.
+        if hall.get_node("Interior").is_ancestor_of(mesh):
+            continue # The imported furniture has its own original materials.
         if marker.is_ancestor_of(mesh):
             # Wayfinding geometry is not an architectural PBR surface.
             if mesh.material_override == null or mesh.cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_OFF:
@@ -199,4 +205,100 @@ func _verify_finishes(hall: Node3D) -> bool:
     if bounds.position.y<=0.0 or bounds.end.y>0.02 or bounds.position.x<=-2.46 or bounds.end.x>=2.46:
         _fail("Runner clips the floor or inlays")
         return false
+    return true
+
+
+func _model_bounds(model: Node3D) -> AABB:
+    var result := AABB()
+    var found := false
+    for part in model.find_children("*","MeshInstance3D",true,false):
+        var mesh := part as MeshInstance3D
+        if mesh.mesh == null:
+            continue
+        var piece := mesh.global_transform * mesh.get_aabb()
+        result = result.merge(piece) if found else piece
+        found = true
+    return result
+
+
+func _verify_interior(hall: Node3D) -> bool:
+    var interior := hall.get_node("Interior")
+    var lounges := interior.get_node("Lounges")
+    if lounges.get_child_count()!=4:
+        _fail("Expected four coherent, separately editable waiting zones")
+        return false
+    var sofas := 0
+    var tables := 0
+    for item in lounges.find_children("*","StaticBody3D",true,false):
+        var body := item as StaticBody3D
+        var model := body.get_node_or_null("Model") as Node3D
+        var collider := body.get_node_or_null("CollisionShape3D") as CollisionShape3D
+        if model==null or collider==null or collider.disabled or body.collision_layer==0 or body.owner!=hall or model.owner!=hall or collider.owner!=hall:
+            _fail("Furniture is not an editable solid scene instance")
+            return false
+        var bounds := _model_bounds(model)
+        if absf(bounds.position.y-0.014)>0.045 or bounds.size.y<0.45 or bounds.size.y>1.10 or absf(bounds.get_center().x)<4.0:
+            _fail("Floating, ungrounded or incorrectly sized lounge furniture: "+str(body.name)+" "+str(bounds))
+            return false
+        var shape_bounds := AABB()
+        if collider.shape is BoxShape3D:
+            var size := (collider.shape as BoxShape3D).size
+            shape_bounds = collider.global_transform * AABB(-size*0.5,size)
+            sofas+=1
+        elif collider.shape is CylinderShape3D:
+            var cylinder := collider.shape as CylinderShape3D
+            var size := Vector3(cylinder.radius*2.0,cylinder.height,cylinder.radius*2.0)
+            shape_bounds = collider.global_transform * AABB(-size*0.5,size)
+            tables+=1
+        else:
+            _fail("Unexpected furniture collision")
+            return false
+        if bounds.position.distance_to(shape_bounds.position)>0.12 or bounds.end.distance_to(shape_bounds.end)>0.12:
+            _fail("Furniture collision does not follow the original model: "+str(body.name)+" "+str(bounds)+" "+str(shape_bounds))
+            return false
+    if sofas!=6 or tables!=4:
+        _fail("Missing imported lounge furniture")
+        return false
+    for title_value in ["WestConversationLounge","EastConversationLounge"]:
+        var lounge := lounges.get_node(title_value)
+        var table := lounge.get_node("ConversationTable")
+        var prop_node := table.get_node("ChessSet" if title_value.begins_with("West") else "GuestReading") as Node3D
+        var top := _model_bounds(table.get_node("Model") as Node3D)
+        var prop := _model_bounds(prop_node)
+        if absf(prop.position.y-top.end.y)>0.025 or prop.position.x<top.position.x or prop.end.x>top.end.x or prop.position.z<top.position.z or prop.end.z>top.end.z:
+            _fail("Lounge tabletop decoration is floating or overhanging: "+str(prop))
+            return false
+    var reception := interior.get_node("ReceptionDressing")
+    for title_value in ["ServiceBell","OpenGuestBook"]:
+        var model := reception.get_node(title_value) as Node3D
+        var bounds := _model_bounds(model)
+        if absf(bounds.position.y-1.09)>0.025 or bounds.position.x< -3.25 or bounds.end.x>3.25 or bounds.position.z< -6.94 or bounds.end.z> -5.96:
+            _fail("Reception prop is not resting fully on the countertop: "+str(bounds))
+            return false
+    for side in ["West","East"]:
+        var plant := reception.get_node(side+"ReceptionPlant") as StaticBody3D
+        var model := plant.get_node("Model") as Node3D
+        var bounds := _model_bounds(model)
+        if absf(bounds.position.y)>0.06 or bounds.size.y<1.6 or bounds.size.y>2.1 or absf(bounds.get_center().x)<5.5 or plant.get_node_or_null("CollisionShape3D")==null:
+            _fail("Reception plant is ungrounded or blocks the future stairs")
+            return false
+    var fixtures := interior.get_node("CeilingFixtures")
+    for index in range(1,5):
+        var fixture := fixtures.get_node("Chandelier"+str(index)) as Node3D
+        var model := fixture.get_node("OriginalFixture") as Node3D
+        var bounds := _model_bounds(model)
+        if absf(bounds.end.y-8.6)>0.07 or bounds.position.y<6.6 or bounds.size.x<1.4 or bounds.size.x>1.8:
+            _fail("Chandelier is not attached to its ceiling field: "+str(bounds))
+            return false
+    var light_count := 0
+    var shadow_count := 0
+    for item in hall.find_children("*","Light3D",true,false):
+        var light := item as Light3D
+        light_count += 1
+        if light.shadow_enabled:
+            shadow_count += 1
+    if light_count>22 or shadow_count>2:
+        _fail("Lobby lighting exceeded its dynamic light/shadow budget")
+        return false
+    print("HALL_INTERIOR_BUDGET: meshes=",hall.find_children("*","MeshInstance3D",true,false).size()," lights=",light_count," shadow_lights=",shadow_count)
     return true

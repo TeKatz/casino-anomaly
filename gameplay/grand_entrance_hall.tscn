@@ -1,4 +1,4 @@
-[gd_scene load_steps=131 format=3]
+[gd_scene load_steps=163 format=3]
 
 [ext_resource type="Script" path="res://player.gd" id="1_player"]
 [ext_resource type="Script" path="res://gameplay/tutorial.gd" id="HallTutorial"]
@@ -29,15 +29,37 @@
 
 [ext_resource type="Texture2D" path="res://assets/quatrefoil_jacquard_fabric/quatrefoil_jacquard_fabric_rough_2k.jpg" id="Runner2"]
 
+[ext_resource type="PackedScene" path="res://models/sofa_02/sofa_02_1k.gltf" id="InteriorSofa"]
+
+[ext_resource type="PackedScene" path="res://models/round_wooden_table_01/round_wooden_table_01_1k.gltf" id="InteriorTable"]
+
+[ext_resource type="PackedScene" path="res://models/Chandelier_01/Chandelier_01_1k.gltf" id="InteriorChandelier"]
+
+[ext_resource type="PackedScene" path="res://models/sketchfab_monstera/scene.gltf" id="InteriorPlant"]
+
+[ext_resource type="PackedScene" path="res://models/fancy_picture_frame_01/fancy_picture_frame_01_1k.gltf" id="InteriorPainting"]
+
+[ext_resource type="PackedScene" path="res://models/tutorial_user/desk_bell/scene.gltf" id="InteriorBell"]
+
+[ext_resource type="PackedScene" path="res://models/tutorial_user/books_with_magnifier/scene.gltf" id="InteriorBooks"]
+
+[ext_resource type="PackedScene" path="res://models/tutorial_user/wall_light/scene.gltf" id="InteriorSconce"]
+
+[ext_resource type="PackedScene" path="res://models/marble_bust_01/marble_bust_01_1k.gltf" id="InteriorBust"]
+
+[ext_resource type="PackedScene" path="res://models/chess_set/chess_set_1k.gltf" id="InteriorChess"]
+
+[ext_resource type="PackedScene" path="res://models/modern_wooden_cabinet/modern_wooden_cabinet_1k.gltf" id="InteriorCabinet"]
+
 [sub_resource type="FastNoiseLite" id="FineMineralNoise"]
 seed = 137
-frequency = 0.042
-fractal_octaves = 4
-fractal_gain = 0.48
+frequency = 0.016
+fractal_octaves = 3
+fractal_gain = 0.38
 
 [sub_resource type="Gradient" id="MineralPalette"]
 offsets = PackedFloat32Array(0, 0.35, 0.68, 1)
-colors = PackedColorArray(0.52, 0.49, 0.45, 1, 0.70, 0.67, 0.62, 1, 0.87, 0.84, 0.78, 1, 0.96, 0.94, 0.89, 1)
+colors = PackedColorArray(0.78, 0.76, 0.72, 1, 0.83, 0.81, 0.77, 1, 0.89, 0.87, 0.83, 1, 0.94, 0.92, 0.88, 1)
 
 [sub_resource type="NoiseTexture2D" id="MineralColor"]
 width = 512
@@ -51,33 +73,33 @@ width = 512
 height = 512
 seamless = true
 as_normal_map = true
-bump_strength = 2.0
+bump_strength = 0.55
 noise = SubResource("FineMineralNoise")
 
 [sub_resource type="StandardMaterial3D" id="Limestone"]
 resource_name = "Hall | honed warm limestone"
-albedo_color = Color(0.8, 0.76, 0.68, 1)
+albedo_color = Color(0.82, 0.79, 0.72, 1)
 albedo_texture = SubResource("MineralColor")
-roughness = 0.48
+roughness = 0.62
 metallic = 0
 normal_enabled = true
-normal_scale = 0.32
+normal_scale = 0.055
 normal_texture = SubResource("MineralNormal")
-uv1_scale = Vector3(1.15, 1.15, 1.15)
+uv1_scale = Vector3(0.72, 0.72, 0.72)
 uv1_triplanar = true
 uv1_world_triplanar = true
 texture_filter = 5
 
 [sub_resource type="StandardMaterial3D" id="Plaster"]
 resource_name = "Hall | fine ivory plaster"
-albedo_color = Color(0.79, 0.75, 0.66, 1)
+albedo_color = Color(0.80, 0.77, 0.70, 1)
 albedo_texture = SubResource("MineralColor")
 roughness = 0.86
 metallic = 0
 normal_enabled = true
-normal_scale = 0.13
+normal_scale = 0.025
 normal_texture = SubResource("MineralNormal")
-uv1_scale = Vector3(1.9, 1.9, 1.9)
+uv1_scale = Vector3(0.85, 0.85, 0.85)
 uv1_triplanar = true
 uv1_world_triplanar = true
 texture_filter = 5
@@ -104,7 +126,7 @@ albedo_texture = SubResource("MineralColor")
 roughness = 0.46
 metallic = 0.65
 normal_enabled = true
-normal_scale = 0.11
+normal_scale = 0.045
 normal_texture = SubResource("MineralNormal")
 uv1_scale = Vector3(2, 2, 2)
 uv1_triplanar = true
@@ -115,10 +137,10 @@ texture_filter = 5
 resource_name = "Hall | satin champagne brass"
 albedo_color = Color(0.84, 0.58, 0.28, 1)
 albedo_texture = SubResource("MineralColor")
-roughness = 0.31
+roughness = 0.43
 metallic = 0.72
 normal_enabled = true
-normal_scale = 0.08
+normal_scale = 0.035
 normal_texture = SubResource("MineralNormal")
 uv1_scale = Vector3(2, 2, 2)
 uv1_triplanar = true
@@ -127,27 +149,27 @@ texture_filter = 5
 
 [sub_resource type="StandardMaterial3D" id="CeilingIvory"]
 resource_name = "Hall | ivory ceiling finish"
-albedo_color = Color(0.89, 0.84, 0.73, 1)
+albedo_color = Color(0.86, 0.83, 0.76, 1)
 albedo_texture = SubResource("MineralColor")
-roughness = 0.78
+roughness = 0.86
 metallic = 0
 normal_enabled = true
-normal_scale = 0.16
+normal_scale = 0.025
 normal_texture = SubResource("MineralNormal")
-uv1_scale = Vector3(1.6, 1.6, 1.6)
+uv1_scale = Vector3(0.85, 0.85, 0.85)
 uv1_triplanar = true
 uv1_world_triplanar = true
 texture_filter = 5
 
 [sub_resource type="StandardMaterial3D" id="WarmStoneFloor"]
 resource_name = "Hall | satin herringbone parquet"
-albedo_color = Color(0.72, 0.61, 0.49, 1)
+albedo_color = Color(0.58, 0.49, 0.40, 1)
 albedo_texture = ExtResource("Parquet0")
-roughness = 0.53
+roughness = 0.58
 metallic = 0
 roughness_texture = ExtResource("Parquet2")
 normal_enabled = true
-normal_scale = 0.52
+normal_scale = 0.30
 normal_texture = ExtResource("Parquet1")
 uv1_scale = Vector3(0.6, 0.6, 0.6)
 uv1_triplanar = true
@@ -161,7 +183,7 @@ albedo_texture = SubResource("MineralColor")
 roughness = 0.44
 metallic = 0.65
 normal_enabled = true
-normal_scale = 0.07
+normal_scale = 0.035
 normal_texture = SubResource("MineralNormal")
 uv1_scale = Vector3(2, 2, 2)
 uv1_triplanar = true
@@ -203,8 +225,12 @@ background_mode = 1
 background_color = Color(0.055, 0.046, 0.036, 1)
 ambient_light_source = 2
 ambient_light_color = Color(0.90, 0.87, 0.81, 1)
-ambient_light_energy = 0.46
+ambient_light_energy = 0.34
 tonemap_mode = 2
+ssao_enabled = true
+ssao_radius = 1.0
+ssao_intensity = 1.1
+ssao_power = 1.2
 
 [sub_resource type="CapsuleShape3D" id="PlayerCapsule"]
 radius = 0.34
@@ -458,13 +484,13 @@ size = Vector3(7.5, 0.16, 0.13)
 
 [sub_resource type="StandardMaterial3D" id="HallWood"]
 resource_name = "Hall | satin smoked walnut"
-albedo_color = Color(0.76, 0.64, 0.51, 1)
+albedo_color = Color(0.54, 0.43, 0.32, 1)
 albedo_texture = ExtResource("Veneer0")
-roughness = 0.52
+roughness = 0.56
 metallic = 0
 roughness_texture = ExtResource("Veneer2")
 normal_enabled = true
-normal_scale = 0.43
+normal_scale = 0.24
 normal_texture = ExtResource("Veneer1")
 uv1_scale = Vector3(0.7, 0.7, 0.7)
 uv1_triplanar = true
@@ -475,10 +501,10 @@ texture_filter = 5
 resource_name = "Hall | polished dark stone counter"
 albedo_color = Color(0.24, 0.22, 0.19, 1)
 albedo_texture = SubResource("MineralColor")
-roughness = 0.3
+roughness = 0.39
 metallic = 0
 normal_enabled = true
-normal_scale = 0.14
+normal_scale = 0.055
 normal_texture = SubResource("MineralNormal")
 uv1_scale = Vector3(1.35, 1.35, 1.35)
 uv1_triplanar = true
@@ -493,7 +519,7 @@ roughness = 0.95
 metallic = 0
 roughness_texture = ExtResource("Runner2")
 normal_enabled = true
-normal_scale = 0.42
+normal_scale = 0.25
 normal_texture = ExtResource("Runner1")
 uv1_scale = Vector3(1, 1, 1)
 uv1_triplanar = true
@@ -551,6 +577,90 @@ top_radius = 0.22
 bottom_radius = 0.0
 height = 0.30
 radial_segments = 8
+rings = 1
+
+[sub_resource type="StandardMaterial3D" id="LoungeRug"]
+resource_name = "Hall | deep claret lounge rug"
+albedo_color = Color(0.37, 0.19, 0.19, 1)
+albedo_texture = ExtResource("Runner0")
+roughness = 0.95
+metallic = 0
+roughness_texture = ExtResource("Runner2")
+normal_enabled = true
+normal_scale = 0.25
+normal_texture = ExtResource("Runner1")
+uv1_scale = Vector3(1.45, 1.45, 1.45)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 5
+
+[sub_resource type="BoxMesh" id="LoungeRugLarge"]
+size = Vector3(2.6, 0.012, 4.52)
+
+[sub_resource type="BoxMesh" id="LoungeRugSmall"]
+size = Vector3(2.8, 0.012, 2.7)
+
+[sub_resource type="BoxMesh" id="RugBorderLong"]
+size = Vector3(0.035, 0.007, 4.4)
+
+[sub_resource type="BoxMesh" id="RugBorderShort"]
+size = Vector3(2.38, 0.007, 0.035)
+
+[sub_resource type="BoxMesh" id="RugSmallLong"]
+size = Vector3(0.035, 0.007, 2.58)
+
+[sub_resource type="BoxMesh" id="RugSmallShort"]
+size = Vector3(2.58, 0.007, 0.035)
+
+[sub_resource type="BoxShape3D" id="SofaBody"]
+size = Vector3(2.25, 0.875, 1.02)
+
+[sub_resource type="CylinderShape3D" id="TableBody"]
+radius = 0.455
+height = 0.65
+
+[sub_resource type="BoxShape3D" id="PlantBody"]
+size = Vector3(0.52, 0.62, 0.52)
+
+[sub_resource type="BoxShape3D" id="CabinetBody"]
+size = Vector3(1.95, 0.544, 0.416)
+
+[sub_resource type="BoxMesh" id="PedestalBase"]
+size = Vector3(0.58, 0.12, 0.58)
+
+[sub_resource type="BoxMesh" id="PedestalColumn"]
+size = Vector3(0.44, 0.78, 0.44)
+
+[sub_resource type="BoxMesh" id="PedestalCap"]
+size = Vector3(0.6, 0.1, 0.6)
+
+[sub_resource type="BoxShape3D" id="PedestalBody"]
+size = Vector3(0.58, 1, 0.58)
+
+[sub_resource type="BoxMesh" id="PanelBorderHorizontal"]
+size = Vector3(0.045, 0.055, 2.37)
+
+[sub_resource type="BoxMesh" id="PanelBorderVertical"]
+size = Vector3(0.045, 3.52, 0.055)
+
+[sub_resource type="BoxMesh" id="LogoInnerHorizontal"]
+size = Vector3(6.48, 0.045, 0.045)
+
+[sub_resource type="BoxMesh" id="LogoInnerVertical"]
+size = Vector3(0.045, 5.48, 0.045)
+
+[sub_resource type="CylinderMesh" id="CanopyMesh"]
+top_radius = 0.25
+bottom_radius = 0.21
+height = 0.065
+radial_segments = 24
+rings = 1
+
+[sub_resource type="CylinderMesh" id="LogoSpotTrim"]
+top_radius = 0.17
+bottom_radius = 0.17
+height = 0.075
+radial_segments = 24
 rings = 1
 
 [node name="GrandEntranceHall" type="Node3D"]
@@ -2230,83 +2340,83 @@ material_override = SubResource("Brass")
 [node name="Lighting" type="Node3D" parent="."]
 
 [node name="NaveFill1" type="OmniLight3D" parent="Lighting"]
-position = Vector3(0, 6.45, 10.5)
-light_color = Color(1, 0.94, 0.84, 1)
-light_energy = 2.65
-omni_range = 12
-omni_attenuation = 0.9
+position = Vector3(0, 7.02, 10.3)
+light_color = Color(1, 0.88, 0.73, 1)
+light_energy = 2.75
+omni_range = 11.5
+omni_attenuation = 1.15
 shadow_enabled = false
 
 [node name="NaveFill2" type="OmniLight3D" parent="Lighting"]
-position = Vector3(0, 6.45, 4.8)
-light_color = Color(1, 0.94, 0.84, 1)
-light_energy = 2.65
-omni_range = 12
-omni_attenuation = 0.9
+position = Vector3(0, 7.02, 6.2)
+light_color = Color(1, 0.88, 0.73, 1)
+light_energy = 2.75
+omni_range = 11.5
+omni_attenuation = 1.15
 shadow_enabled = false
 
 [node name="NaveFill3" type="OmniLight3D" parent="Lighting"]
-position = Vector3(0, 6.45, -0.4)
-light_color = Color(1, 0.94, 0.84, 1)
-light_energy = 2.65
-omni_range = 12
-omni_attenuation = 0.9
+position = Vector3(0, 7.02, 0.65)
+light_color = Color(1, 0.88, 0.73, 1)
+light_energy = 3.0
+omni_range = 11.5
+omni_attenuation = 1.15
 shadow_enabled = true
 
 [node name="NaveFill4" type="OmniLight3D" parent="Lighting"]
-position = Vector3(0, 6.45, -6)
-light_color = Color(1, 0.94, 0.84, 1)
-light_energy = 2.65
-omni_range = 12
-omni_attenuation = 0.9
+position = Vector3(0, 7.02, -5.45)
+light_color = Color(1, 0.88, 0.73, 1)
+light_energy = 2.75
+omni_range = 11.5
+omni_attenuation = 1.15
 shadow_enabled = false
 
 [node name="NaveFill5" type="OmniLight3D" parent="Lighting"]
-position = Vector3(0, 6.45, -11.1)
-light_color = Color(1, 0.94, 0.84, 1)
-light_energy = 2.65
-omni_range = 12
-omni_attenuation = 0.9
+position = Vector3(0, 7.4, -11.1)
+light_color = Color(1, 0.88, 0.73, 1)
+light_energy = 0.85
+omni_range = 7.0
+omni_attenuation = 1.15
 shadow_enabled = false
 
 [node name="WestGalleryFill1" type="OmniLight3D" parent="Lighting"]
 position = Vector3(-10, 3.6, -4)
 light_color = Color(1, 0.94, 0.84, 1)
-light_energy = 1.6
-omni_range = 7
-omni_attenuation = 0.9
+light_energy = 0.95
+omni_range = 5.6
+omni_attenuation = 1.25
 shadow_enabled = false
 
 [node name="WestGalleryFill2" type="OmniLight3D" parent="Lighting"]
 position = Vector3(-10, 3.6, 2)
 light_color = Color(1, 0.94, 0.84, 1)
-light_energy = 1.6
-omni_range = 7
-omni_attenuation = 0.9
+light_energy = 0.95
+omni_range = 5.6
+omni_attenuation = 1.25
 shadow_enabled = false
 
 [node name="EastGalleryFill1" type="OmniLight3D" parent="Lighting"]
 position = Vector3(10, 3.6, -4)
 light_color = Color(1, 0.94, 0.84, 1)
-light_energy = 1.6
-omni_range = 7
-omni_attenuation = 0.9
+light_energy = 1.8
+omni_range = 5.6
+omni_attenuation = 1.25
 shadow_enabled = false
 
 [node name="EastGalleryFill2" type="OmniLight3D" parent="Lighting"]
 position = Vector3(10, 3.6, 2)
 light_color = Color(1, 0.94, 0.84, 1)
-light_energy = 1.6
-omni_range = 7
-omni_attenuation = 0.9
+light_energy = 0.95
+omni_range = 5.6
+omni_attenuation = 1.25
 shadow_enabled = false
 
 [node name="ReceptionKey" type="OmniLight3D" parent="Lighting"]
 position = Vector3(0, 3.55, -5.3)
-light_color = Color(1, 0.94, 0.84, 1)
-light_energy = 1.5
-omni_range = 8
-omni_attenuation = 0.9
+light_color = Color(1, 0.92, 0.81, 1)
+light_energy = 1.65
+omni_range = 6.5
+omni_attenuation = 1.2
 shadow_enabled = true
 
 [node name="DesignMarkers" type="Node3D" parent="."]
@@ -2550,12 +2660,12 @@ material_override = SubResource("Brass")
 [node name="Panel1Left" type="MeshInstance3D" parent="Reception/Counter"]
 position = Vector3(-2.955, 0.48, 0.45)
 mesh = SubResource("CounterPanelSide")
-material_override = SubResource("DarkBronze")
+material_override = SubResource("Brass")
 
 [node name="Panel1Right" type="MeshInstance3D" parent="Reception/Counter"]
 position = Vector3(-2.045, 0.48, 0.45)
 mesh = SubResource("CounterPanelSide")
-material_override = SubResource("DarkBronze")
+material_override = SubResource("Brass")
 
 [node name="WalnutPanel2" type="MeshInstance3D" parent="Reception/Counter"]
 position = Vector3(-1.5, 0.48, 0.423)
@@ -2575,12 +2685,12 @@ material_override = SubResource("Brass")
 [node name="Panel2Left" type="MeshInstance3D" parent="Reception/Counter"]
 position = Vector3(-1.955, 0.48, 0.45)
 mesh = SubResource("CounterPanelSide")
-material_override = SubResource("DarkBronze")
+material_override = SubResource("Brass")
 
 [node name="Panel2Right" type="MeshInstance3D" parent="Reception/Counter"]
 position = Vector3(-1.045, 0.48, 0.45)
 mesh = SubResource("CounterPanelSide")
-material_override = SubResource("DarkBronze")
+material_override = SubResource("Brass")
 
 [node name="WalnutPanel3" type="MeshInstance3D" parent="Reception/Counter"]
 position = Vector3(-0.5, 0.48, 0.423)
@@ -2600,12 +2710,12 @@ material_override = SubResource("Brass")
 [node name="Panel3Left" type="MeshInstance3D" parent="Reception/Counter"]
 position = Vector3(-0.9550000000000001, 0.48, 0.45)
 mesh = SubResource("CounterPanelSide")
-material_override = SubResource("DarkBronze")
+material_override = SubResource("Brass")
 
 [node name="Panel3Right" type="MeshInstance3D" parent="Reception/Counter"]
 position = Vector3(-0.044999999999999984, 0.48, 0.45)
 mesh = SubResource("CounterPanelSide")
-material_override = SubResource("DarkBronze")
+material_override = SubResource("Brass")
 
 [node name="WalnutPanel4" type="MeshInstance3D" parent="Reception/Counter"]
 position = Vector3(0.5, 0.48, 0.423)
@@ -2625,12 +2735,12 @@ material_override = SubResource("Brass")
 [node name="Panel4Left" type="MeshInstance3D" parent="Reception/Counter"]
 position = Vector3(0.044999999999999984, 0.48, 0.45)
 mesh = SubResource("CounterPanelSide")
-material_override = SubResource("DarkBronze")
+material_override = SubResource("Brass")
 
 [node name="Panel4Right" type="MeshInstance3D" parent="Reception/Counter"]
 position = Vector3(0.9550000000000001, 0.48, 0.45)
 mesh = SubResource("CounterPanelSide")
-material_override = SubResource("DarkBronze")
+material_override = SubResource("Brass")
 
 [node name="WalnutPanel5" type="MeshInstance3D" parent="Reception/Counter"]
 position = Vector3(1.5, 0.48, 0.423)
@@ -2650,12 +2760,12 @@ material_override = SubResource("Brass")
 [node name="Panel5Left" type="MeshInstance3D" parent="Reception/Counter"]
 position = Vector3(1.045, 0.48, 0.45)
 mesh = SubResource("CounterPanelSide")
-material_override = SubResource("DarkBronze")
+material_override = SubResource("Brass")
 
 [node name="Panel5Right" type="MeshInstance3D" parent="Reception/Counter"]
 position = Vector3(1.955, 0.48, 0.45)
 mesh = SubResource("CounterPanelSide")
-material_override = SubResource("DarkBronze")
+material_override = SubResource("Brass")
 
 [node name="WalnutPanel6" type="MeshInstance3D" parent="Reception/Counter"]
 position = Vector3(2.5, 0.48, 0.423)
@@ -2675,11 +2785,828 @@ material_override = SubResource("Brass")
 [node name="Panel6Left" type="MeshInstance3D" parent="Reception/Counter"]
 position = Vector3(2.045, 0.48, 0.45)
 mesh = SubResource("CounterPanelSide")
-material_override = SubResource("DarkBronze")
+material_override = SubResource("Brass")
 
 [node name="Panel6Right" type="MeshInstance3D" parent="Reception/Counter"]
 position = Vector3(2.955, 0.48, 0.45)
 mesh = SubResource("CounterPanelSide")
+material_override = SubResource("Brass")
+
+[node name="Interior" type="Node3D" parent="."]
+position = Vector3(0, 0, 0)
+
+[node name="Lounges" type="Node3D" parent="Interior"]
+position = Vector3(0, 0, 0)
+
+[node name="ReceptionDressing" type="Node3D" parent="Interior"]
+position = Vector3(0, 0, 0)
+
+[node name="WallArtAndTrim" type="Node3D" parent="Interior"]
+position = Vector3(0, 0, 0)
+
+[node name="CeilingFixtures" type="Node3D" parent="Interior"]
+position = Vector3(0, 0, 0)
+
+[node name="EntranceDisplays" type="Node3D" parent="Interior"]
+position = Vector3(0, 0, 0)
+
+[node name="WestConversationLounge" type="Node3D" parent="Interior/Lounges"]
+position = Vector3(-6.49, 0, 11.21)
+
+[node name="AreaRug" type="Node3D" parent="Interior/Lounges/WestConversationLounge"]
+position = Vector3(0, 0, 0)
+
+[node name="WovenField" type="MeshInstance3D" parent="Interior/Lounges/WestConversationLounge/AreaRug"]
+position = Vector3(0, 0.0065, 0)
+mesh = SubResource("LoungeRugLarge")
+material_override = SubResource("LoungeRug")
+
+[node name="WestBorder" type="MeshInstance3D" parent="Interior/Lounges/WestConversationLounge/AreaRug"]
+position = Vector3(-1.24, 0.016, 0)
+mesh = SubResource("RugBorderLong")
+material_override = SubResource("FloorInlay")
+
+[node name="NorthBorder" type="MeshInstance3D" parent="Interior/Lounges/WestConversationLounge/AreaRug"]
+position = Vector3(0, 0.016, -2.2)
+mesh = SubResource("RugBorderShort")
+material_override = SubResource("FloorInlay")
+
+[node name="EastBorder" type="MeshInstance3D" parent="Interior/Lounges/WestConversationLounge/AreaRug"]
+position = Vector3(1.24, 0.016, 0)
+mesh = SubResource("RugBorderLong")
+material_override = SubResource("FloorInlay")
+
+[node name="SouthBorder" type="MeshInstance3D" parent="Interior/Lounges/WestConversationLounge/AreaRug"]
+position = Vector3(0, 0.016, 2.2)
+mesh = SubResource("RugBorderShort")
+material_override = SubResource("FloorInlay")
+
+[node name="NearSofa" type="StaticBody3D" parent="Interior/Lounges/WestConversationLounge"]
+position = Vector3(0, 0.014, -1.28)
+
+[node name="Model" type="Node3D" parent="Interior/Lounges/WestConversationLounge/NearSofa"]
+position = Vector3(-0.00033, -0.00026, 0.08603)
+scale = Vector3(1.25, 1.25, 1.25)
+
+[node name="OriginalAsset" parent="Interior/Lounges/WestConversationLounge/NearSofa/Model" instance=ExtResource("InteriorSofa")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Interior/Lounges/WestConversationLounge/NearSofa"]
+position = Vector3(0, 0.439, 0)
+shape = SubResource("SofaBody")
+
+[node name="FarSofa" type="StaticBody3D" parent="Interior/Lounges/WestConversationLounge"]
+position = Vector3(0, 0.014, 1.28)
+rotation = Vector3(0, 3.14159, 0)
+
+[node name="Model" type="Node3D" parent="Interior/Lounges/WestConversationLounge/FarSofa"]
+position = Vector3(-0.00033, -0.00026, 0.08603)
+scale = Vector3(1.25, 1.25, 1.25)
+
+[node name="OriginalAsset" parent="Interior/Lounges/WestConversationLounge/FarSofa/Model" instance=ExtResource("InteriorSofa")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Interior/Lounges/WestConversationLounge/FarSofa"]
+position = Vector3(0, 0.439, 0)
+shape = SubResource("SofaBody")
+
+[node name="ConversationTable" type="StaticBody3D" parent="Interior/Lounges/WestConversationLounge"]
+position = Vector3(0, 0.014, 0)
+
+[node name="Model" type="Node3D" parent="Interior/Lounges/WestConversationLounge/ConversationTable"]
+position = Vector3(0, 0.00086, 0)
+scale = Vector3(0.65, 0.65, 0.65)
+
+[node name="OriginalAsset" parent="Interior/Lounges/WestConversationLounge/ConversationTable/Model" instance=ExtResource("InteriorTable")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Interior/Lounges/WestConversationLounge/ConversationTable"]
+position = Vector3(0, 0.325, 0)
+shape = SubResource("TableBody")
+
+[node name="ChessSet" type="Node3D" parent="Interior/Lounges/WestConversationLounge/ConversationTable"]
+position = Vector3(0, 0.653, 0)
+scale = Vector3(0.91, 0.91, 0.91)
+rotation = Vector3(0, 0.16, 0)
+
+[node name="OriginalAsset" parent="Interior/Lounges/WestConversationLounge/ConversationTable/ChessSet" instance=ExtResource("InteriorChess")]
+
+[node name="WestWaitingNook" type="Node3D" parent="Interior/Lounges"]
+position = Vector3(-6.52, 0, 6.12)
+
+[node name="AreaRug" type="Node3D" parent="Interior/Lounges/WestWaitingNook"]
+position = Vector3(0, 0, 0)
+
+[node name="WovenField" type="MeshInstance3D" parent="Interior/Lounges/WestWaitingNook/AreaRug"]
+position = Vector3(0, 0.0065, 0)
+mesh = SubResource("LoungeRugSmall")
+material_override = SubResource("LoungeRug")
+
+[node name="WestBorder" type="MeshInstance3D" parent="Interior/Lounges/WestWaitingNook/AreaRug"]
+position = Vector3(-1.34, 0.016, 0)
+mesh = SubResource("RugSmallLong")
+material_override = SubResource("FloorInlay")
+
+[node name="NorthBorder" type="MeshInstance3D" parent="Interior/Lounges/WestWaitingNook/AreaRug"]
+position = Vector3(0, 0.016, -1.29)
+mesh = SubResource("RugSmallShort")
+material_override = SubResource("FloorInlay")
+
+[node name="EastBorder" type="MeshInstance3D" parent="Interior/Lounges/WestWaitingNook/AreaRug"]
+position = Vector3(1.34, 0.016, 0)
+mesh = SubResource("RugSmallLong")
+material_override = SubResource("FloorInlay")
+
+[node name="SouthBorder" type="MeshInstance3D" parent="Interior/Lounges/WestWaitingNook/AreaRug"]
+position = Vector3(0, 0.016, 1.29)
+mesh = SubResource("RugSmallShort")
+material_override = SubResource("FloorInlay")
+
+[node name="WindowSofa" type="StaticBody3D" parent="Interior/Lounges/WestWaitingNook"]
+position = Vector3(-0.62, 0.014, 0)
+rotation = Vector3(0, 1.5708, 0)
+
+[node name="Model" type="Node3D" parent="Interior/Lounges/WestWaitingNook/WindowSofa"]
+position = Vector3(-0.00033, -0.00026, 0.08603)
+scale = Vector3(1.25, 1.25, 1.25)
+
+[node name="OriginalAsset" parent="Interior/Lounges/WestWaitingNook/WindowSofa/Model" instance=ExtResource("InteriorSofa")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Interior/Lounges/WestWaitingNook/WindowSofa"]
+position = Vector3(0, 0.439, 0)
+shape = SubResource("SofaBody")
+
+[node name="OccasionalTable" type="StaticBody3D" parent="Interior/Lounges/WestWaitingNook"]
+position = Vector3(0.71, 0.014, 0)
+
+[node name="Model" type="Node3D" parent="Interior/Lounges/WestWaitingNook/OccasionalTable"]
+position = Vector3(0, 0.00086, 0)
+scale = Vector3(0.65, 0.65, 0.65)
+
+[node name="OriginalAsset" parent="Interior/Lounges/WestWaitingNook/OccasionalTable/Model" instance=ExtResource("InteriorTable")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Interior/Lounges/WestWaitingNook/OccasionalTable"]
+position = Vector3(0, 0.325, 0)
+shape = SubResource("TableBody")
+
+[node name="WestNookFill" type="OmniLight3D" parent="Interior/Lounges/WestWaitingNook"]
+position = Vector3(0, 3.35, 0)
+light_color = Color(1, 0.86, 0.69, 1)
+light_energy = 0.8
+omni_range = 4.4
+omni_attenuation = 1.3
+shadow_enabled = false
+
+[node name="WestReceptionPlant" type="StaticBody3D" parent="Interior/ReceptionDressing"]
+position = Vector3(-6.55, 0, -10.98)
+
+[node name="Model" type="Node3D" parent="Interior/ReceptionDressing/WestReceptionPlant"]
+position = Vector3(-0.0364, 0.7305, 0.05723)
+scale = Vector3(1.4, 1.4, 1.4)
+
+[node name="OriginalAsset" parent="Interior/ReceptionDressing/WestReceptionPlant/Model" instance=ExtResource("InteriorPlant")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Interior/ReceptionDressing/WestReceptionPlant"]
+position = Vector3(0, 0.31, 0)
+shape = SubResource("PlantBody")
+
+[node name="WestPanel1" type="Node3D" parent="Interior/WallArtAndTrim"]
+position = Vector3(-7.904, 0, 7.6)
+
+[node name="Bottom" type="MeshInstance3D" parent="Interior/WallArtAndTrim/WestPanel1"]
+position = Vector3(0, 0.61, 0)
+mesh = SubResource("PanelBorderHorizontal")
+material_override = SubResource("Brass")
+
+[node name="Left" type="MeshInstance3D" parent="Interior/WallArtAndTrim/WestPanel1"]
+position = Vector3(0, 2.4, -1.16)
+mesh = SubResource("PanelBorderVertical")
+material_override = SubResource("Brass")
+
+[node name="Top" type="MeshInstance3D" parent="Interior/WallArtAndTrim/WestPanel1"]
+position = Vector3(0, 4.19, 0)
+mesh = SubResource("PanelBorderHorizontal")
+material_override = SubResource("Brass")
+
+[node name="Right" type="MeshInstance3D" parent="Interior/WallArtAndTrim/WestPanel1"]
+position = Vector3(0, 2.4, 1.16)
+mesh = SubResource("PanelBorderVertical")
+material_override = SubResource("Brass")
+
+[node name="WestPanel2" type="Node3D" parent="Interior/WallArtAndTrim"]
+position = Vector3(-7.904, 0, 11.3)
+
+[node name="Bottom" type="MeshInstance3D" parent="Interior/WallArtAndTrim/WestPanel2"]
+position = Vector3(0, 0.61, 0)
+mesh = SubResource("PanelBorderHorizontal")
+material_override = SubResource("Brass")
+
+[node name="Left" type="MeshInstance3D" parent="Interior/WallArtAndTrim/WestPanel2"]
+position = Vector3(0, 2.4, -1.16)
+mesh = SubResource("PanelBorderVertical")
+material_override = SubResource("Brass")
+
+[node name="Top" type="MeshInstance3D" parent="Interior/WallArtAndTrim/WestPanel2"]
+position = Vector3(0, 4.19, 0)
+mesh = SubResource("PanelBorderHorizontal")
+material_override = SubResource("Brass")
+
+[node name="Right" type="MeshInstance3D" parent="Interior/WallArtAndTrim/WestPanel2"]
+position = Vector3(0, 2.4, 1.16)
+mesh = SubResource("PanelBorderVertical")
+material_override = SubResource("Brass")
+
+[node name="HistoricPainting" type="Node3D" parent="Interior/WallArtAndTrim/WestPanel2"]
+position = Vector3(0.033, 2.7, 0)
+scale = Vector3(2.2, 2.2, 2.2)
+rotation = Vector3(0, 1.5708, 0)
+
+[node name="OriginalAsset" parent="Interior/WallArtAndTrim/WestPanel2/HistoricPainting" instance=ExtResource("InteriorPainting")]
+
+[node name="WestPanel3" type="Node3D" parent="Interior/WallArtAndTrim"]
+position = Vector3(-7.904, 0, -9.2)
+
+[node name="Bottom" type="MeshInstance3D" parent="Interior/WallArtAndTrim/WestPanel3"]
+position = Vector3(0, 0.61, 0)
+mesh = SubResource("PanelBorderHorizontal")
+material_override = SubResource("Brass")
+
+[node name="Left" type="MeshInstance3D" parent="Interior/WallArtAndTrim/WestPanel3"]
+position = Vector3(0, 2.4, -1.16)
+mesh = SubResource("PanelBorderVertical")
+material_override = SubResource("Brass")
+
+[node name="Top" type="MeshInstance3D" parent="Interior/WallArtAndTrim/WestPanel3"]
+position = Vector3(0, 4.19, 0)
+mesh = SubResource("PanelBorderHorizontal")
+material_override = SubResource("Brass")
+
+[node name="Right" type="MeshInstance3D" parent="Interior/WallArtAndTrim/WestPanel3"]
+position = Vector3(0, 2.4, 1.16)
+mesh = SubResource("PanelBorderVertical")
+material_override = SubResource("Brass")
+
+[node name="HistoricPainting" type="Node3D" parent="Interior/WallArtAndTrim/WestPanel3"]
+position = Vector3(0.033, 2.7, 0)
+scale = Vector3(2.2, 2.2, 2.2)
+rotation = Vector3(0, 1.5708, 0)
+
+[node name="OriginalAsset" parent="Interior/WallArtAndTrim/WestPanel3/HistoricPainting" instance=ExtResource("InteriorPainting")]
+
+[node name="WestPanel4" type="Node3D" parent="Interior/WallArtAndTrim"]
+position = Vector3(-7.904, 0, -12.1)
+
+[node name="Bottom" type="MeshInstance3D" parent="Interior/WallArtAndTrim/WestPanel4"]
+position = Vector3(0, 0.61, 0)
+mesh = SubResource("PanelBorderHorizontal")
+material_override = SubResource("Brass")
+
+[node name="Left" type="MeshInstance3D" parent="Interior/WallArtAndTrim/WestPanel4"]
+position = Vector3(0, 2.4, -1.16)
+mesh = SubResource("PanelBorderVertical")
+material_override = SubResource("Brass")
+
+[node name="Top" type="MeshInstance3D" parent="Interior/WallArtAndTrim/WestPanel4"]
+position = Vector3(0, 4.19, 0)
+mesh = SubResource("PanelBorderHorizontal")
+material_override = SubResource("Brass")
+
+[node name="Right" type="MeshInstance3D" parent="Interior/WallArtAndTrim/WestPanel4"]
+position = Vector3(0, 2.4, 1.16)
+mesh = SubResource("PanelBorderVertical")
+material_override = SubResource("Brass")
+
+[node name="WestWallSconce1" type="Node3D" parent="Interior/WallArtAndTrim"]
+position = Vector3(-7.986, 3.05, 9.47)
+rotation = Vector3(0, 1.5708, 0)
+
+[node name="Fixture" type="Node3D" parent="Interior/WallArtAndTrim/WestWallSconce1"]
+position = Vector3(0, -0.202, 0.004)
+scale = Vector3(0.00545, 0.00545, 0.00545)
+
+[node name="OriginalAsset" parent="Interior/WallArtAndTrim/WestWallSconce1/Fixture" instance=ExtResource("InteriorSconce")]
+
+[node name="LocalGlow" type="OmniLight3D" parent="Interior/WallArtAndTrim/WestWallSconce1"]
+position = Vector3(0, 0.025, 0.4)
+light_color = Color(1, 0.86, 0.69, 1)
+light_energy = 0.95
+omni_range = 4.6
+omni_attenuation = 1.3
+shadow_enabled = false
+
+[node name="WestWallSconce2" type="Node3D" parent="Interior/WallArtAndTrim"]
+position = Vector3(-7.925, 3.78, -9.2)
+rotation = Vector3(0, 1.5708, 0)
+
+[node name="Fixture" type="Node3D" parent="Interior/WallArtAndTrim/WestWallSconce2"]
+position = Vector3(0, -0.202, 0.004)
+scale = Vector3(0.00545, 0.00545, 0.00545)
+
+[node name="OriginalAsset" parent="Interior/WallArtAndTrim/WestWallSconce2/Fixture" instance=ExtResource("InteriorSconce")]
+
+[node name="LocalGlow" type="OmniLight3D" parent="Interior/WallArtAndTrim/WestWallSconce2"]
+position = Vector3(0, 0.025, 0.4)
+light_color = Color(1, 0.86, 0.69, 1)
+light_energy = 0.95
+omni_range = 4.6
+omni_attenuation = 1.3
+shadow_enabled = false
+
+[node name="WestPortraitDisplay" type="StaticBody3D" parent="Interior/EntranceDisplays"]
+position = Vector3(-3.65, 0, 13.23)
+
+[node name="Base" type="MeshInstance3D" parent="Interior/EntranceDisplays/WestPortraitDisplay"]
+position = Vector3(0, 0.06, 0)
+mesh = SubResource("PedestalBase")
 material_override = SubResource("DarkBronze")
+
+[node name="Column" type="MeshInstance3D" parent="Interior/EntranceDisplays/WestPortraitDisplay"]
+position = Vector3(0, 0.51, 0)
+mesh = SubResource("PedestalColumn")
+material_override = SubResource("Limestone")
+
+[node name="Cap" type="MeshInstance3D" parent="Interior/EntranceDisplays/WestPortraitDisplay"]
+position = Vector3(0, 0.95, 0)
+mesh = SubResource("PedestalCap")
+material_override = SubResource("Brass")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Interior/EntranceDisplays/WestPortraitDisplay"]
+position = Vector3(0, 0.5, 0)
+shape = SubResource("PedestalBody")
+
+[node name="PortraitBust" type="Node3D" parent="Interior/EntranceDisplays/WestPortraitDisplay"]
+position = Vector3(0.019, 1, 0.008)
+scale = Vector3(1.45, 1.45, 1.45)
+rotation = Vector3(0, 3.14159, 0)
+
+[node name="OriginalAsset" parent="Interior/EntranceDisplays/WestPortraitDisplay/PortraitBust" instance=ExtResource("InteriorBust")]
+
+[node name="EastConversationLounge" type="Node3D" parent="Interior/Lounges"]
+position = Vector3(6.49, 0, 11.21)
+
+[node name="AreaRug" type="Node3D" parent="Interior/Lounges/EastConversationLounge"]
+position = Vector3(0, 0, 0)
+
+[node name="WovenField" type="MeshInstance3D" parent="Interior/Lounges/EastConversationLounge/AreaRug"]
+position = Vector3(0, 0.0065, 0)
+mesh = SubResource("LoungeRugLarge")
+material_override = SubResource("LoungeRug")
+
+[node name="WestBorder" type="MeshInstance3D" parent="Interior/Lounges/EastConversationLounge/AreaRug"]
+position = Vector3(-1.24, 0.016, 0)
+mesh = SubResource("RugBorderLong")
+material_override = SubResource("FloorInlay")
+
+[node name="NorthBorder" type="MeshInstance3D" parent="Interior/Lounges/EastConversationLounge/AreaRug"]
+position = Vector3(0, 0.016, -2.2)
+mesh = SubResource("RugBorderShort")
+material_override = SubResource("FloorInlay")
+
+[node name="EastBorder" type="MeshInstance3D" parent="Interior/Lounges/EastConversationLounge/AreaRug"]
+position = Vector3(1.24, 0.016, 0)
+mesh = SubResource("RugBorderLong")
+material_override = SubResource("FloorInlay")
+
+[node name="SouthBorder" type="MeshInstance3D" parent="Interior/Lounges/EastConversationLounge/AreaRug"]
+position = Vector3(0, 0.016, 2.2)
+mesh = SubResource("RugBorderShort")
+material_override = SubResource("FloorInlay")
+
+[node name="NearSofa" type="StaticBody3D" parent="Interior/Lounges/EastConversationLounge"]
+position = Vector3(0, 0.014, -1.28)
+
+[node name="Model" type="Node3D" parent="Interior/Lounges/EastConversationLounge/NearSofa"]
+position = Vector3(-0.00033, -0.00026, 0.08603)
+scale = Vector3(1.25, 1.25, 1.25)
+
+[node name="OriginalAsset" parent="Interior/Lounges/EastConversationLounge/NearSofa/Model" instance=ExtResource("InteriorSofa")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Interior/Lounges/EastConversationLounge/NearSofa"]
+position = Vector3(0, 0.439, 0)
+shape = SubResource("SofaBody")
+
+[node name="FarSofa" type="StaticBody3D" parent="Interior/Lounges/EastConversationLounge"]
+position = Vector3(0, 0.014, 1.28)
+rotation = Vector3(0, 3.14159, 0)
+
+[node name="Model" type="Node3D" parent="Interior/Lounges/EastConversationLounge/FarSofa"]
+position = Vector3(-0.00033, -0.00026, 0.08603)
+scale = Vector3(1.25, 1.25, 1.25)
+
+[node name="OriginalAsset" parent="Interior/Lounges/EastConversationLounge/FarSofa/Model" instance=ExtResource("InteriorSofa")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Interior/Lounges/EastConversationLounge/FarSofa"]
+position = Vector3(0, 0.439, 0)
+shape = SubResource("SofaBody")
+
+[node name="ConversationTable" type="StaticBody3D" parent="Interior/Lounges/EastConversationLounge"]
+position = Vector3(0, 0.014, 0)
+
+[node name="Model" type="Node3D" parent="Interior/Lounges/EastConversationLounge/ConversationTable"]
+position = Vector3(0, 0.00086, 0)
+scale = Vector3(0.65, 0.65, 0.65)
+
+[node name="OriginalAsset" parent="Interior/Lounges/EastConversationLounge/ConversationTable/Model" instance=ExtResource("InteriorTable")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Interior/Lounges/EastConversationLounge/ConversationTable"]
+position = Vector3(0, 0.325, 0)
+shape = SubResource("TableBody")
+
+[node name="GuestReading" type="Node3D" parent="Interior/Lounges/EastConversationLounge/ConversationTable"]
+position = Vector3(-0.018, 0.653, -0.026)
+scale = Vector3(0.83, 0.83, 0.83)
+rotation = Vector3(0, -0.35, 0)
+
+[node name="OriginalAsset" parent="Interior/Lounges/EastConversationLounge/ConversationTable/GuestReading" instance=ExtResource("InteriorBooks")]
+
+[node name="EastWaitingNook" type="Node3D" parent="Interior/Lounges"]
+position = Vector3(6.52, 0, 6.12)
+
+[node name="AreaRug" type="Node3D" parent="Interior/Lounges/EastWaitingNook"]
+position = Vector3(0, 0, 0)
+
+[node name="WovenField" type="MeshInstance3D" parent="Interior/Lounges/EastWaitingNook/AreaRug"]
+position = Vector3(0, 0.0065, 0)
+mesh = SubResource("LoungeRugSmall")
+material_override = SubResource("LoungeRug")
+
+[node name="WestBorder" type="MeshInstance3D" parent="Interior/Lounges/EastWaitingNook/AreaRug"]
+position = Vector3(-1.34, 0.016, 0)
+mesh = SubResource("RugSmallLong")
+material_override = SubResource("FloorInlay")
+
+[node name="NorthBorder" type="MeshInstance3D" parent="Interior/Lounges/EastWaitingNook/AreaRug"]
+position = Vector3(0, 0.016, -1.29)
+mesh = SubResource("RugSmallShort")
+material_override = SubResource("FloorInlay")
+
+[node name="EastBorder" type="MeshInstance3D" parent="Interior/Lounges/EastWaitingNook/AreaRug"]
+position = Vector3(1.34, 0.016, 0)
+mesh = SubResource("RugSmallLong")
+material_override = SubResource("FloorInlay")
+
+[node name="SouthBorder" type="MeshInstance3D" parent="Interior/Lounges/EastWaitingNook/AreaRug"]
+position = Vector3(0, 0.016, 1.29)
+mesh = SubResource("RugSmallShort")
+material_override = SubResource("FloorInlay")
+
+[node name="WindowSofa" type="StaticBody3D" parent="Interior/Lounges/EastWaitingNook"]
+position = Vector3(0.62, 0.014, 0)
+rotation = Vector3(0, -1.5708, 0)
+
+[node name="Model" type="Node3D" parent="Interior/Lounges/EastWaitingNook/WindowSofa"]
+position = Vector3(-0.00033, -0.00026, 0.08603)
+scale = Vector3(1.25, 1.25, 1.25)
+
+[node name="OriginalAsset" parent="Interior/Lounges/EastWaitingNook/WindowSofa/Model" instance=ExtResource("InteriorSofa")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Interior/Lounges/EastWaitingNook/WindowSofa"]
+position = Vector3(0, 0.439, 0)
+shape = SubResource("SofaBody")
+
+[node name="OccasionalTable" type="StaticBody3D" parent="Interior/Lounges/EastWaitingNook"]
+position = Vector3(-0.71, 0.014, 0)
+
+[node name="Model" type="Node3D" parent="Interior/Lounges/EastWaitingNook/OccasionalTable"]
+position = Vector3(0, 0.00086, 0)
+scale = Vector3(0.65, 0.65, 0.65)
+
+[node name="OriginalAsset" parent="Interior/Lounges/EastWaitingNook/OccasionalTable/Model" instance=ExtResource("InteriorTable")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Interior/Lounges/EastWaitingNook/OccasionalTable"]
+position = Vector3(0, 0.325, 0)
+shape = SubResource("TableBody")
+
+[node name="EastNookFill" type="OmniLight3D" parent="Interior/Lounges/EastWaitingNook"]
+position = Vector3(0, 3.35, 0)
+light_color = Color(1, 0.86, 0.69, 1)
+light_energy = 0.8
+omni_range = 4.4
+omni_attenuation = 1.3
+shadow_enabled = false
+
+[node name="EastReceptionPlant" type="StaticBody3D" parent="Interior/ReceptionDressing"]
+position = Vector3(6.55, 0, -10.98)
+
+[node name="Model" type="Node3D" parent="Interior/ReceptionDressing/EastReceptionPlant"]
+position = Vector3(-0.0364, 0.7305, 0.05723)
+scale = Vector3(1.4, 1.4, 1.4)
+
+[node name="OriginalAsset" parent="Interior/ReceptionDressing/EastReceptionPlant/Model" instance=ExtResource("InteriorPlant")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Interior/ReceptionDressing/EastReceptionPlant"]
+position = Vector3(0, 0.31, 0)
+shape = SubResource("PlantBody")
+
+[node name="EastPanel1" type="Node3D" parent="Interior/WallArtAndTrim"]
+position = Vector3(7.904, 0, 7.6)
+
+[node name="Bottom" type="MeshInstance3D" parent="Interior/WallArtAndTrim/EastPanel1"]
+position = Vector3(0, 0.61, 0)
+mesh = SubResource("PanelBorderHorizontal")
+material_override = SubResource("Brass")
+
+[node name="Left" type="MeshInstance3D" parent="Interior/WallArtAndTrim/EastPanel1"]
+position = Vector3(0, 2.4, -1.16)
+mesh = SubResource("PanelBorderVertical")
+material_override = SubResource("Brass")
+
+[node name="Top" type="MeshInstance3D" parent="Interior/WallArtAndTrim/EastPanel1"]
+position = Vector3(0, 4.19, 0)
+mesh = SubResource("PanelBorderHorizontal")
+material_override = SubResource("Brass")
+
+[node name="Right" type="MeshInstance3D" parent="Interior/WallArtAndTrim/EastPanel1"]
+position = Vector3(0, 2.4, 1.16)
+mesh = SubResource("PanelBorderVertical")
+material_override = SubResource("Brass")
+
+[node name="EastPanel2" type="Node3D" parent="Interior/WallArtAndTrim"]
+position = Vector3(7.904, 0, 11.3)
+
+[node name="Bottom" type="MeshInstance3D" parent="Interior/WallArtAndTrim/EastPanel2"]
+position = Vector3(0, 0.61, 0)
+mesh = SubResource("PanelBorderHorizontal")
+material_override = SubResource("Brass")
+
+[node name="Left" type="MeshInstance3D" parent="Interior/WallArtAndTrim/EastPanel2"]
+position = Vector3(0, 2.4, -1.16)
+mesh = SubResource("PanelBorderVertical")
+material_override = SubResource("Brass")
+
+[node name="Top" type="MeshInstance3D" parent="Interior/WallArtAndTrim/EastPanel2"]
+position = Vector3(0, 4.19, 0)
+mesh = SubResource("PanelBorderHorizontal")
+material_override = SubResource("Brass")
+
+[node name="Right" type="MeshInstance3D" parent="Interior/WallArtAndTrim/EastPanel2"]
+position = Vector3(0, 2.4, 1.16)
+mesh = SubResource("PanelBorderVertical")
+material_override = SubResource("Brass")
+
+[node name="HistoricPainting" type="Node3D" parent="Interior/WallArtAndTrim/EastPanel2"]
+position = Vector3(-0.033, 2.7, 0)
+scale = Vector3(2.2, 2.2, 2.2)
+rotation = Vector3(0, -1.5708, 0)
+
+[node name="OriginalAsset" parent="Interior/WallArtAndTrim/EastPanel2/HistoricPainting" instance=ExtResource("InteriorPainting")]
+
+[node name="EastPanel3" type="Node3D" parent="Interior/WallArtAndTrim"]
+position = Vector3(7.904, 0, -9.2)
+
+[node name="Bottom" type="MeshInstance3D" parent="Interior/WallArtAndTrim/EastPanel3"]
+position = Vector3(0, 0.61, 0)
+mesh = SubResource("PanelBorderHorizontal")
+material_override = SubResource("Brass")
+
+[node name="Left" type="MeshInstance3D" parent="Interior/WallArtAndTrim/EastPanel3"]
+position = Vector3(0, 2.4, -1.16)
+mesh = SubResource("PanelBorderVertical")
+material_override = SubResource("Brass")
+
+[node name="Top" type="MeshInstance3D" parent="Interior/WallArtAndTrim/EastPanel3"]
+position = Vector3(0, 4.19, 0)
+mesh = SubResource("PanelBorderHorizontal")
+material_override = SubResource("Brass")
+
+[node name="Right" type="MeshInstance3D" parent="Interior/WallArtAndTrim/EastPanel3"]
+position = Vector3(0, 2.4, 1.16)
+mesh = SubResource("PanelBorderVertical")
+material_override = SubResource("Brass")
+
+[node name="HistoricPainting" type="Node3D" parent="Interior/WallArtAndTrim/EastPanel3"]
+position = Vector3(-0.033, 2.7, 0)
+scale = Vector3(2.2, 2.2, 2.2)
+rotation = Vector3(0, -1.5708, 0)
+
+[node name="OriginalAsset" parent="Interior/WallArtAndTrim/EastPanel3/HistoricPainting" instance=ExtResource("InteriorPainting")]
+
+[node name="EastPanel4" type="Node3D" parent="Interior/WallArtAndTrim"]
+position = Vector3(7.904, 0, -12.1)
+
+[node name="Bottom" type="MeshInstance3D" parent="Interior/WallArtAndTrim/EastPanel4"]
+position = Vector3(0, 0.61, 0)
+mesh = SubResource("PanelBorderHorizontal")
+material_override = SubResource("Brass")
+
+[node name="Left" type="MeshInstance3D" parent="Interior/WallArtAndTrim/EastPanel4"]
+position = Vector3(0, 2.4, -1.16)
+mesh = SubResource("PanelBorderVertical")
+material_override = SubResource("Brass")
+
+[node name="Top" type="MeshInstance3D" parent="Interior/WallArtAndTrim/EastPanel4"]
+position = Vector3(0, 4.19, 0)
+mesh = SubResource("PanelBorderHorizontal")
+material_override = SubResource("Brass")
+
+[node name="Right" type="MeshInstance3D" parent="Interior/WallArtAndTrim/EastPanel4"]
+position = Vector3(0, 2.4, 1.16)
+mesh = SubResource("PanelBorderVertical")
+material_override = SubResource("Brass")
+
+[node name="EastWallSconce1" type="Node3D" parent="Interior/WallArtAndTrim"]
+position = Vector3(7.986, 3.05, 9.47)
+rotation = Vector3(0, -1.5708, 0)
+
+[node name="Fixture" type="Node3D" parent="Interior/WallArtAndTrim/EastWallSconce1"]
+position = Vector3(0, -0.202, 0.004)
+scale = Vector3(0.00545, 0.00545, 0.00545)
+
+[node name="OriginalAsset" parent="Interior/WallArtAndTrim/EastWallSconce1/Fixture" instance=ExtResource("InteriorSconce")]
+
+[node name="LocalGlow" type="OmniLight3D" parent="Interior/WallArtAndTrim/EastWallSconce1"]
+position = Vector3(0, 0.025, 0.4)
+light_color = Color(1, 0.86, 0.69, 1)
+light_energy = 0.95
+omni_range = 4.6
+omni_attenuation = 1.3
+shadow_enabled = false
+
+[node name="EastWallSconce2" type="Node3D" parent="Interior/WallArtAndTrim"]
+position = Vector3(7.925, 3.78, -9.2)
+rotation = Vector3(0, -1.5708, 0)
+
+[node name="Fixture" type="Node3D" parent="Interior/WallArtAndTrim/EastWallSconce2"]
+position = Vector3(0, -0.202, 0.004)
+scale = Vector3(0.00545, 0.00545, 0.00545)
+
+[node name="OriginalAsset" parent="Interior/WallArtAndTrim/EastWallSconce2/Fixture" instance=ExtResource("InteriorSconce")]
+
+[node name="LocalGlow" type="OmniLight3D" parent="Interior/WallArtAndTrim/EastWallSconce2"]
+position = Vector3(0, 0.025, 0.4)
+light_color = Color(1, 0.86, 0.69, 1)
+light_energy = 0.95
+omni_range = 4.6
+omni_attenuation = 1.3
+shadow_enabled = false
+
+[node name="EastPortraitDisplay" type="StaticBody3D" parent="Interior/EntranceDisplays"]
+position = Vector3(3.65, 0, 13.23)
+
+[node name="Base" type="MeshInstance3D" parent="Interior/EntranceDisplays/EastPortraitDisplay"]
+position = Vector3(0, 0.06, 0)
+mesh = SubResource("PedestalBase")
+material_override = SubResource("DarkBronze")
+
+[node name="Column" type="MeshInstance3D" parent="Interior/EntranceDisplays/EastPortraitDisplay"]
+position = Vector3(0, 0.51, 0)
+mesh = SubResource("PedestalColumn")
+material_override = SubResource("Limestone")
+
+[node name="Cap" type="MeshInstance3D" parent="Interior/EntranceDisplays/EastPortraitDisplay"]
+position = Vector3(0, 0.95, 0)
+mesh = SubResource("PedestalCap")
+material_override = SubResource("Brass")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Interior/EntranceDisplays/EastPortraitDisplay"]
+position = Vector3(0, 0.5, 0)
+shape = SubResource("PedestalBody")
+
+[node name="PortraitBust" type="Node3D" parent="Interior/EntranceDisplays/EastPortraitDisplay"]
+position = Vector3(0.019, 1, 0.008)
+scale = Vector3(1.45, 1.45, 1.45)
+rotation = Vector3(0, 3.14159, 0)
+
+[node name="OriginalAsset" parent="Interior/EntranceDisplays/EastPortraitDisplay/PortraitBust" instance=ExtResource("InteriorBust")]
+
+[node name="ServiceBell" type="Node3D" parent="Interior/ReceptionDressing"]
+position = Vector3(-1.95, 1.08915, -6.29)
+scale = Vector3(0.12, 0.12, 0.12)
+
+[node name="OriginalAsset" parent="Interior/ReceptionDressing/ServiceBell" instance=ExtResource("InteriorBell")]
+
+[node name="OpenGuestBook" type="Node3D" parent="Interior/ReceptionDressing"]
+position = Vector3(1.89, 1.0908, -6.44)
+scale = Vector3(1.13, 1.13, 1.13)
+rotation = Vector3(0, 0.14, 0)
+
+[node name="OriginalAsset" parent="Interior/ReceptionDressing/OpenGuestBook" instance=ExtResource("InteriorBooks")]
+
+[node name="WestStaffSideboard" type="StaticBody3D" parent="Interior/ReceptionDressing"]
+position = Vector3(-6.38, 0, -13.26)
+
+[node name="Model" type="Node3D" parent="Interior/ReceptionDressing/WestStaffSideboard"]
+position = Vector3(0, 0, 0.008)
+scale = Vector3(0.8, 0.8, 0.8)
+
+[node name="OriginalAsset" parent="Interior/ReceptionDressing/WestStaffSideboard/Model" instance=ExtResource("InteriorCabinet")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Interior/ReceptionDressing/WestStaffSideboard"]
+position = Vector3(0, 0.272, 0)
+shape = SubResource("CabinetBody")
+
+[node name="EastStaffSideboard" type="StaticBody3D" parent="Interior/ReceptionDressing"]
+position = Vector3(6.38, 0, -13.26)
+
+[node name="Model" type="Node3D" parent="Interior/ReceptionDressing/EastStaffSideboard"]
+position = Vector3(0, 0, 0.008)
+scale = Vector3(0.8, 0.8, 0.8)
+
+[node name="OriginalAsset" parent="Interior/ReceptionDressing/EastStaffSideboard/Model" instance=ExtResource("InteriorCabinet")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Interior/ReceptionDressing/EastStaffSideboard"]
+position = Vector3(0, 0.272, 0)
+shape = SubResource("CabinetBody")
+
+[node name="LogoInnerLeft" type="MeshInstance3D" parent="Interior/WallArtAndTrim"]
+position = Vector3(-3.22, 3.3, -13.807)
+mesh = SubResource("LogoInnerVertical")
+material_override = SubResource("Brass")
+
+[node name="LogoInnerBottom" type="MeshInstance3D" parent="Interior/WallArtAndTrim"]
+position = Vector3(0, 0.5375, -13.807)
+mesh = SubResource("LogoInnerHorizontal")
+material_override = SubResource("Brass")
+
+[node name="LogoInnerRight" type="MeshInstance3D" parent="Interior/WallArtAndTrim"]
+position = Vector3(3.22, 3.3, -13.807)
+mesh = SubResource("LogoInnerVertical")
+material_override = SubResource("Brass")
+
+[node name="LogoInnerTop" type="MeshInstance3D" parent="Interior/WallArtAndTrim"]
+position = Vector3(0, 6.0625, -13.807)
+mesh = SubResource("LogoInnerHorizontal")
+material_override = SubResource("Brass")
+
+[node name="Chandelier1" type="Node3D" parent="Interior/CeilingFixtures"]
+position = Vector3(0, 8.6, 10.3)
+
+[node name="OriginalFixture" type="Node3D" parent="Interior/CeilingFixtures/Chandelier1"]
+position = Vector3(0, 0, 0)
+scale = Vector3(2.15, 2.15, 2.15)
+
+[node name="OriginalAsset" parent="Interior/CeilingFixtures/Chandelier1/OriginalFixture" instance=ExtResource("InteriorChandelier")]
+
+[node name="CeilingCanopy" type="MeshInstance3D" parent="Interior/CeilingFixtures/Chandelier1"]
+position = Vector3(0, -0.025, 0)
+mesh = SubResource("CanopyMesh")
+material_override = SubResource("Brass")
+
+[node name="Chandelier2" type="Node3D" parent="Interior/CeilingFixtures"]
+position = Vector3(0, 8.6, 6.2)
+
+[node name="OriginalFixture" type="Node3D" parent="Interior/CeilingFixtures/Chandelier2"]
+position = Vector3(0, 0, 0)
+scale = Vector3(2.15, 2.15, 2.15)
+
+[node name="OriginalAsset" parent="Interior/CeilingFixtures/Chandelier2/OriginalFixture" instance=ExtResource("InteriorChandelier")]
+
+[node name="CeilingCanopy" type="MeshInstance3D" parent="Interior/CeilingFixtures/Chandelier2"]
+position = Vector3(0, -0.025, 0)
+mesh = SubResource("CanopyMesh")
+material_override = SubResource("Brass")
+
+[node name="Chandelier3" type="Node3D" parent="Interior/CeilingFixtures"]
+position = Vector3(0, 8.6, 0.65)
+
+[node name="OriginalFixture" type="Node3D" parent="Interior/CeilingFixtures/Chandelier3"]
+position = Vector3(0, 0, 0)
+scale = Vector3(2.15, 2.15, 2.15)
+
+[node name="OriginalAsset" parent="Interior/CeilingFixtures/Chandelier3/OriginalFixture" instance=ExtResource("InteriorChandelier")]
+
+[node name="CeilingCanopy" type="MeshInstance3D" parent="Interior/CeilingFixtures/Chandelier3"]
+position = Vector3(0, -0.025, 0)
+mesh = SubResource("CanopyMesh")
+material_override = SubResource("Brass")
+
+[node name="Chandelier4" type="Node3D" parent="Interior/CeilingFixtures"]
+position = Vector3(0, 8.6, -5.45)
+
+[node name="OriginalFixture" type="Node3D" parent="Interior/CeilingFixtures/Chandelier4"]
+position = Vector3(0, 0, 0)
+scale = Vector3(2.15, 2.15, 2.15)
+
+[node name="OriginalAsset" parent="Interior/CeilingFixtures/Chandelier4/OriginalFixture" instance=ExtResource("InteriorChandelier")]
+
+[node name="CeilingCanopy" type="MeshInstance3D" parent="Interior/CeilingFixtures/Chandelier4"]
+position = Vector3(0, -0.025, 0)
+mesh = SubResource("CanopyMesh")
+material_override = SubResource("Brass")
+
+[node name="LogoWash" type="Node3D" parent="Interior/CeilingFixtures"]
+position = Vector3(0, 8.6, -10.65)
+
+[node name="RecessedTrim" type="MeshInstance3D" parent="Interior/CeilingFixtures/LogoWash"]
+position = Vector3(0, -0.04, 0)
+mesh = SubResource("LogoSpotTrim")
+material_override = SubResource("DarkBronze")
+
+[node name="LogoSpot" type="SpotLight3D" parent="Interior/CeilingFixtures/LogoWash"]
+position = Vector3(0, -0.11, 0)
+rotation = Vector3(-0.9, 0, 0)
+light_color = Color(1, 0.91, 0.79, 1)
+light_energy = 2.2
+spot_range = 8.2
+spot_angle = 38
+spot_attenuation = 1.2
+shadow_enabled = false
+
+[node name="CasinoDoorAccent" type="SpotLight3D" parent="Interior/CeilingFixtures"]
+position = Vector3(10.45, 4.48, -4)
+rotation = Vector3(-0.86, -1.5708, 0)
+light_color = Color(1, 0.91, 0.79, 1)
+light_energy = 1.2
+spot_range = 4
+spot_angle = 42
+spot_attenuation = 1.2
+shadow_enabled = false
 
 [editable path="CroupierStation"]
