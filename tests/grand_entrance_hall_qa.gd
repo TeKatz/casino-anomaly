@@ -52,7 +52,7 @@ func _run() -> void:
     if static_count < 40 or architecture.get_child_count() < 5:
         _fail("Missing authored architecture")
         return
-    if not _verify_finishes(hall) or not _verify_interior(hall):
+    if not _verify_finishes(hall) or not _verify_interior(hall) or not _verify_detail_assets(hall):
         return
     var space := hall.get_world_3d().direct_space_state
     var exclude: Array[RID] = [player.get_rid()]
@@ -301,4 +301,77 @@ func _verify_interior(hall: Node3D) -> bool:
         _fail("Lobby lighting exceeded its dynamic light/shadow budget")
         return false
     print("HALL_INTERIOR_BUDGET: meshes=",hall.find_children("*","MeshInstance3D",true,false).size()," lights=",light_count," shadow_lights=",shadow_count)
+    return true
+
+
+func _verify_detail_assets(hall: Node3D) -> bool:
+    # Validate that the exact original scenes are authored, not runtime
+    # substitutes. Small surface props remain noninteractive.
+    var expected := [
+        ["Interior/WallArtAndTrim/WestPanel1/AlternatePainting", "res://models/fancy_picture_frame_02/fancy_picture_frame_02_2k.gltf"],
+        ["Interior/WallArtAndTrim/EastPanel4/AlternatePainting", "res://models/fancy_picture_frame_02/fancy_picture_frame_02_2k.gltf"],
+        ["Interior/GalleryDetails/WestFloorVase/Model", "res://models/brass_vase_01/brass_vase_01_2k.gltf"],
+        ["Interior/GalleryDetails/WestFireAlarm", "res://models/fire_alarm/fire_alarm_1k.gltf"],
+        ["Interior/GalleryDetails/EastFloorVase/Model", "res://models/brass_vase_01/brass_vase_01_2k.gltf"],
+        ["Interior/GalleryDetails/EastFireAlarm", "res://models/fire_alarm/fire_alarm_1k.gltf"],
+        ["Interior/WallArtAndTrim/EntryFireAlarm", "res://models/fire_alarm/fire_alarm_1k.gltf"],
+        ["Interior/ReceptionDressing/CounterBrassVase", "res://models/brass_vase_03/brass_vase_03_2k.gltf"],
+        ["Interior/ReceptionDressing/WestStaffSideboard/SideboardBrassVase", "res://models/brass_vase_03/brass_vase_03_2k.gltf"],
+        ["Interior/ReceptionDressing/CroupierPocketWatch", "res://models/pocket_watch/pocket_watch_1k.gltf"],
+        ["Interior/Lounges/WestWaitingNook/OccasionalTable/SmallBrassVase", "res://models/brass_vase_04/brass_vase_04_2k.gltf"],
+        ["Interior/Lounges/EastWaitingNook/OccasionalTable/CigarettePack", "res://models/cigarette_pack/cigarette_pack_1k.gltf"]
+    ]
+    for record in expected:
+        var model := hall.get_node_or_null(record[0]) as Node3D
+        if model==null or model.owner!=hall:
+            _fail("Missing editable lobby detail: "+str(record[0]))
+            return false
+        var source := model.get_node_or_null("OriginalAsset") as Node3D
+        if source==null or source.scene_file_path!=record[1]:
+            _fail("Wrong original source for "+str(record[0]))
+            return false
+        if _model_bounds(model).size.length()<0.01:
+            _fail("Detail asset has no visible model: "+str(record[0]))
+            return false
+    for side in ["West","East"]:
+        var vase := hall.get_node("Interior/GalleryDetails/"+side+"FloorVase") as StaticBody3D
+        var model := vase.get_node("Model") as Node3D
+        var bounds := _model_bounds(model)
+        var collision := vase.get_node("CollisionShape3D") as CollisionShape3D
+        var shape := collision.shape as CylinderShape3D
+        if shape==null or collision.disabled or vase.collision_layer==0 or absf(bounds.position.y)>0.015 or absf(bounds.size.y-shape.height)>0.025 or absf(bounds.size.x-shape.radius*2.0)>0.025 or absf(bounds.size.z-shape.radius*2.0)>0.025:
+            _fail("Floor vase is ungrounded or has mismatched collision")
+            return false
+        if absf(bounds.get_center().x)<11.4 or absf(bounds.get_center().x)>11.8 or absf(bounds.get_center().z+1.0)>0.02:
+            _fail("Floor vase moved into the gallery walking lane")
+            return false
+    for record in [
+        ["Interior/ReceptionDressing/CounterBrassVase","Reception/Counter/Countertop/Mesh"],
+        ["Interior/ReceptionDressing/CroupierPocketWatch","Reception/Counter/Countertop/Mesh"],
+        ["Interior/ReceptionDressing/WestStaffSideboard/SideboardBrassVase","Interior/ReceptionDressing/WestStaffSideboard/Model"],
+        ["Interior/Lounges/WestWaitingNook/OccasionalTable/SmallBrassVase","Interior/Lounges/WestWaitingNook/OccasionalTable/Model"],
+        ["Interior/Lounges/EastWaitingNook/OccasionalTable/CigarettePack","Interior/Lounges/EastWaitingNook/OccasionalTable/Model"]
+    ]:
+        var prop_node := hall.get_node(record[0]) as Node3D
+        var support := hall.get_node(record[1]) as Node3D
+        var bounds := _model_bounds(prop_node)
+        var top := _model_bounds(support)
+        if absf(bounds.position.y-top.end.y)>0.025 or bounds.position.x<top.position.x or bounds.end.x>top.end.x or bounds.position.z<top.position.z or bounds.end.z>top.end.z:
+            _fail("Lobby detail is floating or overhanging: "+str(record[0])+" "+str(bounds))
+            return false
+    for record in [
+        ["Interior/WallArtAndTrim/WestPanel1/AlternatePainting",-7.93,0],
+        ["Interior/WallArtAndTrim/EastPanel4/AlternatePainting",7.93,0],
+        ["Interior/GalleryDetails/WestFireAlarm",-12.0,0],
+        ["Interior/GalleryDetails/EastFireAlarm",12.0,0],
+        ["Interior/WallArtAndTrim/EntryFireAlarm",14.0,2]
+    ]:
+        var model := hall.get_node(record[0]) as Node3D
+        var bounds := _model_bounds(model)
+        var axis := int(record[2])
+        var wall_face := float(record[1])
+        var back := bounds.end[axis] if wall_face>0.0 else bounds.position[axis]
+        if absf(back-wall_face)>0.025:
+            _fail("Wall detail is not attached to its supporting surface: "+str(record[0]))
+            return false
     return true

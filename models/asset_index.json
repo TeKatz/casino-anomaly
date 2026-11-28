@@ -301,6 +301,132 @@
       "resolution": "1k",
       "sourcePage": "https://polyhaven.com/a/brass_candleholders"
     },
+    "brass_vase_01": {
+      "entrypoint": "brass_vase_01_2k.gltf",
+      "files": {
+        "brass_vase_01.bin": {
+          "apiMd5": "e90e1aea42c064d2f9574873b00b835c",
+          "apiSize": 498240,
+          "bytes": 498240,
+          "sha256": "acc32719ee7c42c5b5fd07507a3dd7779e95445754759876bdbc133cebefa8ff",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/brass_vase_01/brass_vase_01.bin"
+        },
+        "brass_vase_01_2k.gltf": {
+          "apiMd5": "68ed4b693d321240989e269d6549bdc0",
+          "apiSize": 2693,
+          "bytes": 2693,
+          "sha256": "e06292d066d3440a57a043149a9ee27f636f41b20318f63fca7db7d38ccc7eae",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/2k/brass_vase_01/brass_vase_01_2k.gltf"
+        },
+        "textures/brass_vase_01_arm_2k.jpg": {
+          "apiMd5": "5bccf138f3ebf518a78d688cb34b63de",
+          "apiSize": 419285,
+          "bytes": 419285,
+          "sha256": "4c57b8076885c117205ea125a57b13ff2caf90ebb55bbbe5efd55c93562587d4",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/brass_vase_01/brass_vase_01_arm_2k.jpg"
+        },
+        "textures/brass_vase_01_diff_2k.jpg": {
+          "apiMd5": "d1272872c122a54088f915ed8b6ca1ac",
+          "apiSize": 520722,
+          "bytes": 520722,
+          "sha256": "3d1455113398211ca010ec836c67faf418100175e99da875002334364fb81b40",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/brass_vase_01/brass_vase_01_diff_2k.jpg"
+        },
+        "textures/brass_vase_01_nor_gl_2k.jpg": {
+          "apiMd5": "231579a37b6c91b1187db402cc933567",
+          "apiSize": 295687,
+          "bytes": 295687,
+          "sha256": "b8fb1da280897b51a576b615bcba608692d00f5cbb148f8917ea431002dce098",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/brass_vase_01/brass_vase_01_nor_gl_2k.jpg"
+        }
+      },
+      "resolution": "2k",
+      "sourcePage": "https://polyhaven.com/a/brass_vase_01"
+    },
+    "brass_vase_03": {
+      "entrypoint": "brass_vase_03_2k.gltf",
+      "files": {
+        "brass_vase_03.bin": {
+          "apiMd5": "be8d72f282ef5de9fdc735e45edf8a00",
+          "apiSize": 65136,
+          "bytes": 65136,
+          "sha256": "55332659811893d1903cbff6aebee7ea4b2824d330171bd9cb20f80f305c4aeb",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/brass_vase_03/brass_vase_03.bin"
+        },
+        "brass_vase_03_2k.gltf": {
+          "apiMd5": "9d3b41f92c2e07615ba040c164fd8a52",
+          "apiSize": 2668,
+          "bytes": 2668,
+          "sha256": "a66857b95d7694e19d4b7cad973213c754d08f67fb93f11434a8e848c2451cbe",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/2k/brass_vase_03/brass_vase_03_2k.gltf"
+        },
+        "textures/brass_vase_03_arm_2k.jpg": {
+          "apiMd5": "31348f6384cef0cd9a2aae1bc78a97a6",
+          "apiSize": 1653568,
+          "bytes": 1653568,
+          "sha256": "b1ae2cf3bb0854d8f3fef5f7998512da022cf3bb5cc534d17391e07cb34b6cd5",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/brass_vase_03/brass_vase_03_arm_2k.jpg"
+        },
+        "textures/brass_vase_03_diff_2k.jpg": {
+          "apiMd5": "9d6537b5c43d49d2763f66db15b62c5f",
+          "apiSize": 1877378,
+          "bytes": 1877378,
+          "sha256": "7596db572387f85292047258c57f67ab112b0add37963b1918a0571e7e49bd7a",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/brass_vase_03/brass_vase_03_diff_2k.jpg"
+        },
+        "textures/brass_vase_03_nor_gl_2k.jpg": {
+          "apiMd5": "5e622945c9aa2140999ee2f56ca5c474",
+          "apiSize": 1629154,
+          "bytes": 1629154,
+          "sha256": "ad52d43668add935db5d9f7ea3be11ca91c2d3effc6e719968e44dd92231be6b",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/brass_vase_03/brass_vase_03_nor_gl_2k.jpg"
+        }
+      },
+      "resolution": "2k",
+      "sourcePage": "https://polyhaven.com/a/brass_vase_03"
+    },
+    "brass_vase_04": {
+      "entrypoint": "brass_vase_04_2k.gltf",
+      "files": {
+        "brass_vase_04.bin": {
+          "apiMd5": "870b9b1d2a6cb2f236afc98fb80c9215",
+          "apiSize": 68208,
+          "bytes": 68208,
+          "sha256": "d28d50c37cf772eca34c76359bb8a092b4a2cf407be9f9e4951a9ce15ee4184f",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/brass_vase_04/brass_vase_04.bin"
+        },
+        "brass_vase_04_2k.gltf": {
+          "apiMd5": "0db5b2295a54535c5517ef92568dd6b5",
+          "apiSize": 2677,
+          "bytes": 2677,
+          "sha256": "dfb425f4053705563610510519ddd1d97d7822e809ddb753bbf168e091dda3bd",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/2k/brass_vase_04/brass_vase_04_2k.gltf"
+        },
+        "textures/brass_vase_04_arm_2k.jpg": {
+          "apiMd5": "041c2b2d7398232743be6731570f903f",
+          "apiSize": 420126,
+          "bytes": 420126,
+          "sha256": "b99224a219c6a2cacb7f43ac7a659aed84bfde96bc49d1f7670dd2faa1ab07a8",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/brass_vase_04/brass_vase_04_arm_2k.jpg"
+        },
+        "textures/brass_vase_04_diff_2k.jpg": {
+          "apiMd5": "a50bd439bb055b4319315b2b736cb094",
+          "apiSize": 517376,
+          "bytes": 517376,
+          "sha256": "58a234ad00b63e060713380b6eb0870cd5fa60c0dba564f3c458984d2c80a134",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/brass_vase_04/brass_vase_04_diff_2k.jpg"
+        },
+        "textures/brass_vase_04_nor_gl_2k.jpg": {
+          "apiMd5": "2bc30d2882a48ad49e61020f617d1bc3",
+          "apiSize": 154629,
+          "bytes": 154629,
+          "sha256": "ed762e676f413d61eac93df3191d2a464d1d174a0c21386890075bbda69b0c1f",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/brass_vase_04/brass_vase_04_nor_gl_2k.jpg"
+        }
+      },
+      "resolution": "2k",
+      "sourcePage": "https://polyhaven.com/a/brass_vase_04"
+    },
     "chess_set": {
       "entrypoint": "chess_set_1k.gltf",
       "files": {
@@ -384,6 +510,48 @@
       },
       "resolution": "1k",
       "sourcePage": "https://polyhaven.com/a/chess_set"
+    },
+    "cigarette_pack": {
+      "entrypoint": "cigarette_pack_1k.gltf",
+      "files": {
+        "cigarette_pack.bin": {
+          "apiMd5": "056de33ca0cc5de18e44ec62030bf12a",
+          "apiSize": 305080,
+          "bytes": 305080,
+          "sha256": "81cc5555f7d81aa1271a84dce3e94ff666b947e34b9b515c5e751946c901b00c",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/cigarette_pack/cigarette_pack.bin"
+        },
+        "cigarette_pack_1k.gltf": {
+          "apiMd5": "f8c00c7df1c44801ec03615de542d108",
+          "apiSize": 7111,
+          "bytes": 7111,
+          "sha256": "ca9fb0aa5f42dfbfec88c2a4bd1ed1a85a1aa6884044f2117569909cd7d05f42",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/cigarette_pack/cigarette_pack_1k.gltf"
+        },
+        "textures/cigarette_pack_arm_1k.jpg": {
+          "apiMd5": "138e8cb6034943fde4a292e3c5a64a35",
+          "apiSize": 245227,
+          "bytes": 245227,
+          "sha256": "3fd0a2e85db837485ccebb32cea24685511e6cc558d07f278d5779a2604b8bca",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/cigarette_pack/cigarette_pack_arm_1k.jpg"
+        },
+        "textures/cigarette_pack_diff_1k.jpg": {
+          "apiMd5": "82d8b2fc5fd9359ac4da10d6041f6465",
+          "apiSize": 460088,
+          "bytes": 460088,
+          "sha256": "267d0f02b2c65eafc889c5391e35854b77fa811b5532129741b28da36df8d3d1",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/cigarette_pack/cigarette_pack_diff_1k.jpg"
+        },
+        "textures/cigarette_pack_nor_gl_1k.jpg": {
+          "apiMd5": "869def112c98764b71577cbda706c6a2",
+          "apiSize": 344891,
+          "bytes": 344891,
+          "sha256": "e708479a1ffa7ef2b0654e39f3c791dab1cd75f2417b93e65d294c676e51a5e4",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/cigarette_pack/cigarette_pack_nor_gl_1k.jpg"
+        }
+      },
+      "resolution": "1k",
+      "sourcePage": "https://polyhaven.com/a/cigarette_pack"
     },
     "concrete_cat_statue": {
       "entrypoint": "concrete_cat_statue_1k.gltf",
@@ -489,6 +657,111 @@
       },
       "resolution": "1k",
       "sourcePage": "https://polyhaven.com/a/fancy_picture_frame_01"
+    },
+    "fancy_picture_frame_02": {
+      "entrypoint": "fancy_picture_frame_02_2k.gltf",
+      "files": {
+        "fancy_picture_frame_02.bin": {
+          "apiMd5": "352cff9f333720063a5948aaffc9d0f3",
+          "apiSize": 825908,
+          "bytes": 825908,
+          "sha256": "cc94201d75e5934dce90f3adfe7ab19e63f163bd22e22bf8e594ca8f29ef459e",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/fancy_picture_frame_02/fancy_picture_frame_02.bin"
+        },
+        "fancy_picture_frame_02_2k.gltf": {
+          "apiMd5": "5a61a25a449f95daf82f781624ee0be5",
+          "apiSize": 5085,
+          "bytes": 5085,
+          "sha256": "2e365c648d78755442ed0673cd4dc648a03ebb0584da882214ecbced09c8d9f2",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/2k/fancy_picture_frame_02/fancy_picture_frame_02_2k.gltf"
+        },
+        "textures/fancy_picture_frame_02_canvas_diff_2k.jpg": {
+          "apiMd5": "c54b6368bcd532187efbe35ea39d4574",
+          "apiSize": 388701,
+          "bytes": 388701,
+          "sha256": "91e52f33d426019e6a42c9b58969bd25859823cbef11ba16997fc106cb751576",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/fancy_picture_frame_02/fancy_picture_frame_02_canvas_diff_2k.jpg"
+        },
+        "textures/fancy_picture_frame_02_canvas_nor_gl_2k.jpg": {
+          "apiMd5": "ba1f815bfa9c95f5b135e18e97f0f092",
+          "apiSize": 181655,
+          "bytes": 181655,
+          "sha256": "dbb01b95e14af71ca5ed4ac0f56e25e925207c4626af83faa4a4a7b77e896352",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/fancy_picture_frame_02/fancy_picture_frame_02_canvas_nor_gl_2k.jpg"
+        },
+        "textures/fancy_picture_frame_02_canvas_rough_2k.jpg": {
+          "apiMd5": "271e63e0c741fcb337def4012203952f",
+          "apiSize": 350054,
+          "bytes": 350054,
+          "sha256": "8258f663ac25d13e296a10506c506499bfa2851962e0c89bb83321c8995ec507",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/fancy_picture_frame_02/fancy_picture_frame_02_canvas_rough_2k.jpg"
+        },
+        "textures/fancy_picture_frame_02_diff_2k.jpg": {
+          "apiMd5": "79b21893b2f3f8a50cf54a1931486cd8",
+          "apiSize": 796246,
+          "bytes": 796246,
+          "sha256": "baf519889eecd41336174a9a656d15bd65db6e5c4418ad46a8a7496a04cbb3bf",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/fancy_picture_frame_02/fancy_picture_frame_02_diff_2k.jpg"
+        },
+        "textures/fancy_picture_frame_02_nor_gl_2k.jpg": {
+          "apiMd5": "f4a5999fd7e0e8cb056745919be146fb",
+          "apiSize": 1019316,
+          "bytes": 1019316,
+          "sha256": "df5f0ca03df47437eb6cb9efefe9228326c507613bcdf005862ce09c6471f0e6",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/fancy_picture_frame_02/fancy_picture_frame_02_nor_gl_2k.jpg"
+        },
+        "textures/fancy_picture_frame_02_rough_2k.jpg": {
+          "apiMd5": "5e8cecd97d97d417f19cc1a72248bf49",
+          "apiSize": 675877,
+          "bytes": 675877,
+          "sha256": "b7a2bb39756e45c969ba06148fcede64dd7be76b7a0fde64a312b2f2963fe8c2",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/fancy_picture_frame_02/fancy_picture_frame_02_rough_2k.jpg"
+        }
+      },
+      "resolution": "2k",
+      "sourcePage": "https://polyhaven.com/a/fancy_picture_frame_02"
+    },
+    "fire_alarm": {
+      "entrypoint": "fire_alarm_1k.gltf",
+      "files": {
+        "fire_alarm.bin": {
+          "apiMd5": "517104e2e304785ae0425efb479bca80",
+          "apiSize": 112072,
+          "bytes": 112072,
+          "sha256": "f65b6fe5ed53c248497fe833ac66d5b8c452e28db4b02b8d1b67109fcc2ce132",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/fire_alarm/fire_alarm.bin"
+        },
+        "fire_alarm_1k.gltf": {
+          "apiMd5": "d4a586d6eaeb2f3aa74f4914a70153ee",
+          "apiSize": 4264,
+          "bytes": 4264,
+          "sha256": "4a924f45a0f23036a938e06a251677f9654f39507f0e13d06cc4a0b05c83b959",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/fire_alarm/fire_alarm_1k.gltf"
+        },
+        "textures/fire_alarm_arm_1k.jpg": {
+          "apiMd5": "d1f8f0db345f229194be811413ca4c5f",
+          "apiSize": 650243,
+          "bytes": 650243,
+          "sha256": "b98f4fe9f190b74581cdff5a9e075d42cd48c16c5f9aba321c5dfe8ce93058a7",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fire_alarm/fire_alarm_arm_1k.jpg"
+        },
+        "textures/fire_alarm_diff_1k.jpg": {
+          "apiMd5": "43ddc895bc8eadfc583f0ded6ed4567f",
+          "apiSize": 540983,
+          "bytes": 540983,
+          "sha256": "fc0558110922f7f5ae83e488b913857b576946a33ef46c89886f7c6de722e660",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fire_alarm/fire_alarm_diff_1k.jpg"
+        },
+        "textures/fire_alarm_nor_gl_1k.jpg": {
+          "apiMd5": "45faa21f22b249704acf2ca86d17461d",
+          "apiSize": 642044,
+          "bytes": 642044,
+          "sha256": "45aa3e47120decf5a28e81a2586e3a4c8d6cdb10ba5ceed66d905de74fe1dbb7",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fire_alarm/fire_alarm_nor_gl_1k.jpg"
+        }
+      },
+      "resolution": "1k",
+      "sourcePage": "https://polyhaven.com/a/fire_alarm"
     },
     "horse_statue_01": {
       "entrypoint": "horse_statue_01_1k.gltf",
@@ -615,6 +888,55 @@
       },
       "resolution": "1k",
       "sourcePage": "https://polyhaven.com/a/modern_wooden_cabinet"
+    },
+    "pocket_watch": {
+      "entrypoint": "pocket_watch_1k.gltf",
+      "files": {
+        "pocket_watch.bin": {
+          "apiMd5": "251eceb2b83339a68ce2c7203e03a775",
+          "apiSize": 419168,
+          "bytes": 419168,
+          "sha256": "95a268728180a2616ecc65b9b63f6b89404b68a0fcac8071ba969d6b77c2ff0e",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/pocket_watch/pocket_watch.bin"
+        },
+        "pocket_watch_1k.gltf": {
+          "apiMd5": "52714a67d8581541c488e5bed550584d",
+          "apiSize": 12349,
+          "bytes": 12349,
+          "sha256": "36e1fcf52643f83429b893a897e4751f8820a8996e5d92c206594b2857e4262d",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/pocket_watch/pocket_watch_1k.gltf"
+        },
+        "textures/pocket_watch_arm_1k.jpg": {
+          "apiMd5": "94464642aeea7e1f12bdf4b7d430a986",
+          "apiSize": 439443,
+          "bytes": 439443,
+          "sha256": "f7bf56c1c6d665fd388d3bc1c024663de83d21f53f164602cf063a0978359d3a",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/pocket_watch/pocket_watch_arm_1k.jpg"
+        },
+        "textures/pocket_watch_diff_1k.jpg": {
+          "apiMd5": "6430fafda38ebfcd71f634bc2597cdd8",
+          "apiSize": 623303,
+          "bytes": 623303,
+          "sha256": "246b9ed33d4438075f03dd652b23b23137b3d5bea6e01a04a66e4a17d1d8449c",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/pocket_watch/pocket_watch_diff_1k.jpg"
+        },
+        "textures/pocket_watch_glass_rough_1k.jpg": {
+          "apiMd5": "35391e54efbf703630e65ee1e018b6b7",
+          "apiSize": 281914,
+          "bytes": 281914,
+          "sha256": "e7646d2b5a53539b0c68f7391c20683792228dda6b7c801e5868752619b923d3",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/pocket_watch/pocket_watch_glass_rough_1k.jpg"
+        },
+        "textures/pocket_watch_nor_gl_1k.jpg": {
+          "apiMd5": "ad5836d8a1327f1450e45a0dc9b01e71",
+          "apiSize": 301185,
+          "bytes": 301185,
+          "sha256": "abf421a4989a6f68b4971421ad8e026b8eaa7eb33e7a36d512afdb8eccc717f4",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/pocket_watch/pocket_watch_nor_gl_1k.jpg"
+        }
+      },
+      "resolution": "1k",
+      "sourcePage": "https://polyhaven.com/a/pocket_watch"
     },
     "round_wooden_table_01": {
       "entrypoint": "round_wooden_table_01_1k.gltf",

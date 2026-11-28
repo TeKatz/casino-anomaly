@@ -63,6 +63,41 @@
     {
       "id": "horse_statue_01",
       "role": "decorative equestrian statue"
+    },
+    {
+      "id": "fancy_picture_frame_02",
+      "role": "alternate historic artwork in entrance hall",
+      "resolution": "2k"
+    },
+    {
+      "id": "brass_vase_01",
+      "role": "floor vases in entrance hall galleries",
+      "resolution": "2k"
+    },
+    {
+      "id": "brass_vase_03",
+      "role": "reception and sideboard brass vase",
+      "resolution": "2k"
+    },
+    {
+      "id": "brass_vase_04",
+      "role": "small waiting lounge vase",
+      "resolution": "2k"
+    },
+    {
+      "id": "fire_alarm",
+      "role": "noninteractive wall fire alarm",
+      "resolution": "1k"
+    },
+    {
+      "id": "pocket_watch",
+      "role": "personal reception counter detail",
+      "resolution": "1k"
+    },
+    {
+      "id": "cigarette_pack",
+      "role": "waiting lounge tabletop detail",
+      "resolution": "1k"
     }
   ]
 }

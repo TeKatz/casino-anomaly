@@ -1,4 +1,4 @@
-[gd_scene load_steps=163 format=3]
+[gd_scene load_steps=171 format=3]
 
 [ext_resource type="Script" path="res://player.gd" id="1_player"]
 [ext_resource type="Script" path="res://gameplay/tutorial.gd" id="HallTutorial"]
@@ -50,6 +50,20 @@
 [ext_resource type="PackedScene" path="res://models/chess_set/chess_set_1k.gltf" id="InteriorChess"]
 
 [ext_resource type="PackedScene" path="res://models/modern_wooden_cabinet/modern_wooden_cabinet_1k.gltf" id="InteriorCabinet"]
+
+[ext_resource type="PackedScene" path="res://models/fancy_picture_frame_02/fancy_picture_frame_02_2k.gltf" id="Detail_fancy_picture_frame_02"]
+
+[ext_resource type="PackedScene" path="res://models/brass_vase_01/brass_vase_01_2k.gltf" id="Detail_brass_vase_01"]
+
+[ext_resource type="PackedScene" path="res://models/brass_vase_03/brass_vase_03_2k.gltf" id="Detail_brass_vase_03"]
+
+[ext_resource type="PackedScene" path="res://models/brass_vase_04/brass_vase_04_2k.gltf" id="Detail_brass_vase_04"]
+
+[ext_resource type="PackedScene" path="res://models/fire_alarm/fire_alarm_1k.gltf" id="Detail_fire_alarm"]
+
+[ext_resource type="PackedScene" path="res://models/pocket_watch/pocket_watch_1k.gltf" id="Detail_pocket_watch"]
+
+[ext_resource type="PackedScene" path="res://models/cigarette_pack/cigarette_pack_1k.gltf" id="Detail_cigarette_pack"]
 
 [sub_resource type="FastNoiseLite" id="FineMineralNoise"]
 seed = 137
@@ -662,6 +676,10 @@ bottom_radius = 0.17
 height = 0.075
 radial_segments = 24
 rings = 1
+
+[sub_resource type="CylinderShape3D" id="GalleryVaseCollision"]
+radius = 0.13071
+height = 0.796343
 
 [node name="GrandEntranceHall" type="Node3D"]
 script = ExtResource("HallTutorial")
@@ -3608,5 +3626,92 @@ spot_range = 4
 spot_angle = 42
 spot_attenuation = 1.2
 shadow_enabled = false
+
+[node name="AlternatePainting" type="Node3D" parent="Interior/WallArtAndTrim/WestPanel1"]
+position = Vector3(-0.02, 2.65, 0)
+scale = Vector3(2, 2, 2)
+rotation = Vector3(0, 1.5707963, 0)
+
+[node name="OriginalAsset" parent="Interior/WallArtAndTrim/WestPanel1/AlternatePainting" instance=ExtResource("Detail_fancy_picture_frame_02")]
+
+[node name="AlternatePainting" type="Node3D" parent="Interior/WallArtAndTrim/EastPanel4"]
+position = Vector3(0.02, 2.65, 0)
+scale = Vector3(2, 2, 2)
+rotation = Vector3(0, -1.5707963, 0)
+
+[node name="OriginalAsset" parent="Interior/WallArtAndTrim/EastPanel4/AlternatePainting" instance=ExtResource("Detail_fancy_picture_frame_02")]
+
+[node name="GalleryDetails" type="Node3D" parent="Interior"]
+
+[node name="WestFloorVase" type="StaticBody3D" parent="Interior/GalleryDetails"]
+position = Vector3(-11.6, 0, -1)
+
+[node name="Model" type="Node3D" parent="Interior/GalleryDetails/WestFloorVase"]
+position = Vector3(0, -0.001671, 0)
+scale = Vector3(1.15, 1.15, 1.15)
+
+[node name="OriginalAsset" parent="Interior/GalleryDetails/WestFloorVase/Model" instance=ExtResource("Detail_brass_vase_01")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Interior/GalleryDetails/WestFloorVase"]
+position = Vector3(0, 0.3981715, 0)
+shape = SubResource("GalleryVaseCollision")
+
+[node name="WestFireAlarm" type="Node3D" parent="Interior/GalleryDetails"]
+position = Vector3(-11.995, 1.48, 4.24)
+rotation = Vector3(0, 1.5707963, 0)
+
+[node name="OriginalAsset" parent="Interior/GalleryDetails/WestFireAlarm" instance=ExtResource("Detail_fire_alarm")]
+
+[node name="EastFloorVase" type="StaticBody3D" parent="Interior/GalleryDetails"]
+position = Vector3(11.6, 0, -1)
+
+[node name="Model" type="Node3D" parent="Interior/GalleryDetails/EastFloorVase"]
+position = Vector3(0, -0.001671, 0)
+scale = Vector3(1.15, 1.15, 1.15)
+
+[node name="OriginalAsset" parent="Interior/GalleryDetails/EastFloorVase/Model" instance=ExtResource("Detail_brass_vase_01")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Interior/GalleryDetails/EastFloorVase"]
+position = Vector3(0, 0.3981715, 0)
+shape = SubResource("GalleryVaseCollision")
+
+[node name="EastFireAlarm" type="Node3D" parent="Interior/GalleryDetails"]
+position = Vector3(11.995, 1.48, 4.24)
+rotation = Vector3(0, -1.5707963, 0)
+
+[node name="OriginalAsset" parent="Interior/GalleryDetails/EastFireAlarm" instance=ExtResource("Detail_fire_alarm")]
+
+[node name="EntryFireAlarm" type="Node3D" parent="Interior/WallArtAndTrim"]
+position = Vector3(2.63, 1.48, 13.994)
+rotation = Vector3(0, 3.1415927, 0)
+
+[node name="OriginalAsset" parent="Interior/WallArtAndTrim/EntryFireAlarm" instance=ExtResource("Detail_fire_alarm")]
+
+[node name="CounterBrassVase" type="Node3D" parent="Interior/ReceptionDressing"]
+position = Vector3(-2.65, 1.089156, -6.42)
+
+[node name="OriginalAsset" parent="Interior/ReceptionDressing/CounterBrassVase" instance=ExtResource("Detail_brass_vase_03")]
+
+[node name="SideboardBrassVase" type="Node3D" parent="Interior/ReceptionDressing/WestStaffSideboard"]
+position = Vector3(-0.55, 0.543156, 0)
+
+[node name="OriginalAsset" parent="Interior/ReceptionDressing/WestStaffSideboard/SideboardBrassVase" instance=ExtResource("Detail_brass_vase_03")]
+
+[node name="CroupierPocketWatch" type="Node3D" parent="Interior/ReceptionDressing"]
+position = Vector3(1.18, 1.097824, -6.25)
+rotation = Vector3(-1.5707963, 0.35, 0)
+
+[node name="OriginalAsset" parent="Interior/ReceptionDressing/CroupierPocketWatch" instance=ExtResource("Detail_pocket_watch")]
+
+[node name="SmallBrassVase" type="Node3D" parent="Interior/Lounges/WestWaitingNook/OccasionalTable"]
+position = Vector3(0.12, 0.652913, 0.02)
+
+[node name="OriginalAsset" parent="Interior/Lounges/WestWaitingNook/OccasionalTable/SmallBrassVase" instance=ExtResource("Detail_brass_vase_04")]
+
+[node name="CigarettePack" type="Node3D" parent="Interior/Lounges/EastWaitingNook/OccasionalTable"]
+position = Vector3(-0.1, 0.6533, 0.065)
+rotation = Vector3(0, 0.4, 0)
+
+[node name="OriginalAsset" parent="Interior/Lounges/EastWaitingNook/OccasionalTable/CigarettePack" instance=ExtResource("Detail_cigarette_pack")]
 
 [editable path="CroupierStation"]

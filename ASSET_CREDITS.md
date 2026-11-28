@@ -1,10 +1,22 @@
 # Third-party 3D assets
 
-All ten 3D models in `models/` are supplied by [Poly Haven](https://polyhaven.com/) under [CC0](https://polyhaven.com/license). Model identifiers, source pages, resolutions and pinned file hashes are recorded in `models/catalog.json` and `models/asset_index.json`. Imported models are not owned by Casino Anomaly. Existing Poly Haven wood and jacquard textures remain separately documented in `assets/*/source.json`.
+The Poly Haven model assets in `models/` are supplied by [Poly Haven](https://polyhaven.com/) under [CC0](https://polyhaven.com/license). Model identifiers, source pages, resolutions and pinned file hashes are recorded in `models/catalog.json` and `models/asset_index.json`. Imported models are not owned by Casino Anomaly. Existing Poly Haven wood and jacquard textures remain separately documented in `assets/*/source.json`.
 
 Model source set: Chandelier_02, Chandelier_01, brass_candleholders, marble_bust_01, fancy_picture_frame_01, security_camera_01, wine_bottles_01, bar_chair_round_01, CoffeeCart_01, modern_wooden_cabinet.
 
 The installer does not request assets from Poly Haven at runtime; model imports are downloaded and verified during development. The in-game Credits panel links back to these sources.
+
+## Grand Entrance Hall — additional Poly Haven props (CC0)
+
+The seven original glTF assets selected by the owner are preserved at their
+supplied resolution, with SHA-256 hashes in the asset index:
+- [fancy_picture_frame_02](https://polyhaven.com/a/fancy_picture_frame_02) — 2K, CC0.
+- [brass_vase_01](https://polyhaven.com/a/brass_vase_01) — 2K, CC0.
+- [brass_vase_03](https://polyhaven.com/a/brass_vase_03) — 2K, CC0.
+- [brass_vase_04](https://polyhaven.com/a/brass_vase_04) — 2K, CC0.
+- [fire_alarm](https://polyhaven.com/a/fire_alarm) — 1K, CC0.
+- [pocket_watch](https://polyhaven.com/a/pocket_watch) — 1K, CC0.
+- [cigarette_pack](https://polyhaven.com/a/cigarette_pack) — 1K, CC0.
 
 ## Monstera Deliciosa Potted Mid-Century plant — Giora (CC BY 4.0)
 

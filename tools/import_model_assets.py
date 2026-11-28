@@ -157,16 +157,17 @@ def main() -> None:
 
         files = load_json(base)
         variants = files.get("gltf", {})
-        choice = variants.get(spec["resolution"], {})
+        resolution = item.get("resolution", spec["resolution"])
+        choice = variants.get(resolution, {})
         main_file = choice.get("gltf")
         if not main_file:
-            raise ValueError("No requested 1K glTF: " + identifier)
+            raise ValueError("No requested " + resolution + " glTF: " + identifier)
         main_name = PurePosixPath(urlsplit(main_file["url"]).path).name
         sources = {main_name: main_file, **main_file.get("include", {})}
         if not all(isinstance(path, str) for path in sources):
             raise ValueError("Invalid includes for " + identifier)
         manifest = {"sourcePage": "https://polyhaven.com/a/" + identifier,
-                    "resolution": spec["resolution"], "entrypoint": main_name, "files": {}}
+                    "resolution": resolution, "entrypoint": main_name, "files": {}}
         for relative, remote in sources.items():
             subpath = relative_file(relative)
             target = folder / subpath

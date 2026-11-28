@@ -115,6 +115,19 @@ resources; runtime mesh counts are logged by QA. GPU frame time, startup
 and visual quality require a real Forward+ comparison on the player's
 machine rather than estimates based on node counts.
 
+## Phase 7B — Selected detail assets
+
+The seven user-supplied Poly Haven glTF models are added without texture
+downscaling: alternate 2K historic paintings in two previously empty wall
+panels, two 2K floor vases by the outer solid gallery bays (matching simple
+cylindrical collision), 2K small vases on the reception, sideboard and waiting
+table, three 1K decorative fire alarms, one 1K pocket watch lying face-up on
+the reception counter and one 1K cigarette pack on a waiting table. All
+instances are authored and individually movable. No additional light,
+interaction, trigger or new gameplay mechanic is introduced. Existing
+path/collision tests remain enabled, with original-source, surface-contact
+and gallery clearance regressions for the added details.
+
 ## QA
 
 Run `godot --headless --path . --script tests/grand_entrance_hall_qa.gd`
