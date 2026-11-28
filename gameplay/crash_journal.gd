@@ -121,7 +121,10 @@ func _launch_monitor() -> void:
     # Keep the monitor outside the installation, just as the updater is.
     # A content-keyed copy avoids rewriting the helper on every launch and
     # prevents the old helper from holding a lock during an in-game update.
+    var prepare_started := Time.get_ticks_msec()
+    record("monitor_prepare_begin")
     var hash_value := FileAccess.get_sha256(source)
+    record("monitor_source_hashed", {"elapsed_ms": Time.get_ticks_msec() - prepare_started})
     if hash_value.length() != 64:
         record("monitor_unavailable", {"reason": "helper_hash"})
         return
@@ -130,12 +133,20 @@ func _launch_monitor() -> void:
         record("monitor_unavailable", {"reason": "helper_directory"})
         return
     var helper := helper_dir.path_join("CasinoAnomaly.Updater.exe")
-    if not FileAccess.file_exists(helper) or FileAccess.get_sha256(helper) != hash_value:
+    var cache_started := Time.get_ticks_msec()
+    var cache_valid := FileAccess.file_exists(helper) and FileAccess.get_sha256(helper) == hash_value
+    record("monitor_cache_checked", {"elapsed_ms": Time.get_ticks_msec() - cache_started, "cache_hit": cache_valid})
+    if not cache_valid:
+        var copy_started := Time.get_ticks_msec()
         var temporary := helper + "." + str(OS.get_process_id()) + ".tmp"
         if DirAccess.copy_absolute(source, temporary) != OK:
             record("monitor_unavailable", {"reason": "helper_copy"})
             return
-        if FileAccess.get_sha256(temporary) != hash_value:
+        record("monitor_helper_copied", {"elapsed_ms": Time.get_ticks_msec() - copy_started})
+        var verify_started := Time.get_ticks_msec()
+        var copied_hash := FileAccess.get_sha256(temporary)
+        record("monitor_helper_verified", {"elapsed_ms": Time.get_ticks_msec() - verify_started})
+        if copied_hash != hash_value:
             DirAccess.remove_absolute(temporary)
             record("monitor_unavailable", {"reason": "helper_copy_hash"})
             return
@@ -144,8 +155,9 @@ func _launch_monitor() -> void:
             if not FileAccess.file_exists(helper) or FileAccess.get_sha256(helper) != hash_value:
                 record("monitor_unavailable", {"reason": "helper_install"})
                 return
+    var launch_started := Time.get_ticks_msec()
     var pid := OS.create_process(helper, PackedStringArray(["--monitor-crash", str(OS.get_process_id()), ProjectSettings.globalize_path(session_dir)]), false)
-    record("monitor_launched" if pid > 0 else "monitor_unavailable", {"monitor_pid": pid})
+    record("monitor_launched" if pid > 0 else "monitor_unavailable", {"monitor_pid": pid, "launch_ms": Time.get_ticks_msec() - launch_started, "prepare_total_ms": Time.get_ticks_msec() - prepare_started})
 
 
 func _exit_tree() -> void:

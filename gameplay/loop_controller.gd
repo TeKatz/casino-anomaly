@@ -1,4 +1,5 @@
 extends Node3D
+const InitialLoadTrace = preload("res://gameplay/initial_load_trace.gd")
 const StreamingTrace = preload("res://gameplay/streaming_trace.gd")
 ## Seamless Exit-8-style spatial streaming.
 ## At most two authored casino rooms coexist briefly: active + next.
@@ -93,6 +94,7 @@ var _pending_portal_ms := 0.0
 
 
 func _ready() -> void:
+	InitialLoadTrace.record(self, "casino_controller_ready_begin")
 	room = get_parent() as Node3D
 	player = room.get_node_or_null("Player") as CharacterBody3D
 	if player == null:
@@ -100,10 +102,12 @@ func _ready() -> void:
 		queue_free()
 		return
 	portals = StreamPortals.new()
+	InitialLoadTrace.record(self, "casino_portals_prepare_begin")
 	if not portals.prepare_room(room):
 		push_error("Could not open the authored casino's exit portals")
 		queue_free()
 		return
+	InitialLoadTrace.record(self, "casino_portals_prepare_end")
 	if not portals.seal_initial_entrance(room):
 		push_error("Could not cap the initial casino entrance")
 		queue_free()
@@ -124,9 +128,11 @@ func _ready() -> void:
 	if state == null:
 		queue_free()
 		return
+	InitialLoadTrace.record(self, "casino_first_round_begin")
 	var available: Array[String] = demo.available_ids(room)
 	state.prepare_round(available)
 	demo.apply(room, str(state.anomaly_id))
+	InitialLoadTrace.record(self, "casino_first_round_end")
 	_update_level_sign(room, int(state.correct_streak), false)
 	# Parent to the persistent player so the developer overlay follows all
 	# no-teleport room handoffs without ever appearing in the normal HUD.
@@ -134,6 +140,7 @@ func _ready() -> void:
 		var dev_menu := AnomalyDevMenu.new()
 		dev_menu.name = "AnomalyDevMenu"
 		player.add_child(dev_menu)
+	InitialLoadTrace.record(self, "casino_controller_ready_end")
 
 
 func debug_available_ids() -> Array[String]:

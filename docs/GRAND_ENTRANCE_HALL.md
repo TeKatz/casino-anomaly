@@ -185,7 +185,34 @@ engine memory counters can be unavailable (zero). The monitor preserves the
 exit code and matching Windows Application Error metadata when available.
 Normal shutdown with code zero is not classified as a crash. Unexpected
 termination produces a local crash_report.zip under user://crash_reports.
-No automatic upload, memory dump, restart or loading-mode change is made.
+No automatic upload, memory dump or restart is made.
+
+### Initial casino transition stability (crash #001)
+
+The reported native access violation (0xC0000005, Godot 4.5.1 Forward+
+Vulkan) occurred after the threaded PackedScene request returned OK and
+the tutorial left the tree, but before casino activation completed.
+This does not prove a specific engine function failed. As a targeted
+mitigation only the tutorial-to-casino request uses serial dependency
+workers; the request remains asynchronous. Direct menu loads and the
+optimized room streaming are unchanged. Extra breadcrumbs cover the
+tutorial tree exit (not guaranteed GPU resource destruction), the save
+flag, first activation frames, casino root/controller initialization,
+furniture and VoxelGI resource load/assignment. They are restricted to
+initial activation and never perform synchronous journal I/O during
+normal streaming. Monitor preparation now records hash, copy,
+verification and launch durations independently; the existing integrity
+checks remain in place.
+
+Optional native dumps for a local diagnostic session: use Microsoft's
+Sysinternals ProcDump (https://learn.microsoft.com/en-us/sysinternals/downloads/procdump),
+run `procdump64.exe -e -w CasinoAnomaly.exe` from a writable diagnostic
+folder before starting the game. This requests a default minidump on an
+unhandled exception; engine exception handling can prevent capture.
+It is an opt-in external diagnostic, not bundled or enabled automatically,
+and does not change Windows registry settings. Dumps may contain private
+process memory; review before sharing, and keep the regular crash ZIP.
+Matching native debug symbols are needed for meaningful symbolized stacks.
 
 ## QA
 

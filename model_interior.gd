@@ -1,4 +1,5 @@
 extends Node3D
+const InitialLoadTrace = preload("res://gameplay/initial_load_trace.gd")
 const StreamingTrace = preload("res://gameplay/streaming_trace.gd")
 
 # Placement layer for the CC0 Poly Haven assets in models/catalog.json.
@@ -46,8 +47,10 @@ var _population_started := false
 var _population_done := false
 
 func _populate() -> void:
+    InitialLoadTrace.record(self, "casino_polyhaven_population_begin")
     begin_streaming_population()
     advance_streaming_population(true)
+    InitialLoadTrace.record(self, "casino_polyhaven_population_end", {"placed": placed_model_count})
 
 func begin_streaming_population() -> void:
     if _population_started:

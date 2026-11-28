@@ -1,5 +1,6 @@
 @tool
 extends Node3D
+const InitialLoadTrace = preload("res://gameplay/initial_load_trace.gd")
 
 # First room-design pass. Everything is intentionally modular so assets may replace
 # the whitebox furniture later without rebuilding the room or its collision layout.
@@ -54,7 +55,9 @@ var lights: Node3D
 func _ready() -> void:
     if has_meta("_streaming_assembly"):
         return
+    InitialLoadTrace.record(self, "casino_hall_ready_begin")
     initialize_streamed_hall()
+    InitialLoadTrace.record(self, "casino_hall_ready_end")
 
 func initialize_streamed_hall() -> void:
     var showcase := has_meta("_menu_showcase")

@@ -28,6 +28,19 @@ func _run() -> void:
     if loader == null or state == null:
         _fail("SceneLoader or LoopState autoload missing")
         return
+    # Explicit policy regression: headless tests alone would otherwise
+    # exercise only the existing serial-worker branch.
+    for record in [
+        ["res://main.tscn",true,false,false],
+        ["res://main.tscn",false,false,true],
+        ["res://gameplay/tutorial.tscn",false,false,true],
+        ["res://main.tscn",true,true,false],
+        ["res://main.tscn",false,true,false],
+        ["res://gameplay/tutorial.tscn",false,true,false]
+    ]:
+        if loader.call("_use_parallel_dependencies",record[0],record[1],record[2])!=record[3]:
+            _fail("Initial loading worker policy changed: "+str(record))
+            return
     if loader.get_node_or_null("LoadingOverlay/Background") == null:
         _fail("Persistent loader has no rendered background")
         return
@@ -114,10 +127,26 @@ func _run() -> void:
         return
     var journal_path := journal_dir.path_join("events.jsonl")
     var journal_text := FileAccess.get_file_as_string(journal_path)
-    for event_name in ["load_overlay_requested", "load_threaded_request_begin", "load_threaded_request_returned", "load_resources_ready", "load_get_packed_begin", "load_activate_scene_begin", "load_scene_ready", "casino_door_interacted"]:
+    for event_name in ["load_overlay_requested", "load_threaded_request_begin", "load_threaded_request_returned", "load_resources_ready", "load_get_packed_begin", "load_activate_scene_begin", "load_scene_ready", "casino_door_interacted", "tutorial_tree_exit", "load_complete_tutorial_begin", "load_complete_tutorial_returned", "load_first_frame_after_activation", "load_second_frame_after_activation", "casino_hall_ready_begin", "casino_hall_ready_end", "casino_controller_ready_begin", "casino_controller_ready_end", "casino_first_round_begin", "casino_first_round_end", "casino_voxel_gi_load_begin", "casino_voxel_gi_load_end", "casino_polyhaven_population_begin", "casino_polyhaven_population_end", "casino_sketchfab_population_begin", "casino_sketchfab_population_end"]:
         if not journal_text.contains('"event":"'+event_name+'"'):
             _fail("Missing persisted crash breadcrumb: "+event_name)
             return
+    var serial_request_seen := false
+    for line in journal_text.split("\n",false):
+        var entry: Variant = JSON.parse_string(line)
+        if entry is Dictionary and entry.get("event")=="load_threaded_request_begin":
+            var details: Dictionary = entry.get("details",{})
+            if details.get("target")=="res://main.tscn" and details.get("parallel_dependencies")==false:
+                serial_request_seen = true
+    if not serial_request_seen:
+        _fail("Actual initial casino request did not use serial dependency workers")
+        return
+    # A late call must not write synchronous breadcrumbs during normal play.
+    var trace_script := load("res://gameplay/initial_load_trace.gd")
+    trace_script.record(current_scene,"unexpected_streaming_trace")
+    if FileAccess.get_file_as_string(journal_path).contains("unexpected_streaming_trace"):
+        _fail("Initial activation tracer leaked into normal gameplay")
+        return
     journal.set("enabled",false)
     for file_name in DirAccess.get_files_at(journal_dir):
         DirAccess.remove_absolute(ProjectSettings.globalize_path(journal_dir.path_join(file_name)))

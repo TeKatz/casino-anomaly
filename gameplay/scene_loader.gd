@@ -209,16 +209,20 @@ func travel_to(path: String, complete_intro: bool = false) -> bool:
     return true
 
 
+func _use_parallel_dependencies(path: String, complete_intro: bool, headless: bool) -> bool:
+    # Preserve the existing headless workaround and other loading routes.
+    return not headless and not (path == "res://main.tscn" and complete_intro)
+
+
 func _begin_loading() -> void:
     await get_tree().process_frame
     await get_tree().process_frame
     if not active or failed:
         return
-    # Headless uses the Dummy renderer, whose RID stores can race when
-    # glTF/mesh dependencies are initialized by multiple loading workers.
-    # Keep the asynchronous request and progress polling, but serialize
-    # dependency loading there. The real GPU game retains parallel loading.
-    var use_sub_threads := DisplayServer.get_name() != "headless"
+    # The confirmed native crash happened after the tutorial-to-casino
+    # threaded request succeeded. Serialize its dependency workers as a
+    # targeted mitigation; the request itself remains asynchronous.
+    var use_sub_threads := _use_parallel_dependencies(target_path, finish_tutorial, DisplayServer.get_name() == "headless")
     _trace("load_threaded_request_begin", {"parallel_dependencies": use_sub_threads})
     var err := ResourceLoader.load_threaded_request(target_path, "PackedScene", use_sub_threads)
     _trace("load_threaded_request_returned", {"error": err})
@@ -285,9 +289,15 @@ func _commit_scene() -> void:
     if finish_tutorial:
         var run_state = get_node_or_null("/root/LoopState")
         if run_state != null:
+            _trace("load_complete_tutorial_begin")
             run_state.complete_tutorial()
+            _trace("load_complete_tutorial_returned")
     await get_tree().process_frame
+    var first_scene := get_tree().current_scene
+    _trace("load_first_frame_after_activation", {"current_scene": first_scene.scene_file_path if first_scene != null else ""})
     await get_tree().process_frame
+    var second_scene := get_tree().current_scene
+    _trace("load_second_frame_after_activation", {"current_scene": second_scene.scene_file_path if second_scene != null else ""})
     display_progress = 1.0
     _trace("load_scene_ready")
     progress_bar.value = 100.0

@@ -37,6 +37,15 @@ func _ready() -> void:
         settings.options_changed.connect(_on_settings_changed)
     _refresh_hint()
 
+func _exit_tree() -> void:
+    # This marks the old scene leaving the SceneTree, not completion of
+    # native renderer resource destruction (which can be deferred).
+    if changing:
+        var journal := get_node_or_null("/root/CrashJournal")
+        if journal != null:
+            journal.call("record", "tutorial_tree_exit", {"path": scene_file_path})
+
+
 func _refresh_hint() -> void:
     door_prompt.call("set_prompt_text", Loc.t("tutorial.enter", self))
     for gallery in $SideGalleries.get_children():

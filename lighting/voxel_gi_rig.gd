@@ -1,5 +1,6 @@
 @tool
 extends Node3D
+const InitialLoadTrace = preload("res://gameplay/initial_load_trace.gd")
 const StreamingTrace = preload("res://gameplay/streaming_trace.gd")
 ## Pre-baked VoxelGI volumes for a rotated/streamed Casino Anomaly hall.
 ## No bake is performed at runtime. Exported builds only enable validated
@@ -15,6 +16,7 @@ var streaming_active := true
 
 
 func _ready() -> void:
+    InitialLoadTrace.record(self, "casino_voxel_gi_ready_begin")
     _ensure_volumes()
     # The editor has no live run or user graphics state. Always preview
     # validated baked GI there. In game, keep the streaming and settings
@@ -29,6 +31,7 @@ func _ready() -> void:
         if settings != null:
             settings.options_changed.connect(_on_setting_changed)
     call_deferred("_load_baked_data")
+    InitialLoadTrace.record(self, "casino_voxel_gi_ready_end")
 
 
 func _ensure_volumes() -> void:
@@ -51,6 +54,7 @@ func _ensure_volume(label: String, center: Vector3, extents: Vector3) -> void:
 
 
 func _load_baked_data() -> void:
+    InitialLoadTrace.record(self, "casino_voxel_gi_load_begin")
     var trace_start := StreamingTrace.begin()
     var loaded := 0
     for name in BAKES:
@@ -62,11 +66,15 @@ func _load_baked_data() -> void:
         if not ResourceLoader.exists(path):
             probe.data = null
             continue
+        InitialLoadTrace.record(self, "casino_voxel_gi_resource_begin", {"probe": name, "path": path})
         var baked := load(path) as VoxelGIData
+        InitialLoadTrace.record(self, "casino_voxel_gi_resource_returned", {"probe": name, "valid": baked != null})
         if not RuntimeCache.valid_gi(baked):
             probe.data = null
             continue
+        InitialLoadTrace.record(self, "casino_voxel_gi_assign_begin", {"probe": name})
         probe.data = baked
+        InitialLoadTrace.record(self, "casino_voxel_gi_assign_end", {"probe": name})
         loaded += 1
     baked_data_ready = loaded == BAKES.size()
     if not baked_data_ready:
@@ -76,6 +84,7 @@ func _load_baked_data() -> void:
                 (item as VoxelGI).visible = false
     _apply_visibility()
     StreamingTrace.finish("voxel_gi.load_assign", trace_start)
+    InitialLoadTrace.record(self, "casino_voxel_gi_load_end", {"loaded_probes": loaded, "complete": baked_data_ready})
 
 
 func _on_setting_changed(key: String) -> void:
