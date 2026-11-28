@@ -78,6 +78,11 @@ func has_continue() -> bool:
 
 
 func _bound_profile() -> Node:
+    # Standalone simulations and QA states deliberately live outside the
+    # SceneTree. Never resolve an absolute autoload path or borrow a live
+    # profile for those independent states.
+    if not is_inside_tree():
+        return null
     var profiles := get_node_or_null("/root/ProfileManager")
     if profiles == null or profiles.active_slot <= 0 or save_path != profiles.run_path(profiles.active_slot, mode):
         return null
