@@ -15,14 +15,6 @@ _EDITOR_SHUTDOWN_RIDS = (
     "PN18TextServerAdvanced22ShapedTextDataAdvancedE",
     "PN18TextServerAdvanced12FontAdvancedE",
 )
-_PROP_SHUTDOWN_RIDS = (
-    "PN13RendererDummy14TextureStorage12DummyTextureE",
-    "N13RendererDummy11MeshStorage14DummyMultiMeshE",
-    "N13RendererDummy9DummyMeshE",
-    "N13RendererDummy15MaterialStorage13DummyMaterialE",
-    "N13RendererDummy15MaterialStorage11DummyShaderE",
-    "N17RendererSceneCull8InstanceE",
-)
 
 
 def known_renderer_shutdown(clean, script, editor):
@@ -30,10 +22,6 @@ def known_renderer_shutdown(clean, script, editor):
     if editor and script in ("tests/sketchfab_true_editor_qa.gd",
                              "tests/voxel_gi_editor_preview_qa.gd"):
         allowed = _EDITOR_SHUTDOWN_RIDS
-    elif not editor and script == "tests/prop_visuals_qa.gd":
-        allowed = _PROP_SHUTDOWN_RIDS
-        if clean == "ERROR: Pages in use exist at exit in PagedAllocator: N20RasterizerSceneDummy21GeometryInstanceDummyE":
-            return True
     match = re.fullmatch(r"ERROR: \d+ RID allocations? of type '([^']+)' (?:was|were) leaked at exit\.", clean)
     return match is not None and match.group(1) in allowed
 
@@ -67,6 +55,11 @@ def main():
     parser.add_argument("--seconds", type=int, default=300)
     args = parser.parse_args()
     cmd = [args.godot, "--headless", "--path", ".", "--script", "res://" + args.script]
+    # Temporary investigation: identify the remaining shutdown objects
+    # in existing fixtures, without adding test runs or changing pass rules.
+    if args.script in ("tests/grand_entrance_hall_qa.gd", "tests/menu_visual_qa.gd",
+                       "tests/sketchfab_true_editor_qa.gd"):
+        cmd.insert(1, "--verbose")
     if args.editor:
         cmd.insert(1, "--editor")
     if args.suite:

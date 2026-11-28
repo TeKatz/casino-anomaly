@@ -43,6 +43,18 @@ func _ready() -> void:
         event_players[event] = voice
 
 
+func _exit_tree() -> void:
+    # Release active UI voices and Ogg decoders before AudioServer shuts
+    # down, just as the persistent world-audio director does.
+    for value in event_players.values():
+        var voice := value as AudioStreamPlayer
+        if is_instance_valid(voice):
+            voice.stop()
+            voice.stream = null
+    event_players.clear()
+    player = null
+
+
 func play_click() -> void:
     play_event("navigation")
 

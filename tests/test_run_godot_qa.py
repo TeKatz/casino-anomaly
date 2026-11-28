@@ -42,13 +42,13 @@ class LogClassifierTests(unittest.TestCase):
         self.assertEqual(classify_line(leak, self.marker, True, "win32", "tests/smoke.gd", True), (True, True, False))
         self.assertEqual(classify_line(leak.replace("N16RendererViewport8ViewportE", "unknown"), self.marker, True, "win32", script, True), (True, True, False))
 
-    def test_prop_shutdown_is_narrowly_scoped(self):
+    def test_fixed_prop_shutdown_leaks_are_fatal(self):
         script = "tests/prop_visuals_qa.gd"
         for leak in (
             "ERROR: Pages in use exist at exit in PagedAllocator: N20RasterizerSceneDummy21GeometryInstanceDummyE",
             "ERROR: 16 RID allocations of type 'N13RendererDummy9DummyMeshE' were leaked at exit.",
         ):
-            self.assertEqual(classify_line(leak, self.marker, True, "win32", script), (True, False, True))
+            self.assertEqual(classify_line(leak, self.marker, True, "win32", script), (True, True, False))
             self.assertEqual(classify_line(leak, self.marker, False, "win32", script), (False, True, False))
             self.assertEqual(classify_line(leak, self.marker, True, "win32", "tests/smoke.gd"), (True, True, False))
 

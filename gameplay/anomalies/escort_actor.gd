@@ -17,6 +17,12 @@ const PLAYER_CLEARANCE := 0.86
 const SPRINT_CLOSING := 4.5
 const ESCAPE_REPLAN := 0.35
 const ESCAPE_MIN_TIME := 0.45
+# Recast previously rounded 0.36 m clearance up to 2 cells and
+# 0.18 m climb down to 1 cell. Declare those effective dimensions.
+const NAV_CELL_SIZE := 0.25
+const NAV_CELL_HEIGHT := 0.15
+const NAV_RADIUS := 2.0 * NAV_CELL_SIZE
+const NAV_CLIMB := NAV_CELL_HEIGHT
 var state: State = State.WAIT
 var hall: Node3D
 var rig: Node3D
@@ -71,6 +77,8 @@ func configure(room: Node3D) -> bool:
     add_child(agent)
     # Each streamed room is a separate navigation world.
     nav_map = NavigationServer3D.map_create()
+    NavigationServer3D.map_set_cell_size(nav_map, NAV_CELL_SIZE)
+    NavigationServer3D.map_set_cell_height(nav_map, NAV_CELL_HEIGHT)
     NavigationServer3D.map_set_active(nav_map,true)
     agent.set_navigation_map(nav_map)
     hide()
@@ -87,11 +95,11 @@ func _plan_navigation() -> void:
     nav_mesh = NavigationMesh.new()
     nav_mesh.geometry_parsed_geometry_type = NavigationMesh.PARSED_GEOMETRY_STATIC_COLLIDERS
     nav_mesh.geometry_collision_mask = 1
-    nav_mesh.agent_radius = 0.36
+    nav_mesh.cell_size = NAV_CELL_SIZE
+    nav_mesh.cell_height = NAV_CELL_HEIGHT
+    nav_mesh.agent_radius = NAV_RADIUS
     nav_mesh.agent_height = 1.80
-    nav_mesh.agent_max_climb = 0.18
-    nav_mesh.cell_size = 0.25
-    nav_mesh.cell_height = 0.15
+    nav_mesh.agent_max_climb = NAV_CLIMB
     var geometry: NavigationMeshSourceGeometryData3D = NavigationMeshSourceGeometryData3D.new()
     NavigationServer3D.parse_source_geometry_data(nav_mesh,geometry,hall)
     if geometry.has_data():
@@ -103,12 +111,14 @@ func _navigation_baked() -> void:
     nav_region = NavigationRegion3D.new()
     nav_region.name = "EscortRoomNavigation"
     nav_region.navigation_mesh = nav_mesh
+    # Select the private map before entering the tree so the region is
+    # never briefly registered against the default world map.
+    nav_region.set_navigation_map(nav_map)
     # Parent ownership is the actor; top-level transform keeps the mesh
     # fixed in room space even when the character walks.
     add_child(nav_region)
     nav_region.top_level = true
     nav_region.global_transform = hall.global_transform
-    nav_region.set_navigation_map(nav_map)
     nav_ready = true
 
 func _flat(v: Vector3) -> Vector3:
