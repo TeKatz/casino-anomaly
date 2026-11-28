@@ -91,6 +91,10 @@ func _run() -> void:
         _fail("Canonical tutorial path did not load the new hall")
         return
     var marker := door.get_node("DestinationMarker") as Node3D
+    var objective := player.get_node_or_null("ObjectiveHUD") as CanvasLayer
+    if objective == null or (objective.get("card") as Control).visible:
+        _fail("Fresh tutorial has premature objective HUD")
+        return
     if marker.visible or bool(intro.get("has_spoken")):
         _fail("Fresh tutorial has premature destination guidance")
         return
@@ -105,7 +109,7 @@ func _run() -> void:
     event.action = "casino_interact"
     event.pressed = true
     intro.call("_unhandled_input",event)
-    if marker.visible or not bool(loader.get("active")) or not bool(intro.get("changing")) or not bool(player.get("interaction_locked")) or state.tutorial_done:
+    if (objective.get("card") as Control).visible or marker.visible or not bool(loader.get("active")) or not bool(intro.get("changing")) or not bool(player.get("interaction_locked")) or state.tutorial_done:
         _fail("Start-door interaction did not lock input and start loading before completing tutorial")
         return
     intro.call("_unhandled_input",event)
@@ -121,6 +125,9 @@ func _run() -> void:
         return
     if not await _wait_for_scene("res://main.tscn", loader):
         _fail("Threaded casino transition did not finish")
+        return
+    if current_scene.get_node_or_null("Player/ObjectiveHUD")!=null or is_instance_valid(objective):
+        _fail("Tutorial objective survived the casino handoff")
         return
     if not state.tutorial_done or not state.round_ready or not str(state.anomaly_id).is_empty():
         _fail("Intro completion or first clean casino round was lost")

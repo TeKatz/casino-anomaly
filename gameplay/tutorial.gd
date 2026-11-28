@@ -4,6 +4,7 @@ const Controls = preload("res://gameplay/input_bindings.gd")
 const Loc = preload("res://gameplay/localization.gd")
 const Conversation = preload("res://gameplay/croupier_dialogue.gd")
 const DoorPrompt = preload("res://ui/door_prompt.gd")
+const ObjectiveHUD = preload("res://ui/objective_hud.gd")
 
 @onready var player: CharacterBody3D = $Player
 @onready var camera: Camera3D = $Player/Camera3D
@@ -18,6 +19,8 @@ const DoorPrompt = preload("res://ui/door_prompt.gd")
 
 var door_prompt: CanvasLayer
 var conversation: CanvasLayer
+var objective_hud: CanvasLayer
+var _pending_objectives: Dictionary = {}
 var changing := false
 # Guidance is local to this entrance visit, not a progression requirement.
 var has_spoken := false
@@ -32,6 +35,10 @@ func _ready() -> void:
     conversation.name = "CroupierDialogue"
     add_child(conversation)
     conversation.closed.connect(_on_conversation_closed)
+    conversation.objective_discovered.connect(_on_objective_discovered)
+    objective_hud = ObjectiveHUD.new()
+    objective_hud.name = "ObjectiveHUD"
+    player.add_child(objective_hud)
     var settings = get_node_or_null("/root/GameSettings")
     if settings != null:
         settings.options_changed.connect(_on_settings_changed)
@@ -77,6 +84,8 @@ func _process(delta: float) -> void:
 func _update_destination_marker(delta: float) -> void:
     var show_marker := has_spoken and not changing and not _loader_active() and not is_dialogue_open() and not get_tree().paused and bool(Controls.pref(self, "hud_visible", true)) and bool(Controls.pref(self, "interaction_hints", true)) and bool(Controls.pref(self, "tutorial_hints", true))
     destination_marker.visible = show_marker
+    if objective_hud != null:
+        objective_hud.call("set_context_visible",show_marker)
     if not show_marker or bool(Controls.pref(self, "reduced_motion", false)):
         marker_phase = 0.0
         destination_marker.position = marker_home
@@ -135,16 +144,25 @@ func _open_conversation() -> void:
     conversation.call("show_conversation")
     _update_destination_marker(0.0)
 
+func _on_objective_discovered(id: String, text_key: String) -> void:
+    # Receiving a page is not the same as closing the conversation.
+    # Defer the objective announcement until the player returns to gameplay.
+    _pending_objectives[id] = text_key
+
+
 func _on_conversation_closed() -> void:
     if changing:
         return
     croupier.call("set_talking", false)
     player.call("set_interaction_locked", false)
     Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-    has_spoken = true
+    if _pending_objectives.has("enter_main_casino"):
+        has_spoken = true
+        objective_hud.call("set_objective","enter_main_casino",str(_pending_objectives["enter_main_casino"]))
+    _pending_objectives.clear()
     var journal := get_node_or_null("/root/CrashJournal")
     if journal != null:
-        journal.call("record", "croupier_conversation_closed")
+        journal.call("record", "croupier_conversation_closed", {"objective_unlocked": has_spoken})
     _update_destination_marker(0.0)
 
 func _unhandled_input(event: InputEvent) -> void:

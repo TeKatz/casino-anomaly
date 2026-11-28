@@ -214,6 +214,27 @@ and does not change Windows registry settings. Dumps may contain private
 process memory; review before sharing, and keep the regular crash ZIP.
 Matching native debug symbols are needed for meaningful symbolized stacks.
 
+## Phase 7B — Data-driven reception dialogue and objectives
+
+The Croupier uses `gameplay/dialogue_catalog.gd` for conversation IDs, speaker,
+context, ordered topic pages and optional objective IDs. Both English and
+German localization live in the existing vocabulary. The reusable dialogue
+view uses the common premium button theme, a lower-left speech column,
+scrollable topic choices and explicit next/back navigation. It fits the
+logical viewport and respects caption sizes and reduced motion. Additional
+rooms may configure another validated conversation dictionary and connect
+the objective_discovered signal to their own scene-local objective logic.
+No dialogue is required to enter the casino, and no new save flag is added.
+
+The scene-owned player objective HUD appears at the upper right only after
+the player receives an informative page and closes the conversation. The
+existing destination marker follows that same discovery. It fades in with
+a one-shot gold accent reveal, respects HUD/tutorial/interaction settings
+and reduced motion, hides during dialogue, pause and loading, and is freed
+with the tutorial scene. The destination remains skippable. Classic-specific
+streak instructions are explicitly labeled Classic; other mode rules are
+unchanged.
+
 ## QA
 
 Run `godot --headless --path . --script tests/grand_entrance_hall_qa.gd`

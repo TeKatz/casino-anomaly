@@ -225,7 +225,11 @@ func _run() -> void:
         _fail("Dialogue must release the mouse for its buttons")
         return
     var response := dialogue.get("response_label") as Label
-    if response == null or not response.text.contains("Willkommen") or not response.text.contains("hintere Tür") or marker.visible:
+    var objective := player.get_node_or_null("ObjectiveHUD") as CanvasLayer
+    if objective == null or (objective.get("card") as Control).visible:
+        _fail("Objective appeared before useful dialogue")
+        return
+    if response == null or not response.text.contains("Willkommen") or marker.visible:
         _fail("German welcome must be concise and visible")
         return
     var choices: Dictionary = dialogue.get("buttons")
@@ -235,43 +239,72 @@ func _run() -> void:
                 or not choice.has_meta("_ui_click_attached"):
             _fail("Dialogue buttons must share the premium theme and UI click feedback")
             return
-    dialogue.call("_on_choice", "rules")
-    if not response.text.to_lower().contains("zwölf"):
-        _fail("Rules must explain the required streak in German")
+    # Opening and closing without reading an informative topic must not
+    # grant an objective. Preserve the NPC animation and input contracts.
+    dialogue.call("close_conversation")
+    if marker.visible or bool(room.get("has_spoken")) or (objective.get("card") as Control).visible:
+        _fail("Empty conversation granted a destination objective")
         return
+    room.call("_open_conversation")
+    dialogue.call("_on_choice","rules")
+    if not response.text.contains("Vergleich") or marker.visible or (objective.get("card") as Control).visible:
+        _fail("Reference explanation or deferred objective incorrect")
+        return
+    dialogue.call("_next_page")
+    if not response.text.contains("ANOMALIE") or not response.text.contains("NORMAL"):
+        _fail("Decision instructions missing")
+        return
+    dialogue.call("_next_page")
+    if not response.text.to_lower().contains("zwölf"):
+        _fail("Rules must explain the required Classic streak in German")
+        return
+    dialogue.call("_previous_page")
+    if not response.text.contains("ANOMALIE"):
+        _fail("Back navigation did not restore the previous line")
+        return
+    dialogue.call("_next_page")
     settings.set_option("language", "en")
     if str(hint.get("prompt_text")) != "E · Talk" or prompt_caption.text != "Talk" \
             or not response.text.to_lower().contains("twelve"):
         _fail("Bilingual text did not update live")
         return
     dialogue.call("close_conversation")
-    if not marker.visible or not bool(room.get("has_spoken")):
-        _fail("Closing the conversation did not reveal the main casino marker")
+    if not marker.visible or not bool(room.get("has_spoken")) or not (objective.get("card") as Control).visible or str(objective.get("objective_id"))!="enter_main_casino":
+        _fail("Closing informative dialogue did not reveal the destination objective")
         return
+    var objective_text := objective.get("message") as Label
+    if not objective_text.text.contains("Main Casino"):
+        _fail("Objective was not localized in English")
+        return
+    settings.set_option("language","de")
+    if not objective_text.text.contains("Hauptcasino"):
+        _fail("Objective did not translate live")
+        return
+    settings.set_option("language","en")
     room.call("_update_destination_marker",0.7)
     if absf(marker.position.y-marker_home.y)<0.05 or absf(marker.position.y-marker_home.y)>0.121 or not is_equal_approx(marker.position.z,marker_home.z):
         _fail("Destination marker hover is not bounded and vertical")
         return
     settings.set_option("reduced_motion",true)
     room.call("_update_destination_marker",0.7)
-    if not marker.visible or not marker.position.is_equal_approx(marker_home):
+    if not marker.visible or not marker.position.is_equal_approx(marker_home) or not is_equal_approx((objective.get("card") as Control).modulate.a,1.0):
         _fail("Reduced motion must keep a stationary destination marker")
         return
     for key in ["hud_visible","interaction_hints","tutorial_hints"]:
         settings.set_option(key,false)
-        if marker.visible:
-            _fail("Destination marker ignored "+key)
+        if marker.visible or (objective.get("card") as Control).visible:
+            _fail("Destination guidance ignored "+key)
             return
         settings.set_option(key,true)
-        if not marker.visible:
-            _fail("Destination marker did not restore after "+key)
+        if not marker.visible or not (objective.get("card") as Control).visible:
+            _fail("Destination guidance did not restore after "+key)
             return
     room.call("_open_conversation")
-    if marker.visible:
-        _fail("Destination marker remained visible during repeated dialogue")
+    if marker.visible or (objective.get("card") as Control).visible:
+        _fail("Destination guidance remained visible during repeated dialogue")
         return
     dialogue.call("close_conversation")
-    if not marker.visible:
+    if not marker.visible or not (objective.get("card") as Control).visible:
         _fail("Repeated dialogue lost destination guidance")
         return
     if model_installed:
